@@ -1,6 +1,4 @@
-variable "vpc_id" {
-  default = "vpc-01b4c015c07050a71"
-}
+variable "vpc_id" {}
 
 variable "vpc_cidr" {
   default = "10.0.0.0/16"
@@ -8,6 +6,10 @@ variable "vpc_cidr" {
 
 variable "vpn_cidr" {
   default = "10.0.0.0/16"
+}
+
+variable "remote_vpn_ip_cidr" {
+  default = "0.0.0.0/0"
 }
 
 variable "public_subnet_ids" {
@@ -20,6 +22,7 @@ variable "key_name" {
   default = "my_key_pair"
 }
 
+#contents of the my_key_pair.pem file to connect to the vpn.
 variable "private_key" {}
 
 variable "ami" {
@@ -32,31 +35,25 @@ variable "instance_type" {
 
 variable "cert_arn" {}
 
-variable "public_domain_name" {
-  default = "www.firehawkvfx.com"
-}
+# public domain name withou www
+variable "public_domain_name" {}
 
-variable "openvpn_admin_user" {
-  default = "StackAdmin"
-}
+variable "openvpn_admin_user" {}
 
-variable "openvpn_user" {
-  default = "openvpnuser"
-}
+variable "openvpn_user" {}
 
-variable "openvpn_admin_pw" {
-  default = "ChangeThisPassword99Times"
-}
+variable "openvpn_admin_pw" {}
 
 module "openvpn" {
-  source = "github.com/terraform-community-modules/tf_aws_openvpn"
+  source = "github.com/firehawkvfx/tf_aws_openvpn"
   name   = "openVPN"
 
   # VPC Inputs
-  vpc_id            = "${var.vpc_id}"
-  vpc_cidr          = "${var.vpc_cidr}"
-  vpn_cidr          = "${var.vpn_cidr}"
-  public_subnet_ids = "${var.public_subnet_ids}"
+  vpc_id             = "${var.vpc_id}"
+  vpc_cidr           = "${var.vpc_cidr}"
+  vpn_cidr           = "${var.vpn_cidr}"
+  public_subnet_ids  = "${var.public_subnet_ids}"
+  remote_vpn_ip_cidr = "${var.remote_vpn_ip_cidr}"
 
   # EC2 Inputs
   key_name = "${var.key_name}"
