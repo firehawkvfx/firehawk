@@ -4,13 +4,26 @@ variable "vpn_private_ip" {}
 
 variable "vpc_id" {}
 
-variable "private_subnets" {}
+variable "private_subnets" {
+  default = []
+}
 
-variable "private_subnets_cidr_blocks" {}
-variable "public_subnets_cidr_blocks" {}
+variable "private_subnets_cidr_blocks" {
+  default = []
+}
+
+variable "public_subnets_cidr_blocks" {
+  default = []
+}
+
+resource "aws_cloudformation_stack" "SoftNASRole" {
+  name         = "FCB-SoftNASRole"
+  capabilities = ["CAPABILITY_IAM", "CAPABILITY_NAMED_IAM"]
+  template_url = "https://s3-ap-southeast-2.amazonaws.com/aws-softnas-cloudformation/softnas-role.json"
+}
 
 resource "aws_cloudformation_stack" "SoftNASStack" {
-  name               = "ADStack"
+  name               = "FCB-SoftNASStack"
   capabilities       = ["CAPABILITY_IAM"]
   timeout_in_minutes = "60"
 
