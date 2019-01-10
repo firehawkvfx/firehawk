@@ -28,3 +28,14 @@ module "vpn" {
   openvpn_admin_user = "${var.openvpn_admin_user}"
   openvpn_admin_pw   = "${var.openvpn_admin_pw}"
 }
+
+module "softnas" {
+  source = "./modules/softnas"
+
+  vpn_private_ip              = "${module.vpn.private_ip}"
+  key_name                    = "${var.key_name}"
+  vpc_id                      = "${module.vpc.vpc_id}"
+  private_subnets             = "${module.vpc.private_subnets}"
+  private_subnets_cidr_blocks = "${module.vpc.private_subnets_cidr_blocks}"
+  public_subnets_cidr_blocks  = "${module.vpc.public_subnets_cidr_blocks}"
+}
