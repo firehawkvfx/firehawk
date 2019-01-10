@@ -74,3 +74,11 @@ module "openvpn" {
   openvpn_admin_user = "${var.openvpn_admin_user}" # Note: Don't choose "admin" username. Looks like it's already reserved.
   openvpn_admin_pw   = "${var.openvpn_admin_pw}"
 }
+
+output "private_ip" {
+  value = "${module.openvpn.private_ip}"
+}
+
+output "public_ip" {
+  value = "${module.openvpn.public_ip}"
+}
