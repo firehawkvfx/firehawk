@@ -8,9 +8,8 @@ variable "vpn_cidr" {
   default = "10.0.0.0/16"
 }
 
-variable "remote_vpn_ip_cidr" {
-  default = "0.0.0.0/0"
-}
+# remote_vpn_ip_cidr is the ip address of the remote host / user intending to connect over vpn. eg '197.125.62.53/32'
+variable "remote_vpn_ip_cidr" {}
 
 variable "public_subnet_ids" {
   default = ["subnet-0a7554f56af4d6d0a", "subnet-0257c7f8b1d68b6e4"]
