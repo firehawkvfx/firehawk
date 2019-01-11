@@ -23,6 +23,8 @@ resource "aws_cloudformation_stack" "SoftNASRole" {
 }
 
 resource "aws_cloudformation_stack" "SoftNASStack" {
+  depends_on = ["aws_cloudformation_stack.SoftNASRole"]
+
   name               = "FCB-SoftNASStack"
   capabilities       = ["CAPABILITY_IAM"]
   timeout_in_minutes = "60"
