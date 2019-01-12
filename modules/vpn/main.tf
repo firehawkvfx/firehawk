@@ -45,7 +45,7 @@ variable "openvpn_admin_pw" {}
 
 module "openvpn" {
   #source = "github.com/firehawkvfx/tf_aws_openvpn"
-  source = "./tf_aws_openvpn"
+  source = "../tf_aws_openvpn"
   name   = "openVPN"
 
   # VPC Inputs
