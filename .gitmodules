@@ -1,0 +1,3 @@
+[submodule "modules/tf_aws_openvpn"]
+	path = modules/tf_aws_openvpn
+	url = https://github.com/firehawkvfx/tf_aws_openvpn
