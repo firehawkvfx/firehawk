@@ -16,6 +16,8 @@ variable "public_subnets_cidr_blocks" {
   default = []
 }
 
+variable "bastion_private_ip" {}
+
 #this role should be conditionally created if it doesn't exist
 
 resource "aws_cloudformation_stack" "SoftNASRole" {
@@ -42,8 +44,8 @@ resource "aws_cloudformation_stack" "SoftNASStack" {
     #1st is the vpn
     ADBastion1PrivateIP = "${var.vpn_private_ip}"
 
-    #2nd is likely some other bastion / gateway
-    ADBastion2PrivateIP = "10.0.101.181"
+    #2nd is likely some other bastion / gateway that you will use to access the softnas instance.  This provides an alternative if there are issues with the vpn.
+    ADBastion2PrivateIP = "${var.bastion_private_ip}"
     PrivateSubnet1CIDR  = "${var.private_subnets_cidr_blocks[0]}"
     VPCID               = "${var.vpc_id}"
     PrivateSubnet1ID    = "${var.private_subnets[0]}"
