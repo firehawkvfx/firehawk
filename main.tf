@@ -7,6 +7,9 @@ provider "aws" {
 
 module "vpc" {
   source = "./modules/vpc"
+
+  #sleep will disable the nat gateway to save cost during idle time.
+  sleep = "${var.sleep}"
 }
 
 module "vpn" {
