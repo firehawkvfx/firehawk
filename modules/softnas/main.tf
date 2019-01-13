@@ -16,6 +16,8 @@ variable "public_subnets_cidr_blocks" {
   default = []
 }
 
+#this role should be conditionally created if it doesn't exist
+
 resource "aws_cloudformation_stack" "SoftNASRole" {
   name         = "FCB-SoftNASRole"
   capabilities = ["CAPABILITY_IAM", "CAPABILITY_NAMED_IAM"]
@@ -35,8 +37,13 @@ resource "aws_cloudformation_stack" "SoftNASStack" {
     NasType             = "m4.xlarge"
     PrivateIPEth0NAS1   = "10.0.1.11"
     PrivateIPEth1NAS1   = "10.0.1.12"
+
+    #security groups will open access to some public facing instances via their private ips. 
+    #1st is the vpn
     ADBastion1PrivateIP = "${var.vpn_private_ip}"
-    ADBastion2PrivateIP = "${var.vpn_private_ip}"
+
+    #2nd is likely some other bastion / gateway
+    ADBastion2PrivateIP = "10.0.101.181"
     PrivateSubnet1CIDR  = "${var.private_subnets_cidr_blocks[0]}"
     VPCID               = "${var.vpc_id}"
     PrivateSubnet1ID    = "${var.private_subnets[0]}"
