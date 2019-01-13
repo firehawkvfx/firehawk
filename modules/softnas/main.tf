@@ -57,3 +57,33 @@ resource "aws_cloudformation_stack" "SoftNASStack" {
 
   template_url = "https://s3-ap-southeast-2.amazonaws.com/aws-softnas-cloudformation/softnas-1az.json"
 }
+
+output "instanceid" {
+  value = "${aws_cloudformation_stack.SoftNASStack.outputs["InstanceID"]}"
+}
+
+# Attach 4 identical existing ebs volumes to the softnas instance.  if a volume has been initialised previously, it will be detected by softnas.
+
+resource "aws_volume_attachment" "ebs_att0" {
+  device_name = "/dev/sdf"
+  volume_id   = "${var.volumes[0]}"
+  instance_id = "${aws_cloudformation_stack.SoftNASStack.outputs["InstanceID"]}"
+}
+
+resource "aws_volume_attachment" "ebs_att1" {
+  device_name = "/dev/sdg"
+  volume_id   = "${var.volumes[1]}"
+  instance_id = "${aws_cloudformation_stack.SoftNASStack.outputs["InstanceID"]}"
+}
+
+resource "aws_volume_attachment" "ebs_att2" {
+  device_name = "/dev/sdh"
+  volume_id   = "${var.volumes[2]}"
+  instance_id = "${aws_cloudformation_stack.SoftNASStack.outputs["InstanceID"]}"
+}
+
+resource "aws_volume_attachment" "ebs_att3" {
+  device_name = "/dev/sdi"
+  volume_id   = "${var.volumes[3]}"
+  instance_id = "${aws_cloudformation_stack.SoftNASStack.outputs["InstanceID"]}"
+}
