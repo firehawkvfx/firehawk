@@ -1,0 +1,5 @@
+To aquire the latest gpu driver, you must have the aws cli installed.
+https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/install-nvidia-driver.html
+
+run this in the current path -
+aws s3 cp --recursive s3://ec2-linux-nvidia-drivers/latest/ .
