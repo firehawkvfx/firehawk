@@ -14,7 +14,7 @@ module "vpc" {
 
 #options for gateway type are centos7 and pcoip
 variable "gateway_type" {
-  default = "centos7"
+  default = "pcoip"
 }
 
 module "vpn" {
@@ -64,6 +64,7 @@ module "softnas" {
 
   vpn_private_ip              = "${module.vpn.private_ip}"
   key_name                    = "${var.key_name}"
+  private_key                 = "${file("${var.local_key_path}")}"
   vpc_id                      = "${module.vpc.vpc_id}"
   private_subnets             = "${module.vpc.private_subnets}"
   private_subnets_cidr_blocks = "${module.vpc.private_subnets_cidr_blocks}"

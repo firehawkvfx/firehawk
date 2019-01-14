@@ -1,4 +1,5 @@
 variable "key_name" {}
+variable "private_key" {}
 
 variable "vpn_private_ip" {}
 
@@ -79,3 +80,35 @@ resource "aws_volume_attachment" "ebs_att" {
   volume_id   = "${element(var.volumes, count.index)}"
   instance_id = "${aws_cloudformation_stack.SoftNASStack.outputs["InstanceID"]}"
 }
+
+#need to append data to the end of /etc/export
+
+
+# resource "null_resource" remote_exec_provisioner_update {
+#   count = "${length(var.volumes)>0}"
+
+
+#   provisioner "remote-exec" {
+#     connection {
+#       user        = "centos"
+#       host        = "${aws_instance.pcoipgw.public_ip}"
+#       private_key = "${var.private_key}"
+#       type        = "ssh"
+#       timeout     = "10m"
+#     }
+
+
+#     inline = [
+#       "sudo cat << EOF | sudo tee --append /etc/exports",
+#       "/export/NAS3/NASVOL3	*(async,insecure,no_subtree_check,no_root_squash,rw,nohide)",
+#       "EOF",
+#     ]
+#   }
+
+
+#   # We reboot the instance locally.  A reboot command will cause a terraform error.
+#   provisioner "local-exec" {
+#     command = "aws ec2 reboot-instances --instance-ids ${aws_instance.pcoipgw.id}"
+#   }
+# }
+
