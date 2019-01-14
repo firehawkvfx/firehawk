@@ -62,4 +62,6 @@ module "softnas" {
   private_subnets_cidr_blocks = "${module.vpc.private_subnets_cidr_blocks}"
   public_subnets_cidr_blocks  = "${module.vpc.public_subnets_cidr_blocks}"
   bastion_private_ip          = "${module.pcoipgw.private_ip}"
+  volumes                     = "${var.volumes}"
+  mounts                      = "${var.mounts}"
 }

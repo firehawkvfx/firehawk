@@ -16,6 +16,14 @@ variable "public_subnets_cidr_blocks" {
   default = []
 }
 
+variable "volumes" {
+  default = []
+}
+
+variable "mounts" {
+  default = []
+}
+
 variable "bastion_private_ip" {}
 
 #this role should be conditionally created if it doesn't exist
@@ -62,28 +70,12 @@ output "instanceid" {
   value = "${aws_cloudformation_stack.SoftNASStack.outputs["InstanceID"]}"
 }
 
-# Attach 4 identical existing ebs volumes to the softnas instance.  if a volume has been initialised previously, it will be detected by softnas.
+# Attach existing ebs volumes to the softnas instance.  if a volume has been initialised previously, it will be detected by softnas.
+# we iterate over the volumes and mounts to attach them to the softnas instance 
 
-resource "aws_volume_attachment" "ebs_att0" {
-  device_name = "/dev/sdf"
-  volume_id   = "${var.volumes[0]}"
-  instance_id = "${aws_cloudformation_stack.SoftNASStack.outputs["InstanceID"]}"
-}
-
-resource "aws_volume_attachment" "ebs_att1" {
-  device_name = "/dev/sdg"
-  volume_id   = "${var.volumes[1]}"
-  instance_id = "${aws_cloudformation_stack.SoftNASStack.outputs["InstanceID"]}"
-}
-
-resource "aws_volume_attachment" "ebs_att2" {
-  device_name = "/dev/sdh"
-  volume_id   = "${var.volumes[2]}"
-  instance_id = "${aws_cloudformation_stack.SoftNASStack.outputs["InstanceID"]}"
-}
-
-resource "aws_volume_attachment" "ebs_att3" {
-  device_name = "/dev/sdi"
-  volume_id   = "${var.volumes[3]}"
+resource "aws_volume_attachment" "ebs_att" {
+  count       = "${length(var.volumes)}"
+  device_name = "${element(var.mounts, count.index)}"
+  volume_id   = "${element(var.volumes, count.index)}"
   instance_id = "${aws_cloudformation_stack.SoftNASStack.outputs["InstanceID"]}"
 }
