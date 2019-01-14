@@ -12,6 +12,11 @@ module "vpc" {
   sleep = "${var.sleep}"
 }
 
+#options for gateway type are centos7 and pcoip
+variable "gateway_type" {
+  default = "centos7"
+}
+
 module "vpn" {
   source = "./modules/vpn"
 
@@ -41,6 +46,8 @@ module "vpn" {
 module "pcoipgw" {
   source = "./modules/pcoipgw"
 
+  #options for gateway type are centos7 and pcoip
+  gateway_type      = "${var.gateway_type}"
   vpc_id            = "${module.vpc.vpc_id}"
   vpc_cidr          = "${module.vpc.vpc_cidr_block}"
   remote_ip_cidr    = "${var.remote_ip_cidr}"

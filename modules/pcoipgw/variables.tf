@@ -24,8 +24,32 @@ variable "key_name" {
 variable "private_key" {}
 
 #this ami id is for southeast-ap-2 sydney only.  todo - changes will need to be made to pull a list of ami's
-variable "ami" {
-  default = "ami-0b292fed58bac1726"
+# variable "ami" {
+#   default = "ami-0b292fed58bac1726"
+# }
+
+#options for gateway type are centos7 and pcoip
+variable "gateway_type" {
+  default = "centos7"
+}
+
+#CentOS Linux 7 x86_64 HVM EBS ENA 1805_01-b7ee8a69-ee97-4a49-9e68-afaee216db2e-ami-77ec9308.4 (ami-d8c21dba)
+variable "ami_map" {
+  type = "map"
+
+  default = {
+    pcoip   = "ami-0b292fed58bac1726"
+    centos7 = "ami-d8c21dba"
+  }
+}
+
+variable "instance_type_map" {
+  type = "map"
+
+  default = {
+    pcoip   = "g3.4xlarge"
+    centos7 = "t2.micro"
+  }
 }
 
 variable "instance_type" {
