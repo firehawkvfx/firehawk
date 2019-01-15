@@ -75,6 +75,10 @@ output "instanceid" {
   value = "${aws_cloudformation_stack.SoftNASStack.outputs["InstanceID"]}"
 }
 
+output "instanceip" {
+  value = "${aws_cloudformation_stack.SoftNASStack.outputs["InstanceIP"]}"
+}
+
 # Attach existing ebs volumes to the softnas instance.  if a volume has been initialised previously, it will be detected by softnas.
 # we iterate over the volumes and mounts to attach them to the softnas instance 
 
@@ -85,31 +89,34 @@ resource "aws_volume_attachment" "ebs_att" {
   instance_id = "${aws_cloudformation_stack.SoftNASStack.outputs["InstanceID"]}"
 }
 
-#need to append data to the end of /etc/export
-
+#need to append data to the end of /etc/export.  since the instance is inside a private subnet, a vpn connection must be active prior to configuration
+# this wont work until a vpn can be started by terraform.
 # resource "null_resource" remote_exec_provisioner_update {
-#   count = "${length(var.volumes)>0}"
+#   count = "${length(var.volumes)>0 ? 1 : 0}"
 
 #   provisioner "remote-exec" {
 #     connection {
 #       user        = "centos"
-#       host        = "${aws_instance.pcoipgw.public_ip}"
+#       host        = "${aws_cloudformation_stack.SoftNASStack.outputs["InstanceIP"]}"
 #       private_key = "${var.private_key}"
 #       type        = "ssh"
 #       timeout     = "10m"
 #     }
 
+#     #/export *(async,insecure,no_subtree_check,no_root_squash,rw,nohide,fsid=0)
+
 #     inline = [
 #       "sudo cat << EOF | sudo tee --append /etc/exports",
-#       "/export/NAS3/NASVOL3	*(async,insecure,no_subtree_check,no_root_squash,rw,nohide)",
+#       "/export/NAS3/NASVOL3 *(async,insecure,no_subtree_check,no_root_squash,rw,nohide)",
 #       "EOF",
+#       "service nfs restart",
 #     ]
 #   }
 
 #   # We reboot the instance locally.  A reboot command will cause a terraform error.
-#   provisioner "local-exec" {
-#     command = "aws ec2 reboot-instances --instance-ids ${aws_instance.pcoipgw.id}"
-#   }
+#   # provisioner "local-exec" {
+#   #   command = "aws ec2 reboot-instances --instance-ids ${aws_instance.pcoipgw.id}"
+#   # }
 # }
 
 resource "null_resource" shutdownsoftnas {
