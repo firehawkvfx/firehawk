@@ -40,6 +40,9 @@ module "vpn" {
   openvpn_user       = "${var.openvpn_user}"
   openvpn_admin_user = "${var.openvpn_admin_user}"
   openvpn_admin_pw   = "${var.openvpn_admin_pw}"
+
+  #sleep will stop instances to save cost during idle time.
+  sleep = "${var.sleep}"
 }
 
 #PCOIP Gateway.  This is a graphical instance that serves as a gateway into the vpc should vpn access fail.
@@ -56,6 +59,9 @@ module "pcoipgw" {
   #a provided route 53 zone id will be modified to have a subdomain to access vpn.  you will need to manually setup a route 53 zone for a domain with an ssl certificate.
   key_name    = "${var.key_name}"
   private_key = "${file("${var.local_key_path}")}"
+
+  #sleep will stop instances to save cost during idle time.
+  sleep = "${var.sleep}"
 }
 
 #A single softnas instance that resides in a private subnet for high performance nfs storage
@@ -72,4 +78,7 @@ module "softnas" {
   bastion_private_ip          = "${module.pcoipgw.private_ip}"
   volumes                     = "${var.volumes}"
   mounts                      = "${var.mounts}"
+
+  #sleep will stop instances to save cost during idle time.
+  sleep = "${var.sleep}"
 }

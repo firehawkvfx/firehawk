@@ -151,3 +151,11 @@ resource "aws_instance" "pcoipgw" {
     command = "aws ec2 reboot-instances --instance-ids ${self.id}"
   }
 }
+
+resource "null_resource" shutdownpcoipgw {
+  count = "${var.sleep ? 1 : 0}"
+
+  provisioner "local-exec" {
+    command = "aws ec2 stop-instances --instance-ids ${aws_instance.pcoipgw.id}"
+  }
+}

@@ -30,7 +30,7 @@ variable "private_key" {}
 
 #options for gateway type are centos7 and pcoip
 variable "gateway_type" {
-  default = "centos7"
+  default = "pcoip"
 }
 
 #CentOS Linux 7 x86_64 HVM EBS ENA 1805_01-b7ee8a69-ee97-4a49-9e68-afaee216db2e-ami-77ec9308.4 (ami-d8c21dba)
@@ -58,4 +58,8 @@ variable "instance_type" {
 
 variable "user" {
   default = "centos"
+}
+
+variable "sleep" {
+  default = false
 }

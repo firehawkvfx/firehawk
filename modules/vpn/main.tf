@@ -41,6 +41,10 @@ variable "openvpn_user" {}
 
 variable "openvpn_admin_pw" {}
 
+variable "sleep" {
+  default = false
+}
+
 module "openvpn" {
   #source = "github.com/firehawkvfx/tf_aws_openvpn"
   source = "../tf_aws_openvpn"
@@ -71,6 +75,9 @@ module "openvpn" {
   openvpn_user       = "${var.openvpn_user}"
   openvpn_admin_user = "${var.openvpn_admin_user}" # Note: Don't choose "admin" username. Looks like it's already reserved.
   openvpn_admin_pw   = "${var.openvpn_admin_pw}"
+
+  #sleep will stop instances to save cost during idle time.
+  sleep = "${var.sleep}"
 }
 
 output "private_ip" {

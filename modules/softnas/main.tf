@@ -25,6 +25,10 @@ variable "mounts" {
   default = []
 }
 
+variable "sleep" {
+  default = false
+}
+
 variable "bastion_private_ip" {}
 
 #this role should be conditionally created if it doesn't exist
@@ -83,10 +87,8 @@ resource "aws_volume_attachment" "ebs_att" {
 
 #need to append data to the end of /etc/export
 
-
 # resource "null_resource" remote_exec_provisioner_update {
 #   count = "${length(var.volumes)>0}"
-
 
 #   provisioner "remote-exec" {
 #     connection {
@@ -97,7 +99,6 @@ resource "aws_volume_attachment" "ebs_att" {
 #       timeout     = "10m"
 #     }
 
-
 #     inline = [
 #       "sudo cat << EOF | sudo tee --append /etc/exports",
 #       "/export/NAS3/NASVOL3	*(async,insecure,no_subtree_check,no_root_squash,rw,nohide)",
@@ -105,10 +106,16 @@ resource "aws_volume_attachment" "ebs_att" {
 #     ]
 #   }
 
-
 #   # We reboot the instance locally.  A reboot command will cause a terraform error.
 #   provisioner "local-exec" {
 #     command = "aws ec2 reboot-instances --instance-ids ${aws_instance.pcoipgw.id}"
 #   }
 # }
 
+resource "null_resource" shutdownsoftnas {
+  count = "${var.sleep ? 1 : 0}"
+
+  provisioner "local-exec" {
+    command = "aws ec2 stop-instances --instance-ids ${aws_cloudformation_stack.SoftNASStack.outputs["InstanceID"]}"
+  }
+}
