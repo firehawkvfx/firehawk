@@ -48,7 +48,8 @@ variable "sleep" {
 module "openvpn" {
   #source = "github.com/firehawkvfx/tf_aws_openvpn"
   source = "../tf_aws_openvpn"
-  name   = "openVPN"
+
+  name = "openVPN"
 
   # VPC Inputs
   vpc_id             = "${var.vpc_id}"
