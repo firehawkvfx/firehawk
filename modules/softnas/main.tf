@@ -89,8 +89,12 @@ resource "aws_volume_attachment" "ebs_att" {
   instance_id = "${aws_cloudformation_stack.SoftNASStack.outputs["InstanceID"]}"
 }
 
-#need to append data to the end of /etc/export.  since the instance is inside a private subnet, a vpn connection must be active prior to configuration
-# this wont work until a vpn can be started by terraform.
+# todo : need to report success at correct time after it has started.  see email from steven melnikov at softnas to check how to do this.
+
+# here we need to append data to the end of /etc/export.  since the instance is inside a private subnet, a vpn connection must be active prior to configuration
+# this wont work until a vpn can be started by terraform.  currently, this code exists in the cloudformation template.
+# ansible may be a better way to do this.
+
 # resource "null_resource" remote_exec_provisioner_update {
 #   count = "${length(var.volumes)>0 ? 1 : 0}"
 
