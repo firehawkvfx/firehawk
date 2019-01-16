@@ -41,12 +41,15 @@ variable "openvpn_user" {}
 
 variable "openvpn_admin_pw" {}
 
+variable "local_key_path" {}
+
 variable "sleep" {
   default = false
 }
 
 module "openvpn" {
   #source = "github.com/firehawkvfx/tf_aws_openvpn"
+
   source = "../tf_aws_openvpn"
 
   name = "openVPN"
@@ -59,11 +62,11 @@ module "openvpn" {
   remote_vpn_ip_cidr = "${var.remote_vpn_ip_cidr}"
 
   # EC2 Inputs
-  key_name = "${var.key_name}"
-
-  private_key   = "${var.private_key}"
-  ami           = "${var.ami}"
-  instance_type = "${var.instance_type}"
+  key_name       = "${var.key_name}"
+  private_key    = "${var.private_key}"
+  local_key_path = "${var.local_key_path}"
+  ami            = "${var.ami}"
+  instance_type  = "${var.instance_type}"
 
   # ELB Inputs
   cert_arn = "${var.cert_arn}"
