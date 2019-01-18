@@ -113,11 +113,7 @@ resource "aws_instance" "pcoipgw" {
 }
 
 resource "null_resource" "pcoipgw" {
-<<<<<<< HEAD
   count = "${(var.skip_update || var.use_custom_ami) ? 0 : 1}"
-=======
-  count = "${var.skip_update ? 0 : 1}"
->>>>>>> auto-download-vpn
 
   #transfer the gpu driver
   provisioner "file" {
