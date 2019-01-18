@@ -77,6 +77,10 @@ variable "pcoip_skip_update" {
   default = true
 }
 
+variable "pcoip_skip_update" {
+  default = true
+}
+
 module "pcoipgw" {
   source = "./modules/pcoipgw"
 
