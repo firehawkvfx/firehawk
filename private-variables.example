@@ -1,0 +1,64 @@
+# IMPORTANT : this example file must be duplicated and renamed private-variables.tf and filled out with your own values.  
+# These are example values only.
+# private-variables.tf is in the .gitignore and will not be included in version control / github repos.
+
+#you can get an ssl certificate arn by verifying your domain with aws certificate manager.
+variable "cert_arn" {
+  default = "arn:aws:acm:blahdyblah-blah"
+}
+
+variable "openvpn_admin_pw" {
+  default = "SomePassForOpenVPN"
+}
+
+variable "region" {
+  default = "ap-southeast-2"
+}
+
+# once you setup an ssl certificate with your domain, it will have a route zone id.
+variable "route_zone_id" {
+  default = "A465DWEGGS"
+}
+
+variable "public_domain_name" {
+  default = "example.com"
+}
+
+variable "openvpn_user" {
+  default = "openvpnas"
+}
+
+variable "openvpn_admin_user" {
+  default = "openvpnas"
+}
+
+#generate a keypair and enter its name here.
+variable "key_name" {
+  default = "my_key_pair"
+}
+
+#the path to the key stored locally where terraform is run.
+variable "local_key_path" {
+  default = "~/my_key_pair.pem"
+}
+
+#the remote_ip_cidr is the public remote static ip address of the site that will access the vpc
+variable "remote_ip_cidr" {
+  default = "118.26.48.12/32"
+}
+
+#the vpn cidr will assign addresses to remote hosts with dhcp in this cidr block.
+variable "vpn_cidr" {
+  default = "10.0.201.0/24"
+}
+
+# Create 4 or more ebs volumes that are the same size and list them here.  they will be attached upon terraform apply.
+# They will also safely persist after terraform destroy.
+variable "volumes" {
+  default = ["vol-02a554534", "vol-077a45349c232", "vol-09d545345336316c47", "vol-0b04453453c4550"]
+}
+
+# these are the mount points for each ebs volume above when attached to the softnas instance.  generally, these shouldn't be changed unless adding more volumes.
+variable "mounts" {
+  default = ["/dev/sdf", "/dev/sdg", "/dev/sdh", "/dev/sdi"]
+}
