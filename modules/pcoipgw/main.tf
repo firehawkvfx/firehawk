@@ -66,9 +66,18 @@ resource "aws_security_group" "pcoipgw" {
   }
 }
 
+# You may wish to use a custom ami of your own creation.  insert the ami details below
+variable "use_custom_ami" {
+  default = false
+}
+
+variable "custom_ami" {
+  default = ""
+}
+
 resource "aws_instance" "pcoipgw" {
   #instance type and ami are determined by the gateway type variable for if you want a graphical or non graphical instance.
-  ami           = "${lookup(var.ami_map, var.gateway_type)}"
+  ami           = "${var.use_custom_ami ? var.custom_ami : lookup(var.ami_map, var.gateway_type)}"
   instance_type = "${lookup(var.instance_type_map, var.gateway_type)}"
 
   key_name  = "${var.key_name}"
@@ -80,13 +89,6 @@ resource "aws_instance" "pcoipgw" {
     Name = "${var.gateway_type}"
   }
 
-  # this segment is not currently configured for centos. user name and pw need to be setup in userdata.
-  # `admin_user` and `admin_pw` need to be passed in to the appliance through `user_data`, see docs -->
-  # https://docs.openvpn.net/how-to-tutorialsguides/virtual-platforms/amazon-ec2-appliance-ami-quick-start-guide/
-  #user_data = <<USERDATA
-  #USERDATA
-
-  #first sleep for some time before instance is ready after boot.
   provisioner "remote-exec" {
     connection {
       user        = "centos"
@@ -100,6 +102,19 @@ resource "aws_instance" "pcoipgw" {
       "sleep 60",
     ]
   }
+
+  # this segment is not currently configured for centos. user name and pw need to be setup in userdata.
+  # `admin_user` and `admin_pw` need to be passed in to the appliance through `user_data`, see docs -->
+  # https://docs.openvpn.net/how-to-tutorialsguides/virtual-platforms/amazon-ec2-appliance-ami-quick-start-guide/
+  #user_data = <<USERDATA
+  #USERDATA
+
+  #first sleep for some time before instance is ready after boot.
+}
+
+resource "null_resource" "pcoipgw" {
+  count = "${(var.skip_update || var.use_custom_ami) ? 0 : 1}"
+
   #transfer the gpu driver
   provisioner "file" {
     source      = "${path.module}/gpudriver/NVIDIA-Linux-x86_64-390.96-grid.run"
@@ -113,6 +128,7 @@ resource "aws_instance" "pcoipgw" {
       timeout     = "10m"
     }
   }
+
   provisioner "remote-exec" {
     connection {
       user        = "centos"
@@ -126,9 +142,11 @@ resource "aws_instance" "pcoipgw" {
       "sudo yum update -y",
     ]
   }
+
   provisioner "local-exec" {
     command = "aws ec2 reboot-instances --instance-ids ${self.id} & sleep 10"
   }
+
   #update yum will break pcoip, so it is reconfigured at this point.
   provisioner "remote-exec" {
     connection {
@@ -146,6 +164,7 @@ resource "aws_instance" "pcoipgw" {
       "sudo dracut -fv",
     ]
   }
+
   #after dracut, we reboot the instance locally.  annoyingly, a reboot command will cause a terraform error.
   provisioner "local-exec" {
     command = "aws ec2 reboot-instances --instance-ids ${self.id}"
