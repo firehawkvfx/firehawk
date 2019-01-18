@@ -31,6 +31,10 @@ variable "sleep" {
 
 variable "bastion_private_ip" {}
 
+variable "skip_update" {
+  default = false
+}
+
 #this role should be conditionally created if it doesn't exist
 
 resource "aws_cloudformation_stack" "SoftNASRole" {
@@ -89,35 +93,11 @@ resource "aws_volume_attachment" "ebs_att" {
   instance_id = "${aws_cloudformation_stack.SoftNASStack.outputs["InstanceID"]}"
 }
 
-#need to append data to the end of /etc/export.  since the instance is inside a private subnet, a vpn connection must be active prior to configuration
-# this wont work until a vpn can be started by terraform.
-# resource "null_resource" remote_exec_provisioner_update {
-#   count = "${length(var.volumes)>0 ? 1 : 0}"
+# todo : need to report success at correct time after it has started.  see email from steven melnikov at softnas to check how to do this.
 
-#   provisioner "remote-exec" {
-#     connection {
-#       user        = "centos"
-#       host        = "${aws_cloudformation_stack.SoftNASStack.outputs["InstanceIP"]}"
-#       private_key = "${var.private_key}"
-#       type        = "ssh"
-#       timeout     = "10m"
-#     }
-
-#     #/export *(async,insecure,no_subtree_check,no_root_squash,rw,nohide,fsid=0)
-
-#     inline = [
-#       "sudo cat << EOF | sudo tee --append /etc/exports",
-#       "/export/NAS3/NASVOL3 *(async,insecure,no_subtree_check,no_root_squash,rw,nohide)",
-#       "EOF",
-#       "service nfs restart",
-#     ]
-#   }
-
-#   # We reboot the instance locally.  A reboot command will cause a terraform error.
-#   # provisioner "local-exec" {
-#   #   command = "aws ec2 reboot-instances --instance-ids ${aws_instance.pcoipgw.id}"
-#   # }
-# }
+# we need to append data to the end of /etc/export.  since the instance is inside a private subnet, a vpn connection must be active prior to configuration
+# this wont work until a vpn can be started by terraform.  currently, this code exists in the cloudformation template.
+# ansible may be a better way to do this.
 
 resource "null_resource" shutdownsoftnas {
   count = "${var.sleep ? 1 : 0}"
