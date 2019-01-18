@@ -31,6 +31,10 @@ variable "sleep" {
 
 variable "bastion_private_ip" {}
 
+variable "skip_update" {
+  default = false
+}
+
 #this role should be conditionally created if it doesn't exist
 
 resource "aws_cloudformation_stack" "SoftNASRole" {

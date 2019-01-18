@@ -47,6 +47,10 @@ module "vpn" {
 }
 
 #A single softnas instance that resides in a private subnet for high performance nfs storage
+variable "softnas_skip_update" {
+  default = true
+}
+
 module "softnas" {
   source = "./modules/softnas"
 
@@ -61,11 +65,18 @@ module "softnas" {
   volumes                     = "${var.volumes}"
   mounts                      = "${var.mounts}"
 
+  #skipping os updates will allow faster rollout, but may be non functional
+  skip_update = "${var.softnas_skip_update}"
+
   #sleep will stop instances to save cost during idle time.
   sleep = "${var.sleep}"
 }
 
 #PCOIP Gateway.  This is a graphical instance that serves as a gateway into the vpc should vpn access fail.
+variable "pcoip_skip_update" {
+  default = true
+}
+
 module "pcoipgw" {
   source = "./modules/pcoipgw"
 
@@ -79,6 +90,9 @@ module "pcoipgw" {
   #a provided route 53 zone id will be modified to have a subdomain to access vpn.  you will need to manually setup a route 53 zone for a domain with an ssl certificate.
   key_name    = "${var.key_name}"
   private_key = "${file("${var.local_key_path}")}"
+
+  #skipping os updates will allow faster rollout, but may be non functional
+  skip_update = "${var.pcoip_skip_update}"
 
   #sleep will stop instances to save cost during idle time.
   sleep = "${var.sleep}"

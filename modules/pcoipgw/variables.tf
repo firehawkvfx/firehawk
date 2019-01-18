@@ -63,3 +63,7 @@ variable "user" {
 variable "sleep" {
   default = false
 }
+
+variable "skip_update" {
+  default = false
+}
