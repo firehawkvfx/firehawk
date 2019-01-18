@@ -90,7 +90,6 @@ module "pcoipgw" {
   #a provided route 53 zone id will be modified to have a subdomain to access vpn.  you will need to manually setup a route 53 zone for a domain with an ssl certificate.
   key_name    = "${var.key_name}"
   private_key = "${file("${var.local_key_path}")}"
-  skip_update = "${var.pcoip_skip_update}"
 
   #skipping os updates will allow faster rollout, but may be non functional
   skip_update = "${var.pcoip_skip_update}"
