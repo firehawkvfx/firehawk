@@ -1,3 +1,6 @@
 [submodule "modules/tf_aws_openvpn"]
 	path = modules/tf_aws_openvpn
 	url = https://github.com/firehawkvfx/tf_aws_openvpn
+[submodule "modules/terraform-aws-vpc"]
+	path = modules/terraform-aws-vpc
+	url = https://github.com/firehawkvfx/terraform-aws-vpc.git
