@@ -52,36 +52,42 @@ module "openvpn" {
 
   source = "../tf_aws_openvpn"
 
-  name = "openVPN"
+  #start vpn will initialise service locally to connect
+  #start_vpn = false
 
+
+  #create_openvpn = "${var.create_openvpn}"
+
+  name = "openVPN"
   # VPC Inputs
   vpc_id             = "${var.vpc_id}"
   vpc_cidr           = "${var.vpc_cidr}"
   vpn_cidr           = "${var.vpn_cidr}"
   public_subnet_ids  = "${var.public_subnet_ids}"
   remote_vpn_ip_cidr = "${var.remote_vpn_ip_cidr}"
-
   # EC2 Inputs
   key_name       = "${var.key_name}"
   private_key    = "${var.private_key}"
   local_key_path = "${var.local_key_path}"
   ami            = "${var.ami}"
   instance_type  = "${var.instance_type}"
-
+  # Network Routing Inputs.  source destination checks are disable for nat gateways or routing on an instance.
+  source_dest_check = false
   # ELB Inputs
   cert_arn = "${var.cert_arn}"
-
   # DNS Inputs
   domain_name   = "${var.public_domain_name}"
   route_zone_id = "${var.route_zone_id}"
-
   # OpenVPN Inputs
   openvpn_user       = "${var.openvpn_user}"
   openvpn_admin_user = "${var.openvpn_admin_user}" # Note: Don't choose "admin" username. Looks like it's already reserved.
   openvpn_admin_pw   = "${var.openvpn_admin_pw}"
-
   #sleep will stop instances to save cost during idle time.
   sleep = "${var.sleep}"
+}
+
+output "id" {
+  value = "${module.openvpn.id}"
 }
 
 output "private_ip" {
