@@ -5,3 +5,4 @@ modules/vpc/.terraform/*
 modules/vpn/.terraform/plugins/linux_amd64/lock.json
 modules/vpn/.terraform/modules/*
 modules/vpn/.terraform/plugins/*
+plan
