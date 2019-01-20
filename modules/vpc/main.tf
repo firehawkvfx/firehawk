@@ -22,7 +22,7 @@ module "vpc" {
   one_nat_gateway_per_az = false
 
   #not sure if this is actually required - it seems mroe realted to aws type vpn gateway as a paid service
-  enable_vpn_gateway = true
+  #enable_vpn_gateway = true
 
   tags = {
     Terraform   = "true"

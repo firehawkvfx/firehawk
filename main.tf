@@ -72,6 +72,7 @@ variable "pcoip_instance_sleep" {
 
 module "pcoipgw" {
   source = "./modules/pcoipgw"
+  name   = "pcoip"
 
   #options for gateway type are centos7 and pcoip
   gateway_type      = "${var.gateway_type}"
@@ -101,6 +102,7 @@ variable "node_sleep_on_create" {
 
 module "node" {
   source = "./modules/node-centos"
+  name   = "centos"
 
   # region will determine the ami
   region = "${var.region}"

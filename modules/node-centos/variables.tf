@@ -1,6 +1,4 @@
-variable "name" {
-  default = "pcoipgw"
-}
+variable "name" {}
 
 variable "vpc_id" {}
 
