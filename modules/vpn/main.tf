@@ -23,7 +23,10 @@ variable "key_name" {
 variable "private_key" {}
 
 variable "ami" {
-  default = "ami-7777b515"
+  #v2.5
+  #default = "ami-7777b515"
+  #v2.6.1
+  default = "ami-05fdd828e5a7530b0"
 }
 
 variable "instance_type" {

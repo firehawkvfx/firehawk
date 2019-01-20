@@ -5,49 +5,6 @@ provider "aws" {
   region = "${var.region}"
 }
 
-variable "region" {
-  default = "ap-southeast-2"
-}
-
-variable "sleep" {
-  default = false
-}
-
-# NAT gateway allows outbound internet access for instances in the private subnets.  
-# this will be required if running softnas updates and potentially the softnas license server.
-variable "enable_nat_gateway" {
-  default = true
-}
-
-variable "create_vpc" {
-  default = true
-}
-
-variable "create_openvpn" {
-  default = true
-}
-
-# #172.16.135.0/24 will be reserved for the remote subnet
-# variable "private_remote_subnet" {
-#   default = "172.16.135.0/24"
-# }
-
-variable "vpc_cidr" {
-  default = "10.0.0.0/16"
-}
-
-variable "azs" {
-  default = ["ap-southeast-2a", "ap-southeast-2b"]
-}
-
-variable "private_subnets" {
-  default = ["10.0.1.0/24", "10.0.2.0/24"]
-}
-
-variable "public_subnets" {
-  default = ["10.0.101.0/24", "10.0.102.0/24"]
-}
-
 module "vpc" {
   source     = "terraform-aws-modules/vpc/aws"
   create_vpc = true
@@ -63,35 +20,15 @@ module "vpc" {
   enable_nat_gateway     = "${(var.sleep || !var.enable_nat_gateway) ? false : true}"
   single_nat_gateway     = true
   one_nat_gateway_per_az = false
-  enable_vpn_gateway     = false
+
+  #not sure if this is actually required - it seems mroe realted to aws type vpn gateway as a paid service
+  enable_vpn_gateway = true
 
   tags = {
     Terraform   = "true"
     Environment = "dev"
   }
 }
-
-variable "remote_ip_cidr" {}
-
-variable "route_zone_id" {}
-
-variable "key_name" {}
-
-variable "private_key" {}
-
-variable "local_key_path" {}
-
-variable "cert_arn" {}
-
-variable "public_domain_name" {}
-
-variable "openvpn_user" {}
-
-variable "openvpn_admin_user" {}
-
-variable "openvpn_admin_pw" {}
-
-variable "vpn_cidr" {}
 
 module "vpn" {
   source = "../vpn"
@@ -142,44 +79,4 @@ resource "aws_route" "private_openvpn_gateway" {
   timeouts {
     create = "5m"
   }
-}
-
-output "vpc_id" {
-  value = "${module.vpc.vpc_id}"
-}
-
-output "vpc_cidr_block" {
-  value = "${module.vpc.vpc_cidr_block}"
-}
-
-output "private_subnets" {
-  value = "${module.vpc.private_subnets}"
-}
-
-output "private_subnets_cidr_blocks" {
-  value = "${module.vpc.private_subnets_cidr_blocks}"
-}
-
-output "public_subnets" {
-  value = "${module.vpc.public_subnets}"
-}
-
-output "public_subnets_cidr_blocks" {
-  value = "${module.vpc.public_subnets_cidr_blocks}"
-}
-
-output "vpc_main_route_table_id" {
-  value = "${module.vpc.vpc_main_route_table_id}"
-}
-
-output "public_route_table_ids" {
-  value = "${module.vpc.public_route_table_ids}"
-}
-
-output "private_route_table_ids" {
-  value = "${module.vpc.private_route_table_ids}"
-}
-
-output "vpn_private_ip" {
-  value = "${module.vpn.private_ip}"
 }

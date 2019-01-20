@@ -96,46 +96,55 @@ resource "aws_instance" "node_centos" {
   tags {
     Name = "node_centos"
   }
-
-  provisioner "remote-exec" {
-    connection {
-      user        = "centos"
-      host        = "${self.public_ip}"
-      private_key = "${var.private_key}"
-      timeout     = "10m"
-    }
-
-    inline = [
-      # Sleep 60 seconds until AMI is ready
-      "sleep 60",
-    ]
-  }
 }
 
-resource "null_resource" "update-node" {
-  count = "${var.skip_update ? 0 : 1}"
+#   provisioner "remote-exec" {
+#     connection {
+#       user        = "centos"
+#       host        = "${self.public_ip}"
+#       private_key = "${var.private_key}"
+#       timeout     = "10m"
+#     }
 
-  provisioner "remote-exec" {
-    connection {
-      user        = "centos"
-      host        = "${self.public_ip}"
-      private_key = "${var.private_key}"
-      timeout     = "10m"
-    }
 
-    inline = [
-      # Sleep 60 seconds until AMI is ready
-      "sudo yum update -y",
+#     inline = [
+#       # Sleep 60 seconds until AMI is ready
+#       "sleep 60",
+#     ]
+#   }
+# }
 
-      "sudo yum reboot",
-    ]
-  }
-}
 
-resource "null_resource" "shutdown-node" {
-  count = "${var.sleep ? 1 : 0}"
+# resource "null_resource" "update-node" {
+#   count = "${var.skip_update ? 0 : 1}"
 
-  provisioner "local-exec" {
-    command = "aws ec2 stop-instances --instance-ids ${aws_instance.node_centos.id}"
-  }
-}
+
+#   provisioner "remote-exec" {
+#     connection {
+#       user        = "centos"
+#       host        = "${aws_instance.node_centos.public_ip}"
+#       private_key = "${var.private_key}"
+#       timeout     = "10m"
+#     }
+
+
+#     inline = [
+#       # Sleep 60 seconds until AMI is ready
+#       "sudo yum update -y",
+
+
+#       "sudo yum reboot",
+#     ]
+#   }
+# }
+
+
+# resource "null_resource" "shutdown-node" {
+#   count = "${var.sleep ? 1 : 0}"
+
+
+#   provisioner "local-exec" {
+#     command = "aws ec2 stop-instances --instance-ids ${aws_instance.node_centos.id}"
+#   }
+# }
+
