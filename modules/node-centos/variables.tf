@@ -49,7 +49,7 @@ variable "sleep" {
 }
 
 variable "skip_update" {
-  default = false
+  default = true
 }
 
 variable "vpn_cidr" {}
