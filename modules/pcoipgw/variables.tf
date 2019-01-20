@@ -11,6 +11,8 @@ variable "vpc_cidr" {}
 #example "125.254.24.255/32"
 variable "remote_ip_cidr" {}
 
+variable "vpn_cidr" {}
+
 # examples ["subnet-0a7554f56af4d6d0a", "subnet-0257c7f8b1d68b6e4"]
 variable "public_subnet_ids" {
   default = []
