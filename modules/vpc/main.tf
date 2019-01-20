@@ -61,22 +61,40 @@ locals {
   nat_gateway_count = "${length(module.vpc.natgw_ids)}"
 }
 
-resource "aws_route_table" "openvpn" {
-  count = "${length(var.private_subnets)}"
+# resource "aws_route_table" "openvpn" {
+#   count = "${length(var.private_subnets)}"
 
-  vpc_id = "${module.vpc.vpc_id}"
 
-  tags = "${merge(map("Name", "OpenVPN_Route"))}"
-}
+#   vpc_id = "${module.vpc.vpc_id}"
 
-resource "aws_route" "private_openvpn_gateway" {
-  count = "${length(var.private_subnets)}"
 
-  route_table_id         = "${element(aws_route_table.openvpn.*.id, count.index)}"
-  destination_cidr_block = "${var.vpn_cidr}"
-  instance_id            = "${module.vpn.id}"
+#   tags = "${merge(map("Name", "OpenVPN_Route"))}"
+# }
 
-  timeouts {
-    create = "5m"
-  }
-}
+
+# resource "aws_route" "private_openvpn_gateway" {
+#   count = "${length(var.private_subnets)}"
+
+
+#   route_table_id         = "${element(aws_route_table.openvpn.*.id, count.index)}"
+#   destination_cidr_block = "${var.vpn_cidr}"
+#   instance_id            = "${module.vpn.id}"
+
+
+#   timeouts {
+#     create = "5m"
+#   }
+# }
+
+
+# ##########################
+# # Route table association
+# ##########################
+# resource "aws_route_table_association" "openvpn" {
+#   count = "${length(var.private_subnets)}"
+
+
+#   subnet_id      = "${element(module.vpc.private_subnets, count.index)}"
+#   route_table_id = "${element(aws_route_table.openvpn.*.id, count.index)}"
+# }
+
