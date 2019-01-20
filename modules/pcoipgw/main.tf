@@ -28,6 +28,14 @@ resource "aws_security_group" "pcoipgw" {
     description = "all incoming traffic from remote access ip"
   }
 
+  ingress {
+    protocol    = "-1"
+    from_port   = 0
+    to_port     = 0
+    cidr_blocks = ["${var.vpn_cidr}"]
+    description = "all incoming traffic from remote subnet range"
+  }
+
   # For OpenVPN Client Web Server & Admin Web UI
 
   ingress {
