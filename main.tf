@@ -5,11 +5,16 @@ provider "aws" {
   region = "${var.region}"
 }
 
+variable "enable_nat_gateway" {
+  default = false
+}
+
 module "vpc" {
   source = "./modules/vpc"
 
   #sleep will disable the nat gateway to save cost during idle time.
-  sleep = "${var.sleep}"
+  sleep              = "${var.sleep}"
+  enable_nat_gateway = "${var.enable_nat_gateway}"
 
   #vpn variables
 
