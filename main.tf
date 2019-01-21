@@ -22,6 +22,8 @@ module "vpc" {
   vpn_cidr = "${var.vpn_cidr}"
   #the remote public address that will connect to the openvpn instance and other public instances
   remote_ip_cidr = "${var.remote_ip_cidr}"
+  #the remote private cidr range of the subnet the openvpn client reside in.  used if you intend to use the client as a router / gateway for other nodes in your private network.
+  remote_subnet_cidr = "${var.remote_subnet_cidr}"
   #a provided route 53 zone id will be modified to have a subdomain to access vpn.  you will need to manually setup a route 53 zone for a domain with an ssl certificate.
   route_zone_id      = "${var.route_zone_id}"
   key_name           = "${var.key_name}"
