@@ -64,28 +64,38 @@ locals {
 # resource "aws_route_table" "openvpn" {
 #   count = "${length(var.private_subnets)}"
 
-
 #   vpc_id = "${module.vpc.vpc_id}"
-
 
 #   tags = "${merge(map("Name", "OpenVPN_Route"))}"
 # }
 
+resource "aws_route" "private_openvpn_dhcp_gateway" {
+  count = "${length(module.vpc.private_route_table_ids)}"
 
-# resource "aws_route" "private_openvpn_gateway" {
-#   count = "${length(var.private_subnets)}"
+  route_table_id         = "${element(module.vpc.private_route_table_ids, count.index)}"
+  destination_cidr_block = "${var.vpn_cidr}"
+  instance_id            = "${module.vpn.id}"
 
+  timeouts {
+    create = "5m"
+  }
+}
 
-#   route_table_id         = "${element(aws_route_table.openvpn.*.id, count.index)}"
-#   destination_cidr_block = "${var.vpn_cidr}"
-#   instance_id            = "${module.vpn.id}"
+variable "remote_subnet_cidr" {
+  default = "192.168.0.0/24"
+}
 
+resource "aws_route" "private_openvpn_remote_subnet_gateway" {
+  count = "${length(module.vpc.private_route_table_ids)}"
 
-#   timeouts {
-#     create = "5m"
-#   }
-# }
+  route_table_id         = "${element(module.vpc.private_route_table_ids, count.index)}"
+  destination_cidr_block = "${var.remote_subnet_cidr}"
+  instance_id            = "${module.vpn.id}"
 
+  timeouts {
+    create = "5m"
+  }
+}
 
 # ##########################
 # # Route table association
