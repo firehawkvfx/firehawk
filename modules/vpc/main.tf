@@ -70,7 +70,7 @@ locals {
 # }
 
 resource "aws_route" "private_openvpn_dhcp_gateway" {
-  count = "${length(module.vpc.private_route_table_ids)}"
+  count = "${length(var.private_subnets)}"
 
   route_table_id         = "${element(module.vpc.private_route_table_ids, count.index)}"
   destination_cidr_block = "${var.vpn_cidr}"
@@ -86,7 +86,7 @@ variable "remote_subnet_cidr" {
 }
 
 resource "aws_route" "private_openvpn_remote_subnet_gateway" {
-  count = "${length(module.vpc.private_route_table_ids)}"
+  count = "${length(var.private_subnets)}"
 
   route_table_id         = "${element(module.vpc.private_route_table_ids, count.index)}"
   destination_cidr_block = "${var.remote_subnet_cidr}"
