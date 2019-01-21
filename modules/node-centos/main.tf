@@ -136,9 +136,12 @@ resource "null_resource" "update-node" {
 
       # These are deadline dependencies
       "sudo yum install redhat-lsb -y",
-
-      "sudo yum reboot",
     ]
+  }
+
+  #a reboot command in the instance will cause a terraform error.  we do it locally instead.
+  provisioner "local-exec" {
+    command = "aws ec2 reboot-instances --instance-ids ${aws_instance.node_centos.id}"
   }
 }
 

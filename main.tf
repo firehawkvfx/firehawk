@@ -6,7 +6,7 @@ provider "aws" {
 }
 
 variable "enable_nat_gateway" {
-  default = false
+  default = true
 }
 
 module "vpc" {
