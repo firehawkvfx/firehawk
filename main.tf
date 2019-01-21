@@ -69,7 +69,7 @@ variable "softnas_skip_update" {
 
 #PCOIP Gateway.  This is a graphical instance that serves as a gateway into the vpc should vpn access fail.
 variable "pcoip_skip_update" {
-  default = true
+  default = false
 }
 
 #this will stop the instance upon creation.  this is useful for graphical instances which are expensive and may not need to be used immediately.
@@ -100,7 +100,7 @@ module "pcoipgw" {
 }
 
 variable "node_skip_update" {
-  default = true
+  default = false
 }
 
 variable "node_sleep_on_create" {

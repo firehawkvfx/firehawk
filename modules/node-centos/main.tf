@@ -53,6 +53,13 @@ resource "aws_security_group" "node_centos" {
     description = "https"
   }
   ingress {
+    protocol    = "tcp"
+    from_port   = 27100
+    to_port     = 27100
+    cidr_blocks = ["${var.remote_ip_cidr}"]
+    description = "DeadlineDB MongoDB"
+  }
+  ingress {
     protocol    = "udp"
     from_port   = 1194
     to_port     = 1194
@@ -96,55 +103,49 @@ resource "aws_instance" "node_centos" {
   tags {
     Name = "node_centos"
   }
+
+  provisioner "remote-exec" {
+    connection {
+      user        = "centos"
+      host        = "${self.private_ip}"
+      private_key = "${var.private_key}"
+      timeout     = "10m"
+    }
+
+    inline = [
+      # Sleep 60 seconds until AMI is ready
+      "sleep 60",
+    ]
+  }
 }
 
-#   provisioner "remote-exec" {
-#     connection {
-#       user        = "centos"
-#       host        = "${self.public_ip}"
-#       private_key = "${var.private_key}"
-#       timeout     = "10m"
-#     }
+resource "null_resource" "update-node" {
+  count = "${var.skip_update ? 0 : 1}"
 
+  provisioner "remote-exec" {
+    connection {
+      user        = "centos"
+      host        = "${aws_instance.node_centos.private_ip}"
+      private_key = "${var.private_key}"
+      timeout     = "10m"
+    }
 
-#     inline = [
-#       # Sleep 60 seconds until AMI is ready
-#       "sleep 60",
-#     ]
-#   }
-# }
+    inline = [
+      # Sleep 60 seconds until AMI is ready
+      "sudo yum update -y",
 
+      # These are deadline dependencies
+      "sudo yum install redhat-lsb -y",
 
-# resource "null_resource" "update-node" {
-#   count = "${var.skip_update ? 0 : 1}"
+      "sudo yum reboot",
+    ]
+  }
+}
 
+resource "null_resource" "shutdown-node" {
+  count = "${var.sleep ? 1 : 0}"
 
-#   provisioner "remote-exec" {
-#     connection {
-#       user        = "centos"
-#       host        = "${aws_instance.node_centos.public_ip}"
-#       private_key = "${var.private_key}"
-#       timeout     = "10m"
-#     }
-
-
-#     inline = [
-#       # Sleep 60 seconds until AMI is ready
-#       "sudo yum update -y",
-
-
-#       "sudo yum reboot",
-#     ]
-#   }
-# }
-
-
-# resource "null_resource" "shutdown-node" {
-#   count = "${var.sleep ? 1 : 0}"
-
-
-#   provisioner "local-exec" {
-#     command = "aws ec2 stop-instances --instance-ids ${aws_instance.node_centos.id}"
-#   }
-# }
-
+  provisioner "local-exec" {
+    command = "aws ec2 stop-instances --instance-ids ${aws_instance.node_centos.id}"
+  }
+}
