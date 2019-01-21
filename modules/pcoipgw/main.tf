@@ -121,7 +121,7 @@ resource "aws_instance" "pcoipgw" {
 }
 
 resource "null_resource" "pcoipgw" {
-  count = "${(var.skip_update || var.use_custom_ami) ? 0 : 1}"
+  #count = "${(var.skip_update || var.use_custom_ami) ? 0 : 1}"
 
   #transfer the gpu driver
   provisioner "file" {
@@ -148,11 +148,17 @@ resource "null_resource" "pcoipgw" {
 
     inline = [
       "sudo yum update -y",
+
+      # these are deadline dependencies
+      "sudo yum install redhat-lsb libX11 libXext -y",
+
+      "sudo yum install libMesaGL1 -y",
+      "sudo yum install mesa-libGL mesa-libGLU -y",
     ]
   }
 
   provisioner "local-exec" {
-    command = "aws ec2 reboot-instances --instance-ids ${self.id} & sleep 10"
+    command = "aws ec2 reboot-instances --instance-ids ${aws_instance.pcoipgw.id} & sleep 30"
   }
 
   #update yum will break pcoip, so it is reconfigured at this point.
@@ -175,12 +181,13 @@ resource "null_resource" "pcoipgw" {
 
   #after dracut, we reboot the instance locally.  annoyingly, a reboot command will cause a terraform error.
   provisioner "local-exec" {
-    command = "aws ec2 reboot-instances --instance-ids ${self.id}"
+    command = "aws ec2 reboot-instances --instance-ids ${aws_instance.pcoipgw.id}"
   }
 }
 
 resource "null_resource" shutdownpcoipgw {
-  count = "${var.sleep ? 1 : 0}"
+  depends_on = ["null_resource.pcoipgw"]
+  count      = "${var.sleep ? 1 : 0}"
 
   provisioner "local-exec" {
     command = "aws ec2 stop-instances --instance-ids ${aws_instance.pcoipgw.id}"
