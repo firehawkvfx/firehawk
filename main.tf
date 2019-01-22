@@ -129,4 +129,8 @@ module "node" {
 
   #sleep will stop instances to save cost during idle time.
   sleep = "${var.sleep || var.node_sleep_on_create}"
+
+  deadline_user                 = "${var.deadline_user}"
+  deadline_user_password        = "${var.deadline_user_password}"
+  deadline_samba_server_address = "${var.deadline_samba_server_address}"
 }
