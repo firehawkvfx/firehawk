@@ -119,8 +119,26 @@ resource "aws_instance" "node_centos" {
   }
 }
 
+variable "deadline_user" {
+  default = "deadlineuser"
+}
+
+variable "deadline_user_password" {}
+
+variable "deadline_samba_server_address" {
+  default = "192.169.0.14"
+}
+
 resource "null_resource" "update-node" {
   count = "${var.skip_update ? 0 : 1}"
+
+  provisioner "local-exec" {
+    command = <<EOT
+      ~/openvpn_config/startvpn.sh
+      sleep 10
+      ping -c15 '${aws_instance.node_centos.private_ip}'
+  EOT
+  }
 
   provisioner "remote-exec" {
     connection {
@@ -136,6 +154,9 @@ resource "null_resource" "update-node" {
 
       # These are deadline dependencies
       "sudo yum install redhat-lsb -y",
+
+      "sudo mkdir /mnt/repo",
+      "sudo mount -t cifs -o username=${var.deadline_user},password=${var.deadline_user_password} //${var.deadline_samba_server_address}/DeadlineRepository /mnt/repo",
     ]
   }
 
