@@ -9,12 +9,18 @@ variable "vpc_cidr" {}
 #example "125.254.24.255/32"
 variable "remote_ip_cidr" {}
 
+variable "remote_subnet_cidr" {}
+
 # examples ["subnet-0a7554f56af4d6d0a", "subnet-0257c7f8b1d68b6e4"]
 variable "public_subnet_ids" {
   default = []
 }
 
 variable "private_subnet_ids" {
+  default = []
+}
+
+variable "private_subnets_cidr_blocks" {
   default = []
 }
 
@@ -55,3 +61,8 @@ variable "vpn_cidr" {}
 variable "region" {}
 
 variable "softnas_private_ip" {}
+
+variable "deadline_certificates_location" {}
+variable "deadline_installers_filename" {}
+
+variable "local_key_path" {}
