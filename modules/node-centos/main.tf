@@ -104,19 +104,19 @@ resource "aws_instance" "node_centos" {
     Name = "node_centos"
   }
 
-  provisioner "remote-exec" {
-    connection {
-      user        = "centos"
-      host        = "${self.private_ip}"
-      private_key = "${var.private_key}"
-      timeout     = "10m"
-    }
+  # provisioner "remote-exec" {
+  #   connection {
+  #     user        = "centos"
+  #     host        = "${self.private_ip}"
+  #     private_key = "${var.private_key}"
+  #     timeout     = "10m"
+  #   }
 
-    inline = [
-      # Sleep 60 seconds until AMI is ready
-      "sleep 60",
-    ]
-  }
+  #   inline = [
+  #     # Sleep 60 seconds until AMI is ready
+  #     "sleep 60",
+  #   ]
+  # }
 }
 
 variable "deadline_user" {
@@ -125,18 +125,29 @@ variable "deadline_user" {
 
 variable "deadline_user_password" {}
 
+variable "deadline_user_uid" {}
+
 variable "deadline_samba_server_address" {
-  default = "192.169.0.14"
+  default = "192.169.0.111"
+}
+
+#wakeup a node after sleep
+resource "null_resource" "start-node" {
+  count = "${var.sleep ? 0 : 1}"
+
+  provisioner "local-exec" {
+    command = "aws ec2 start-instances --instance-ids ${aws_instance.node_centos.id}"
+  }
 }
 
 resource "null_resource" "update-node" {
-  count = "${var.skip_update ? 0 : 1}"
+  # todo: this wont provision unless vpn client routes to deadline db onsite are established.  read tf_aws_vpn notes for more configuration instructions.
 
   provisioner "local-exec" {
     command = <<EOT
       ~/openvpn_config/startvpn.sh
       sleep 10
-      ping -c15 '${aws_instance.node_centos.private_ip}'
+      ping -c5 '${aws_instance.node_centos.private_ip}'
   EOT
   }
 
@@ -148,19 +159,61 @@ resource "null_resource" "update-node" {
       timeout     = "10m"
     }
 
-    inline = [
-      # Sleep 60 seconds until AMI is ready
-      "sudo yum update -y",
+    # inline = [
+    #   # create dealine user and password
+    #   "sudo useradd -u ${var.deadline_user_uid} ${var.deadline_user}",
+    #   # read here to improve automounting processes https://wiki.centos.org/TipsAndTricks/WindowsShares
+    #   "sudo mkdir /etc/deadline",
+    #   "sudo echo 'username=sushi\npassword=yummy' >> /etc/deadline/secret.txt"
 
-      # These are deadline dependencies
-      "sudo yum install redhat-lsb -y",
 
-      "sudo mkdir /mnt/repo",
-      "sudo mount -t cifs -o username=${var.deadline_user},password=${var.deadline_user_password} //${var.deadline_samba_server_address}/DeadlineRepository /mnt/repo",
+    #   "echo '${var.deadline_user_password}' | sudo passwd ${var.deadline_user} --stdin",
+    #   "set -x",
+    #   "${var.skip_update ? " \n" : "sudo yum update -y"}",
+
+
+    #   # These are deadline dependencies
+    #   "sudo yum install redhat-lsb -y",
+
+
+    #   "sudo mkdir /mnt/repo",
+    #   "sudo mount -t cifs -o username=${var.deadline_user},password=${var.deadline_user_password} //${var.deadline_samba_server_address}/DeadlineRepository /mnt/repo",
+    # ]
+
+    inline = [<<EOT
+#create dealine user and password
+sudo useradd -u ${var.deadline_user_uid} ${var.deadline_user}
+echo '${var.deadline_user_password}' | sudo passwd ${var.deadline_user} --stdin
+#give sudo priveledges
+sudo usermod -aG wheel ${var.deadline_user}
+
+#read here to improve automounting mound cifs smb processes https://wiki.centos.org/TipsAndTricks/WindowsShares
+
+sudo mkdir /etc/deadline
+cat << EOF | sudo tee --append /etc/deadline/secret.txt
+username=${var.deadline_user}
+password=${var.deadline_user_password}
+EOF
+set -x
+${var.skip_update ? " \n" : "sudo yum update -y"}
+
+#These are deadline dependencies
+sudo yum install redhat-lsb -y
+sudo yum install samba-client samba-common cifs-utils -y
+#mount repository automatically over the vpn.  if you don't have routing configured, this won't work
+sudo mkdir /mnt/repo
+cat << EOF | sudo tee --append /etc/fstab
+//${var.deadline_samba_server_address}/DeadlineRepository /mnt/repo cifs    credentials=/etc/deadline/secret.txt,_netdev,uid=789 0 0
+EOF
+sudo mount -a
+sudo ls /mnt/repo
+EOT
     ]
   }
 
-  #a reboot command in the instance will cause a terraform error.  we do it locally instead.
+  #sudo mount -t cifs -o username=${var.deadline_user},password=${var.deadline_user_password} //${var.deadline_samba_server_address}/DeadlineRepository /mnt/repo
+
+  #a reboot command in the shell of the instance will cause a terraform error.  We do it locally instead.
   provisioner "local-exec" {
     command = "aws ec2 reboot-instances --instance-ids ${aws_instance.node_centos.id}"
   }

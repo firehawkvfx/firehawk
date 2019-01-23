@@ -70,7 +70,7 @@ variable "softnas_skip_update" {
 
 #PCOIP Gateway.  This is a graphical instance that serves as a gateway into the vpc should vpn access fail.
 variable "pcoip_skip_update" {
-  default = false
+  default = true
 }
 
 #this will stop the instance upon creation.  this is useful for graphical instances which are expensive and may not need to be used immediately.
@@ -78,30 +78,30 @@ variable "pcoip_instance_sleep" {
   default = true
 }
 
-module "pcoipgw" {
-  source = "./modules/pcoipgw"
-  name   = "pcoip"
+# module "pcoipgw" {
+#   source = "./modules/pcoipgw"
+#   name   = "pcoip"
 
-  #options for gateway type are centos7 and pcoip
-  gateway_type      = "${var.gateway_type}"
-  vpc_id            = "${module.vpc.vpc_id}"
-  vpc_cidr          = "${module.vpc.vpc_cidr_block}"
-  vpn_cidr          = "${var.vpn_cidr}"
-  remote_ip_cidr    = "${var.remote_ip_cidr}"
-  public_subnet_ids = "${module.vpc.public_subnets}"
+#   #options for gateway type are centos7 and pcoip
+#   gateway_type      = "${var.gateway_type}"
+#   vpc_id            = "${module.vpc.vpc_id}"
+#   vpc_cidr          = "${module.vpc.vpc_cidr_block}"
+#   vpn_cidr          = "${var.vpn_cidr}"
+#   remote_ip_cidr    = "${var.remote_ip_cidr}"
+#   public_subnet_ids = "${module.vpc.public_subnets}"
 
-  key_name    = "${var.key_name}"
-  private_key = "${file("${var.local_key_path}")}"
+#   key_name    = "${var.key_name}"
+#   private_key = "${file("${var.local_key_path}")}"
 
-  #skipping os updates will allow faster rollout for testing, but may be non functional
-  skip_update = "${var.pcoip_skip_update}"
+#   #skipping os updates will allow faster rollout for testing, but may be non functional
+#   skip_update = "${var.pcoip_skip_update}"
 
-  #sleep will stop instances to save cost during idle time.
-  sleep = "${var.sleep || var.pcoip_instance_sleep}"
-}
+#   #sleep will stop instances to save cost during idle time.
+#   sleep = "${var.sleep || var.pcoip_instance_sleep}"
+# }
 
 variable "node_skip_update" {
-  default = false
+  default = true
 }
 
 variable "node_sleep_on_create" {
@@ -134,4 +134,5 @@ module "node" {
   deadline_user                 = "${var.deadline_user}"
   deadline_user_password        = "${var.deadline_user_password}"
   deadline_samba_server_address = "${var.deadline_samba_server_address}"
+  deadline_user_uid             = "${var.deadline_user_uid}"
 }
