@@ -41,7 +41,7 @@ variable "public_domain_name" {}
 variable "openvpn_admin_user" {}
 
 variable "openvpn_user" {}
-
+variable "openvpn_user_pw" {}
 variable "openvpn_admin_pw" {}
 
 variable "local_key_path" {}
@@ -83,6 +83,7 @@ module "openvpn" {
   route_zone_id = "${var.route_zone_id}"
   # OpenVPN Inputs
   openvpn_user       = "${var.openvpn_user}"
+  openvpn_user_pw    = "${var.openvpn_user_pw}"
   openvpn_admin_user = "${var.openvpn_admin_user}" # Note: Don't choose "admin" username. Looks like it's already reserved.
   openvpn_admin_pw   = "${var.openvpn_admin_pw}"
   #sleep will stop instances to save cost during idle time.

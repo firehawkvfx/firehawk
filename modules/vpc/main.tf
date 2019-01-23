@@ -50,6 +50,7 @@ module "vpn" {
   cert_arn           = "${var.cert_arn}"
   public_domain_name = "${var.public_domain_name}"
   openvpn_user       = "${var.openvpn_user}"
+  openvpn_user_pw    = "${var.openvpn_user_pw}"
   openvpn_admin_user = "${var.openvpn_admin_user}"
   openvpn_admin_pw   = "${var.openvpn_admin_pw}"
   #sleep will stop instances to save cost during idle time.

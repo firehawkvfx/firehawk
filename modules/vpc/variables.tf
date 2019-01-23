@@ -60,6 +60,7 @@ variable "cert_arn" {}
 variable "public_domain_name" {}
 
 variable "openvpn_user" {}
+variable "openvpn_user_pw" {}
 
 variable "openvpn_admin_user" {}
 
