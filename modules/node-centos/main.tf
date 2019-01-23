@@ -43,6 +43,7 @@ resource "aws_security_group" "node_centos" {
     from_port   = 22
     to_port     = 22
     cidr_blocks = ["${var.remote_ip_cidr}"]
+    cidr_blocks = ["${concat(list("${var.remote_subnet_cidr}", "${var.remote_ip_cidr}"), "${var.private_subnets_cidr_blocks}")}"]
     description = "ssh"
   }
   ingress {
@@ -56,8 +57,22 @@ resource "aws_security_group" "node_centos" {
     protocol    = "tcp"
     from_port   = 27100
     to_port     = 27100
-    cidr_blocks = ["${var.remote_ip_cidr}"]
+    cidr_blocks = ["${concat(list("${var.remote_subnet_cidr}"), "${var.private_subnets_cidr_blocks}")}"]
     description = "DeadlineDB MongoDB"
+  }
+  ingress {
+    protocol    = "tcp"
+    from_port   = 8080
+    to_port     = 8080
+    cidr_blocks = ["${concat(list("${var.remote_subnet_cidr}"), "${var.private_subnets_cidr_blocks}")}"]
+    description = "Deadline And Deadline RCS"
+  }
+  ingress {
+    protocol    = "tcp"
+    from_port   = 4433
+    to_port     = 4433
+    cidr_blocks = ["${concat(list("${var.remote_subnet_cidr}"), "${var.private_subnets_cidr_blocks}")}"]
+    description = "Deadline RCS TLS HTTPS"
   }
   ingress {
     protocol    = "udp"
@@ -148,7 +163,45 @@ resource "null_resource" "update-node" {
       ~/openvpn_config/startvpn.sh
       sleep 10
       ping -c5 '${aws_instance.node_centos.private_ip}'
+      ssh-keygen -y -f ${var.local_key_path} > ~/temp_public_key
   EOT
+  }
+
+  provisioner "file" {
+    connection {
+      user        = "centos"
+      host        = "${aws_instance.node_centos.private_ip}"
+      private_key = "${var.private_key}"
+      type        = "ssh"
+      timeout     = "10m"
+    }
+
+    source      = "~/temp_public_key"
+    destination = "~/temp_public_key"
+  }
+
+  #provision the deadline user https://aws.amazon.com/premiumsupport/knowledge-center/new-user-accounts-linux-instance/
+  provisioner "remote-exec" {
+    connection {
+      user        = "centos"
+      host        = "${aws_instance.node_centos.private_ip}"
+      private_key = "${var.private_key}"
+      type        = "ssh"
+      timeout     = "10m"
+    }
+
+    inline = [<<EOT
+#create dealine user and password
+sudo useradd -u ${var.deadline_user_uid} ${var.deadline_user}
+sudo passwd -d ${var.deadline_user}
+sudo mkdir /home/${var.deadline_user}/.ssh
+#sudo touch /home/${var.deadline_user}/.ssh/authorized_keys
+sudo mv ~/temp_public_key /home/${var.deadline_user}/.ssh/authorized_keys
+sudo chown -R ${var.deadline_user}:${var.deadline_user} /home/${var.deadline_user}/.ssh
+sudo chmod 700 /home/${var.deadline_user}/.ssh
+sudo chmod 600 /home/${var.deadline_user}/.ssh/authorized_keys
+EOT
+    ]
   }
 
   provisioner "remote-exec" {
@@ -156,15 +209,82 @@ resource "null_resource" "update-node" {
       user        = "centos"
       host        = "${aws_instance.node_centos.private_ip}"
       private_key = "${var.private_key}"
+      type        = "ssh"
+      timeout     = "10m"
+    }
+
+    inline = [<<EOT
+#give sudo priveledges after key is added
+sudo usermod -aG wheel ${var.deadline_user}
+sudo systemctl restart sshd.service
+sudo mkdir -p /opt/Thinkbox/certs
+sudo chown -R ${var.deadline_user}:${var.deadline_user} /opt/Thinkbox/certs
+sudo chmod 700 /opt/Thinkbox/certs
+EOT
+    ]
+  }
+
+  connection {
+    user        = "${var.deadline_user}"
+    host        = "${aws_instance.node_centos.private_ip}"
+    private_key = "${var.private_key}"
+    type        = "ssh"
+    timeout     = "10m"
+  }
+
+  #copy the deadline certificates to the render node
+  #provisioner "file" {
+  #  source      = "${var.deadline_certificates_location}/ca.crt"
+  #  destination = "/opt/Thinkbox/certs/ca.crt"
+  #}
+
+  provisioner "file" {
+    source      = "${var.deadline_certificates_location}/Deadline10RemoteClient.pfx"
+    destination = "/opt/Thinkbox/certs/Deadline10RemoteClient.pfx"
+  }
+
+  #provisioner "file" {
+  #  source      = "${var.deadline_certificates_location}/deadlinedb.firehawkvfx.com.pfx"
+  #  destination = "/opt/Thinkbox/certs/deadlinedb.firehawkvfx.com.pfx"
+  #}
+
+
+  #copy the deadline installer to the rendernode
+  # provisioner "file" {
+  #   source      = "${path.module}/file_package/${var.deadline_installers_filename}"
+  #   destination = "/var/tmp/${var.deadline_installers_filename}"
+  # }
+
+  provisioner "remote-exec" {
+    connection {
+      user        = "${var.deadline_user}"
+      host        = "${aws_instance.node_centos.private_ip}"
+      private_key = "${var.private_key}"
+      type        = "ssh"
+      timeout     = "10m"
+    }
+
+    inline = [
+      "sudo chmod 600 /opt/Thinkbox/certs/Deadline10RemoteClient.pfx",
+    ]
+
+    #"sudo chmod +x /var/tmp/${var.deadline_installers_filename}",
+  }
+  provisioner "remote-exec" {
+    connection {
+      user        = "centos"
+      host        = "${aws_instance.node_centos.private_ip}"
+      private_key = "${var.private_key}"
+      type        = "ssh"
       timeout     = "10m"
     }
 
     inline = [<<EOT
 #create dealine user and password
-sudo useradd -u ${var.deadline_user_uid} ${var.deadline_user}
-echo '${var.deadline_user_password}' | sudo passwd ${var.deadline_user} --stdin
+#sudo useradd -u ${var.deadline_user_uid} ${var.deadline_user}
+#echo '${var.deadline_user_password}' | sudo passwd ${var.deadline_user} --stdin
 #give sudo priveledges
-sudo usermod -aG wheel ${var.deadline_user}
+#sudo usermod -aG wheel ${var.deadline_user}
 
 #read here to improve automounting mound cifs smb processes https://wiki.centos.org/TipsAndTricks/WindowsShares
 
@@ -187,8 +307,8 @@ cat << EOF | sudo tee --append /etc/fstab
 //${var.deadline_samba_server_address}/DeadlineRepository /mnt/repo cifs    credentials=/etc/deadline/secret.txt,_netdev,uid=789 0 0
 ${var.softnas_private_ip}:/NAS3/NASVOL3 /mnt/softnas nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
 EOF
-sudo mount -a
-sudo ls /mnt/repo
+#sudo mount -a
+#sudo ls /mnt/repo
 EOT
     ]
   }

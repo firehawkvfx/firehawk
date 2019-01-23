@@ -117,14 +117,19 @@ module "node" {
   region = "${var.region}"
 
   #options for gateway type are centos7 and pcoip
-  vpc_id             = "${module.vpc.vpc_id}"
-  vpc_cidr           = "${module.vpc.vpc_cidr_block}"
-  vpn_cidr           = "${var.vpn_cidr}"
-  remote_ip_cidr     = "${var.remote_ip_cidr}"
-  private_subnet_ids = "${module.vpc.private_subnets}"
+  vpc_id                      = "${module.vpc.vpc_id}"
+  vpc_cidr                    = "${module.vpc.vpc_cidr_block}"
+  vpn_cidr                    = "${var.vpn_cidr}"
+  remote_ip_cidr              = "${var.remote_ip_cidr}"
+  private_subnet_ids          = "${module.vpc.private_subnets}"
+  private_subnets_cidr_blocks = "${module.vpc.private_subnets_cidr_blocks}"
+  remote_subnet_cidr          = "${var.remote_subnet_cidr}"
 
-  key_name    = "${var.key_name}"
-  private_key = "${file("${var.local_key_path}")}"
+  key_name                       = "${var.key_name}"
+  local_key_path                 = "${var.local_key_path}"
+  private_key                    = "${file("${var.local_key_path}")}"
+  deadline_certificates_location = "${var.deadline_certificates_location}"
+  deadline_installers_filename   = "${var.deadline_installers_filename}"
 
   #skipping os updates will allow faster rollout for testing.
   skip_update = "${var.node_skip_update}"

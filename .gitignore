@@ -6,3 +6,6 @@ modules/vpn/.terraform/plugins/linux_amd64/lock.json
 modules/vpn/.terraform/modules/*
 modules/vpn/.terraform/plugins/*
 plan
+modules/node-centos/file_package/CertificateInstaller-10.0.23.4-linux-x64-installer.run
+modules/node-centos/file_package/Deadline-10.0.23.4-linux-installers.tar
+modules/node-centos/file_package/DeadlineClient-10.0.23.4-linux-x64-installer.run
