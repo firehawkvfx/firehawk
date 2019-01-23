@@ -44,29 +44,29 @@ variable "gateway_type" {
 
 #A single softnas instance that resides in a private subnet for high performance nfs storage
 variable "softnas_skip_update" {
-  default = true
+  default = false
 }
 
-# module "softnas" {
-#   source = "./modules/softnas"
+module "softnas" {
+  source = "./modules/softnas"
 
-#   vpn_private_ip              = "${module.vpc.vpn_private_ip}"
-#   key_name                    = "${var.key_name}"
-#   private_key                 = "${file("${var.local_key_path}")}"
-#   vpc_id                      = "${module.vpc.vpc_id}"
-#   private_subnets             = "${module.vpc.private_subnets}"
-#   private_subnets_cidr_blocks = "${module.vpc.private_subnets_cidr_blocks}"
-#   public_subnets_cidr_blocks  = "${module.vpc.public_subnets_cidr_blocks}"
-#   bastion_private_ip          = "${module.pcoipgw.private_ip}"
-#   volumes                     = "${var.volumes}"
-#   mounts                      = "${var.mounts}"
+  vpn_private_ip              = "${module.vpc.vpn_private_ip}"
+  key_name                    = "${var.key_name}"
+  private_key                 = "${file("${var.local_key_path}")}"
+  vpc_id                      = "${module.vpc.vpc_id}"
+  private_subnets             = "${module.vpc.private_subnets}"
+  private_subnets_cidr_blocks = "${module.vpc.private_subnets_cidr_blocks}"
+  public_subnets_cidr_blocks  = "${module.vpc.public_subnets_cidr_blocks}"
+  bastion_private_ip          = "${module.pcoipgw.private_ip}"
+  volumes                     = "${var.volumes}"
+  mounts                      = "${var.mounts}"
 
-#   #skipping os updates will allow faster rollout, but may be non functional
-#   skip_update = "${var.softnas_skip_update}"
+  #skipping os updates will allow faster rollout, but may be non functional
+  skip_update = "${var.softnas_skip_update}"
 
-#   #sleep will stop instances to save cost during idle time.
-#   sleep = "${var.sleep}"
-# }
+  #sleep will stop instances to save cost during idle time.
+  sleep = "${var.sleep}"
+}
 
 #PCOIP Gateway.  This is a graphical instance that serves as a gateway into the vpc should vpn access fail.
 variable "pcoip_skip_update" {
@@ -74,31 +74,32 @@ variable "pcoip_skip_update" {
 }
 
 #this will stop the instance upon creation.  this is useful for graphical instances which are expensive and may not need to be used immediately.
-variable "pcoip_instance_sleep" {
+variable "pcoip_sleep_after_creation" {
   default = true
 }
 
-# module "pcoipgw" {
-#   source = "./modules/pcoipgw"
-#   name   = "pcoip"
+module "pcoipgw" {
+  source = "./modules/pcoipgw"
+  name   = "pcoip"
 
-#   #options for gateway type are centos7 and pcoip
-#   gateway_type      = "${var.gateway_type}"
-#   vpc_id            = "${module.vpc.vpc_id}"
-#   vpc_cidr          = "${module.vpc.vpc_cidr_block}"
-#   vpn_cidr          = "${var.vpn_cidr}"
-#   remote_ip_cidr    = "${var.remote_ip_cidr}"
-#   public_subnet_ids = "${module.vpc.public_subnets}"
+  #options for gateway type are centos7 and pcoip
+  gateway_type      = "${var.gateway_type}"
+  vpc_id            = "${module.vpc.vpc_id}"
+  vpc_cidr          = "${module.vpc.vpc_cidr_block}"
+  vpn_cidr          = "${var.vpn_cidr}"
+  remote_ip_cidr    = "${var.remote_ip_cidr}"
+  public_subnet_ids = "${module.vpc.public_subnets}"
 
-#   key_name    = "${var.key_name}"
-#   private_key = "${file("${var.local_key_path}")}"
+  key_name    = "${var.key_name}"
+  private_key = "${file("${var.local_key_path}")}"
 
-#   #skipping os updates will allow faster rollout for testing, but may be non functional
-#   skip_update = "${var.pcoip_skip_update}"
+  #skipping os updates will allow faster rollout for testing, but may be non functional
+  skip_update = "${var.pcoip_skip_update}"
 
-#   #sleep will stop instances to save cost during idle time.
-#   sleep = "${var.sleep || var.pcoip_instance_sleep}"
-# }
+  #sleep will stop instances to save cost during idle time.
+  sleep                      = "${var.sleep}"
+  pcoip_sleep_after_creation = "${var.pcoip_sleep_after_creation}"
+}
 
 variable "node_skip_update" {
   default = true
@@ -135,4 +136,5 @@ module "node" {
   deadline_user_password        = "${var.deadline_user_password}"
   deadline_samba_server_address = "${var.deadline_samba_server_address}"
   deadline_user_uid             = "${var.deadline_user_uid}"
+  softnas_private_ip            = "${module.softnas.private_ip}"
 }

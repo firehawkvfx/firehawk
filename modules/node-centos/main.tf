@@ -159,27 +159,6 @@ resource "null_resource" "update-node" {
       timeout     = "10m"
     }
 
-    # inline = [
-    #   # create dealine user and password
-    #   "sudo useradd -u ${var.deadline_user_uid} ${var.deadline_user}",
-    #   # read here to improve automounting processes https://wiki.centos.org/TipsAndTricks/WindowsShares
-    #   "sudo mkdir /etc/deadline",
-    #   "sudo echo 'username=sushi\npassword=yummy' >> /etc/deadline/secret.txt"
-
-
-    #   "echo '${var.deadline_user_password}' | sudo passwd ${var.deadline_user} --stdin",
-    #   "set -x",
-    #   "${var.skip_update ? " \n" : "sudo yum update -y"}",
-
-
-    #   # These are deadline dependencies
-    #   "sudo yum install redhat-lsb -y",
-
-
-    #   "sudo mkdir /mnt/repo",
-    #   "sudo mount -t cifs -o username=${var.deadline_user},password=${var.deadline_user_password} //${var.deadline_samba_server_address}/DeadlineRepository /mnt/repo",
-    # ]
-
     inline = [<<EOT
 #create dealine user and password
 sudo useradd -u ${var.deadline_user_uid} ${var.deadline_user}
@@ -200,10 +179,13 @@ ${var.skip_update ? " \n" : "sudo yum update -y"}
 #These are deadline dependencies
 sudo yum install redhat-lsb -y
 sudo yum install samba-client samba-common cifs-utils -y
+sudo yum install nfs-utils nfs-utils-lib -y
 #mount repository automatically over the vpn.  if you don't have routing configured, this won't work
 sudo mkdir /mnt/repo
+sudo mkdir /mnt/softnas
 cat << EOF | sudo tee --append /etc/fstab
 //${var.deadline_samba_server_address}/DeadlineRepository /mnt/repo cifs    credentials=/etc/deadline/secret.txt,_netdev,uid=789 0 0
+${var.softnas_private_ip}:/NAS3/NASVOL3 /mnt/softnas nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
 EOF
 sudo mount -a
 sudo ls /mnt/repo

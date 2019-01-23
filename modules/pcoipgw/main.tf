@@ -83,6 +83,10 @@ variable "custom_ami" {
   default = ""
 }
 
+locals {
+  skip_update = "${(var.skip_update || var.use_custom_ami)}"
+}
+
 resource "aws_instance" "pcoipgw" {
   #instance type and ami are determined by the gateway type variable for if you want a graphical or non graphical instance.
   ami           = "${var.use_custom_ami ? var.custom_ami : lookup(var.ami_map, var.gateway_type)}"
@@ -111,6 +115,10 @@ resource "aws_instance" "pcoipgw" {
     ]
   }
 
+  provisioner "local-exec" {
+    command = "${var.pcoip_sleep_after_creation && local.skip_update ? "aws ec2 stop-instances --instance-ids ${aws_instance.pcoipgw.id}" : ""}"
+  }
+
   # this segment is not currently configured for centos. user name and pw need to be setup in userdata.
   # `admin_user` and `admin_pw` need to be passed in to the appliance through `user_data`, see docs -->
   # https://docs.openvpn.net/how-to-tutorialsguides/virtual-platforms/amazon-ec2-appliance-ami-quick-start-guide/
@@ -121,7 +129,7 @@ resource "aws_instance" "pcoipgw" {
 }
 
 resource "null_resource" "pcoipgw" {
-  #count = "${(var.skip_update || var.use_custom_ami) ? 0 : 1}"
+  count = "${local.skip_update ? 0 : 1}"
 
   #transfer the gpu driver
   provisioner "file" {
@@ -181,13 +189,12 @@ resource "null_resource" "pcoipgw" {
 
   #after dracut, we reboot the instance locally.  annoyingly, a reboot command will cause a terraform error.
   provisioner "local-exec" {
-    command = "aws ec2 reboot-instances --instance-ids ${aws_instance.pcoipgw.id}"
+    command = "${var.pcoip_sleep_after_creation ? "aws ec2 stop-instances --instance-ids ${aws_instance.pcoipgw.id}" : "aws ec2 reboot-instances --instance-ids ${aws_instance.pcoipgw.id}"}"
   }
 }
 
-resource "null_resource" shutdownpcoipgw {
-  depends_on = ["null_resource.pcoipgw"]
-  count      = "${var.sleep ? 1 : 0}"
+resource "null_resource" "shutdownpcoipgw" {
+  count = "${var.sleep ? 1 : 0}"
 
   provisioner "local-exec" {
     command = "aws ec2 stop-instances --instance-ids ${aws_instance.pcoipgw.id}"

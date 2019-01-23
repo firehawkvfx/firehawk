@@ -79,7 +79,7 @@ output "instanceid" {
   value = "${aws_cloudformation_stack.SoftNASStack.outputs["InstanceID"]}"
 }
 
-output "instanceip" {
+output "private_ip" {
   value = "${aws_cloudformation_stack.SoftNASStack.outputs["InstanceIP"]}"
 }
 
