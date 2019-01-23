@@ -67,3 +67,7 @@ variable "sleep" {
 variable "skip_update" {
   default = false
 }
+
+variable "pcoip_sleep_after_creation" {
+  default = false
+}

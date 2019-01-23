@@ -53,3 +53,5 @@ variable "skip_update" {
 variable "vpn_cidr" {}
 
 variable "region" {}
+
+variable "softnas_private_ip" {}
