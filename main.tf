@@ -137,9 +137,10 @@ module "node" {
   #sleep will stop instances to save cost during idle time.
   sleep = "${var.sleep || var.node_sleep_on_create}"
 
-  deadline_user                 = "${var.deadline_user}"
-  deadline_user_password        = "${var.deadline_user_password}"
-  deadline_samba_server_address = "${var.deadline_samba_server_address}"
-  deadline_user_uid             = "${var.deadline_user_uid}"
-  softnas_private_ip            = "${module.softnas.private_ip}"
+  deadline_user                  = "${var.deadline_user}"
+  deadline_user_password         = "${var.deadline_user_password}"
+  deadline_samba_server_address  = "${var.deadline_samba_server_address}"
+  deadline_samba_server_hostname = "${var.deadline_samba_server_hostname}"
+  deadline_user_uid              = "${var.deadline_user_uid}"
+  softnas_private_ip             = "${module.softnas.private_ip}"
 }

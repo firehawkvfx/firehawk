@@ -155,7 +155,7 @@ resource "null_resource" "start-node" {
   }
 }
 
-resource "null_resource" "update-node" {
+resource "null_resource" "update_node" {
   # todo: this wont provision unless vpn client routes to deadline db onsite are established.  read tf_aws_vpn notes for more configuration instructions.
   #start vpn and generate a public key from private key.
   provisioner "local-exec" {
@@ -279,6 +279,7 @@ EOT
 
     inline = [
       "sudo chmod 600 /opt/Thinkbox/certs/Deadline10RemoteClient.pfx",
+      "sudo chmod 700 /var/tmp/${var.deadline_installers_filename}",
     ]
 
     #"sudo chmod +x /var/tmp/${var.deadline_installers_filename}",
@@ -306,6 +307,8 @@ cat << EOF | sudo tee --append /etc/deadline/secret.txt
 username=${var.deadline_user}
 password=${var.deadline_user_password}
 EOF
+#ensure secret is readable only by root
+sudo chmod 400 /etc/deadline/secret.txt
 set -x
 ${var.skip_update ? " \n" : "sudo yum update -y"}
 
@@ -313,12 +316,17 @@ ${var.skip_update ? " \n" : "sudo yum update -y"}
 sudo yum install redhat-lsb -y
 sudo yum install samba-client samba-common cifs-utils -y
 sudo yum install nfs-utils nfs-utils-lib -y
+#bzip2 is needed to install deadline client.
+sudo yum install bzip2 -y
 #mount repository automatically over the vpn.  if you don't have routing configured, this won't work
 sudo mkdir /mnt/repo
 sudo mkdir /mnt/softnas
 cat << EOF | sudo tee --append /etc/fstab
 //${var.deadline_samba_server_address}/DeadlineRepository /mnt/repo cifs    credentials=/etc/deadline/secret.txt,_netdev,uid=${var.deadline_user_uid} 0 0
 ${var.softnas_private_ip}:/NAS3/NASVOL3 /mnt/softnas nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
+EOF
+cat << EOF | sudo tee --append /etc/hosts
+${var.deadline_samba_server_hostname}  ${var.deadline_samba_server_hostname}
 EOF
 #sudo mount -a
 #sudo ls /mnt/repo
