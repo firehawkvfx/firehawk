@@ -66,3 +66,5 @@ variable "deadline_certificates_location" {}
 variable "deadline_installers_filename" {}
 
 variable "local_key_path" {}
+
+variable "deadline_samba_server_hostname" {}
