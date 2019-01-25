@@ -157,7 +157,7 @@ resource "null_resource" "start-node" {
 
 resource "null_resource" "update-node" {
   # todo: this wont provision unless vpn client routes to deadline db onsite are established.  read tf_aws_vpn notes for more configuration instructions.
-
+  #start vpn and generate a public key from private key.
   provisioner "local-exec" {
     command = <<EOT
       ~/openvpn_config/startvpn.sh
@@ -180,6 +180,13 @@ resource "null_resource" "update-node" {
     destination = "~/temp_public_key"
   }
 
+  #remove public key from local system after copy to instance
+  provisioner "local-exec" {
+    command = <<EOT
+      rm -frv ~/temp_public_key
+  EOT
+  }
+
   #provision the deadline user https://aws.amazon.com/premiumsupport/knowledge-center/new-user-accounts-linux-instance/
   provisioner "remote-exec" {
     connection {
@@ -191,12 +198,14 @@ resource "null_resource" "update-node" {
     }
 
     inline = [<<EOT
-#create dealine user and password
+#create dealine user and password.  its important for the deadline user to have the same uid across any system where the user exists.
 sudo useradd -u ${var.deadline_user_uid} ${var.deadline_user}
 sudo passwd -d ${var.deadline_user}
 sudo mkdir /home/${var.deadline_user}/.ssh
 #sudo touch /home/${var.deadline_user}/.ssh/authorized_keys
+#move public key to defined authorised key, will replace anything in here if it exists.
 sudo mv ~/temp_public_key /home/${var.deadline_user}/.ssh/authorized_keys
+#set ownership, write permission for deadline user to folder, and read & write for owner to authorized keys file per amazon documentation.
 sudo chown -R ${var.deadline_user}:${var.deadline_user} /home/${var.deadline_user}/.ssh
 sudo chmod 700 /home/${var.deadline_user}/.ssh
 sudo chmod 600 /home/${var.deadline_user}/.ssh/authorized_keys
@@ -218,12 +227,18 @@ EOT
 sudo usermod -aG wheel ${var.deadline_user}
 sudo systemctl restart sshd.service
 sudo mkdir -p /opt/Thinkbox/certs
+
 sudo chown -R ${var.deadline_user}:${var.deadline_user} /opt/Thinkbox/certs
 sudo chmod 700 /opt/Thinkbox/certs
+echo 'uid is-'
+id -u ${var.deadline_user}
+echo 'gid is-'
+id -g ${var.deadline_user}
 EOT
     ]
   }
 
+  # now we can connect as the deadlineuser
   connection {
     user        = "${var.deadline_user}"
     host        = "${aws_instance.node_centos.private_ip}"
@@ -248,13 +263,11 @@ EOT
   #  destination = "/opt/Thinkbox/certs/deadlinedb.firehawkvfx.com.pfx"
   #}
 
-
-  #copy the deadline installer to the rendernode
-  # provisioner "file" {
-  #   source      = "${path.module}/file_package/${var.deadline_installers_filename}"
-  #   destination = "/var/tmp/${var.deadline_installers_filename}"
-  # }
-
+  #copy the deadline installer to the rendernode 
+  provisioner "file" {
+    source      = "${path.module}/file_package/${var.deadline_installers_filename}"
+    destination = "/var/tmp/${var.deadline_installers_filename}"
+  }
   provisioner "remote-exec" {
     connection {
       user        = "${var.deadline_user}"
@@ -304,7 +317,7 @@ sudo yum install nfs-utils nfs-utils-lib -y
 sudo mkdir /mnt/repo
 sudo mkdir /mnt/softnas
 cat << EOF | sudo tee --append /etc/fstab
-//${var.deadline_samba_server_address}/DeadlineRepository /mnt/repo cifs    credentials=/etc/deadline/secret.txt,_netdev,uid=789 0 0
+//${var.deadline_samba_server_address}/DeadlineRepository /mnt/repo cifs    credentials=/etc/deadline/secret.txt,_netdev,uid=${var.deadline_user_uid} 0 0
 ${var.softnas_private_ip}:/NAS3/NASVOL3 /mnt/softnas nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
 EOF
 #sudo mount -a

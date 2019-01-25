@@ -16,8 +16,10 @@ deadlinedb.example.com
 
 Assign a static ip address from your router to the bridge vm ethernet adaptor.  This address will be used for security groups.
 
-A new user with UID 789 named:
-deadlineuser
+A new user with UID 9001 and Gid 9001 named:
+deadlineuser : deadlineuser
+in ubuntu use adduser (not useradd)
+
 
 Packages:  
 apt-get install openvpn
@@ -26,11 +28,16 @@ apt-get install libx11-6
 apt-get install libxext-6
 apt-get install libgl1-mesa-6
 
+note: the last two weren't available per the thinkbox docs.  using these instead
+apt-get install libxext6
+apt-get install libgl1-mesa-dev
+
 Installed software and package notes:
 AWS CLI with your access credentials  
 Terraform 0.11.11  
 Installations of Deadline 10 repository, database, and RCS
 
+in ubuntu vm on site:
 For launcher setup (during client setup), dont tick any boxes to launch the slave when launcher starts, or to install it as a daemon- This vm wont be used as a render node.
 
 Deadline RCS on port 8080
@@ -40,6 +47,9 @@ Mongo DB on port
 27100
 
 install generated certificates in a safe location accessible with root only permissions.
+
+deadline cert will need to have read access for deadline user.
+/opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx
 
 
 AWS Parameters will need some manual configuration and approving subscriptions.
