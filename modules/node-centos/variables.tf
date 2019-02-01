@@ -64,8 +64,6 @@ variable "softnas_private_ip" {}
 
 variable "local_key_path" {}
 
-variable "deadline_samba_server_hostname" {}
-
 # You may wish to use a custom ami that incorporates your own configuration.  Insert the ami details below if you wish to use this.
 variable "use_custom_ami" {
   default = false
@@ -86,9 +84,7 @@ variable "deadline_user_password" {}
 
 variable "deadline_user_uid" {}
 
-variable "deadline_samba_server_hostname" {
-  default = "deadlinedb.firehawkvfx.com"
-}
+variable "deadline_samba_server_hostname" {}
 
 variable "deadline_certificates_location" {
   default = "/opt/Thinkbox/certs"
@@ -96,6 +92,10 @@ variable "deadline_certificates_location" {
 
 variable "deadline_installers_filename" {
   default = "DeadlineClient-10.0.23.4-linux-x64-installer.run"
+}
+
+variable "houdini_installer_filename" {
+  default = "houdini-17.0.459-linux_x86_64_gcc6.3.tar"
 }
 
 variable "deadline_client_certificate" {
@@ -129,3 +129,5 @@ variable "deadline_proxy_root_dir" {
 variable "deadline_samba_server_address" {
   default = "192.168.92.10"
 }
+
+variable "houdini_license_server_address" {}
