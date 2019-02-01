@@ -373,9 +373,8 @@ resource "null_resource" "install_houdini" {
   provisioner "local-exec" {
     command = <<EOT
       ~/openvpn_config/startvpn.sh
-      sleep 10
-      ping -c5 '${aws_instance.node_centos.private_ip}'
-      ssh-keygen -y -f ${var.local_key_path} > ~/temp_public_key
+      sleep 60
+      #ping '${aws_instance.node_centos.private_ip}'
   EOT
   }
 
