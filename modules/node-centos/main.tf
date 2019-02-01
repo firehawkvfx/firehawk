@@ -96,25 +96,20 @@ resource "aws_security_group" "node_centos" {
   }
 }
 
-# You may wish to use a custom ami that incorporates your own configuration.  Insert the ami details below if you wish to use this.
-variable "use_custom_ami" {
-  default = false
-}
-
-variable "custom_ami" {
-  default = ""
-}
-
 resource "aws_instance" "node_centos" {
   #instance type and ami are determined by the gateway type variable for if you want a graphical or non graphical instance.
   ami           = "${var.use_custom_ami ? var.custom_ami : lookup(var.ami_map, var.region)}"
   instance_type = "${var.instance_type}"
 
-  key_name  = "${var.key_name}"
-  subnet_id = "${element(var.private_subnet_ids, count.index)}"
+  #ebs_optimized = true
 
+  root_block_device {
+    volume_size = "16"
+    volume_type = "standard"
+  }
+  key_name               = "${var.key_name}"
+  subnet_id              = "${element(var.private_subnet_ids, count.index)}"
   vpc_security_group_ids = ["${aws_security_group.node_centos.id}"]
-
   tags {
     Name = "node_centos"
   }
@@ -132,18 +127,6 @@ resource "aws_instance" "node_centos" {
   #     "sleep 60",
   #   ]
   # }
-}
-
-variable "deadline_user" {
-  default = "deadlineuser"
-}
-
-variable "deadline_user_password" {}
-
-variable "deadline_user_uid" {}
-
-variable "deadline_samba_server_address" {
-  default = "192.169.0.111"
 }
 
 #wakeup a node after sleep
@@ -198,6 +181,8 @@ resource "null_resource" "update_node" {
     }
 
     inline = [<<EOT
+#provision the desired timezone.
+cp ${var.time_zone_info_path_linux} /etc/localtime
 #create dealine user and password.  its important for the deadline user to have the same uid across any system where the user exists.
 sudo useradd -u ${var.deadline_user_uid} ${var.deadline_user}
 sudo passwd -d ${var.deadline_user}
@@ -333,6 +318,22 @@ EOF
 EOT
     ]
   }
+  provisioner "remote-exec" {
+    connection {
+      user        = "${var.deadline_user}"
+      host        = "${aws_instance.node_centos.private_ip}"
+      private_key = "${var.private_key}"
+      type        = "ssh"
+      timeout     = "10m"
+    }
+
+    inline = [<<EOT
+set -x
+cd /var/tmp
+sudo ./${var.deadline_installers_filename} --mode unattended --debuglevel 2 --prefix ${var.deadline_prefix} --connectiontype Remote --noguimode true --licensemode UsageBased --launcherdaemon true --slavestartup 1 --daemonuser ${var.deadline_user} --enabletls true --tlsport 4433 --httpport 8080 --proxyrootdir ${var.deadline_proxy_root_dir} --proxycertificate ${var.deadline_proxy_certificate} --proxycertificatepassword ${var.deadline_proxy_certificate_password}
+EOT
+    ]
+  }
 
   #sudo mount -t cifs -o username=${var.deadline_user},password=${var.deadline_user_password} //${var.deadline_samba_server_address}/DeadlineRepository /mnt/repo
 
@@ -340,6 +341,11 @@ EOT
   provisioner "local-exec" {
     command = "aws ec2 reboot-instances --instance-ids ${aws_instance.node_centos.id}"
   }
+}
+
+resource "aws_ami_from_instance" "node_centos" {
+  name               = "node_centos"
+  source_instance_id = "${aws_instance.node_centos.id}"
 }
 
 resource "null_resource" "shutdown-node" {

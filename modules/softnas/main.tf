@@ -99,6 +99,15 @@ resource "aws_volume_attachment" "ebs_att" {
 # this wont work until a vpn can be started by terraform.  currently, this code exists in the cloudformation template.
 # ansible may be a better way to do this.
 
+#wakeup a node after sleep
+resource "null_resource" "start-node" {
+  count = "${var.sleep ? 0 : 1}"
+
+  provisioner "local-exec" {
+    command = "aws ec2 start-instances --instance-ids ${aws_cloudformation_stack.SoftNASStack.outputs["InstanceID"]}"
+  }
+}
+
 resource "null_resource" shutdownsoftnas {
   count = "${var.sleep ? 1 : 0}"
 

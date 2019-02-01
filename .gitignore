@@ -9,3 +9,4 @@ plan
 modules/node-centos/file_package/*.run
 modules/node-centos/file_package/*.tar
 modules/node-centos/gpudriver/*.run
+modules/node-centos/current_deadline.ini
