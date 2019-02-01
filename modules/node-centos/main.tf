@@ -323,6 +323,8 @@ ${var.skip_update ? " \n" : "sudo yum update -y"}
 sudo yum install redhat-lsb -y
 sudo yum install samba-client samba-common cifs-utils -y
 sudo yum install nfs-utils nfs-utils-lib -y
+sudo yum install epel-release -y
+sudo yum install nload nmap -y
 #bzip2 is needed to install deadline client.
 sudo yum install bzip2 -y
 #mount repository automatically over the vpn.  if you don't have routing configured, this won't work
@@ -366,6 +368,17 @@ EOT
 }
 
 resource "null_resource" "install_houdini" {
+  depends_on = ["null_resource.update_node"]
+
+  provisioner "local-exec" {
+    command = <<EOT
+      ~/openvpn_config/startvpn.sh
+      sleep 10
+      ping -c5 '${aws_instance.node_centos.private_ip}'
+      ssh-keygen -y -f ${var.local_key_path} > ~/temp_public_key
+  EOT
+  }
+
   # now we can connect as the deadlineuser
   connection {
     user        = "${var.deadline_user}"
@@ -393,9 +406,9 @@ resource "null_resource" "install_houdini" {
     inline = [<<EOT
 set -x
 sudo chmod 600 /var/tmp/${var.houdini_installer_filename}
-#these are needed for houdini to start
-yum install mesa-libGLw
-yum install libXp libXp-devel
+#these are needed for houdini to start https://rajivpandit.wordpress.com/category/fx-pipeline/page/8/
+sudo yum install -y mesa-libGLw
+sudo yum install -y libXp libXp-devel 
 cd /var/tmp
 sudo tar -xvf /var/tmp/${var.houdini_installer_filename}
 sudo mkdir houdini_installer
@@ -405,9 +418,9 @@ cd houdini_installer
 sudo ./houdini.install --auto-install --accept-EULA --install-houdini --no-local-licensing --install-hfs-symlink
 cd /opt/hfs17.0
 sudo sed -i '/licensingMode = sesinetd/s/^# //g' /opt/hfs17.0/houdini/c.opt
-hserver
+/opt/hfs17.0/bin/hserver
 #source houdini_setup
-hserver -S ${var.houdini_license_server_address}
+/opt/hfs17.0/bin/hserver -S ${var.houdini_license_server_address}
 EOT
     ]
   }
