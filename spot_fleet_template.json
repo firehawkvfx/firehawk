@@ -1,0 +1,197 @@
+{
+  "IamFleetRole": "arn:aws:iam::972620357255:role/aws-ec2-spot-fleet-tagging-role",
+  "AllocationStrategy": "lowestPrice",
+  "TargetCapacity": 4,
+  "SpotPrice": "0.399",
+  "ValidFrom": "2019-01-27T11:15:03Z",
+  "ValidUntil": "2020-01-27T11:15:03Z",
+  "TerminateInstancesWithExpiration": true,
+  "LaunchSpecifications": [
+    {
+      "ImageId": "ami-0a6b243e6936580d7",
+      "InstanceType": "m3.xlarge",
+      "SubnetId": "subnet-0956be7660d5f7bbf",
+      "KeyName": "my_key_pair",
+      "SpotPrice": "0.372",
+      "BlockDeviceMappings": [
+        {
+          "DeviceName": "/dev/sda1",
+          "Ebs": {
+            "DeleteOnTermination": false,
+            "VolumeType": "gp2",
+            "VolumeSize": 8,
+            "SnapshotId": "snap-03bd92819c04b9bac"
+          }
+        }
+      ],
+      "SecurityGroups": [
+        {
+          "GroupId": "sg-036c67083c8cff8d9"
+        }
+      ]
+    },
+    {
+      "ImageId": "ami-0a6b243e6936580d7",
+      "InstanceType": "t3.xlarge",
+      "SubnetId": "subnet-0956be7660d5f7bbf",
+      "KeyName": "my_key_pair",
+      "SpotPrice": "0.2102",
+      "BlockDeviceMappings": [
+        {
+          "DeviceName": "/dev/sda1",
+          "Ebs": {
+            "DeleteOnTermination": false,
+            "VolumeType": "gp2",
+            "VolumeSize": 8,
+            "SnapshotId": "snap-03bd92819c04b9bac"
+          }
+        }
+      ],
+      "SecurityGroups": [
+        {
+          "GroupId": "sg-036c67083c8cff8d9"
+        }
+      ]
+    },
+    {
+      "ImageId": "ami-0a6b243e6936580d7",
+      "InstanceType": "r3.xlarge",
+      "SubnetId": "subnet-0956be7660d5f7bbf",
+      "KeyName": "my_key_pair",
+      "SpotPrice": "0.399",
+      "BlockDeviceMappings": [
+        {
+          "DeviceName": "/dev/sda1",
+          "Ebs": {
+            "DeleteOnTermination": false,
+            "VolumeType": "gp2",
+            "VolumeSize": 8,
+            "SnapshotId": "snap-03bd92819c04b9bac"
+          }
+        }
+      ],
+      "SecurityGroups": [
+        {
+          "GroupId": "sg-036c67083c8cff8d9"
+        }
+      ]
+    },
+    {
+      "ImageId": "ami-0a6b243e6936580d7",
+      "InstanceType": "m4.xlarge",
+      "SubnetId": "subnet-0956be7660d5f7bbf",
+      "KeyName": "my_key_pair",
+      "SpotPrice": "0.25",
+      "BlockDeviceMappings": [
+        {
+          "DeviceName": "/dev/sda1",
+          "Ebs": {
+            "DeleteOnTermination": false,
+            "VolumeType": "gp2",
+            "VolumeSize": 8,
+            "SnapshotId": "snap-03bd92819c04b9bac"
+          }
+        }
+      ],
+      "SecurityGroups": [
+        {
+          "GroupId": "sg-036c67083c8cff8d9"
+        }
+      ]
+    },
+    {
+      "ImageId": "ami-0a6b243e6936580d7",
+      "InstanceType": "t2.xlarge",
+      "SubnetId": "subnet-0956be7660d5f7bbf",
+      "KeyName": "my_key_pair",
+      "SpotPrice": "0.2336",
+      "BlockDeviceMappings": [
+        {
+          "DeviceName": "/dev/sda1",
+          "Ebs": {
+            "DeleteOnTermination": false,
+            "VolumeType": "gp2",
+            "VolumeSize": 8,
+            "SnapshotId": "snap-03bd92819c04b9bac"
+          }
+        }
+      ],
+      "SecurityGroups": [
+        {
+          "GroupId": "sg-036c67083c8cff8d9"
+        }
+      ]
+    },
+    {
+      "ImageId": "ami-0a6b243e6936580d7",
+      "InstanceType": "r4.xlarge",
+      "SubnetId": "subnet-0956be7660d5f7bbf",
+      "KeyName": "my_key_pair",
+      "SpotPrice": "0.319",
+      "BlockDeviceMappings": [
+        {
+          "DeviceName": "/dev/sda1",
+          "Ebs": {
+            "DeleteOnTermination": false,
+            "VolumeType": "gp2",
+            "VolumeSize": 8,
+            "SnapshotId": "snap-03bd92819c04b9bac"
+          }
+        }
+      ],
+      "SecurityGroups": [
+        {
+          "GroupId": "sg-036c67083c8cff8d9"
+        }
+      ]
+    },
+    {
+      "ImageId": "ami-0a6b243e6936580d7",
+      "InstanceType": "m5.xlarge",
+      "SubnetId": "subnet-0956be7660d5f7bbf",
+      "KeyName": "my_key_pair",
+      "SpotPrice": "0.24",
+      "BlockDeviceMappings": [
+        {
+          "DeviceName": "/dev/sda1",
+          "Ebs": {
+            "DeleteOnTermination": false,
+            "VolumeType": "gp2",
+            "VolumeSize": 8,
+            "SnapshotId": "snap-03bd92819c04b9bac"
+          }
+        }
+      ],
+      "SecurityGroups": [
+        {
+          "GroupId": "sg-036c67083c8cff8d9"
+        }
+      ]
+    },
+    {
+      "ImageId": "ami-0a6b243e6936580d7",
+      "InstanceType": "m5d.xlarge",
+      "SubnetId": "subnet-0956be7660d5f7bbf",
+      "KeyName": "my_key_pair",
+      "SpotPrice": "0.284",
+      "BlockDeviceMappings": [
+        {
+          "DeviceName": "/dev/sda1",
+          "Ebs": {
+            "DeleteOnTermination": false,
+            "VolumeType": "gp2",
+            "VolumeSize": 8,
+            "SnapshotId": "snap-03bd92819c04b9bac"
+          }
+        }
+      ],
+      "SecurityGroups": [
+        {
+          "GroupId": "sg-036c67083c8cff8d9"
+        }
+      ]
+    }
+  ],
+  "Type": "request",
+  "InstancePoolsToUseCount": 7
+}

@@ -129,6 +129,7 @@ module "node" {
   local_key_path                 = "${var.local_key_path}"
   private_key                    = "${file("${var.local_key_path}")}"
   deadline_certificates_location = "${var.deadline_certificates_location}"
+  deadline_prefix                = "${var.deadline_prefix}"
   deadline_installers_filename   = "${var.deadline_installers_filename}"
 
   #skipping os updates will allow faster rollout for testing.
@@ -137,10 +138,17 @@ module "node" {
   #sleep will stop instances to save cost during idle time.
   sleep = "${var.sleep || var.node_sleep_on_create}"
 
-  deadline_user                  = "${var.deadline_user}"
-  deadline_user_password         = "${var.deadline_user_password}"
-  deadline_samba_server_address  = "${var.deadline_samba_server_address}"
-  deadline_samba_server_hostname = "${var.deadline_samba_server_hostname}"
-  deadline_user_uid              = "${var.deadline_user_uid}"
-  softnas_private_ip             = "${module.softnas.private_ip}"
+  deadline_user                       = "${var.deadline_user}"
+  deadline_user_password              = "${var.deadline_user_password}"
+  deadline_samba_server_address       = "${var.deadline_samba_server_address}"
+  deadline_samba_server_hostname      = "${var.deadline_samba_server_hostname}"
+  deadline_proxy_root_dir             = "${var.deadline_proxy_root_dir}"
+  deadline_user_uid                   = "${var.deadline_user_uid}"
+  deadline_proxy_certificate          = "${var.deadline_proxy_certificate}"
+  deadline_proxy_certificate_password = "${var.deadline_proxy_certificate_password}"
+  deadline_db_ssl_password            = "${var.deadline_db_ssl_password}"
+  deadline_client_certificate         = "${var.deadline_client_certificate}"
+
+  softnas_private_ip        = "${module.softnas.private_ip}"
+  time_zone_info_path_linux = "${lookup(var.time_zone_info_path_linux, "Australia_Sydney")}"
 }
