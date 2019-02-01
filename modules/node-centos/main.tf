@@ -36,6 +36,14 @@ resource "aws_security_group" "node_centos" {
     description = "all incoming traffic from remote subnet range"
   }
 
+  ingress {
+    protocol    = "-1"
+    from_port   = 0
+    to_port     = 0
+    cidr_blocks = ["${var.houdini_license_server_address}/32"]
+    description = "Houdini License Server and Deadline DB"
+  }
+
   # For OpenVPN Client Web Server & Admin Web UI
 
   ingress {
@@ -73,6 +81,20 @@ resource "aws_security_group" "node_centos" {
     to_port     = 4433
     cidr_blocks = ["${concat(list("${var.remote_subnet_cidr}"), "${var.private_subnets_cidr_blocks}")}"]
     description = "Deadline RCS TLS HTTPS"
+  }
+  ingress {
+    protocol    = "tcp"
+    from_port   = 1714
+    to_port     = 1714
+    cidr_blocks = ["${var.houdini_license_server_address}/32"]
+    description = "Houdini license server"
+  }
+  ingress {
+    protocol    = "udp"
+    from_port   = 1714
+    to_port     = 1714
+    cidr_blocks = ["${var.houdini_license_server_address}/32"]
+    description = "Houdini license server"
   }
   ingress {
     protocol    = "udp"
@@ -311,7 +333,7 @@ cat << EOF | sudo tee --append /etc/fstab
 ${var.softnas_private_ip}:/NAS3/NASVOL3 /mnt/softnas nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
 EOF
 cat << EOF | sudo tee --append /etc/hosts
-${var.deadline_samba_server_hostname}  ${var.deadline_samba_server_hostname}
+${var.deadline_samba_server_address}  ${var.deadline_samba_server_hostname}
 EOF
 #sudo mount -a
 #sudo ls /mnt/repo
@@ -343,10 +365,58 @@ EOT
   }
 }
 
-resource "aws_ami_from_instance" "node_centos" {
-  name               = "node_centos"
-  source_instance_id = "${aws_instance.node_centos.id}"
+resource "null_resource" "install_houdini" {
+  # now we can connect as the deadlineuser
+  connection {
+    user        = "${var.deadline_user}"
+    host        = "${aws_instance.node_centos.private_ip}"
+    private_key = "${var.private_key}"
+    type        = "ssh"
+    timeout     = "10m"
+  }
+
+  #copy the deadline installer to the rendernode 
+  provisioner "file" {
+    source      = "${path.module}/file_package/${var.houdini_installer_filename}"
+    destination = "/var/tmp/${var.houdini_installer_filename}"
+  }
+
+  provisioner "remote-exec" {
+    connection {
+      user        = "${var.deadline_user}"
+      host        = "${aws_instance.node_centos.private_ip}"
+      private_key = "${var.private_key}"
+      type        = "ssh"
+      timeout     = "10m"
+    }
+
+    inline = [<<EOT
+set -x
+sudo chmod 600 /var/tmp/${var.houdini_installer_filename}
+#these are needed for houdini to start
+yum install mesa-libGLw
+yum install libXp libXp-devel
+cd /var/tmp
+sudo tar -xvf /var/tmp/${var.houdini_installer_filename}
+sudo mkdir houdini_installer
+sudo tar -xvf ${var.houdini_installer_filename} -C houdini_installer --strip-components 1
+cd houdini_installer
+#sudo ./houdini.install --auto-install --accept-EULA --install-houdini --install-license --no-local-licensing --install-hfs-symlink
+sudo ./houdini.install --auto-install --accept-EULA --install-houdini --no-local-licensing --install-hfs-symlink
+cd /opt/hfs17.0
+sudo sed -i '/licensingMode = sesinetd/s/^# //g' /opt/hfs17.0/houdini/c.opt
+hserver
+#source houdini_setup
+hserver -S ${var.houdini_license_server_address}
+EOT
+    ]
+  }
 }
+
+# resource "aws_ami_from_instance" "node_centos" {
+#   name               = "node_centos_houdini"
+#   source_instance_id = "${aws_instance.node_centos.id}"
+# }
 
 resource "null_resource" "shutdown-node" {
   count = "${var.sleep ? 1 : 0}"

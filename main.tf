@@ -102,7 +102,7 @@ module "pcoipgw" {
 }
 
 variable "node_skip_update" {
-  default = true
+  default = false
 }
 
 variable "node_sleep_on_create" {
@@ -148,6 +148,8 @@ module "node" {
   deadline_proxy_certificate_password = "${var.deadline_proxy_certificate_password}"
   deadline_db_ssl_password            = "${var.deadline_db_ssl_password}"
   deadline_client_certificate         = "${var.deadline_client_certificate}"
+
+  houdini_license_server_address = "${var.houdini_license_server_address}"
 
   softnas_private_ip        = "${module.softnas.private_ip}"
   time_zone_info_path_linux = "${lookup(var.time_zone_info_path_linux, "Australia_Sydney")}"

@@ -56,3 +56,5 @@ AWS Parameters will need some manual configuration and approving subscriptions.
 Start by creating a new m4xlarge instance
 with the ami, select - softnas, consumption based platinum for low compute requirements.  you can switch to medium or high to test as well.
 aggree to the subscription and once the instance starts, get the ami id and insert it into the terraform variables to launch.
+
+Written by Andrew Graham
