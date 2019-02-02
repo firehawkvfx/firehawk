@@ -425,10 +425,10 @@ EOT
   }
 }
 
-# resource "aws_ami_from_instance" "node_centos" {
-#   name               = "node_centos_houdini"
-#   source_instance_id = "${aws_instance.node_centos.id}"
-# }
+resource "aws_ami_from_instance" "node_centos" {
+  name               = "node_centos_houdini_${aws_instance.node_centos.id}"
+  source_instance_id = "${aws_instance.node_centos.id}"
+}
 
 resource "null_resource" "shutdown-node" {
   count = "${var.sleep ? 1 : 0}"
