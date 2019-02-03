@@ -1,4 +1,8 @@
 # firehawk-compute-batch
+# Open Firehawk
+Written by Andrew Graham
+
+
 This is in developement - Unstable
 
 The goals of this project are to setup an AWS VPC, Storage, a VPN, connection with License Servers (onsite), and batch workloads for SideFX Houdini
@@ -6,7 +10,7 @@ The goals of this project are to setup an AWS VPC, Storage, a VPN, connection wi
 Currently this is being developed in and launched from an Ubuntu 16.04.5 vm in vmware workstation, running in a RHEL 7.5 host.
 Eventually this could be replaced with docker for virtualisation.
 
-The Ubuntu VM requires the following default components-
+The Ubuntu 16.04 VM requires the following default components-
 50GB mounted volume size.
 4 cores.
 16GB RAM.
@@ -20,6 +24,7 @@ A new user with UID 9001 and Gid 9001 named:
 deadlineuser : deadlineuser
 in ubuntu use adduser (not useradd)
 
+This user should exist in the vm, and on your workstation.  we will always log in as this user from now on to simplify permissions issues.  onces everything is working you can implement groups with other users.
 
 Packages:  
 apt-get install openvpn
@@ -57,4 +62,37 @@ Start by creating a new m4xlarge instance
 with the ami, select - softnas, consumption based platinum for low compute requirements.  you can switch to medium or high to test as well.
 aggree to the subscription and once the instance starts, get the ami id and insert it into the terraform variables to launch.
 
-Written by Andrew Graham
+
+### client side config ###
+
+Generally the client side ubuntu vm will have these components running so you should start each component in a terminal to observe logs or run them as services
+
+-inside the git repository, running 'terraform apply' will create all infrastructure and ensure it is running.  (it can be put to sleep with 'terraform apply -var sleep=true --auto-approve').  if you happen to commit any changes, it is your responsibility to make sure that any private information is excluded from those commits.  private information should be stored with vault, or in the private-variables.tf file you need to customise.
+
+-'service openvpn restart' - will connect to the remote vpn.  ensure you can ping instances in the private subnet.
+-run deadline rcs.  The Remote connection server is the process that render nodes will connect to the Deadline DB with
+-run deadline monitor to observe processes and configure your Usage Based Licencing, and spot fleet JSON settings.
+-run deadline pulse.  Deadline will use the json definition you provide in the event plugin named spot to spin up spot instances.
+
+Before submission, ensure the single render node is visible to the monitor.  create an Amazon Machine Image (AMI) of that instance, and ensure this AMI ID is in your JSON spot definition.
+
+## client side workstation
+
+Your workstation will probably wnat the deadline client installed.  You can install it with the same method used to install on the render node.  an example below-
+
+su - deadlineuser
+sudo ./DeadlineClient-10.0.23.4-linux-x64-installer.run --mode unattended --debuglevel 2 --prefix /opt/Thinkbox/Deadline10 --connectiontype Remote --noguimode true --licensemode UsageBased --launcherdaemon true --slavestartup 1 --daemonuser deadlineuser --enabletls true --tlsport 4433 --httpport 8080 --proxyrootdir 192.168.96.4:4433 --proxycertificate /opt/Thinkbox/certs/Deadline10RemoteClient.pfx --proxycertificatepassword SomePassword
+
+Ensure you have read + write permissions for the user and group on the proxy certificate.
+
+after this you can run the deadline client.
+cd /opt/Thinkbox/Deadline10
+./deadlinemonitor
+
+You can install the houdini deadline submission rop with these instructions-
+https://docs.thinkboxsoftware.com/products/deadline/10.0/1_User%20Manual/manual/app-houdini.html
+
+The installer is found in the deadilne repository.  this smb share should have been setup already when you configured the deadline repository, so you can mount it to your workstation temporarily
+sudo mount -t cifs -o username=deadlineuser,password=<password> //<samba_server_address>/DeadlineRepository /mnt/repo
+
+if the automatic installer doesn't work, follow the manual instructions.
