@@ -328,11 +328,13 @@ sudo yum install nload nmap -y
 #bzip2 is needed to install deadline client.
 sudo yum install bzip2 -y
 #mount repository automatically over the vpn.  if you don't have routing configured, this won't work
-sudo mkdir /mnt/repo
-sudo mkdir /mnt/softnas
+sudo mkdir -p /mnt/repo
+sudo mkdir -p /mnt/softnas/nasvol3
+sudo mkdir /prod
 cat << EOF | sudo tee --append /etc/fstab
 //${var.deadline_samba_server_address}/DeadlineRepository /mnt/repo cifs    credentials=/etc/deadline/secret.txt,_netdev,uid=${var.deadline_user_uid} 0 0
-${var.softnas_private_ip}:/NAS3/NASVOL3 /mnt/softnas nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
+${var.softnas_private_ip}:/NAS3/NASVOL3 /mnt/softnas/nasvol3 nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
+/mnt/softnas/nasvol3 /prod none defaults,bind 0 0
 EOF
 cat << EOF | sudo tee --append /etc/hosts
 ${var.deadline_samba_server_address}  ${var.deadline_samba_server_hostname}
