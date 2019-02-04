@@ -47,12 +47,12 @@ variable "softnas_export_path" {
   default = "/naspool2/nasvol2"
 }
 
-variable "softnas_mount_path" {
-  default = "/mnt/softnas/nasvol2"
-}
+
 variable "vpn_cidr" {}
 
 variable "softnas_user_password" {}
+
+variable "cloudformation_role_name" {}
 
 #this role should be conditionally created if it doesn't exist
 
@@ -92,7 +92,6 @@ resource "aws_cloudformation_stack" "SoftNASStack" {
     PublicSubnet2CIDR   = "${var.public_subnets_cidr_blocks[1]}"
 
     SoftnasExportPath = "${var.softnas_export_path}"
-    SoftnasMountPath = "${var.softnas_mount_path}"
   }
 
   template_url = "https://s3-ap-southeast-2.amazonaws.com/aws-softnas-cloudformation/softnas-1az.json"
