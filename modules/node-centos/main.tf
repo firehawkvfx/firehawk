@@ -334,7 +334,7 @@ sudo mkdir /prod
 cat << EOF | sudo tee --append /etc/fstab
 //${var.deadline_samba_server_address}/DeadlineRepository /mnt/repo cifs    credentials=/etc/deadline/secret.txt,_netdev,uid=${var.deadline_user_uid} 0 0
 ${var.softnas_private_ip1}:${var.softnas_export_path} ${var.softnas_mount_path}" nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
-${var.softnas_mount_path}" /prod none defaults,bind 0 0
+${var.softnas_mount_path} /prod none defaults,bind 0 0
 EOF
 cat << EOF | sudo tee --append /etc/hosts
 ${var.deadline_samba_server_address}  ${var.deadline_samba_server_hostname}
