@@ -371,7 +371,7 @@ EOT
 
   #a reboot command in the shell of the instance will cause a terraform error.  We do it locally instead.
   provisioner "local-exec" {
-    command = "aws ec2 reboot-instances --instance-ids ${aws_instance.node_centos.id}"
+    command = "aws ec2 reboot-instances --instance-ids ${aws_instance.node_centos.id} && sleep 60"
   }
 }
 
