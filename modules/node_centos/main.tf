@@ -441,7 +441,7 @@ EOT
 
 resource "random_id" "ami_unique_name" {
   keepers = {
-    # Generate a new id each time we switch to a new AMI id
+    # Generate a new id each time we switch to a new instance id
     ami_id = "${aws_instance.node_centos.id}"
   }
 
