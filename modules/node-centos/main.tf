@@ -427,8 +427,10 @@ EOT
   }
 }
 
+resource "random_uuid" "ami" {}
+
 resource "aws_ami_from_instance" "node_centos" {
-  name               = "node_centos_houdini_${aws_instance.node_centos.id}"
+  name               = "node_centos_houdini_${aws_instance.node_centos.id}_${random_uuid.ami.result}"
   source_instance_id = "${aws_instance.node_centos.id}"
 }
 
