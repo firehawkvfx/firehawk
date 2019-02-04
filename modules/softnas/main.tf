@@ -35,6 +35,25 @@ variable "skip_update" {
   default = false
 }
 
+variable "softnas_private_ip1" {
+  default = "10.0.1.11"
+}
+
+variable "softnas_private_ip2" {
+  default = "10.0.1.12"
+}
+
+variable "softnas_export_path" {
+  default = "/naspool2/nasvol2"
+}
+
+variable "softnas_mount_path" {
+  default = "/mnt/softnas/nasvol2"
+}
+variable "vpn_cidr" {}
+
+variable "softnas_user_password" {}
+
 #this role should be conditionally created if it doesn't exist
 
 resource "aws_cloudformation_stack" "SoftNASRole" {
@@ -52,10 +71,10 @@ resource "aws_cloudformation_stack" "SoftNASStack" {
 
   parameters = {
     KeyName             = "${var.key_name}"
-    SoftnasUserPassword = "tempLogin497"
+    SoftnasUserPassword = "${var.softnas_user_password}"
     NasType             = "m4.xlarge"
-    PrivateIPEth0NAS1   = "10.0.1.11"
-    PrivateIPEth1NAS1   = "10.0.1.12"
+    PrivateIPEth0NAS1   = "${var.softnas_private_ip1}"
+    PrivateIPEth1NAS1   = "${var.softnas_private_ip2}"
 
     #security groups will open access to some public facing instances via their private ips. 
     #1st is the vpn
@@ -65,11 +84,15 @@ resource "aws_cloudformation_stack" "SoftNASStack" {
     ADBastion2PrivateIP = "${var.bastion_private_ip}"
     PrivateSubnet1CIDR  = "${var.private_subnets_cidr_blocks[0]}"
     VPCID               = "${var.vpc_id}"
+    VPNCIDR = "${var.vpn_cidr}"
     PrivateSubnet1ID    = "${var.private_subnets[0]}"
     PrivateSubnet2CIDR  = "${var.private_subnets_cidr_blocks[1]}"
     PrivateSubnet2ID    = "${var.private_subnets[1]}"
     PublicSubnet1CIDR   = "${var.public_subnets_cidr_blocks[0]}"
     PublicSubnet2CIDR   = "${var.public_subnets_cidr_blocks[1]}"
+
+    SoftnasExportPath = "${var.softnas_export_path}"
+    SoftnasMountPath = "${var.softnas_mount_path}"
   }
 
   template_url = "https://s3-ap-southeast-2.amazonaws.com/aws-softnas-cloudformation/softnas-1az.json"

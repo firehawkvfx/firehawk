@@ -54,10 +54,16 @@ module "softnas" {
   key_name                    = "${var.key_name}"
   private_key                 = "${file("${var.local_key_path}")}"
   vpc_id                      = "${module.vpc.vpc_id}"
+  vpn_cidr = "${var.vpn_cidr}"
   private_subnets             = "${module.vpc.private_subnets}"
   private_subnets_cidr_blocks = "${module.vpc.private_subnets_cidr_blocks}"
   public_subnets_cidr_blocks  = "${module.vpc.public_subnets_cidr_blocks}"
   bastion_private_ip          = "${module.pcoipgw.private_ip}"
+  softnas_private_ip1 = "${var.softnas_private_ip1}"
+  softnas_private_ip2 = "${var.softnas_private_ip2}"
+  softnas_export_path = "${var.softnas_export_path}"
+  softnas_mount_path = "${var.softnas_mount_path}"
+  softnas_user_password = "${var.softnas_user_password}"
   volumes                     = "${var.volumes}"
   mounts                      = "${var.mounts}"
 
@@ -151,6 +157,10 @@ module "node" {
 
   houdini_license_server_address = "${var.houdini_license_server_address}"
 
-  softnas_private_ip        = "${module.softnas.private_ip}"
+  #softnas_private_ip        = "${module.softnas.private_ip}"
   time_zone_info_path_linux = "${lookup(var.time_zone_info_path_linux, "Australia_Sydney")}"
+
+  softnas_private_ip1 = "${var.softnas_private_ip1}"
+  softnas_export_path = "${var.softnas_export_path}"
+  softnas_mount_path = "${var.softnas_mount_path}"
 }

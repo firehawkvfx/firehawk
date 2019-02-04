@@ -60,8 +60,6 @@ variable "vpn_cidr" {}
 
 variable "region" {}
 
-variable "softnas_private_ip" {}
-
 variable "local_key_path" {}
 
 # You may wish to use a custom ami that incorporates your own configuration.  Insert the ami details below if you wish to use this.
@@ -131,3 +129,20 @@ variable "deadline_samba_server_address" {
 }
 
 variable "houdini_license_server_address" {}
+
+
+variable "softnas_private_ip1" {
+  default = "10.0.1.11"
+}
+
+variable "softnas_private_ip2" {
+  default = "10.0.1.12"
+}
+
+variable "softnas_export_path" {
+  default = "/naspool2/nasvol2"
+}
+
+variable "softnas_mount_path" {
+  default = "/mnt/softnas/nasvol2"
+}
