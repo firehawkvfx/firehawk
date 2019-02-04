@@ -439,11 +439,18 @@ EOT
   }
 }
 
-resource "random_uuid" "ami" {}
+resource "random_id" "ami_unique_name" {
+  keepers = {
+    # Generate a new id each time we switch to a new AMI id
+    ami_id = "${aws_instance.node_centos.id}"
+  }
+
+  byte_length = 8
+}
 
 resource "aws_ami_from_instance" "node_centos" {
   depends_on         = ["null_resource.install_houdini"]
-  name               = "node_centos_houdini_${aws_instance.node_centos.id}_${random_uuid.ami.result}"
+  name               = "node_centos_houdini_${aws_instance.node_centos.id}_${random_id.ami_unique_name.hex}"
   source_instance_id = "${aws_instance.node_centos.id}"
 }
 
