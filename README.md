@@ -62,6 +62,8 @@ Start by creating a new m4xlarge instance
 with the ami, select - softnas, consumption based platinum for low compute requirements.  you can switch to medium or high to test as well.
 aggree to the subscription and once the instance starts, get the ami id and insert it into the terraform variables to launch.
 
+in the tf_aws_open vpn module be sure to follow the instructions on its reuired permissions.
+this will enable storing vpn files for the auto login feature to work.
 
 ### client side config ###
 
