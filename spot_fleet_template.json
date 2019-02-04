@@ -1,197 +1,585 @@
 {
-  "IamFleetRole": "arn:aws:iam::972620357255:role/aws-ec2-spot-fleet-tagging-role",
-  "AllocationStrategy": "lowestPrice",
-  "TargetCapacity": 4,
-  "SpotPrice": "0.399",
-  "ValidFrom": "2019-01-27T11:15:03Z",
-  "ValidUntil": "2020-01-27T11:15:03Z",
-  "TerminateInstancesWithExpiration": true,
-  "LaunchSpecifications": [
-    {
-      "ImageId": "ami-0a6b243e6936580d7",
-      "InstanceType": "m3.xlarge",
-      "SubnetId": "subnet-0956be7660d5f7bbf",
-      "KeyName": "my_key_pair",
-      "SpotPrice": "0.372",
-      "BlockDeviceMappings": [
-        {
-          "DeviceName": "/dev/sda1",
-          "Ebs": {
-            "DeleteOnTermination": false,
-            "VolumeType": "gp2",
-            "VolumeSize": 8,
-            "SnapshotId": "snap-03bd92819c04b9bac"
+  "houdini_engine_4T_16GB": {
+    "Pools": "pool1",
+    "IamFleetRole": "arn:aws:iam::972620357255:role/aws-ec2-spot-fleet-tagging-role",
+    "AllocationStrategy": "lowestPrice",
+    "TargetCapacity": 5,
+    "SpotPrice": "0.399",
+    "ValidFrom": "2019-02-03T12:03:44Z",
+    "ValidUntil": "2020-02-03T12:03:44Z",
+    "TerminateInstancesWithExpiration": true,
+    "LaunchSpecifications": [
+      {
+        "ImageId": "ami-08a0a50d5285d2fc1",
+        "InstanceType": "t3.xlarge",
+        "SubnetId": "subnet-0956be7660d5f7bbf",
+        "KeyName": "20180418 Workstation",
+        "SpotPrice": "0.2102",
+        "IamInstanceProfile": {
+          "Arn": "arn:aws:iam::972620357255:instance-profile/DeadlineSlaveRole"
+        },
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/sda1",
+            "Ebs": {
+              "DeleteOnTermination": true,
+              "VolumeType": "standard",
+              "VolumeSize": 16,
+              "SnapshotId": "snap-07aaa930c1a7740a8"
+            }
           }
-        }
-      ],
-      "SecurityGroups": [
-        {
-          "GroupId": "sg-036c67083c8cff8d9"
-        }
-      ]
-    },
-    {
-      "ImageId": "ami-0a6b243e6936580d7",
-      "InstanceType": "t3.xlarge",
-      "SubnetId": "subnet-0956be7660d5f7bbf",
-      "KeyName": "my_key_pair",
-      "SpotPrice": "0.2102",
-      "BlockDeviceMappings": [
-        {
-          "DeviceName": "/dev/sda1",
-          "Ebs": {
-            "DeleteOnTermination": false,
-            "VolumeType": "gp2",
-            "VolumeSize": 8,
-            "SnapshotId": "snap-03bd92819c04b9bac"
+        ],
+        "SecurityGroups": [
+          {
+            "GroupId": "sg-036c67083c8cff8d9"
           }
-        }
-      ],
-      "SecurityGroups": [
-        {
-          "GroupId": "sg-036c67083c8cff8d9"
-        }
-      ]
-    },
-    {
-      "ImageId": "ami-0a6b243e6936580d7",
-      "InstanceType": "r3.xlarge",
-      "SubnetId": "subnet-0956be7660d5f7bbf",
-      "KeyName": "my_key_pair",
-      "SpotPrice": "0.399",
-      "BlockDeviceMappings": [
-        {
-          "DeviceName": "/dev/sda1",
-          "Ebs": {
-            "DeleteOnTermination": false,
-            "VolumeType": "gp2",
-            "VolumeSize": 8,
-            "SnapshotId": "snap-03bd92819c04b9bac"
+        ],
+        "TagSpecifications": [
+          {
+            "ResourceType": "instance",
+            "Tags": [
+              {
+                "Key": "Name",
+                "Value": "UpdatedRole"
+              }
+            ]
           }
-        }
-      ],
-      "SecurityGroups": [
-        {
-          "GroupId": "sg-036c67083c8cff8d9"
-        }
-      ]
-    },
-    {
-      "ImageId": "ami-0a6b243e6936580d7",
-      "InstanceType": "m4.xlarge",
-      "SubnetId": "subnet-0956be7660d5f7bbf",
-      "KeyName": "my_key_pair",
-      "SpotPrice": "0.25",
-      "BlockDeviceMappings": [
-        {
-          "DeviceName": "/dev/sda1",
-          "Ebs": {
-            "DeleteOnTermination": false,
-            "VolumeType": "gp2",
-            "VolumeSize": 8,
-            "SnapshotId": "snap-03bd92819c04b9bac"
+        ]
+      },
+      {
+        "ImageId": "ami-08a0a50d5285d2fc1",
+        "InstanceType": "m3.xlarge",
+        "SubnetId": "subnet-0956be7660d5f7bbf",
+        "KeyName": "20180418 Workstation",
+        "SpotPrice": "0.372",
+        "IamInstanceProfile": {
+          "Arn": "arn:aws:iam::972620357255:instance-profile/DeadlineSlaveRole"
+        },
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/sda1",
+            "Ebs": {
+              "DeleteOnTermination": true,
+              "VolumeType": "standard",
+              "VolumeSize": 16,
+              "SnapshotId": "snap-07aaa930c1a7740a8"
+            }
           }
-        }
-      ],
-      "SecurityGroups": [
-        {
-          "GroupId": "sg-036c67083c8cff8d9"
-        }
-      ]
-    },
-    {
-      "ImageId": "ami-0a6b243e6936580d7",
-      "InstanceType": "t2.xlarge",
-      "SubnetId": "subnet-0956be7660d5f7bbf",
-      "KeyName": "my_key_pair",
-      "SpotPrice": "0.2336",
-      "BlockDeviceMappings": [
-        {
-          "DeviceName": "/dev/sda1",
-          "Ebs": {
-            "DeleteOnTermination": false,
-            "VolumeType": "gp2",
-            "VolumeSize": 8,
-            "SnapshotId": "snap-03bd92819c04b9bac"
+        ],
+        "SecurityGroups": [
+          {
+            "GroupId": "sg-036c67083c8cff8d9"
           }
-        }
-      ],
-      "SecurityGroups": [
-        {
-          "GroupId": "sg-036c67083c8cff8d9"
-        }
-      ]
-    },
-    {
-      "ImageId": "ami-0a6b243e6936580d7",
-      "InstanceType": "r4.xlarge",
-      "SubnetId": "subnet-0956be7660d5f7bbf",
-      "KeyName": "my_key_pair",
-      "SpotPrice": "0.319",
-      "BlockDeviceMappings": [
-        {
-          "DeviceName": "/dev/sda1",
-          "Ebs": {
-            "DeleteOnTermination": false,
-            "VolumeType": "gp2",
-            "VolumeSize": 8,
-            "SnapshotId": "snap-03bd92819c04b9bac"
+        ],
+        "TagSpecifications": [
+          {
+            "ResourceType": "instance",
+            "Tags": [
+              {
+                "Key": "Name",
+                "Value": "UpdatedRole"
+              }
+            ]
           }
-        }
-      ],
-      "SecurityGroups": [
-        {
-          "GroupId": "sg-036c67083c8cff8d9"
-        }
-      ]
-    },
-    {
-      "ImageId": "ami-0a6b243e6936580d7",
-      "InstanceType": "m5.xlarge",
-      "SubnetId": "subnet-0956be7660d5f7bbf",
-      "KeyName": "my_key_pair",
-      "SpotPrice": "0.24",
-      "BlockDeviceMappings": [
-        {
-          "DeviceName": "/dev/sda1",
-          "Ebs": {
-            "DeleteOnTermination": false,
-            "VolumeType": "gp2",
-            "VolumeSize": 8,
-            "SnapshotId": "snap-03bd92819c04b9bac"
+        ]
+      },
+      {
+        "ImageId": "ami-08a0a50d5285d2fc1",
+        "InstanceType": "r3.xlarge",
+        "SubnetId": "subnet-0956be7660d5f7bbf",
+        "KeyName": "20180418 Workstation",
+        "SpotPrice": "0.399",
+        "IamInstanceProfile": {
+          "Arn": "arn:aws:iam::972620357255:instance-profile/DeadlineSlaveRole"
+        },
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/sda1",
+            "Ebs": {
+              "DeleteOnTermination": true,
+              "VolumeType": "standard",
+              "VolumeSize": 16,
+              "SnapshotId": "snap-07aaa930c1a7740a8"
+            }
           }
-        }
-      ],
-      "SecurityGroups": [
-        {
-          "GroupId": "sg-036c67083c8cff8d9"
-        }
-      ]
-    },
-    {
-      "ImageId": "ami-0a6b243e6936580d7",
-      "InstanceType": "m5d.xlarge",
-      "SubnetId": "subnet-0956be7660d5f7bbf",
-      "KeyName": "my_key_pair",
-      "SpotPrice": "0.284",
-      "BlockDeviceMappings": [
-        {
-          "DeviceName": "/dev/sda1",
-          "Ebs": {
-            "DeleteOnTermination": false,
-            "VolumeType": "gp2",
-            "VolumeSize": 8,
-            "SnapshotId": "snap-03bd92819c04b9bac"
+        ],
+        "SecurityGroups": [
+          {
+            "GroupId": "sg-036c67083c8cff8d9"
           }
-        }
-      ],
-      "SecurityGroups": [
-        {
-          "GroupId": "sg-036c67083c8cff8d9"
-        }
-      ]
-    }
-  ],
-  "Type": "request",
-  "InstancePoolsToUseCount": 7
+        ],
+        "TagSpecifications": [
+          {
+            "ResourceType": "instance",
+            "Tags": [
+              {
+                "Key": "Name",
+                "Value": "UpdatedRole"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "ImageId": "ami-08a0a50d5285d2fc1",
+        "InstanceType": "m4.xlarge",
+        "SubnetId": "subnet-0956be7660d5f7bbf",
+        "KeyName": "20180418 Workstation",
+        "SpotPrice": "0.25",
+        "IamInstanceProfile": {
+          "Arn": "arn:aws:iam::972620357255:instance-profile/DeadlineSlaveRole"
+        },
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/sda1",
+            "Ebs": {
+              "DeleteOnTermination": true,
+              "VolumeType": "standard",
+              "VolumeSize": 16,
+              "SnapshotId": "snap-07aaa930c1a7740a8"
+            }
+          }
+        ],
+        "SecurityGroups": [
+          {
+            "GroupId": "sg-036c67083c8cff8d9"
+          }
+        ],
+        "TagSpecifications": [
+          {
+            "ResourceType": "instance",
+            "Tags": [
+              {
+                "Key": "Name",
+                "Value": "UpdatedRole"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "ImageId": "ami-08a0a50d5285d2fc1",
+        "InstanceType": "t2.xlarge",
+        "SubnetId": "subnet-0956be7660d5f7bbf",
+        "KeyName": "20180418 Workstation",
+        "SpotPrice": "0.2336",
+        "IamInstanceProfile": {
+          "Arn": "arn:aws:iam::972620357255:instance-profile/DeadlineSlaveRole"
+        },
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/sda1",
+            "Ebs": {
+              "DeleteOnTermination": true,
+              "VolumeType": "standard",
+              "VolumeSize": 16,
+              "SnapshotId": "snap-07aaa930c1a7740a8"
+            }
+          }
+        ],
+        "SecurityGroups": [
+          {
+            "GroupId": "sg-036c67083c8cff8d9"
+          }
+        ],
+        "TagSpecifications": [
+          {
+            "ResourceType": "instance",
+            "Tags": [
+              {
+                "Key": "Name",
+                "Value": "UpdatedRole"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "ImageId": "ami-08a0a50d5285d2fc1",
+        "InstanceType": "r4.xlarge",
+        "SubnetId": "subnet-0956be7660d5f7bbf",
+        "KeyName": "20180418 Workstation",
+        "SpotPrice": "0.319",
+        "IamInstanceProfile": {
+          "Arn": "arn:aws:iam::972620357255:instance-profile/DeadlineSlaveRole"
+        },
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/sda1",
+            "Ebs": {
+              "DeleteOnTermination": true,
+              "VolumeType": "standard",
+              "VolumeSize": 16,
+              "SnapshotId": "snap-07aaa930c1a7740a8"
+            }
+          }
+        ],
+        "SecurityGroups": [
+          {
+            "GroupId": "sg-036c67083c8cff8d9"
+          }
+        ],
+        "TagSpecifications": [
+          {
+            "ResourceType": "instance",
+            "Tags": [
+              {
+                "Key": "Name",
+                "Value": "UpdatedRole"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "ImageId": "ami-08a0a50d5285d2fc1",
+        "InstanceType": "m5d.xlarge",
+        "SubnetId": "subnet-0956be7660d5f7bbf",
+        "KeyName": "20180418 Workstation",
+        "SpotPrice": "0.284",
+        "IamInstanceProfile": {
+          "Arn": "arn:aws:iam::972620357255:instance-profile/DeadlineSlaveRole"
+        },
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/sda1",
+            "Ebs": {
+              "DeleteOnTermination": true,
+              "VolumeType": "standard",
+              "VolumeSize": 16,
+              "SnapshotId": "snap-07aaa930c1a7740a8"
+            }
+          }
+        ],
+        "SecurityGroups": [
+          {
+            "GroupId": "sg-036c67083c8cff8d9"
+          }
+        ],
+        "TagSpecifications": [
+          {
+            "ResourceType": "instance",
+            "Tags": [
+              {
+                "Key": "Name",
+                "Value": "UpdatedRole"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "Type": "maintain",
+    "InstancePoolsToUseCount": 6
+  },
+  "houdini_engine_8T_16GB": {
+    "Pools": "pool1",
+    "IamFleetRole": "arn:aws:iam::972620357255:role/aws-ec2-spot-fleet-tagging-role",
+    "AllocationStrategy": "lowestPrice",
+    "TargetCapacity": 5,
+    "SpotPrice": "0.798",
+    "ValidFrom": "2019-02-03T12:03:44Z",
+    "ValidUntil": "2020-02-03T12:03:44Z",
+    "TerminateInstancesWithExpiration": true,
+    "LaunchSpecifications": [
+      {
+        "ImageId": "ami-08a0a50d5285d2fc1",
+        "InstanceType": "c3.2xlarge",
+        "SubnetId": "subnet-0956be7660d5f7bbf",
+        "KeyName": "20180418 Workstation",
+        "SpotPrice": "0.529",
+        "IamInstanceProfile": {
+          "Arn": "arn:aws:iam::972620357255:instance-profile/DeadlineSlaveRole"
+        },
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/sda1",
+            "Ebs": {
+              "DeleteOnTermination": true,
+              "VolumeType": "standard",
+              "VolumeSize": 16,
+              "SnapshotId": "snap-07aaa930c1a7740a8"
+            }
+          }
+        ],
+        "SecurityGroups": [
+          {
+            "GroupId": "sg-036c67083c8cff8d9"
+          }
+        ],
+        "TagSpecifications": [
+          {
+            "ResourceType": "instance",
+            "Tags": [
+              {
+                "Key": "Name",
+                "Value": "UpdatedRole"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "ImageId": "ami-08a0a50d5285d2fc1",
+        "InstanceType": "t3.2xlarge",
+        "SubnetId": "subnet-0956be7660d5f7bbf",
+        "KeyName": "20180418 Workstation",
+        "SpotPrice": "0.4204",
+        "IamInstanceProfile": {
+          "Arn": "arn:aws:iam::972620357255:instance-profile/DeadlineSlaveRole"
+        },
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/sda1",
+            "Ebs": {
+              "DeleteOnTermination": true,
+              "VolumeType": "standard",
+              "VolumeSize": 16,
+              "SnapshotId": "snap-07aaa930c1a7740a8"
+            }
+          }
+        ],
+        "SecurityGroups": [
+          {
+            "GroupId": "sg-036c67083c8cff8d9"
+          }
+        ],
+        "TagSpecifications": [
+          {
+            "ResourceType": "instance",
+            "Tags": [
+              {
+                "Key": "Name",
+                "Value": "UpdatedRole"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "ImageId": "ami-08a0a50d5285d2fc1",
+        "InstanceType": "m3.2xlarge",
+        "SubnetId": "subnet-0956be7660d5f7bbf",
+        "KeyName": "20180418 Workstation",
+        "SpotPrice": "0.745",
+        "IamInstanceProfile": {
+          "Arn": "arn:aws:iam::972620357255:instance-profile/DeadlineSlaveRole"
+        },
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/sda1",
+            "Ebs": {
+              "DeleteOnTermination": true,
+              "VolumeType": "standard",
+              "VolumeSize": 16,
+              "SnapshotId": "snap-07aaa930c1a7740a8"
+            }
+          }
+        ],
+        "SecurityGroups": [
+          {
+            "GroupId": "sg-036c67083c8cff8d9"
+          }
+        ],
+        "TagSpecifications": [
+          {
+            "ResourceType": "instance",
+            "Tags": [
+              {
+                "Key": "Name",
+                "Value": "UpdatedRole"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "ImageId": "ami-08a0a50d5285d2fc1",
+        "InstanceType": "r3.2xlarge",
+        "SubnetId": "subnet-0956be7660d5f7bbf",
+        "KeyName": "20180418 Workstation",
+        "SpotPrice": "0.798",
+        "IamInstanceProfile": {
+          "Arn": "arn:aws:iam::972620357255:instance-profile/DeadlineSlaveRole"
+        },
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/sda1",
+            "Ebs": {
+              "DeleteOnTermination": true,
+              "VolumeType": "standard",
+              "VolumeSize": 16,
+              "SnapshotId": "snap-07aaa930c1a7740a8"
+            }
+          }
+        ],
+        "SecurityGroups": [
+          {
+            "GroupId": "sg-036c67083c8cff8d9"
+          }
+        ],
+        "TagSpecifications": [
+          {
+            "ResourceType": "instance",
+            "Tags": [
+              {
+                "Key": "Name",
+                "Value": "UpdatedRole"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "ImageId": "ami-08a0a50d5285d2fc1",
+        "InstanceType": "c5.2xlarge",
+        "SubnetId": "subnet-0956be7660d5f7bbf",
+        "KeyName": "20180418 Workstation",
+        "SpotPrice": "0.444",
+        "IamInstanceProfile": {
+          "Arn": "arn:aws:iam::972620357255:instance-profile/DeadlineSlaveRole"
+        },
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/sda1",
+            "Ebs": {
+              "DeleteOnTermination": true,
+              "VolumeType": "standard",
+              "VolumeSize": 16,
+              "SnapshotId": "snap-07aaa930c1a7740a8"
+            }
+          }
+        ],
+        "SecurityGroups": [
+          {
+            "GroupId": "sg-036c67083c8cff8d9"
+          }
+        ],
+        "TagSpecifications": [
+          {
+            "ResourceType": "instance",
+            "Tags": [
+              {
+                "Key": "Name",
+                "Value": "UpdatedRole"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "ImageId": "ami-08a0a50d5285d2fc1",
+        "InstanceType": "m4.2xlarge",
+        "SubnetId": "subnet-0956be7660d5f7bbf",
+        "KeyName": "20180418 Workstation",
+        "SpotPrice": "0.5",
+        "IamInstanceProfile": {
+          "Arn": "arn:aws:iam::972620357255:instance-profile/DeadlineSlaveRole"
+        },
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/sda1",
+            "Ebs": {
+              "DeleteOnTermination": true,
+              "VolumeType": "standard",
+              "VolumeSize": 16,
+              "SnapshotId": "snap-07aaa930c1a7740a8"
+            }
+          }
+        ],
+        "SecurityGroups": [
+          {
+            "GroupId": "sg-036c67083c8cff8d9"
+          }
+        ],
+        "TagSpecifications": [
+          {
+            "ResourceType": "instance",
+            "Tags": [
+              {
+                "Key": "Name",
+                "Value": "UpdatedRole"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "ImageId": "ami-08a0a50d5285d2fc1",
+        "InstanceType": "t2.2xlarge",
+        "SubnetId": "subnet-0956be7660d5f7bbf",
+        "KeyName": "20180418 Workstation",
+        "SpotPrice": "0.4672",
+        "IamInstanceProfile": {
+          "Arn": "arn:aws:iam::972620357255:instance-profile/DeadlineSlaveRole"
+        },
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/sda1",
+            "Ebs": {
+              "DeleteOnTermination": true,
+              "VolumeType": "standard",
+              "VolumeSize": 16,
+              "SnapshotId": "snap-07aaa930c1a7740a8"
+            }
+          }
+        ],
+        "SecurityGroups": [
+          {
+            "GroupId": "sg-036c67083c8cff8d9"
+          }
+        ],
+        "TagSpecifications": [
+          {
+            "ResourceType": "instance",
+            "Tags": [
+              {
+                "Key": "Name",
+                "Value": "UpdatedRole"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "ImageId": "ami-08a0a50d5285d2fc1",
+        "InstanceType": "m5.2xlarge",
+        "SubnetId": "subnet-0956be7660d5f7bbf",
+        "KeyName": "20180418 Workstation",
+        "SpotPrice": "0.48",
+        "IamInstanceProfile": {
+          "Arn": "arn:aws:iam::972620357255:instance-profile/DeadlineSlaveRole"
+        },
+        "BlockDeviceMappings": [
+          {
+            "DeviceName": "/dev/sda1",
+            "Ebs": {
+              "DeleteOnTermination": true,
+              "VolumeType": "standard",
+              "VolumeSize": 16,
+              "SnapshotId": "snap-07aaa930c1a7740a8"
+            }
+          }
+        ],
+        "SecurityGroups": [
+          {
+            "GroupId": "sg-036c67083c8cff8d9"
+          }
+        ],
+        "TagSpecifications": [
+          {
+            "ResourceType": "instance",
+            "Tags": [
+              {
+                "Key": "Name",
+                "Value": "UpdatedRole"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "Type": "maintain",
+    "InstancePoolsToUseCount": 7
+  }
 }
