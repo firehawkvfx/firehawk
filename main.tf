@@ -59,13 +59,40 @@ module "softnas" {
   private_subnets_cidr_blocks = "${module.vpc.private_subnets_cidr_blocks}"
   public_subnets_cidr_blocks  = "${module.vpc.public_subnets_cidr_blocks}"
   bastion_private_ip          = "${module.pcoipgw.private_ip}"
-  softnas_private_ip1 = "${var.softnas_private_ip1}"
-  softnas_private_ip2 = "${var.softnas_private_ip2}"
-  softnas_export_path = "${var.softnas_export_path}"
-  softnas_mount_path = "${var.softnas_mount_path}"
+  softnas_private_ip1 = "${var.softnas1_private_ip1}"
+  softnas_private_ip2 = "${var.softnas1_private_ip2}"
+  softnas_export_path = "${var.softnas1_export_path}"
+  #softnas_mount_path = "${var.softnas1_mount_path}"
   softnas_user_password = "${var.softnas_user_password}"
-  volumes                     = "${var.volumes}"
-  mounts                      = "${var.mounts}"
+  volumes                     = "${var.softnas1_volumes}"
+  mounts                      = "${var.softnas1_mounts}"
+
+  #skipping os updates will allow faster rollout, but may be non functional
+  skip_update = "${var.softnas_skip_update}"
+
+  #sleep will stop instances to save cost during idle time.
+  sleep = "${var.sleep}"
+}
+
+module "softnas2" {
+  source = "./modules/softnas"
+
+  vpn_private_ip              = "${module.vpc.vpn_private_ip}"
+  key_name                    = "${var.key_name}"
+  private_key                 = "${file("${var.local_key_path}")}"
+  vpc_id                      = "${module.vpc.vpc_id}"
+  vpn_cidr = "${var.vpn_cidr}"
+  private_subnets             = "${module.vpc.private_subnets}"
+  private_subnets_cidr_blocks = "${module.vpc.private_subnets_cidr_blocks}"
+  public_subnets_cidr_blocks  = "${module.vpc.public_subnets_cidr_blocks}"
+  bastion_private_ip          = "${module.pcoipgw.private_ip}"
+  softnas_private_ip1 = "${var.softnas2_private_ip1}"
+  softnas_private_ip2 = "${var.softnas2_private_ip2}"
+  softnas_export_path = "${var.softnas2_export_path}"
+  #softnas_mount_path = "${var.softnas2_mount_path}"
+  softnas_user_password = "${var.softnas_user_password}"
+  volumes                     = "${var.softnas2_volumes}"
+  mounts                      = "${var.softnas2_mounts}"
 
   #skipping os updates will allow faster rollout, but may be non functional
   skip_update = "${var.softnas_skip_update}"
@@ -160,7 +187,7 @@ module "node" {
   #softnas_private_ip        = "${module.softnas.private_ip}"
   time_zone_info_path_linux = "${lookup(var.time_zone_info_path_linux, "Australia_Sydney")}"
 
-  softnas_private_ip1 = "${var.softnas_private_ip1}"
-  softnas_export_path = "${var.softnas_export_path}"
-  softnas_mount_path = "${var.softnas_mount_path}"
+  softnas_private_ip1 = "${var.softnas1_private_ip1}"
+  softnas_export_path = "${var.softnas1_export_path}"
+  softnas_mount_path = "${var.softnas1_mount_path}"
 }
