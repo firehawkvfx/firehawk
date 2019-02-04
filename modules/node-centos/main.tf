@@ -161,6 +161,12 @@ resource "null_resource" "start-node" {
 }
 
 resource "null_resource" "update_node" {
+  depends_on = ["aws_instance.node_centos"]
+
+  triggers {
+    instanceid = "${ aws_instance.node_centos.id }"
+  }
+
   # todo: this wont provision unless vpn client routes to deadline db onsite are established.  read tf_aws_vpn notes for more configuration instructions.
   #start vpn and generate a public key from private key.
   provisioner "local-exec" {
@@ -372,6 +378,10 @@ EOT
 resource "null_resource" "install_houdini" {
   depends_on = ["null_resource.update_node"]
 
+  triggers {
+    instanceid = "${ aws_instance.node_centos.id }"
+  }
+
   provisioner "local-exec" {
     command = <<EOT
       ~/openvpn_config/startvpn.sh
@@ -430,6 +440,7 @@ EOT
 resource "random_uuid" "ami" {}
 
 resource "aws_ami_from_instance" "node_centos" {
+  depends_on         = ["null_resource.install_houdini"]
   name               = "node_centos_houdini_${aws_instance.node_centos.id}_${random_uuid.ami.result}"
   source_instance_id = "${aws_instance.node_centos.id}"
 }
