@@ -123,7 +123,7 @@ variable "node_sleep_on_create" {
 }
 
 module "node" {
-  source = "./modules/node-centos"
+  source = "./modules/node_centos"
   name   = "centos"
 
   # region will determine the ami

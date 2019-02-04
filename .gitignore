@@ -6,9 +6,10 @@ modules/vpn/.terraform/plugins/linux_amd64/lock.json
 modules/vpn/.terraform/modules/*
 modules/vpn/.terraform/plugins/*
 plan
-modules/node-centos/file_package/*.run
-modules/node-centos/file_package/*.tar
-modules/node-centos/gpudriver/*.run
-modules/node-centos/current_deadline.ini
+modules/node_centos/file_package/*.run
+modules/node_centos/file_package/*.tar
+modules/node_centos/gpudriver/*.run
+modules/node_centos/current_deadline.ini
 IamFleetRole.json
-modules/node-centos/file_package/submission/*
+modules/node_centos/file_package/submission/*
+modules/node_centos/file_package/CertificateInstaller-10.0.23.4-linux-x64-installer.run
