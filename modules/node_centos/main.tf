@@ -160,6 +160,19 @@ resource "null_resource" "start-node" {
   }
 }
 
+resource "null_resource" "start_vpn" {
+  # todo: this wont provision unless vpn client routes to deadline db onsite are established.  read tf_aws_vpn notes for more configuration instructions.
+  #start vpn and generate a public key from private key.
+  provisioner "local-exec" {
+    command = <<EOT
+      set -x
+      ${path.module}/../tf_aws_openvpn/startvpn.sh
+      sleep 10
+      ping -c5 '${aws_instance.node_centos.private_ip}'
+  EOT
+  }
+}
+
 resource "null_resource" "update_node" {
   depends_on = ["aws_instance.node_centos"]
 
