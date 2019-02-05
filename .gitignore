@@ -13,3 +13,4 @@ modules/node_centos/current_deadline.ini
 IamFleetRole.json
 modules/node_centos/file_package/submission/*
 modules/node_centos/file_package/CertificateInstaller-10.0.23.4-linux-x64-installer.run
+spot_fleet_template.json

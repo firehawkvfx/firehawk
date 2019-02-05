@@ -135,20 +135,6 @@ resource "aws_instance" "node_centos" {
   tags {
     Name = "node_centos"
   }
-
-  # provisioner "remote-exec" {
-  #   connection {
-  #     user        = "centos"
-  #     host        = "${self.private_ip}"
-  #     private_key = "${var.private_key}"
-  #     timeout     = "10m"
-  #   }
-
-  #   inline = [
-  #     # Sleep 60 seconds until AMI is ready
-  #     "sleep 60",
-  #   ]
-  # }
 }
 
 #wakeup a node after sleep
@@ -224,7 +210,7 @@ resource "null_resource" "update_node" {
 
     inline = [<<EOT
 #provision the desired timezone.
-cp ${var.time_zone_info_path_linux} /etc/localtime
+sudo cp ${var.time_zone_info_path_linux} /etc/localtime
 #create dealine user and password.  its important for the deadline user to have the same uid across any system where the user exists.
 sudo useradd -u ${var.deadline_user_uid} ${var.deadline_user}
 sudo passwd -d ${var.deadline_user}
@@ -345,22 +331,25 @@ sudo yum install samba-client samba-common cifs-utils -y
 sudo yum install nfs-utils nfs-utils-lib -y
 sudo yum install epel-release -y
 sudo yum install nload nmap -y
+sudo yum install tree -y
 #bzip2 is needed to install deadline client.
 sudo yum install bzip2 -y
 #mount repository automatically over the vpn.  if you don't have routing configured, this won't work
 sudo mkdir -p /mnt/repo
-sudo mkdir -p ${var.softnas_mount_path}"
+sudo mkdir -p ${var.softnas_mount_path}
 sudo mkdir /prod
 cat << EOF | sudo tee --append /etc/fstab
+### DYNAMIC MOUNTS START ###
 //${var.deadline_samba_server_address}/DeadlineRepository /mnt/repo cifs    credentials=/etc/deadline/secret.txt,_netdev,uid=${var.deadline_user_uid} 0 0
-${var.softnas_private_ip1}:${var.softnas_export_path} ${var.softnas_mount_path}" nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
+${var.softnas_private_ip1}:${var.softnas_export_path} ${var.softnas_mount_path} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
 ${var.softnas_mount_path} /prod none defaults,bind 0 0
+### DYNAMIC MOUNTS END ###
 EOF
 cat << EOF | sudo tee --append /etc/hosts
 ${var.deadline_samba_server_address}  ${var.deadline_samba_server_hostname}
 EOF
-#sudo mount -a
-#sudo ls /mnt/repo
+sudo mount -a
+sudo tree /mnt -L 3
 EOT
     ]
   }
@@ -400,8 +389,9 @@ resource "null_resource" "install_houdini" {
     command = <<EOT
       #~/openvpn_config/startvpn.sh
       ${path.module}/../tf_aws_openvpn/startvpn.sh
+      set -x
       sleep 60
-      #ping '${aws_instance.node_centos.private_ip}'
+      #ping ${aws_instance.node_centos.private_ip}
   EOT
   }
 
@@ -443,7 +433,8 @@ cd houdini_installer
 #sudo ./houdini.install --auto-install --accept-EULA --install-houdini --install-license --no-local-licensing --install-hfs-symlink
 sudo ./houdini.install --auto-install --accept-EULA --install-houdini --no-local-licensing --install-hfs-symlink
 cd /opt/hfs17.0
-sudo sed -i '/licensingMode = sesinetd/s/^# //g' /opt/hfs17.0/houdini/c.opt
+sudo sed -i '/licensingMode = sesinetd/s/^# //g' /opt/hfs17.0/houdini/Licensing.opt
+sudo cat /opt/hfs17.0/houdini/Licensing.opt
 /opt/hfs17.0/bin/hserver
 #source houdini_setup
 /opt/hfs17.0/bin/hserver -S ${var.houdini_license_server_address}
