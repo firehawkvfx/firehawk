@@ -65,6 +65,13 @@ aggree to the subscription and once the instance starts, get the ami id and inse
 in the tf_aws_open vpn module be sure to follow the instructions on its reuired permissions.
 this will enable storing vpn files for the auto login feature to work.
 
+### client side openvpn 
+
+before running anything, ensure you follow the instructions of this file and that it is executable without having to enter a password.
+modules/tf_aws_openvpn/startvpn.sh
+
+the steps if followed correctly should allowed the script to be executed as the user without entering a password.  if you can't get it to work, test each line and identify if you have made an error in your visudo file.
+
 ### client side config ###
 
 Generally the client side ubuntu vm will have these components running so you should start each component in a terminal to observe logs or run them as services
