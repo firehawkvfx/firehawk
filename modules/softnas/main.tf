@@ -86,7 +86,7 @@ resource "aws_cloudformation_stack" "SoftNAS2Stack" {
     SoftnasRoleName     = "SoftNAS_HA_IAM"
     KeyName             = "${var.key_name}"
     SoftnasUserPassword = "${var.softnas_user_password}"
-    InstanceName        = "SoftNAS1_PlatinumConsumptionHigherCompute"
+    InstanceName        = "SoftNAS2_PlatinumConsumptionHigherCompute"
     AMI                 = "ami-5e7ea03c"
     NasType             = "m5.2xlarge"
     PrivateIPEth0NAS1   = "${var.softnas2_private_ip1}"
