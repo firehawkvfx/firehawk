@@ -1,9 +1,18 @@
 # firehawk-compute-batch
+<<<<<<< HEAD
 # Open Firehawk
 Written by Andrew Graham
 
+=======
+This is in developement - not ready for production.
 
-This is in developement - Unstable
+The initial goals of this project are to setup an AWS VPC, Storage, a VPN, connect License Servers, and batch workloads for SideFX Houdini.  It also serves as a foundation for other linux 3D rendering software.
+
+Contribution to extend functionality is welcome.  Please contact me if you wish to contribute in a particular area so that we can collaborate efficiently.  Planned changes in implementation could affect what is currently in the major branch that at this stage is good to be aware of:
+
+Storage and Node configuration with Ansible is intended, but not currently in place. Onsite VM configuration with Vagrant and Ansible is also intended but not yet in place.
+>>>>>>> 4d94a2455d74f2da08884d883febff660e269862
+
 
 The goals of this project are to setup an AWS VPC, Storage, a VPN, connection with License Servers (onsite), and batch workloads for SideFX Houdini
 
@@ -65,14 +74,14 @@ aggree to the subscription and once the instance starts, get the ami id and inse
 in the tf_aws_open vpn module be sure to follow the instructions on its reuired permissions.
 this will enable storing vpn files for the auto login feature to work.
 
-### client side openvpn 
+### client side openvpn (tested in ubuntu 16.04.05) ###
 
 before running anything, ensure you follow the instructions of this file and that it is executable without having to enter a password.
 modules/tf_aws_openvpn/startvpn.sh
 
 the steps if followed correctly should allowed the script to be executed as the user without entering a password.  if you can't get it to work, test each line and identify if you have made an error in your visudo file.
 
-### client side config ###
+### client side deadline config (tested in ubuntu 16.04.05) ###
 
 Generally the client side ubuntu vm will have these components running so you should start each component in a terminal to observe logs or run them as services
 
@@ -87,7 +96,7 @@ Before submission, ensure the single render node is visible to the monitor.  cre
 
 ## client side workstation
 
-Your workstation will probably wnat the deadline client installed.  You can install it with the same method used to install on the render node.  an example below-
+Your workstation will probably want the deadline client installed.  You can install it with the same method used to install on the render node.  an example below-
 
 su - deadlineuser
 sudo ./DeadlineClient-10.0.23.4-linux-x64-installer.run --mode unattended --debuglevel 2 --prefix /opt/Thinkbox/Deadline10 --connectiontype Remote --noguimode true --licensemode UsageBased --launcherdaemon true --slavestartup 1 --daemonuser deadlineuser --enabletls true --tlsport 4433 --httpport 8080 --proxyrootdir 192.168.96.4:4433 --proxycertificate /opt/Thinkbox/certs/Deadline10RemoteClient.pfx --proxycertificatepassword SomePassword
