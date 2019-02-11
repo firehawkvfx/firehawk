@@ -11,7 +11,6 @@ The initial goals of this project are to setup an AWS VPC, Storage, a VPN, conne
 Contribution to extend functionality is welcome.  Please contact me if you wish to contribute in a particular area so that we can collaborate efficiently.  Planned changes in implementation could affect what is currently in the major branch that at this stage is good to be aware of:
 
 Storage and Node configuration with Ansible is intended, but not currently in place. Onsite VM configuration with Vagrant and Ansible is also intended but not yet in place.
->>>>>>> 4d94a2455d74f2da08884d883febff660e269862
 
 
 The goals of this project are to setup an AWS VPC, Storage, a VPN, connection with License Servers (onsite), and batch workloads for SideFX Houdini
