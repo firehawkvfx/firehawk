@@ -1,6 +1,4 @@
-# firehawk-compute-batch
-<<<<<<< HEAD
-# Open Firehawk
+# openFirehawk
 Written by Andrew Graham
 
 =======
