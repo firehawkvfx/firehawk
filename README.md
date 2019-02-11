@@ -1,8 +1,7 @@
 # openFirehawk
 Written by Andrew Graham
 
-=======
-This is in developement - not ready for production.
+=== This is in developement - not ready for production. ===
 
 The initial goals of this project are to setup an AWS VPC, Storage, a VPN, connect License Servers, and batch workloads for SideFX Houdini.  It also serves as a foundation for other linux 3D rendering software.
 
