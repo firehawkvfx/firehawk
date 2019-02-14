@@ -17,6 +17,39 @@ output "softnas_role_name" {
   value = "${aws_cloudformation_stack.SoftNASRole.outputs["SoftNasRoleName"]}"
 }
 
+#softnas provides no ability to query the ami you will need by region.  it must be added to the map manually.
+variable "ami_platinum_consumption_lower_compute" {
+  type = "map"
+
+  default = {
+    ap-southeast-2 = "ami-a24a98c0"
+  }
+}
+
+variable "instance_type_platinum_consumption_lower_compute" {
+  type = "map"
+
+  default = {
+    "m4.xlarge" = "m4.xlarge"
+  }
+}
+
+variable "ami_platinum_consumption_higher_compute" {
+  type = "map"
+
+  default = {
+    "ap-southeast-2" = "ami-5e7ea03c"
+  }
+}
+
+variable "instance_type_platinum_consumption_higher_compute" {
+  type = "map"
+
+  default = {
+    "m5.2xlarge" = "m5.2xlarge"
+  }
+}
+
 resource "random_uuid" "test" {}
 
 resource "aws_cloudformation_stack" "SoftNAS1Stack" {
@@ -31,8 +64,8 @@ resource "aws_cloudformation_stack" "SoftNAS1Stack" {
     KeyName             = "${var.key_name}"
     SoftnasUserPassword = "${var.softnas_user_password}"
     InstanceName        = "SoftNAS1_PlatinumConsumptionLowerCompute"
-    AMI                 = "ami-a24a98c0"
-    NasType             = "m4.xlarge"
+    AMI                 = "${var.ami_platinum_consumption_lower_compute["ap-southeast-2"]}"
+    NasType             = "${var.instance_type_platinum_consumption_lower_compute["m4.xlarge"]}"
     PrivateIPEth0NAS1   = "${var.softnas1_private_ip1}"
     PrivateIPEth1NAS1   = "${var.softnas1_private_ip2}"
 
@@ -86,9 +119,9 @@ resource "aws_cloudformation_stack" "SoftNAS2Stack" {
     SoftnasRoleName     = "SoftNAS_HA_IAM"
     KeyName             = "${var.key_name}"
     SoftnasUserPassword = "${var.softnas_user_password}"
-    InstanceName        = "SoftNAS1_PlatinumConsumptionHigherCompute"
-    AMI                 = "ami-5e7ea03c"
-    NasType             = "m5.2xlarge"
+    InstanceName        = "SoftNAS2_PlatinumConsumptionLowerCompute"
+    AMI                 = "${var.ami_platinum_consumption_lower_compute["ap-southeast-2"]}"
+    NasType             = "${var.instance_type_platinum_consumption_lower_compute["m4.xlarge"]}"
     PrivateIPEth0NAS1   = "${var.softnas2_private_ip1}"
     PrivateIPEth1NAS1   = "${var.softnas2_private_ip2}"
 

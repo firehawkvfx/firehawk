@@ -21,9 +21,11 @@ module "vpc" {
   single_nat_gateway     = true
   one_nat_gateway_per_az = false
 
-  #not sure if this is actually required - it seems mroe realted to aws type vpn gateway as a paid service
+  #not sure if this is actually required - it seems mroe related to aws type vpn gateway as a paid service
   #enable_vpn_gateway = true
 
+  enable_dns_support   = true
+  enable_dns_hostnames = true
   tags = {
     Terraform   = "true"
     Environment = "dev"
