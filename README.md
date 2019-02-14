@@ -283,3 +283,6 @@ The installer is found in the deadilne repository.  this smb share should have b
 sudo mount -t cifs -o username=deadlineuser,password=<password> //<samba_server_address>/DeadlineRepository /mnt/repo
 
 if the automatic installer doesn't work, follow the manual instructions.
+<!--stackedit_data:
+eyJoaXN0b3J5IjpbNjQ4ODU2NTUwXX0=
+-->
