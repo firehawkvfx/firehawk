@@ -76,13 +76,13 @@ and also to check the group id:
 
     cat /etc/group
 Next you will want the user to be a super user for now.  it will be possible to tighten the permissions later, but for testing we will do this-
-sudo usermod -aG wheel ${var.deadline_user}
 
-now log out and log back in as the new user.
+    sudo usermod -aG wheel ${var.deadline_user}
 
-You will want to install deadline DB, and deadline RCS in the vm, and take note of all the paths where you place your certificates.  We selected the ubuntu 16 VM because at this time its the easiest way to install Deadline DB and RCS on. 
+Now log out and log back in as the new user.  You will want to install deadline DB, and deadline RCS in the vm, and take note of all the paths where you place your certificates.  We selected the ubuntu 16 VM because at this time its the easiest way to install Deadline DB and RCS with a gui installer.
 
-In the ubuntu 16 VM you will also want to install open vpn with:
+In the Ubuntu 16 VM you will also want to install open vpn (and any required dependencies that may arise) with:
+
 sudo apt-install openvpn
 Then you can try starting an openvpn access server AMI on AWS.  It’s a good exercise for you to create one of these on your own (not using openFirehawk at this stage) in a public subnet.  learning how to get the autoconnect feature working for the ubuntu vm to this openVPN instance will be needed.  if you can do that, openFirehawk will be able to create its own open vpn server and connect to it.
 
@@ -288,6 +288,6 @@ sudo mount -t cifs -o username=deadlineuser,password=<password> //<samba_server_
 
 if the automatic installer doesn't work, follow the manual instructions.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbOTQ2MTg3NTc2LDY1OTA4OTA5NCw1NDg5OD
+eyJoaXN0b3J5IjpbNDQ2MDAzMDIxLDY1OTA4OTA5NCw1NDg5OD
 M2OTYsLTc5NDU5MjA1LDUwODUzMDQ4MSw3MDgxNzYyOV19
 -->
