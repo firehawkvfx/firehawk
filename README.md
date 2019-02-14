@@ -43,7 +43,7 @@ So The next thing you should do is setup budget notifications.  Set a number you
 
 #### Pointers on cost awareness:
 
-Initially run very small tests and get an understanding of costs with small tests that never use more than say 100GB of storage, that can be produced on light 2 core instances.  Cost managment in AWS is not easy.
+Initially run very small tests and get an understanding of costs with small tests that never use more than say 100GB of storage, that can be produced on light 2 core instances.  Cost managment in AWS is not easy, and you usually should allow a day before you can see a break down of what happenned (though its possible to implement more aggressive cost analysis with developement).
 
 EBS volumes (think virtual hard drives) cost money.  check for any volumes you don't need and delete them.
 
@@ -283,6 +283,6 @@ sudo mount -t cifs -o username=deadlineuser,password=<password> //<samba_server_
 
 if the automatic installer doesn't work, follow the manual instructions.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTE1NDc2NDg4NjksNTQ4OTgzNjk2LC03OT
-Q1OTIwNSw1MDg1MzA0ODEsNzA4MTc2MjldfQ==
+eyJoaXN0b3J5IjpbLTc0NzkzMzc0MSw1NDg5ODM2OTYsLTc5ND
+U5MjA1LDUwODUzMDQ4MSw3MDgxNzYyOV19
 -->
