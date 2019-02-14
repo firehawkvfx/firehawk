@@ -5,8 +5,9 @@ This is in developement and not ready for production.
 
 ## Intro
 
-openFirehawk is a set of modules to help VFX artists define create an on demand render farm with infrastructure as code.  It is written in Terraform.  While Terraform is able to interface with many cloud providers, current implementation is with AWS.
-It is managed with open vpn and provisioned with ssh. Ansible is planned to take over this role.
+openFirehawk is a set of modules to help VFX artists create an on demand render farm with infrastructure as code.  It is written in Terraform.  While Terraform is able to interface with many cloud providers, current implementation is with AWS.  Extension to Google Cloud Platform is planned once a good simple foundation is established with these initial modules.
+
+It is managed with openVpn and provisioned with ssh. Ansible is planned to take over this role.
 
 I'll be changing the way things work to make openFirehawk easier for people over time.  Currently it is not ready for simple replication in another environment without challenges. It’s not going to be easy yet!  Much of the current work needs to be automated further, and learning it all if you are new to it is going to be a challenge.
 
