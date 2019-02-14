@@ -18,17 +18,17 @@ So for those that are comfortable with a challenge at this early stage and want 
 
 If you are totally new to this and you think its a lot to learn, I recommend just passively putting these tutorials on without necesarily following the steps to just expose yourself to the concepts and get an overview.  Going through the steps yourself is obviously better though.
 
-These might be good paid video courses to try-
+These are some good paid video courses to try-
 ##### Pluralsight:
 - Terraform - Getting Started
 - Deep Dive - Terraform
 
-Udemy:
-Mastering Ansible (its a little clunky at times but its still good)  
-Deploying to AWS with Ansible and Terraform - linux academy.
+##### Udemy:
+- Mastering Ansible (its a little clunky at times but its still good)  
+- Deploying to AWS with Ansible and Terraform - linux academy.
 
-There is also the book:
-Terraform up and running.
+##### Books:
+- Terraform up and running.
 
 # Getting Started
 
@@ -288,6 +288,6 @@ sudo mount -t cifs -o username=deadlineuser,password=<password> //<samba_server_
 
 if the automatic installer doesn't work, follow the manual instructions.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbNDMxOTIxMjkwLDY1OTA4OTA5NCw1NDg5OD
+eyJoaXN0b3J5IjpbOTQ2MTg3NTc2LDY1OTA4OTA5NCw1NDg5OD
 M2OTYsLTc5NDU5MjA1LDUwODUzMDQ4MSw3MDgxNzYyOV19
 -->
