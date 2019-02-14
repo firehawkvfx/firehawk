@@ -7,7 +7,7 @@ This is in developement and not ready for production.
 
 I'll be changing the way things work to make openFirehawk easier for people over time.  Currently it is not ready for simple replication in another environment without challenges. It’s not going to be easy yet!  Much of the current work needs to be automated further, and learning it all if you are new to it is going to be a challenge.
 
-Until we are ready for beta testing, these docs are still here for people driven to learn how things work and want to be involved as an early adopter.  I will work on these docs to give you a path to learnontribution to these docs is welcomed!
+Until we are ready for beta testing, these docs are still here for people driven to learn how things work and want to be involved as an early adopter.  I will work on these docs to give you a path to learn. contribution to these docs is welcomed!
 
 But I do want to provide a path to get started for TDs that want to contribute, learn terraform, and are not afraid to push their bash skills in a shell further and learn new tools.
 
@@ -280,6 +280,6 @@ sudo mount -t cifs -o username=deadlineuser,password=<password> //<samba_server_
 
 if the automatic installer doesn't work, follow the manual instructions.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTI4MzgyMDA5MywtNzk0NTkyMDUsNTA4NT
-MwNDgxLDcwODE3NjI5XX0=
+eyJoaXN0b3J5IjpbNTQ4OTgzNjk2LC03OTQ1OTIwNSw1MDg1Mz
+A0ODEsNzA4MTc2MjldfQ==
 -->
