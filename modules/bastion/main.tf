@@ -1,11 +1,11 @@
 #----------------------------------------------------------------
-# This module creates all resources necessary for a PCOIP instance in AWS
+# This module creates all resources necessary for am Ansible Bastion instance in AWS
 #----------------------------------------------------------------
 
-resource "aws_security_group" "pcoipgw" {
+resource "aws_security_group" "bastion" {
   name        = "${var.name}"
   vpc_id      = "${var.vpc_id}"
-  description = "Teradici PCOIP security group"
+  description = "Bastion Security Group"
 
   tags {
     Name = "${var.name}"
@@ -66,13 +66,13 @@ resource "aws_security_group" "pcoipgw" {
   }
 }
 
-resource "aws_instance" "pcoipgw" {
-  ami           = "${var.ami}"
+resource "aws_instance" "bastion" {
+  ami           = "${lookup(var.ami_map, var.region)}"
   instance_type = "${var.instance_type}"
   key_name      = "${var.key_name}"
   subnet_id     = "${element(var.public_subnet_ids, count.index)}"
 
-  vpc_security_group_ids = ["${aws_security_group.pcoipgw.id}"]
+  vpc_security_group_ids = ["${aws_security_group.bastion.id}"]
 
   tags {
     Name = "${var.name}"
@@ -95,5 +95,13 @@ USERDATA
       # Sleep 60 seconds until AMI is ready
       "sleep 60",
     ]
+  }
+}
+
+resource "null_resource" "shutdown-node" {
+  count = "${var.sleep ? 1 : 0}"
+
+  provisioner "local-exec" {
+    command = "aws ec2 stop-instances --instance-ids ${aws_instance.bastion.id}"
   }
 }
