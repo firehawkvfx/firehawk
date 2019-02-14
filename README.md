@@ -129,7 +129,7 @@ So each instance like these that are used will need you to launch them once to g
 
 You’ll need to agree to the conditions of the ami, and then enter the ami ID that resulted ) visible from the aws ec2 instance console) for your region into the map.  Feel free to commit the added AMI map back into the repo too to help others.
 
-in terrafThis is an example of the ami_map variable in node_centos/variables.tf
+In terraform, a map is really a dictionary for those familiar with python.  This is an example of the ami_map variable in node_centos/variables.tf
 ```
 variable "ami_map" {
   type = "map"
@@ -141,9 +141,11 @@ variable "ami_map" {
 ```
 ap-southeast-2 is the sydney region, so if that region is set correctly in private-variables.tf
 then when we lookup the dictionary, we will get the ami with this function in main.tf
-lookup(var.ami_map, var.region)
 
-so if I’m us-east-1, after starting up the latest centos 7 ami, I can enter that in like so
+    lookup(var.ami_map, var.region)
+
+So if I’m located at us-east-1, after starting up the latest CentOS 7 AMI, I can enter that in like so
+```
 variable "ami_map" {
   type = "map"
 
@@ -152,7 +154,7 @@ variable "ami_map" {
     us-east-1 = “ami ID goes here”
   }
 }
-
+```
 and provided your region is set correctly in private-variables.tf, then that ami will be looked up.
 
 
@@ -289,7 +291,6 @@ sudo mount -t cifs -o username=deadlineuser,password=<password> //<samba_server_
 
 if the automatic installer doesn't work, follow the manual instructions.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTE0MjgwMDUxMjgsNjU5MDg5MDk0LDU0OD
-k4MzY5NiwtNzk0NTkyMDUsNTA4NTMwNDgxLDcwODE3NjI5XX0=
-
+eyJoaXN0b3J5IjpbNzI0MzE1NjU1LDY1OTA4OTA5NCw1NDg5OD
+M2OTYsLTc5NDU5MjA1LDUwODUzMDQ4MSw3MDgxNzYyOV19
 -->
