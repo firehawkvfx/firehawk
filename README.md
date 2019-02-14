@@ -49,24 +49,23 @@ Initially run very small tests and get an understanding of costs with small test
 
 - S3 is cloud storage that also costs money.  Be mindful of it.  if you create an S3 drive with softnas, set a limit on that size that you are most comfortable spending if it fills up.  Make sure softnas is using a thin volume in S3, otherwise you allocate the full amount of data to be used even if the drive is empty.
 
-Check that any outstanding jobs are paused, and spot requests have been terminated in the spot fleet tab.  If you simply terminate an instance, but there are remaining render tasks, a spot fleet request may just replace it.  if you see any autoscaling groups, these should also be set to 0 (but we dont use them at the time of this writing).
+- Check that any outstanding jobs are paused, and spot requests have been terminated in the spot fleet tab.  If you simply terminate an instance, but there are remaining render tasks, a spot fleet request may just replace it.  if you see any autoscaling groups, these should also be set to 0 (but we dont use them at the time of this writing).
 
-Turn off nodes when not using them.  When I'm done using the resources I do this-
+- Turn off nodes when not using them.  When I'm done using the resources I do this-
 terraform plan -out=plan -var sleep=true
 I check the plan to see that it is going to do what it should.  then run this to execute it.
 terraform apply plan
 
-If you run this command you can put all the infrastructure to sleep (including the NAT gateway), but you should always verify through the AWS console that this actually happenned, and that all nodes, and nate gateway are off.  
+- If you run this command you can put all the infrastructure to sleep (including the NAT gateway), but you should always verify through the AWS console that this actually happenned, and that all nodes, and nate gateway are off.  
 
-The NAT gateway is another sneaky cost visible in your AWS VPC console, usually around $5 /day if you forget about it.  It allows your private network (systems in the private subnet) outbound access to the internet.  Security groups can lock down any internet access to the minimum adresses required for licencing things like softnas or other software.  Licensing configuration with most software you would use makes possible to not need any NAT gateway but that is beyond the scope of openFirehawk at this point in time.
+- The NAT gateway is another sneaky cost visible in your AWS VPC console, usually around $5 /day if you forget about it.  It allows your private network (systems in the private subnet) outbound access to the internet.  Security groups can lock down any internet access to the minimum adresses required for licencing things like softnas or other software.  Licensing configuration with most software you would use makes possible to not need any NAT gateway but that is beyond the scope of openFirehawk at this point in time.
 
 
-### running the onsite component
+### Running an onsite management VM
 
-You can also start experimenting with an Ubuntu 16 VM with 4 vcpus, and a 50GB volume to install to.  8GB RAM is a good start.
-Buy a few UBL credits for deadline, $10 worth or so to play with.  Thinkbox will credit that to your AWS account on request if you email them.
+You can  start experimenting with an Ubuntu 16 VM with 4 vcpus, and a 50GB volume to install to.  8GB RAM is a good start.  Buy a few UBL credits for deadline, $10 worth or so to play with.  Thinkbox will credit that to your AWS account on request if you email them and they provide support.
 
-The vm will need a new user.  we will call it deadlineuser.  it will also have auid of 9001.  its possible to change this uid but be mindful of the variables set in private-variable.tf if you do,
+The VM will need a new user.  we will call it deadlineuser.  it will also have auid of 9001.  its possible to change this uid but be mindful of the variables set in private-variable.tf if you do,
 sudo adduser -u 9001 deadlineuser.
 This user should also be the member of a group, deadlineuser, and the gid should be 9001.  you can review this with the command
 cat /etc/group
@@ -283,6 +282,6 @@ sudo mount -t cifs -o username=deadlineuser,password=<password> //<samba_server_
 
 if the automatic installer doesn't work, follow the manual instructions.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTg1NDgwNzM3OSw1NDg5ODM2OTYsLTc5ND
+eyJoaXN0b3J5IjpbLTg4NzQ4NTAxNiw1NDg5ODM2OTYsLTc5ND
 U5MjA1LDUwODUzMDQ4MSw3MDgxNzYyOV19
 -->
