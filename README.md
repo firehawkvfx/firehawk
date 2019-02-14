@@ -3,7 +3,9 @@ Written by Andrew Graham for use with Hashicorp Terraform.
 
 This is in developement and not ready for production.  
 
-# Getting Started
+# Intro
+
+openFirehawk is a set of modules to help VFX artists define their own render farm with infrastructure as code.
 
 I'll be changing the way things work to make openFirehawk easier for people over time.  Currently it is not ready for simple replication in another environment without challenges. It’s not going to be easy yet!  Much of the current work needs to be automated further, and learning it all if you are new to it is going to be a challenge.
 
@@ -280,6 +282,6 @@ sudo mount -t cifs -o username=deadlineuser,password=<password> //<samba_server_
 
 if the automatic installer doesn't work, follow the manual instructions.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbNTQ4OTgzNjk2LC03OTQ1OTIwNSw1MDg1Mz
-A0ODEsNzA4MTc2MjldfQ==
+eyJoaXN0b3J5IjpbLTE2NzIwNTY0MDIsNTQ4OTgzNjk2LC03OT
+Q1OTIwNSw1MDg1MzA0ODEsNzA4MTc2MjldfQ==
 -->
