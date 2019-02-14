@@ -1,13 +1,11 @@
 # openFirehawk
-Written by Andrew Graham
+Written by Andrew Graham for use with Hashicorp Terraform.
 
-This is in developement and not ready for production.
+This is in developement and not ready for production.  
 
 # Getting Started
 
-I'll be changing the way things work to make openFirehawk easier for people over time.  
-
-Currently it is not really ready for replication in another environment without challenges. It’s not going to be easy yet!  Much of the current work needs to be automated further, and learning it all if you are new to it is going to be a challenge
+I'll be changing the way things work to make openFirehawk easier for people over time.  Currently it is not ready for simple replication in another environment without challenges. It’s not going to be easy yet!  Much of the current work needs to be automated further, and learning it all if you are new to it is going to be a challenge
 
 Until we are ready for beta testing, these docs are here for people driven to learn how things work.  For some that really want to get into building this, I will work on these docs to give you a path to learn.  Contribution to these docs is welcomed!
 
@@ -28,6 +26,11 @@ Deploying to AWS with Ansible and Terraform - linux academy.
 
 There is also the book:
 Terraform up and running.
+
+# Getting Started
+
+
+
 
 
 You will want to experiment with spinning up an AWS account.  You will need to start an instance in your nearest region with this ami - (softnas platinum consumption based for lower compute requirements).  take note of the AMI.  you wont need to leave this instance running.  You can terminate it, and delete the EBS volume.
@@ -281,5 +284,5 @@ sudo mount -t cifs -o username=deadlineuser,password=<password> //<samba_server_
 
 if the automatic installer doesn't work, follow the manual instructions.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTEzMDU1MjIyMzddfQ==
+eyJoaXN0b3J5IjpbNTA4NTMwNDgxXX0=
 -->
