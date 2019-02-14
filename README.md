@@ -110,7 +110,7 @@ https://learn.hashicorp.com/terraform/getting-started/install.html
 Next you can clone the git repository into your ubuntu vm-
 git clone https://github.com/firehawkvfx/openfirehawk.git
 
-I do need to make it known that the way we are storing private variables is not good, and I intend to move to a product called vault to handle the storing of secrets in the future.
+I do need to make it known that the way we are storing private variables is not best practice, and I intend to move to a product called vault to handle the storing of secrets in the future in an encrypted format.
 
 Currently, we have a private-variables.example file, which you will copy and rename to private-variables.tf
 This filename is in .gitignore, so it will not be in any git commits.
@@ -289,7 +289,6 @@ sudo mount -t cifs -o username=deadlineuser,password=<password> //<samba_server_
 
 if the automatic installer doesn't work, follow the manual instructions.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTIyOTAwMTUwMSw2NTkwODkwOTQsNTQ4OT
-gzNjk2LC03OTQ1OTIwNSw1MDg1MzA0ODEsNzA4MTc2MjldfQ==
-
+eyJoaXN0b3J5IjpbNDkwNTM3MzEyLDY1OTA4OTA5NCw1NDg5OD
+M2OTYsLTc5NDU5MjA1LDUwODUzMDQ4MSw3MDgxNzYyOV19
 -->
