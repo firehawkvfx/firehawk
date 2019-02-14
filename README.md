@@ -159,23 +159,23 @@ and provided your region is set correctly in private-variables.tf, then that ami
 
 
 ### Your first terraform apply
-In the open firehawk repo, I recommend you pen up the main.tf file and comment out everything except the vpc to ensure you can create the vpc, and also connect openvpn.  It’s necesary for this component to work before moving forward.
+In the open firehawk repo, I recommend you pen up the main.tf file and comment out everything except the vpc to ensure you can create the vpc, and also connect openvpn.  It’s necesary for the openvpn component to work before moving forward.
 
+Run:
 
-    sudo service openvpn restart
+    terraform init
 
-run:
-terraform init
+Review the output is without errors:
 
-review the output is without errors:
-terraform plan -out=plan
+    terraform plan -out=plan
 
 Execute the plan.
-terraform apply plan
+
+    terraform apply plan
 
 ### preparation of open vpn
 
-Read these docs to set permissions on the autostart openvpn script, and how to configure the access server.  some settings are required to allow access to the ubuntu VM you have onsite.
+Read these docs to set permissions on the autostart openvpn config and startvpn.sh script, and how to configure the access server.  some settings are required to allow access to the ubuntu VM you have onsite.
 
 README.md
 startvpn.sh
@@ -183,6 +183,10 @@ startvpn.sh
 this allows permission for a script to copy open vpn startup settings from the access server into your openvpn settings.
 
 if all goes well, the startvpn.sh script when executed will initiate a connection with the openvpn access server, and you will be able to ping its private ip.  you should be able to ping the public ip too.  if you can’t ping the public ip you have a security group issue and your onsite static ip isn’t in the private-variables.tf file.
+
+You can also manually start open vpn with:
+    sudo service openvpn restart
+
 
 ### old docs to migrate
 
@@ -294,6 +298,7 @@ sudo mount -t cifs -o username=deadlineuser,password=<password> //<samba_server_
 
 if the automatic installer doesn't work, follow the manual instructions.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbOTcwMDcxNDY2LDY1OTA4OTA5NCw1NDg5OD
-M2OTYsLTc5NDU5MjA1LDUwODUzMDQ4MSw3MDgxNzYyOV19
+eyJoaXN0b3J5IjpbLTE5Nzc3NTQ1NjIsNjU5MDg5MDk0LDU0OD
+k4MzY5NiwtNzk0NTkyMDUsNTA4NTMwNDgxLDcwODE3NjI5XX0=
+
 -->
