@@ -6,7 +6,7 @@ This is in developement and not ready for production.
 # Intro
 
 openFirehawk is a set of modules to help VFX artists define create an on demand render farm with infrastructure as code.  It is written in Terraform.  While Terraform is able to interface with many cloud providers, current implementation is with AWS.
-It is managed with op
+It is managed with open vpn and provisioned with ssh. Ansible is planned to take over this role.
 
 I'll be changing the way things work to make openFirehawk easier for people over time.  Currently it is not ready for simple replication in another environment without challenges. It’s not going to be easy yet!  Much of the current work needs to be automated further, and learning it all if you are new to it is going to be a challenge.
 
@@ -36,7 +36,7 @@ You will want to experiment with spinning up an AWS account.  You will need to s
 Next startup up an open vpn access server instance from the openvpn AMI, and when started, take note of this AMI.  these will need to be added into terraform variables later, because they are unique to your region.
 
 
-### Some notes on you own AWS account - with great power comes great responsibility:
+### Running your own AWS account - with great power comes great responsibility:
 You are going to be managing these resources from an AWS account and you are solely responsible for the costs incurred, and to understand AWS charges.  The first thing you should be doing is setup 2 factor authentication.  Do not skip this.  You'll make it easy for hackers to misuse you credit card to mine crypto.  Eye watering bills are possible!  
 
 So The next thing you should do is setup budget notifications.  Set a number you are willing to spend per month, and setup email notifications for every 20% of that budget.  The notifications are there in case you forget to do this step - check your AWS costs for a daily breakdown of what you spend, and do it every day to learn.  its a good habit to do it at the start of every day.
@@ -283,6 +283,6 @@ sudo mount -t cifs -o username=deadlineuser,password=<password> //<samba_server_
 
 if the automatic installer doesn't work, follow the manual instructions.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMzMwNTQ2NjQ0LDU0ODk4MzY5NiwtNzk0NT
+eyJoaXN0b3J5IjpbMjI3NjQ1NTI1LDU0ODk4MzY5NiwtNzk0NT
 kyMDUsNTA4NTMwNDgxLDcwODE3NjI5XX0=
 -->
