@@ -45,9 +45,9 @@ So The next thing you should do is setup budget notifications.  Set a number you
 
 Initially run very small tests and get an understanding of costs with small tests that never use more than say 100GB of storage, that can be produced on light 2 core instances.  Cost managment in AWS is not easy, and you usually should allow a day before you can see a break down of what happenned (though its possible to implement more aggressive cost analysis with developement).
 
-EBS volumes (think virtual hard drives) cost money.  check for any volumes you don't need and delete them.
+- EBS volumes (think virtual hard drives) cost money.  check for any volumes you don't need and delete them.
 
-S3 is cloud storage that also costs money.  Be mindful of it.  if you create an S3 drive with softnas, set a limit on that size that you are most comfortable spending if it fills up.  Make sure softnas is using a thin volume in S3, otherwise you allocate the full amount of data to be used even if the drive is empty.
+- S3 is cloud storage that also costs money.  Be mindful of it.  if you create an S3 drive with softnas, set a limit on that size that you are most comfortable spending if it fills up.  Make sure softnas is using a thin volume in S3, otherwise you allocate the full amount of data to be used even if the drive is empty.
 
 Check that any outstanding jobs are paused, and spot requests have been terminated in the spot fleet tab.  If you simply terminate an instance, but there are remaining render tasks, a spot fleet request may just replace it.  if you see any autoscaling groups, these should also be set to 0 (but we dont use them at the time of this writing).
 
@@ -283,6 +283,6 @@ sudo mount -t cifs -o username=deadlineuser,password=<password> //<samba_server_
 
 if the automatic installer doesn't work, follow the manual instructions.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTc0NzkzMzc0MSw1NDg5ODM2OTYsLTc5ND
+eyJoaXN0b3J5IjpbLTg1NDgwNzM3OSw1NDg5ODM2OTYsLTc5ND
 U5MjA1LDUwODUzMDQ4MSw3MDgxNzYyOV19
 -->
