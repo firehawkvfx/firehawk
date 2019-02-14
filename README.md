@@ -41,9 +41,9 @@ You are going to be managing these resources from an AWS account and you are sol
 
 So The next thing you should do is setup budget notifications.  Set a number you are willing to spend per month, and setup email notifications for every 20% of that budget.  The notifications are there in case you forget to do this step - check your AWS costs for a daily breakdown of what you spend, and do it every day to learn.  its a good habit to do it at the start of every day.
 
-These are the main pointers I have on cost awareness -
+#### Pointers on cost awareness:
 
-Run very small tests and get an understanding of costs with small tests that never use more than say 100GB of storage, and can be produced on light 2 core instances.
+Initially run very small tests and get an understanding of costs with small tests that never use more than say 100GB of storage, that can be produced on light 2 core instances.  Cost managment in AWS is not easy.
 
 EBS volumes (think virtual hard drives) cost money.  check for any volumes you don't need and delete them.
 
@@ -283,6 +283,6 @@ sudo mount -t cifs -o username=deadlineuser,password=<password> //<samba_server_
 
 if the automatic installer doesn't work, follow the manual instructions.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMjI3NjQ1NTI1LDU0ODk4MzY5NiwtNzk0NT
-kyMDUsNTA4NTMwNDgxLDcwODE3NjI5XX0=
+eyJoaXN0b3J5IjpbLTE1NDc2NDg4NjksNTQ4OTgzNjk2LC03OT
+Q1OTIwNSw1MDg1MzA0ODEsNzA4MTc2MjldfQ==
 -->
