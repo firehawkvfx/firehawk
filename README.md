@@ -1,9 +1,14 @@
 # openFirehawk
 Written by Andrew Graham
 
-This is in developement and not ready for production.
+=== This is in developement and- not ready for production.
 
-# step by step
+ ===
+
+
+
+
+### step by step ###
 
 I'll be changing the way things work to make openFirehawk easier for people over time.  
 
@@ -281,5 +286,5 @@ sudo mount -t cifs -o username=deadlineuser,password=<password> //<samba_server_
 
 if the automatic installer doesn't work, follow the manual instructions.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbNzA4MTc2MjldfQ==
+eyJoaXN0b3J5IjpbMjExOTY3ODY1Myw3MDgxNzYyOV19
 -->
