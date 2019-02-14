@@ -122,15 +122,15 @@ Security groups are configured to ignore any inbound internet traffic unless it 
 
 In terraform, each instance we start will use an AMI, and these AMI’s are unique to your region.  We would like the ability to query all ami’s for all regions (https://github.com/firehawkvfx/openfirehawk/projects/1#card-17639682) but for now it doesn’t appear possible for softnas.
 
-so each instance like these that are used will need you to launch them once.
-centos7 (search for CentOS Linux 7 x86_64 HVM in your region)
-openvpn (search for OpenVPN Access Server in your region)
-Teradici pcoip for centos 7  (search for Teradici Cloud Access Software for CentOS 7 in your region)
+So each instance like these that are used will need you to launch them once to get the AMI ID.
+- CentOS7 (search for CentOS Linux 7 x86_64 HVM in your region)
+- openvpn (search for OpenVPN Access Server in your region)
+- Teradici pcoip for centos 7  (search for Teradici Cloud Access Software for CentOS 7 in your region)
 
-you’ll need to agree to the conditions of the ami, and then enter the ami ID that resulted ) visible from the aws ec2 instance console) for your region into the map.  Feel free to commit the added AMI map back into the repo too to help others.
+You’ll need to agree to the conditions of the ami, and then enter the ami ID that resulted ) visible from the aws ec2 instance console) for your region into the map.  Feel free to commit the added AMI map back into the repo too to help others.
 
-This is an example of the map in node_centos/variables.tf
-
+in terrafThis is an example of the ami_map variable in node_centos/variables.tf
+```
 variable "ami_map" {
   type = "map"
 
@@ -138,7 +138,7 @@ variable "ami_map" {
     ap-southeast-2 = "ami-d8c21dba"
   }
 }
-
+```
 ap-southeast-2 is the sydney region, so if that region is set correctly in private-variables.tf
 then when we lookup the dictionary, we will get the ami with this function in main.tf
 lookup(var.ami_map, var.region)
@@ -289,6 +289,7 @@ sudo mount -t cifs -o username=deadlineuser,password=<password> //<samba_server_
 
 if the automatic installer doesn't work, follow the manual instructions.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbNDkwNTM3MzEyLDY1OTA4OTA5NCw1NDg5OD
-M2OTYsLTc5NDU5MjA1LDUwODUzMDQ4MSw3MDgxNzYyOV19
+eyJoaXN0b3J5IjpbLTE0MjgwMDUxMjgsNjU5MDg5MDk0LDU0OD
+k4MzY5NiwtNzk0NTkyMDUsNTA4NTMwNDgxLDcwODE3NjI5XX0=
+
 -->
