@@ -68,9 +68,10 @@ You can  start experimenting with an Ubuntu 16 VM with 4 vcpus, and a 50GB volum
 The VM will need a new user.  We will call it deadlineuser.  It will also have a uid and gid of 9001.  its possible to change this uid but be mindful of the variables set in private-variable.tf if you do,
 sudo adduser -u 9001 deadlineuser.
 This user should also be the member of a group, deadlineuser, and the gid should be 9001.  you can review this with the command
-users
+     users
+   
 and
-cat /etc/group
+				cat /etc/group
 Next you will want the user to be a super user for now.  it will be possible to tighten the permissions later, but for testing we will do this-
 sudo usermod -aG wheel ${var.deadline_user}
 
@@ -284,6 +285,6 @@ sudo mount -t cifs -o username=deadlineuser,password=<password> //<samba_server_
 
 if the automatic installer doesn't work, follow the manual instructions.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTIxMzczOTU0NTYsNTQ4OTgzNjk2LC03OT
-Q1OTIwNSw1MDg1MzA0ODEsNzA4MTc2MjldfQ==
+eyJoaXN0b3J5IjpbLTQ4NDE0NjQzMCw1NDg5ODM2OTYsLTc5ND
+U5MjA1LDUwODUzMDQ4MSw3MDgxNzYyOV19
 -->
