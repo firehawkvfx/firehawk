@@ -19,9 +19,9 @@ So for those that are comfortable with a challenge at this early stage and want 
 If you are totally new to this and you think its a lot to learn, I recommend just passively putting these tutorials on without necesarily following the steps to just expose yourself to the concepts and get an overview.  Going through the steps yourself is obviously better though.
 
 These might be good paid video courses to try-
-Pluralsight:
-Terraform - Getting Started
-Deep Dive - Terraform
+##### Pluralsight:
+- Terraform - Getting Started
+- Deep Dive - Terraform
 
 Udemy:
 Mastering Ansible (its a little clunky at times but its still good)  
@@ -65,7 +65,7 @@ terraform apply plan
 
 You can  start experimenting with an Ubuntu 16 VM with 4 vcpus, and a 50GB volume to install to.  8GB RAM is a good start.  Buy a few UBL credits for deadline, $10 worth or so to play with.  Thinkbox will credit that to your AWS account on request if you email them and they provide support.
 
-The VM will need a new user.  We will call it deadlineuser.  It will also have a uid and gid of 9001.  its possible to change this uid but be mindful of the variables set in [private-variables.tf](private-variables.tf) if you do.
+The VM will need a new user.  We will call it deadlineuser.  It will also have a uid and gid of 9001.  its possible to change this uid but be mindful of the variables set in [private-variables.tf](https://github.com/firehawkvfx/openfirehawk/blob/master/private-variables.example) if you do.
 
     sudo adduser -u 9001 deadlineuser.
 
@@ -288,7 +288,6 @@ sudo mount -t cifs -o username=deadlineuser,password=<password> //<samba_server_
 
 if the automatic installer doesn't work, follow the manual instructions.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTEyNDYyNDU0NzQsNjU5MDg5MDk0LDU0OD
-k4MzY5NiwtNzk0NTkyMDUsNTA4NTMwNDgxLDcwODE3NjI5XX0=
-
+eyJoaXN0b3J5IjpbNDMxOTIxMjkwLDY1OTA4OTA5NCw1NDg5OD
+M2OTYsLTc5NDU5MjA1LDUwODUzMDQ4MSw3MDgxNzYyOV19
 -->
