@@ -173,7 +173,7 @@ Execute the plan.
 
     terraform apply plan
 
-### preparation of open vpn
+### Preparation of open vpn
 
 Read these docs to set permissions on the autostart openvpn config and startvpn.sh script, and how to configure the access server.  Some settings are required to allow access to the ubuntu VM you have onsite, and we go through these steps in the tf_aws_openvpn readme-
 
@@ -191,7 +191,7 @@ You can also manually start open vpn with:
 
 ### old docs to migrate
 
-The initial goals of this project are to setup an AWS VPC, Storage, a VPN, connect License Servers, and batch workloads for SideFX Houdini.  It also serves as a foundation for other linux 3D rendering software.
+The initial goals of this project are to setup an AWS VPC, Storage, a VPN, connect License Servers, and batch workloads for SideFX Houdini.  It also serves as a foundation for other linux friendly 3D rendering software.
 
 Contribution to extend functionality is welcome.  Please contact me if you wish to contribute in a particular area so that we can collaborate efficiently.  Planned changes in implementation could affect what is currently in the major branch that at this stage is good to be aware of:
 
@@ -299,7 +299,7 @@ sudo mount -t cifs -o username=deadlineuser,password=<password> //<samba_server_
 
 if the automatic installer doesn't work, follow the manual instructions.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTUxMjM4MDQ4MSw2NTkwODkwOTQsNTQ4OT
-gzNjk2LC03OTQ1OTIwNSw1MDg1MzA0ODEsNzA4MTc2MjldfQ==
+eyJoaXN0b3J5IjpbLTExNDk2MTk1MjgsNjU5MDg5MDk0LDU0OD
+k4MzY5NiwtNzk0NTkyMDUsNTA4NTMwNDgxLDcwODE3NjI5XX0=
 
 -->
