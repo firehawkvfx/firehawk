@@ -180,11 +180,12 @@ Read these docs to set permissions on the autostart openvpn config and startvpn.
 README.md
 startvpn.sh
 
-this allows permission for a script to copy open vpn startup settings from the access server into your openvpn settings.
+This allows permission for a script to copy open vpn startup settings from the access server into your openvpn settings.
 
 if all goes well, the startvpn.sh script when executed will initiate a connection with the openvpn access server, and you will be able to ping its private ip.  you should be able to ping the public ip too.  if you can’t ping the public ip you have a security group issue and your onsite static ip isn’t in the private-variables.tf file.
 
 You can also manually start open vpn with:
+
     sudo service openvpn restart
 
 
@@ -298,7 +299,7 @@ sudo mount -t cifs -o username=deadlineuser,password=<password> //<samba_server_
 
 if the automatic installer doesn't work, follow the manual instructions.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTE5Nzc3NTQ1NjIsNjU5MDg5MDk0LDU0OD
+eyJoaXN0b3J5IjpbLTE3MjUzMjE4NzIsNjU5MDg5MDk0LDU0OD
 k4MzY5NiwtNzk0NTkyMDUsNTA4NTMwNDgxLDcwODE3NjI5XX0=
 
 -->
