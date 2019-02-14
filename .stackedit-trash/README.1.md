@@ -3,11 +3,11 @@ Written by Andrew Graham
 
 This is in developement and not ready for production.
 
-# step by step
+# Getting Started
 
 I'll be changing the way things work to make openFirehawk easier for people over time.  
 
-Currently it is not really ready for replication in another environment without chlalenges. It’s not going to be easy yet!  Much of the current work needs to be automated further, and learning it all if you are new to it is going to be a challenge
+Currently it is not really ready for replication in another environment without challenges. It’s not going to be easy yet!  Much of the current work needs to be automated further, and learning it all if you are new to it is going to be a challenge
 
 Until we are ready for beta testing, these docs are here for people driven to learn how things work.  For some that really want to get into building this, I will work on these docs to give you a path to learn.  Contribution to these docs is welcomed!
 
@@ -281,5 +281,5 @@ sudo mount -t cifs -o username=deadlineuser,password=<password> //<samba_server_
 
 if the automatic installer doesn't work, follow the manual instructions.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbNzA4MTc2MjldfQ==
+eyJoaXN0b3J5IjpbLTEzMDU1MjIyMzddfQ==
 -->
