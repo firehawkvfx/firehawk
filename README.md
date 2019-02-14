@@ -5,7 +5,8 @@ This is in developement and not ready for production.
 
 # Intro
 
-openFirehawk is a set of modules to help VFX artists define their own render farm with infrastructure as code.
+openFirehawk is a set of modules to help VFX artists define create an on demand render farm with infrastructure as code.  It is written in Terraform.  While Terraform is able to interface with many cloud providers, current implementation is with AWS.
+It is managed with op
 
 I'll be changing the way things work to make openFirehawk easier for people over time.  Currently it is not ready for simple replication in another environment without challenges. It’s not going to be easy yet!  Much of the current work needs to be automated further, and learning it all if you are new to it is going to be a challenge.
 
@@ -282,6 +283,6 @@ sudo mount -t cifs -o username=deadlineuser,password=<password> //<samba_server_
 
 if the automatic installer doesn't work, follow the manual instructions.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTE2NzIwNTY0MDIsNTQ4OTgzNjk2LC03OT
-Q1OTIwNSw1MDg1MzA0ODEsNzA4MTc2MjldfQ==
+eyJoaXN0b3J5IjpbMzMwNTQ2NjQ0LDU0ODk4MzY5NiwtNzk0NT
+kyMDUsNTA4NTMwNDgxLDcwODE3NjI5XX0=
 -->
