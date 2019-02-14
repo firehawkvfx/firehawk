@@ -29,10 +29,6 @@ Terraform up and running.
 
 # Getting Started
 
-
-
-
-
 You will want to experiment with spinning up an AWS account.  You will need to start an instance in your nearest region with this ami - (softnas platinum consumption based for lower compute requirements).  take note of the AMI.  you wont need to leave this instance running.  You can terminate it, and delete the EBS volume.
 Next startup up an open vpn access server instance from the openvpn AMI, and when started, take note of this AMI.  these will need to be added into terraform variables later, because they are unique to your region.
 
@@ -284,6 +280,6 @@ sudo mount -t cifs -o username=deadlineuser,password=<password> //<samba_server_
 
 if the automatic installer doesn't work, follow the manual instructions.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTc5NDU5MjA1LDUwODUzMDQ4MSw3MDgxNz
-YyOV19
+eyJoaXN0b3J5IjpbLTI4MzgyMDA5MywtNzk0NTkyMDUsNTA4NT
+MwNDgxLDcwODE3NjI5XX0=
 -->
