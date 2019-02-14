@@ -175,10 +175,10 @@ Execute the plan.
 
 ### preparation of open vpn
 
-Read these docs to set permissions on the autostart openvpn config and startvpn.sh script, and how to configure the access server.  some settings are required to allow access to the ubuntu VM you have onsite.
+Read these docs to set permissions on the autostart openvpn config and startvpn.sh script, and how to configure the access server.  Some settings are required to allow access to the ubuntu VM you have onsite, and we go through these steps in the tf_aws_openvpn readme-
 
-README.md
-startvpn.sh
+[README.md](https://github.com/firehawkvfx/tf_aws_openvpn/blob/master/README.md)
+[startvpn.sh](https://github.com/firehawkvfx/tf_aws_openvpn/blob/master/startvpn.sh)
 
 This allows permission for a script to copy open vpn startup settings from the access server into your openvpn settings.
 
@@ -299,7 +299,7 @@ sudo mount -t cifs -o username=deadlineuser,password=<password> //<samba_server_
 
 if the automatic installer doesn't work, follow the manual instructions.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTE3MjUzMjE4NzIsNjU5MDg5MDk0LDU0OD
+eyJoaXN0b3J5IjpbLTExOTU3OTA0NjAsNjU5MDg5MDk0LDU0OD
 k4MzY5NiwtNzk0NTkyMDUsNTA4NTMwNDgxLDcwODE3NjI5XX0=
 
 -->
