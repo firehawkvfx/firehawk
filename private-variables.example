@@ -1,14 +1,10 @@
-# IMPORTANT : this example file must be duplicated and renamed private-variables.tf and filled out with your own values.  
+# IMPORTANT : this example file must be duplicated and renamed as private-variables.tf and filled out with your own values.  
 # These are example values only.
-# private-variables.tf is in the .gitignore and will not be included in version control / github repos.
+# private-variables.tf is in the .gitignore and will not be included in version control / github repos to protect against sharing of private information.
 
 #you can get an ssl certificate arn by verifying your domain with aws certificate manager.
 variable "cert_arn" {
-  default = "arn:aws:acm:blahdyblah-blah"
-}
-
-variable "openvpn_admin_pw" {
-  default = "SomePassForOpenVPN"
+  default = "arn:aws:ac-0f2fb92f6aa5"
 }
 
 variable "region" {
@@ -17,19 +13,27 @@ variable "region" {
 
 # once you setup an ssl certificate with your domain, it will have a route zone id.
 variable "route_zone_id" {
-  default = "A465DWEGGS"
+  default = "Z1L65843GH455G"
 }
 
 variable "public_domain_name" {
-  default = "example.com"
+  default = "firehawkvfx.com"
 }
 
 variable "openvpn_user" {
   default = "openvpnas"
 }
 
+variable "openvpn_user_pw" {
+  default = "ChangeThisOrElse99xFail"
+}
+
 variable "openvpn_admin_user" {
   default = "openvpnas"
+}
+
+variable "openvpn_admin_pw" {
+  default = "ChangeThisOrElse99xFail"
 }
 
 #generate a keypair and enter its name here.
@@ -43,22 +47,170 @@ variable "local_key_path" {
 }
 
 #the remote_ip_cidr is the public remote static ip address of the site that will access the vpc
+#see this page for more understanding on ip ranges reserved for this purpose
+#https://openvpn.net/community-resources/how-to/
 variable "remote_ip_cidr" {
-  default = "118.26.48.12/32"
+  default = "145.10.32.75/32"
 }
 
-#the vpn cidr will assign addresses to remote hosts with dhcp in this cidr block.
+#the vpn cidr is the range the client will assign addresses to remote hosts with dhcp in this cidr block.
 variable "vpn_cidr" {
-  default = "10.0.201.0/24"
+  default = "172.16.125.0/24"
 }
 
-# Create 4 or more ebs volumes that are the same size and list them here.  they will be attached upon terraform apply.
-# They will also safely persist after terraform destroy.
-variable "volumes" {
-  default = ["vol-02a554534", "vol-077a45349c232", "vol-09d545345336316c47", "vol-0b04453453c4550"]
+#the remote subnet cidr block is the subnet range that your remote site is in.  use this if you intend to use the openvpn client
+#as a router / gateway for other nodes on your remote network to access the EC2 private subnet.
+variable "remote_subnet_cidr" {
+  default = "192.168.17.0/24"
 }
 
-# these are the mount points for each ebs volume above when attached to the softnas instance.  generally, these shouldn't be changed unless adding more volumes.
-variable "mounts" {
+variable "softnas1_cloudformation_role_name" {
+  default = "FCB-Softnas1Role"
+}
+
+variable "softnas2_cloudformation_role_name" {
+  default = "FCB-Softnas2Role"
+}
+
+variable "softnas_user_password" {
+  default = "ChangeThisOrElse99xFail"
+}
+
+#also used for s3 disks MakingStuffUp4
+
+variable "softnas1_private_ip1" {
+  default = "10.0.1.11"
+}
+
+variable "softnas1_private_ip2" {
+  default = "10.0.1.12"
+}
+
+variable "softnas2_private_ip1" {
+  default = "10.0.1.21"
+}
+
+variable "softnas2_private_ip2" {
+  default = "10.0.1.22"
+}
+#this is the path to the actual volume you have created on softnas to share with NFS
+variable "softnas1_export_path" {
+  default = "/naspool2/nasvol2"
+}
+#this is the path that will be created on render nodes to mount the share to.
+variable "softnas1_mount_path" {
+  default = "/mnt/softnas/nasvol2"
+}
+#this is the path to the actual volume you have created on softnas to share with NFS
+variable "softnas2_export_path" {
+  default = "/NAS3/NASVOL3"
+}
+#this is the path that will be created on render nodes to mount the share to.
+variable "softnas2_mount_path" {
+  default = "/mnt/softnas/nasvol3"
+}
+#you can mount precreated EBS volumes from your AWS account by listing them here.  These EBS volumes will be preserved after instance termination, but ensure you verify this in your workflow through testing.
+#leave this as a blank list if you dont wish to mount any precreated volumes.
+variable "softnas1_volumes" {
+  default = ["vol-0dfdb289f3a00f63c", "vol-071219d59b8153d6a", "vol-0a21cf466c807a753", "vol-0c0703a9c333cef86"]
+}
+
+variable "softnas2_volumes" {
+  default = []
+}
+# These are the mount points for each volume, starting with "sdf".
+variable "softnas1_mounts" {
   default = ["/dev/sdf", "/dev/sdg", "/dev/sdh", "/dev/sdi"]
+}
+
+variable "softnas2_mounts" {
+  default = ["/dev/sdf", "/dev/sdg", "/dev/sdh", "/dev/sdi"]
+}
+
+variable "softnas_mailserver" {
+  default = "mailserver.example.com"
+}
+
+variable "softnas_smtp_port" {
+  default = "26"
+}
+
+variable "softnas_smtp_username" {
+  default = "admin@example.com"
+}
+
+variable "softnas_smtp_password" {
+  default = "MyEmailSecretWillBeDifferent"
+}
+
+variable "softnas_smtp_from" {
+  default = "admin@example.com"
+}
+
+variable "smtp_encryption" {
+  default = "none"
+}
+#the name of the account to create for render nodes to run as.
+variable "deadline_user" {
+  default = "deadlineuser"
+}
+
+variable "deadline_user_password" {
+  default = "ChangeThisOrElse99xFail"
+}
+
+variable "deadline_user_uid" {
+  default = "9001"
+}
+
+variable "deadline_samba_server_hostname" {
+  default = "deadlinedb.example.com"
+}
+
+variable "deadline_prefix" {
+  default = "/opt/Thinkbox/Deadline10"
+}
+
+variable "deadline_certificates_location" {
+  default = "/opt/Thinkbox/certs"
+}
+#the deadline client installer name located in modules/node_centos/file_package.  place this installer in that location after downloading from thinkbox.
+variable "deadline_installers_filename" {
+  default = "DeadlineClient-10.0.23.4-linux-x64-installer.run"
+}
+#location of the certificate on the remote system you are executing terraform from.
+variable "deadline_client_certificate" {
+  default = "/opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx"
+}
+#location of the certificate on the remote system you are executing terraform from.
+variable "deadline_server_certificate" {
+  default = "/opt/Thinkbox/certs/deadlinedb.example.com.pfx"
+}
+
+variable "deadline_db_ssl_password" {
+  default = "PasswordIUsedWhenInstallingDeadline"
+}
+
+variable "deadline_proxy_certificate_password" {
+  default = "PasswordIUsedWhenInstallingDeadline"
+}
+#location of the certificate on the remote system you are executing terraform from.
+variable "deadline_ca_certificate" {
+  default = "/opt/Thinkbox/certs/ca.crt"
+}
+#location of the certificate on the remote system you are executing terraform from.
+variable "deadline_proxy_certificate" {
+  default = "/opt/Thinkbox/certs/Deadline10RemoteClient.pfx"
+}
+#the private ip address of the deadline RCS.  usually the same as deadline DB.
+variable "deadline_proxy_root_dir" {
+  default = "192.168.15.10:4433"
+}
+
+variable "deadline_samba_server_address" {
+  default = "192.168.15.10"
+}
+
+variable "houdini_license_server_address" {
+  default = "192.168.15.10"
 }

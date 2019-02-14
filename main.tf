@@ -47,11 +47,6 @@ variable "softnas_skip_update" {
   default = false
 }
 
-# module "softnas_role" {
-#   source = "./modules/softnas_role"
-#   name         = "${var.softnas1_cloudformation_role_name}"
-# }
-
 module "softnas" {
   source                         = "./modules/softnas"
   cloudformation_role_stack_name = "${var.softnas1_cloudformation_role_name}"
@@ -91,6 +86,14 @@ module "softnas" {
 #softnas 1 must exist before softnas 2 does.  there are limits with dependencys and rols that require this.
 #todo when dependencys work, split the module up.  run a loop
 
+variable "pcoip_sleep_after_creation" {
+  default = true
+}
+
+variable "pcoip_skip_update" {
+  default = true
+}
+
 # module "pcoipgw" {
 #   source = "./modules/pcoipgw"
 #   name   = "pcoip"
@@ -119,7 +122,7 @@ variable "node_skip_update" {
 }
 
 variable "node_sleep_on_create" {
-  default = false
+  default = true
 }
 
 module "node" {
@@ -170,4 +173,36 @@ module "node" {
   softnas_private_ip1 = "${var.softnas1_private_ip1}"
   softnas_export_path = "${var.softnas1_export_path}"
   softnas_mount_path  = "${var.softnas1_mount_path}"
+}
+
+module "bastion" {
+  source = "./modules/bastion"
+
+  name = "bastion"
+
+  # region will determine the ami
+  region = "${var.region}"
+
+  #options for gateway type are centos7 and pcoip
+  vpc_id                      = "${module.vpc.vpc_id}"
+  vpc_cidr                    = "${module.vpc.vpc_cidr_block}"
+  vpn_cidr                    = "${var.vpn_cidr}"
+  remote_ip_cidr              = "${var.remote_ip_cidr}"
+  public_subnet_ids           = "${module.vpc.public_subnets}"
+  public_subnets_cidr_blocks  = "${module.vpc.public_subnets_cidr_blocks}"
+  private_subnets_cidr_blocks = "${module.vpc.private_subnets_cidr_blocks}"
+  remote_subnet_cidr          = "${var.remote_subnet_cidr}"
+
+  key_name       = "${var.key_name}"
+  local_key_path = "${var.local_key_path}"
+  private_key    = "${file("${var.local_key_path}")}"
+
+  #skipping os updates will allow faster rollout for testing.
+  skip_update = "${var.node_skip_update}"
+
+  #sleep will stop instances to save cost during idle time.
+  sleep = "${var.sleep || var.node_sleep_on_create}"
+
+  #softnas_private_ip        = "${module.softnas.private_ip}"
+  time_zone_info_path_linux = "${lookup(var.time_zone_info_path_linux, "Australia_Sydney")}"
 }
