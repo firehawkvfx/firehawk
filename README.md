@@ -83,8 +83,9 @@ Now log out and log back in as the new user.  You will want to install deadline 
 
 In the Ubuntu 16 VM you will also want to install open vpn (and any required dependencies that may arise) with:
 
-sudo apt-install openvpn
-Then you can try starting an openvpn access server AMI on AWS.  It’s a good exercise for you to create one of these on your own (not using openFirehawk at this stage) in a public subnet.  learning how to get the autoconnect feature working for the ubuntu vm to this openVPN instance will be needed.  if you can do that, openFirehawk will be able to create its own open vpn server and connect to it.
+    sudo apt-install openvpn
+Then you can try starting an OpenVPN Access Server AMI by launching a new EC2 instance on AWS through the EC2 console.  It’s a good exercise for you to create one of these on your own (not using openFirehawk at this stage) in a public subnet.  learning how to get the autoconnect feature working for the ubuntu vm to this openVPN instance will be needed.  You will also need to allow a security group to have inbound access from you
+If you can do that, openFirehawk will be able to create its own open vpn server and connect to it.
 
 Instances that reside in the private subnet are currently configured through openvpn.  This is why we are moving to Ansible to handle this instead, and remove openVPN as a dependency for most of the configuration of the network.  open vpn will still be needed for render nodes to establish a connection with licence servers and the render management DB.
 
@@ -288,6 +289,6 @@ sudo mount -t cifs -o username=deadlineuser,password=<password> //<samba_server_
 
 if the automatic installer doesn't work, follow the manual instructions.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbNDQ2MDAzMDIxLDY1OTA4OTA5NCw1NDg5OD
+eyJoaXN0b3J5IjpbNzI1Nzc1MjMxLDY1OTA4OTA5NCw1NDg5OD
 M2OTYsLTc5NDU5MjA1LDUwODUzMDQ4MSw3MDgxNzYyOV19
 -->
