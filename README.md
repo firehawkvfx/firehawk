@@ -155,11 +155,14 @@ variable "ami_map" {
   }
 }
 ```
-and provided your region is set correctly in private-variables.tf, then that ami will be looked up.
+and provided your region is set correctly in private-variables.tf, then that ami IDwill be looked up correctly.
 
 
-### your first terraform apply ###
-in the open firehawk repo, I recommend open up the main.tf file and comment out everything except the vpc to ensure you can create the vpc, and connect openvpn.  It’s necesary for this component to work before moving forward.
+### Your first terraform apply
+In the open firehawk repo, I recommend you pen up the main.tf file and comment out everything except the vpc to ensure you can create the vpc, and also connect openvpn.  It’s necesary for this component to work before moving forward.
+
+
+    sudo service openvpn restart
 
 run:
 terraform init
@@ -291,6 +294,6 @@ sudo mount -t cifs -o username=deadlineuser,password=<password> //<samba_server_
 
 if the automatic installer doesn't work, follow the manual instructions.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbNzI0MzE1NjU1LDY1OTA4OTA5NCw1NDg5OD
+eyJoaXN0b3J5IjpbOTcwMDcxNDY2LDY1OTA4OTA5NCw1NDg5OD
 M2OTYsLTc5NDU5MjA1LDUwODUzMDQ4MSw3MDgxNzYyOV19
 -->
