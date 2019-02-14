@@ -112,9 +112,8 @@ git clone https://github.com/firehawkvfx/openfirehawk.git
 
 I do need to make it known that the way we are storing private variables is not best practice, and I intend to move to a product called vault to handle the storing of secrets in the future in an encrypted format.
 
-Currently, we have a private-variables.example file, which you will copy and rename to private-variables.tf
-This filename is in .gitignore, so it will not be in any git commits.
-You should set permissions on it so that only you have read acces, and root has write access.
+Currently, we have a [private-variables.example](https://github.com/firehawkvfx/openfirehawk/blob/master/private-variables.example) file, which you will copy and rename to [private-variables.tf](https://github.com/firehawkvfx/openfirehawk/blob/master/private-variables.example)
+This filename is in .gitignore, so it will not be in any git commits.  You should set permissions on it so that only you have read access, and root has write access.
 In it you will set your own values for these variables.  many will be different for your environment, and you absolutely must use unique passwords and set your public static ip address for onsite.
 
 Security groups are configured to ignore any inbound internet traffic unless it comes from your onsite public ip address
@@ -299,7 +298,7 @@ sudo mount -t cifs -o username=deadlineuser,password=<password> //<samba_server_
 
 if the automatic installer doesn't work, follow the manual instructions.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTYyNTg3ODQzNCw2NTkwODkwOTQsNTQ4OT
-gzNjk2LC03OTQ1OTIwNSw1MDg1MzA0ODEsNzA4MTc2MjldfQ==
+eyJoaXN0b3J5IjpbLTIwMTkyNTk4ODksNjU5MDg5MDk0LDU0OD
+k4MzY5NiwtNzk0NTkyMDUsNTA4NTMwNDgxLDcwODE3NjI5XX0=
 
 -->
