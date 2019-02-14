@@ -180,9 +180,9 @@ Read these docs to set permissions on the autostart openvpn config and startvpn.
 [README.md](https://github.com/firehawkvfx/tf_aws_openvpn/blob/master/README.md)
 [startvpn.sh](https://github.com/firehawkvfx/tf_aws_openvpn/blob/master/startvpn.sh)
 
-This allows permission for a script to copy open vpn startup settings from the access server into your openvpn settings.
+This allows permission for startvpn.sh script to copy open vpn startup settings from the access server into your openvpn settings.  sudo permissions must be allowed for the specific commands executed so they can be performed without a password.
 
-if all goes well, the startvpn.sh script when executed will initiate a connection with the openvpn access server, and you will be able to ping its private ip.  you should be able to ping the public ip too.  if you can’t ping the public ip you have a security group issue and your onsite static ip isn’t in the private-variables.tf file.
+If all goes well, the startvpn.sh script when executed will initiate a connection with the openvpn access server, and you will be able to ping the access server's private IP.  You should also be able to ping the public ip too.  If you can’t ping the public ip you have a security group issue and your onsite static ip isn’t in the private-variables.tf file.
 
 You can also manually start open vpn with:
 
@@ -299,7 +299,7 @@ sudo mount -t cifs -o username=deadlineuser,password=<password> //<samba_server_
 
 if the automatic installer doesn't work, follow the manual instructions.
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTExOTU3OTA0NjAsNjU5MDg5MDk0LDU0OD
-k4MzY5NiwtNzk0NTkyMDUsNTA4NTMwNDgxLDcwODE3NjI5XX0=
+eyJoaXN0b3J5IjpbMTYyNTg3ODQzNCw2NTkwODkwOTQsNTQ4OT
+gzNjk2LC03OTQ1OTIwNSw1MDg1MzA0ODEsNzA4MTc2MjldfQ==
 
 -->
