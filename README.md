@@ -64,7 +64,7 @@ terraform apply plan
 
 ## Running an onsite management VM
 
-You can  start experimenting with an Ubuntu 16 VM with 4 vcpus, and a 50GB volume to install to.  8GB RAM is a good start.  Buy a few UBL credits for deadline, $10 worth or so to play with.  Thinkbox will credit that to your AWS account on request if you email them and they provide support.
+You can  start experimenting with an Ubuntu 16 VM with 4 vcpus, and a 50GB volume to install to.  8GB RAM is a good start.  After you start to test with more than 2 render nodes, buy a few UBL credits for deadline, $10 worth or so to play with.  You won't be able to test deadline with more than 2 nodes visible to the manager.  Thinkbox will credit that to your AWS account on request if you email them and they provide support.
 
 The VM will need a new user.  We will call it deadlineuser.  It will also have a uid and gid of 9001.  its possible to change this uid but be mindful of the variables set in [private-variables.tf](https://github.com/firehawkvfx/openfirehawk/blob/master/private-variables.example) if you do.
 
@@ -193,8 +193,8 @@ You can also manually start open vpn with:
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTcxMTc1MTExLDk1OTYzMzQ0MywtMTE1OT
-I2OTM2MCwtMTczMDU3NTM1NCwtMTUwMTU2NjkzLC0zNjY5NDg3
-MCw2NTkwODkwOTQsNTQ4OTgzNjk2LC03OTQ1OTIwNSw1MDg1Mz
-A0ODEsNzA4MTc2MjldfQ==
+eyJoaXN0b3J5IjpbMTkzMzQ5NTI3MCwxNzExNzUxMTEsOTU5Nj
+MzNDQzLC0xMTU5MjY5MzYwLC0xNzMwNTc1MzU0LC0xNTAxNTY2
+OTMsLTM2Njk0ODcwLDY1OTA4OTA5NCw1NDg5ODM2OTYsLTc5ND
+U5MjA1LDUwODUzMDQ4MSw3MDgxNzYyOV19
 -->
