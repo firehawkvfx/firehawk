@@ -40,11 +40,11 @@ Next startup up an open vpn access server instance from the openvpn AMI, and whe
 ## Disclaimer: Running your own AWS account.
 You are going to be managing these resources from an AWS account and you are solely responsible for the costs incurred, and you should tread slowly to understand AWS charges.
 
-The first thing to not skip is setup 2 factor authentication.  Do not skip this.  You'll make it easy for hackers to misuse you credit card to mine crypto.  Eye watering bills are possible!  
+The first thing to do is **setup 2 factor authentication.  Do not skip this**.  You'll make it easy for hackers to misuse you credit card to mine crypto.  Eye watering bills are possible!  
 
 So The next thing you should do is setup budget notifications.  Set a number you are willing to spend per month, and setup email notifications for every 20% of that budget.  The notifications are there in case you forget to do this step - check your AWS costs for a daily breakdown of what you spend, and do it every day to learn.  its a good habit to do it at the start of every day.
 
-#### Pointers on cost awareness:
+## Pointers on cost awareness:
 
 Initially run very small tests and get an understanding of costs with small tests that never use more than say 100GB of storage, that can be produced on light 2 core instances.  Cost managment in AWS is not easy, and you usually should allow a day before you can see a break down of what happenned (though its possible to implement more aggressive cost analysis with developement).
 
@@ -64,7 +64,7 @@ terraform apply plan
 - The NAT gateway is another sneaky cost visible in your AWS VPC console, usually around $5 /day if you forget about it.  It allows your private network (systems in the private subnet) outbound access to the internet.  Security groups can lock down any internet access to the minimum adresses required for licencing things like softnas or other software.  Licensing configuration with most software you would use makes possible to not need any NAT gateway but that is beyond the scope of openFirehawk at this point in time.
 
 
-### Running an onsite management VM
+## Running an onsite management VM
 
 You can  start experimenting with an Ubuntu 16 VM with 4 vcpus, and a 50GB volume to install to.  8GB RAM is a good start.  Buy a few UBL credits for deadline, $10 worth or so to play with.  Thinkbox will credit that to your AWS account on request if you email them and they provide support.
 
@@ -195,7 +195,7 @@ You can also manually start open vpn with:
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTIxMTIxMDQxMCwtMzY2OTQ4NzAsNjU5MD
+eyJoaXN0b3J5IjpbMTg4NjA4NjMwMCwtMzY2OTQ4NzAsNjU5MD
 g5MDk0LDU0ODk4MzY5NiwtNzk0NTkyMDUsNTA4NTMwNDgxLDcw
 ODE3NjI5XX0=
 -->
