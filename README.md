@@ -15,38 +15,6 @@
 <ul>
 <li><a href="#openfirehawk">openFirehawk</a>
 <ul>
-<li><a href="#intro">Intro</a></li>
-<li><a href="#getting-started">Getting Started</a></li>
-<li><a href="#disclaimer-running-your-own-aws-account.">Disclaimer: Running your own AWS account.</a></li>
-<li><a href="#pointers-on-cost-awareness">Pointers on cost awareness:</a></li>
-<li><a href="#running-an-onsite-management-vm">Running an onsite management VM</a></li>
-<li><a href="#aws-configure">AWS configure</a></li>
-<li><a href="#install-terraform">Install Terraform</a></li>
-<li><a href="#configuring-private-variables">Configuring private variables</a></li>
-<li><a href="#your-first-terraform-apply">Your first terraform apply</a></li>
-<li><a href="#preparation-of-open-vpn">Preparation of open vpn</a></li>
-</ul>
-</li>
-</ul>
-
-    </div>
-  </div>
-  <div class="stackedit__right">
-    <div class="stackedit__html">
-      
-
-
-  
-  
-  <title>README</title>
-  
-
-
-  <div class="stackedit__left">
-    <div class="stackedit__toc">
-</div></div><ul>
-<li><a href="#openfirehawk">openFirehawk</a>
-<ul>
 <li><a href="#intro">Intro</a>
 <ul>
 <li><a href="#pluralsight">Pluralsight:</a></li>
@@ -66,9 +34,9 @@
 </ul>
 </li>
 </ul>
-<pre><code>&lt;/div&gt;
-</code></pre>
-  
+
+    </div>
+  </div>
   <div class="stackedit__right">
     <div class="stackedit__html">
       <h1 id="openfirehawk">openFirehawk</h1>
@@ -180,11 +148,12 @@ which should be static and you’ll need to arrange that with your ISP if you ar
 <p>In terraform, a map is really a dictionary for those familiar with python.  This is an example of the ami_map variable in node_centos/variables.tf</p>
 <pre><code>variable "ami_map" {
   type = "map"
-</code></pre></div></div><p>default = {<br>
-ap-southeast-2 = “ami-d8c21dba”<br>
-}<br>
-}<br>
-</p>
+
+  default = {
+    ap-southeast-2 = "ami-d8c21dba"
+  }
+}
+</code></pre>
 <p>ap-southeast-2 is the sydney region, so if that region is set correctly in <a href="http://private-variables.tf">private-variables.tf</a><br>
 then when we lookup the dictionary, we will get the ami with this function in <a href="http://main.tf">main.tf</a></p>
 <pre><code>lookup(var.ami_map, var.region)
@@ -192,12 +161,13 @@ then when we lookup the dictionary, we will get the ami with this function in <a
 <p>So if I’m located at us-east-1, after starting up the latest CentOS 7 AMI, I can enter that in like so</p>
 <pre><code>variable "ami_map" {
   type = "map"
-</code></pre><p>default = {<br>
-ap-southeast-2 = “ami-d8c21dba”<br>
-us-east-1 = “ami ID goes here”<br>
-}<br>
-}<br>
-</p>
+
+  default = {
+    ap-southeast-2 = "ami-d8c21dba"
+    us-east-1 = “ami ID goes here”
+  }
+}
+</code></pre>
 <p>and provided your region is set correctly in <a href="http://private-variables.tf">private-variables.tf</a>, then that ami IDwill be looked up correctly.</p>
 <h2 id="your-first-terraform-apply">Your first terraform apply</h2>
 <p>In the open firehawk repo, I recommend you pen up the <a href="http://main.tf">main.tf</a> file and comment out everything except the vpc to ensure you can create the vpc, and also connect openvpn.  It’s necesary for the openvpn component to work before moving forward.</p>
@@ -219,11 +189,6 @@ us-east-1 = “ami ID goes here”<br>
 <p>You can also manually start open vpn with:</p>
 <pre><code>sudo service openvpn restart
 </code></pre>
-<pre><code>&lt;/div&gt;
-</code></pre>
-  
-
-
 
     </div>
   </div>
