@@ -37,8 +37,10 @@ You will want to experiment with spinning up an AWS account.  You will need to s
 Next startup up an open vpn access server instance from the openvpn AMI, and when started, take note of this AMI.  these will need to be added into terraform variables later, because they are unique to your region.
 
 
-## Running your own AWS account - with great power comes great responsibility:
-You are going to be managing these resources from an AWS account and you are solely responsible for the costs incurred, and to understand AWS charges.  The first thing you should be doing is setup 2 factor authentication.  Do not skip this.  You'll make it easy for hackers to misuse you credit card to mine crypto.  Eye watering bills are possible!  
+## Disclaimer: Running your own AWS account.
+You are going to be managing these resources from an AWS account and you are solely responsible for the costs incurred, and you should tread slowly to understand AWS charges.
+
+The first thing to not skip is setup 2 factor authentication.  Do not skip this.  You'll make it easy for hackers to misuse you credit card to mine crypto.  Eye watering bills are possible!  
 
 So The next thing you should do is setup budget notifications.  Set a number you are willing to spend per month, and setup email notifications for every 20% of that budget.  The notifications are there in case you forget to do this step - check your AWS costs for a daily breakdown of what you spend, and do it every day to learn.  its a good habit to do it at the start of every day.
 
@@ -193,7 +195,7 @@ You can also manually start open vpn with:
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTc4NjExMzM1LC0zNjY5NDg3MCw2NTkwOD
-kwOTQsNTQ4OTgzNjk2LC03OTQ1OTIwNSw1MDg1MzA0ODEsNzA4
-MTc2MjldfQ==
+eyJoaXN0b3J5IjpbLTIxMTIxMDQxMCwtMzY2OTQ4NzAsNjU5MD
+g5MDk0LDU0ODk4MzY5NiwtNzk0NTkyMDUsNTA4NTMwNDgxLDcw
+ODE3NjI5XX0=
 -->
