@@ -92,7 +92,7 @@ If you can succesfuly auto connect to this openvpn instance, then openFirehawk w
 
 Instances that reside in the private subnet are currently configured through openvpn.  This is why we are moving to Ansible to handle this instead, and remove openVPN as a dependency for most of the configuration of the network.  open vpn will still be needed for render nodes to establish a connection with licence servers and the render management DB.
 
-### AWS configure
+## AWS configure
 
 Next you will go through the steps to install the AWS cli into the ubuntu 16 VM.
 You should create a new user in aws for the cli.  don’t use the root account.  if theres ever a problem with security, you want root to be able to disable the cli users access keys.
@@ -104,11 +104,11 @@ and test that its working by running
 aws ec2 describe-regions --output table --debug
 Which should out put a table of regions if working.
 
-### Install Terraform ###
+## Install Terraform
 
 https://learn.hashicorp.com/terraform/getting-started/install.html
 
-### Configuring private variables
+## Configuring private variables
 
 Next you can clone the git repository into your ubuntu vm-
 git clone https://github.com/firehawkvfx/openfirehawk.git
@@ -161,22 +161,22 @@ variable "ami_map" {
 and provided your region is set correctly in private-variables.tf, then that ami IDwill be looked up correctly.
 
 
-### Your first terraform apply
+## Your first terraform apply
 In the open firehawk repo, I recommend you pen up the main.tf file and comment out everything except the vpc to ensure you can create the vpc, and also connect openvpn.  It’s necesary for the openvpn component to work before moving forward.
 
 Run:
 
     terraform init
 
-Review the output is without errors:
+Review the plan output is without errors:
 
     terraform plan -out=plan
 
-Execute the plan.
+Execute the plan.  Writing out a plan before execution is best practice
 
     terraform apply plan
 
-### Preparation of open vpn
+## Preparation of open vpn
 
 Read these docs to set permissions on the autostart openvpn config and startvpn.sh script, and how to configure the access server.  Some settings are required to allow access to the ubuntu VM you have onsite, and we go through these steps in the tf_aws_openvpn readme-
 
@@ -195,7 +195,7 @@ You can also manually start open vpn with:
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTg4NjA4NjMwMCwtMzY2OTQ4NzAsNjU5MD
+eyJoaXN0b3J5IjpbMTU3MzcwNDAyMSwtMzY2OTQ4NzAsNjU5MD
 g5MDk0LDU0ODk4MzY5NiwtNzk0NTkyMDUsNTA4NTMwNDgxLDcw
 ODE3NjI5XX0=
 -->
