@@ -172,7 +172,7 @@ Review the plan output is without errors:
 
     terraform plan -out=plan
 
-Execute the plan.  Writing out a plan before execution is best practice
+Execute the plan.  Writing out a plan before execution and reviewing it is best practice.
 
     terraform apply plan
 
@@ -195,7 +195,7 @@ You can also manually start open vpn with:
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTU3MzcwNDAyMSwtMzY2OTQ4NzAsNjU5MD
+eyJoaXN0b3J5IjpbLTE1MDE1NjY5MywtMzY2OTQ4NzAsNjU5MD
 g5MDk0LDU0ODk4MzY5NiwtNzk0NTkyMDUsNTA4NTMwNDgxLDcw
 ODE3NjI5XX0=
 -->
