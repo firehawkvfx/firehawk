@@ -5,10 +5,7 @@ Written by Andrew Graham for use with Hashicorp Terraform.
 
 openFirehawk is a set of modules to help VFX artists create an on demand render farm with infrastructure as code.  It is written in Terraform.  While Terraform is able to interface with many cloud providers, current implementation is with AWS.  Extension to Google Cloud Platform is planned once a good simple foundation is established with these initial modules.
 
-
-
-
-# Intro
+## Intro
 
 It is managed with openVpn and provisioned with ssh. Ansible is planned to take over this role.
 
@@ -198,7 +195,8 @@ You can also manually start open vpn with:
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTExNTkyNjkzNjAsLTE3MzA1NzUzNTQsLT
-E1MDE1NjY5MywtMzY2OTQ4NzAsNjU5MDg5MDk0LDU0ODk4MzY5
-NiwtNzk0NTkyMDUsNTA4NTMwNDgxLDcwODE3NjI5XX0=
+eyJoaXN0b3J5IjpbOTU5NjMzNDQzLC0xMTU5MjY5MzYwLC0xNz
+MwNTc1MzU0LC0xNTAxNTY2OTMsLTM2Njk0ODcwLDY1OTA4OTA5
+NCw1NDg5ODM2OTYsLTc5NDU5MjA1LDUwODUzMDQ4MSw3MDgxNz
+YyOV19
 -->
