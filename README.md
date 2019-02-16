@@ -20,24 +20,24 @@ So for those that are comfortable with a challenge at this early stage and want 
 If you are totally new to this and you think its a lot to learn, I recommend just passively putting these tutorials on without necesarily following the steps to just expose yourself to the concepts and get an overview.  Going through the steps yourself is obviously better though.
 
 These are some good paid video courses to try-
-##### Pluralsight:
+### Pluralsight:
 - Terraform - Getting Started
 - Deep Dive - Terraform
 
-##### Udemy:
+### Udemy:
 - Mastering Ansible (its a little clunky at times but its still good)  
 - Deploying to AWS with Ansible and Terraform - linux academy.
 
-##### Books:
+### Books:
 - Terraform up and running.
 
-# Getting Started
+## Getting Started
 
 You will want to experiment with spinning up an AWS account.  You will need to start an instance in your nearest region with this ami - (softnas platinum consumption based for lower compute requirements).  take note of the AMI.  you wont need to leave this instance running.  You can terminate it, and delete the EBS volume.
 Next startup up an open vpn access server instance from the openvpn AMI, and when started, take note of this AMI.  these will need to be added into terraform variables later, because they are unique to your region.
 
 
-### Running your own AWS account - with great power comes great responsibility:
+## Running your own AWS account - with great power comes great responsibility:
 You are going to be managing these resources from an AWS account and you are solely responsible for the costs incurred, and to understand AWS charges.  The first thing you should be doing is setup 2 factor authentication.  Do not skip this.  You'll make it easy for hackers to misuse you credit card to mine crypto.  Eye watering bills are possible!  
 
 So The next thing you should do is setup budget notifications.  Set a number you are willing to spend per month, and setup email notifications for every 20% of that budget.  The notifications are there in case you forget to do this step - check your AWS costs for a daily breakdown of what you spend, and do it every day to learn.  its a good habit to do it at the start of every day.
@@ -193,6 +193,7 @@ You can also manually start open vpn with:
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTM2Njk0ODcwLDY1OTA4OTA5NCw1NDg5OD
-M2OTYsLTc5NDU5MjA1LDUwODUzMDQ4MSw3MDgxNzYyOV19
+eyJoaXN0b3J5IjpbLTc4NjExMzM1LC0zNjY5NDg3MCw2NTkwOD
+kwOTQsNTQ4OTgzNjk2LC03OTQ1OTIwNSw1MDg1MzA0ODEsNzA4
+MTc2MjldfQ==
 -->
