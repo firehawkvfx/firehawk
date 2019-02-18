@@ -5,15 +5,13 @@ openFirehawk is a set of modules to help VFX artists create an on demand render 
 
 ## Intro
 
-It is managed with openVpn and provisioned with ssh. Ansible is planned to take over this role.
-
 I'll be changing the way things work to make openFirehawk easier for people over time.  Currently it is not ready for simple replication in another environment without challenges. It’s not going to be easy yet!  Much of the current work needs to be automated further, and learning it all if you are new to it is going to be a challenge.
 
 Until we are ready for beta testing, these docs are still here for people driven to learn how things work and want to be involved as an early adopter.  I will work on these docs to give you a path to learn. contribution to these docs is welcomed!
 
 But I do want to provide a path to get started for TDs that want to contribute, learn terraform, and are not afraid to push their bash skills in a shell further and learn new tools.
 
-So for those that are comfortable with a challenge at this early stage and want to help develop, I’d recommend learning Terraform and Ansible.  Terraform is how we will define our infrastructure. Ansible (though not implemented at this time of writing) is how openFirehawk will be able go forward provisioning / configuring systems in a more modular fashion.
+So for those that are comfortable with a challenge at this early stage and want to help develop, I’d recommend learning Terraform and Ansible.  Terraform is how we will define our infrastructure. Ansible (though not implemented at this time of writing) is how openFirehawk will be able go forward provisioning / configuring systems in a more modular fashion.  Currently 
 
 If you are totally new to this and you think its a lot to learn, I recommend just passively putting these tutorials on without necesarily following the steps to just expose yourself to the concepts and get an overview.  Going through the steps yourself is obviously better though.
 
@@ -193,8 +191,9 @@ You can also manually start open vpn with:
 
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTkzMzQ5NTI3MCwxNzExNzUxMTEsOTU5Nj
-MzNDQzLC0xMTU5MjY5MzYwLC0xNzMwNTc1MzU0LC0xNTAxNTY2
-OTMsLTM2Njk0ODcwLDY1OTA4OTA5NCw1NDg5ODM2OTYsLTc5ND
-U5MjA1LDUwODUzMDQ4MSw3MDgxNzYyOV19
+eyJoaXN0b3J5IjpbLTEyNDYzMjE0MzcsMTkzMzQ5NTI3MCwxNz
+ExNzUxMTEsOTU5NjMzNDQzLC0xMTU5MjY5MzYwLC0xNzMwNTc1
+MzU0LC0xNTAxNTY2OTMsLTM2Njk0ODcwLDY1OTA4OTA5NCw1ND
+g5ODM2OTYsLTc5NDU5MjA1LDUwODUzMDQ4MSw3MDgxNzYyOV19
+
 -->
