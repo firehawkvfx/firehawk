@@ -4,7 +4,7 @@ OpenFirehawk is an open source project (MPL2.0).  It's developement is made poss
 
 - [Become a backer or sponsor on Patreon](https://www.patreon.com/openfirehawk)
 
-Backers
+### Backers
 
 Janghyung Kim
 Anton Ognyev
@@ -12,6 +12,6 @@ Mikas Sadauskas
 Stan Shapetskiy
 Sergio Caires
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTE0ODAxMzI2OTQsOTc3MDgzODA1LDE0NT
-QwMjA4MDJdfQ==
+eyJoaXN0b3J5IjpbMTM2ODU3MTQ5NSw5NzcwODM4MDUsMTQ1ND
+AyMDgwMl19
 -->
