@@ -2,7 +2,16 @@
 
 OpenFirehawk is an open source project (MPL2.0).  It's developement is made possible by these incredible [backers](https://github.com/firehawkvfx/openfirehawk/blob/master/BACKERS.md). If you'd like to join them, please consider:
 
-- [Become a backer or sponsor on Patreon](https://www.patreon.com/openfirehawk).
+- [Become a backer or sponsor on Patreon](https://www.patreon.com/openfirehawk)
+
+Backers
+
+Janghyung Kim
+Anton Ognyev
+Mikas Sadauskas
+Stan Shapetskiy
+Sergio Caires
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbOTc3MDgzODA1LDE0NTQwMjA4MDJdfQ==
+eyJoaXN0b3J5IjpbLTE0ODAxMzI2OTQsOTc3MDgzODA1LDE0NT
+QwMjA4MDJdfQ==
 -->
