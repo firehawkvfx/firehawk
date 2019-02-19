@@ -93,6 +93,15 @@ Instances that reside in the private subnet are currently configured through ope
 Next you will go through the steps to install the AWS cli into the ubuntu 16 VM.
 You should create a new user in aws for the cli.  don’t use the root account.  if theres ever a problem with security, you want root to be able to disable the cli users access keys.
 
+So create a new user with these permissions for testing only.  These permissions are not suitable to production, and they should be limited to the minimum neecesary for your production after testing.
+
+Permissions:
+AdministratorAccess
+AmazonS3FullAccess
+
+If you think you will need Active Directory for some reason, also add these permissions:
+DirectoryServiceAdministrators
+
 when you enter the new users cli keys with:
 aws cli configure
 
