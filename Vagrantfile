@@ -59,6 +59,16 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "sudo apt-get install -y ansible"
   #reboot required for desktop to function.
   config.vm.provision "shell", inline: "sudo reboot"
+  config.vm.provision "ansible" do |ansible|
+    ansible.playbook = "playbook.yml"
+  end
+  
   #to check display manager run: 
   #cat /etc/X11/default-display-manager
+  # to install terraform https://linuxacademy.com/community/posts/show/topic/18181-can-somebody-explain-how-to-install-terraform
+#   sudo yum install -y zip unzip (if these are not installed)
+#   wget https://releases.hashicorp.com/terraform/0.9.8/terraform_0.9.8_linux_amd64.zip
+#   unzip terraform_0.9.8_linux_amd64.zip
+#   sudo mv terraform /usr/local/bin/
+#   Confirm terraform binary is accessible: terraform --version
 end
