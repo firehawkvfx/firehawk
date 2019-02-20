@@ -1,0 +1,14 @@
+- hosts: localhost
+  user: vagrant
+  sudo: yes
+
+  tasks:
+    - name: change hostname to myserver
+      hostname:
+        name: "openfirehawkserver.firehawkvfx.com"
+    - name: add myself to /etc/hosts
+      lineinfile:
+        dest: /etc/hosts
+        regexp: '^127\.0\.0\.1[ \t]+localhost'
+        line: "127.0.0.1 localhost openfirehawkserver.firehawkvfx.com"
+        state: present
