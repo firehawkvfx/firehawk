@@ -1,0 +1,34 @@
+- hosts: localhost
+
+  tasks:
+    - name: Ensures dir exists
+      file:
+        path: /home/deadlineuser/Downloads/Deadline-10.0.23.4-linux-installers/
+        state: directory
+        owner: deadlineuser
+      become: yes
+
+    - name: Ensures dir exists
+      file:
+        path: /opt/Thinkbox/certs
+        state: directory
+        owner: deadlineuser
+      become: yes
+
+    - name: Extract
+      unarchive:
+        src: /vagrant/downloads/Deadline-10.0.23.4-linux-installers.tar
+        dest: /home/deadlineuser/Downloads/Deadline-10.0.23.4-linux-installers/
+        owner: deadlineuser
+        mode: u+x
+      become: yes
+
+    - name: install deadline db
+      command: /home/deadlineuser/Downloads/Deadline-10.0.23.4-linux-installers/DeadlineRepository-10.0.23.4-linux-x64-installer.run --mode unattended --debuglevel 2 --prefix /opt/Thinkbox/DeadlineRepository10 --setpermissions true --installmongodb true --dbOverwrite true --mongodir /opt/Thinkbox/DeadlineDatabase10 --dbListeningPort 27017 --certgen_outdir /opt/Thinkbox/DeadlineDatabase10/certs --certgen_password @WhatTime --createX509dbuser true --requireSSL true --dbhost openfirehawkserver.firehawkvfx.com --dbport 27017 --dbuser deadlineuser --dbpassword @WhatTime --dbauth true --dbcertpass @WhatTime --dbssl true
+      become: true
+
+      #shell: /home/deadlineuser/Downloads/DeadlineRepository-10.0.23.4-linux-x64-installer.run --mode unattended --debuglevel 2 --prefix /opt/Thinkbox/DeadlineRepository10 --setpermissions true --installmongodb true --dbOverwrite true --mongodir /opt/Thinkbox/DeadlineDatabase10 --dbListeningPort 27017 --certgen_outdir /opt/Thinkbox/DeadlineDatabase10/certs --certgen_password @WhatTime --createX509dbuser true --requireSSL true --dbhost openfirehawkserver.firehawkvfx.com --dbport 27017 --dbuser deadlineuser --dbpassword @WhatTime --dbauth true --dbcertpass @WhatTime --dbssl true
+    - name: Restart network service for interface eth0
+      service:
+        name: Deadline10db
+        state: restarted

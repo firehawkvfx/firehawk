@@ -1,0 +1,8 @@
+- hosts: localhost
+
+- name: install terraform
+  import_playbook: modules/install-terraform.yaml
+- name: install deadlinedb
+  import_playbook: modules/install-deadlinedb.yaml
+- name: install deadlinercs
+  import_playbook: modules/install-deadlinercs.yaml
