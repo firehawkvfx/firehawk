@@ -3,6 +3,17 @@ provider "aws" {
   #  access_key = "${var.aws_access_key}"
   #  secret_key = "${var.aws_secret_key}"
   region = "${var.region}"
+  
+  # in a dev environment these 3 version locks below can be disabled.  in production, they should be locked based on the suggested versions from terraform init.
+  version = "~> 1.60"
+}
+
+provider "null" {
+  version = "~> 2.0"
+}
+
+provider "random" {
+  version = "~> 2.0"
 }
 
 variable "enable_nat_gateway" {
