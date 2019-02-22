@@ -1,0 +1,53 @@
+---
+# tasks file for roles/deadlinercs
+- name: Ensures dir exists
+  file:
+    path: /home/deadlineuser/Downloads/Deadline-10.0.23.4-linux-installers/
+    state: directory
+    owner: deadlineuser
+  become: yes
+
+- name: Ensures dir exists
+  file:
+    path: /opt/Thinkbox/certs
+    state: directory
+    owner: deadlineuser
+  become: yes
+
+- name: Extract
+  unarchive:
+    src: /vagrant/downloads/Deadline-10.0.23.4-linux-installers.tar
+    dest: /home/deadlineuser/Downloads/Deadline-10.0.23.4-linux-installers/
+    owner: deadlineuser
+    mode: u+x
+  become: yes
+
+- name: set permissions
+  file:
+    path: /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx
+    mode: u=r,g=r,o=r
+    owner: deadlineuser
+  become: yes
+
+- name: deadline must have full access to repository
+  file: 
+    path: /opt/Thinkbox/DeadlineRepository10
+    owner: deadlineuser
+    mode: u=rwX,g=rwX,o=r
+    recurse: yes
+
+- name: check permissions and ownership on certificates
+  debug:
+    msg: "ls -ltria /opt/Thinkbox/DeadlineDatabase10/certs/"
+
+  # /home/deadlineuser/Downloads/Deadline-10.0.23.4-linux-installers/DeadlineRepository-10.0.23.4-linux-x64-installer.run --mode unattended --debuglevel 2 --prefix /opt/Thinkbox/DeadlineRepository10 --setpermissions true --installmongodb true --dbOverwrite true --mongodir /opt/Thinkbox/DeadlineDatabase10 --dbListeningPort 27017 --certgen_outdir /opt/Thinkbox/DeadlineDatabase10/certs --certgen_password @WhatTime --createX509dbuser true --requireSSL true --dbhost openfirehawkserver.firehawkvfx.com --dbport 27017 --dbuser deadlineuser --dbpassword @WhatTime --dbauth true --dbcertpass @WhatTime --dbssl true
+  # need to install rcs
+  # db ssl cert /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx
+- name: install deadline rcs
+  command: /home/deadlineuser/Downloads/Deadline-10.0.23.4-linux-installers/DeadlineClient-10.0.23.4-linux-x64-installer.run --mode unattended --debuglevel 2 --prefix /opt/Thinkbox/Deadline10 --connectiontype Repository --repositorydir /opt/Thinkbox/DeadlineRepository10/ --proxyrootdir openfirehawkserver.firehawkvfx.com:4433 --dbsslcertificate /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --dbsslpassword @WhatTime --licensemode UsageBased --daemonuser deadlineuser --connserveruser deadlineuser --httpport 4433 --tlsport 4433 --enabletls true --tlscertificates generate  --generatedcertdir /opt/Thinkbox/certs/ --clientcert_pass @WhatTime
+  become: true
+  # node command that is working-
+  # sudo ./${var.deadline_installers_filename} --mode unattended --debuglevel 2 --prefix /opt/Thinkbox/Deadline10 --connectiontype Remote --noguimode true --licensemode UsageBased --launcherdaemon true --slavestartup 1 --daemonuser deadlineuser --enabletls true --tlsport 4433 --httpport 8080 --proxyrootdir 192.168.92.10:4433 --proxycertificate /opt/Thinkbox/certs/Deadline10RemoteClient.pfx --proxycertificatepassword @WhatTime
+
+  #shell: /home/deadlineuser/Downloads/DeadlineRepository-10.0.23.4-linux-x64-installer.run --mode unattended --debuglevel 2 --prefix /opt/Thinkbox/DeadlineRepository10 --setpermissions true --installmongodb true --dbOverwrite true --mongodir /opt/Thinkbox/DeadlineDatabase10 --dbListeningPort 27017 --certgen_outdir /opt/Thinkbox/DeadlineDatabase10/certs --certgen_password @WhatTime --createX509dbuser true --requireSSL true --dbhost openfirehawkserver.firehawkvfx.com --dbport 27017 --dbuser deadlineuser --dbpassword @WhatTime --dbauth true --dbcertpass @WhatTime --dbssl true
+

@@ -3,5 +3,5 @@
   become: true
   
   roles:
-    - deadlinedb
+    - terraform
 

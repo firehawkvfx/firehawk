@@ -11,5 +11,6 @@
   vars:
     no_extension: "{{ deadline_linux_installers_tar | splitext | first }}"
     basename: "{{ no_extension.split('/')[-1] }}"
+    
   roles:
-    - role: deadlinedb
+    - role: deadlinercs
