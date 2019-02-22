@@ -60,7 +60,27 @@ terraform apply plan
 - The NAT gateway is another sneaky cost visible in your AWS VPC console, usually around $5 /day if you forget about it.  It allows your private network (systems in the private subnet) outbound access to the internet.  Security groups can lock down any internet access to the minimum adresses required for licencing things like softnas or other software.  Licensing configuration with most software you would use makes possible to not need any NAT gateway but that is beyond the scope of openFirehawk at this point in time.
 
 
-## Running an onsite management VM
+## Running an onsite management VM with Vagrant
+
+Vagrant is a tool that manages your initial VM configuration onsite.  It allows us to create a consistent environment to launch our infrastructure from.  From there we will provision the software installed on it with Ansible.
+
+- Install Vagrant from Hashicorp.
+- Install Virtualbox to run our VM from.
+- Clone the openfirehawk repo
+    git clone https://github.com/firehawkvfx/openfirehawk.git
+- Run this to download an ubuntu base image and install ansible in the vm.  Provisioning the ubuntu desktop GUI may take some time.
+    vagrant up
+- Take a snapshot of this initial state and verify its there in the list.
+    vagrant snapshot push
+    vagrant snapshot list
+- IMPORTANT if you ever need to restore the snapshot, be sure to use the --no-delete option, otherwise the snapshot will be deleted.  Try restoring a snapshot now-
+    vagrant snapshot pop --no-delete
+- Now we will ssh into the vm and start provisioning with ansible.
+    vagrant ssh
+- The git repo tree we are running vagrant from is shared with the VM in /vagrant
+  We run our first playbook to create the deadlineuser and change the default password for the ubuntu user and deadlineuser.
+    ansible-playbook /vagrant/ansible/init.yaml
+
 
 You can  start experimenting with an Ubuntu 16 VM with 4 vcpus, and a 50GB volume to install to.  8GB RAM is a good start.  After you start to test with more than 2 render nodes, buy a few UBL credits for deadline, $10 worth or so to play with.  You won't be able to test deadline with more than 2 nodes visible to the manager.  Thinkbox will credit that to your AWS account on request if you email them and they provide support.
 

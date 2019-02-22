@@ -20,3 +20,4 @@ playbook.retry
 downloads/*
 ansible/*.retry
 ansible-log.txt
+ansible/modules/*.retry
