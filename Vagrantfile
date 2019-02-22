@@ -6,7 +6,8 @@ Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/xenial64"
   config.vagrant.plugins = ['vagrant-disksize', 'vagrant-reload']
   config.disksize.size = '50GB'
-  config.vm.network "public_network", bridge: "eno1"
+  #config.vm.network "public_network", bridge: "eno1"
+  config.vm.network "public_network"
   config.vm.provider "virtualbox" do |vb|
     # Display the VirtualBox GUI when booting the machine
     vb.gui = true
@@ -28,6 +29,8 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "sudo apt-get install -y software-properties-common"
   config.vm.provision "shell", inline: "sudo apt-add-repository --yes --update ppa:ansible/ansible"
   config.vm.provision "shell", inline: "sudo apt-get install -y ansible"
+  # we define the location of the ansible hosts file in an environment variable.
+  config.vm.provision "shell", inline: "grep -qxF 'ANSIBLE_INVENTORY=/vagrant/ansible/hosts' /etc/environment || echo 'ANSIBLE_INVENTORY=/vagrant/ansible/hosts' | sudo tee -a /etc/environment"
   #reboot required for desktop to function.
   config.vm.provision "shell", inline: "sudo reboot"
   # trigger reload

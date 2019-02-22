@@ -1,6 +1,5 @@
 ---
-#---
-#tasks:
+# tasks file for roles/terraform
 - name: Ansible create file if it doesn't exist example
   file:
     path: "/vagrant/ansible-log.txt"
@@ -8,7 +7,9 @@
   become: yes
 
 - name: Ensures dir exists
-  file: path=/vagrant/downloads state=directory
+  file:
+    path: /vagrant/downloads
+    state: directory
   become: yes
 
 - name: Download file
@@ -18,7 +19,9 @@
   become: yes
 
 - name: Ensures dir exists
-  file: path=/vagrant/downloads/terraform_0.11.11_linux_amd64/ state=directory
+  file:
+    path: /vagrant/downloads/terraform_0.11.11_linux_amd64/
+    state: directory
   become: yes
 
 - name: Extract
@@ -26,12 +29,11 @@
     src: /vagrant/downloads/terraform_0.11.11_linux_amd64.zip
     dest: /vagrant/downloads/terraform_0.11.11_linux_amd64/
   become: yes
-
+  
 - copy:
     src: /vagrant/downloads/terraform_0.11.11_linux_amd64/terraform
     dest: /usr/local/bin/terraform
     owner: vagrant
     group: vagrant
     mode: u=rx,g=rx,o=r
-    #validate: /usr/sbin/visudo -cf %s
   become: yes
