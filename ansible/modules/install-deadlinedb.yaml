@@ -8,7 +8,7 @@
   fail:
     msg: "Bailing out: file not found - {{ deadline_linux_installers_tar }}"
   when: deadline_linux_installers_tar_stat.stat.exists == false or deadline_linux_installers_tar_stat.stat.isdir == true
-  
+
 - name: Ensures dir exists
   file:
     path: "/home/deadlineuser/Downloads/{{ basename }}"
@@ -48,6 +48,14 @@
   # node command that is working-
   # sudo ./${var.deadline_installers_filename} --mode unattended --debuglevel 2 --prefix /opt/Thinkbox/Deadline10 --connectiontype Remote --noguimode true --licensemode UsageBased --launcherdaemon true --slavestartup 1 --daemonuser deadlineuser --enabletls true --tlsport 4433 --httpport 8080 --proxyrootdir 192.168.92.10:4433 --proxycertificate /opt/Thinkbox/certs/Deadline10RemoteClient.pfx --proxycertificatepassword @WhatTime
   #shell: /home/deadlineuser/Downloads/DeadlineRepository-10.0.23.4-linux-x64-installer.run --mode unattended --debuglevel 2 --prefix /opt/Thinkbox/DeadlineRepository10 --setpermissions true --installmongodb true --dbOverwrite true --mongodir /opt/Thinkbox/DeadlineDatabase10 --dbListeningPort 27017 --certgen_outdir /opt/Thinkbox/DeadlineDatabase10/certs --certgen_password @WhatTime --createX509dbuser true --requireSSL true --dbhost openfirehawkserver.firehawkvfx.com --dbport 27017 --dbuser deadlineuser --dbpassword @WhatTime --dbauth true --dbcertpass @WhatTime --dbssl true
+
+- name: deadline must have full access to repository
+  file: 
+    path: /opt/Thinkbox/DeadlineRepository10
+    owner: deadlineuser
+    mode: u=rwX,g=rwX,o=r
+    recurse: yes
+
 - name: Restart network service for interface eth0
   service:
     name: Deadline10db
