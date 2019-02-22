@@ -22,7 +22,9 @@ Vagrant.configure("2") do |config|
   # update packages
   config.vm.provision "shell", inline: "sudo apt-get update"
   config.vm.provision "shell", inline: "sudo apt-get install sshpass"
-  # # Install ubuntu desktop and virtualbox additions
+  # Install ubuntu desktop and virtualbox additions.  Because a reboot is required only two choices to provision-
+  # Install the gui with vagrant or install the gui with ansible installed on the host.  
+  # This creates potentiall issues because ideally, Ansible should be used within the vm only to limit ansible version issues if the user updates vagrant on their host.
   config.vm.provision "shell", inline: "sudo apt-get install -y ubuntu-desktop virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11 xserver-xorg-legacy"
   # Permit anyone to start the GUI
   config.vm.provision "shell", inline: "sudo sed -i 's/allowed_users=.*$/allowed_users=anybody/' /etc/X11/Xwrapper.config"
@@ -41,10 +43,15 @@ Vagrant.configure("2") do |config|
   #ansible provissioning
   #ansible_inventory_dir = "ansible/hosts"
   config.vm.provision "playbook1", type:'ansible_local' do |ansible|
-    ansible.inventory_path = "ansible/hosts"
+    #ansible.inventory_path = "ansible/hosts"
     ansible.playbook = "ansible/init.yaml"
     #ansible.playbook = "ansible/newuser.yaml"
+    #ansible.playbook = "ansible/init-gui.yaml"
     #ansible.inventory_path = "./ansible/hosts"
-    
   end
+  vm.trigger.after :up do |trigger|
+    trigger.warn = "Taking Snapshot"
+    trigger.run = {inline: "vagrant snapshot push"}
+  end
+  # upon completion, ready to provision playbook newuser_deadline.yaml
 end
