@@ -167,6 +167,14 @@ for example sydney is-
 - And we set the permissions on that keypair so that only the vagrant user has read access.
     sudo chmod 400 my_key_pair.pem
 
+## Create a hosted zone
+If you want to be able to access your resources through a domain like the vpn, eg vpn.example.com
+you can create a public hosted zone in route53.  since this will be a permanent part of your infrastructure you will need to do this manually.
+you can either transfer an existing domain to aws (not recommended for dev if you are attached to this domain!)
+or you can purchase a new domain of some random name with a cheap extension (doesn't need to be .com)
+
+
+
 
 ## OpenVPN Access Server
 
