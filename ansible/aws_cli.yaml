@@ -19,8 +19,4 @@
     basename: "{{ no_extension.split('/')[-1] }}"
     
   roles:
-    - role: newuser
-    - role: terraform
-    - role: deadlinedb
-    - role: deadlinercs
     - role: aws-cli

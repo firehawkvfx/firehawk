@@ -45,13 +45,10 @@ Vagrant.configure("2") do |config|
   config.vm.provision "playbook1", type:'ansible_local' do |ansible|
     #ansible.inventory_path = "ansible/hosts"
     ansible.playbook = "ansible/init.yaml"
-    #ansible.playbook = "ansible/newuser.yaml"
-    #ansible.playbook = "ansible/init-gui.yaml"
-    #ansible.inventory_path = "./ansible/hosts"
   end
-  vm.trigger.after :up do |trigger|
-    trigger.warn = "Taking Snapshot"
-    trigger.run = {inline: "vagrant snapshot push"}
-  end
+  # vm.trigger.after :up do |trigger|
+  #   trigger.warn = "Taking Snapshot"
+  #   trigger.run = {inline: "vagrant snapshot push"}
+  # end
   # upon completion, ready to provision playbook newuser_deadline.yaml
 end

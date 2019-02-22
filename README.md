@@ -64,13 +64,20 @@ terraform apply plan
 
 Vagrant is a tool that manages your initial VM configuration onsite.  It allows us to create a consistent environment to launch our infrastructure from.  From there we will provision the software installed on it with Ansible.
 
+Currently, this has only been tested from a Linux RHEL 7.5/Centos Host.  You are welcome to experiment with other Operating systems so long as they can run the following-
+    Vagrant
+    VirtualBox
+    Ansible
+
 - Install Vagrant from Hashicorp.
 - Install Virtualbox to run our VM from.
 - Clone the openfirehawk repo
     git clone https://github.com/firehawkvfx/openfirehawk.git
-- Run this to download an ubuntu base image and install ansible in the vm.  Provisioning the ubuntu desktop GUI may take some time.
+- Download the latest deadline installer tar, and place the .tar file in the local openfirehawk/downloads folder.
+- Download the latest houdini installer, and place the .tar file in the local openfirehawk/downloads folder.
+- Run this to download an ubuntu base image and install ansible in the vm.  Provisioning the ubuntu desktop GUI may take 15mins +
     vagrant up
-- Take a snapshot of this initial state and verify its there in the list.
+- When the the process completes, take a snapshot of this initial state and verify its there in the list.
     vagrant snapshot push
     vagrant snapshot list
 - IMPORTANT if you ever need to restore the snapshot, be sure to use the --no-delete option, otherwise the snapshot will be deleted.  Try restoring a snapshot now-
@@ -78,60 +85,101 @@ Vagrant is a tool that manages your initial VM configuration onsite.  It allows 
 - Now we will ssh into the vm and start provisioning with ansible.
     vagrant ssh
 - The git repo tree we are running vagrant from is shared with the VM in /vagrant
-  We run our first playbook to create the deadlineuser and change the default password for the ubuntu user and deadlineuser.
-    ansible-playbook /vagrant/ansible/init.yaml
+  We run our first playbook to create the deadlineuser and change the default password for the ubuntu user and deadlineuser.  This will also install deadline DB, and RCS, provided you have a tar downloaded in openfirehawk/downloads.
+    ansible-playbook /vagrant/ansible/newuser_deadline.yaml
 
+- You should be able to select the deadlineuser in the VM GUI, and login with a password. Open a terminal in the VM and run-
+    deadlinemonitor
+- You should see 1 slave exist in the bottom window, which is this vm.  since we can validate that the deadline DB and RCS is working, we will disable this because we won't want to use this server to render!
+- INMPORTANT: After you start to render with more than 2 render nodes visible here, you need to purchase UBL credits for deadline to play with.  Thinkbox will credit that to your AWS account on request if you email them and request it.  You won't be able to test deadline with more than 2 nodes visible to the manager.  You will configure your UBL credits to use with the deadline monitor (see deadline docs on how to do this)
+- to launch instances in AWS, you will configure your AWS account to be used with the Command Line Interface.  See aws documentation - https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html
+More on this below...
 
-You can  start experimenting with an Ubuntu 16 VM with 4 vcpus, and a 50GB volume to install to.  8GB RAM is a good start.  After you start to test with more than 2 render nodes, buy a few UBL credits for deadline, $10 worth or so to play with.  You won't be able to test deadline with more than 2 nodes visible to the manager.  Thinkbox will credit that to your AWS account on request if you email them and they provide support.
+## AWS configure
 
-The VM will need a new user.  We will call it deadlineuser.  It will also have a uid and gid of 9001.  its possible to change this uid but be mindful of the variables set in [private-variables.tf](https://github.com/firehawkvfx/openfirehawk/blob/master/private-variables.example) if you do.
+You should create a new user in your AWS account for the Command Line Interface(CLI).  Don’t use root account credentials.  if theres ever a problem with security, you want root to be able to disable the cli users access keys.
 
-    sudo adduser -u 9001 deadlineuser.
+- Create a new user in your AWS management Console -> IAM.
 
-This user should also be the member of a group, deadlineuser, and the gid should be 9001.  you can review this with the command:
+- Give the user these permissions for testing only.  These permissions should be altered to be the minimum neecesary for your production after testing.
+Permissions:
+EC2FullAccess
+IAMFullAccess
+Route53FullAccess
+s3AdminAcces
 
-    users
-and also to check the group id:
+We currently use cloudfromation and need admin access.  It will be removed in the future but for now add these permissions:
+AdministratorAccess
 
-    cat /etc/group
-Next you will want the user to be a super user for now.  it will be possible to tighten the permissions later, but for testing we will do this-
+If you think you will need Active Directory for some reason, also add these permissions:
+DirectoryServiceAdministrators
 
-    sudo usermod -aG wheel ${var.deadline_user}
+- Under security credentials, create Access Keys for the CLI.  Don't write these down anywhere, you are going to copy them straight into the VM.  its easy enough to destroy them and recreate them again in the future, you would just update with "aws configure" again.
 
-Now log out and log back in as the new user.  You will want to install deadline DB, and deadline RCS in the vm, and take note of all the paths where you place your certificates.  We selected the ubuntu 16 VM because at this time its the easiest way to install Deadline DB and RCS with a gui installer.
+- Enter the new users cli keys with:
+    aws configure
 
-In the Ubuntu 16 VM you will also want to install open vpn (and any required dependencies that may arise) with:
+- When asked for the region specify it from this list. https://docs.aws.amazon.com/general/latest/gr/rande.html
+for example sydney is-
+    ap-southeast-2
+- When asked for the default output format, enter
+    json
 
-    sudo apt-install openvpn
+- Test that its working by running
+    aws ec2 describe-regions --output table --debug
+
+- This should out put a table of regions if working-
+
+    ----------------------------------------------------------
+    |                     DescribeRegions                    |
+    +--------------------------------------------------------+
+    ||                        Regions                       ||
+    |+-----------------------------------+------------------+|
+    ||             Endpoint              |   RegionName     ||
+    |+-----------------------------------+------------------+|
+    ||  ec2.eu-north-1.amazonaws.com     |  eu-north-1      ||
+    ||  ec2.ap-south-1.amazonaws.com     |  ap-south-1      ||
+    ||  ec2.eu-west-3.amazonaws.com      |  eu-west-3       ||
+    ||  ec2.eu-west-2.amazonaws.com      |  eu-west-2       ||
+    ||  ec2.eu-west-1.amazonaws.com      |  eu-west-1       ||
+    ||  ec2.ap-northeast-2.amazonaws.com |  ap-northeast-2  ||
+    ||  ec2.ap-northeast-1.amazonaws.com |  ap-northeast-1  ||
+    ||  ec2.sa-east-1.amazonaws.com      |  sa-east-1       ||
+    ||  ec2.ca-central-1.amazonaws.com   |  ca-central-1    ||
+    ||  ec2.ap-southeast-1.amazonaws.com |  ap-southeast-1  ||
+    ||  ec2.ap-southeast-2.amazonaws.com |  ap-southeast-2  ||
+    ||  ec2.eu-central-1.amazonaws.com   |  eu-central-1    ||
+    ||  ec2.us-east-1.amazonaws.com      |  us-east-1       ||
+    ||  ec2.us-east-2.amazonaws.com      |  us-east-2       ||
+    ||  ec2.us-west-1.amazonaws.com      |  us-west-1       ||
+    ||  ec2.us-west-2.amazonaws.com      |  us-west-2       ||
+    |+-----------------------------------+------------------+|
+
+- You now have established the ability to control instances from within this VM.
+
+## OpenVPN Access Server
+
 Then you can try starting an OpenVPN Access Server AMI by launching a new EC2 instance on AWS through the EC2 console.  It’s a good exercise for you to create one of these on your own (not using openFirehawk at this stage) in a public subnet.  learning how to get the autoconnect feature working for the ubuntu vm to this openVPN instance will be needed.  You will also need to allow a security group to have inbound access from your onsite public static IP adress.
 If you can succesfuly auto connect to this openvpn instance, then openFirehawk will be able to create its own OpenVPN Access Server and connect to it as well.
 
 Instances that reside in the private subnet are currently configured through openvpn.  This is why we are moving to Ansible to handle this instead, and remove openVPN as a dependency for most of the configuration of the network.  open vpn will still be needed for render nodes to establish a connection with licence servers and the render management DB.
 
-## AWS configure
 
-Next you will go through the steps to install the AWS cli into the ubuntu 16 VM.
-You should create a new user in aws for the cli.  don’t use the root account.  if theres ever a problem with security, you want root to be able to disable the cli users access keys.
+## Terraform
 
-So create a new user with these permissions for testing only.  These permissions are not suitable to production, and they should be limited to the minimum neecesary for your production after testing.
+Terraform is used to create all our infrastructure in the cloud provider.  It is launched from with your vm which contains all the credentials required to create resources.
 
-Permissions:
-AdministratorAccess
-AmazonS3FullAccess
+- From the git repo folder on your host, we will ssh into the openfirehawk server with vagrant ssh-
+    :../openfirehawk/$ vagrant ssh
+- Once in, type 
+    cd /vagrant
+    ls
+- The contents of this shared folder should be identical to the openfirehawk repository folder.
+- If you cannot see anything in here, you may need to reload the vm and try again-
+    exit
+    vagrant reload
+    vagrant ssh
 
-If you think you will need Active Directory for some reason, also add these permissions:
-DirectoryServiceAdministrators
-
-when you enter the new users cli keys with:
-aws cli configure
-
-and test that its working by running
-aws ec2 describe-regions --output table --debug
-Which should out put a table of regions if working.
-
-## Install Terraform
-
-https://learn.hashicorp.com/terraform/getting-started/install.html
 
 ## Configuring private variables
 
