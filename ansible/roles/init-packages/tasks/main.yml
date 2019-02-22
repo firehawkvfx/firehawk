@@ -1,0 +1,55 @@
+---
+# tasks file for roles/init-packages
+- name: install mkpasswd, pip, pexpect, passlib
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - whois
+    - python-pip
+    - python-pexpect
+    - python-passlib
+
+
+- name: Add gui support and virtualbox requirements
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - ubuntu-desktop
+    - virtualbox-guest-dkms
+    - virtualbox-guest-utils
+    - virtualbox-guest-x11
+    - xserver-xorg-legacy
+
+- name: Allow any user to login to gui.
+  lineinfile:
+    path: /etc/X11/Xwrapper.config
+    regexp: '^allowed_users='
+    line: 'allowed_users=anybody'
+
+- name: Disable prompts for updates.  In a prod environment we should be provision the update with a release.
+  lineinfile:
+    path: /etc/update-manager/release-upgrades
+    regexp: '^Prompt='
+    line: 'Prompt=never'
+
+  # config.vm.provision "shell", inline: "sudo sed -i 's/allowed_users=.*$/allowed_users=anybody/' /etc/X11/Xwrapper.config"
+  # #disable the update notifier.  We do not want to update to ubuntu 18, currently deadline installer gui doesn't work in 18.
+  # config.vm.provision "shell", inline: "sudo sed -i 's/Prompt=.*$/Prompt=never/' /etc/update-manager/release-upgrades"
+
+# - name: install pip
+#   package:
+#     name: python-pip
+#     state: present
+# - name: install pexpect
+#   pip:
+#     name: pexpect
+#   become: yes
+# - name: install passlib
+#   pip:
+#     name: passlib
+#   become: yes
+
+
+#   ubuntu-desktop virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11 xserver-xorg-legacy
