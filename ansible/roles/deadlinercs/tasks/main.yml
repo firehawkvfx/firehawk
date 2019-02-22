@@ -41,17 +41,31 @@
   register: cert_permissions
 
 - debug: msg="{{ cert_permissions.stdout }}"
-
 - debug: msg="{{ cert_permissions.stderr }}"
 
-  # /home/deadlineuser/Downloads/Deadline-10.0.23.4-linux-installers/DeadlineRepository-10.0.23.4-linux-x64-installer.run --mode unattended --debuglevel 2 --prefix /opt/Thinkbox/DeadlineRepository10 --setpermissions true --installmongodb true --dbOverwrite true --mongodir /opt/Thinkbox/DeadlineDatabase10 --dbListeningPort 27017 --certgen_outdir /opt/Thinkbox/DeadlineDatabase10/certs --certgen_password @WhatTime --createX509dbuser true --requireSSL true --dbhost openfirehawkserver.firehawkvfx.com --dbport 27017 --dbuser deadlineuser --dbpassword @WhatTime --dbauth true --dbcertpass @WhatTime --dbssl true
-  # need to install rcs
-  # db ssl cert /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx
 - name: install deadline rcs
-  command: /home/deadlineuser/Downloads/Deadline-10.0.23.4-linux-installers/DeadlineClient-10.0.23.4-linux-x64-installer.run --mode unattended --enable-components proxyconfig --debuglevel 2 --prefix /opt/Thinkbox/Deadline10 --connectiontype Repository --repositorydir /opt/Thinkbox/DeadlineRepository10/ --proxyrootdir openfirehawkserver.firehawkvfx.com:4433 --dbsslcertificate /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --dbsslpassword @WhatTime --licensemode UsageBased --daemonuser deadlineuser --connserveruser deadlineuser --httpport 4433 --tlsport 4433 --enabletls true --tlscertificates generate  --generatedcertdir /opt/Thinkbox/certs/ --clientcert_pass @WhatTime
+  command: /home/deadlineuser/Downloads/Deadline-10.0.23.4-linux-installers/DeadlineClient-10.0.23.4-linux-x64-installer.run --mode unattended --launcherdaemon true --enable-components proxyconfig --servercert /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --debuglevel 2 --prefix /opt/Thinkbox/Deadline10 --connectiontype Repository --repositorydir /opt/Thinkbox/DeadlineRepository10/ --proxyrootdir openfirehawkserver.firehawkvfx.com:4433 --dbsslcertificate /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --dbsslpassword @WhatTime --licensemode UsageBased --daemonuser deadlineuser --connserveruser deadlineuser --httpport 4433 --tlsport 4433 --enabletls true --tlscertificates generate  --generatedcertdir /opt/Thinkbox/certs/ --clientcert_pass @WhatTime
   become: true
-  # node command that is working-
-  # sudo ./${var.deadline_installers_filename} --mode unattended --debuglevel 2 --prefix /opt/Thinkbox/Deadline10 --connectiontype Remote --noguimode true --licensemode UsageBased --launcherdaemon true --slavestartup 1 --daemonuser deadlineuser --enabletls true --tlsport 4433 --httpport 8080 --proxyrootdir 192.168.92.10:4433 --proxycertificate /opt/Thinkbox/certs/Deadline10RemoteClient.pfx --proxycertificatepassword @WhatTime
 
-  #shell: /home/deadlineuser/Downloads/DeadlineRepository-10.0.23.4-linux-x64-installer.run --mode unattended --debuglevel 2 --prefix /opt/Thinkbox/DeadlineRepository10 --setpermissions true --installmongodb true --dbOverwrite true --mongodir /opt/Thinkbox/DeadlineDatabase10 --dbListeningPort 27017 --certgen_outdir /opt/Thinkbox/DeadlineDatabase10/certs --certgen_password @WhatTime --createX509dbuser true --requireSSL true --dbhost openfirehawkserver.firehawkvfx.com --dbport 27017 --dbuser deadlineuser --dbpassword @WhatTime --dbauth true --dbcertpass @WhatTime --dbssl true
+- name: Restart service for deadlinedb
+  service:
+    name: deadline10launcher
+    state: restarted
+  become: true
 
+- name: check /var/lib/Thinkbox/Deadline10/deadline.ini
+  command: cat /var/lib/Thinkbox/Deadline10/deadline.ini 
+  register: deadline_config
+
+- debug: msg="{{ deadline_config.stdout }}"
+- debug: msg="{{ deadline_config.stderr }}"
+
+- name: Allow new lines from ansible shell output.  Logout or reboot for this to take effect.
+  lineinfile:
+    path: /home/deadlineuser/.bashrc
+    line: "{{ item }}"
+    create: yes
+  with_items:
+    - "alias deadlinemonitor='cd /opt/Thinkbox/Deadline10/bin && ./deadlinemonitor'"
+    - "alias deadlinercs='cd /opt/Thinkbox/Deadline10/bin && ./deadlinercs'"
+    - "alias deadlinepulse='cd /opt/Thinkbox/Deadline10/bin && ./deadlinepulse'"

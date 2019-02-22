@@ -1,5 +1,5 @@
 ---
-- hosts: localhost
+- hosts: ansible_control
   become: true
   
   roles:

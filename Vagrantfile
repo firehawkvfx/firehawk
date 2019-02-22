@@ -4,6 +4,7 @@
 Vagrant.configure("2") do |config|
   # Ubuntu 16.04
   config.vm.box = "ubuntu/xenial64"
+  config.vm.define "ansible_control"
   config.vagrant.plugins = ['vagrant-disksize', 'vagrant-reload']
   config.disksize.size = '50GB'
   #config.vm.network "public_network", bridge: "eno1"
@@ -18,13 +19,20 @@ Vagrant.configure("2") do |config|
     vb.customize ["modifyvm", :id, "--accelerate3d", "on"]
     vb.customize ['modifyvm', :id, '--clipboard', 'bidirectional']  
   end
-  # Install ubuntu desktop and virtualbox additions
+  # require "fileutils"
+  # f = File.open("hosts","w")
+  # servers.each do |servers|
+  #   f.puts servers["ip_addr"]
+  # end # servers.each
+  # f.close
+  # # Install ubuntu desktop and virtualbox additions
   config.vm.provision "shell", inline: "sudo apt-get update"
-  config.vm.provision "shell", inline: "sudo apt-get install -y ubuntu-desktop virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11 xserver-xorg-legacy"
-  # Permit anyone to start the GUI
-  config.vm.provision "shell", inline: "sudo sed -i 's/allowed_users=.*$/allowed_users=anybody/' /etc/X11/Xwrapper.config"
-  #disable the update notifier.  We do not want to update to ubuntu 18, currently deadline installer gui doesn't work in 18.
-  config.vm.provision "shell", inline: "sudo sed -i 's/Prompt=.*$/Prompt=never/' /etc/update-manager/release-upgrades"
+  config.vm.provision "shell", inline: "sudo apt-get install sshpass"
+  # config.vm.provision "shell", inline: "sudo apt-get install -y ubuntu-desktop virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11 xserver-xorg-legacy"
+  # # Permit anyone to start the GUI
+  # config.vm.provision "shell", inline: "sudo sed -i 's/allowed_users=.*$/allowed_users=anybody/' /etc/X11/Xwrapper.config"
+  # #disable the update notifier.  We do not want to update to ubuntu 18, currently deadline installer gui doesn't work in 18.
+  # config.vm.provision "shell", inline: "sudo sed -i 's/Prompt=.*$/Prompt=never/' /etc/update-manager/release-upgrades"
   # install ansible
   config.vm.provision "shell", inline: "sudo apt-get install -y software-properties-common"
   config.vm.provision "shell", inline: "sudo apt-add-repository --yes --update ppa:ansible/ansible"
@@ -37,10 +45,11 @@ Vagrant.configure("2") do |config|
   config.vm.provision :reload
   #ansible provissioning
   #ansible_inventory_dir = "ansible/hosts"
-  #config.vm.provision "playbook1", type:'ansible' do |ansible|
-    #ansible.playbook = "ansible/install-terraform.yaml"
-    #ansible.playbook = "playbook.yaml"
-    #ansible.inventory_path = "#{ansible_inventory_dir}/vagrant"
+  config.vm.provision "playbook1", type:'ansible_local' do |ansible|
+    ansible.inventory_path = "ansible/hosts"
+    ansible.playbook = "ansible/init.yaml"
+    #ansible.playbook = "ansible/newuser.yaml"
     #ansible.inventory_path = "./ansible/hosts"
-  #end
+    
+  end
 end

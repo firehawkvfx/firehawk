@@ -1,0 +1,14 @@
+---
+- hosts: ansible_control
+  become: true
+
+  vars_prompt:
+    - name: "my_password"
+      prompt: "Enter password for new deadlineuser"
+      private: yes
+      encrypt: "sha512_crypt"
+      confirm: yes
+      salt_size: 7
+    
+  roles:
+    - role: newuser

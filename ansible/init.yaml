@@ -1,10 +1,7 @@
-- hosts: localhost
-  user: vagrant
-  sudo: yes
+---
+- hosts: ansible_control
+  become: true
 
-- name: set hostname and add to hosts file
-  import_playbook: modules/init-hostname.yaml
-- name: Initialise packages required for encryption
-  import_playbook: modules/newuser-init.yaml
-- name: Create the deadlineuser and change deafualt ubuntu pass.
-  import_playbook: modules/newuser-deadlineuser.yaml
+  roles:
+    - role: init-host
+    - role: init-packages
