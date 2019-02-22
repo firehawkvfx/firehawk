@@ -4,12 +4,22 @@
   pip: 
     name: pip
     extra_args: --upgrade
-  become_user: deadlineuser
+  #become_user: vagrant
   become: true
 
 - name: install the package, force upgrade
   pip: 
     name: awscli
     extra_args: --upgrade --user
-  become_user: deadlineuser
+  #become_user: vagrant
+  become: true
+
+- name: install the package, force upgrade
+  apt: 
+    name: python-boto
+  become: true
+
+- name: install the package, force upgrade
+  pip: 
+    name: boto3
   become: true

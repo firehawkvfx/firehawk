@@ -162,10 +162,14 @@ for example sydney is-
 - ssh into the openfirehawk server vm
     vagrant ssh
     cd ~
-- We should be in the vagrant user home dir within the vm.  now we generate a key pair with the AWS CLI.
-    aws ec2 create-key-pair --key-name my_key_pair >> my_key_pair.pem
+- We should be in the vagrant user home dir within the vm.  now we generate a key pair with the AWS CLI. See this reference for more info https://sharadchhetri.com/2015/03/09/create-and-remove-aws-ec2-key-pair-by-using-command-line/
+    aws ec2 create-key-pair --key-name my_key_pair --query 'KeyMaterial' --output text > ~/my_key_pair.pem
 - And we set the permissions on that keypair so that only the vagrant user has read access.
-    sudo chmod 400 my_key_pair.pem
+    sudo chmod 400 ~/my_key_pair.pem
+- Add the key for ssh forwarding.
+    ssh-add ~/my_key_pair.pem
+
+https://stackoverflow.com/questions/17846529/could-not-open-a-connection-to-your-authentication-agent/17848593#17848593
 
 ## Create a hosted zone
 If you want to be able to access your resources through a domain like the vpn, eg vpn.example.com
