@@ -6,21 +6,10 @@
   register: deadline_linux_installers_tar_stat
   become: yes
 
-- name : "string test 1"
-  debug:
-    msg: "file found - {{deadline_linux_installers_tar_stat.stat.exists}}"
-  when: deadline_linux_installers_tar_stat.stat.exists
-
-- name: "string test 2"
-  debug:
-    msg: "file not found - {{deadline_linux_installers_tar_stat.stat.exists}}"
-  when: deadline_linux_installers_tar_stat.stat.exists == false
-
 - name: fail if not existing tar
   fail:
     msg: "Bailing out: file not found - {{ deadline_linux_installers_tar }}"
   when: deadline_linux_installers_tar_stat.stat.exists == false or deadline_linux_installers_tar_stat.stat.isdir == True
-  #become: yes
 
 - name: Ensures dir exists
   file:
