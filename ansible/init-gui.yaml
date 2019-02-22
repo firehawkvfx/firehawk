@@ -3,5 +3,4 @@
   become: true
 
   roles:
-    - role: init-host
-    - role: init-packages
+    - role: init-gui
