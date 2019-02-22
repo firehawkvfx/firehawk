@@ -157,6 +157,17 @@ for example sydney is-
 
 - You now have established the ability to control instances from within this VM.
 
+## Create a key pair to manage AWS EC2
+
+- ssh into the openfirehawk server vm
+    vagrant ssh
+    cd ~
+- We should be in the vagrant user home dir within the vm.  now we generate a key pair with the AWS CLI.
+    aws ec2 create-key-pair --key-name my_key_pair >> my_key_pair.pem
+- And we set the permissions on that keypair so that only the vagrant user has read access.
+    sudo chmod 400 my_key_pair.pem
+
+
 ## OpenVPN Access Server
 
 Then you can try starting an OpenVPN Access Server AMI by launching a new EC2 instance on AWS through the EC2 console.  It’s a good exercise for you to create one of these on your own (not using openFirehawk at this stage) in a public subnet.  learning how to get the autoconnect feature working for the ubuntu vm to this openVPN instance will be needed.  You will also need to allow a security group to have inbound access from your onsite public static IP adress.
