@@ -1,0 +1,8 @@
+---
+- hosts:
+    openvpn
+  remote_user: openvpnas
+  become: true
+
+  roles:
+    - role: openvpn

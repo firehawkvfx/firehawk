@@ -30,9 +30,37 @@
     dest: /vagrant/downloads/terraform_0.11.11_linux_amd64/
   become: yes
   
-- copy:
+- name: Copy terraform to binaries
+  copy:
     src: /vagrant/downloads/terraform_0.11.11_linux_amd64/terraform
     dest: /usr/local/bin/terraform
+    owner: vagrant
+    group: vagrant
+    mode: u=rx,g=rx,o=r
+  become: yes
+
+- name: Download terraform-inventory
+  get_url:
+    url: https://github.com/adammck/terraform-inventory/releases/download/v0.8/terraform-inventory_v0.8_linux_amd64.zip
+    dest: /vagrant/downloads
+    mode: 0440
+
+- name: Ensures dir exists
+  file:
+    path: /vagrant/downloads/terraform-inventory_v0.8_linux_amd64/
+    state: directory
+  become: yes
+
+- name: Extract
+  unarchive:
+    src: /vagrant/downloads/terraform-inventory_v0.8_linux_amd64.zip
+    dest: /vagrant/downloads/terraform-inventory_v0.8_linux_amd64/
+  become: yes
+  
+- name: Copy terraform-inventory to binaries.
+  copy:
+    src: /vagrant/downloads/terraform-inventory_v0.8_linux_amd64/terraform-inventory
+    dest: /usr/local/bin/terraform-inventory
     owner: vagrant
     group: vagrant
     mode: u=rx,g=rx,o=r
