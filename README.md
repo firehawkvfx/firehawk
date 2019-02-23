@@ -182,7 +182,11 @@ or you can purchase a new domain of some random name with a cheap extension (doe
 
 ## OpenVPN Access Server
 
-Then you can try starting an OpenVPN Access Server AMI by launching a new EC2 instance on AWS through the EC2 console.  It’s a good exercise for you to create one of these on your own (not using openFirehawk at this stage) in a public subnet.  learning how to get the autoconnect feature working for the ubuntu vm to this openVPN instance will be needed.  You will also need to allow a security group to have inbound access from your onsite public static IP adress.
+Then you can try starting an OpenVPN Access Server AMI by launching a new EC2 instance on AWS through the EC2 console.  It’s a good exercise for you to create one of these on your own (not using openFirehawk at this stage) in a public subnet.  
+
+Its important to start a single instance to register yourself to the ami.  if you want to learn more about thi instance read on, otherwise skip to terraform!
+
+You will also need to allow a security group to have inbound access from your onsite public static IP adress.
 If you can succesfuly auto connect to this openvpn instance, then openFirehawk will be able to create its own OpenVPN Access Server and connect to it as well.
 
 Instances that reside in the private subnet are currently configured through openvpn.  This is why we are moving to Ansible to handle this instead, and remove openVPN as a dependency for most of the configuration of the network.  open vpn will still be needed for render nodes to establish a connection with licence servers and the render management DB.
@@ -202,6 +206,19 @@ Terraform is used to create all our infrastructure in the cloud provider.  It is
     exit
     vagrant reload
     vagrant ssh
+
+
+- now we will initialise terraform. in the /vagrant path.
+    terraform init
+
+- when it completes, spin up the infrastructure.
+    terraform plan -out=plan
+
+- if all seem well, apply the plan.
+    terraform apply plan
+
+- now provision openvpn.
+cd /vagrant && ansible-playbook -i /usr/local/bin/terraform-inventory /vagrant/ansible/openvpn.yaml
 
 
 ## Configuring private variables

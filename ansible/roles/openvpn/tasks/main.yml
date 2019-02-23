@@ -1,0 +1,14 @@
+---
+# tasks file for ansible/roles/openvpn
+# - name: Ensures file exists
+#   file:
+#     path: /var/tmp/ansible-test.log
+#     state: file
+#   become: yes
+
+- name: ensure file exists
+  copy:
+    content: ""
+    dest: /var/tmp/ansible-test.log
+    force: no
+    mode: 0555
