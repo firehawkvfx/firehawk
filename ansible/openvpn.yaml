@@ -1,6 +1,24 @@
 ---
-- hosts:
-    role_vpn
+# - hosts:
+#     localhost
+#   become: true
+
+#   tasks:
+#   - name: Add new openvpn ec2 instance host key to known hosts on creation onlyt
+#     connection: local
+#     #shell: "ping {{ hostvars['openvpnip'] }}"
+#     shell: "ssh-keyscan -H vpn.firehawkfilm.com >> ~/.ssh/known_hosts"
+
+- hosts: openvpnip
+  remote_user: openvpnas
+  become: yes
+  gather_facts: no
+
+  pre_tasks:
+  - name: 'install python for ansible bootstrap'
+    raw: 'sudo apt-get -y install python'
+
+- hosts: openvpnip
   remote_user: openvpnas
   become: true
 

@@ -289,6 +289,25 @@ Execute the plan.  Writing out a plan before execution and reviewing it is best 
 
     terraform apply plan
 
+## Terraform - taint
+
+if you make changes to your infrastructure, a good way to replace resources is something like this.  lets say I want to destroy my openvpn instance and start over
+
+    terraform taint -module vpc.vpn.openvpn aws_instance.openvpn
+
+Now I should also taint what is downstream if there are dependencies that aren't being picked up too, like the eip.
+
+    vagrant@openfirehawkserver:/vagrant$ terraform taint -module vpc.vpn.openvpn aws_eip.openvpnip
+    The resource aws_eip.openvpnip in the module root.vpc.vpn.openvpn has been marked as tainted!
+    vagrant@openfirehawkserver:/vagrant$ terraform taint -module vpc.vpn.openvpn aws_route53_record.openvpn_record
+    The resource aws_route53_record.openvpn_record in the module root.vpc.vpn.openvpn has been marked as tainted!
+
+
+after I'm happy with this I can run terraform apply.
+    terraform plan -out=plan
+    terraform apply plan
+
+
 ## Preparation of open vpn
 
 Read these docs to set permissions on the autostart openvpn config and startvpn.sh script, and how to configure the access server.  Some settings are required to allow access to the ubuntu VM you have onsite, and we go through these steps in the tf_aws_openvpn readme-
