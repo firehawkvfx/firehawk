@@ -61,7 +61,7 @@ module "openvpn" {
 
   #create_openvpn = "${var.create_openvpn}"
 
-  name = "openVPN"
+  name = "openvpn_ec2"
   # VPC Inputs
   vpc_id             = "${var.vpc_id}"
   vpc_cidr           = "${var.vpc_cidr}"
