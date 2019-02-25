@@ -97,10 +97,31 @@ USERDATA
   }
 }
 
-resource "null_resource" "shutdown-node" {
+# resource "null_resource" "shutdown-node" {
+#   count = "${var.sleep ? 1 : 0}"
+
+#   provisioner "local-exec" {
+#     command = "aws ec2 stop-instances --instance-ids ${aws_instance.bastion.id}"
+#   }
+# }
+
+
+resource "null_resource" "start-bastion" {
+  count = "${var.sleep ? 0 : 1}"
+
+  provisioner "local-exec" {
+    command = "aws ec2 start-instances --instance-ids ${aws_instance.bastion.id}"
+  }
+}
+
+resource "null_resource" "shutdown-bastion" {
   count = "${var.sleep ? 1 : 0}"
 
   provisioner "local-exec" {
-    command = "aws ec2 stop-instances --instance-ids ${aws_instance.bastion.id}"
+    #command = "aws ec2 stop-instances --instance-ids ${aws_instance.softnas1.id}"
+
+    command = <<EOT
+      aws ec2 stop-instances --instance-ids ${aws_instance.bastion.id}
+  EOT
   }
 }

@@ -252,7 +252,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "icmp"
     from_port   = 8
     to_port     = 0
-    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
+    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" , "${var.public_subnets_cidr_blocks[0]}", "172.27.232.0/24"]
     description = "icmp"
   }
   ingress {
@@ -452,22 +452,22 @@ resource "aws_instance" "softnas1" {
 # ansible may be a better way to do this.
 
 #wakeup a node after sleep
-# resource "null_resource" "start-node" {
-#   count = "${var.sleep ? 0 : 1}"
+resource "null_resource" "start-softnas" {
+  count = "${var.sleep ? 0 : 1}"
 
-#   provisioner "local-exec" {
-#     command = "aws ec2 start-instances --instance-ids ${aws_instance.softnas1.id}"
-#   }
-# }
+  provisioner "local-exec" {
+    command = "aws ec2 start-instances --instance-ids ${aws_instance.softnas1.id}"
+  }
+}
 
-# resource "null_resource" shutdownsoftnas {
-#   count = "${var.sleep ? 1 : 0}"
+resource "null_resource" "shutdown-softnas" {
+  count = "${var.sleep ? 1 : 0}"
 
-#   provisioner "local-exec" {
-#     command = "aws ec2 stop-instances --instance-ids ${aws_instance.softnas1.id}"
+  provisioner "local-exec" {
+    #command = "aws ec2 stop-instances --instance-ids ${aws_instance.softnas1.id}"
 
-#     command = <<EOT
-#       aws ec2 stop-instances --instance-ids ${aws_instance.softnas1.id}
-#   EOT
-#   }
-# }
+    command = <<EOT
+      aws ec2 stop-instances --instance-ids ${aws_instance.softnas1.id}
+  EOT
+  }
+}
