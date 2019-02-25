@@ -307,16 +307,19 @@ Make sure you check your aws account for any resources that haven't been turned 
 
 ## Terraform - taint
 
-if you make changes to your infrastructure, a good way to replace resources is something like this.  lets say I want to destroy my openvpn instance and start over
+if you make changes to your infrastructure that you want to recover from, a good way to replace resources is something like this...  lets say I want to destroy my openvpn instance and start over
 
     terraform taint -module vpc.vpn.openvpn aws_instance.openvpn
 
 Now I should also taint what is downstream if there are dependencies that aren't being picked up too, like the eip.
 
-    vagrant@openfirehawkserver:/vagrant$ terraform taint -module vpc.vpn.openvpn aws_eip.openvpnip
-    The resource aws_eip.openvpnip in the module root.vpc.vpn.openvpn has been marked as tainted!
-    vagrant@openfirehawkserver:/vagrant$ terraform taint -module vpc.vpn.openvpn aws_route53_record.openvpn_record
-    The resource aws_route53_record.openvpn_record in the module root.vpc.vpn.openvpn has been marked as tainted!
+    terraform taint -module vpc.vpn.openvpn aws_eip.openvpnip
+
+The resource aws_eip.openvpnip in the module root.vpc.vpn.openvpn has been marked as tainted!
+
+    terraform taint -module vpc.vpn.openvpn aws_route53_record.openvpn_record
+
+The resource aws_route53_record.openvpn_record in the module root.vpc.vpn.openvpn has been marked as tainted!
 
 
 after I'm happy with this I can run terraform apply.
