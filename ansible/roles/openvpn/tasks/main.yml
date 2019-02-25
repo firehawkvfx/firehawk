@@ -33,6 +33,7 @@
     dest: ~/openvpn_config/
     force: yes
     flat: true
+    mode: 400
   with_items:
     - ca.crt
     - client.crt
@@ -45,12 +46,15 @@
     dest: ~/openvpn_config/openvpn.conf
     force: yes
     flat: true
+    mode: 400
 
-- copy:
+- name: Create open vpn autologin 
+  copy:
     content: |
               {{ openvpn_user }}
               {{ openvpn_user_pw }}
     dest: ~/openvpn_config/yourserver.txt
+    mode: 400
   connection: local
   become_user: vagrant
   become: yes
@@ -95,7 +99,36 @@
   connection: local
   become_user: vagrant
   become: yes
+
+- name: insert after
+  lineinfile:
+    path: ~/openvpn_config/openvpn.conf
+    state: present
+    line: '# OVPN_ACCESS_SERVER_AUTOLOGIN=1'
+    insertafter: '# OVPN_ACCESS_SERVER_PROFILE='
+  connection: local
+  become_user: vagrant
+  become: yes
+
+
+
+
+
     
+# - name: Ansible copy to /etc/openvpn
+#   copy:
+#     src: ~/openvpn_config/{{ item }}
+#     dest: /etc/openvpn/{{ item }}
+#     #force: yes
+#   with_items:
+#     - openvpn.conf
+#     - ca.crt
+#     - client.crt
+#     - client.key
+#     - ta.key
+#   connection: local
+#   become_user: vagrant
+#   become: yes
 
 # - name: Ansible copy file force
 #   fetch:
