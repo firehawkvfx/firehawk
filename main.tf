@@ -58,44 +58,44 @@ variable "softnas_skip_update" {
   default = false
 }
 
-# module "softnas" {
-#   source                         = "./modules/softnas"
-#   cloudformation_role_stack_name = "${var.softnas1_cloudformation_role_name}"
+module "softnas" {
+  source                         = "./modules/softnas"
+  cloudformation_role_stack_name = "${var.softnas1_cloudformation_role_name}"
 
-#   #softnas_role = "${module.softnas_role.softnas_role_name}"
+  #softnas_role = "${module.softnas_role.softnas_role_name}"
 
-#   cloudformation_stack_name   = "FCB-SoftNAS1Stack"
-#   vpn_private_ip              = "${module.vpc.vpn_private_ip}"
-#   key_name                    = "${var.key_name}"
-#   private_key                 = "${file("${var.local_key_path}")}"
-#   vpc_id                      = "${module.vpc.vpc_id}"
-#   vpn_cidr                    = "${var.vpn_cidr}"
-#   private_subnets             = "${module.vpc.private_subnets}"
-#   private_subnets_cidr_blocks = "${module.vpc.private_subnets_cidr_blocks}"
-#   public_subnets_cidr_blocks  = "${module.vpc.public_subnets_cidr_blocks}"
-#   bastion_private_ip          = "${module.vpc.vpn_private_ip}"
-#   softnas_user_password       = "${var.softnas_user_password}"
+  cloudformation_stack_name   = "FCB-SoftNAS1Stack"
+  vpn_private_ip              = "${module.vpc.vpn_private_ip}"
+  key_name                    = "${var.key_name}"
+  private_key                 = "${file("${var.local_key_path}")}"
+  vpc_id                      = "${module.vpc.vpc_id}"
+  vpn_cidr                    = "${var.vpn_cidr}"
+  private_subnets             = "${module.vpc.private_subnets}"
+  private_subnets_cidr_blocks = "${module.vpc.private_subnets_cidr_blocks}"
+  public_subnets_cidr_blocks  = "${module.vpc.public_subnets_cidr_blocks}"
+  bastion_private_ip          = "${module.vpc.vpn_private_ip}"
+  softnas_user_password       = "${var.softnas_user_password}"
 
-#   #softnas_role_name = "${module.softnas_role.softnas_role_name}"
+  #softnas_role_name = "${module.softnas_role.softnas_role_name}"
 
-#   softnas1_private_ip1 = "${var.softnas1_private_ip1}"
-#   softnas1_private_ip2 = "${var.softnas1_private_ip2}"
-#   softnas1_export_path = "${var.softnas1_export_path}"
-#   softnas1_volumes     = "${var.softnas1_volumes}"
-#   softnas1_mounts      = "${var.softnas1_mounts}"
-#   softnas2_private_ip1 = "${var.softnas2_private_ip1}"
-#   softnas2_private_ip2 = "${var.softnas2_private_ip2}"
-#   softnas2_export_path = "${var.softnas2_export_path}"
-#   softnas2_volumes     = "${var.softnas2_volumes}"
-#   softnas2_mounts      = "${var.softnas2_mounts}"
-#   #skipping os updates will allow faster rollout, but may be non functional
-#   skip_update = "${var.softnas_skip_update}"
-#   #sleep will stop instances to save cost during idle time.
-#   sleep = "${var.sleep}"
-# }
+  softnas1_private_ip1 = "${var.softnas1_private_ip1}"
+  softnas1_private_ip2 = "${var.softnas1_private_ip2}"
+  softnas1_export_path = "${var.softnas1_export_path}"
+  softnas1_volumes     = "${var.softnas1_volumes}"
+  softnas1_mounts      = "${var.softnas1_mounts}"
+  softnas2_private_ip1 = "${var.softnas2_private_ip1}"
+  softnas2_private_ip2 = "${var.softnas2_private_ip2}"
+  softnas2_export_path = "${var.softnas2_export_path}"
+  softnas2_volumes     = "${var.softnas2_volumes}"
+  softnas2_mounts      = "${var.softnas2_mounts}"
+  #skipping os updates will allow faster rollout, but may be non functional
+  skip_update = "${var.softnas_skip_update}"
+  #sleep will stop instances to save cost during idle time.
+  sleep = "${var.sleep}"
+}
 
-#softnas 1 must exist before softnas 2 does.  there are limits with dependencys and rols that require this.
-#todo when dependencys work, split the module up.  run a loop
+softnas 1 must exist before softnas 2 does.  there are limits with dependencys and rols that require this.
+todo when dependencys work, split the module up.  run a loop
 
 variable "pcoip_sleep_after_creation" {
   default = true
