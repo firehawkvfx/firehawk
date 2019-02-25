@@ -94,8 +94,8 @@ module "softnas" {
   sleep = "${var.sleep}"
 }
 
-softnas 1 must exist before softnas 2 does.  there are limits with dependencys and rols that require this.
-todo when dependencys work, split the module up.  run a loop
+# softnas 1 must exist before softnas 2 does.  there are limits with dependencys and rols that require this.
+# todo when dependencys work, split the module up.  run a loop
 
 variable "pcoip_sleep_after_creation" {
   default = true
