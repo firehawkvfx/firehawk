@@ -73,6 +73,8 @@ module "softnas" {
   private_subnets             = "${module.vpc.private_subnets}"
   private_subnets_cidr_blocks = "${module.vpc.private_subnets_cidr_blocks}"
   public_subnets_cidr_blocks  = "${module.vpc.public_subnets_cidr_blocks}"
+  remote_subnet_cidr          = "${var.remote_subnet_cidr}"
+  remote_ip_cidr              = "${var.remote_ip_cidr}"
   bastion_private_ip          = "${module.vpc.vpn_private_ip}"
   softnas_user_password       = "${var.softnas_user_password}"
 
