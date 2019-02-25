@@ -150,28 +150,28 @@ resource "aws_security_group" "softnas" {
     protocol    = "tcp"
     from_port   = 0
     to_port     = 65535
-    cidr_blocks = ["${concat(list("${var.remote_subnet_cidr}", "${var.remote_ip_cidr}"), "${var.private_subnets_cidr_blocks}")}"]
+    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
     description = "all incoming traffic from remote vpn"
   }
   ingress {
     protocol    = "udp"
     from_port   = 49152
     to_port     = 65535
-    cidr_blocks = ["${concat(list("${var.remote_subnet_cidr}", "${var.remote_ip_cidr}"), "${var.private_subnets_cidr_blocks}")}"]
+    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
     description = ""
   }
   ingress {
     protocol    = "tcp"
     from_port   = 53
     to_port     = 53
-    cidr_blocks = ["${concat(list("${var.remote_subnet_cidr}", "${var.remote_ip_cidr}"), "${var.private_subnets_cidr_blocks}")}"]
+    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
     description = "DNS"
   }
   ingress {
     protocol    = "udp"
     from_port   = 53
     to_port     = 53
-    cidr_blocks = ["${concat(list("${var.remote_subnet_cidr}", "${var.remote_ip_cidr}"), "${var.private_subnets_cidr_blocks}")}"]
+    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
     description = "DNS"
   }
 
@@ -180,28 +180,28 @@ resource "aws_security_group" "softnas" {
     protocol    = "tcp"
     from_port   = 111
     to_port     = 111
-    cidr_blocks = ["${concat(list("${var.remote_subnet_cidr}", "${var.remote_ip_cidr}"), "${var.private_subnets_cidr_blocks}")}"]
+    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
     description = "NFS"
   }
   ingress {
     protocol    = "udp"
     from_port   = 111
     to_port     = 111
-    cidr_blocks = ["${concat(list("${var.remote_subnet_cidr}", "${var.remote_ip_cidr}"), "${var.private_subnets_cidr_blocks}")}"]
+    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
     description = "NFS"
   }
   ingress {
     protocol    = "tcp"
     from_port   = 892
     to_port     = 892
-    cidr_blocks = ["${concat(list("${var.remote_subnet_cidr}", "${var.remote_ip_cidr}"), "${var.private_subnets_cidr_blocks}")}"]
+    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
     description = "rquotad, nlockmgr, mountd, status"
   }
   ingress {
     protocol    = "udp"
     from_port   = 892
     to_port     = 892
-    cidr_blocks = ["${concat(list("${var.remote_subnet_cidr}", "${var.remote_ip_cidr}"), "${var.private_subnets_cidr_blocks}")}"]
+    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
     description = "rquotad, nlockmgr, mountd, status"
   }
 
@@ -209,14 +209,14 @@ resource "aws_security_group" "softnas" {
     protocol    = "tcp"
     from_port   = 2010
     to_port     = 2010
-    cidr_blocks = ["${concat(list("${var.remote_subnet_cidr}", "${var.remote_ip_cidr}"), "${var.private_subnets_cidr_blocks}")}"]
+    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
     description = "rquotad, nlockmgr, mountd, status"
   }
   ingress {
     protocol    = "udp"
     from_port   = 2010
     to_port     = 2010
-    cidr_blocks = ["${concat(list("${var.remote_subnet_cidr}", "${var.remote_ip_cidr}"), "${var.private_subnets_cidr_blocks}")}"]
+    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
     description = "rquotad, nlockmgr, mountd, status"
   }
 
@@ -224,50 +224,49 @@ resource "aws_security_group" "softnas" {
     protocol    = "tcp"
     from_port   = 2014
     to_port     = 2014
-    cidr_blocks = ["${concat(list("${var.remote_subnet_cidr}", "${var.remote_ip_cidr}"), "${var.private_subnets_cidr_blocks}")}"]
+    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
     description = "rquotad, nlockmgr, mountd, status"
   }
   ingress {
     protocol    = "udp"
     from_port   = 2014
     to_port     = 2014
-    cidr_blocks = ["${concat(list("${var.remote_subnet_cidr}", "${var.remote_ip_cidr}"), "${var.private_subnets_cidr_blocks}")}"]
+    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
     description = "rquotad, nlockmgr, mountd, status"
   }
   ingress {
     protocol    = "tcp"
     from_port   = 2049
     to_port     = 2049
-    cidr_blocks = ["${concat(list("${var.remote_subnet_cidr}", "${var.remote_ip_cidr}"), "${var.private_subnets_cidr_blocks}")}"]
+    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
     description = "rquotad, nlockmgr, mountd, status"
   }
   ingress {
     protocol    = "udp"
     from_port   = 2049
     to_port     = 2049
-    cidr_blocks = ["${concat(list("${var.remote_subnet_cidr}", "${var.remote_ip_cidr}"), "${var.private_subnets_cidr_blocks}")}"]
+    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
     description = "rquotad, nlockmgr, mountd, status"
   }
   ingress {
     protocol    = "icmp"
     from_port   = 8
     to_port     = 0
-    cidr_blocks = ["${concat(list("${var.remote_subnet_cidr}", "${var.remote_ip_cidr}"), "${var.private_subnets_cidr_blocks}")}"]
+    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
     description = "icmp"
   }
   ingress {
     protocol    = "tcp"
     from_port   = 22
     to_port     = 22
-    cidr_blocks = ["${var.remote_ip_cidr}"]
-    cidr_blocks = ["${concat(list("${var.remote_subnet_cidr}", "${var.remote_ip_cidr}"), "${var.private_subnets_cidr_blocks}")}"]
+    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
     description = "ssh"
   }
   ingress {
     protocol    = "tcp"
     from_port   = 443
     to_port     = 443
-    cidr_blocks = ["${concat(list("${var.remote_subnet_cidr}", "${var.remote_ip_cidr}"), "${var.private_subnets_cidr_blocks}")}"]
+    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
     description = "https"
   }
   egress {
