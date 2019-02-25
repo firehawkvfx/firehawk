@@ -289,6 +289,22 @@ Execute the plan.  Writing out a plan before execution and reviewing it is best 
 
     terraform apply plan
 
+If at any point you want to remove all the infrastructure (to save cost, perhaps you don't need it anymore, or you want to start over)
+
+    terraform destroy
+
+Keep in mind that you may still have ebs volumes, s3 usage or other resources to consider in your account costs that will remain.
+
+openFirehawk also uses a sleep variable.  When sleep is set to true, it will shutdown all systems, including the NAT gateway.  its a good idea to do this when nothing is needed, but you want to continue working later.
+
+    terraform plan -out=plan -var sleep=true
+
+View the plan and run it if all is well to turn things off
+
+    terraform apply plan
+
+Make sure you check your aws account for any resources that haven't been turned off.
+
 ## Terraform - taint
 
 if you make changes to your infrastructure, a good way to replace resources is something like this.  lets say I want to destroy my openvpn instance and start over
@@ -314,6 +330,66 @@ Read these docs to set permissions on the autostart openvpn config and startvpn.
 
 [README.md](https://github.com/firehawkvfx/tf_aws_openvpn/blob/master/README.md)
 [startvpn.sh](https://github.com/firehawkvfx/tf_aws_openvpn/blob/master/startvpn.sh)
+
+## Important Notes for Routing:
+
+### You can check /var/log/syslog to confirm vpn connection.
+check autoload is set to all or openvpn in /etc/default
+ensure startvpn.sh is in ~/openvpn_config.  openvpn.conf auto login files are constructed here and placed in /etc/openvpn before execution.  
+  
+read more here to learn about setting up routes  
+https://openvpn.net/vpn-server-resources/site-to-site-routing-explained-in-detail/  
+https://askubuntu.com/questions/612840/adding-route-on-client-using-openvpn  
+
+You will need ip forwarding on client and server if routing both sides.  
+https://community.openvpn.net/openvpn/wiki/265-how-do-i-enable-ip-forwarding  
+
+
+**These are the manual steps required to get both private subnets to connect, and we'd love to figure out the equivalent commands drop in when I'm provisioning the access server to automate them, but for now these are manual steps.**
+  
+-  in VPN Settings | Should VPN clients have access to private subnets  
+(non-public networks on the server side)?  
+Yes, enable routing  
+  
+- Specify the private subnets to which all clients should be given access (one per line):  
+10.0.101.0/24
+10.0.1.0/24
+(these subnets are in aws, the open vpn access server resides in the 10.0.101.0/24 subnet)  
+
+- Allow access from these private subnets to all VPN client IP addresses and subnets : on  
+  
+- in user permissions | user  
+configure vpn gateway:  
+yes  
+  
+- Allow client to act as VPN gateway (enter the cidr block for your onsite network)
+for these client-side subnets:  
+192.168.92.0/24
+
+At this point, your client side vpn client should be able to ping any private ip, and if you ssh into one of those ips, it whould be able to ping your client side ip with its private ip address.
+
+If not you will have to trouble shoot before you can continue further because this functionality is required.
+  
+if you intend to provide access to other systems on your local network, promiscuous mode must enabled on host ethernet adapters.  for example, if openvpn client is in ubuntu vm, and we are running the vm with bridged ethernet in a linux host, then enabling promiscuous mode, and setting up a static route is needed in the host.  
+https://askubuntu.com/questions/430355/configure-a-network-interface-into-promiscuous-mode  
+for example, if you use a rhel host run this in the host to provide static route to the adaptor inside the vm (should be on the same subnet)
+```
+sudo ip route add 10.0.0.0/16 via [ip adress of the bridged ethernet adaptor in the vm]
+```
+check routes with:
+```
+sudo route -n
+ifconfig eth1 up
+ifconfig eth1 promisc
+```
+
+In the ubuntu vm where where terraform is running, ip forwarding must be on.  You must be using a bridged adaptor.
+http://www.networkinghowtos.com/howto/enable-ip-forwarding-on-ubuntu-13-04/
+
+```
+sudo sysctl net.ipv4.ip_forward=1
+```
+
 
 This allows permission for startvpn.sh script to copy open vpn startup settings from the access server into your openvpn settings.  sudo permissions must be allowed for the specific commands executed so they can be performed without a password.
 

@@ -24,3 +24,65 @@
 
   roles:
     - role: openvpn
+
+
+- hosts: ansible_control
+  become: true
+
+  tasks:
+    - name: Ansible copy local openvpn files to /etc/openvpn
+      copy:
+        src: ~/openvpn_config/{{ item }}
+        dest: /etc/openvpn/{{ item }}
+        owner: vagrant
+        group: vagrant
+        mode: 0400
+        force: yes
+      with_items:
+        - openvpn.conf
+        - ca.crt
+        - client.crt
+        - client.key
+        - ta.key
+        - yourserver.txt
+      become_user: vagrant
+      become: yes
+
+    - name: Ansible allow autostart, uncomment
+      replace:
+        path: /etc/default/openvpn
+        regexp: '^#(.*AUTOSTART="all".*)'
+        replace: '\1'
+      #connection: local
+      #become_user: vagrant
+      become: yes
+
+    - name: allow ip forwarding, uncomment
+      replace:
+        path: /etc/sysctl.conf
+        regexp: '^#(.*net.ipv4.ip_forward=1.*)'
+        replace: '\1'
+      #connection: local
+      #become_user: vagrant
+      become: yes      
+
+    - name: force systemd to reread configs (2.4 and above)
+      systemd:
+        daemon_reload: yes
+      become: yes
+
+    - name: reload service oepnvpn, in all cases
+      systemd:
+        name: openvpn
+        state: reloaded
+      become: yes
+    
+
+
+  # copy:
+  #   src: /vagrant/downloads/terraform_0.11.11_linux_amd64/terraform
+  #   dest: /usr/local/bin/terraform
+  #   owner: vagrant
+  #   group: vagrant
+  #   mode: u=rx,g=rx,o=r
+  # become: yes
