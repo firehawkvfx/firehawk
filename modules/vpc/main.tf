@@ -72,17 +72,31 @@ locals {
 #   tags = "${merge(map("Name", "OpenVPN_Route"))}"
 # }
 
-resource "aws_route" "private_openvpn_dhcp_gateway" {
-  count = "${length(var.private_subnets)}"
+# resource "aws_route" "private_openvpn_dhcp_gateway" {
+#   count = "${length(var.private_subnets)}"
 
-  route_table_id         = "${element(module.vpc.private_route_table_ids, count.index)}"
-  destination_cidr_block = "${var.vpn_cidr}"
-  instance_id            = "${module.vpn.id}"
+#   route_table_id         = "${element(module.vpc.private_route_table_ids, count.index)}"
+#   destination_cidr_block = "${var.vpn_cidr}"
+#   instance_id            = "${module.vpn.id}"
 
-  timeouts {
-    create = "5m"
-  }
-}
+#   timeouts {
+#     create = "5m"
+#   }
+# }
+
+# resource "aws_route" "public_openvpn_dhcp_gateway" {
+#   count = "${length(var.public_subnets)}"
+
+#   route_table_id         = "${element(module.vpc.public_route_table_ids, count.index)}"
+#   destination_cidr_block = "${var.vpn_cidr}"
+#   instance_id            = "${module.vpn.id}"
+
+#   timeouts {
+#     create = "5m"
+#   }
+# }
+
+#192.168.92.0/24
 
 variable "remote_subnet_cidr" {
   default = "192.168.0.0/24"
@@ -92,6 +106,18 @@ resource "aws_route" "private_openvpn_remote_subnet_gateway" {
   count = "${length(var.private_subnets)}"
 
   route_table_id         = "${element(module.vpc.private_route_table_ids, count.index)}"
+  destination_cidr_block = "${var.remote_subnet_cidr}"
+  instance_id            = "${module.vpn.id}"
+
+  timeouts {
+    create = "5m"
+  }
+}
+
+resource "aws_route" "public_openvpn_remote_subnet_gateway" {
+  count = "${length(var.private_subnets)}"
+
+  route_table_id         = "${element(module.vpc.public_route_table_ids, count.index)}"
   destination_cidr_block = "${var.remote_subnet_cidr}"
   instance_id            = "${module.vpn.id}"
 
