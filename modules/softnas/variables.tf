@@ -48,6 +48,9 @@ variable "softnas_export_path" {
 }
 
 variable "vpn_cidr" {}
+variable "remote_subnet_cidr" {}
+
+variable "remote_ip_cidr" {}
 
 variable "softnas_user_password" {}
 
