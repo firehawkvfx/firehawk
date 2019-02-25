@@ -259,7 +259,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "tcp"
     from_port   = 22
     to_port     = 22
-    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
+    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" , "${var.public_subnets_cidr_blocks[0]}"]
     description = "ssh"
   }
   ingress {
