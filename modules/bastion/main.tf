@@ -24,10 +24,9 @@ resource "aws_security_group" "bastion" {
     protocol    = "-1"
     from_port   = 0
     to_port     = 0
-    cidr_blocks = ["${var.remote_ip_cidr}"]
+    cidr_blocks = ["172.27.232.0/24", "192.168.92.0/24", "172.27.236.0/24"]
     description = "all incoming traffic from remote access ip"
   }
-
   # For OpenVPN Client Web Server & Admin Web UI
 
   ingress {
