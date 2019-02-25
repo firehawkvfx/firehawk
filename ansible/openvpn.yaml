@@ -45,7 +45,7 @@
         - client.key
         - ta.key
         - yourserver.txt
-      become_user: vagrant
+      #become_user: vagrant
       become: yes
 
     - name: Ansible allow autostart, uncomment
