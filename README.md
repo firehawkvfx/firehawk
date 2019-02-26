@@ -355,8 +355,10 @@ https://community.openvpn.net/openvpn/wiki/265-how-do-i-enable-ip-forwarding
 Yes, enable routing  
   
 - Specify the private subnets to which all clients should be given access (one per line):  
-10.0.101.0/24
 10.0.1.0/24
+10.0.101.0/24
+172.27.232.0/24
+172.27.224.0/24
 (these subnets are in aws, the open vpn access server resides in the 10.0.101.0/24 subnet)  
 
 - Allow access from these private subnets to all VPN client IP addresses and subnets : on  
