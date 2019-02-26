@@ -11,7 +11,7 @@
   pip: 
     name: awscli
     extra_args: --upgrade --user
-  #become_user: vagrant
+  become_user: vagrant
   become: true
 
 - name: install the package, force upgrade

@@ -126,6 +126,33 @@ resource "aws_route" "public_openvpn_remote_subnet_gateway" {
   }
 }
 
+### routes may be needed for traffic going back to open vpn dhcp adresses
+resource "aws_route" "private_openvpn_remote_subnet_vpndhcp_gateway" {
+  count = "${length(var.private_subnets)}"
+
+  route_table_id         = "${element(module.vpc.private_route_table_ids, count.index)}"
+  destination_cidr_block = "172.27.232.0/24"
+  instance_id            = "${module.vpn.id}"
+
+  timeouts {
+    create = "5m"
+  }
+}
+
+resource "aws_route" "public_openvpn_remote_subnet_vpndhcp_gateway" {
+  count = "${length(var.private_subnets)}"
+
+  route_table_id         = "${element(module.vpc.public_route_table_ids, count.index)}"
+  destination_cidr_block = "172.27.232.0/24"
+  instance_id            = "${module.vpn.id}"
+
+  timeouts {
+    create = "5m"
+  }
+}
+
+
+
 # ##########################
 # # Route table association
 # ##########################

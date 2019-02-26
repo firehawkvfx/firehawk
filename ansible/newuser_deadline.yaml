@@ -20,7 +20,7 @@
     
   roles:
     - role: newuser
-    - role: terraform
+    #- role: terraform
     - role: deadlinedb
     - role: deadlinercs
     - role: aws-cli
