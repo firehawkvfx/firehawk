@@ -252,7 +252,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "icmp"
     from_port   = 8
     to_port     = 0
-    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" , "${var.public_subnets_cidr_blocks[0]}", "172.27.232.0/24"]
+    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" , "${var.public_subnets_cidr_blocks[0]}", "${var.vpn_cidr}"]
     description = "icmp"
   }
   ingress {
@@ -266,7 +266,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "tcp"
     from_port   = 443
     to_port     = 443
-    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
+    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}", "${var.vpn_cidr}" ]
     description = "https"
   }
   egress {
@@ -331,10 +331,23 @@ resource "aws_instance" "softnas1" {
   #subnet_id              = "${var.private_subnets[0]}"
   #vpc_security_group_ids = ["${aws_security_group.node_centos.id}"]
 
+  user_data = "${file("${path.module}/user_data.yml")}"
+
+
+
   tags {
     Name = "SoftNAS1_PlatinumConsumptionLowerCompute"
+    Route = "private"
+    Role = "softnas"
+  }
+  # remove existing keys from localhost to avoid unnecesary warning of MITM
+  provisioner "local-exec" {
+    command = "ssh-keygen -f ~/.ssh/known_hosts -R ${var.softnas1_private_ip1}"
+    command = "ssh-keygen -f ~/.ssh/known_hosts -R ${var.softnas1_private_ip2}"
   }
 }
+
+
 
 # resource "aws_cloudformation_stack" "SoftNAS1Stack" {
 #   depends_on = ["aws_cloudformation_stack.SoftNASRole"]

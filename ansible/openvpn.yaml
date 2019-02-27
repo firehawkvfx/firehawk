@@ -1,14 +1,4 @@
 ---
-# - hosts:
-#     localhost
-#   become: true
-
-#   tasks:
-#   - name: Add new openvpn ec2 instance host key to known hosts on creation onlyt
-#     connection: local
-#     #shell: "ping {{ hostvars['openvpnip'] }}"
-#     shell: "ssh-keyscan -H vpn.firehawkfilm.com >> ~/.ssh/known_hosts"
-
 - hosts: openvpnip
   remote_user: openvpnas
   become: yes
@@ -45,7 +35,6 @@
         - client.key
         - ta.key
         - yourserver.txt
-      #become_user: vagrant
       become: yes
 
     - name: Ansible allow autostart, uncomment
@@ -53,8 +42,6 @@
         path: /etc/default/openvpn
         regexp: '^#(.*AUTOSTART="all".*)'
         replace: '\1'
-      #connection: local
-      #become_user: vagrant
       become: yes
 
     - name: allow ip forwarding, uncomment
@@ -62,8 +49,6 @@
         path: /etc/sysctl.conf
         regexp: '^#(.*net.ipv4.ip_forward=1.*)'
         replace: '\1'
-      #connection: local
-      #become_user: vagrant
       become: yes      
 
     - name: force systemd to reread configs (2.4 and above)
@@ -76,13 +61,3 @@
         name: openvpn
         state: reloaded
       become: yes
-    
-
-
-  # copy:
-  #   src: /vagrant/downloads/terraform_0.11.11_linux_amd64/terraform
-  #   dest: /usr/local/bin/terraform
-  #   owner: vagrant
-  #   group: vagrant
-  #   mode: u=rx,g=rx,o=r
-  # become: yes

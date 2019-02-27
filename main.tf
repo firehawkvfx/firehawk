@@ -36,12 +36,16 @@ module "vpc" {
   #the remote private cidr range of the subnet the openvpn client reside in.  used if you intend to use the client as a router / gateway for other nodes in your private network.
   remote_subnet_cidr = "${var.remote_subnet_cidr}"
   #a provided route 53 zone id will be modified to have a subdomain to access vpn.  you will need to manually setup a route 53 zone for a domain with an ssl certificate.
-  route_zone_id      = "${var.route_zone_id}"
+  
   key_name           = "${var.key_name}"
   private_key        = "${file("${var.local_key_path}")}"
   local_key_path     = "${var.local_key_path}"
-  cert_arn           = "${var.cert_arn}"
+
+  route_zone_id      = "${var.route_zone_id}"
   public_domain_name = "${var.public_domain_name}"
+
+  cert_arn           = "${var.cert_arn}"
+  
   openvpn_user       = "${var.openvpn_user}"
   openvpn_user_pw    = "${var.openvpn_user_pw}"
   openvpn_admin_user = "${var.openvpn_admin_user}"
@@ -210,11 +214,15 @@ module "bastion" {
   local_key_path = "${var.local_key_path}"
   private_key    = "${file("${var.local_key_path}")}"
 
+  route_zone_id      = "${var.route_zone_id}"
+  public_domain_name = "${var.public_domain_name}"
+
   #skipping os updates will allow faster rollout for testing.
   skip_update = "${var.node_skip_update}"
 
   #sleep will stop instances to save cost during idle time.
-  sleep = "${var.sleep || var.node_sleep_on_create}"
+  sleep = "${var.sleep}"
+  # || var.node_sleep_on_create}"
 
   #softnas_private_ip        = "${module.softnas.private_ip}"
   time_zone_info_path_linux = "${lookup(var.time_zone_info_path_linux, "Australia_Sydney")}"

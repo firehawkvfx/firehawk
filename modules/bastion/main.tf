@@ -65,6 +65,17 @@ resource "aws_security_group" "bastion" {
   }
 }
 
+resource "aws_eip" "bastionip" {
+
+  vpc      = true
+  instance = "${aws_instance.bastion.id}"
+
+  tags {
+    role = "bastion"
+    route = "public"
+  }
+}
+
 resource "aws_instance" "bastion" {
   ami           = "${lookup(var.ami_map, var.region)}"
   instance_type = "${var.instance_type}"
@@ -75,6 +86,8 @@ resource "aws_instance" "bastion" {
 
   tags {
     Name = "${var.name}"
+    #role = "bastion"
+    #route = "public"
   }
 
   # `admin_user` and `admin_pw` need to be passed in to the appliance through `user_data`, see docs -->
@@ -97,13 +110,21 @@ USERDATA
   }
 }
 
-# resource "null_resource" "shutdown-node" {
-#   count = "${var.sleep ? 1 : 0}"
+output "ip" {
+  value = "${aws_eip.bastionip.public_ip}"
+}
 
-#   provisioner "local-exec" {
-#     command = "aws ec2 stop-instances --instance-ids ${aws_instance.bastion.id}"
-#   }
-# }
+variable "route_zone_id" {}
+variable "public_domain_name" {}
+
+resource "aws_route53_record" "openvpn_record" {
+  zone_id = "${var.route_zone_id}"
+  name    = "bastion.${var.public_domain_name}"
+  type    = "A"
+  ttl     = 300
+  records = ["${aws_eip.bastionip.public_ip}"]
+}
+
 
 
 resource "null_resource" "start-bastion" {
@@ -118,8 +139,6 @@ resource "null_resource" "shutdown-bastion" {
   count = "${var.sleep ? 1 : 0}"
 
   provisioner "local-exec" {
-    #command = "aws ec2 stop-instances --instance-ids ${aws_instance.softnas1.id}"
-
     command = <<EOT
       aws ec2 stop-instances --instance-ids ${aws_instance.bastion.id}
   EOT

@@ -50,6 +50,8 @@ variable "sleep" {
   default = false
 }
 
+variable "remote_subnet_cidr" {}
+
 module "openvpn" {
   #source = "github.com/firehawkvfx/tf_aws_openvpn"
 
@@ -68,6 +70,7 @@ module "openvpn" {
   vpn_cidr           = "${var.vpn_cidr}"
   public_subnet_ids  = "${var.public_subnet_ids}"
   remote_vpn_ip_cidr = "${var.remote_vpn_ip_cidr}"
+  remote_subnet_cidr = "${var.remote_subnet_cidr}"
   # EC2 Inputs
   key_name       = "${var.key_name}"
   private_key    = "${var.private_key}"
@@ -79,7 +82,7 @@ module "openvpn" {
   # ELB Inputs
   cert_arn = "${var.cert_arn}"
   # DNS Inputs
-  domain_name   = "${var.public_domain_name}"
+  public_domain_name   = "${var.public_domain_name}"
   route_zone_id = "${var.route_zone_id}"
   # OpenVPN Inputs
   openvpn_user       = "${var.openvpn_user}"

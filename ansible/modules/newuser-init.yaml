@@ -7,14 +7,17 @@
       package:
         name: whois
         state: present
+
     - name: install pip
       package:
         name: python-pip
         state: present
+
     - name: install pexpect
       pip:
         name: pexpect
       become: yes
+      
     - name: install passlib
       pip:
         name: passlib

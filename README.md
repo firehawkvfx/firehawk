@@ -32,6 +32,10 @@ These are some good paid video courses to try-
 You will want to experiment with spinning up an AWS account.  You will need to start an instance in your nearest region with this ami - (softnas platinum consumption based for lower compute requirements).  take note of the AMI.  you wont need to leave this instance running.  You can terminate it, and delete the EBS volume.
 Next startup up an open vpn access server instance from the openvpn AMI, and when started, take note of this AMI.  these will need to be added into terraform variables later, because they are unique to your region.
 
+## Security
+openFirehawk is not ready for production.  There are outstanding changes that need to be done to improve security for general use.
+
+It's important that your router firmware is kept up to date.  We configure AWS to ignore all inbound communication from anywhere but your own static ip.  The greatest vulnerability between you and AWS is your router.  open vpn encrypts traffic before it goes through the router, but if the router is compromised, enough information to establish those credentials can be gained for a man in the middle attack.
 
 ## Disclaimer: Running your own AWS account.
 You are going to be managing these resources from an AWS account and you are solely responsible for the costs incurred, and you should tread slowly to understand AWS charges.
@@ -358,7 +362,6 @@ Yes, enable routing
 10.0.1.0/24
 10.0.101.0/24
 172.27.232.0/24
-172.27.224.0/24
 (these subnets are in aws, the open vpn access server resides in the 10.0.101.0/24 subnet)  
 
 - Allow access from these private subnets to all VPN client IP addresses and subnets : on  

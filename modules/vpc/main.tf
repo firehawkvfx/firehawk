@@ -32,6 +32,10 @@ module "vpc" {
   }
 }
 
+variable "remote_subnet_cidr" {
+  default = "192.168.0.0/24"
+}
+
 module "vpn" {
   source = "../vpn"
 
@@ -41,6 +45,7 @@ module "vpn" {
   vpc_cidr = "${module.vpc.vpc_cidr_block}"
   #the cidr range that the vpn will assign to remote addresses within the vpc if routing.
   vpn_cidr = "${var.vpn_cidr}"
+  remote_subnet_cidr = "${var.remote_subnet_cidr}"
   #the remote public address that will connect to the openvpn instance
   remote_vpn_ip_cidr = "${var.remote_ip_cidr}"
   public_subnet_ids  = "${module.vpc.public_subnets}"
@@ -98,10 +103,6 @@ locals {
 
 #192.168.92.0/24
 
-variable "remote_subnet_cidr" {
-  default = "192.168.0.0/24"
-}
-
 resource "aws_route" "private_openvpn_remote_subnet_gateway" {
   count = "${length(var.private_subnets)}"
 
@@ -131,7 +132,7 @@ resource "aws_route" "private_openvpn_remote_subnet_vpndhcp_gateway" {
   count = "${length(var.private_subnets)}"
 
   route_table_id         = "${element(module.vpc.private_route_table_ids, count.index)}"
-  destination_cidr_block = "172.27.232.0/24"
+  destination_cidr_block = "${var.vpn_cidr}"
   instance_id            = "${module.vpn.id}"
 
   timeouts {
@@ -143,7 +144,7 @@ resource "aws_route" "public_openvpn_remote_subnet_vpndhcp_gateway" {
   count = "${length(var.private_subnets)}"
 
   route_table_id         = "${element(module.vpc.public_route_table_ids, count.index)}"
-  destination_cidr_block = "172.27.232.0/24"
+  destination_cidr_block = "${var.vpn_cidr}"
   instance_id            = "${module.vpn.id}"
 
   timeouts {

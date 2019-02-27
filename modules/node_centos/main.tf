@@ -134,6 +134,7 @@ resource "aws_instance" "node_centos" {
   vpc_security_group_ids = ["${aws_security_group.node_centos.id}"]
   tags {
     Name = "node_centos"
+    route = "private"
   }
 }
 
