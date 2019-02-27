@@ -1,0 +1,4 @@
+#cloud-config
+hostname: nas1.firehawkvfx.com
+fqdn: nas1.firehawkvfx.com
+manage_etc_hosts: false
