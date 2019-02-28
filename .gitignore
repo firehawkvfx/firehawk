@@ -24,3 +24,4 @@ ansible/modules/*.retry
 ansible/group_vars/all/vault
 hostvars.log
 tmp/softnas_checkupdate.json
+tmp/softnas_checkupdate.json
