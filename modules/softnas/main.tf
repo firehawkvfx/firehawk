@@ -342,8 +342,10 @@ resource "aws_instance" "softnas1" {
   }
   # remove existing keys from localhost to avoid unnecesary warning of MITM
   provisioner "local-exec" {
-    command = "ssh-keygen -f ~/.ssh/known_hosts -R ${var.softnas1_private_ip1}"
-    command = "ssh-keygen -f ~/.ssh/known_hosts -R ${var.softnas1_private_ip2}"
+    command = "set -x"
+    command = "echo 'remove from hosts file'"
+    command = "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R ${var.softnas1_private_ip1}"
+    command = "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R ${var.softnas1_private_ip2}"
   }
 }
 

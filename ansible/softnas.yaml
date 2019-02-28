@@ -51,37 +51,41 @@
       dest: /tmp/updatetype
       force: no
 
-  - name: install mkpasswd
-    package:
-      name: expect
-      state: present
+  # - name: install mkpasswd
+  #   package:
+  #     name: expect
+  #     state: present
 
-  - name: install pip
-    package:
-      name: python-pip
-      state: present
+  # - name: install pip
+  #   package:
+  #     name: python-pip
+  #     state: present
 
-  - name: install pexpect
-    pip:
-      name: pexpect
-    become: yes
+  # - name: install pexpect
+  #   pip:
+  #     name: pexpect
+  #   become: yes
     
-  - name: install passlib
-    pip:
-      name: passlib
-    become: yes
+  # - name: install passlib
+  #   pip:
+  #     name: passlib
+  #   become: yes
 
-  - name: set user pass
-    expect:
-      command: passwd softnas
-      responses:
-        (?i)password: "{{ user_softnas_pw }}"
-        (?i)Retype new password: "{{ user_softnas_pw }}"
+  # - name: set user pass
+  #   expect:
+  #     command: passwd softnas
+  #     responses:
+  #       (?i)password: "{{ user_softnas_pw }}"
+  #       (?i)Retype new password: "{{ user_softnas_pw }}"
 
-  - name: multiline test
+  # - name: change pass stdin
+  #   command: echo {{ user_softnas_pw }} | passwd --stdin softnas
+
+  - name: multiline test & change softnas pass
     #command: "softnas-cmd login softnas {{ user_softnas_pw }} && softnas-cmd executeupdate"
     shell: |
-      softnas-cmd login softnas {{ user_softnas_pw }} && softnas-cmd checkupdate
+      #softnas-cmd login softnas {{ user_softnas_pw }} && softnas-cmd checkupdate
+      echo {{ user_softnas_pw }} | passwd --stdin softnas
     register: softnas_multiline_test
 
   - name: multiline test
@@ -200,6 +204,7 @@
       msg: "{{ item.stdout }}"
     with_items:
       - "{{ nmap_result.results }}"
+    when: debug > 0
 
   - name: Uncomment line from /etc/ssh/sshd_config
     lineinfile:
@@ -207,6 +212,7 @@
       regexp: '^#\s*MOUNTD_PORT=892.*$'
       line: 'MOUNTD_PORT=892'
   
+  # # these services need to be restarted if a reboot/update wasn't occuring and changes to volummes are made
   # - service:
   #     name: "{{ item }}"
   #     state: restarted
@@ -225,26 +231,79 @@
   - name: login and ack agreement
     debug:
       var: softnas_login.stdout.split('\n')
+
+  - name: Remove updatetype file. a ticket suggested this so that some beta wasn't deployed at update.
+    file:
+      path: '/tmp/updatetype'
+      state: absent
       
   - name: login and checkupdate
-    #command: "softnas-cmd login softnas {{ user_softnas_pw }} && softnas-cmd checkupdate"
     shell: |
-      softnas-cmd login softnas {{ user_softnas_pw }} && softnas-cmd checkupdate
+      softnas-cmd login softnas {{ user_softnas_pw }} && softnas-cmd checkupdate > /tmp/softnas_checkupdate.json
     register: softnas_checkupdate
-  - name: login and checkupdate
-    debug:
-      var: softnas_checkupdate.stdout.split('\n')
 
+  - fetch:
+      src: /tmp/softnas_checkupdate.json
+      dest: /vagrant/tmp/softnas_checkupdate.json
+      force: yes
+      flat: true
+      #mode: 400
+  - fetch:
+      src: /tmp/softnas_checkupdate.json
+      dest: /tmp/softnas_checkupdate.json
+      force: yes
+      flat: true
+      #mode: 400
+
+  - include_vars:
+      file: /tmp/softnas_checkupdate.json
+      name: softnas_checkupdate_dict
+
+  - debug:
+      var: softnas_checkupdate_dict
+
+  - debug:
+      msg: "{{ item }}"
+    with_items: "{{ softnas_checkupdate_dict.result.currentVersion }}"
+
+  - name: get version data
+    set_fact:
+      softnas_currentversion: "{{ softnas_checkupdate_dict.result.currentVersion }}"
+      softnas_latestversion: "{{ softnas_checkupdate_dict.result.latestVersion }}"
+
+  - name: get update status
+    set_fact:
+      softnas_uptodate: softnas_currentversion is match( "{{ softnas_latestversion }}" )
+
+  - name: softnas_uptodate status
+    debug:
+      var: "{{ softnas_uptodate }}"
+    
   - name: login and executeupdate
-    #command: "softnas-cmd login softnas {{ user_softnas_pw }} && softnas-cmd executeupdate"
     shell: |
       softnas-cmd login softnas {{ user_softnas_pw }} && softnas-cmd executeupdate
     register: softnas_executeupdate
+    when: not softnas_uptodate
 
-  - name: login and executeupdate
+  - name: login and executeupdate output
     debug:
       var: softnas_executeupdate.stdout.split('\n')
+    when: not softnas_uptodate
+
+  - name: Check if Softnas Update file exists
+    stat: 
+      path: /tmp/softnas-update.status
+    register: update_file
+
+  - name: "Check if Softnas Update completed."
+    wait_for:
+      path: /tmp/softnas-update.status
+      search_regex: OK
+    when: update_file.stat.exists
       
+
+
+
 
 
 

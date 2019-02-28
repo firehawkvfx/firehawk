@@ -1,6 +1,8 @@
 ---
 ansible_ssh_private_key_file: ~/my_key_pair.pem
 
+debug: 0
+
 db_pass: "{{ vault_db_pass }}"
 
 openvpn_user: openvpnas
