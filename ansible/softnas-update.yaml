@@ -1,0 +1,153 @@
+- hosts: role_softnas
+  remote_user: centos
+  become: true
+
+  vars:
+    bastionip: "{{ groups['bastionip'][0] }}"
+
+  tasks:
+  - name: Remove updatetype file. A ticket involving softnas suggested this so that some beta isn't deployed at update.
+    file:
+      path: '/tmp/updatetype'
+      state: absent
+      
+  - name: login and checkupdate
+    shell: |
+      softnas-cmd login softnas {{ user_softnas_pw }} && softnas-cmd checkupdate > /tmp/softnas_checkupdate.json
+    register: softnas_checkupdate
+
+  - fetch:
+      src: /tmp/softnas_checkupdate.json
+      dest: /vagrant/tmp/softnas_checkupdate.json
+      force: yes
+      flat: true
+
+  - fetch:
+      src: /tmp/softnas_checkupdate.json
+      dest: /tmp/softnas_checkupdate.json
+      force: yes
+      flat: true
+
+  - include_vars:
+      file: /tmp/softnas_checkupdate.json
+      name: softnas_checkupdate_dict
+
+  - debug:
+      var: softnas_checkupdate_dict
+
+  - debug:
+      msg: "{{ item }}"
+    with_items: "{{ softnas_checkupdate_dict.result.currentVersion }}"
+
+  
+  - set_fact:
+      softnas_currentversion_var: "{{ softnas_checkupdate_dict.result.currentVersion }}"
+  - set_fact:
+      softnas_latestversion_var: "{{ softnas_checkupdate_dict.result.latestVersion }}"
+
+  - name: current version
+    debug:
+      msg: "{{ softnas_currentversion_var }}"
+
+  - name: latest version
+    debug:
+      msg: "{{ softnas_latestversion_var }}"
+
+  - name: check if versions don't match
+    set_fact:
+      softnas_uptodate: "{{ softnas_currentversion_var == softnas_latestversion_var }}"
+      softnas_runupdate: "{{ softnas_currentversion_var != softnas_latestversion_var }}"
+    when: (softnas_currentversion_var is defined) and (softnas_latestversion_var is defined)
+
+  - name: softnas run update
+    debug:
+      msg: "var softnas_runupdate is: {{ softnas_runupdate }}"
+
+  - name: softnas_uptodate status
+    debug:
+      msg: "var softnas_uptodate is: {{ softnas_uptodate }}"
+    
+  - name: login and executeupdate
+    shell: |
+      softnas-cmd login softnas {{ user_softnas_pw }} && softnas-cmd executeupdate
+    register: softnas_executeupdate
+    when: softnas_runupdate
+
+  - name: executeupdate output
+    debug:
+      var: softnas_executeupdate.stdout.split('\n')
+    when: softnas_runupdate
+
+  - name: Check if Softnas Update file exists
+    stat: 
+      path: /tmp/softnas-update.status
+    register: update_file
+
+  - name: "Wait until Softnas Update completed. This can take up to 1 hour"
+    wait_for:
+      path: /tmp/softnas-update.status
+      search_regex: OK
+      sleep: 30
+      timeout: 5400
+    when: update_file.stat.exists and softnas_runupdate
+      
+
+
+
+
+
+
+
+  # # - command: "softnas-cmd ackagreement"
+  # - command: "softnas-cmd checkupdate"
+  # #- command: "softnas-cmd executeupdate"
+
+
+# [
+#   "#cloud-config\n",
+#   "hostname: nas1.firehawkvfx.com\n",
+#   "fqdn: nas1.firehawkvfx.com\n",
+#   "manage_etc_hosts: false\n",
+#   "runcmd:\n",
+#   "  - echo > /root/.ssh/authorized_keys\n",
+#   "  - echo 'export HOSTNAME=nas1.firehawkvfx.com' >> /root/.bash_profile\n",
+#   "  - sed -i -e 's/admin@firehawkvfx.com/queglay@gmail.com/g' /var/www/softnas/config/monitoring.ini\n",
+#   "  - sed -i -e 's/no/yes/g' /var/www/softnas/config/monitoring.ini\n",
+#   "  - sed -i -e 's/SMTP_MAILSERVER=\"\"/SMTP_MAILSERVER=\"smtp-relay.gmail.com\"/g' /var/www/softnas/config/monitoring.ini\n",
+#   "  - sed -i -e 's/SMTP_PORT=\"\"/SMTP_PORT=\"587\"/g' /var/www/softnas/config/monitoring.ini\n",
+#   "  - sed -i -e 's/SMTP_ENCRYPTION=\"\"/SMTP_ENCRYPTION=\"tlsv1\"/g' /var/www/softnas/config/monitoring.ini\n",
+#   "  - cp -a /var/www/softnas/config/general_settings.ini.prototype /var/www/softnas/config/general_settings.ini\n",
+#   "  - sed -i -e 's/smtp_mailserver = /smtp_mailserver = \"smtp-relay.gmail.com\"/g' /var/www/softnas/config/general_settings.ini\n",
+#   "  - sed -i -e 's/smtp_port = /smtp_port = \"587\"/g' /var/www/softnas/config/general_settings.ini\n",
+#   "  - yum install -y nmap\n",
+#   "  - nmap -p 80 softnas.com\n",
+#   "  - nmap -p 443 softnas.com\n",
+#   "  - nmap -p 80 www.softnas.com\n",
+#   "  - nmap -p 443 www.softnas.com\n",
+#   "  - nmap -p 80 mirror.softnas.com\n",
+#   "  - nmap -p 443 mirror.softnas.com\n",
+#   "  - sed -i '/MOUNTD_PORT=892/s/^#*//g' /etc/sysconfig/nfs\n",
+#   "  - echo '/export *(async,insecure,no_subtree_check,no_root_squash,rw,nohide,fsid=0)' >> /etc/exports\n",
+#   "  - echo '/export",
+#   {
+#     "Ref": "SoftnasExportPath"
+#   },
+#   " *(async,insecure,no_subtree_check,no_root_squash,rw,nohide)' >> /etc/exports\n",
+#   "  - service nfs restart\n",
+#   "  - service softnas restart\n",
+#   "  - service monit restart\n",
+#   "  - /bin/echo > /tmp/updatetype\n",
+#   "  - echo '",
+#   {
+#     "Ref": "SoftnasUserPassword"
+#   },
+#   "' | passwd --stdin softnas\n",
+#   "  - softnas-cmd login softnas ",
+#   {
+#     "Ref": "SoftnasUserPassword"
+#   },
+#   "\n",
+#   "  - softnas-cmd ackagreement\n",
+#   "  - softnas-cmd checkupdate\n",
+#   "  - softnas-cmd executeupdate\n"
+# ]
