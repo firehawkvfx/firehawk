@@ -4,7 +4,7 @@
   become: true
 
   vars:
-    s3_disk_name: /dev/s3-1
+    s3_disk_name: /dev/s3-0
 
   tasks:
   - name: delete s3 extender disk

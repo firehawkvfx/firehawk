@@ -5,6 +5,8 @@
 
   vars:
     s3_disk_bucket_name: softnas-test-4
+    new_pool_name: pool1
+    new_volume_name: volume1
     s3_disk_size_max_value: 50
     s3_disk_size_max_units: GB
     s3_disk_region: "{{ aws_region }}"
@@ -24,7 +26,7 @@
     shell: |
       softnas-cmd login softnas {{ user_softnas_pw }}
 
-  - name: create extender disk
+  - name: create s3 extender disk
     shell: |
       softnas-cmd login softnas {{ user_softnas_pw }}
       softnas-cmd diskmgmt createExtenderDisk type=amazon accessKey={{ aws_access_key }} secretKey={{ aws_secret_key }} bucketName={{ s3_disk_bucket_name }} sizeMaxValue={{ s3_disk_size_max_value }} sizeMaxUnits={{ s3_disk_size_max_units }} region={{ s3_disk_region }} encrypted={{ s3_disk_password }} > /tmp/softnas_init_s3_disk_output_dict.json
@@ -38,7 +40,7 @@
       file: /tmp/softnas_init_s3_disk_output_dict.json
       name: softnas_init_s3_disk_output_dict
 
-  - name: all json output
+  - name: s3 extender disk all json output
     debug:
       msg: "{{ softnas_init_s3_disk_output_dict }}"
 
@@ -69,8 +71,81 @@
     debug:
       msg: "{{ new_s3_disk_name }}"
 
-  # - name: create extender disk
-  #   shell: |
-  #     softnas-cmd login softnas {{ user_softnas_pw }}
-  #     softnas-cmd createpool {{ new_s3_disk_name }} -n={{ new_s3_pool_name }} -r=0 -f=on -sync=standard -cs=off -shared=on -t > /tmp/softnas_init_s3_volume_output_dict.json
+  - name: create pool
+    shell: |
+      softnas-cmd login softnas {{ user_softnas_pw }}
+      softnas-cmd createpool {{ new_s3_disk_name }} -n={{ new_pool_name }} -r=0 -f=on -sync=standard -cs=off -shared=on -t > /tmp/softnas_init_pool_output_dict.json
 
+  - fetch:
+      src: /tmp/softnas_init_pool_output_dict.json
+      dest: /tmp/
+      flat: true
+
+  - include_vars:
+      file: /tmp/softnas_init_pool_output_dict.json
+      name: softnas_init_pool_output_dict
+
+  - name: create pool all json output
+    debug:
+      msg: "{{ softnas_init_pool_output_dict }}"
+
+  - name: check if softnas cli login succeeded
+    debug:
+      msg: "softnas-cli login succeeded"
+    when: softnas_init_pool_output_dict.success
+
+  - name: check if softnas cli login failed
+    fail:
+      msg: "{{softnas_init_pool_output_dict}}"
+    failed_when: softnas_init_pool_output_dict.success == false
+
+  - name: check if pool create succeeded
+    debug:
+      msg: "{{softnas_init_pool_output_dict.result.msg}}"
+    when: softnas_init_pool_output_dict.result.success
+
+  - name: check if pool create failed
+    fail:
+      msg: "{{softnas_init_pool_output_dict.result.msg}}"
+    failed_when: softnas_init_pool_output_dict.result.success == false
+
+  - name: create volume
+    shell: |
+      softnas-cmd login softnas {{ user_softnas_pw }}
+      softnas-cmd createvolume vol_name={{ new_volume_name }} pool={{ new_pool_name }} vol_type=filesystem provisioning=thin exportNFS=on shareCIFS=on enable_snapshot=off sync=always replication=off > /tmp/softnas_init_volume_output_dict.json
+
+  - fetch:
+      src: /tmp/softnas_init_volume_output_dict.json
+      dest: /tmp/
+      flat: true
+
+  - include_vars:
+      file: /tmp/softnas_init_volume_output_dict.json
+      name: softnas_init_volume_output_dict
+
+  - name: create volume all json output
+    debug:
+      msg: "{{ softnas_init_volume_output_dict }}"
+
+  - name: check if softnas cli login succeeded
+    debug:
+      msg: "softnas-cli login succeeded"
+    when: softnas_init_volume_output_dict.success
+
+  - name: check if softnas cli login failed
+    fail:
+      msg: "{{softnas_init_volume_output_dict}}"
+    failed_when: softnas_init_volume_output_dict.success == false
+
+  - name: check if volume create succeeded
+    debug:
+      msg: "{{softnas_init_volume_output_dict.result.msg}}"
+    when: softnas_init_volume_output_dict.result.success
+
+  - name: check if volume create failed
+    fail:
+      msg: "{{softnas_init_volume_output_dict.result.msg}}"
+    failed_when: softnas_init_volume_output_dict.result.success == false
+
+
+    #
