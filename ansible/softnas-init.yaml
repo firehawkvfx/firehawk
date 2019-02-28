@@ -22,6 +22,8 @@
   vars:
     bastionip: "{{ groups['bastionip'][0] }}"
 
+    # need to remove old hosts ssh-keygen -f "/home/vagrant/.ssh/known_hosts" -R 10.0.1.11
+
   tasks:
   - name: delegate keyscan to add keys from remote subnet via bastion host.
     command: "ssh-keyscan {{ groups['role_softnas'][0] }}"
