@@ -40,9 +40,12 @@ It's important that your router firmware is kept up to date.  We configure AWS t
 ## Disclaimer: Running your own AWS account.
 You are going to be managing these resources from an AWS account and you are solely responsible for the costs incurred, and you should tread slowly to understand AWS charges.
 
-The first thing to do is **setup 2 factor authentication.  Do not skip this**.  You'll make it easy for hackers to misuse you credit card to mine crypto.  Eye watering bills are possible!  
+The first thing to do is **setup 2 factor authentication.  Do not skip this**.  You'll make it easy for hackers to misuse you credit card to mine crypto.  Eye watering bills are possible!
 
 So The next thing you should do is setup budget notifications.  Set a number you are willing to spend per month, and setup email notifications for every 20% of that budget.  The notifications are there in case you forget to do this step - check your AWS costs for a daily breakdown of what you spend, and do it every day to learn.  its a good habit to do it at the start of every day.
+
+Lastly, when you create aws access and secret keys, set a policy to age those keys out after 30 days.  unlike normal access from a workstation, which can be 
+limited down to a specific static ip with security groups, these access keys allow resources to be created from anywhere, and even for security groups to be changed, guard them closely.  Personally, I dont even write them down - If I need to enter them again for some reason, I take that opportunity to cycle them and enter update them into the encrypted vault.
 
 ## Pointers on cost awareness:
 
