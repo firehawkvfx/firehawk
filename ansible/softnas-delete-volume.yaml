@@ -39,7 +39,7 @@
 
   - name: check if volume delete succeeded
     debug:
-      msg: "{{softnas_delete_volume_output_dict.result.msg}}"
+      msg: "{{softnas_delete_volume_output_dict.result.msg }}"
     when: softnas_delete_volume_output_dict.result.success
 
   - name: check if volume delete failed

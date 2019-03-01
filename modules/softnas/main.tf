@@ -5,10 +5,9 @@
 #   template_url = "https://s3-ap-southeast-2.amazonaws.com/aws-softnas-cloudformation/softnas-role.json"
 # }
 
-
-
 resource "aws_iam_role" "softnas_role" {
   name = "SoftNAS_HA_IAM"
+
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -150,58 +149,63 @@ resource "aws_security_group" "softnas" {
     protocol    = "tcp"
     from_port   = 0
     to_port     = 65535
-    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
     description = "all incoming traffic from remote vpn"
   }
+
   ingress {
     protocol    = "udp"
     from_port   = 49152
     to_port     = 65535
-    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
     description = ""
   }
+
   ingress {
     protocol    = "tcp"
     from_port   = 53
     to_port     = 53
-    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
     description = "DNS"
   }
+
   ingress {
     protocol    = "udp"
     from_port   = 53
     to_port     = 53
-    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
     description = "DNS"
   }
-
 
   ingress {
     protocol    = "tcp"
     from_port   = 111
     to_port     = 111
-    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
     description = "NFS"
   }
+
   ingress {
     protocol    = "udp"
     from_port   = 111
     to_port     = 111
-    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
     description = "NFS"
   }
+
   ingress {
     protocol    = "tcp"
     from_port   = 892
     to_port     = 892
-    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
     description = "rquotad, nlockmgr, mountd, status"
   }
+
   ingress {
     protocol    = "udp"
     from_port   = 892
     to_port     = 892
-    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
     description = "rquotad, nlockmgr, mountd, status"
   }
 
@@ -209,14 +213,15 @@ resource "aws_security_group" "softnas" {
     protocol    = "tcp"
     from_port   = 2010
     to_port     = 2010
-    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
     description = "rquotad, nlockmgr, mountd, status"
   }
+
   ingress {
     protocol    = "udp"
     from_port   = 2010
     to_port     = 2010
-    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
     description = "rquotad, nlockmgr, mountd, status"
   }
 
@@ -224,51 +229,58 @@ resource "aws_security_group" "softnas" {
     protocol    = "tcp"
     from_port   = 2014
     to_port     = 2014
-    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
     description = "rquotad, nlockmgr, mountd, status"
   }
+
   ingress {
     protocol    = "udp"
     from_port   = 2014
     to_port     = 2014
-    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
     description = "rquotad, nlockmgr, mountd, status"
   }
+
   ingress {
     protocol    = "tcp"
     from_port   = 2049
     to_port     = 2049
-    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
     description = "rquotad, nlockmgr, mountd, status"
   }
+
   ingress {
     protocol    = "udp"
     from_port   = 2049
     to_port     = 2049
-    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" ]
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
     description = "rquotad, nlockmgr, mountd, status"
   }
+
   ingress {
     protocol    = "icmp"
     from_port   = 8
     to_port     = 0
-    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" , "${var.public_subnets_cidr_blocks[0]}", "${var.vpn_cidr}"]
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.public_subnets_cidr_blocks[0]}", "${var.vpn_cidr}"]
     description = "icmp"
   }
+
   ingress {
     protocol    = "tcp"
     from_port   = 22
     to_port     = 22
-    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}" , "${var.public_subnets_cidr_blocks[0]}"]
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.public_subnets_cidr_blocks[0]}", "${var.vpn_cidr}"]
     description = "ssh"
   }
+
   ingress {
     protocol    = "tcp"
     from_port   = 443
     to_port     = 443
-    cidr_blocks = [ "${var.remote_subnet_cidr}", "${var.private_subnets_cidr_blocks}", "${var.vpn_cidr}" ]
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
     description = "https"
   }
+
   egress {
     protocol    = "-1"
     from_port   = 0
@@ -279,8 +291,8 @@ resource "aws_security_group" "softnas" {
 }
 
 resource "aws_network_interface" "nas1eth0" {
-  subnet_id   = "${var.private_subnets[0]}"
-  private_ips = ["${var.softnas1_private_ip1}"]
+  subnet_id       = "${var.private_subnets[0]}"
+  private_ips     = ["${var.softnas1_private_ip1}"]
   security_groups = ["${aws_security_group.softnas.id}"]
 
   tags = {
@@ -289,8 +301,8 @@ resource "aws_network_interface" "nas1eth0" {
 }
 
 resource "aws_network_interface" "nas1eth1" {
-  subnet_id   = "${var.private_subnets[0]}"
-  private_ips = ["${var.softnas1_private_ip2}"]
+  subnet_id       = "${var.private_subnets[0]}"
+  private_ips     = ["${var.softnas1_private_ip2}"]
   security_groups = ["${aws_security_group.softnas.id}"]
 
   tags = {
@@ -299,7 +311,7 @@ resource "aws_network_interface" "nas1eth1" {
 }
 
 resource "aws_instance" "softnas1" {
-  ami = "${var.ami_platinum_consumption_lower_compute["ap-southeast-2"]}"
+  ami           = "${var.ami_platinum_consumption_lower_compute["ap-southeast-2"]}"
   instance_type = "${var.instance_type_platinum_consumption_lower_compute["m4.xlarge"]}"
 
   ebs_optimized = true
@@ -307,38 +319,40 @@ resource "aws_instance" "softnas1" {
   iam_instance_profile = "${aws_iam_instance_profile.softnas_profile.name}"
 
   network_interface = {
-    device_index = 0
+    device_index         = 0
     network_interface_id = "${aws_network_interface.nas1eth0.id}"
+
     #delete_on_termination = true
   }
 
   network_interface = {
-    device_index = 1
+    device_index         = 1
     network_interface_id = "${aws_network_interface.nas1eth1.id}"
+
     #delete_on_termination = true
   }
 
   root_block_device {
     volume_size = "30"
     volume_type = "gp2"
+
     #device_name = "/dev/sda1"
     delete_on_termination = true
+
     # if specifying a snapshot, do not specify encryption.
     #encryption = false
   }
 
-  key_name               = "${var.key_name}"
+  key_name = "${var.key_name}"
+
   #subnet_id              = "${var.private_subnets[0]}"
   #vpc_security_group_ids = ["${aws_security_group.node_centos.id}"]
 
   user_data = "${file("${path.module}/user_data.yml")}"
-
-
-
   tags {
-    Name = "SoftNAS1_PlatinumConsumptionLowerCompute"
+    Name  = "SoftNAS1_PlatinumConsumptionLowerCompute"
     Route = "private"
-    Role = "softnas"
+    Role  = "softnas"
   }
   # remove existing keys from localhost to avoid unnecesary warning of MITM
   provisioner "local-exec" {
@@ -348,8 +362,6 @@ resource "aws_instance" "softnas1" {
     command = "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R ${var.softnas1_private_ip2}"
   }
 }
-
-
 
 # resource "aws_cloudformation_stack" "SoftNAS1Stack" {
 #   depends_on = ["aws_cloudformation_stack.SoftNASRole"]

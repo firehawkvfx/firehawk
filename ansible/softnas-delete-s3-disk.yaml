@@ -3,8 +3,9 @@
   become_user: root
   become: true
 
-  vars:
-    s3_disk_name: /dev/s3-0
+  # example to execute from commandline:
+  # ansible-playbook -i ansible/inventory ansible/softnas-delete-s3-disk.yaml -v --extra-vars "s3_disk_name='/dev/s3-1'"
+
 
   tasks:
   - name: delete s3 extender disk

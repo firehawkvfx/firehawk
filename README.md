@@ -376,6 +376,7 @@ yes
 - Allow client to act as VPN gateway (enter the cidr block for your onsite network)
 for these client-side subnets:  
 192.168.92.0/24
+172.27.232.0/24
 
 At this point, your client side vpn client should be able to ping any private ip, and if you ssh into one of those ips, it whould be able to ping your client side ip with its private ip address.
 

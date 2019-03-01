@@ -9,6 +9,8 @@ variable "private_subnets" {
   default = []
 }
 
+variable "all_private_subnets_cidr_range" {}
+
 variable "private_subnets_cidr_blocks" {
   default = []
 }
