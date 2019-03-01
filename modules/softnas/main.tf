@@ -361,6 +361,18 @@ resource "aws_instance" "softnas1" {
     command = "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R ${var.softnas1_private_ip1}"
     command = "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R ${var.softnas1_private_ip2}"
   }
+  provisioner "remote-exec" {
+    inline = ["sudo yum install -y python"]
+
+    connection {
+      type        = "ssh"
+      user        = "centos"
+      private_key = "${var.private_key}"
+    }
+  }
+  provisioner "local-exec" {
+    command = "ansible-playbook -i ansible/inventory ansible/softnas-init.yaml -v"
+  }
 }
 
 # resource "aws_cloudformation_stack" "SoftNAS1Stack" {
