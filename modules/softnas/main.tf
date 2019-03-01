@@ -354,24 +354,36 @@ resource "aws_instance" "softnas1" {
     Route = "private"
     Role  = "softnas"
   }
-  # remove existing keys from localhost to avoid unnecesary warning of MITM
-  provisioner "local-exec" {
-    command = "set -x"
-    command = "echo 'remove from hosts file'"
-    command = "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R ${var.softnas1_private_ip1}"
-    command = "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R ${var.softnas1_private_ip2}"
-  }
-  provisioner "remote-exec" {
-    inline = ["sudo yum install -y python"]
+}
 
-    connection {
-      type        = "ssh"
-      user        = "centos"
-      private_key = "${var.private_key}"
-    }
+resource "null_resource" "provision_softnas" {
+  depends_on = ["aws_instance.softnas1"]
+
+  triggers {
+    instanceid = "${ aws_instance.softnas1.id }"
   }
+
+  provisioner "remote-exec" {
+    connection {
+      user                = "centos"
+      host                = "${aws_instance.softnas1.private_ip}"
+      bastion_host        = "bastion.firehawkfilm.com"
+      private_key         = "${var.private_key}"
+      bastion_private_key = "${var.private_key}"
+      type                = "ssh"
+      timeout             = "10m"
+    }
+
+    inline = ["set -x && sudo yum install -y python"]
+  }
+
   provisioner "local-exec" {
-    command = "ansible-playbook -i ansible/inventory ansible/softnas-init.yaml -v"
+    command = <<EOT
+      set -x
+      cd /vagrant
+      ansible-playbook -i ansible/inventory ansible/softnas-init.yaml -v
+      ansible-playbook -i ansible/inventory ansible/softnas-update.yaml -v
+  EOT
   }
 }
 
