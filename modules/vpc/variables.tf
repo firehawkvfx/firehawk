@@ -39,6 +39,11 @@ variable "private_subnets" {
   default = ["10.0.1.0/24", "10.0.2.0/24"]
 }
 
+# due to aws security group limits, we need a single range to encompass all private subnets for softnas security groups to not exceed the limit.
+variable "all_private_subnets_cidr_range" {
+  default = "10.0.1.0/24"
+}
+
 variable "public_subnets" {
   default = ["10.0.101.0/24", "10.0.102.0/24"]
 }

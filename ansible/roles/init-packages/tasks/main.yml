@@ -10,4 +10,7 @@
     - python-pexpect
     - python-passlib
     - openvpn
+    - nfs-common
+
+#nfs-common is used for showmount
 

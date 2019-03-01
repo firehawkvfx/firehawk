@@ -3,7 +3,7 @@ provider "aws" {
   #  access_key = "${var.aws_access_key}"
   #  secret_key = "${var.aws_secret_key}"
   region = "${var.region}"
-  
+
   # in a dev environment these 3 version locks below can be disabled.  in production, they should be locked based on the suggested versions from terraform init.
   version = "~> 1.60"
 }
@@ -35,17 +35,15 @@ module "vpc" {
   remote_ip_cidr = "${var.remote_ip_cidr}"
   #the remote private cidr range of the subnet the openvpn client reside in.  used if you intend to use the client as a router / gateway for other nodes in your private network.
   remote_subnet_cidr = "${var.remote_subnet_cidr}"
+
   #a provided route 53 zone id will be modified to have a subdomain to access vpn.  you will need to manually setup a route 53 zone for a domain with an ssl certificate.
-  
+
   key_name           = "${var.key_name}"
   private_key        = "${file("${var.local_key_path}")}"
   local_key_path     = "${var.local_key_path}"
-
   route_zone_id      = "${var.route_zone_id}"
   public_domain_name = "${var.public_domain_name}"
-
   cert_arn           = "${var.cert_arn}"
-  
   openvpn_user       = "${var.openvpn_user}"
   openvpn_user_pw    = "${var.openvpn_user_pw}"
   openvpn_admin_user = "${var.openvpn_admin_user}"
@@ -68,19 +66,20 @@ module "softnas" {
 
   #softnas_role = "${module.softnas_role.softnas_role_name}"
 
-  cloudformation_stack_name   = "FCB-SoftNAS1Stack"
-  vpn_private_ip              = "${module.vpc.vpn_private_ip}"
-  key_name                    = "${var.key_name}"
-  private_key                 = "${file("${var.local_key_path}")}"
-  vpc_id                      = "${module.vpc.vpc_id}"
-  vpn_cidr                    = "${var.vpn_cidr}"
-  private_subnets             = "${module.vpc.private_subnets}"
-  private_subnets_cidr_blocks = "${module.vpc.private_subnets_cidr_blocks}"
-  public_subnets_cidr_blocks  = "${module.vpc.public_subnets_cidr_blocks}"
-  remote_subnet_cidr          = "${var.remote_subnet_cidr}"
-  remote_ip_cidr              = "${var.remote_ip_cidr}"
-  bastion_private_ip          = "${module.vpc.vpn_private_ip}"
-  softnas_user_password       = "${var.softnas_user_password}"
+  cloudformation_stack_name      = "FCB-SoftNAS1Stack"
+  vpn_private_ip                 = "${module.vpc.vpn_private_ip}"
+  key_name                       = "${var.key_name}"
+  private_key                    = "${file("${var.local_key_path}")}"
+  vpc_id                         = "${module.vpc.vpc_id}"
+  vpn_cidr                       = "${var.vpn_cidr}"
+  private_subnets                = "${module.vpc.private_subnets}"
+  private_subnets_cidr_blocks    = "${module.vpc.private_subnets_cidr_blocks}"
+  all_private_subnets_cidr_range = "${module.vpc.all_private_subnets_cidr_range}"
+  public_subnets_cidr_blocks     = "${module.vpc.public_subnets_cidr_blocks}"
+  remote_subnet_cidr             = "${var.remote_subnet_cidr}"
+  remote_ip_cidr                 = "${var.remote_ip_cidr}"
+  bastion_private_ip             = "${module.vpc.vpn_private_ip}"
+  softnas_user_password          = "${var.softnas_user_password}"
 
   #softnas_role_name = "${module.softnas_role.softnas_role_name}"
 
@@ -222,6 +221,7 @@ module "bastion" {
 
   #sleep will stop instances to save cost during idle time.
   sleep = "${var.sleep}"
+
   # || var.node_sleep_on_create}"
 
   #softnas_private_ip        = "${module.softnas.private_ip}"

@@ -10,7 +10,9 @@ openvpn_user_pw: "{{ vault_openvpn_user_pw }}"
 
 user_softnas_pw: "{{ vault_user_softnas_pw }}"
 
-aws_region: "{{ vault_user_softnas_pw }}"
+aws_region: "{{ vault_aws_region }}"
 aws_access_key: "{{ vault_aws_access_key }}"
 aws_secret_key: "{{ vault_aws_secret_key }}"
 s3_disk_password: "{{ vault_s3_disk_password }}"
+
+public_domain: "{{ vault_public_domain }}"
