@@ -1,5 +1,7 @@
 - hosts: ansible_control
+  remote_user: vagrant
   become: true
+  gather_facts: no
 
   vars:
     bastionip: "{{ groups['bastionip'][0] }}"
@@ -10,9 +12,16 @@
       msg: "{{ item }}"
     with_items:
       - "{{ bastionip }}"
+
+  - name: clean known hosts
+    shell: "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R {{ bastionip }}"
+    become: true
+    become_user: vagrant
   
   - name: Write the new ec2 instance host key to known hosts
-    shell: "ssh-keyscan -H {{ bastionip }} >> ~/.ssh/known_hosts"
+    shell: "ssh-keyscan -H {{ bastionip }} >> /home/vagrant/.ssh/known_hosts"
+    become: true
+    become_user: vagrant
 
 - hosts: localhost
   remote_user: vagrant
@@ -25,6 +34,12 @@
     # need to remove old hosts ssh-keygen -f "/home/vagrant/.ssh/known_hosts" -R 10.0.1.11
 
   tasks:
+
+  - name: clean known hosts
+    shell: "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R {{ groups['role_softnas'][0] }}"
+    become: true
+    become_user: vagrant
+
   - name: delegate keyscan to add keys from remote subnet via bastion host.
     command: "ssh-keyscan {{ groups['role_softnas'][0] }}"
     register: new_host_fingerprint
@@ -38,6 +53,8 @@
       dest: /home/vagrant/.ssh/known_hosts
       line: "{{ item }}"
     with_items: "{{ new_host_fingerprint.stdout_lines }}"
+    become: true
+    become_user: vagrant
 
 - hosts: role_softnas
   remote_user: centos
