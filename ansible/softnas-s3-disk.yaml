@@ -1,0 +1,319 @@
+- hosts: ansible_control
+  remote_user: vagrant
+
+  vars:
+    # if pool name and volume name match an existing bucket, then it will be imported.  creation will skip.
+    # commandline example to override defaults:
+    # ansible-playbook -i ansible/inventory ansible/softnas-s3-disk.yaml --extra-vars "pool_name=pool10 volume_name=volume10 s3_disk_size_max_value=600 encrypt_s3=true"
+
+    pool_name: pool9
+    volume_name: volume9
+    encrypt_s3: false
+    s3_disk_size_max_value: 500
+    s3_disk_size_max_units: GB
+    s3_disk_region: "{{ aws_region }}"
+    existing_bucket: false
+
+  tasks:
+  - set_fact:
+      pool_name: "{{ pool_name }}"
+      volume_name: "{{ volume_name }}"
+      encrypt_s3: "{{ encrypt_s3 }}"
+      s3_disk_size_max_value: "{{ s3_disk_size_max_value }}"
+      s3_disk_size_max_units: "{{ s3_disk_size_max_units }}"
+      s3_disk_region: "{{ s3_disk_region }}"
+      existing_bucket: "{{ existing_bucket }}"
+
+  - name: Create s3 extender disk. Query existing buckets.
+    shell: |
+      aws s3api list-buckets --query "Buckets[].Name"
+    register: bucket_out
+
+  - set_fact:
+      buckets: "{{ bucket_out.stdout | from_json }}"
+      search_string: "{{ pool_name }}-{{ volume_name }}"
+
+  - debug:
+      msg: "{{ buckets }}"
+
+  - name: check for existing pool and volume name
+    set_fact:
+      existing_bucket: "{{ item }}"
+    when:  search_string in item
+    with_items:
+      - "{{ buckets }}"
+
+  - name: existing_bucket
+    debug:
+      msg: "existing_bucket: {{ existing_bucket }}"
+    when: existing_bucket != false
+
+  - name: get bucket region if match found
+    shell: |
+      aws s3api get-bucket-location --bucket {{ existing_bucket }}
+    register: bucket_location_shell_output
+    when: existing_bucket != false
+
+  - name: register bucket location
+    set_fact:
+      bucket_location: "{{ (bucket_location_shell_output.stdout|from_json).LocationConstraint }}"
+    when: existing_bucket != false
+
+  - name: Existing bucket.  Will mount this to SoftNAS instead of creating a new one.
+    debug:
+      msg: "found bucket: {{ existing_bucket }}\nlocation: {{ bucket_location }}"
+    when: existing_bucket != false
+
+# create a new bucket
+- hosts: role_softnas
+  remote_user: centos
+  become_user: root
+  become: true
+
+  vars:
+    pool_name: "{{ hostvars['ansible_control']['pool_name'] }}"
+    volume_name: "{{ hostvars['ansible_control']['volume_name'] }}"
+    encrypt_s3: "{{ hostvars['ansible_control']['encrypt_s3'] }}"
+    s3_disk_size_max_value: "{{ hostvars['ansible_control']['s3_disk_size_max_value'] }}"
+    s3_disk_size_max_units: "{{ hostvars['ansible_control']['s3_disk_size_max_units'] }}"
+    s3_disk_region: "{{ hostvars['ansible_control']['s3_disk_region'] }}"
+    existing_bucket: "{{ hostvars['ansible_control']['existing_bucket'] }}"
+  
+  # import by bucket name if bucket name exists, then import, else create.
+  # if created, then also:
+  # create pool from disk mount
+  # create volume from pool
+  # ----
+  # create nfs share.
+
+  # create ability to delete
+  tasks:
+    - debug:
+        msg: "existing_bucket: {{ existing_bucket }}"
+      when: existing_bucket == false
+
+    - include_role: 
+        name: softnas-s3-disk-create
+      when: existing_bucket == false
+
+# mount an existing bucket
+- hosts: role_softnas
+  remote_user: centos
+  become_user: root
+  become: true
+
+  vars:
+    pool_name: "{{ hostvars['ansible_control']['pool_name'] }}"
+    volume_name: "{{ hostvars['ansible_control']['volume_name'] }}"
+    encrypt_s3: "{{ hostvars['ansible_control']['encrypt_s3'] }}"
+    s3_disk_size_max_value: "{{ hostvars['ansible_control']['s3_disk_size_max_value'] }}"
+    s3_disk_size_max_units: "{{ hostvars['ansible_control']['s3_disk_size_max_units'] }}"
+    s3_disk_region: "{{ hostvars['ansible_control']['s3_disk_region'] }}"
+    existing_bucket: "{{ hostvars['ansible_control']['existing_bucket'] }}"
+    bucket_location: "{{ hostvars['ansible_control']['bucket_location'] }}"
+    s3_disk_name: s3-0
+  
+  # import by bucket name if bucket name exists, then import, else create.
+  # if created, then also:
+  # create pool from disk mount
+  # create volume from pool
+  # ----
+  # create nfs share.
+
+  # create ability to delete
+  tasks:
+    - debug:
+        msg: "existing_bucket: {{ existing_bucket }}\nImporting."
+      when: existing_bucket != false
+
+    - include_role: 
+        name: softnas-s3-disk-import
+      when: existing_bucket != false
+
+
+
+
+
+# - import_playbook: softnas-s3-disk-import.yaml
+#   when: hostvars.ansible_control.existing_bucket
+
+# - hosts: role_softnas
+#   remote_user: centos
+#   become_user: root
+#   become: true
+
+#   vars:
+#     pool_name: pool1
+#     volume_name: volume1
+#     encrypt_s3: false
+#     s3_disk_size_max_value: 500
+#     s3_disk_size_max_units: GB
+#     s3_disk_region: "{{ aws_region }}"
+  
+#   # import by bucket name if bucket name exists, then import, else create.
+#   # if created, then also do this.
+#   # create pool from disk mount
+#   # create volume from pool
+#   # ----
+#   # create nfs share.
+
+#   # create ability to delete
+
+#   tasks:
+#   - name: check pool_name is defined
+#     fail:
+#       msg: "Bailing out: creating a disk requires a 'pool_name'"
+#     when: pool_name is not defined
+
+#   - name: check volume_name is defined
+#     fail:
+#       msg: "Bailing out: creating a disk requires a 'volume_name'"
+#     when: volume_name is not defined
+
+#   - set_fact:
+#       encrypt_option: ""
+#       encrypt_label: "notencrypted"
+  
+#   - name: check if s3_disk_password is defined
+#     set_fact:
+#       encrypt_option: "encrypted={{ s3_disk_password }}"
+#       encrypt_label: "encrypted"
+#     when: encrypt_s3 and s3_disk_password is defined
+
+#   - set_fact:
+#       s3_disk_bucket_name: "{{ public_domain | replace('.','') }}-softnas-{{ pool_name }}-{{ volume_name }}-{{ s3_disk_size_max_value }}{{ s3_disk_size_max_units | lower}}-{{ encrypt_label }}"
+
+#   - name: Bucket name
+#     debug:
+#       msg: "Will create bucket name: {{s3_disk_bucket_name}}"
+
+#   - name: softnas login
+#     shell: |
+#       softnas-cmd login softnas {{ user_softnas_pw }}
+
+#   - name: create s3 extender disk
+#     shell: |
+#       softnas-cmd login softnas {{ user_softnas_pw }}
+#       set -x
+#       softnas-cmd diskmgmt createExtenderDisk type=amazon accessKey={{ aws_access_key }} secretKey={{ aws_secret_key }} bucketName={{ s3_disk_bucket_name }} sizeMaxValue={{ s3_disk_size_max_value }} sizeMaxUnits={{ s3_disk_size_max_units }} region={{ s3_disk_region }} {{ encrypt_option }}> /tmp/softnas_init_s3_disk_output_dict.json
+#   # encrypted={{ s3_disk_password }}
+#   - fetch:
+#       src: /tmp/softnas_init_s3_disk_output_dict.json
+#       dest: /tmp/
+#       flat: true
+
+#   - include_vars:
+#       file: /tmp/softnas_init_s3_disk_output_dict.json
+#       name: softnas_init_s3_disk_output_dict
+
+#   - name: s3 extender disk all json output
+#     debug:
+#       msg: "{{ softnas_init_s3_disk_output_dict }}"
+
+#   - name: check if softnas cli login succeeded
+#     debug:
+#       msg: "softnas-cli login succeeded"
+#     when: softnas_init_s3_disk_output_dict.success
+
+#   - name: check if softnas cli login failed
+#     fail:
+#       msg: "{{softnas_init_s3_disk_output_dict}}"
+#     failed_when: softnas_init_s3_disk_output_dict.success == false
+
+#   # - name: check if disk create succeeded
+#   #   debug:
+#   #     msg: "{{softnas_init_s3_disk_output_dict.result.msg}}"
+#   #   when: softnas_init_s3_disk_output_dict.result.success
+
+#   - name: check if disk create failed
+#     fail:
+#       msg: "{{softnas_init_s3_disk_output_dict.result.msg}}"
+#     failed_when: softnas_init_s3_disk_output_dict.result.success == false
+
+#   - set_fact:
+#       new_s3_disk_name: "{{ softnas_init_s3_disk_output_dict.result.records.disk_info.disk_name }}"
+    
+#   - name: new disk name
+#     debug:
+#       msg: "{{ new_s3_disk_name }}"
+
+#   - name: create pool
+#     shell: |
+#       softnas-cmd login softnas {{ user_softnas_pw }}
+#       softnas-cmd createpool {{ new_s3_disk_name }} -n={{ pool_name }} -r=0 -f=on -sync=standard -cs=off -shared=on -t > /tmp/softnas_init_pool_output_dict.json
+
+#   - fetch:
+#       src: /tmp/softnas_init_pool_output_dict.json
+#       dest: /tmp/
+#       flat: true
+
+#   - include_vars:
+#       file: /tmp/softnas_init_pool_output_dict.json
+#       name: softnas_init_pool_output_dict
+
+#   - name: create pool all json output
+#     debug:
+#       msg: "{{ softnas_init_pool_output_dict }}"
+
+#   - name: check if softnas cli login succeeded
+#     debug:
+#       msg: "softnas-cli login succeeded"
+#     when: softnas_init_pool_output_dict.success
+
+#   - name: check if softnas cli login failed
+#     fail:
+#       msg: "{{softnas_init_pool_output_dict}}"
+#     failed_when: softnas_init_pool_output_dict.success == false
+
+#   # - name: check if pool create succeeded
+#   #   debug:
+#   #     msg: "{{softnas_init_pool_output_dict.result.msg}}"
+#   #   when: softnas_init_pool_output_dict.result.success
+
+#   - name: check if pool create failed
+#     fail:
+#       msg: "{{softnas_init_pool_output_dict.result.msg}}"
+#     failed_when: softnas_init_pool_output_dict.result.success == false
+
+#   - name: create volume
+#     shell: |
+#       softnas-cmd login softnas {{ user_softnas_pw }}
+#       softnas-cmd createvolume vol_name={{ volume_name }} pool={{ pool_name }} vol_type=filesystem provisioning=thin exportNFS=on shareCIFS=on enable_snapshot=off sync=always replication=off > /tmp/softnas_init_volume_output_dict.json
+
+#   - fetch:
+#       src: /tmp/softnas_init_volume_output_dict.json
+#       dest: /tmp/
+#       flat: true
+
+#   - include_vars:
+#       file: /tmp/softnas_init_volume_output_dict.json
+#       name: softnas_init_volume_output_dict
+
+#   - name: create volume all json output
+#     debug:
+#       msg: "{{ softnas_init_volume_output_dict }}"
+
+#   - name: check if softnas cli login succeeded
+#     debug:
+#       msg: "softnas-cli login succeeded"
+#     when: softnas_init_volume_output_dict.success
+
+#   - name: check if softnas cli login failed
+#     fail:
+#       msg: "{{softnas_init_volume_output_dict}}"
+#     failed_when: softnas_init_volume_output_dict.success == false
+
+#   # - name: check if volume create succeeded
+#   #   debug:
+#   #     msg: "{{softnas_init_volume_output_dict.result.msg}}"
+#   #   when: softnas_init_volume_output_dict.result.success
+
+#   - name: Check volume create failed
+#     fail:
+#       msg: "{{softnas_init_volume_output_dict.result.msg}}"
+#     failed_when: softnas_init_volume_output_dict.result.success == false
+
+#   - name: Check volume create succeeded
+#     debug:
+#       msg: "disk_name: {{ new_s3_disk_name }} vol_path: {{ softnas_init_volume_output_dict.result.records.vol_path }} bucket_name: {{ s3_disk_bucket_name }}"
+#     when: softnas_init_volume_output_dict.result.success
