@@ -1,0 +1,85 @@
+---
+# tasks file for ansible/roles/softnas-s3-disk-import
+# - hosts: role_softnas
+#   remote_user: centos
+#   become_user: root
+#   become: true
+
+#   vars:
+#     existing_bucket: {{ hostvars.ansible_control.existing_bucket }}
+#     pool_name: pool1
+#     volume_name: volume1
+#     encrypt_s3: false
+#     s3_disk_size_max_value: 500
+#     s3_disk_size_max_units: GB
+#     s3_disk_region: "{{ aws_region }}"
+#     s3_disk_name: s3-0
+  
+  # import by bucket name if bucket name exists, then import, else create.
+  # if created, then also do this.
+  # create pool from disk mount
+  # create volume from pool
+  # ----
+  # create nfs share.
+
+  # create ability to delete
+
+  # tasks:
+# - name: check pool_name is defined
+#   fail:
+#     msg: "Bailing out: creating a disk requires a 'pool_name'"
+#   when: pool_name is not defined
+
+# - name: check volume_name is defined
+#   fail:
+#     msg: "Bailing out: creating a disk requires a 'volume_name'"
+#   when: volume_name is not defined
+
+# - name: Bucket name
+#   debug:
+#     msg: "Will create bucket name: {{s3_disk_bucket_name}}"
+
+# - name: softnas login
+#   shell: |
+#     softnas-cmd login softnas {{ user_softnas_pw }}
+- name: get bucket attributes
+  set_fact:
+    encrypt_s3: false
+    encrypt_option: ""
+    s3_disk_size_max_value: "{{ existing_bucket.split('-')[4][:-2] }}"
+    s3_disk_size_max_units: "{{ existing_bucket.split('-')[4][-2:] | lower }}"
+    encrypt_label: "{{ existing_bucket.split('-')[5] }}"
+    
+- name: check strings for attributes
+  debug:
+    msg: |
+      encrypt_label: {{ encrypt_label }}
+      s3_disk_size_max_value: {{ s3_disk_size_max_value }}
+      s3_disk_size_max_units: {{ s3_disk_size_max_units }}
+
+
+- name: check encryption
+  set_fact:
+    encrypt_s3: true
+  when: encrypt_label is match("encrypted")
+
+- name: check if s3_disk_password is defined
+  set_fact:
+    encrypt_option: "--encrypt {{ s3_disk_password }}"
+  when: encrypt_s3 and s3_disk_password is defined
+
+- name: create s3 extender disk
+  shell: |
+    softnas-cmd login softnas {{ user_softnas_pw }}
+    set -x
+    echo '/var/www/softnas/scripts/s3disk.sh --import --dname {{ s3_disk_name }} --bname {{ existing_bucket }} --bsize {{ s3_disk_size_max_value }}{{ s3_disk_size_max_units }} --region {{ bucket_location }} {{ encrypt_option }}' > /tmp/softnas_s3_disk_import_output
+  #register: softnas_s3_disk_import_output
+    #softnas-cmd diskmgmt createExtenderDisk type=amazon accessKey={{ aws_access_key }} secretKey={{ aws_secret_key }} bucketName={{ s3_disk_bucket_name }} sizeMaxValue={{ s3_disk_size_max_value }} sizeMaxUnits={{ s3_disk_size_max_units }} region={{ s3_disk_region }} {{ encrypt_option }}> /tmp/softnas_init_s3_disk_output_dict.json
+
+- name: import command
+  shell: "cat /tmp/softnas_s3_disk_import_output"
+  register: softnas_s3_disk_import_output
+
+- name: import command
+  debug:
+    msg: "{{ softnas_s3_disk_import_output.stdout }}"
