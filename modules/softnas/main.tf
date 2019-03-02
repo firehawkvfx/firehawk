@@ -146,26 +146,18 @@ resource "aws_security_group" "softnas" {
   }
 
   ingress {
-    protocol    = "tcp"
+    protocol    = "-1"
     from_port   = 0
-    to_port     = 65535
-    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
-    description = "all incoming traffic from remote vpn"
-  }
-
-  ingress {
-    protocol    = "udp"
-    from_port   = 49152
-    to_port     = 65535
-    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
-    description = ""
+    to_port     = 0
+    cidr_blocks = ["${var.remote_subnet_cidr}", "10.0.0.0/16", "${var.public_subnets_cidr_blocks[0]}", "${var.vpn_cidr}"]
+    description = "all incoming traffic"
   }
 
   ingress {
     protocol    = "tcp"
     from_port   = 53
     to_port     = 53
-    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.public_subnets_cidr_blocks[0]}", "${var.vpn_cidr}"]
     description = "DNS"
   }
 
@@ -173,88 +165,8 @@ resource "aws_security_group" "softnas" {
     protocol    = "udp"
     from_port   = 53
     to_port     = 53
-    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.public_subnets_cidr_blocks[0]}", "${var.vpn_cidr}"]
     description = "DNS"
-  }
-
-  ingress {
-    protocol    = "tcp"
-    from_port   = 111
-    to_port     = 111
-    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
-    description = "NFS"
-  }
-
-  ingress {
-    protocol    = "udp"
-    from_port   = 111
-    to_port     = 111
-    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
-    description = "NFS"
-  }
-
-  ingress {
-    protocol    = "tcp"
-    from_port   = 892
-    to_port     = 892
-    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
-    description = "rquotad, nlockmgr, mountd, status"
-  }
-
-  ingress {
-    protocol    = "udp"
-    from_port   = 892
-    to_port     = 892
-    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
-    description = "rquotad, nlockmgr, mountd, status"
-  }
-
-  ingress {
-    protocol    = "tcp"
-    from_port   = 2010
-    to_port     = 2010
-    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
-    description = "rquotad, nlockmgr, mountd, status"
-  }
-
-  ingress {
-    protocol    = "udp"
-    from_port   = 2010
-    to_port     = 2010
-    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
-    description = "rquotad, nlockmgr, mountd, status"
-  }
-
-  ingress {
-    protocol    = "tcp"
-    from_port   = 2014
-    to_port     = 2014
-    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
-    description = "rquotad, nlockmgr, mountd, status"
-  }
-
-  ingress {
-    protocol    = "udp"
-    from_port   = 2014
-    to_port     = 2014
-    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
-    description = "rquotad, nlockmgr, mountd, status"
-  }
-
-  ingress {
-    protocol    = "tcp"
-    from_port   = 2049
-    to_port     = 2049
-    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
-    description = "rquotad, nlockmgr, mountd, status"
-  }
-
-  ingress {
-    protocol    = "udp"
-    from_port   = 2049
-    to_port     = 2049
-    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
-    description = "rquotad, nlockmgr, mountd, status"
   }
 
   ingress {
@@ -277,8 +189,104 @@ resource "aws_security_group" "softnas" {
     protocol    = "tcp"
     from_port   = 443
     to_port     = 443
-    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.public_subnets_cidr_blocks[0]}", "${var.vpn_cidr}"]
     description = "https"
+  }
+
+  ingress {
+    protocol    = "tcp"
+    from_port   = 0
+    to_port     = 65535
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
+    description = "all incoming traffic from remote vpn"
+  }
+
+  ingress {
+    protocol    = "udp"
+    from_port   = 49152
+    to_port     = 65535
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
+    description = ""
+  }
+
+  ingress {
+    protocol    = "tcp"
+    from_port   = 111
+    to_port     = 111
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
+    description = "NFS"
+  }
+
+  ingress {
+    protocol    = "udp"
+    from_port   = 111
+    to_port     = 111
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
+    description = "NFS"
+  }
+
+  ingress {
+    protocol    = "tcp"
+    from_port   = 892
+    to_port     = 892
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
+    description = "rquotad, nlockmgr, mountd, status"
+  }
+
+  ingress {
+    protocol    = "udp"
+    from_port   = 892
+    to_port     = 892
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
+    description = "rquotad, nlockmgr, mountd, status"
+  }
+
+  ingress {
+    protocol    = "tcp"
+    from_port   = 2010
+    to_port     = 2010
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
+    description = "rquotad, nlockmgr, mountd, status"
+  }
+
+  ingress {
+    protocol    = "udp"
+    from_port   = 2010
+    to_port     = 2010
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
+    description = "rquotad, nlockmgr, mountd, status"
+  }
+
+  ingress {
+    protocol    = "tcp"
+    from_port   = 2014
+    to_port     = 2014
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
+    description = "rquotad, nlockmgr, mountd, status"
+  }
+
+  ingress {
+    protocol    = "udp"
+    from_port   = 2014
+    to_port     = 2014
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
+    description = "rquotad, nlockmgr, mountd, status"
+  }
+
+  ingress {
+    protocol    = "tcp"
+    from_port   = 2049
+    to_port     = 2049
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
+    description = "rquotad, nlockmgr, mountd, status"
+  }
+
+  ingress {
+    protocol    = "udp"
+    from_port   = 2049
+    to_port     = 2049
+    cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.vpn_cidr}"]
+    description = "rquotad, nlockmgr, mountd, status"
   }
 
   egress {

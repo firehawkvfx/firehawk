@@ -83,11 +83,12 @@
       path: /tmp/softnas-update.status
     register: update_file
 
-  - name: "Wait until Softnas Update completed. This can take up to 1 hour"
+  - name: "Wait until Softnas Update completes. This can take 15-45 mins"
     wait_for:
       path: /tmp/softnas-update.status
       search_regex: OK
-      sleep: 30
+      #sleep: 30
+      # sleep may cause issues if it reboots between checks
       timeout: 5400
     when: update_file.stat.exists and softnas_runupdate
       
