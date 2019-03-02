@@ -4,10 +4,10 @@
   become: true
 
   vars:
-    new_pool_name: pool1
-    new_volume_name: volume1
-    s3_disk_bucket_name: "{{ public_domain | replace('.','') }}-softnas-{{ new_pool_name }}-{{ new_volume_name }}"
-    s3_disk_size_max_value: 50
+    pool_name: pool1
+    volume_name: volume1
+    encrypt_s3: false
+    s3_disk_size_max_value: 500
     s3_disk_size_max_units: GB
     s3_disk_region: "{{ aws_region }}"
   
@@ -21,10 +21,32 @@
   # create ability to delete
 
   tasks:
+  - name: check pool_name is defined
+    fail:
+      msg: "Bailing out: creating a disk requires a 'pool_name'"
+    when: pool_name is not defined
 
-  - name: bucket name
+  - name: check volume_name is defined
+    fail:
+      msg: "Bailing out: creating a disk requires a 'volume_name'"
+    when: volume_name is not defined
+
+  - set_fact:
+      encrypt_option: ""
+      encrypt_label: "notencrypted"
+  
+  - name: check if s3_disk_password is defined
+    set_fact:
+      encrypt_option: "encrypted={{ s3_disk_password }}"
+      encrypt_label: "encrypted"
+    when: encrypt_s3 and s3_disk_password is defined
+
+  - set_fact:
+      s3_disk_bucket_name: "{{ public_domain | replace('.','') }}-softnas-{{ pool_name }}-{{ volume_name }}-{{ encrypt_label }}-{{ s3_disk_size_max_value }}{{ s3_disk_size_max_units | lower}}"
+
+  - name: Bucket name
     debug:
-      msg: "{{s3_disk_bucket_name}}"
+      msg: "Will create bucket name: {{s3_disk_bucket_name}}"
 
   - name: softnas login
     shell: |
@@ -33,8 +55,9 @@
   - name: create s3 extender disk
     shell: |
       softnas-cmd login softnas {{ user_softnas_pw }}
-      softnas-cmd diskmgmt createExtenderDisk type=amazon accessKey={{ aws_access_key }} secretKey={{ aws_secret_key }} bucketName={{ s3_disk_bucket_name }} sizeMaxValue={{ s3_disk_size_max_value }} sizeMaxUnits={{ s3_disk_size_max_units }} region={{ s3_disk_region }} encrypted={{ s3_disk_password }} > /tmp/softnas_init_s3_disk_output_dict.json
-  
+      set -x
+      softnas-cmd diskmgmt createExtenderDisk type=amazon accessKey={{ aws_access_key }} secretKey={{ aws_secret_key }} bucketName={{ s3_disk_bucket_name }} sizeMaxValue={{ s3_disk_size_max_value }} sizeMaxUnits={{ s3_disk_size_max_units }} region={{ s3_disk_region }} {{ encrypt_option }}> /tmp/softnas_init_s3_disk_output_dict.json
+  # encrypted={{ s3_disk_password }}
   - fetch:
       src: /tmp/softnas_init_s3_disk_output_dict.json
       dest: /tmp/
@@ -78,7 +101,7 @@
   - name: create pool
     shell: |
       softnas-cmd login softnas {{ user_softnas_pw }}
-      softnas-cmd createpool {{ new_s3_disk_name }} -n={{ new_pool_name }} -r=0 -f=on -sync=standard -cs=off -shared=on -t > /tmp/softnas_init_pool_output_dict.json
+      softnas-cmd createpool {{ new_s3_disk_name }} -n={{ pool_name }} -r=0 -f=on -sync=standard -cs=off -shared=on -t > /tmp/softnas_init_pool_output_dict.json
 
   - fetch:
       src: /tmp/softnas_init_pool_output_dict.json
@@ -116,7 +139,7 @@
   - name: create volume
     shell: |
       softnas-cmd login softnas {{ user_softnas_pw }}
-      softnas-cmd createvolume vol_name={{ new_volume_name }} pool={{ new_pool_name }} vol_type=filesystem provisioning=thin exportNFS=on shareCIFS=on enable_snapshot=off sync=always replication=off > /tmp/softnas_init_volume_output_dict.json
+      softnas-cmd createvolume vol_name={{ volume_name }} pool={{ pool_name }} vol_type=filesystem provisioning=thin exportNFS=on shareCIFS=on enable_snapshot=off sync=always replication=off > /tmp/softnas_init_volume_output_dict.json
 
   - fetch:
       src: /tmp/softnas_init_volume_output_dict.json
