@@ -59,7 +59,7 @@
       bucket_location: "{{ (bucket_location_shell_output.stdout|from_json).LocationConstraint }}"
     when: existing_bucket != false
 
-  - name: Existing bucket.  Will mount this to SoftNAS instead of creating a new one.
+  - name: Existing bucket with pool and volume name.  Will mount this to SoftNAS instead of creating a new bucket.
     debug:
       msg: "found bucket: {{ existing_bucket }}\nlocation: {{ bucket_location }}"
     when: existing_bucket != false
@@ -96,7 +96,7 @@
         name: softnas-s3-disk-create
       when: existing_bucket == false
 
-# mount an existing bucket
+# mount / import an existing bucket
 - hosts: role_softnas
   remote_user: centos
   become_user: root
