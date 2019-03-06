@@ -25,3 +25,4 @@ ansible/group_vars/all/vault
 hostvars.log
 tmp/*
 tmp/softnas_checkupdate.json
+tmp/softnas_checkupdate.json

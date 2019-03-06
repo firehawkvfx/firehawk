@@ -395,6 +395,68 @@ resource "null_resource" "provision_softnas" {
   }
 }
 
+resource "random_id" "ami_unique_name" {
+  keepers = {
+    # Generate a new id each time we switch to a new instance id
+    ami_id = "${aws_instance.softnas1.id}"
+  }
+
+  byte_length = 8
+}
+
+resource "aws_ami_from_instance" "softnas1" {
+  depends_on         = ["null_resource.provision_softnas"]
+  name               = "softnas1_${aws_instance.softnas1.id}_${random_id.ami_unique_name.hex}"
+  source_instance_id = "${aws_instance.softnas1.id}"
+
+  tags {
+    Name = "softnas1_${aws_instance.softnas1.id}_${random_id.ami_unique_name.hex}"
+  }
+}
+
+# Once an AMI is built above, then we test the connection to the instance via a bastion below.
+# When connection to softnas is established, we know the instance has booted.  We continue to provision an s3 extender disk below.
+# this creates an s3 bucket if it doesn't already exist.  if there is a bucket with the same disk_device number, same nas name, and same domain,
+# then the existing bucket will be mounted instead and existing data wil be available.  you may need to login to the softnas web ui to import the existing pool and volume,
+# but the disk should be mounted correctly.
+# Domains can be used to differentiate dev environments from production.
+# for example, dev.example.com vs prod.example.com are different namespaces for two different buckets with otherwise identical properties to coexist in the same aws account.
+# if an existing bucket is detected, s3_disk_size_max_value and encrypt_s3 are overidden by the settings on the bucket, and commandline variables ignored.
+# the s3 encryption password is stored in your encrypted vault in ansible/host_vars/all/vault
+
+# IMPORTANT: if creating a new disk, the disk_device should be the next number available to the instance.
+# eg if these are already moujnted, /dev/s3-0, /dev/s3-1, /dev/s3-2, then the disk_device for the next bucket should be "3".
+
+resource "null_resource" "provision_softnas_volumes" {
+  depends_on = ["aws_ami_from_instance.softnas1"]
+
+  triggers {
+    instanceid = "${ aws_instance.softnas1.id }"
+  }
+
+  provisioner "remote-exec" {
+    connection {
+      user                = "centos"
+      host                = "${aws_instance.softnas1.private_ip}"
+      bastion_host        = "bastion.firehawkfilm.com"
+      private_key         = "${var.private_key}"
+      bastion_private_key = "${var.private_key}"
+      type                = "ssh"
+      timeout             = "10m"
+    }
+
+    inline = ["set -x && echo 'booted'"]
+  }
+
+  provisioner "local-exec" {
+    command = <<EOT
+      set -x
+      cd /vagrant
+      ansible-playbook -i ansible/inventory ansible/softnas-s3-disk.yaml -v --extra-vars "pool_name=pool0 volume_name=volume0 disk_device=0 s3_disk_size_max_value=600 encrypt_s3=true"
+  EOT
+  }
+}
+
 # resource "aws_cloudformation_stack" "SoftNAS1Stack" {
 #   depends_on = ["aws_cloudformation_stack.SoftNASRole"]
 
