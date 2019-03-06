@@ -55,7 +55,7 @@
     msg: "installer path: {{ files_matched.files[0].path }}"
 
 - name: install deadline rcs
-  command: "{{ files_matched.files[0].path }} --mode unattended --launcherdaemon true --enable-components proxyconfig --servercert /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --debuglevel 2 --prefix /opt/Thinkbox/Deadline10 --connectiontype Repository --repositorydir /opt/Thinkbox/DeadlineRepository10/ --proxyrootdir openfirehawkserver.firehawkvfx.com:4433 --dbsslcertificate /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --dbsslpassword @WhatTime --licensemode UsageBased --daemonuser deadlineuser --connserveruser deadlineuser --httpport 4433 --tlsport 4433 --enabletls true --tlscertificates generate  --generatedcertdir /opt/Thinkbox/certs/ --clientcert_pass @WhatTime --slavestartup false"
+  command: "{{ files_matched.files[0].path }} --mode unattended --launcherdaemon true --enable-components proxyconfig --servercert /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --debuglevel 2 --prefix /opt/Thinkbox/Deadline10 --connectiontype Repository --repositorydir /opt/Thinkbox/DeadlineRepository10/ --proxyrootdir openfirehawkserver.firehawkvfx.com:4433 --dbsslcertificate /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --dbsslpassword {{ deadline_proxy_certificate_password }} --licensemode UsageBased --daemonuser deadlineuser --connserveruser deadlineuser --httpport 4433 --tlsport 4433 --enabletls true --tlscertificates generate  --generatedcertdir /opt/Thinkbox/certs/ --clientcert_pass {{ deadline_proxy_certificate_password }} --slavestartup false"
   become: true
 
 - name: Restart service for deadlinedb
