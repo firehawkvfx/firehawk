@@ -12,12 +12,10 @@
     volume_name: volume0
     disk_device: 0
     nas_name: softnas
-    encrypt_s3: true
+    encrypt_s3: false
     s3_disk_size_max_value: 500
     s3_disk_size_max_units: GB
     s3_disk_region: "{{ aws_region }}"
-
-    # this will be calculated later-
     existing_bucket: false
 
   tasks:
@@ -152,7 +150,6 @@
 
   # create ability to delete
   tasks:
-
     - debug:
         msg: "existing_bucket: {{ existing_bucket }}\nImporting."
       when: existing_bucket != false
@@ -161,61 +158,5 @@
         name: softnas-s3-disk-import
       when: existing_bucket != false
 
-# after an import or creation of new disk, we need to setup the export.
 
-- hosts: role_softnas
-  remote_user: centos
-  become_user: root
-  become: true
 
-  vars:
-    pool_name: "{{ hostvars['ansible_control']['pool_name'] }}"
-    volume_name: "{{ hostvars['ansible_control']['volume_name'] }}"
-    disk_device: "{{ hostvars['ansible_control']['disk_device'] }}"
-    nas_name: "{{ hostvars['ansible_control']['nas_name'] }}"
-    encrypt_s3: "{{ hostvars['ansible_control']['encrypt_s3'] }}"
-    s3_disk_size_max_value: "{{ hostvars['ansible_control']['s3_disk_size_max_value'] }}"
-    s3_disk_size_max_units: "{{ hostvars['ansible_control']['s3_disk_size_max_units'] }}"
-    s3_disk_region: "{{ hostvars['ansible_control']['s3_disk_region'] }}"
-    existing_bucket: "{{ hostvars['ansible_control']['existing_bucket'] }}"
-    bucket_location: "{{ hostvars['ansible_control']['bucket_location'] }}"
-  
-  # create nfs share.
-
-  tasks:
-  # - name: set /etc/exports
-  #   lineinfile:
-  #     path: /etc/exports
-  #     line: "/export *(async,insecure,no_subtree_check,no_root_squash,rw,nohide,fsid=0)"
-  #     backup: yes
-
-  # - name: insert marker start
-  #   lineinfile:
-  #     path: /etc/exports
-  #     insertafter: "^#?/export.*$"
-  #     line: "# BEGIN ANSIBLE MANAGED BLOCK"
-  #     backup: yes
-
-  # - name: insert marker end
-  #   lineinfile:
-  #     path: /etc/exports
-  #     insertafter: "# BEGIN ANSIBLE MANAGED BLOCK"
-  #     line: "# END ANSIBLE MANAGED BLOCK"
-  #     create: true
-
-  # - name: insert/update block 
-  #   blockinfile:
-  #     path: /etc/exports
-  #     backup: yes
-  #     content: |
-        
-  #       /export /{{ pool_name }}/{{ volume_name }} *(async,insecure,no_subtree_check,no_root_squash,rw,nohide)'
-        
-  - name: restart services after export updates
-    service:
-      name: "{{ item }}"
-      state: restarted
-    with_items:
-      - nfs
-      - softnas
-      - monit

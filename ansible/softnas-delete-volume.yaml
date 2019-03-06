@@ -1,11 +1,14 @@
+# example 
+# ansible-playbook -i ansible/inventory ansible/softnas-delete-volume.yaml -v --extra-vars "volume_name=volume0 pool_name=pool0
+
 - hosts: role_softnas
   remote_user: centos
   become_user: root
   become: true
 
   vars:
-    volume_name: volume1
-    pool_name: pool1
+    volume_name: volume0
+    pool_name: pool0
 
   tasks:
   - name: delete volume

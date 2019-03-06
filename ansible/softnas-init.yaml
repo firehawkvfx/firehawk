@@ -30,11 +30,9 @@
 
   vars:
     bastionip: "{{ groups['bastionip'][0] }}"
-
     # need to remove old hosts ssh-keygen -f "/home/vagrant/.ssh/known_hosts" -R 10.0.1.11
-
+    
   tasks:
-
   - name: clean known hosts
     shell: "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R {{ groups['role_softnas'][0] }}"
     become: true
@@ -70,47 +68,33 @@
       dest: /tmp/updatetype
       force: no
 
-  # - name: install mkpasswd
-  #   package:
-  #     name: expect
-  #     state: present
+# these packages are required to pass an encrypted string via commandline into a user pass.
+  - name: install mkpasswd
+    package:
+      name: expect
+      state: present
 
-  # - name: install pip
-  #   package:
-  #     name: python-pip
-  #     state: present
+  - name: install pip
+    package:
+      name: python-pip
+      state: present
 
-  # - name: install pexpect
-  #   pip:
-  #     name: pexpect
-  #   become: yes
+  - name: install pexpect
+    pip:
+      name: pexpect
+    become: yes
     
-  # - name: install passlib
-  #   pip:
-  #     name: passlib
-  #   become: yes
+  - name: install passlib
+    pip:
+      name: passlib
+    become: yes
 
-  # - name: set user pass
-  #   expect:
-  #     command: passwd softnas
-  #     responses:
-  #       (?i)password: "{{ user_softnas_pw }}"
-  #       (?i)Retype new password: "{{ user_softnas_pw }}"
-
-  # - name: change pass stdin
-  #   command: echo {{ user_softnas_pw }} | passwd --stdin softnas
-
-  - name: multiline test & change softnas pass
-    #command: "softnas-cmd login softnas {{ user_softnas_pw }} && softnas-cmd executeupdate"
-    shell: |
-      #softnas-cmd login softnas {{ user_softnas_pw }} && softnas-cmd checkupdate
-      echo {{ user_softnas_pw }} | passwd --stdin softnas
-    register: softnas_multiline_test
-
-  - name: multiline test
-    debug:
-      var: softnas_multiline_test.stdout.split('\n')
-      
+  - name: set user pass
+    expect:
+      command: passwd softnas
+      responses:
+        (?i)password: "{{ user_softnas_pw }}"
+        (?i)Retype new password: "{{ user_softnas_pw }}"
 
   - name: ensure file exists
     copy:
@@ -147,7 +131,6 @@
     lineinfile:
       path: /var/www/softnas/config/monitoring.ini
       insertafter: "^#?# Valid values for SMTP_ENCRYPTION are SSLV2, SSLV3 and TLSV1"
-      #insertafter: .*Valid values for SMTP_ENCRYPTION are SSLV2, SSLV3 and TLSV1.*
       line: "# BEGIN ANSIBLE MANAGED BLOCK"
       backup: yes
 

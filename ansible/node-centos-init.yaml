@@ -1,0 +1,496 @@
+# - hosts: ansible_control
+#   remote_user: vagrant
+#   become: true
+#   gather_facts: no
+
+#   vars:
+#     bastionip: "{{ groups['bastionip'][0] }}"
+
+#   tasks: 
+#   - name: echo bastion public ip
+#     debug:
+#       msg: "{{ item }}"
+#     with_items:
+#       - "{{ bastionip }}"
+
+#   - name: clean known hosts
+#     shell: "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R {{ bastionip }}"
+#     become: true
+#     become_user: vagrant
+  
+#   - name: Write the new ec2 instance host key to known hosts
+#     shell: "ssh-keyscan -H {{ bastionip }} >> /home/vagrant/.ssh/known_hosts"
+#     become: true
+#     become_user: vagrant
+
+# - hosts: localhost
+#   remote_user: vagrant
+#   become: true
+#   gather_facts: no
+
+#   vars:
+#     bastionip: "{{ groups['bastionip'][0] }}"
+#     # need to remove old hosts ssh-keygen -f "/home/vagrant/.ssh/known_hosts" -R 10.0.1.11
+    
+#   tasks:
+#   - name: clean known hosts
+#     shell: "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R {{ groups['role_node_centos'][0] }}"
+#     become: true
+#     become_user: vagrant
+
+#   - name: delegate keyscan to add keys from remote subnet via bastion host.
+#     command: "ssh-keyscan {{ groups['role_node_centos'][0] }}"
+#     register: new_host_fingerprint
+#     delegate_to: "centos@{{ groups['bastionip'][0] }}"
+
+#   - debug:
+#       msg: "{{ new_host_fingerprint.stdout_lines }}"
+
+#   - name: add keyscan to known hosts
+#     lineinfile:
+#       dest: /home/vagrant/.ssh/known_hosts
+#       line: "{{ item }}"
+#     with_items: "{{ new_host_fingerprint.stdout_lines }}"
+#     become: true
+#     become_user: vagrant
+
+- hosts: role_node_centos
+  remote_user: centos
+  become: true
+
+  vars:
+    bastionip: "{{ groups['bastionip'][0] }}"
+    hostname: "node1.{{ public_domain }}"
+
+  tasks:
+
+  # - name: init authorized_keys
+  #   copy:
+  #     content: ""
+  #     dest: /root/.ssh/authorized_keys
+  #     force: no
+  #   become: true
+
+  # - name: change hostname
+  #   hostname:
+  #     name: "{{ hostname }}"
+      
+  # - name: add myself to /etc/hosts
+  #   lineinfile:
+  #     dest: /etc/hosts
+  #     regexp: '^127\.0\.0\.1[ \t]+localhost'
+  #     line: "127.0.0.1 localhost {{ hostname }}"
+  #     state: present
+
+  # - name: Set hostname var in bash profile
+  #   lineinfile:
+  #     path: /root/.bash_profile
+  #     line: 'export HOSTNAME={{ hostname }}'
+
+#   - name: upgrade all packages - yum update
+#     yum:
+#       name: '*'
+#       state: latest
+# # these packages are required to pass an encrypted string via commandline into a user pass and are suited to centos.
+#   - name: install mkpasswd
+#     package:
+#       name: expect
+#       state: present
+
+#   - name: install epel-release
+#     package:
+#       name: epel-release
+#       state: present
+
+#   - name: install pip
+#     package:
+#       #name: epel-release
+#       name: python-pip
+#       state: present
+
+#   - name: install pexpect
+#     pip:
+#       name: pexpect
+#     become: yes
+    
+#   - name: install passlib
+#     pip:
+#       name: passlib
+#     become: yes
+
+  # - name: Ensure group "deadlineuser" exists
+  #   group:
+  #     name: deadlineuser
+  #     state: present
+  #     gid: 9001
+
+  # - name: Add the user 'deadlineuser' with a specific uid and a primary group of 'deadlineuser'
+  #   user:
+  #     name: deadlineuser
+  #     comment: A user for rendering operations.
+  #     groups: # Empty by default, here we give it some groups
+  #       - wheel
+  #       - deadlineuser
+  #     uid: 9001
+  #     #group: deadlineuser
+
+  # - name: set user pass
+  #   expect:
+  #     command: passwd deadlineuser
+  #     responses:
+  #       (?i)password: "{{ user_deadlineuser_pw }}"
+  #       (?i)Retype new password: "{{ user_deadlineuser_pw }}"
+
+
+  # - name: setup ssh key for deadline user by generating key identifier from pem key
+  #   shell: |
+  #     ssh-keygen -y -f {{ local_key_path }} > /home/vagrant/{{ key_name }}_public
+  #   connection: local
+  #   become_user: vagrant
+  #   become: yes
+
+  # - name: create .ssh dir
+  #   file: 
+  #     path: /home/deadlineuser/.ssh/
+  #     state: directory
+  #     mode: 0700
+  #     owner: deadlineuser
+  #     group: deadlineuser
+  #   become: yes
+  #   become_user: deadlineuser
+
+  # - name: copy key for deadlineuser
+  #   copy:
+  #     src: "/home/vagrant/{{ key_name }}_public"
+  #     dest: /home/deadlineuser/.ssh/authorized_keys
+  #     mode: 0600
+  #     owner: deadlineuser
+  #     group: deadlineuser
+  #   become: yes
+
+  # - name: copy time zone info
+  #   copy:
+  #     src: "{{ time_zone_info_path_linux }}"
+  #     dest: /etc/localtime
+  #     remote_src: true
+  #   become: yes
+
+  # - name: restart sshd.service
+  #   service: 
+  #     name: sshd
+  #     state: restarted
+
+  # - name: create Thinkbox dir
+  #   file: 
+  #     path: /opt/Thinkbox/
+  #     state: directory
+  #     mode: 0700
+  #     owner: deadlineuser
+  #     group: deadlineuser
+  #   become: yes
+
+  # - name: create Thinkbox cert dir
+  #   file: 
+  #     path: /opt/Thinkbox/certs
+  #     state: directory
+  #     mode: 0700
+  #     owner: deadlineuser
+  #     group: deadlineuser
+  #   become: yes
+
+  - name: set deadline remote client certificate permissions locally
+    file: 
+      path: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
+      mode: 0644
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+    connection: local
+
+  - name: Copy deadline remote client certificate
+    copy: 
+      src: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
+      dest: "/opt/Thinkbox/certs/test"
+      mode: 0600
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+
+  - name: strange problem here.  for some reason read permission is needed for everyone set above or the ansible copy doesn't work.  so we set it back here.
+    file: 
+      path: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
+      mode: 0640
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+    connection: local
+
+  - name: create download dir
+    file: 
+      path: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
+      state: directory
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+
+  - name: copy deadline installer
+    copy:
+      src: "{{ deadline_linux_installers_tar }}"
+      dest: "/home/deadlineuser/Downloads/{{ deadline_linux_filename }}"
+      mode: 0640
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+
+  - name: create deadline installer dir
+    file: 
+      path: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
+      state: directory
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+
+
+  - name: Extract
+    unarchive:
+      src: "/home/deadlineuser/Downloads/{{ deadline_linux_filename }}"
+      dest: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
+      owner: deadlineuser
+      mode: u+x
+      remote_src: true
+    become: yes
+
+  - name: "Ansible find files in subdirectory examples /home/deadlineuser/Downloads/Deadline-10.0.23.4-linux-installers/"
+    find:
+      paths: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
+      patterns: "*DeadlineClient-*-linux-x64-installer.run"
+    register: files_matched
+    become: true
+
+  - debug:
+      msg: "installer path: {{ files_matched.files[0].path }}"
+  
+  - name: set execute permissions on installer
+    file:
+      path: "{{ files_matched.files[0].path }}"
+      mode: 0700
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+
+  # - name: install deadline db
+  #   command: "{{ files_matched.files[0].path }} --mode unattended --debuglevel 2 --prefix /opt/Thinkbox/DeadlineRepository10 --setpermissions true --installmongodb true --dbOverwrite true --mongodir /opt/Thinkbox/DeadlineDatabase10 --dbListeningPort 27017 --certgen_outdir /opt/Thinkbox/DeadlineDatabase10/certs --certgen_password @WhatTime --createX509dbuser true --requireSSL true --dbhost openfirehawkserver.firehawkvfx.com --dbport 27017 --dbuser deadlineuser --dbpassword @WhatTime --dbauth true --dbcertpass @WhatTime --dbssl true"
+  #   become: true
+  #   # node command that is working-
+  #   # sudo ./${var.deadline_installers_filename} --mode unattended --debuglevel 2 --prefix /opt/Thinkbox/Deadline10 --connectiontype Remote --noguimode true --licensemode UsageBased --launcherdaemon true --slavestartup 1 --daemonuser deadlineuser --enabletls true --tlsport 4433 --httpport 8080 --proxyrootdir 192.168.92.10:4433 --proxycertificate /opt/Thinkbox/certs/Deadline10RemoteClient.pfx --proxycertificatepassword @WhatTime
+  #   #shell: /home/deadlineuser/Downloads/DeadlineRepository-10.0.23.4-linux-x64-installer.run --mode unattended --debuglevel 2 --prefix /opt/Thinkbox/DeadlineRepository10 --setpermissions true --installmongodb true --dbOverwrite true --mongodir /opt/Thinkbox/DeadlineDatabase10 --dbListeningPort 27017 --certgen_outdir /opt/Thinkbox/DeadlineDatabase10/certs --certgen_password @WhatTime --createX509dbuser true --requireSSL true --dbhost openfirehawkserver.firehawkvfx.com --dbport 27017 --dbuser deadlineuser --dbpassword @WhatTime --dbauth true --dbcertpass @WhatTime --dbssl true
+  # - name: Restart service for deadlinedb
+  #   service:
+  #     name: Deadline10db
+  #     state: restarted
+  #   become: true
+
+  - name: deadline dependencies
+    package:
+      name: "{{ item }}"
+      state: present
+    with_items:
+      - redhat-lsb
+      - samba-client
+      - samba-common
+      - cifs-utils
+      - nfs-utils
+      - nload
+      - tree
+      - bzip2
+      #- nfs-utils-lib
+
+  - name: create production path
+    file: 
+      path: "{{ production_mount_target }}"
+      state: directory
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+  
+  - name: create softnas mount point
+    file: 
+      path: "{{ softnas_mount_source }}"
+      state: directory
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+
+  - name: insert marker start
+    lineinfile:
+      path: /etc/fstab
+      insertafter: "^#?UUID.*$"
+
+      line: "# BEGIN ANSIBLE MANAGED BLOCK"
+      backup: yes
+
+  - name: insert marker end
+    lineinfile:
+      path: /etc/fstab
+      insertafter: "# BEGIN ANSIBLE MANAGED BLOCK"
+      line: "# END ANSIBLE MANAGED BLOCK"
+      create: true
+ 
+  - name: insert/update block in /etc/fstab
+    blockinfile:
+      path: /etc/fstab
+      backup: yes
+      content: |
+        
+        {{ groups['role_softnas'][0] }}:{{ softnas_mount_source }} {{ softnas_mount_source }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
+        {{ softnas_mount_source }} /prod none defaults,bind 0 0
+        
+
+  - name:
+    command: mount -a
+
+
+    #sudo ./${var.deadline_installers_filename} --mode unattended --debuglevel 2 --prefix ${var.deadline_prefix} --connectiontype Remote --noguimode true --licensemode UsageBased --launcherdaemon true --slavestartup 1 --daemonuser ${var.deadline_user} --enabletls true --tlsport 4433 --httpport 8080 --proxyrootdir ${var.deadline_proxy_root_dir} --proxycertificate ${var.deadline_proxy_certificate} --proxycertificatepassword ${var.deadline_proxy_certificate_password}
+
+# sudo mkdir /etc/deadline
+# cat << EOF | sudo tee --append /etc/deadline/secret.txt
+# username=${var.deadline_user}
+# password=${var.deadline_user_password}
+# EOF
+# #ensure secret is readable only by root
+# sudo chmod 400 /etc/deadline/secret.txt
+# set -x
+# ${var.skip_update ? " \n" : "sudo yum update -y"}
+
+# #These are deadline dependencies
+# sudo yum install redhat-lsb -y
+# sudo yum install samba-client samba-common cifs-utils -y
+# sudo yum install nfs-utils nfs-utils-lib -y
+# sudo yum install epel-release -y
+# sudo yum install nload nmap -y
+# sudo yum install tree -y
+# #bzip2 is needed to install deadline client.
+# sudo yum install bzip2 -y
+# #mount repository automatically over the vpn.  if you don't have routing configured, this won't work
+# sudo mkdir -p /mnt/repo
+# sudo mkdir -p ${var.softnas_mount_path}
+# sudo mkdir /prod
+# cat << EOF | sudo tee --append /etc/fstab
+# ### DYNAMIC MOUNTS START ###
+# //${var.deadline_samba_server_address}/DeadlineRepository /mnt/repo cifs    credentials=/etc/deadline/secret.txt,_netdev,uid=${var.deadline_user_uid} 0 0
+# ${var.softnas_private_ip1}:${var.softnas_export_path} ${var.softnas_mount_path} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
+# ${var.softnas_mount_path} /prod none defaults,bind 0 0
+# ### DYNAMIC MOUNTS END ###
+# EOF
+# cat << EOF | sudo tee --append /etc/hosts
+# ${var.deadline_samba_server_address}  ${var.deadline_samba_server_hostname}
+# EOF
+# sudo mount -a
+# sudo tree /mnt -L 3
+# EOT
+#     ]
+#   }
+#   provisioner "remote-exec" {
+#     connection {
+#       user        = "${var.deadline_user}"
+#       host        = "${aws_instance.node_centos.private_ip}"
+#       private_key = "${var.private_key}"
+#       type        = "ssh"
+#       timeout     = "10m"
+#     }
+
+#     inline = [<<EOT
+# set -x
+# cd /var/tmp
+# sudo ./${var.deadline_installers_filename} --mode unattended --debuglevel 2 --prefix ${var.deadline_prefix} --connectiontype Remote --noguimode true --licensemode UsageBased --launcherdaemon true --slavestartup 1 --daemonuser ${var.deadline_user} --enabletls true --tlsport 4433 --httpport 8080 --proxyrootdir ${var.deadline_proxy_root_dir} --proxycertificate ${var.deadline_proxy_certificate} --proxycertificatepassword ${var.deadline_proxy_certificate_password}
+# EOT
+#     ]
+#   }
+
+#   #sudo mount -t cifs -o username=${var.deadline_user},password=${var.deadline_user_password} //${var.deadline_samba_server_address}/DeadlineRepository /mnt/repo
+
+#   #a reboot command in the shell of the instance will cause a terraform error.  We do it locally instead.
+#   provisioner "local-exec" {
+#     command = "aws ec2 reboot-instances --instance-ids ${aws_instance.node_centos.id} && sleep 60"
+#   }
+# }
+
+# resource "null_resource" "install_houdini" {
+#   depends_on = ["null_resource.update_node"]
+
+#   triggers {
+#     instanceid = "${ aws_instance.node_centos.id }"
+#   }
+
+#   provisioner "local-exec" {
+#     command = <<EOT
+#       #~/openvpn_config/startvpn.sh
+#       ${path.module}/../tf_aws_openvpn/startvpn.sh
+#       set -x
+#       sleep 60
+#       #ping ${aws_instance.node_centos.private_ip}
+#   EOT
+#   }
+
+#   # now we can connect as the deadlineuser
+#   connection {
+#     user        = "${var.deadline_user}"
+#     host        = "${aws_instance.node_centos.private_ip}"
+#     private_key = "${var.private_key}"
+#     type        = "ssh"
+#     timeout     = "10m"
+#   }
+
+#   #copy the deadline installer to the rendernode 
+#   provisioner "file" {
+#     source      = "${path.module}/file_package/${var.houdini_installer_filename}"
+#     destination = "/var/tmp/${var.houdini_installer_filename}"
+#   }
+
+#   provisioner "remote-exec" {
+#     connection {
+#       user        = "${var.deadline_user}"
+#       host        = "${aws_instance.node_centos.private_ip}"
+#       private_key = "${var.private_key}"
+#       type        = "ssh"
+#       timeout     = "10m"
+#     }
+
+#     inline = [<<EOT
+# set -x
+# sudo chmod 600 /var/tmp/${var.houdini_installer_filename}
+# #these are needed for houdini to start https://rajivpandit.wordpress.com/category/fx-pipeline/page/8/
+# sudo yum install -y mesa-libGLw
+# sudo yum install -y libXp libXp-devel 
+# cd /var/tmp
+# sudo tar -xvf /var/tmp/${var.houdini_installer_filename}
+# sudo mkdir houdini_installer
+# sudo tar -xvf ${var.houdini_installer_filename} -C houdini_installer --strip-components 1
+# cd houdini_installer
+# #sudo ./houdini.install --auto-install --accept-EULA --install-houdini --install-license --no-local-licensing --install-hfs-symlink
+# sudo ./houdini.install --auto-install --accept-EULA --install-houdini --no-local-licensing --install-hfs-symlink
+# cd /opt/hfs17.0
+# sudo sed -i '/licensingMode = sesinetd/s/^# //g' /opt/hfs17.0/houdini/Licensing.opt
+# sudo cat /opt/hfs17.0/houdini/Licensing.opt
+# /opt/hfs17.0/bin/hserver
+# #source houdini_setup
+# /opt/hfs17.0/bin/hserver -S ${var.houdini_license_server_address}
+# EOT
+#     ]
+#   }
+# }
+
+# resource "random_id" "ami_unique_name" {
+#   keepers = {
+#     # Generate a new id each time we switch to a new instance id
+#     ami_id = "${aws_instance.node_centos.id}"
+#   }
+
+#   byte_length = 8
+# }
+
+# resource "aws_ami_from_instance" "node_centos" {
+#   depends_on         = ["null_resource.install_houdini"]
+#   name               = "node_centos_houdini_${aws_instance.node_centos.id}_${random_id.ami_unique_name.hex}"
+#   source_instance_id = "${aws_instance.node_centos.id}"
+# }
