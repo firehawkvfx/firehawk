@@ -278,18 +278,6 @@
       group: deadlineuser
     become: yes
 
-  # - name: install deadline db
-  #   command: "{{ files_matched.files[0].path }} --mode unattended --debuglevel 2 --prefix /opt/Thinkbox/DeadlineRepository10 --setpermissions true --installmongodb true --dbOverwrite true --mongodir /opt/Thinkbox/DeadlineDatabase10 --dbListeningPort 27017 --certgen_outdir /opt/Thinkbox/DeadlineDatabase10/certs --certgen_password @WhatTime --createX509dbuser true --requireSSL true --dbhost openfirehawkserver.firehawkvfx.com --dbport 27017 --dbuser deadlineuser --dbpassword @WhatTime --dbauth true --dbcertpass @WhatTime --dbssl true"
-  #   become: true
-  #   # node command that is working-
-  #   # sudo ./${var.deadline_installers_filename} --mode unattended --debuglevel 2 --prefix /opt/Thinkbox/Deadline10 --connectiontype Remote --noguimode true --licensemode UsageBased --launcherdaemon true --slavestartup 1 --daemonuser deadlineuser --enabletls true --tlsport 4433 --httpport 8080 --proxyrootdir 192.168.92.10:4433 --proxycertificate /opt/Thinkbox/certs/Deadline10RemoteClient.pfx --proxycertificatepassword @WhatTime
-  #   #shell: /home/deadlineuser/Downloads/DeadlineRepository-10.0.23.4-linux-x64-installer.run --mode unattended --debuglevel 2 --prefix /opt/Thinkbox/DeadlineRepository10 --setpermissions true --installmongodb true --dbOverwrite true --mongodir /opt/Thinkbox/DeadlineDatabase10 --dbListeningPort 27017 --certgen_outdir /opt/Thinkbox/DeadlineDatabase10/certs --certgen_password @WhatTime --createX509dbuser true --requireSSL true --dbhost openfirehawkserver.firehawkvfx.com --dbport 27017 --dbuser deadlineuser --dbpassword @WhatTime --dbauth true --dbcertpass @WhatTime --dbssl true
-  # - name: Restart service for deadlinedb
-  #   service:
-  #     name: Deadline10db
-  #     state: restarted
-  #   become: true
-
   - name: deadline dependencies
     package:
       name: "{{ item }}"
@@ -345,101 +333,21 @@
         {{ groups['role_softnas'][0] }}:{{ softnas_mount_source }} {{ softnas_mount_source }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
         {{ softnas_mount_source }} /prod none defaults,bind 0 0
         
-
-  - name:
+  - name: mount all changes to fstab
     command: mount -a
 
+  - name: install deadline client
+    shell: |
+      cd /home/deadlineuser/Downloads/
+      "{{ files_matched.files[0].path }} --mode unattended --debuglevel 2 --prefix {{ deadline_prefix }} --connectiontype Remote --noguimode true --licensemode UsageBased --launcherdaemon true --slavestartup 1 --daemonuser {{ user_deadlineuser_name }} --enabletls true --tlsport 4433 --httpport 8080 --proxyrootdir {{ deadline_proxy_root_dir }} --proxycertificate {{ deadline_proxy_certificate }} --proxycertificatepassword {{ deadline_proxy_certificate_password }}"
+    register: deadline_client_install_output_shell
+    become_user: centos
+    become: true
 
-    #sudo ./${var.deadline_installers_filename} --mode unattended --debuglevel 2 --prefix ${var.deadline_prefix} --connectiontype Remote --noguimode true --licensemode UsageBased --launcherdaemon true --slavestartup 1 --daemonuser ${var.deadline_user} --enabletls true --tlsport 4433 --httpport 8080 --proxyrootdir ${var.deadline_proxy_root_dir} --proxycertificate ${var.deadline_proxy_certificate} --proxycertificatepassword ${var.deadline_proxy_certificate_password}
+  - name: check deadline client install
+    debug:
+      msg: "{{ deadline_client_install_output_shell.stdout }}"
 
-# sudo mkdir /etc/deadline
-# cat << EOF | sudo tee --append /etc/deadline/secret.txt
-# username=${var.deadline_user}
-# password=${var.deadline_user_password}
-# EOF
-# #ensure secret is readable only by root
-# sudo chmod 400 /etc/deadline/secret.txt
-# set -x
-# ${var.skip_update ? " \n" : "sudo yum update -y"}
-
-# #These are deadline dependencies
-# sudo yum install redhat-lsb -y
-# sudo yum install samba-client samba-common cifs-utils -y
-# sudo yum install nfs-utils nfs-utils-lib -y
-# sudo yum install epel-release -y
-# sudo yum install nload nmap -y
-# sudo yum install tree -y
-# #bzip2 is needed to install deadline client.
-# sudo yum install bzip2 -y
-# #mount repository automatically over the vpn.  if you don't have routing configured, this won't work
-# sudo mkdir -p /mnt/repo
-# sudo mkdir -p ${var.softnas_mount_path}
-# sudo mkdir /prod
-# cat << EOF | sudo tee --append /etc/fstab
-# ### DYNAMIC MOUNTS START ###
-# //${var.deadline_samba_server_address}/DeadlineRepository /mnt/repo cifs    credentials=/etc/deadline/secret.txt,_netdev,uid=${var.deadline_user_uid} 0 0
-# ${var.softnas_private_ip1}:${var.softnas_export_path} ${var.softnas_mount_path} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
-# ${var.softnas_mount_path} /prod none defaults,bind 0 0
-# ### DYNAMIC MOUNTS END ###
-# EOF
-# cat << EOF | sudo tee --append /etc/hosts
-# ${var.deadline_samba_server_address}  ${var.deadline_samba_server_hostname}
-# EOF
-# sudo mount -a
-# sudo tree /mnt -L 3
-# EOT
-#     ]
-#   }
-#   provisioner "remote-exec" {
-#     connection {
-#       user        = "${var.deadline_user}"
-#       host        = "${aws_instance.node_centos.private_ip}"
-#       private_key = "${var.private_key}"
-#       type        = "ssh"
-#       timeout     = "10m"
-#     }
-
-#     inline = [<<EOT
-# set -x
-# cd /var/tmp
-# sudo ./${var.deadline_installers_filename} --mode unattended --debuglevel 2 --prefix ${var.deadline_prefix} --connectiontype Remote --noguimode true --licensemode UsageBased --launcherdaemon true --slavestartup 1 --daemonuser ${var.deadline_user} --enabletls true --tlsport 4433 --httpport 8080 --proxyrootdir ${var.deadline_proxy_root_dir} --proxycertificate ${var.deadline_proxy_certificate} --proxycertificatepassword ${var.deadline_proxy_certificate_password}
-# EOT
-#     ]
-#   }
-
-#   #sudo mount -t cifs -o username=${var.deadline_user},password=${var.deadline_user_password} //${var.deadline_samba_server_address}/DeadlineRepository /mnt/repo
-
-#   #a reboot command in the shell of the instance will cause a terraform error.  We do it locally instead.
-#   provisioner "local-exec" {
-#     command = "aws ec2 reboot-instances --instance-ids ${aws_instance.node_centos.id} && sleep 60"
-#   }
-# }
-
-# resource "null_resource" "install_houdini" {
-#   depends_on = ["null_resource.update_node"]
-
-#   triggers {
-#     instanceid = "${ aws_instance.node_centos.id }"
-#   }
-
-#   provisioner "local-exec" {
-#     command = <<EOT
-#       #~/openvpn_config/startvpn.sh
-#       ${path.module}/../tf_aws_openvpn/startvpn.sh
-#       set -x
-#       sleep 60
-#       #ping ${aws_instance.node_centos.private_ip}
-#   EOT
-#   }
-
-#   # now we can connect as the deadlineuser
-#   connection {
-#     user        = "${var.deadline_user}"
-#     host        = "${aws_instance.node_centos.private_ip}"
-#     private_key = "${var.private_key}"
-#     type        = "ssh"
-#     timeout     = "10m"
-#   }
 
 #   #copy the deadline installer to the rendernode 
 #   provisioner "file" {
