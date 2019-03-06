@@ -7,19 +7,6 @@
     bastionip: "{{ groups['bastionip'][0] }}"
 
   tasks:
-  # - name: disable /sbin/reboot /sbin/shutdown /sbin/halt /sbin/poweroff so that softnas update wont break connection.
-  #   file:
-  #     path: "{{ item }}"
-  #     state: touch
-  #     mode: "u-x,g-x,o-x"
-  #     modification_time: "preserve"
-  #     access_time: "preserve"
-  #   with_items:
-  #     - /sbin/reboot
-  #     - /sbin/shutdown
-  #     - /sbin/halt
-  #     - /sbin/poweroff
-
   - name: Remove updatetype file. A ticket involving softnas suggested this so that some beta isn't deployed at update.
     file:
       path: '/tmp/updatetype'
@@ -117,59 +104,3 @@
       search_regex: "^OK. SoftNAS software update to version.*completed at.*$"
       timeout: 600
     when: update_file.stat.exists and softnas_runupdate
-
-
-
-  # # - command: "softnas-cmd ackagreement"
-  # - command: "softnas-cmd checkupdate"
-  # #- command: "softnas-cmd executeupdate"
-
-
-# [
-#   "#cloud-config\n",
-#   "hostname: nas1.firehawkvfx.com\n",
-#   "fqdn: nas1.firehawkvfx.com\n",
-#   "manage_etc_hosts: false\n",
-#   "runcmd:\n",
-#   "  - echo > /root/.ssh/authorized_keys\n",
-#   "  - echo 'export HOSTNAME=nas1.firehawkvfx.com' >> /root/.bash_profile\n",
-#   "  - sed -i -e 's/admin@firehawkvfx.com/queglay@gmail.com/g' /var/www/softnas/config/monitoring.ini\n",
-#   "  - sed -i -e 's/no/yes/g' /var/www/softnas/config/monitoring.ini\n",
-#   "  - sed -i -e 's/SMTP_MAILSERVER=\"\"/SMTP_MAILSERVER=\"smtp-relay.gmail.com\"/g' /var/www/softnas/config/monitoring.ini\n",
-#   "  - sed -i -e 's/SMTP_PORT=\"\"/SMTP_PORT=\"587\"/g' /var/www/softnas/config/monitoring.ini\n",
-#   "  - sed -i -e 's/SMTP_ENCRYPTION=\"\"/SMTP_ENCRYPTION=\"tlsv1\"/g' /var/www/softnas/config/monitoring.ini\n",
-#   "  - cp -a /var/www/softnas/config/general_settings.ini.prototype /var/www/softnas/config/general_settings.ini\n",
-#   "  - sed -i -e 's/smtp_mailserver = /smtp_mailserver = \"smtp-relay.gmail.com\"/g' /var/www/softnas/config/general_settings.ini\n",
-#   "  - sed -i -e 's/smtp_port = /smtp_port = \"587\"/g' /var/www/softnas/config/general_settings.ini\n",
-#   "  - yum install -y nmap\n",
-#   "  - nmap -p 80 softnas.com\n",
-#   "  - nmap -p 443 softnas.com\n",
-#   "  - nmap -p 80 www.softnas.com\n",
-#   "  - nmap -p 443 www.softnas.com\n",
-#   "  - nmap -p 80 mirror.softnas.com\n",
-#   "  - nmap -p 443 mirror.softnas.com\n",
-#   "  - sed -i '/MOUNTD_PORT=892/s/^#*//g' /etc/sysconfig/nfs\n",
-#   "  - echo '/export *(async,insecure,no_subtree_check,no_root_squash,rw,nohide,fsid=0)' >> /etc/exports\n",
-#   "  - echo '/export",
-#   {
-#     "Ref": "SoftnasExportPath"
-#   },
-#   " *(async,insecure,no_subtree_check,no_root_squash,rw,nohide)' >> /etc/exports\n",
-#   "  - service nfs restart\n",
-#   "  - service softnas restart\n",
-#   "  - service monit restart\n",
-#   "  - /bin/echo > /tmp/updatetype\n",
-#   "  - echo '",
-#   {
-#     "Ref": "SoftnasUserPassword"
-#   },
-#   "' | passwd --stdin softnas\n",
-#   "  - softnas-cmd login softnas ",
-#   {
-#     "Ref": "SoftnasUserPassword"
-#   },
-#   "\n",
-#   "  - softnas-cmd ackagreement\n",
-#   "  - softnas-cmd checkupdate\n",
-#   "  - softnas-cmd executeupdate\n"
-# ]

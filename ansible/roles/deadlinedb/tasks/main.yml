@@ -13,7 +13,7 @@
 
 - name: Ensures dir exists
   file:
-    path: "/home/deadlineuser/Downloads/{{ basename }}"
+    path: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
     state: directory
     owner: deadlineuser
   become: yes
@@ -28,15 +28,14 @@
 - name: Extract
   unarchive:
     src: "{{ deadline_linux_installers_tar }}"
-    dest: "/home/deadlineuser/Downloads/{{ basename }}"
-    #"{{ deadline_linux_installers_tar | splitext | first }}/"
+    dest: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
     owner: deadlineuser
     mode: u+x
   become: yes
 
 - name: "Ansible find files in subdirectory examples /home/deadlineuser/Downloads/Deadline-10.0.23.4-linux-installers/"
   find:
-    paths: /home/deadlineuser/Downloads/{{ basename }}
+    paths: /home/deadlineuser/Downloads/{{ deadline_linux_basename }}
     patterns: "*DeadlineRepository-*-linux-x64-installer.run"
   register: files_matched
   become: true

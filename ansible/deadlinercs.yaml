@@ -2,15 +2,15 @@
 - hosts: ansible_control
   become: true
 
-  vars_prompt:
-    - name: "deadline_linux_installers_tar"
-      prompt: "What is the path to the deadline linux installers .tar?"
-      default: "/vagrant/downloads/Deadline-10.0.23.4-linux-installers.tar"
-      private: no
+  # vars_prompt:
+  #   - name: "deadline_linux_installers_tar"
+  #     prompt: "What is the path to the deadline linux installers .tar?"
+  #     default: "/vagrant/downloads/Deadline-10.0.23.4-linux-installers.tar"
+  #     private: no
 
-  vars:
-    no_extension: "{{ deadline_linux_installers_tar | splitext | first }}"
-    basename: "{{ no_extension.split('/')[-1] }}"
+  # vars:
+  #   no_extension: "{{ deadline_linux_installers_tar | splitext | first }}"
+  #   basename: "{{ no_extension.split('/')[-1] }}"
     
   roles:
     - role: deadlinercs

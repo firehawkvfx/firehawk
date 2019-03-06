@@ -3,6 +3,20 @@ ansible_ssh_private_key_file: ~/my_key_pair.pem
 
 debug: 0
 
+production_mount_target: "/prod"
+
+softnas_mount_source: "/pool0/volume0"
+
+deadline_certificates_location: "/opt/Thinkbox/certs"
+deadline_linux_installers_tar: "/vagrant/downloads/Deadline-10.0.23.4-linux-installers.tar"
+
+
+deadline_linux_no_extension: "{{ deadline_linux_installers_tar | splitext | first }}"
+deadline_linux_basename: "{{ deadline_linux_no_extension.split('/')[-1] }}"
+deadline_linux_filename: "{{ deadline_linux_installers_tar.split('/')[-1] }}"
+
+### Vault Variables ###
+
 db_pass: "{{ vault_db_pass }}"
 
 openvpn_user: openvpnas
@@ -10,9 +24,17 @@ openvpn_user_pw: "{{ vault_openvpn_user_pw }}"
 
 user_softnas_pw: "{{ vault_user_softnas_pw }}"
 
+user_deadlineuser_pw: "{{ vault_user_deadlineuser_pw }}"
+
 aws_region: "{{ vault_aws_region }}"
 aws_access_key: "{{ vault_aws_access_key }}"
 aws_secret_key: "{{ vault_aws_secret_key }}"
 s3_disk_password: "{{ vault_s3_disk_password }}"
 
-public_domain: "{{ vault_public_domain }}"
+public_domain: "{{ vault_public_domain_dev }}"
+public_domain_prod: "{{ vault_public_domain_prod }}"
+
+key_name: "{{ vault_key_name }}"
+local_key_path: "{{ vault_local_key_path }}"
+
+time_zone_info_path_linux: "{{ vault_time_zone_info_path_linux['Australia_Sydney'] }}"

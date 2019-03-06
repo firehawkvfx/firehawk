@@ -16,8 +16,8 @@
 
 - name: Extract
   unarchive:
-    src: /vagrant/downloads/Deadline-10.0.23.4-linux-installers.tar
-    dest: /home/deadlineuser/Downloads/Deadline-10.0.23.4-linux-installers/
+    src: "{{ deadline_linux_installers_tar }}"
+    dest: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
     owner: deadlineuser
     mode: u+x
   become: yes
@@ -43,8 +43,19 @@
 - debug: msg="{{ cert_permissions.stdout }}"
 - debug: msg="{{ cert_permissions.stderr }}"
 
+
+- name: "Ansible find files in subdirectory examples /home/deadlineuser/Downloads/Deadline-10.0.23.4-linux-installers/"
+  find:
+    paths: /home/deadlineuser/Downloads/{{ deadline_linux_basename }}
+    patterns: "*DeadlineClient-*-linux-x64-installer.run"
+  register: files_matched
+  become: true
+
+- debug:
+    msg: "installer path: {{ files_matched.files[0].path }}"
+
 - name: install deadline rcs
-  command: /home/deadlineuser/Downloads/Deadline-10.0.23.4-linux-installers/DeadlineClient-10.0.23.4-linux-x64-installer.run --mode unattended --launcherdaemon true --enable-components proxyconfig --servercert /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --debuglevel 2 --prefix /opt/Thinkbox/Deadline10 --connectiontype Repository --repositorydir /opt/Thinkbox/DeadlineRepository10/ --proxyrootdir openfirehawkserver.firehawkvfx.com:4433 --dbsslcertificate /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --dbsslpassword @WhatTime --licensemode UsageBased --daemonuser deadlineuser --connserveruser deadlineuser --httpport 4433 --tlsport 4433 --enabletls true --tlscertificates generate  --generatedcertdir /opt/Thinkbox/certs/ --clientcert_pass @WhatTime --slavestartup false
+  command: "{{ files_matched.files[0].path }} --mode unattended --launcherdaemon true --enable-components proxyconfig --servercert /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --debuglevel 2 --prefix /opt/Thinkbox/Deadline10 --connectiontype Repository --repositorydir /opt/Thinkbox/DeadlineRepository10/ --proxyrootdir openfirehawkserver.firehawkvfx.com:4433 --dbsslcertificate /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --dbsslpassword @WhatTime --licensemode UsageBased --daemonuser deadlineuser --connserveruser deadlineuser --httpport 4433 --tlsport 4433 --enabletls true --tlscertificates generate  --generatedcertdir /opt/Thinkbox/certs/ --clientcert_pass @WhatTime --slavestartup false"
   become: true
 
 - name: Restart service for deadlinedb
