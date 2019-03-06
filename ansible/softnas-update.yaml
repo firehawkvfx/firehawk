@@ -1,11 +1,25 @@
 - hosts: role_softnas
   remote_user: centos
+  become_user: root
   become: true
 
   vars:
     bastionip: "{{ groups['bastionip'][0] }}"
 
   tasks:
+  # - name: disable /sbin/reboot /sbin/shutdown /sbin/halt /sbin/poweroff so that softnas update wont break connection.
+  #   file:
+  #     path: "{{ item }}"
+  #     state: touch
+  #     mode: "u-x,g-x,o-x"
+  #     modification_time: "preserve"
+  #     access_time: "preserve"
+  #   with_items:
+  #     - /sbin/reboot
+  #     - /sbin/shutdown
+  #     - /sbin/halt
+  #     - /sbin/poweroff
+
   - name: Remove updatetype file. A ticket involving softnas suggested this so that some beta isn't deployed at update.
     file:
       path: '/tmp/updatetype'
@@ -86,16 +100,23 @@
   - name: "Wait until Softnas Update completes. This can take 15-45 mins"
     wait_for:
       path: /tmp/softnas-update.status
-      search_regex: OK
-      #sleep: 30
-      # sleep may cause issues if it reboots between checks
-      timeout: 5400
+      search_regex: "^OK.*$"
+      timeout: 3600
     when: update_file.stat.exists and softnas_runupdate
-      
 
+  - name: Wait for the reboot to complete if there was a change.
+    wait_for_connection:
+      connect_timeout: 20
+      sleep: 5
+      delay: 180
+      timeout: 600
 
-
-
+  - name: "Verify update completed"
+    wait_for:
+      path: /tmp/softnas-update.status
+      search_regex: "^OK. SoftNAS software update to version.*completed at.*$"
+      timeout: 600
+    when: update_file.stat.exists and softnas_runupdate
 
 
 

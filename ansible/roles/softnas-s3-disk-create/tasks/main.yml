@@ -17,14 +17,14 @@
     encrypt_option: ""
     encrypt_label: "nonencrypted"
 
-- name: check if s3_disk_password is defined
+- name: check if s3_disk_password is defined and encrypt is true
   set_fact:
     encrypt_option: "encrypted={{ s3_disk_password }}"
     encrypt_label: "encrypted"
-  when: encrypt_s3 and s3_disk_password is defined
+  when: (s3_disk_password is defined) and (encrypt_s3 == true)
 
 - set_fact:
-    s3_disk_bucket_name: "{{ public_domain | replace('.','') }}-softnas-{{ pool_name }}-{{ volume_name }}-{{ s3_disk_size_max_value }}{{ s3_disk_size_max_units | lower}}-{{ encrypt_label }}"
+    s3_disk_bucket_name: "{{ public_domain | replace('.','') }}-{{ nas_name }}-{{ pool_name }}-{{ volume_name }}-{{ disk_device }}-{{ s3_disk_size_max_value }}{{ s3_disk_size_max_units | lower}}-{{ encrypt_label }}"
 
 - name: Bucket name
   debug:
@@ -104,7 +104,9 @@
 
 - name: check if pool create failed
   fail:
-    msg: "{{softnas_init_pool_output_dict.result.msg}}"
+    msg: |
+      "Bucket was created, but pool create failed.  If you are trying to create a new device to extend an existing pool this can be taken over through the softnas storage center ui under the menu: storage pools-expand."
+      {{softnas_init_pool_output_dict.result.msg}}
   failed_when: softnas_init_pool_output_dict.result.success == false
 
 - name: create volume
