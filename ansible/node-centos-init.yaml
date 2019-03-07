@@ -1,58 +1,58 @@
-# - hosts: ansible_control
-#   remote_user: vagrant
-#   become: true
-#   gather_facts: no
+- hosts: ansible_control
+  remote_user: vagrant
+  become: true
+  gather_facts: no
 
-#   vars:
-#     bastionip: "{{ groups['bastionip'][0] }}"
+  vars:
+    bastionip: "{{ groups['bastionip'][0] }}"
 
-#   tasks: 
-#   - name: echo bastion public ip
-#     debug:
-#       msg: "{{ item }}"
-#     with_items:
-#       - "{{ bastionip }}"
+  tasks: 
+  - name: echo bastion public ip
+    debug:
+      msg: "{{ item }}"
+    with_items:
+      - "{{ bastionip }}"
 
-#   - name: clean known hosts
-#     shell: "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R {{ bastionip }}"
-#     become: true
-#     become_user: vagrant
+  - name: clean known hosts
+    shell: "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R {{ bastionip }}"
+    become: true
+    become_user: vagrant
   
-#   - name: Write the new ec2 instance host key to known hosts
-#     shell: "ssh-keyscan -H {{ bastionip }} >> /home/vagrant/.ssh/known_hosts"
-#     become: true
-#     become_user: vagrant
+  - name: Write the new ec2 instance host key to known hosts
+    shell: "ssh-keyscan -H {{ bastionip }} >> /home/vagrant/.ssh/known_hosts"
+    become: true
+    become_user: vagrant
 
-# - hosts: localhost
-#   remote_user: vagrant
-#   become: true
-#   gather_facts: no
+- hosts: localhost
+  remote_user: vagrant
+  become: true
+  gather_facts: no
 
-#   vars:
-#     bastionip: "{{ groups['bastionip'][0] }}"
-#     # need to remove old hosts ssh-keygen -f "/home/vagrant/.ssh/known_hosts" -R 10.0.1.11
+  vars:
+    bastionip: "{{ groups['bastionip'][0] }}"
+    # need to remove old hosts ssh-keygen -f "/home/vagrant/.ssh/known_hosts" -R 10.0.1.11
     
-#   tasks:
-#   - name: clean known hosts
-#     shell: "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R {{ groups['role_node_centos'][0] }}"
-#     become: true
-#     become_user: vagrant
+  tasks:
+  - name: clean known hosts
+    shell: "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R {{ groups['role_node_centos'][0] }}"
+    become: true
+    become_user: vagrant
 
-#   - name: delegate keyscan to add keys from remote subnet via bastion host.
-#     command: "ssh-keyscan {{ groups['role_node_centos'][0] }}"
-#     register: new_host_fingerprint
-#     delegate_to: "centos@{{ groups['bastionip'][0] }}"
+  - name: delegate keyscan to add keys from remote subnet via bastion host.
+    command: "ssh-keyscan {{ groups['role_node_centos'][0] }}"
+    register: new_host_fingerprint
+    delegate_to: "centos@{{ groups['bastionip'][0] }}"
 
-#   - debug:
-#       msg: "{{ new_host_fingerprint.stdout_lines }}"
+  - debug:
+      msg: "{{ new_host_fingerprint.stdout_lines }}"
 
-#   - name: add keyscan to known hosts
-#     lineinfile:
-#       dest: /home/vagrant/.ssh/known_hosts
-#       line: "{{ item }}"
-#     with_items: "{{ new_host_fingerprint.stdout_lines }}"
-#     become: true
-#     become_user: vagrant
+  - name: add keyscan to known hosts
+    lineinfile:
+      dest: /home/vagrant/.ssh/known_hosts
+      line: "{{ item }}"
+    with_items: "{{ new_host_fingerprint.stdout_lines }}"
+    become: true
+    become_user: vagrant
 
 - hosts: role_node_centos
   remote_user: centos
@@ -63,140 +63,139 @@
     hostname: "node1.{{ public_domain }}"
 
   tasks:
+  - name: init authorized_keys
+    copy:
+      content: ""
+      dest: /root/.ssh/authorized_keys
+      force: no
+    become: true
 
-  # - name: init authorized_keys
-  #   copy:
-  #     content: ""
-  #     dest: /root/.ssh/authorized_keys
-  #     force: no
-  #   become: true
-
-  # - name: change hostname
-  #   hostname:
-  #     name: "{{ hostname }}"
+  - name: change hostname
+    hostname:
+      name: "{{ hostname }}"
       
-  # - name: add myself to /etc/hosts
-  #   lineinfile:
-  #     dest: /etc/hosts
-  #     regexp: '^127\.0\.0\.1[ \t]+localhost'
-  #     line: "127.0.0.1 localhost {{ hostname }}"
-  #     state: present
+  - name: add myself to /etc/hosts
+    lineinfile:
+      dest: /etc/hosts
+      regexp: '^127\.0\.0\.1[ \t]+localhost'
+      line: "127.0.0.1 localhost {{ hostname }}"
+      state: present
 
-  # - name: Set hostname var in bash profile
-  #   lineinfile:
-  #     path: /root/.bash_profile
-  #     line: 'export HOSTNAME={{ hostname }}'
+  - name: Set hostname var in bash profile
+    lineinfile:
+      path: /root/.bash_profile
+      line: 'export HOSTNAME={{ hostname }}'
 
-#   - name: upgrade all packages - yum update
-#     yum:
-#       name: '*'
-#       state: latest
-# # these packages are required to pass an encrypted string via commandline into a user pass and are suited to centos.
-#   - name: install mkpasswd
-#     package:
-#       name: expect
-#       state: present
+  - name: upgrade all packages - yum update
+    yum:
+      name: '*'
+      state: latest
+# these packages are required to pass an encrypted string via commandline into a user pass and are suited to centos.
+  - name: install mkpasswd
+    package:
+      name: expect
+      state: present
 
-#   - name: install epel-release
-#     package:
-#       name: epel-release
-#       state: present
+  - name: install epel-release
+    package:
+      name: epel-release
+      state: present
 
-#   - name: install pip
-#     package:
-#       #name: epel-release
-#       name: python-pip
-#       state: present
+  - name: install pip
+    package:
+      #name: epel-release
+      name: python-pip
+      state: present
 
-#   - name: install pexpect
-#     pip:
-#       name: pexpect
-#     become: yes
+  - name: install pexpect
+    pip:
+      name: pexpect
+    become: yes
     
-#   - name: install passlib
-#     pip:
-#       name: passlib
-#     become: yes
+  - name: install passlib
+    pip:
+      name: passlib
+    become: yes
 
-  # - name: Ensure group "deadlineuser" exists
-  #   group:
-  #     name: deadlineuser
-  #     state: present
-  #     gid: 9001
+  - name: Ensure group "deadlineuser" exists
+    group:
+      name: deadlineuser
+      state: present
+      gid: 9001
 
-  # - name: Add the user 'deadlineuser' with a specific uid and a primary group of 'deadlineuser'
-  #   user:
-  #     name: deadlineuser
-  #     comment: A user for rendering operations.
-  #     groups: # Empty by default, here we give it some groups
-  #       - wheel
-  #       - deadlineuser
-  #     uid: 9001
-  #     #group: deadlineuser
+  - name: Add the user 'deadlineuser' with a specific uid and a primary group of 'deadlineuser'
+    user:
+      name: deadlineuser
+      comment: A user for rendering operations.
+      groups: # Empty by default, here we give it some groups
+        - wheel
+        - deadlineuser
+      uid: 9001
+      #group: deadlineuser
 
-  # - name: set user pass
-  #   expect:
-  #     command: passwd deadlineuser
-  #     responses:
-  #       (?i)password: "{{ user_deadlineuser_pw }}"
-  #       (?i)Retype new password: "{{ user_deadlineuser_pw }}"
+  - name: set user pass
+    expect:
+      command: passwd deadlineuser
+      responses:
+        (?i)password: "{{ user_deadlineuser_pw }}"
+        (?i)Retype new password: "{{ user_deadlineuser_pw }}"
 
 
-  # - name: setup ssh key for deadline user by generating key identifier from pem key
-  #   shell: |
-  #     ssh-keygen -y -f {{ local_key_path }} > /home/vagrant/{{ key_name }}_public
-  #   connection: local
-  #   become_user: vagrant
-  #   become: yes
+  - name: setup ssh key for deadline user by generating key identifier from pem key
+    shell: |
+      ssh-keygen -y -f {{ local_key_path }} > /home/vagrant/{{ key_name }}_public
+    connection: local
+    become_user: vagrant
+    become: yes
 
-  # - name: create .ssh dir
-  #   file: 
-  #     path: /home/deadlineuser/.ssh/
-  #     state: directory
-  #     mode: 0700
-  #     owner: deadlineuser
-  #     group: deadlineuser
-  #   become: yes
-  #   become_user: deadlineuser
+  - name: create .ssh dir
+    file: 
+      path: /home/deadlineuser/.ssh/
+      state: directory
+      mode: 0700
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+    become_user: deadlineuser
 
-  # - name: copy key for deadlineuser
-  #   copy:
-  #     src: "/home/vagrant/{{ key_name }}_public"
-  #     dest: /home/deadlineuser/.ssh/authorized_keys
-  #     mode: 0600
-  #     owner: deadlineuser
-  #     group: deadlineuser
-  #   become: yes
+  - name: copy key for deadlineuser
+    copy:
+      src: "/home/vagrant/{{ key_name }}_public"
+      dest: /home/deadlineuser/.ssh/authorized_keys
+      mode: 0600
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
 
-  # - name: copy time zone info
-  #   copy:
-  #     src: "{{ time_zone_info_path_linux }}"
-  #     dest: /etc/localtime
-  #     remote_src: true
-  #   become: yes
+  - name: copy time zone info
+    copy:
+      src: "{{ time_zone_info_path_linux }}"
+      dest: /etc/localtime
+      remote_src: true
+    become: yes
 
-  # - name: restart sshd.service
-  #   service: 
-  #     name: sshd
-  #     state: restarted
+  - name: restart sshd.service
+    service: 
+      name: sshd
+      state: restarted
 
-  # - name: create Thinkbox dir
-  #   file: 
-  #     path: /opt/Thinkbox/
-  #     state: directory
-  #     mode: 0700
-  #     owner: deadlineuser
-  #     group: deadlineuser
-  #   become: yes
+  - name: create Thinkbox dir
+    file: 
+      path: /opt/Thinkbox/
+      state: directory
+      mode: 0700
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
 
-  # - name: create Thinkbox cert dir
-  #   file: 
-  #     path: /opt/Thinkbox/certs
-  #     state: directory
-  #     mode: 0700
-  #     owner: deadlineuser
-  #     group: deadlineuser
-  #   become: yes
+  - name: create Thinkbox cert dir
+    file: 
+      path: /opt/Thinkbox/certs
+      state: directory
+      mode: 0700
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
 
   - name: set deadline remote client certificate permissions locally
     file: 
@@ -210,7 +209,7 @@
   - name: Copy deadline remote client certificate
     copy: 
       src: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
-      dest: "/opt/Thinkbox/certs/test"
+      dest: "/opt/Thinkbox/certs/"
       mode: 0600
       owner: deadlineuser
       group: deadlineuser
@@ -335,19 +334,53 @@
         
   - name: mount all changes to fstab
     command: mount -a
+    become: true
+
+  - stat:
+      path: /var/lib/Thinkbox/Deadline10/deadline.ini
+    register: deadline_ini_file
+
+  - name: get date
+    shell: |
+      date +"%Y%m%d_%H%M%S"
+    register: current_date
+
+  - set_fact:
+      backup_dest: "/var/lib/Thinkbox/Deadline10/deadline.bak_{{ current_date.stdout }}"
+    when: deadline_ini_file.stat.exists
+
+  - debug:
+      msg: "will backup file to {{ backup_dest }}"
+    when: deadline_ini_file.stat.exists
+
+  - name: move old config to backup.  this prevents old conf settings staying around.
+    command: "mv /var/lib/Thinkbox/Deadline10/deadline.ini {{ backup_dest }}"
+    when: deadline_ini_file.stat.exists
 
   - name: install deadline client
     shell: |
       cd /home/deadlineuser/Downloads/
-      "{{ files_matched.files[0].path }} --mode unattended --debuglevel 2 --prefix {{ deadline_prefix }} --connectiontype Remote --noguimode true --licensemode UsageBased --launcherdaemon true --slavestartup 1 --daemonuser {{ user_deadlineuser_name }} --enabletls true --tlsport 4433 --httpport 8080 --proxyrootdir {{ deadline_proxy_root_dir }} --proxycertificate {{ deadline_proxy_certificate }} --proxycertificatepassword {{ deadline_proxy_certificate_password }}"
+      set -x
+      {{ files_matched.files[0].path }} --mode unattended --debuglevel 2 --prefix {{ deadline_prefix }} --connectiontype Remote --noguimode true --licensemode UsageBased --launcherdaemon true --slavestartup 1 --daemonuser {{ user_deadlineuser_name }} --enabletls true --tlsport 4433 --httpport 8080 --proxyrootdir {{ deadline_proxy_root_dir }} --proxycertificate {{ deadline_proxy_certificate }} --proxycertificatepassword {{ deadline_proxy_certificate_password }}
     register: deadline_client_install_output_shell
-    become_user: centos
+    #become_user: deadlineuser
     become: true
 
-  - name: check deadline client install
+    # current install command
+    # sudo ./DeadlineClient-10.0.23.4-linux-x64-installer.run --mode unattended --debuglevel 2 --prefix /opt/Thinkbox/Deadline10 --connectiontype Remote --noguimode true --licensemode UsageBased --launcherdaemon true --slavestartup 1 --daemonuser deadlineuser --enabletls true --tlsport 4433 --httpport 8080 --proxyrootdir 192.168.92.68:4433 --proxycertificate /opt/Thinkbox/certs/Deadline10RemoteClient.pfx --proxycertificatepassword @WhatTime
+
+    # sudo {{ files_matched.files[0].path }} --mode unattended --debuglevel 2 --prefix {{ deadline_prefix }} --connectiontype Remote --noguimode true --licensemode UsageBased --launcherdaemon true --slavestartup 1 --daemonuser {{ user_deadlineuser_name }} --enabletls true --tlsport 4433 --httpport 8080 --proxyrootdir {{ deadline_proxy_root_dir }} --proxycertificate {{ deadline_proxy_certificate }} --proxycertificatepassword {{ deadline_proxy_certificate_password }}
+
+  - name: check deadline client install output
     debug:
       msg: "{{ deadline_client_install_output_shell.stdout }}"
 
+  - name: check /var/lib/Thinkbox/Deadline10/deadline.ini
+    command: cat /var/lib/Thinkbox/Deadline10/deadline.ini 
+    register: deadline_config
+
+  - debug: msg="{{ deadline_config.stdout }}"
+  - debug: msg="{{ deadline_config.stderr }}"
 
 #   #copy the deadline installer to the rendernode 
 #   provisioner "file" {

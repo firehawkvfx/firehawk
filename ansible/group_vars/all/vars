@@ -29,6 +29,7 @@ user_softnas_pw: "{{ vault_user_softnas_pw }}"
 user_deadlineuser_name: "{{ vault_user_deadlineuser_name }}"
 user_deadlineuser_pw: "{{ vault_user_deadlineuser_pw }}"
 
+openfirehawkserver: "{{ vault_openfirehawkserver }}"
 deadline_proxy_root_dir: "{{ vault_deadline_proxy_root_dir }}"
 deadline_proxy_certificate: "{{ vault_deadline_proxy_certificate }}"
 deadline_proxy_certificate_password: "{{ vault_deadline_proxy_certificate_password }}"
