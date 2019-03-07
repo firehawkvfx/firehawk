@@ -54,9 +54,32 @@
 - debug:
     msg: "installer path: {{ files_matched.files[0].path }}"
 
+- stat:
+    path: /var/lib/Thinkbox/Deadline10/deadline.ini
+  register: deadline_ini_file
+
+- name: get date
+  shell: |
+    date +"%Y%m%d_%H%M%S"
+  register: current_date
+
+- set_fact:
+    backup_dest: "/var/lib/Thinkbox/Deadline10/deadline.bak_{{ current_date.stdout }}"
+  when: deadline_ini_file.stat.exists
+
+- debug:
+    msg: "will backup file to {{ backup_dest }}"
+  when: deadline_ini_file.stat.exists
+
+- name: move old config to backup.  this prevents old conf settings staying around.
+  command: "mv /var/lib/Thinkbox/Deadline10/deadline.ini {{ backup_dest }}"
+  when: deadline_ini_file.stat.exists
+
 - name: install deadline rcs
-  command: "{{ files_matched.files[0].path }} --mode unattended --launcherdaemon true --enable-components proxyconfig --servercert /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --debuglevel 2 --prefix /opt/Thinkbox/Deadline10 --connectiontype Repository --repositorydir /opt/Thinkbox/DeadlineRepository10/ --proxyrootdir openfirehawkserver.firehawkvfx.com:4433 --dbsslcertificate /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --dbsslpassword {{ deadline_proxy_certificate_password }} --licensemode UsageBased --daemonuser deadlineuser --connserveruser deadlineuser --httpport 4433 --tlsport 4433 --enabletls true --tlscertificates generate  --generatedcertdir /opt/Thinkbox/certs/ --clientcert_pass {{ deadline_proxy_certificate_password }} --slavestartup false"
+  command: "{{ files_matched.files[0].path }} --mode unattended --launcherdaemon true --enable-components proxyconfig --servercert /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --debuglevel 2 --prefix /opt/Thinkbox/Deadline10 --connectiontype Repository --repositorydir /opt/Thinkbox/DeadlineRepository10/ --proxyrootdir {{ deadline_proxy_root_dir }} --dbsslcertificate /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --dbsslpassword {{ deadline_proxy_certificate_password }} --licensemode UsageBased --daemonuser deadlineuser --connserveruser deadlineuser --httpport 8080 --tlsport 4433 --enabletls true --tlscertificates generate  --generatedcertdir /opt/Thinkbox/certs/ --clientcert_pass {{ deadline_proxy_certificate_password }} --slavestartup false"
   become: true
+
+# /home/deadlineuser/Downloads/Deadline-10.0.23.4-linux-installers/DeadlineRepository-10.0.23.4-linux-x64-installer.run --mode unattended --launcherdaemon true --enable-components proxyconfig --servercert /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --debuglevel 2 --prefix /opt/Thinkbox/Deadline10 --connectiontype Repository --repositorydir /opt/Thinkbox/DeadlineRepository10/ --proxyrootdir {{ deadline_proxy_root_dir }} --dbsslcertificate /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --dbsslpassword {{ deadline_proxy_certificate_password }} --licensemode UsageBased --daemonuser deadlineuser --connserveruser deadlineuser --httpport 8080 --tlsport 4433 --enabletls true --tlscertificates generate  --generatedcertdir /opt/Thinkbox/certs/ --clientcert_pass {{ deadline_proxy_certificate_password }} --slavestartup false"
 
 - name: Restart service for deadlinedb
   service:

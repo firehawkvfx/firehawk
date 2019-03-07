@@ -19,6 +19,7 @@
 
     # this will be calculated later-
     existing_bucket: false
+    existing_volume: false
 
   tasks:
   - set_fact:
@@ -31,6 +32,7 @@
       s3_disk_size_max_units: "{{ s3_disk_size_max_units }}"
       s3_disk_region: "{{ s3_disk_region }}"
       existing_bucket: "{{ existing_bucket }}"
+      existing_volume: "{{ existing_volume }}"
 
   - name: Create s3 extender disk. Query existing buckets.
     shell: |
@@ -107,6 +109,7 @@
     s3_disk_size_max_units: "{{ hostvars['ansible_control']['s3_disk_size_max_units'] }}"
     s3_disk_region: "{{ hostvars['ansible_control']['s3_disk_region'] }}"
     existing_bucket: "{{ hostvars['ansible_control']['existing_bucket'] }}"
+    existing_volume: "{{ hostvars['ansible_control']['existing_volume'] }}"
   
   # import by bucket name if bucket name exists, then import, else create.
   # if created, then also:
@@ -117,6 +120,19 @@
 
   # create ability to delete
   tasks:
+  
+    - name: Ansible check file exists example.
+      stat:
+        path: /pool_name/volume_name/
+      register: existing_volume_details
+
+    - debug:
+        msg: "volume already exists"
+      when: existing_volume_details.stat.exists
+    - set_fact:
+        existing_volume: true
+      when: existing_volume_details.stat.exists
+
     - debug:
         msg: "existing_bucket: {{ existing_bucket }}"
       when: existing_bucket == false
@@ -142,6 +158,8 @@
     s3_disk_region: "{{ hostvars['ansible_control']['s3_disk_region'] }}"
     existing_bucket: "{{ hostvars['ansible_control']['existing_bucket'] }}"
     bucket_location: "{{ hostvars['ansible_control']['bucket_location'] }}"
+    # need to pull this data from the softnas instance, not defaults.
+    existing_volume: "{{ hostvars['ansible_control']['existing_volume'] }}"
   
   # import by bucket name if bucket name exists, then import, else create.
   # if created, then also:
@@ -155,11 +173,11 @@
 
     - debug:
         msg: "existing_bucket: {{ existing_bucket }}\nImporting."
-      when: existing_bucket != false
+      when: (existing_bucket != false) and (existing_volume == false)
 
     - include_role: 
         name: softnas-s3-disk-import
-      when: existing_bucket != false
+      when: (existing_bucket != false) and (existing_volume == false)
 
 # after an import or creation of new disk, we need to setup the export.
 
@@ -183,39 +201,46 @@
   # create nfs share.
 
   tasks:
-  # - name: set /etc/exports
-  #   lineinfile:
-  #     path: /etc/exports
-  #     line: "/export *(async,insecure,no_subtree_check,no_root_squash,rw,nohide,fsid=0)"
-  #     backup: yes
+  - name: set /etc/exports
+    lineinfile:
+      path: /etc/exports
+      line: "# These mounts are managed in that ansible playbook softnas-s3-disk.yaml and only one volume is exported currently for testing"
+      backup: yes
 
-  # - name: insert marker start
-  #   lineinfile:
-  #     path: /etc/exports
-  #     insertafter: "^#?/export.*$"
-  #     line: "# BEGIN ANSIBLE MANAGED BLOCK"
-  #     backup: yes
+  - name: insert marker start
+    lineinfile:
+      path: /etc/exports
+      insertafter: "^# These mounts.*$"
+      line: "# BEGIN ANSIBLE MANAGED BLOCK"
+      backup: yes
 
-  # - name: insert marker end
-  #   lineinfile:
-  #     path: /etc/exports
-  #     insertafter: "# BEGIN ANSIBLE MANAGED BLOCK"
-  #     line: "# END ANSIBLE MANAGED BLOCK"
-  #     create: true
+  - name: insert marker end
+    lineinfile:
+      path: /etc/exports
+      insertafter: "# BEGIN ANSIBLE MANAGED BLOCK"
+      line: "# END ANSIBLE MANAGED BLOCK"
+      create: true
 
-  # - name: insert/update block 
-  #   blockinfile:
-  #     path: /etc/exports
-  #     backup: yes
-  #     content: |
+  - name: insert/update block 
+    blockinfile:
+      path: /etc/exports
+      backup: yes
+      content: |
+        /export /{{ pool_name }}/{{ volume_name }}/ *(async,insecure,no_subtree_check,no_root_squash,rw,nohide)
+        # /export *(async,insecure,no_subtree_check,no_root_squash,rw,nohide,fsid=0)
+
+  - name: update exports
+    command: "exportfs -r -a"
+    register: update_exports_output
+
+  - debug:
+      msg: "{{ update_exports_output.stdout }}"
         
-  #       /export /{{ pool_name }}/{{ volume_name }} *(async,insecure,no_subtree_check,no_root_squash,rw,nohide)'
-        
-  - name: restart services after export updates
-    service:
-      name: "{{ item }}"
-      state: restarted
-    with_items:
-      - nfs
-      - softnas
-      - monit
+  # - name: restart services after export updates
+  #   service:
+  #     name: "{{ item }}"
+  #     state: restarted
+  #   with_items:
+  #     - nfs
+  #     - softnas
+  #     - monit

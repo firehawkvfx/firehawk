@@ -12,7 +12,7 @@
       softnas-cmd login softnas {{ user_softnas_pw }}
       softnas-cmd diskdevices > /tmp/softnas_list_disk_output_dict.json
 
-  - name: format it
+  - name: format output
     shell: |
       cat /tmp/softnas_list_disk_output_dict.json
     register: softnas_list_disk_output_shell
