@@ -45,16 +45,16 @@ variable "softnas_private_ip2" {
   default = "10.0.1.12"
 }
 
-variable "softnas_export_path" {
-  default = "/naspool2/nasvol2"
-}
+# variable "softnas_export_path" {
+#   default = "/naspool2/nasvol2"
+# }
 
 variable "vpn_cidr" {}
 variable "remote_subnet_cidr" {}
 
 variable "remote_ip_cidr" {}
 
-variable "softnas_user_password" {}
+# variable "softnas_user_password" {}
 
 variable "softnas_role_name" {
   default = "SoftNAS_HA_IAM"
@@ -79,9 +79,9 @@ variable "softnas2_private_ip2" {
   default = "10.0.1.22"
 }
 
-variable "softnas1_export_path" {}
+# variable "softnas1_export_path" {}
 
-variable "softnas2_export_path" {}
+# variable "softnas2_export_path" {}
 
 variable "softnas1_volumes" {
   default = []
