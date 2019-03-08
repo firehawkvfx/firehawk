@@ -1,0 +1,1 @@
+for i in `ansible-vault view ansible/group_vars/all/secrets.txt` ; do export $i ; done

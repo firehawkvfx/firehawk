@@ -12,14 +12,23 @@
       msg: "{{ item }}"
     with_items:
       - "{{ bastionip }}"
-
+  - file:
+      path: /home/vagrant/.ssh/known_hosts
+      state: touch
+    become_user: vagrant
+    
   - name: clean known hosts
     shell: "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R {{ bastionip }}"
     become: true
     become_user: vagrant
   
   - name: Write the new ec2 instance host key to known hosts
-    shell: "ssh-keyscan -H {{ bastionip }} >> /home/vagrant/.ssh/known_hosts"
+    shell: "ssh-keyscan {{ bastionip }} >> /home/vagrant/.ssh/known_hosts"
+    become: true
+    become_user: vagrant
+      
+  - name: Write the new ec2 instance host key to known hosts
+    shell: "ssh-keyscan bastion.firehawkfilm.com >> /home/vagrant/.ssh/known_hosts"
     become: true
     become_user: vagrant
 
@@ -85,6 +94,12 @@
     lineinfile:
       path: /root/.bash_profile
       line: 'export HOSTNAME={{ hostname }}'
+
+  # - name: disable selinux
+  #   lineinfile:
+  #     path: /etc/selinux/config
+  #     regexp: '^SELINUX='
+  #     line: 'SELINUX=disabled'
 
   - name: upgrade all packages - yum update
     yum:
@@ -290,9 +305,10 @@
       - nload
       - tree
       - bzip2
+      - nmap
       #- nfs-utils-lib
 
-  - name: create production path
+  - name: create production path - this should be dynamic and based on the command showmount -e, and automount if remote
     file: 
       path: "{{ production_mount_target }}"
       state: directory
