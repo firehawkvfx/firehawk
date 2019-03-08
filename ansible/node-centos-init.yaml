@@ -21,6 +21,11 @@
     shell: "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R {{ bastionip }}"
     become: true
     become_user: vagrant
+
+  - name: clean known hosts
+    shell: "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R bastion.firehawkfilm.com"
+    become: true
+    become_user: vagrant
   
   - name: Write the new ec2 instance host key to known hosts
     shell: "ssh-keyscan {{ bastionip }} >> /home/vagrant/.ssh/known_hosts"
@@ -39,7 +44,7 @@
 
   vars:
     bastionip: "{{ groups['bastionip'][0] }}"
-    # need to remove old hosts ssh-keygen -f "/home/vagrant/.ssh/known_hosts" -R 10.0.1.11
+    # need to remove old hosts
     
   tasks:
   - name: clean known hosts

@@ -1,4 +1,57 @@
 ---
+- hosts: localhost
+  remote_user: vagrant
+  become: true
+  gather_facts: no
+
+  vars:
+    bastionip: "{{ groups['bastionip'][0] }}"
+    # need to remove old hosts
+    
+  tasks:
+  - name: clean known hosts
+    shell: "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R {{ groups['openvpnip'][0] }}"
+    become: true
+    become_user: vagrant
+
+  - name: clean known hosts
+    shell: "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R vpn.firehawkfilm.com"
+    become: true
+    become_user: vagrant
+
+  - name: delegate keyscan to add keys from remote subnet via bastion host.
+    command: "ssh-keyscan {{ groups['openvpnip'][0] }}"
+    register: new_host_fingerprint
+    #delegate_to: "centos@{{ groups['bastionip'][0] }}"
+
+  - debug:
+      msg: "{{ new_host_fingerprint.stdout_lines }}"
+
+  - name: add keyscan to known hosts
+    lineinfile:
+      dest: /home/vagrant/.ssh/known_hosts
+      line: "{{ item }}"
+    with_items: "{{ new_host_fingerprint.stdout_lines }}"
+    become: true
+    become_user: vagrant
+  
+  - name: delegate keyscan to add keys from remote subnet via bastion host.
+    command: "ssh-keyscan vpn.firehawkfilm.com"
+    register: new_host_fingerprint
+    #delegate_to: "centos@{{ groups['bastionip'][0] }}"
+
+  - debug:
+      msg: "{{ new_host_fingerprint.stdout_lines }}"
+
+  - name: add keyscan to known hosts
+    lineinfile:
+      dest: /home/vagrant/.ssh/known_hosts
+      line: "{{ item }}"
+    with_items: "{{ new_host_fingerprint.stdout_lines }}"
+    become: true
+    become_user: vagrant
+
+# provision
 - hosts: openvpnip
   remote_user: openvpnas
   become: yes
