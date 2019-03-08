@@ -82,6 +82,15 @@ Currently, this has only been tested from a Linux RHEL 7.5/Centos Host.  You are
     git clone https://github.com/firehawkvfx/openfirehawk.git
 - Download the latest deadline installer tar, and place the .tar file in the local openfirehawk/downloads folder.
 - Download the latest houdini installer, and place the .tar file in the local openfirehawk/downloads folder.
+- Prior to running vagrant, we set an environment variable to define the mac address of the vm. it is best to define this permanently in your os-
+    https://www.browserling.com/tools/random-mac
+    https://askubuntu.com/questions/58814/how-do-i-add-environment-variables
+
+```
+sudo -H gedit /etc/environment
+TF_VAR_vagrant_mac=c902ca64107d
+```
+
 - Run this to download an ubuntu base image and install ansible in the vm.  Provisioning the ubuntu desktop GUI may take 15mins +
     vagrant up
 - When the the process completes, take a snapshot of this initial state and verify its there in the list.
@@ -217,7 +226,23 @@ Terraform is used to create all our infrastructure in the cloud provider.  It is
     vagrant ssh
 
 
-- now we will initialise terraform. in the /vagrant path.
+- now we will prep to initialise terraform. in the /vagrant path, first we initialse environment variables that are shared between ansible and terraform.
+these variables are secrets and unique to you, so we encrypt them for any private version control (they can also be added to .gitignore if you don't want them in version control)
+
+-create your own vault file from the template, and place the password for that vault file in ~/.vault_pass
+
+    echo 'MyVaultPassword' > ~/.vault_pass
+    cp secrets_template.txt ansible/group_vars/all/secrets.txt
+    ansible-vault view ansible/group_vars/all/secrets.txt
+
+- edit the variables for your setup
+    ansible-vault edit ansible/group_vars/all/secrets.txt
+
+- next step, is making those variables available to terraform and ansible.
+We will always run this scrupt to update the variables for our environment from this script, before we run a terraform apply.
+    source ./update_var.sh
+
+- now initialise terraform.
     terraform init
 
 - when it completes, spin up the infrastructure.

@@ -12,29 +12,9 @@ Vagrant.configure("2") do |config|
   config.vagrant.plugins = ['vagrant-disksize', 'vagrant-reload']
   config.disksize.size = '50GB'
   #config.vm.network "public_network", bridge: "eno1",
-  config.vm.network "public_network", mac: ENV['vault_vagrant_mac']
-  #config.vm.network "private_network", ip: "192.168.50.33",
-    # auto_config: false
-
-  #config.vm.network "public_network", ip: "192.168.0.17"
+  config.vm.network "public_network", mac: ENV['TF_VAR_vagrant_mac']
 
   # routing issues?  https://stackoverflow.com/questions/35208188/how-can-i-define-network-settings-with-vagrant
-
-  # # default router
-  # config.vm.provision "shell",
-  #   run: "always",
-  #   inline: "route add default gw 192.168.92.1"
-
-  # # default router ipv6
-  # config.vm.provision "shell",
-  #   run: "always",
-  #   inline: "route -A inet6 add default gw fc00::1 enp0s8"
-
-  # # delete default gw on eth0
-  # config.vm.provision "shell",
-  #   run: "always",
-  #   inline: "eval `route -n | awk '{ if ($8 ==\"enp0s8\" && $2 != \"0.0.0.0\") print \"route del default gw \" $2; }'`"
-  
   config.vm.provider "virtualbox" do |vb|
     # Display the VirtualBox GUI when booting the machine
     vb.gui = true
