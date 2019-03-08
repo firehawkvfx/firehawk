@@ -21,6 +21,5 @@ downloads/*
 ansible/*.retry
 ansible-log.txt
 ansible/modules/*.retry
-ansible/group_vars/all/vault
 hostvars.log
 tmp/*

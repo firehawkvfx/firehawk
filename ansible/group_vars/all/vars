@@ -5,13 +5,27 @@ debug: 0
 
 production_mount_target: "/prod"
 
+stage: dev
+
+# domains
+all_domains: {
+dev: "{{ lookup('env','TF_VAR_public_domain_dev') }}",
+prod: "{{ lookup('env','TF_VAR_public_domain_prod') }}"
+}
+
+public_domain: "{{ all_domains[stage] }}"
+# in most cases only the above public_domain should be referenced, which can be switched between dev and prod.
+# the below public_domain_prod is used in some rare cases where multiple instances of infrastructure may not be not possible, like with a licence server.
+# eg I may need to reference houdinilicenceserver.prod.example.com in both the prod and dev environments for render nodes to be tested.
+public_domain_prod: "{{ all_domains['prod'] }}"
+
+### NAS volume mounts ###
+
 softnas_mount_source: "/pool0/volume0"
 
 deadline_certificates_location: "/opt/Thinkbox/certs"
 deadline_linux_installers_tar: "/vagrant/downloads/Deadline-10.0.23.4-linux-installers.tar"
-
 deadline_prefix: "/opt/Thinkbox/Deadline10"
-
 
 deadline_linux_no_extension: "{{ deadline_linux_installers_tar | splitext | first }}"
 deadline_linux_basename: "{{ deadline_linux_no_extension.split('/')[-1] }}"
@@ -19,30 +33,31 @@ deadline_linux_filename: "{{ deadline_linux_installers_tar.split('/')[-1] }}"
 
 ### Vault Variables ###
 
-db_pass: "{{ vault_db_pass }}"
+db_pass: "{{ lookup('env','TF_VAR_db_pass') }}"
 
 openvpn_user: openvpnas
-openvpn_user_pw: "{{ vault_openvpn_user_pw }}"
+openvpn_user_pw: "{{ lookup('env','TF_VAR_openvpn_user_pw') }}"
 
-user_softnas_pw: "{{ vault_user_softnas_pw }}"
+user_softnas_pw: "{{ lookup('env','TF_VAR_user_softnas_pw') }}"
 
-user_deadlineuser_name: "{{ vault_user_deadlineuser_name }}"
-user_deadlineuser_pw: "{{ vault_user_deadlineuser_pw }}"
+user_deadlineuser_name: "{{ lookup('env','TF_VAR_user_deadlineuser_name') }}"
+user_deadlineuser_pw: "{{ lookup('env','TF_VAR_user_deadlineuser_pw') }}"
 
-openfirehawkserver: "{{ vault_openfirehawkserver }}"
-deadline_proxy_root_dir: "{{ vault_deadline_proxy_root_dir }}"
-deadline_proxy_certificate: "{{ vault_deadline_proxy_certificate }}"
-deadline_proxy_certificate_password: "{{ vault_deadline_proxy_certificate_password }}"
+openfirehawkserver: "{{ lookup('env','TF_VAR_openfirehawkserver') }}"
+deadline_proxy_root_dir: "{{ lookup('env','TF_VAR_deadline_proxy_root_dir') }}"
+deadline_proxy_certificate: "{{ lookup('env','TF_VAR_deadline_proxy_certificate') }}"
+deadline_proxy_certificate_password: "{{ lookup('env','TF_VAR_deadline_proxy_certificate_password') }}"
 
-aws_region: "{{ vault_aws_region }}"
-aws_access_key: "{{ vault_aws_access_key }}"
-aws_secret_key: "{{ vault_aws_secret_key }}"
-s3_disk_password: "{{ vault_s3_disk_password }}"
+aws_region: "{{ lookup('env','TF_VAR_aws_region') }}"
+aws_access_key: "{{ lookup('env','TF_VAR_aws_access_key') }}"
+aws_secret_key: "{{ lookup('env','TF_VAR_aws_secret_key') }}"
+s3_disk_password: "{{ lookup('env','TF_VAR_s3_disk_password') }}"
 
-public_domain: "{{ vault_public_domain_dev }}"
-public_domain_prod: "{{ vault_public_domain_prod }}"
+key_name: "{{ lookup('env','TF_VAR_key_name') }}"
+local_key_path: "{{ lookup('env','TF_VAR_local_key_path') }}"
 
-key_name: "{{ vault_key_name }}"
-local_key_path: "{{ vault_local_key_path }}"
+time_zone_info_dict_linux: {
+Australia_Sydney: "/usr/share/zoneinfo/Australia/Sydney"
+}
 
-time_zone_info_path_linux: "{{ vault_time_zone_info_path_linux['Australia_Sydney'] }}"
+time_zone_info_path_linux: "{{ time_zone_info_dict_linux['Australia_Sydney'] }}"

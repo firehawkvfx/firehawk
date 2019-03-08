@@ -15,6 +15,9 @@
   roles:
     - role: openvpn
 
+# pull current config with these commands.  use them to resolve automation of the interface.
+# sudo ./sacli userpropget
+# sudo ./sacli userpropget
 
 - hosts: ansible_control
   become: true

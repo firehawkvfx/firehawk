@@ -95,9 +95,11 @@ Currently, this has only been tested from a Linux RHEL 7.5/Centos Host.  You are
   We run our first playbook to create the deadlineuser and change the default password for the ubuntu user and deadlineuser.  This will also install deadline DB, and RCS, provided you have a tar downloaded in openfirehawk/downloads.
     ansible-playbook /vagrant/ansible/newuser_deadline.yaml
 
-- You should be able to select the deadlineuser in the VM GUI, and login with a password. Open a terminal in the VM and run-
+- You should be able to select the deadlineuser in the VM GUI, and login with a password. Open a terminal in the VM and run these-
     deadlinemonitor
-- You should see 1 slave exist in the bottom window, which is this vm.  since we can validate that the deadline DB and RCS is working, we will disable this because we won't want to use this server to render!
+    deadlinepulse
+    deadlinercs
+- In the monitor You should see 1 slave exist in the bottom window, which is this vm.  since we can validate that the deadline DB and RCS is working, we will disable this because we won't want to use this server to render!
 - INMPORTANT: After you start to render with more than 2 render nodes visible here, you need to purchase UBL credits for deadline to play with.  Thinkbox will credit that to your AWS account on request if you email them and request it.  You won't be able to test deadline with more than 2 nodes visible to the manager.  You will configure your UBL credits to use with the deadline monitor (see deadline docs on how to do this)
 - to launch instances in AWS, you will configure your AWS account to be used with the Command Line Interface.  See aws documentation - https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html
 More on this below...

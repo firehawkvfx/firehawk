@@ -11,11 +11,10 @@ Vagrant.configure("2") do |config|
   config.vm.define "ansible_control"
   config.vagrant.plugins = ['vagrant-disksize', 'vagrant-reload']
   config.disksize.size = '50GB'
-  #config.vm.network "public_network", bridge: "eno1"
-  config.vm.network "public_network"
-
-  config.vm.network "private_network", ip: "192.168.50.33",
-    auto_config: false
+  #config.vm.network "public_network", bridge: "eno1",
+  config.vm.network "public_network", mac: ENV['vault_vagrant_mac']
+  #config.vm.network "private_network", ip: "192.168.50.33",
+    # auto_config: false
 
   #config.vm.network "public_network", ip: "192.168.0.17"
 
@@ -46,6 +45,8 @@ Vagrant.configure("2") do |config|
     vb.customize ["modifyvm", :id, "--accelerate3d", "on"]
     vb.customize ['modifyvm', :id, '--clipboard', 'bidirectional']  
   end
+  # set mac
+  
   # update packages
   config.vm.provision "shell", inline: "sudo apt-get update"
   config.vm.provision "shell", inline: "sudo apt-get install -y sshpass"
