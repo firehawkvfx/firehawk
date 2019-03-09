@@ -28,6 +28,7 @@ Vagrant.configure("2") do |config|
   # set mac
   
   # update packages
+  config.vm.provision "shell", inline: "sudo rm /etc/localtime && sudo ln -s /usr/share/zoneinfo/Australia/Brisbane /etc/localtime", run: "always"
   config.vm.provision "shell", inline: "sudo apt-get update"
   config.vm.provision "shell", inline: "sudo apt-get install -y sshpass"
   # Install ubuntu desktop and virtualbox additions.  Because a reboot is required only two choices to provision-

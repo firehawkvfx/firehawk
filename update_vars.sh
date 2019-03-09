@@ -1,6 +1,6 @@
 IFS='
 '
-for i in `ansible-vault view ansible/group_vars/all/secrets.txt`
+for i in `ansible-vault view secrets/secrets.txt`
 do
     [[ "$i" =~ ^#.*$ ]] && continue
     export $i
