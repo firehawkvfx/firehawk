@@ -170,7 +170,7 @@ module "node" {
   #skipping os updates will allow faster rollout for testing.
   skip_update = "${var.node_skip_update}"
   #sleep will stop instances to save cost during idle time.
-  sleep = "${var.sleep || var.node_sleep_on_create}"
+  sleep = "${var.sleep}"
 
   # deadline_user                       = "${var.deadline_user}"
   # deadline_user_password              = "${var.deadline_user_password}"
