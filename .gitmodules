@@ -4,3 +4,6 @@
 [submodule "modules/terraform-aws-vpc"]
 	path = modules/terraform-aws-vpc
 	url = https://github.com/firehawkvfx/terraform-aws-vpc.git
+[submodule "modules/node_centos/modules/houdini_install_script"]
+	path = modules/node_centos/modules/houdini_install_script
+	url = https://github.com/firehawkvfx/houdini_install_script.git

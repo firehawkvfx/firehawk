@@ -50,10 +50,9 @@ Vagrant.configure("2") do |config|
   config.vm.provision :reload
   #ansible provissioning
   #ansible_inventory_dir = "ansible/hosts"
-  config.vm.provision "playbook1", type:'ansible_local' do |ansible|
-    #ansible.inventory_path = "ansible/hosts"
-    ansible.playbook = "ansible/init.yaml"
-  end
+  # config.vm.provision "playbook1", type:'ansible_local' do |ansible|
+  #   ansible.playbook = "ansible/init.yaml"
+  # end
   # vm.trigger.after :up do |trigger|
   #   trigger.warn = "Taking Snapshot"
   #   trigger.run = {inline: "vagrant snapshot push"}
