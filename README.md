@@ -100,11 +100,23 @@ TF_VAR_vagrant_mac=c902ca64107d
     vagrant snapshot pop --no-delete
 - Now we will ssh into the vm and start provisioning with ansible.
     vagrant ssh
-- The git repo tree we are running vagrant from is shared with the VM in /vagrant
-  We run our first playbook to create the deadlineuser and change the default password for the ubuntu user and deadlineuser.  This will also install deadline DB, and RCS, provided you have a tar downloaded in openfirehawk/downloads.
-    ansible-playbook /vagrant/ansible/newuser_deadline.yaml
+- The git repo tree we are running vagrant from is shared with the VM in /vagrant.
 
-- You should be able to select the deadlineuser in the VM GUI, and login with a password. Open a terminal in the VM and run these-
+- Before we run the first playbook, we need to set a passowrd for our vault. for example -
+    echo 'myVaultPasswordMustBeUnique' > /home/vagrant/.vault_pass
+- now we can initialise the secrets.
+    cd /vagrant
+    cp ansible/secrets.template ansible/group_vars/all/secrets.txt
+- set the variables to your own unique values and encrypt it with-
+    ansible-vault encrypt ansible/group_vars/all/secrets.txt
+- now we can set our environment variables that will decrypt the secrets, and make the values available to terraform and ansible.
+    source ./update_vars.sh
+- now we can execute the first playbook to initialise the vm.
+    ansible-playbook -i ansible/inventory ansible/init.yaml
+- We run our next playbook to create the deadlineuser and change the default password for the ubuntu user and deadlineuser.  This will also install deadline DB, and RCS, provided you have a tar downloaded in openfirehawk/downloads.
+    ansible-playbook -i ansible/inventory /vagrant/ansible/newuser_deadline.yaml
+
+- You should be able to select the deadlineuser in the VM GUI, and login with a password. Open a terminal in the VM GUI, logged in as deadlineuser and run these-
     deadlinemonitor
     deadlinepulse
     deadlinercs

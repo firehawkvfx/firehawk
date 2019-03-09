@@ -35,6 +35,9 @@ deadline_linux_filename: "{{ deadline_linux_installers_tar.split('/')[-1] }}"
 
 db_pass: "{{ lookup('env','TF_VAR_db_pass') }}"
 
+sesi_username: "{{ lookup('env','TF_VAR_sesi_username') }}"
+sesi_password: "{{ lookup('env','TF_VAR_sesi_password') }}"
+
 openvpn_user: openvpnas
 openvpn_user_pw: "{{ lookup('env','TF_VAR_openvpn_user_pw') }}"
 

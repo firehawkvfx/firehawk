@@ -1,10 +1,9 @@
 ---
-# tasks file for roles/aws-cli
+#tasks file for roles/aws-cli
 - name: install the package, force upgrade
   pip: 
     name: pip
     extra_args: --upgrade
-  #become_user: vagrant
   become: true
 
 - name: install the package, force upgrade
@@ -23,3 +22,16 @@
   pip: 
     name: boto3
   become: true
+
+- name: Case insensitive password string match
+  expect:
+    command: aws configure
+    responses:
+      .*Access Key ID \[.*\]: "{{ aws_access_key }}"
+      .*Secret Access Key \[.*\]: "{{ aws_secret_key }}"
+      .*region name \[.*\]: "{{ aws_region }}"
+      .*output format \[.*\]: json
+    #echo: yes
+  become_user: vagrant
+  # you don't want to show passwords in your logs
+  no_log: true

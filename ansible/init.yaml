@@ -6,3 +6,4 @@
     - role: init-host
     - role: init-packages
     - role: terraform
+    - role: aws-cli

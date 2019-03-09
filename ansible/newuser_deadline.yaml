@@ -24,4 +24,3 @@
     #- role: terraform
     - role: deadlinedb
     - role: deadlinercs
-    - role: aws-cli

@@ -16,7 +16,7 @@
   user:
     name: deadlineuser
     uid: 9001
-    password: "{{ my_password }}"
+    #password: "{{ my_password }}"
     groups: # Empty by default, here we give it some groups
       - sudo
     state: present
@@ -24,6 +24,13 @@
     system: no # Defaults to no
     createhome: yes # Defaults to yes
   when: result.stat.exists == false
+
+- name: set user pass
+  expect:
+    command: passwd deadlineuser
+    responses:
+      (?i)password: "{{ my_password }}"
+      (?i)Retype new password: "{{ my_password }}"
 
 - name: change the default ubuntu user passwd
   user:
