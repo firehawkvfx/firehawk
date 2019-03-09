@@ -4,27 +4,8 @@
   vars:
     key_name: .vault-key
 
-  tasks:
-  - file:
-      path: "../keys/"
-      state: directory
-      
-  - stat:
-      path: "../keys/{{ key_name }}"
-    register: key_test
+  # we have to ensure a blank key pass exists before starting.  we should check if the file is black before generating a key.
 
-  - name: generate primary password for crypt
-    copy:
-      content: "{{ lookup('password', '/dev/null length=64 chars=ascii_letters') }}"
-      dest: "../keys/{{ key_name }}"
-    when: key_test.stat.exists == false
-
-  - stat:
-      path: "../keys/{{ key_name }}"
-    register: key_test
-
-  - name: make key read only
-    file:
-      path: "../keys/{{ key_name }}"
-      mode: 400
-    when: key_test.stat.exists == true
+  roles:
+    - init-keys
+    - validate-encryption
