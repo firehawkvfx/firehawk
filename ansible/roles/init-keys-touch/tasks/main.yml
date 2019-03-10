@@ -1,0 +1,10 @@
+- file:
+    path: "/vagrant/keys/"
+    state: directory
+
+- name: create blank vault if it doesn't exist
+  file:
+    path: "/vagrant/keys/{{ key_name }}"
+    state: touch
+    access_time: preserve
+    modification_time: preserve

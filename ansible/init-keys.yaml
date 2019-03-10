@@ -1,11 +1,16 @@
----
 - hosts: ansible_control
   become: true
+
   vars:
     key_name: .vault-key
+    key_path: "/vagrant/keys/{{ key_name }}"
+    secret_path: /vagrant/secrets/secrets.txt
 
-  # we have to ensure a blank key pass exists before starting.  we should check if the file is black before generating a key.
+  # we have to ensure a blank key pass exists before starting.  we check if the file is blank before generating a key.
+  # once a key is generated, the vaildate-encryption role will ensure the secrets file is encrypted with it
 
   roles:
+    - init-keys-touch
     - init-keys
+    # after keys are validated, then we encrypt the secrets file.
     - validate-encryption

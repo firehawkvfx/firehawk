@@ -1,33 +1,35 @@
 ---
 # tasks file for ansible/roles/validate-encryption
 # if the secrets file is not encrypted, then encrypt it.
-- name: read the passwd file
-  shell: cat /vagrant/secrets/secrets.txt 
+-
+
+- name: read the secrets file
+  shell: "cat {{ secret_path }}"
   register: check
 
 - name: File is already encrypted
   when: check.stdout.find('ANSIBLE_VAULT') != -1
-  debug: msg="Secrets file is already encrypted."
+  debug: msg="Secrets file at {{ secret_path }} is already encrypted."
 
 - name: File is not encrypted
   when: check.stdout.find('ANSIBLE_VAULT') == -1
-  debug: msg="Secrets file is not encrypted.  Will encrypt"
+  debug: msg="Secrets file at {{ secret_path }} is not encrypted.  Will encrypt"
 
 - name: encrypt
   when: check.stdout.find('ANSIBLE_VAULT') == -1
   shell: |
-    cd /vagrant/
-    ansible-vault encrypt /vagrant/secrets/secrets.txt
+    cd /vagrant/ansible
+    ansible-vault encrypt --vault-id {{ key_path }} {{ secret_path }}
   register: encrypt_shell
 
 - name: encrypt result
   when: check.stdout.find('ANSIBLE_VAULT') == -1
   debug: msg="{{ encrypt_shell.stdout }}"
 
-- name: Validate update
-  shell: cat /vagrant/secrets/secrets.txt 
+- name: read the passwd file - validate update
+  shell: "cat {{ secret_path }}"
   register: check_post
 
-- name: Validate check
+- name: validate check
   failed_when: check_post.stdout.find('ANSIBLE_VAULT') == -1
   fail: msg="Warning, wasn't able to encrypt secrets file."
