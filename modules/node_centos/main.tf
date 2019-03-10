@@ -165,6 +165,7 @@ resource "null_resource" "provision_node_centos" {
       set -x
       cd /vagrant
       ansible-playbook -i ansible/inventory ansible/node-centos-init.yaml -v
+      ansible-playbook -i ansible/inventory ansible/node-centos-houdini.yaml -v
   EOT
   }
 }

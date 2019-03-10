@@ -1,29 +1,56 @@
 ---
 # tasks file for ansible/roles/init-keys
-- file:
-    path: "../keys/"
-    state: directory
 
-- stat:
-    path: "../keys/{{ key_name }}"
-  register: key_test
+# The purpose of this module is to initialise a random key password if it doesn't exist.  No data in /keys is commited to source control.  Backup keys elsewhere.
+
+- set_fact:
+    key_contents: "{{lookup('file', '/vagrant/keys/{{ key_name }}') }}"
+
+- debug:
+    msg: "vault key is empty: {{ key_contents }}"
+  when: key_contents == ''
+
+- set_fact:
+    key_test: false
+  when: key_contents == ''
+
+- set_fact:
+    key_test: true
+  when: key_contents != ''
+
 - name: notify
   debug:
     msg: "A new random key will be generated in ./keys/{{ key_name }}.  It will not be kept in version control, but it will be used to encrypt anything in ./secrets/ which are kept in version control.  It is important you store this key safely because if lost you will not have access to any secrets that define your current infrastructure state."
-  when: key_test.stat.exists == false
+  when: key_test == false
 
 - name: generate primary password for crypt
   copy:
     content: "{{ lookup('password', '/dev/null length=64 chars=ascii_letters') }}"
-    dest: "../keys/{{ key_name }}"
-  when: key_test.stat.exists == false
+    dest: "/vagrant/keys/{{ key_name }}"
+  when: key_test == false
 
-- stat:
-    path: "../keys/{{ key_name }}"
-  register: key_test
+# check key contents again, it should pass
+- set_fact:
+    key_contents: "{{lookup('file', '/vagrant/keys/{{ key_name }}') }}"
 
-- name: make key read only
+- name: problem generating key
+  failed_when: key_contents == ''
+  fail: "vault key is empty: {{ key_contents }}"
+
+- set_fact:
+    key_test: false
+  when: key_contents == ''
+
+- set_fact:
+    key_test: true
+  when: key_contents != ''
+
+- name: set key permissions to read only
   file:
-    path: "../keys/{{ key_name }}"
-    mode: 400
-  when: key_test.stat.exists == true
+    path: "/vagrant/keys/{{ key_name }}"
+    mode: 0400
+    state: touch
+    access_time: preserve
+    modification_time: preserve
+  when: key_test == true
+  become: true
