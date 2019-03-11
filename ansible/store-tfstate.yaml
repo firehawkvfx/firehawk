@@ -1,0 +1,28 @@
+
+# This process archives secrets.  they are copied to the secrets/ path, and encrypted by the vault id - keys/.vault-key
+# Nothing stored in the secrets path should be unencrypted. normally, .tfstate files are in the git ignore and will not be commited to the repository.
+# so after a commit, if you run a terraform apply, you should also runf store-tfstate.yaml and commit the secrets to the repository.
+
+- hosts: ansible_control
+  become: true
+  remote_user: deadlineuser
+  become_user: root
+
+  vars:
+    secrets:
+      secret1:
+        location: /vagrant/errored.tfstate
+        target: /vagrant/secrets/vagrant/errored.tfstate
+      secret2:
+        location: /vagrant/terraform.tfstate
+        target: /vagrant/secrets/vagrant/terraform.tfstate
+    key_name: .vault-key
+    key_path: "/vagrant/keys/{{ key_name }}"
+  
+  tasks:
+  - name: store-secret
+    with_items:
+      - "{{ lookup('dict', secrets) }}"
+    include_role:
+      name: store-secret
+    vars:
