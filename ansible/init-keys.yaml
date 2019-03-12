@@ -1,4 +1,4 @@
-- hosts: ansible_control
+- hosts: localhost
   become: true
 
   vars:
