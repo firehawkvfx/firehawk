@@ -66,13 +66,20 @@ Vagrant.configure("2") do |config|
   # vagrant ssh
   # check that the right ip you wanted assigned is used with 'ip a'
   # cd /vagrant
-  # now we will setup our environment variables from a template
+  # now we will setup our environment variables from a template.
+  # if you have already done this before, you will probably wan't to keep your old secrets.txt instead of copying in the template.
   # cp secrets.template secrets/secrets.txt
   # edit secrets/secrets.txt with your own unique values.  also copy in the mac address you set, eg TF_VAR_vagrant_mac=000D391G7C51
   # now we need to generate a random key for your vault.  if a key is present already in keys/.vault-key then it will be kept.
   # init-keys.yaml will also ecrypt secrets.txt if it is unencrypted with this new key.
   # ansible-playbook ansible/init-keys.yaml
+  # ensure you have a backup of the key (keys/.vault-key).  Storing it on an encryptted usb key is a good idea.
   # now we can initialise out environment variables.
-  # ansible-playbook -i ansible/inventory ansible/init.yaml
-  # ansible-playbook -i ansible/inventory ansible/newuser_deadline.yaml
+  # source ./update_vars.sh
+  # ansible-playbook -i ansible/inventory/hosts ansible/init.yaml
+  # download the deadline linux installers version 10.0.23.4 into downloads/Deadline-10.0.23.4-linux-installers.tar
+  # ansible-playbook -i ansible/inventory/hosts ansible/newuser_deadline.yaml
+  # remember to always roune source ./update_vars.sh before running any ansible playbooks, or using terraform.
+  # now lets run out first terraform apply.
+  # terraform apply
 end
