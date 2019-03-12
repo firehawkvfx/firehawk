@@ -1,0 +1,40 @@
+- hosts: ansible_control
+  remote_user: vagrant
+  become: true
+  gather_facts: no
+
+# we need different steps for adding a new host in the public subnet, vs private.  we should detect the difference and handle appropriately.
+
+  vars:
+    bastionip: "{{ groups['bastionip'][0] }}"
+
+  tasks: 
+  - name: echo bastion public ip
+    debug:
+      msg: "{{ item }}"
+    with_items:
+      - "{{ bastionip }}"
+  - file:
+      path: /home/vagrant/.ssh/known_hosts
+      state: touch
+    become_user: vagrant
+    
+  - name: clean known hosts
+    shell: "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R {{ bastionip }}"
+    become: true
+    become_user: vagrant
+
+  - name: clean known hosts
+    shell: "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R bastion.firehawkfilm.com"
+    become: true
+    become_user: vagrant
+  
+  - name: Write the new ec2 instance host key to known hosts
+    shell: "ssh-keyscan {{ bastionip }} >> /home/vagrant/.ssh/known_hosts"
+    become: true
+    become_user: vagrant
+      
+  - name: Write the new ec2 instance host key to known hosts
+    shell: "ssh-keyscan bastion.firehawkfilm.com >> /home/vagrant/.ssh/known_hosts"
+    become: true
+    become_user: vagrant
