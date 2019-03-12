@@ -5,7 +5,8 @@
 #    The purpose of this script is to ensure that the template for all users remains consistent.
 # 3) Example values for the secrets.template file are defined in secrets.example. Ensure you have placed an example key=value for any new vars in secrets.example. 
 # If any changes have resulted in a new variable name, then example values helps other understand what they should be using for their own infrastructure.
-
+mkdir -p /vagrant/tmp/
+# The template will be updated by this script
 touch /vagrant/secrets.template
 rm /vagrant/secrets.template
 touch /vagrant/tmp/secrets.temp
