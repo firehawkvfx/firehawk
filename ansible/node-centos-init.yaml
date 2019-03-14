@@ -1,79 +1,8 @@
-- hosts: ansible_control
-  remote_user: vagrant
-  become: true
-  gather_facts: no
-
-  vars:
-    bastionip: "{{ groups['bastionip'][0] }}"
-
-  tasks: 
-  - name: echo bastion public ip
-    debug:
-      msg: "{{ item }}"
-    with_items:
-      - "{{ bastionip }}"
-  - file:
-      path: /home/vagrant/.ssh/known_hosts
-      state: touch
-    become_user: vagrant
-    
-  - name: clean known hosts
-    shell: "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R {{ bastionip }}"
-    become: true
-    become_user: vagrant
-
-  - name: clean known hosts
-    shell: "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R bastion.firehawkfilm.com"
-    become: true
-    become_user: vagrant
-  
-  - name: Write the new ec2 instance host key to known hosts
-    shell: "ssh-keyscan {{ bastionip }} >> /home/vagrant/.ssh/known_hosts"
-    become: true
-    become_user: vagrant
-      
-  - name: Write the new ec2 instance host key to known hosts
-    shell: "ssh-keyscan bastion.firehawkfilm.com >> /home/vagrant/.ssh/known_hosts"
-    become: true
-    become_user: vagrant
-
-- hosts: localhost
-  remote_user: vagrant
-  become: true
-  gather_facts: no
-
-  vars:
-    bastionip: "{{ groups['bastionip'][0] }}"
-    # need to remove old hosts
-    
-  tasks:
-  - name: clean known hosts
-    shell: "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R {{ groups['role_node_centos'][0] }}"
-    become: true
-    become_user: vagrant
-
-  - name: delegate keyscan to add keys from remote subnet via bastion host.
-    command: "ssh-keyscan {{ groups['role_node_centos'][0] }}"
-    register: new_host_fingerprint
-    delegate_to: "centos@{{ groups['bastionip'][0] }}"
-
-  - debug:
-      msg: "{{ new_host_fingerprint.stdout_lines }}"
-
-  - name: add keyscan to known hosts
-    lineinfile:
-      dest: /home/vagrant/.ssh/known_hosts
-      line: "{{ item }}"
-    with_items: "{{ new_host_fingerprint.stdout_lines }}"
-    become: true
-    become_user: vagrant
-
 - hosts: role_node_centos
   remote_user: centos
   become: true
 
   vars:
-    bastionip: "{{ groups['bastionip'][0] }}"
     hostname: "node1.{{ public_domain }}"
 
   tasks:
@@ -123,7 +52,6 @@
 
   - name: install pip
     package:
-      #name: epel-release
       name: python-pip
       state: present
 
@@ -151,7 +79,6 @@
         - wheel
         - deadlineuser
       uid: 9001
-      #group: deadlineuser
 
   - name: set user pass
     expect:
@@ -235,7 +162,7 @@
       group: deadlineuser
     become: yes
 
-  - name: strange problem here.  for some reason read permission is needed for everyone set above or the ansible copy doesn't work.  so we set it back here.
+  - name: Strange requirement here.  For some reason read permissions needed for everyone to be set above or the ansible copy doesn't work.  So we set it back to normal here.
     file: 
       path: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
       mode: 0640

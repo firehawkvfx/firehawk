@@ -1,0 +1,20 @@
+- name: clean known hosts
+  shell: "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R {{ private_ip }}"
+  become: true
+  become_user: vagrant
+
+- name: delegate keyscan to add keys from remote subnet via bastion host.
+  command: "ssh-keyscan {{ private_ip }}"
+  register: new_host_fingerprint
+  delegate_to: "centos@{{ bastion_ip }}"
+
+- debug:
+    msg: "{{ new_host_fingerprint.stdout_lines }}"
+
+- name: add keyscan to known hosts
+  lineinfile:
+    dest: /home/vagrant/.ssh/known_hosts
+    line: "{{ item }}"
+  with_items: "{{ new_host_fingerprint.stdout_lines }}"
+  become: true
+  become_user: vagrant

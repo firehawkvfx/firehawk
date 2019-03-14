@@ -5,37 +5,37 @@
 #    The purpose of this script is to ensure that the template for all users remains consistent.
 # 3) Example values for the secrets.template file are defined in secrets.example. Ensure you have placed an example key=value for any new vars in secrets.example. 
 # If any changes have resulted in a new variable name, then example values helps other understand what they should be using for their own infrastructure.
-mkdir -p /vagrant/tmp/
+mkdir -p ./tmp/
 # The template will be updated by this script
-touch /vagrant/secrets.template
-rm /vagrant/secrets.template
-touch /vagrant/tmp/secrets.temp
-rm /vagrant/tmp/secrets.temp
+touch ./secrets.template
+rm ./secrets.template
+touch ./tmp/secrets.temp
+rm ./tmp/secrets.temp
 # IFS will allow for lop to iterate over lines instead of words seperated by ' '
 IFS='
 '
-for i in `cat /vagrant/secrets.example`
+for i in `cat ./secrets.example`
 do
     [[ "$i" =~ ^#.*$ ]] && continue
     export $i
 done
 
 # Update template
-for i in `ansible-vault view --vault-id /vagrant/keys/.vault-key /vagrant/secrets/secrets.txt`
+for i in `ansible-vault view --vault-id ./keys/.vault-key ./secrets/secrets.txt`
 do
     if [[ "$i" =~ ^#.*$ ]]
     then
-        echo $i >> /vagrant/tmp/secrets.temp
+        echo $i >> ./tmp/secrets.temp
     else
-        echo ${i%%=*}'=$'${i%%=*} >> /vagrant/tmp/secrets.temp
+        echo ${i%%=*}'=$'${i%%=*} >> ./tmp/secrets.temp
     fi
 done
 # substitute example var vules into the template.
-envsubst < "/vagrant/tmp/secrets.temp" > "/vagrant/secrets.template"
-rm /vagrant/tmp/secrets.temp
+envsubst < "./tmp/secrets.temp" > "./secrets.template"
+rm ./tmp/secrets.temp
 
 # Now set environment variables to the actual values defined in the user's secrets.txt file
-for i in `ansible-vault view --vault-id /vagrant/keys/.vault-key /vagrant/secrets/secrets.txt`
+for i in `ansible-vault view --vault-id ./keys/.vault-key ./secrets/secrets.txt`
 do
     [[ "$i" =~ ^#.*$ ]] && continue
     export $i

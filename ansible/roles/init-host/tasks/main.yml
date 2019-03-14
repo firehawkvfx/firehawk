@@ -15,18 +15,4 @@
     path: /etc/environment
     line: "ANSIBLE_STDOUT_CALLBACK=debug"
     create: yes
-
-- name: define ssh config to push through a bastion host to get into private subnet.
-  copy:
-    dest: "/home/vagrant/.ssh/config"
-    content: |
-      host bastion
-        Hostname bastion.{{ public_domain }}
-        User centos 
-        IdentityFile  ~/my_key_pair.pem
-
-      Host 10.0.1.*
-        IdentityFile  ~/my_key_pair.pem
-        User centos
-        ProxyCommand ssh -W %h:%p centos@bastion
     

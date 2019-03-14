@@ -95,29 +95,59 @@ resource "aws_instance" "bastion" {
   user_data = <<USERDATA
 USERDATA
 
-  provisioner "remote-exec" {
-    connection {
-      user        = "${var.user}"
-      host        = "${self.public_ip}"
-      private_key = "${var.private_key}"
-      timeout     = "10m"
-    }
+  # provisioner "remote-exec" {
+  #   connection {
+  #     user        = "${var.user}"
+  #     host        = "${self.public_ip}"
+  #     private_key = "${var.private_key}"
+  #     timeout     = "10m"
+  #   }
 
-    inline = [
-      # Sleep 60 seconds until AMI is ready
-      "sleep 60",
-    ]
-  }
+  #   inline = [
+  #     # Sleep 60 seconds until AMI is ready
+  #     "sleep 60",
+  #   ]
+  # }
 }
 
 output "ip" {
   value = "${aws_eip.bastionip.public_ip}"
 }
 
+resource "null_resource" "provision_bastion" {
+  depends_on = ["aws_instance.bastion", "aws_eip.bastionip", "aws_route53_record.bastion_record"]
+
+  triggers {
+    instanceid = "${ aws_instance.bastion.id }"
+  }
+
+  provisioner "remote-exec" {
+    connection {
+      user                = "centos"
+      host                = "${aws_eip.bastionip.public_ip}"
+      #bastion_host        = "bastion.firehawkfilm.com"
+      private_key         = "${var.private_key}"
+      #bastion_private_key = "${var.private_key}"
+      type                = "ssh"
+      timeout             = "10m"
+    }
+
+    inline = ["set -x && sudo yum install -y python"]
+  }
+
+  provisioner "local-exec" {
+    command = <<EOT
+      set -x
+      cd /vagrant
+      ansible-playbook -i ansible/inventory ansible/ssh-add-public-host.yaml -v --extra-vars "public_ip=${aws_eip.bastionip.public_ip} public_hostname=bastion.${var.public_domain_name} set_bastion=true"
+  EOT
+  }
+}
+
 variable "route_zone_id" {}
 variable "public_domain_name" {}
 
-resource "aws_route53_record" "openvpn_record" {
+resource "aws_route53_record" "bastion_record" {
   zone_id = "${var.route_zone_id}"
   name    = "bastion.${var.public_domain_name}"
   type    = "A"

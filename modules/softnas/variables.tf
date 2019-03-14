@@ -33,6 +33,8 @@ variable "sleep" {
 
 variable "bastion_private_ip" {}
 
+variable "bastion_ip" {}
+
 variable "skip_update" {
   default = false
 }

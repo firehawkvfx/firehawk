@@ -375,20 +375,20 @@ resource "null_resource" "provision_softnas" {
     connection {
       user                = "centos"
       host                = "${aws_instance.softnas1.private_ip}"
-      bastion_host        = "bastion.firehawkfilm.com"
+      bastion_host        = "${var.bastion_ip}"
       private_key         = "${var.private_key}"
       bastion_private_key = "${var.private_key}"
       type                = "ssh"
       timeout             = "10m"
     }
 
-    inline = ["set -x && sudo yum install -y python"]
+    inline = ["sleep 10 && set -x && sudo yum install -y python"]
   }
-
   provisioner "local-exec" {
     command = <<EOT
       set -x
       cd /vagrant
+      ansible-playbook -i ansible/inventory ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.softnas1.private_ip} bastion_ip=${var.bastion_ip}"
       ansible-playbook -i ansible/inventory ansible/softnas-init.yaml -v
       ansible-playbook -i ansible/inventory ansible/softnas-update.yaml -v
   EOT
@@ -427,6 +427,13 @@ resource "aws_ami_from_instance" "softnas1" {
 # IMPORTANT: if creating a new disk, the disk_device should be the next number available to the instance.
 # eg if these are already moujnted, /dev/s3-0, /dev/s3-1, /dev/s3-2, then the disk_device for the next bucket should be "3".
 
+output "softnas1_instanceid" {
+  value = "${aws_instance.softnas1.id}"
+}
+
+output "softnas1_private_ip" {
+  value = "${aws_instance.softnas1.private_ip}"
+}
 resource "null_resource" "provision_softnas_volumes" {
   depends_on = ["aws_ami_from_instance.softnas1"]
 
@@ -438,7 +445,7 @@ resource "null_resource" "provision_softnas_volumes" {
     connection {
       user                = "centos"
       host                = "${aws_instance.softnas1.private_ip}"
-      bastion_host        = "bastion.firehawkfilm.com"
+      bastion_host        = "${var.bastion_ip}"
       private_key         = "${var.private_key}"
       bastion_private_key = "${var.private_key}"
       type                = "ssh"
@@ -495,13 +502,7 @@ resource "null_resource" "provision_softnas_volumes" {
 #   template_url = "https://s3-ap-southeast-2.amazonaws.com/aws-softnas-cloudformation/softnas-1az.json"
 # }
 
-# output "softnas1_instanceid" {
-#   value = "${aws_cloudformation_stack.SoftNAS1Stack.outputs["InstanceID"]}"
-# }
 
-# output "softnas1_private_ip" {
-#   value = "${aws_cloudformation_stack.SoftNAS1Stack.outputs["InstanceIP"]}"
-# }
 
 # Attach existing ebs volumes to the softnas instance.  if a volume has been initialised previously, it will be detected by softnas.
 # we iterate over the volumes and mounts to attach them to the softnas instance 

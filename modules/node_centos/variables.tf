@@ -70,61 +70,7 @@ variable "use_custom_ami" {
 variable "custom_ami" {
   default = ""
 }
-
-# variable "deadline_user" {
-#   default = "deadlineuser"
-# }
-
-# variable "deadline_prefix" {}
-# variable "deadline_user_password" {}
-
-# variable "deadline_user_uid" {}
-
-# variable "deadline_samba_server_hostname" {}
-
-# variable "deadline_certificates_location" {
-#   default = "/opt/Thinkbox/certs"
-# }
-
-# variable "deadline_installers_filename" {
-#   default = "DeadlineClient-10.0.23.4-linux-x64-installer.run"
-# }
-
-# variable "houdini_installer_filename" {
-#   default = "houdini-17.0.459-linux_x86_64_gcc6.3.tar"
-# }
-
-# variable "deadline_client_certificate" {
-#   default = "/opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx"
-# }
-
-# variable "deadline_server_certificate" {
-#   default = "/opt/Thinkbox/certs/deadlinedb.firehawkvfx.com.pfx"
-# }
-
-# variable "deadline_db_ssl_password" {
-#   default = "@WhatTime"
-# }
-
-# variable "deadline_proxy_certificate_password" {
-#   default = "@WhatTime"
-# }
-
-# variable "deadline_ca_certificate" {
-#   default = "/opt/Thinkbox/certs/ca.crt"
-# }
-
-# variable "deadline_proxy_certificate" {
-#   default = "/opt/Thinkbox/certs/Deadline10RemoteClient.pfx"
-# }
-
-# variable "deadline_proxy_root_dir" {
-#   default = "192.168.92.184:4433"
-# }
-
-# variable "deadline_samba_server_address" {
-#   default = "192.168.92.10"
-# }
+variable "bastion_ip" {}
 
 variable "houdini_license_server_address" {}
 
