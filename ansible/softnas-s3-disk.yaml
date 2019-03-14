@@ -226,17 +226,18 @@
       path: /etc/exports
       backup: yes
       content: |
-        /export /{{ pool_name }}/{{ volume_name }}/ *(async,insecure,no_subtree_check,no_root_squash,rw,nohide)
+        /{{ pool_name }}/{{ volume_name }}/ *(async,insecure,no_subtree_check,no_root_squash,rw,nohide)
         # /export *(async,insecure,no_subtree_check,no_root_squash,rw,nohide,fsid=0)
 
   - name: update exports
     command: "exportfs -r -a"
     register: update_exports_output
+    become: true
 
   - debug:
       msg: "{{ update_exports_output.stdout }}"
         
-  # - name: restart services after export updates
+  # - name: restart services after export updates originally recommended by softnas, but after testing may be not needed.
   #   service:
   #     name: "{{ item }}"
   #     state: restarted

@@ -1,69 +1,119 @@
----
-- hosts: localhost
-  remote_user: vagrant
-  become: true
-  gather_facts: no
+# ---
+# - hosts: localhost
+#   remote_user: vagrant
+#   become: true
+#   gather_facts: no
 
-  vars:
-    bastionip: "{{ groups['bastionip'][0] }}"
-    # need to remove old hosts
+#   vars:
+#     bastionip: "{{ groups['bastionip'][0] }}"
+#     # need to remove old hosts
     
-  tasks:
-  - name: clean known hosts
-    shell: "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R {{ groups['openvpnip'][0] }}"
-    become: true
-    become_user: vagrant
+#   tasks:
+#   - name: clean known hosts
+#     shell: "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R {{ groups['openvpnip'][0] }}"
+#     become: true
+#     become_user: vagrant
 
-  - name: clean known hosts
-    shell: "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R vpn.firehawkfilm.com"
-    become: true
-    become_user: vagrant
+#   - name: clean known hosts
+#     shell: "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R vpn.firehawkfilm.com"
+#     become: true
+#     become_user: vagrant
 
-  - name: delegate keyscan to add keys from remote subnet via bastion host.
-    command: "ssh-keyscan {{ groups['openvpnip'][0] }}"
-    register: new_host_fingerprint
-    #delegate_to: "centos@{{ groups['bastionip'][0] }}"
+#   - name: delegate keyscan to add keys from remote subnet via bastion host.
+#     command: "ssh-keyscan {{ groups['openvpnip'][0] }}"
+#     register: new_host_fingerprint
+#     #delegate_to: "centos@{{ groups['bastionip'][0] }}"
 
-  - debug:
-      msg: "{{ new_host_fingerprint.stdout_lines }}"
+#   - debug:
+#       msg: "{{ new_host_fingerprint.stdout_lines }}"
 
-  - name: add keyscan to known hosts
-    lineinfile:
-      dest: /home/vagrant/.ssh/known_hosts
-      line: "{{ item }}"
-    with_items: "{{ new_host_fingerprint.stdout_lines }}"
-    become: true
-    become_user: vagrant
+#   - name: add keyscan to known hosts
+#     lineinfile:
+#       dest: /home/vagrant/.ssh/known_hosts
+#       line: "{{ item }}"
+#     with_items: "{{ new_host_fingerprint.stdout_lines }}"
+#     become: true
+#     become_user: vagrant
   
-  - name: delegate keyscan to add keys from remote subnet via bastion host.
-    command: "ssh-keyscan vpn.firehawkfilm.com"
-    register: new_host_fingerprint
-    #delegate_to: "centos@{{ groups['bastionip'][0] }}"
+#   - name: delegate keyscan to add keys from remote subnet via bastion host.
+#     command: "ssh-keyscan vpn.firehawkfilm.com"
+#     register: new_host_fingerprint
+#     #delegate_to: "centos@{{ groups['bastionip'][0] }}"
 
-  - debug:
-      msg: "{{ new_host_fingerprint.stdout_lines }}"
+#   - debug:
+#       msg: "{{ new_host_fingerprint.stdout_lines }}"
 
-  - name: add keyscan to known hosts
-    lineinfile:
-      dest: /home/vagrant/.ssh/known_hosts
-      line: "{{ item }}"
-    with_items: "{{ new_host_fingerprint.stdout_lines }}"
-    become: true
-    become_user: vagrant
+#   - name: add keyscan to known hosts
+#     lineinfile:
+#       dest: /home/vagrant/.ssh/known_hosts
+#       line: "{{ item }}"
+#     with_items: "{{ new_host_fingerprint.stdout_lines }}"
+#     become: true
+#     become_user: vagrant
 
 # provision
-- hosts: openvpnip
-  remote_user: openvpnas
-  become: yes
-  gather_facts: no
+# - hosts: openvpnip
+#   remote_user: openvpnas
+#   become: yes
+#   gather_facts: no
 
-  pre_tasks:
-  - name: 'install python for ansible bootstrap'
-    raw: 'sudo apt-get -y install python'
+#   pre_tasks:
+#   - name: 'install python for ansible bootstrap'
+#     raw: 'sudo apt-get -y install python'
 
 - hosts: openvpnip
   remote_user: openvpnas
   become: true
+
+  vars:
+    client_network: None
+    client_netmask_bits: None
+    
+  pre_tasks:
+    - name: create dir.
+      file:
+        path: /usr/local/openvpn_as/scripts/seperate
+        state: directory
+
+    - name: configure openvpn server settings
+      shell: |
+        /usr/local/openvpn_as/scripts/sacli -k vpn.daemon.0.client.network -v {{ client_network }} ConfigPut
+        /usr/local/openvpn_as/scripts/sacli -k vpn.daemon.0.client.netmask_bits -v {{ client_netmask_bits }} ConfigPut
+        /usr/local/openvpn_as/scripts/sacli --key 'vpn.server.tls_auth' --value ='true' ConfigPut
+        /usr/local/openvpn_as/scripts/sacli start
+        cd /usr/local/openvpn_as/scripts/
+        #mkdir seperate
+        ./sacli --user {{ openvpn_user }} --key 'prop_autologin' --value 'true' UserPropPut
+        ./sacli --user {{ openvpn_user }} AutoGenerateOnBehalfOf
+        ./sacli -o ./seperate --cn {{ openvpn_user }} get5
+        chown {{ openvpn_user }} seperate/*
+        ls -la seperate
+
+      #     # Set VPN network info
+  #     "sudo /usr/local/openvpn_as/scripts/sacli -k vpn.daemon.0.client.network -v ${element(split("/", var.vpn_cidr), 0)} ConfigPut",
+
+  #     "sudo /usr/local/openvpn_as/scripts/sacli -k vpn.daemon.0.client.netmask_bits -v ${element(split("/", var.vpn_cidr), 1)} ConfigPut",
+
+  #     # here we enable tls which is required if we are to generate ta.key and client.ovpn files
+  #     "sudo /usr/local/openvpn_as/scripts/sacli --key 'vpn.server.tls_auth' --value ='true' ConfigPut",
+
+  #     # Do a warm restart so the config is picked up
+  #     "sudo /usr/local/openvpn_as/scripts/sacli start",
+
+    #     "cd /usr/local/openvpn_as/scripts/",
+
+  #     # todo : need to add a user that is different to the admin user.  currently they must be identical.
+  #     "echo ${var.openvpn_admin_pw} | sudo -S mkdir seperate",
+
+  #     "set -x",
+
+  #     # this enables auto login: todo : check if theres a problem with not having this above the start command
+  #     "sudo ./sacli --user ${var.openvpn_user} --key 'prop_autologin' --value 'true' UserPropPut",
+
+  #     "sudo ./sacli --user ${var.openvpn_user} AutoGenerateOnBehalfOf",
+  #     "sudo ./sacli -o ./seperate --cn ${var.openvpn_user} get5",
+  #     "sudo chown ${var.openvpn_user} seperate/*",
+  #     "ls -la seperate",
 
   roles:
     - role: openvpn
