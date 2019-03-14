@@ -416,7 +416,7 @@ yes
   
 - Allow client to act as VPN gateway (enter the cidr block for your onsite network)
 for these client-side subnets:  
-192.168.92.0/24
+192.168.92.0/24 (match the subnet your openfirehawkserver resides in)
 
 # ssh in to node in the private subnet and attempt to ping the openfirehawkserver.  if you cannot try also adding this in the vpn settings-
 - Allow client to act as VPN gateway (enter the cidr block for your onsite network)
