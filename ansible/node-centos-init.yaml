@@ -50,10 +50,14 @@
       name: epel-release
       state: present
 
+  # - easy_install:
+  #   name: pip
+  #   state: latest
+
   - name: install pip
     package:
       name: python-pip
-      state: present
+      state: latest
 
   - name: install pexpect
     pip:

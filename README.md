@@ -80,6 +80,8 @@ Currently, this has only been tested from a Linux RHEL 7.5/Centos Host.  You are
 - Install Virtualbox to run our VM from.
 - Clone the openfirehawk repo
     git clone --recurse-submodules -j8 https://github.com/firehawkvfx/openfirehawk.git
+- if you already cloned it but forgot the submodules, you can bring them in with
+    git submodule update
 - Download the latest deadline installer tar, and place the .tar file in the local openfirehawk/downloads folder.
 - Download the latest houdini installer, and place the .tar file in the local openfirehawk/downloads folder.
 - Prior to running vagrant, we set an environment variable to define the mac address of the vm. it is best to define this permanently in your os-
