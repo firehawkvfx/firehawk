@@ -60,6 +60,9 @@ Vagrant.configure("2") do |config|
   # end
   # first step before launching vagrant is to ensure an environment var is set with a random mac (you must generate it yourself)
   # export TF_VAR_vagrant_mac=000D391G7C51
+  # if you are on a mac, install homebrew and ensure you have the command envsubst
+  # brew install gettext
+  # brew link --force gettext
   # get your router to assign/reserve a static ip using this same mac address.
   # run vagrant up.
   # upon completion, we are ready to provision playbook 
@@ -79,7 +82,7 @@ Vagrant.configure("2") do |config|
   # ansible-playbook -i ansible/inventory/hosts ansible/init.yaml
   # download the deadline linux installers version 10.0.23.4 into downloads/Deadline-10.0.23.4-linux-installers.tar
   # ansible-playbook -i ansible/inventory/hosts ansible/newuser_deadline.yaml
-  # remember to always roune source ./update_vars.sh before running any ansible playbooks, or using terraform.
+  # remember to always run source ./update_vars.sh before running any ansible playbooks, or using terraform.
   # now lets run out first terraform apply.
   # terraform apply
 end

@@ -79,7 +79,7 @@ Currently, this has only been tested from a Linux RHEL 7.5/Centos Host.  You are
 - Install Vagrant from Hashicorp.
 - Install Virtualbox to run our VM from.
 - Clone the openfirehawk repo
-    git clone https://github.com/firehawkvfx/openfirehawk.git
+    git clone --recurse-submodules -j8 https://github.com/firehawkvfx/openfirehawk.git
 - Download the latest deadline installer tar, and place the .tar file in the local openfirehawk/downloads folder.
 - Download the latest houdini installer, and place the .tar file in the local openfirehawk/downloads folder.
 - Prior to running vagrant, we set an environment variable to define the mac address of the vm. it is best to define this permanently in your os-
@@ -193,11 +193,11 @@ for example sydney is-
     vagrant ssh
     cd ~
 - We should be in the vagrant user home dir within the vm.  now we generate a key pair with the AWS CLI. See this reference for more info https://sharadchhetri.com/2015/03/09/create-and-remove-aws-ec2-key-pair-by-using-command-line/
-    aws ec2 create-key-pair --key-name my_key_pair --query 'KeyMaterial' --output text > ~/my_key_pair.pem
+    aws ec2 create-key-pair --key-name my_key_pair --query 'KeyMaterial' --output text > /vagrant/keys/my_key_pair.pem
 - And we set the permissions on that keypair so that only the vagrant user has read access.
-    sudo chmod 400 ~/my_key_pair.pem
+    sudo chmod 400 /vagrant/keys/my_key_pair.pem
 - Add the key for ssh forwarding.
-    ssh-add ~/my_key_pair.pem
+    ssh-add /vagrant/keys/my_key_pair.pem
 
 https://stackoverflow.com/questions/17846529/could-not-open-a-connection-to-your-authentication-agent/17848593#17848593
 
@@ -269,8 +269,8 @@ cd /vagrant && ansible-playbook -i /usr/local/bin/terraform-inventory /vagrant/a
 
 ## Configuring private variables
 
-Next you can clone the git repository into your ubuntu vm-
-git clone https://github.com/firehawkvfx/openfirehawk.git
+Next you can clone the git repository into your ubuntu vm with the submodules as well-
+git clone --recurse-submodules -j8 https://github.com/firehawkvfx/openfirehawk.git
 
 I do need to make it known that the way we are storing private variables is not best practice, and I intend to move to a product called vault to handle the storing of secrets in the future in an encrypted format.
 

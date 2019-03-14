@@ -1,0 +1,7 @@
+- hosts: localhost
+  remote_user: vagrant
+  become: true
+  gather_facts: no
+
+  roles:
+  - ssh-add-private-host 

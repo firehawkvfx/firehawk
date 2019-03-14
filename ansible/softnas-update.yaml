@@ -2,10 +2,6 @@
   remote_user: centos
   become_user: root
   become: true
-
-  vars:
-    bastionip: "{{ groups['bastionip'][0] }}"
-
   tasks:
   - name: Remove updatetype file. A ticket involving softnas suggested this so that some beta isn't deployed at update.
     file:
