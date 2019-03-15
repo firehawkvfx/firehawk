@@ -133,6 +133,7 @@
 # sudo ./sacli userpropget
 
 - hosts: ansible_control
+  remote_user: vagrant
   become: true
 
   tasks:
@@ -170,19 +171,18 @@
     - name: force systemd to reread configs (2.4 and above)
       systemd:
         daemon_reload: yes
-      become: yes
-
-    - name: reload service openvpn
-      systemd:
         name: openvpn
-        state: reloaded
+        state: started
+        enabled: yes
       become: yes
 
     - name: wait for first restart for service.
-      command: sleep 20
+      command: sleep 30
 
-    - name: reload service openvpn
+    - name: force systemd to reread configs (2.4 and above)
       systemd:
+        daemon_reload: yes
         name: openvpn
-        state: reloaded
+        state: restarted
+        enabled: yes
       become: yes

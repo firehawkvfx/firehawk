@@ -40,3 +40,6 @@ do
     [[ "$i" =~ ^#.*$ ]] && continue
     export $i
 done
+
+# Determine your current public ip for security groups.
+export TF_VAR_remote_ip_cidr="$(dig +short myip.opendns.com @resolver1.opendns.com)/32"

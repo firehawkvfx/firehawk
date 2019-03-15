@@ -8,7 +8,7 @@
     basename: "{{ no_extension.split('/')[-1] }}"
     
   roles:
-    - role: newuser
+    - {role: 'newuser', tags: 'newuser'}
     - role: deadlinedb
     - role: deadlinercs
 
