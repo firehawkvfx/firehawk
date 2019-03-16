@@ -6,4 +6,4 @@
 # we need different steps for adding a new host in the public subnet, vs private.  we should detect the difference and handle appropriately.
 
   roles:
-  - ssh-add-public-host 
+  - ssh-add-public-host

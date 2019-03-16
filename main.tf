@@ -113,7 +113,6 @@ module "softnas" {
   remote_ip_cidr                 = "${var.remote_ip_cidr}"
   bastion_private_ip             = "${module.vpc.vpn_private_ip}"
   bastion_ip = "${module.bastion.public_ip}"
-
   softnas1_private_ip1 = "${var.softnas1_private_ip1}"
   softnas1_private_ip2 = "${var.softnas1_private_ip2}"
   softnas1_mounts = "${var.softnas1_mounts}"

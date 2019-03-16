@@ -28,7 +28,7 @@
   become: true
   become_user: vagrant
 
-- name: define ssh config to push through a bastion host to get into private subnet.
+- name: define ssh config for bastion if set_bastion=true.
   copy:
     dest: "/home/vagrant/.ssh/config"
     mode: 0600

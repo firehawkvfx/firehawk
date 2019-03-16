@@ -52,6 +52,8 @@ variable "sleep" {
 
 variable "remote_subnet_cidr" {}
 
+variable "igw_id" {}
+
 module "openvpn" {
   #source = "github.com/firehawkvfx/tf_aws_openvpn"
 
@@ -59,7 +61,7 @@ module "openvpn" {
 
   #start vpn will initialise service locally to connect
   #start_vpn = false
-
+  igw_id = "${var.igw_id}"
 
   #create_openvpn = "${var.create_openvpn}"
 

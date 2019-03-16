@@ -118,7 +118,14 @@ resource "aws_security_group" "node_centos" {
   }
 }
 
+resource "null_resource" "dependency_softnas_bastion" {
+  triggers {
+    softnas_private_ip1 = "${var.softnas_private_ip1}"
+    bastion_ip = "${var.bastion_ip}"
+  }
+}
 resource "aws_instance" "node_centos" {
+  depends_on = ["null_resource.dependency_softnas_bastion"]
   #instance type and ami are determined by the gateway type variable for if you want a graphical or non graphical instance.
   ami           = "${var.use_custom_ami ? var.custom_ami : lookup(var.ami_map, var.region)}"
   instance_type = "${var.instance_type}"
