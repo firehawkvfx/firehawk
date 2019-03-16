@@ -463,6 +463,9 @@ resource "null_resource" "provision_softnas_volumes" {
   EOT
   }
 }
+output "provision_softnas_volumes" {
+  value = "${null_resource.provision_softnas_volumes.id}"
+}
 
 # todo : need to report success at correct time after it has started.  see email from steven melnikov at softnas to check how to do this.
 

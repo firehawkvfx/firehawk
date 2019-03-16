@@ -118,10 +118,13 @@ resource "aws_security_group" "node_centos" {
   }
 }
 
+variable "provision_softnas_volumes" {}
+
 resource "null_resource" "dependency_softnas_bastion" {
   triggers {
     softnas_private_ip1 = "${var.softnas_private_ip1}"
     bastion_ip = "${var.bastion_ip}"
+    provision_softnas_volumes = "${var.provision_softnas_volumes}"
   }
 }
 resource "aws_instance" "node_centos" {

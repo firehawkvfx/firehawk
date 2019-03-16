@@ -68,7 +68,19 @@ locals {
   nat_gateway_count = "${length(module.vpc.natgw_ids)}"
 }
 
+resource "null_resource" "dependency_vpc" {
+  triggers {
+    vpc_id = "${module.vpc.vpc_id}"
+  }
+}
+resource "null_resource" "dependency_vpn" {
+  triggers {
+    vpn_id = "${module.vpn.id}"
+  }
+}
+
 resource "aws_route" "private_openvpn_remote_subnet_gateway" {
+  depends_on = ["null_resource.dependency_vpc", "null_resource.dependency_vpn"]
   count = "${length(var.private_subnets)}"
 
   route_table_id         = "${element(module.vpc.private_route_table_ids, count.index)}"
@@ -81,6 +93,7 @@ resource "aws_route" "private_openvpn_remote_subnet_gateway" {
 }
 
 resource "aws_route" "public_openvpn_remote_subnet_gateway" {
+  depends_on = ["null_resource.dependency_vpc", "null_resource.dependency_vpn"]
   count = "${length(var.private_subnets)}"
 
   route_table_id         = "${element(module.vpc.public_route_table_ids, count.index)}"
@@ -94,6 +107,7 @@ resource "aws_route" "public_openvpn_remote_subnet_gateway" {
 
 ### routes may be needed for traffic going back to open vpn dhcp adresses
 resource "aws_route" "private_openvpn_remote_subnet_vpndhcp_gateway" {
+  depends_on = ["null_resource.dependency_vpc", "null_resource.dependency_vpn"]
   count = "${length(var.private_subnets)}"
 
   route_table_id         = "${element(module.vpc.private_route_table_ids, count.index)}"
@@ -106,6 +120,7 @@ resource "aws_route" "private_openvpn_remote_subnet_vpndhcp_gateway" {
 }
 
 resource "aws_route" "public_openvpn_remote_subnet_vpndhcp_gateway" {
+  depends_on = ["null_resource.dependency_vpc", "null_resource.dependency_vpn"]
   count = "${length(var.private_subnets)}"
 
   route_table_id         = "${element(module.vpc.public_route_table_ids, count.index)}"
