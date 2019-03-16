@@ -16,10 +16,6 @@
   - pip:
       name: beautifulsoup4
 
-  # - synchronize:
-  #     src: /vagrant/modules/node_centos/modules/houdini_install_script/
-  #     dest: /opt/houdini_install_script/
-
   - copy:
       src: /vagrant/modules/node_centos/modules/houdini_install_script/
       dest: /opt/houdini_install_script/

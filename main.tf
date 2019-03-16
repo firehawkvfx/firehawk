@@ -182,7 +182,7 @@ module "node" {
   private_subnet_ids          = "${module.vpc.private_subnets}"
   private_subnets_cidr_blocks = "${module.vpc.private_subnets_cidr_blocks}"
   remote_subnet_cidr          = "${var.remote_subnet_cidr}"
-
+  provision_softnas_volumes = "${module.softnas.provision_softnas_volumes}"
   bastion_ip = "${module.bastion.public_ip}"
 
   key_name       = "${var.key_name}"
