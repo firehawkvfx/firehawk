@@ -14,6 +14,10 @@ output "private_subnets_cidr_blocks" {
   value = "${module.vpc.private_subnets_cidr_blocks}"
 }
 
+output "all_private_subnets_cidr_range" {
+  value = "${var.all_private_subnets_cidr_range}"
+}
+
 output "public_subnets" {
   value = "${module.vpc.public_subnets}"
 }

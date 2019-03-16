@@ -1,0 +1,68 @@
+- hosts: role_softnas
+  remote_user: centos
+  become_user: root
+  become: true
+
+  vars:
+    s3_disk_name: /dev/s3-0
+
+  tasks:
+  - name: list disks
+    shell: |
+      softnas-cmd login softnas {{ user_softnas_pw }}
+      softnas-cmd diskdevices > /tmp/softnas_list_disk_output_dict.json
+
+  - name: format output
+    shell: |
+      cat /tmp/softnas_list_disk_output_dict.json
+    register: softnas_list_disk_output_shell
+
+  - name: check json
+    debug:
+      msg: "{{ softnas_list_disk_output_shell.stdout | from_json }}"
+    #when: softnas_list_disk_output_dict.result.success
+  
+  - fetch:
+      src: /tmp/softnas_list_disk_output_dict.json
+      dest: /tmp/
+      flat: true
+
+  # with -v this will format correctly when read.
+
+  - include_vars:
+      file: /tmp/softnas_list_disk_output_dict.json
+      name: softnas_list_disk_output_dict
+
+  # - name: this will also format correctly with -v
+  #   shell: |
+  #     cat /tmp/softnas_list_disk_output_dict.json
+  #   register: softnas_list_disk_output_shell
+
+  # - name: all json output, wont format correctly in msg.
+  #   debug:
+  #     msg: "{{ softnas_list_disk_output_dict }}"
+
+  # - name: sub json output, wont format correctly in msg.
+  #   debug:
+  #     msg: "{{ softnas_list_disk_output_dict.result.records }}"
+
+
+  - name: check if softnas cli login succeeded
+    debug:
+      msg: "softnas-cli login succeeded"
+    when: softnas_list_disk_output_dict.success
+
+  - name: check if softnas cli login failed
+    fail:
+      msg: "{{softnas_list_disk_output_dict}}"
+    failed_when: softnas_list_disk_output_dict.success == false
+
+  - name: check if disk list succeeded
+    debug:
+      msg: "{{ softnas_list_disk_output_dict.result.records }}"
+    when: softnas_list_disk_output_dict.result.success
+
+  - name: check if disk list failed
+    fail:
+      msg: "{{softnas_list_disk_output_dict.result}}"
+    failed_when: softnas_list_disk_output_dict.result.success == false

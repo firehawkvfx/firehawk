@@ -1,0 +1,48 @@
+- name: echo bastion public ip
+  debug:
+    msg: "{{ item }}"
+  with_items:
+    - "{{ public_ip }}"
+- file:
+    path: /home/vagrant/.ssh/known_hosts
+    state: touch
+  become_user: vagrant
+  
+- name: clean known hosts
+  shell: "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R {{ public_ip }}"
+  become: true
+  become_user: vagrant
+
+- name: clean known hosts
+  shell: "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R {{ public_hostname }}"
+  become: true
+  become_user: vagrant
+
+- name: Write the new ec2 instance host key to known hosts
+  shell: "ssh-keyscan {{ public_ip }} >> /home/vagrant/.ssh/known_hosts"
+  become: true
+  become_user: vagrant
+    
+- name: Write the new ec2 instance host key to known hosts
+  shell: "ssh-keyscan {{ public_hostname }} >> /home/vagrant/.ssh/known_hosts"
+  become: true
+  become_user: vagrant
+
+- name: define ssh config for bastion if set_bastion=true.
+  copy:
+    dest: "/home/vagrant/.ssh/config"
+    mode: 0600
+    owner: vagrant
+    become: true
+    become_user: vagrant
+    content: |
+      host bastion
+        Hostname bastion.{{ public_domain }}
+        User centos 
+        IdentityFile  /vagrant/keys/my_key_pair.pem
+
+      Host 10.0.1.*
+        IdentityFile  /vagrant/keys/my_key_pair.pem
+        User centos
+        ProxyCommand ssh -W %h:%p centos@bastion
+  when: set_bastion
