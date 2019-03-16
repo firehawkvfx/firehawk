@@ -18,7 +18,7 @@
 - name: encrypt
   when: check.stdout.find('ANSIBLE_VAULT') == -1
   shell: |
-    ansible-vault encrypt --vault-id {{ key_path }} {{ secret_path }}
+    ansible-vault encrypt --vault-id {{ vault_key_path }} {{ secret_path }}
   register: encrypt_shell
 
 - name: encrypt result

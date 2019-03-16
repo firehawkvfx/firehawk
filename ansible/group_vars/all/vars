@@ -65,8 +65,10 @@ time_zone_info_path_linux: "{{ time_zone_info_dict_linux['Australia_Sydney'] }}"
 repo_dir: "{{ playbook_dir.split('/')[0:-1]|join('/') }}"
 
 vault_key_name: .vault-key
+vault_key_path: "{{ repo_dir }}/keys/{{ vault_key_name }}"
 
 key_folder: "{{ repo_dir }}/keys/"
 
 key_path: "{{ repo_dir }}/keys/{{ key_name }}.pem"
 secret_path: "{{ repo_dir }}/secrets/secrets.txt"
+secrets_archive: "{{ repo_dir }}/secrets/{{ envtier }}"
