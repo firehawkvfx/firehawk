@@ -1,0 +1,2 @@
+#bastionip: "{{ groups['bastionip'][0] }}"
+#ansible_ssh_common_args: '-o ProxyCommand="ssh -i /home/vagrant/my_key_pair.pem -W %h:%p -q centos@{{ bastionip }}"'

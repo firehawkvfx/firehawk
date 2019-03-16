@@ -32,15 +32,19 @@ module "vpc" {
   }
 }
 
+variable "remote_subnet_cidr" {}
+
 module "vpn" {
   source = "../vpn"
 
-  #create_openvpn = "${var.create_openvpn}"
+  # dummy attribute to force dependency on IGW.
+  igw_id = "${module.vpc.igw_id}"
 
   vpc_id   = "${module.vpc.vpc_id}"
   vpc_cidr = "${module.vpc.vpc_cidr_block}"
   #the cidr range that the vpn will assign to remote addresses within the vpc if routing.
   vpn_cidr = "${var.vpn_cidr}"
+  remote_subnet_cidr = "${var.remote_subnet_cidr}"
   #the remote public address that will connect to the openvpn instance
   remote_vpn_ip_cidr = "${var.remote_ip_cidr}"
   public_subnet_ids  = "${module.vpc.public_subnets}"
@@ -64,15 +68,46 @@ locals {
   nat_gateway_count = "${length(module.vpc.natgw_ids)}"
 }
 
-# resource "aws_route_table" "openvpn" {
-#   count = "${length(var.private_subnets)}"
+resource "null_resource" "dependency_vpc" {
+  triggers {
+    vpc_id = "${module.vpc.vpc_id}"
+  }
+}
+resource "null_resource" "dependency_vpn" {
+  triggers {
+    vpn_id = "${module.vpn.id}"
+  }
+}
 
-#   vpc_id = "${module.vpc.vpc_id}"
+resource "aws_route" "private_openvpn_remote_subnet_gateway" {
+  depends_on = ["null_resource.dependency_vpc", "null_resource.dependency_vpn"]
+  count = "${length(var.private_subnets)}"
 
-#   tags = "${merge(map("Name", "OpenVPN_Route"))}"
-# }
+  route_table_id         = "${element(module.vpc.private_route_table_ids, count.index)}"
+  destination_cidr_block = "${var.remote_subnet_cidr}"
+  instance_id            = "${module.vpn.id}"
 
-resource "aws_route" "private_openvpn_dhcp_gateway" {
+  timeouts {
+    create = "5m"
+  }
+}
+
+resource "aws_route" "public_openvpn_remote_subnet_gateway" {
+  depends_on = ["null_resource.dependency_vpc", "null_resource.dependency_vpn"]
+  count = "${length(var.private_subnets)}"
+
+  route_table_id         = "${element(module.vpc.public_route_table_ids, count.index)}"
+  destination_cidr_block = "${var.remote_subnet_cidr}"
+  instance_id            = "${module.vpn.id}"
+
+  timeouts {
+    create = "5m"
+  }
+}
+
+### routes may be needed for traffic going back to open vpn dhcp adresses
+resource "aws_route" "private_openvpn_remote_subnet_vpndhcp_gateway" {
+  depends_on = ["null_resource.dependency_vpc", "null_resource.dependency_vpn"]
   count = "${length(var.private_subnets)}"
 
   route_table_id         = "${element(module.vpc.private_route_table_ids, count.index)}"
@@ -84,21 +119,20 @@ resource "aws_route" "private_openvpn_dhcp_gateway" {
   }
 }
 
-variable "remote_subnet_cidr" {
-  default = "192.168.0.0/24"
-}
-
-resource "aws_route" "private_openvpn_remote_subnet_gateway" {
+resource "aws_route" "public_openvpn_remote_subnet_vpndhcp_gateway" {
+  depends_on = ["null_resource.dependency_vpc", "null_resource.dependency_vpn"]
   count = "${length(var.private_subnets)}"
 
-  route_table_id         = "${element(module.vpc.private_route_table_ids, count.index)}"
-  destination_cidr_block = "${var.remote_subnet_cidr}"
+  route_table_id         = "${element(module.vpc.public_route_table_ids, count.index)}"
+  destination_cidr_block = "${var.vpn_cidr}"
   instance_id            = "${module.vpn.id}"
 
   timeouts {
     create = "5m"
   }
 }
+
+
 
 # ##########################
 # # Route table association

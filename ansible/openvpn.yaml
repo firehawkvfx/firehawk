@@ -1,0 +1,123 @@
+
+- hosts: openvpnip
+  remote_user: openvpnas
+  become: true
+
+  vars:
+    client_network: None
+    client_netmask_bits: None
+    
+  pre_tasks:
+    - name: create dir.
+      file:
+        path: /usr/local/openvpn_as/scripts/seperate
+        state: directory
+
+    - name: configure openvpn server settings
+      shell: |
+        /usr/local/openvpn_as/scripts/sacli -k vpn.daemon.0.client.network -v {{ client_network }} ConfigPut
+        /usr/local/openvpn_as/scripts/sacli -k vpn.daemon.0.client.netmask_bits -v {{ client_netmask_bits }} ConfigPut
+        /usr/local/openvpn_as/scripts/sacli --key 'vpn.server.tls_auth' --value 'true' ConfigPut
+        /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.gateway_access --value 'true' ConfigPut
+        /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.private_network.0 --value '10.0.1.0/24' ConfigPut
+        /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.private_network.1 --value '10.0.101.0/24' ConfigPut
+        /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.private_network.2 --value '172.27.232.0/24' ConfigPut
+        /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.private_access --value 'route' ConfigPut
+        /usr/local/openvpn_as/scripts/sacli start
+        cd /usr/local/openvpn_as/scripts/
+        #mkdir seperate
+        ./sacli --user {{ openvpn_user }} --key 'prop_autologin' --value 'true' UserPropPut
+        ./sacli --user {{ openvpn_user }} --key 'c2s_route.0' --value '192.168.10.0/24' UserPropPut
+        ./sacli --user {{ openvpn_user }} AutoGenerateOnBehalfOf
+        ./sacli -o ./seperate --cn {{ openvpn_user }} get5
+        chown {{ openvpn_user }} seperate/*
+        /usr/local/openvpn_as/scripts/sacli start
+        ls -la seperate
+
+      #     # Set VPN network info
+  #     "sudo /usr/local/openvpn_as/scripts/sacli -k vpn.daemon.0.client.network -v ${element(split("/", var.vpn_cidr), 0)} ConfigPut",
+
+  #     "sudo /usr/local/openvpn_as/scripts/sacli -k vpn.daemon.0.client.netmask_bits -v ${element(split("/", var.vpn_cidr), 1)} ConfigPut",
+
+  #     # here we enable tls which is required if we are to generate ta.key and client.ovpn files
+  #     "sudo /usr/local/openvpn_as/scripts/sacli --key 'vpn.server.tls_auth' --value ='true' ConfigPut",
+
+  #     # Do a warm restart so the config is picked up
+  #     "sudo /usr/local/openvpn_as/scripts/sacli start",
+
+    #     "cd /usr/local/openvpn_as/scripts/",
+
+  #     # todo : need to add a user that is different to the admin user.  currently they must be identical.
+  #     "echo ${var.openvpn_admin_pw} | sudo -S mkdir seperate",
+
+  #     "set -x",
+
+  #     # this enables auto login: todo : check if theres a problem with not having this above the start command
+  #     "sudo ./sacli --user ${var.openvpn_user} --key 'prop_autologin' --value 'true' UserPropPut",
+
+  #     "sudo ./sacli --user ${var.openvpn_user} AutoGenerateOnBehalfOf",
+  #     "sudo ./sacli -o ./seperate --cn ${var.openvpn_user} get5",
+  #     "sudo chown ${var.openvpn_user} seperate/*",
+  #     "ls -la seperate",
+
+  roles:
+    - role: openvpn
+
+# pull current config with these commands.  use them to resolve automation of the interface.
+# sudo ./sacli userpropget
+# sudo ./sacli userpropget
+
+- hosts: ansible_control
+  remote_user: vagrant
+  become: true
+
+  tasks:
+    - name: Ansible copy local openvpn files to /etc/openvpn
+      copy:
+        src: ~/openvpn_config/{{ item }}
+        dest: /etc/openvpn/{{ item }}
+        owner: vagrant
+        group: vagrant
+        mode: 0400
+        force: yes
+      with_items:
+        - openvpn.conf
+        - ca.crt
+        - client.crt
+        - client.key
+        - ta.key
+        - yourserver.txt
+      become: yes
+
+    - name: Ansible allow autostart, uncomment
+      replace:
+        path: /etc/default/openvpn
+        regexp: '^#(.*AUTOSTART="all".*)'
+        replace: '\1'
+      become: yes
+
+    - name: allow ip forwarding, uncomment
+      replace:
+        path: /etc/sysctl.conf
+        regexp: '^#(.*net.ipv4.ip_forward=1.*)'
+        replace: '\1'
+      become: yes      
+
+    - name: force systemd to reread configs (2.4 and above)
+      systemd:
+        daemon_reload: yes
+        name: openvpn
+        state: started
+        enabled: yes
+      become: yes
+
+    - name: wait for first restart for service.
+      command: sleep 30
+
+    - name: force systemd to reread configs (2.4 and above)
+      systemd:
+        daemon_reload: yes
+        name: openvpn
+        state: restarted
+        enabled: yes
+      become: yes

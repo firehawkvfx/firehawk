@@ -32,13 +32,20 @@ These are some good paid video courses to try-
 You will want to experiment with spinning up an AWS account.  You will need to start an instance in your nearest region with this ami - (softnas platinum consumption based for lower compute requirements).  take note of the AMI.  you wont need to leave this instance running.  You can terminate it, and delete the EBS volume.
 Next startup up an open vpn access server instance from the openvpn AMI, and when started, take note of this AMI.  these will need to be added into terraform variables later, because they are unique to your region.
 
+## Security
+openFirehawk is not ready for production.  There are outstanding changes that need to be done to improve security for general use.
+
+It's important that your router firmware is kept up to date.  We configure AWS to ignore all inbound communication from anywhere but your own static ip.  The greatest vulnerability between you and AWS is your router.  open vpn encrypts traffic before it goes through the router, but if the router is compromised, enough information to establish those credentials can be gained for a man in the middle attack.
 
 ## Disclaimer: Running your own AWS account.
 You are going to be managing these resources from an AWS account and you are solely responsible for the costs incurred, and you should tread slowly to understand AWS charges.
 
-The first thing to do is **setup 2 factor authentication.  Do not skip this**.  You'll make it easy for hackers to misuse you credit card to mine crypto.  Eye watering bills are possible!  
+The first thing to do is **setup 2 factor authentication.  Do not skip this**.  You'll make it easy for hackers to misuse you credit card to mine crypto.  Eye watering bills are possible!
 
 So The next thing you should do is setup budget notifications.  Set a number you are willing to spend per month, and setup email notifications for every 20% of that budget.  The notifications are there in case you forget to do this step - check your AWS costs for a daily breakdown of what you spend, and do it every day to learn.  its a good habit to do it at the start of every day.
+
+Lastly, when you create aws access and secret keys, set a policy to age those keys out after 30 days.  unlike normal access from a workstation, which can be 
+limited down to a specific static ip with security groups, these access keys allow resources to be created from anywhere, and even for security groups to be changed, guard them closely.  Personally, I dont even write them down - If I need to enter them again for some reason, I take that opportunity to cycle them and enter update them into the encrypted vault.
 
 ## Pointers on cost awareness:
 
@@ -60,63 +67,212 @@ terraform apply plan
 - The NAT gateway is another sneaky cost visible in your AWS VPC console, usually around $5 /day if you forget about it.  It allows your private network (systems in the private subnet) outbound access to the internet.  Security groups can lock down any internet access to the minimum adresses required for licencing things like softnas or other software.  Licensing configuration with most software you would use makes possible to not need any NAT gateway but that is beyond the scope of openFirehawk at this point in time.
 
 
-## Running an onsite management VM
+## Running an onsite management VM with Vagrant
 
-You can  start experimenting with an Ubuntu 16 VM with 4 vcpus, and a 50GB volume to install to.  8GB RAM is a good start.  After you start to test with more than 2 render nodes, buy a few UBL credits for deadline, $10 worth or so to play with.  You won't be able to test deadline with more than 2 nodes visible to the manager.  Thinkbox will credit that to your AWS account on request if you email them and they provide support.
+Vagrant is a tool that manages your initial VM configuration onsite.  It allows us to create a consistent environment to launch our infrastructure from.  From there we will provision the software installed on it with Ansible.
 
-The VM will need a new user.  We will call it deadlineuser.  It will also have a uid and gid of 9001.  its possible to change this uid but be mindful of the variables set in [private-variables.tf](https://github.com/firehawkvfx/openfirehawk/blob/master/private-variables.example) if you do.
+Currently, this has only been tested from a Linux RHEL 7.5/Centos Host.  You are welcome to experiment with other Operating systems so long as they can run the following-
+    Vagrant
+    VirtualBox
+    Ansible
 
-    sudo adduser -u 9001 deadlineuser.
+- Install Vagrant from Hashicorp.
+- Install Virtualbox to run our VM from.
+- Clone the openfirehawk repo
+    git clone --recurse-submodules -j8 https://github.com/firehawkvfx/openfirehawk.git
+- if you already cloned it but forgot the submodules, you can bring them in with
+    git submodule update
+- Download the latest deadline installer tar, and place the .tar file in the local openfirehawk/downloads folder.
+- Download the latest houdini installer, and place the .tar file in the local openfirehawk/downloads folder.
+- Prior to running vagrant, we set an environment variable to define the mac address of the vm. it is best to define this permanently in your os-
+    https://www.browserling.com/tools/random-mac
+    https://askubuntu.com/questions/58814/how-do-i-add-environment-variables
 
-This user should also be the member of a group, deadlineuser, and the gid should be 9001.  you can review this with the command:
+```
+sudo -H gedit /etc/environment
+TF_VAR_vagrant_mac=c902ca64107d
+```
 
-    users
-and also to check the group id:
+- Run this to download an ubuntu base image and install ansible in the vm.  Provisioning the ubuntu desktop GUI may take 15mins +
+    vagrant up
+- When the the process completes, take a snapshot of this initial state and verify its there in the list.
+    vagrant snapshot push
+    vagrant snapshot list
+- IMPORTANT if you ever need to restore the snapshot, be sure to use the --no-delete option, otherwise the snapshot will be deleted.  Try restoring a snapshot now-
+    vagrant snapshot pop --no-delete
+- Now we will ssh into the vm and start provisioning with ansible.
+    vagrant ssh
+- The git repo tree we are running vagrant from is shared with the VM in /vagrant.
 
-    cat /etc/group
-Next you will want the user to be a super user for now.  it will be possible to tighten the permissions later, but for testing we will do this-
+- Before we run the first playbook, we need to set a passowrd for our vault. for example -
+    echo 'myVaultPasswordMustBeUnique' > /home/vagrant/.vault_pass
+- now we can initialise the secrets.
+    cd /vagrant
+    cp ansible/secrets.template ansible/group_vars/all/secrets.txt
+- set the variables to your own unique values and encrypt it with-
+    ansible-vault encrypt ansible/group_vars/all/secrets.txt
+- now we can set our environment variables that will decrypt the secrets, and make the values available to terraform and ansible.
+    source ./update_vars.sh
+- now we can execute the first playbook to initialise the vm.
+    ansible-playbook -i ansible/inventory ansible/init.yaml
+- We run our next playbook to create the deadlineuser and change the default password for the ubuntu user and deadlineuser.  This will also install deadline DB, and RCS, provided you have a tar downloaded in openfirehawk/downloads.
+    ansible-playbook -i ansible/inventory /vagrant/ansible/newuser_deadline.yaml
 
-    sudo usermod -aG wheel ${var.deadline_user}
-
-Now log out and log back in as the new user.  You will want to install deadline DB, and deadline RCS in the vm, and take note of all the paths where you place your certificates.  We selected the ubuntu 16 VM because at this time its the easiest way to install Deadline DB and RCS with a gui installer.
-
-In the Ubuntu 16 VM you will also want to install open vpn (and any required dependencies that may arise) with:
-
-    sudo apt-install openvpn
-Then you can try starting an OpenVPN Access Server AMI by launching a new EC2 instance on AWS through the EC2 console.  It’s a good exercise for you to create one of these on your own (not using openFirehawk at this stage) in a public subnet.  learning how to get the autoconnect feature working for the ubuntu vm to this openVPN instance will be needed.  You will also need to allow a security group to have inbound access from your onsite public static IP adress.
-If you can succesfuly auto connect to this openvpn instance, then openFirehawk will be able to create its own OpenVPN Access Server and connect to it as well.
-
-Instances that reside in the private subnet are currently configured through openvpn.  This is why we are moving to Ansible to handle this instead, and remove openVPN as a dependency for most of the configuration of the network.  open vpn will still be needed for render nodes to establish a connection with licence servers and the render management DB.
+- You should be able to select the deadlineuser in the VM GUI, and login with a password. Open a terminal in the VM GUI, logged in as deadlineuser and run these-
+    deadlinemonitor
+    deadlinepulse
+    deadlinercs
+- In the monitor You should see 1 slave exist in the bottom window, which is this vm.  since we can validate that the deadline DB and RCS is working, we will disable this because we won't want to use this server to render!
+- INMPORTANT: After you start to render with more than 2 render nodes visible here, you need to purchase UBL credits for deadline to play with.  Thinkbox will credit that to your AWS account on request if you email them and request it.  You won't be able to test deadline with more than 2 nodes visible to the manager.  You will configure your UBL credits to use with the deadline monitor (see deadline docs on how to do this)
+- to launch instances in AWS, you will configure your AWS account to be used with the Command Line Interface.  See aws documentation - https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html
+More on this below...
 
 ## AWS configure
 
-Next you will go through the steps to install the AWS cli into the ubuntu 16 VM.
-You should create a new user in aws for the cli.  don’t use the root account.  if theres ever a problem with security, you want root to be able to disable the cli users access keys.
+You should create a new user in your AWS account for the Command Line Interface(CLI).  Don’t use root account credentials.  if theres ever a problem with security, you want root to be able to disable the cli users access keys.
 
-So create a new user with these permissions for testing only.  These permissions are not suitable to production, and they should be limited to the minimum neecesary for your production after testing.
+- Create a new user in your AWS management Console -> IAM.
 
+- Give the user these permissions for testing only.  These permissions should be altered to be the minimum neecesary for your production after testing.
 Permissions:
+EC2FullAccess
+IAMFullAccess
+Route53FullAccess
+s3AdminAcces
+
+We currently use cloudfromation and need admin access.  It will be removed in the future but for now add these permissions:
 AdministratorAccess
-AmazonS3FullAccess
 
 If you think you will need Active Directory for some reason, also add these permissions:
 DirectoryServiceAdministrators
 
-when you enter the new users cli keys with:
-aws cli configure
+- Under security credentials, create Access Keys for the CLI.  Don't write these down anywhere, you are going to copy them straight into the VM.  its easy enough to destroy them and recreate them again in the future, you would just update with "aws configure" again.
 
-and test that its working by running
-aws ec2 describe-regions --output table --debug
-Which should out put a table of regions if working.
+- Enter the new users cli keys with:
+    aws configure
 
-## Install Terraform
+- When asked for the region specify it from this list. https://docs.aws.amazon.com/general/latest/gr/rande.html
+for example sydney is-
+    ap-southeast-2
+- When asked for the default output format, enter
+    json
 
-https://learn.hashicorp.com/terraform/getting-started/install.html
+- Test that its working by running
+    aws ec2 describe-regions --output table --debug
+
+- This should out put a table of regions if working-
+
+    ----------------------------------------------------------
+    |                     DescribeRegions                    |
+    +--------------------------------------------------------+
+    ||                        Regions                       ||
+    |+-----------------------------------+------------------+|
+    ||             Endpoint              |   RegionName     ||
+    |+-----------------------------------+------------------+|
+    ||  ec2.eu-north-1.amazonaws.com     |  eu-north-1      ||
+    ||  ec2.ap-south-1.amazonaws.com     |  ap-south-1      ||
+    ||  ec2.eu-west-3.amazonaws.com      |  eu-west-3       ||
+    ||  ec2.eu-west-2.amazonaws.com      |  eu-west-2       ||
+    ||  ec2.eu-west-1.amazonaws.com      |  eu-west-1       ||
+    ||  ec2.ap-northeast-2.amazonaws.com |  ap-northeast-2  ||
+    ||  ec2.ap-northeast-1.amazonaws.com |  ap-northeast-1  ||
+    ||  ec2.sa-east-1.amazonaws.com      |  sa-east-1       ||
+    ||  ec2.ca-central-1.amazonaws.com   |  ca-central-1    ||
+    ||  ec2.ap-southeast-1.amazonaws.com |  ap-southeast-1  ||
+    ||  ec2.ap-southeast-2.amazonaws.com |  ap-southeast-2  ||
+    ||  ec2.eu-central-1.amazonaws.com   |  eu-central-1    ||
+    ||  ec2.us-east-1.amazonaws.com      |  us-east-1       ||
+    ||  ec2.us-east-2.amazonaws.com      |  us-east-2       ||
+    ||  ec2.us-west-1.amazonaws.com      |  us-west-1       ||
+    ||  ec2.us-west-2.amazonaws.com      |  us-west-2       ||
+    |+-----------------------------------+------------------+|
+
+- You now have established the ability to control instances from within this VM.
+
+## Create a key pair to manage AWS EC2
+
+- ssh into the openfirehawk server vm
+    vagrant ssh
+    cd ~
+- We should be in the vagrant user home dir within the vm.  now we generate a key pair with the AWS CLI. See this reference for more info https://sharadchhetri.com/2015/03/09/create-and-remove-aws-ec2-key-pair-by-using-command-line/
+    aws ec2 create-key-pair --key-name my_key_pair --query 'KeyMaterial' --output text > /vagrant/keys/my_key_pair.pem
+- And we set the permissions on that keypair so that only the vagrant user has read access.
+    sudo chmod 400 /vagrant/keys/my_key_pair.pem
+- Add the key for ssh forwarding.
+    ssh-add /vagrant/keys/my_key_pair.pem
+
+https://stackoverflow.com/questions/17846529/could-not-open-a-connection-to-your-authentication-agent/17848593#17848593
+
+## Create a hosted zone
+If you want to be able to access your resources through a domain like the vpn, eg vpn.example.com
+you can create a public hosted zone in route53.  since this will be a permanent part of your infrastructure you will need to do this manually.
+you can either transfer an existing domain to aws (not recommended for dev if you are attached to this domain!)
+or you can purchase a new domain of some random name with a cheap extension (doesn't need to be .com)
+
+
+
+
+## OpenVPN Access Server
+
+Then you can try starting an OpenVPN Access Server AMI by launching a new EC2 instance on AWS through the EC2 console.  It’s a good exercise for you to create one of these on your own (not using openFirehawk at this stage) in a public subnet.  
+
+Its important to start a single instance to register yourself to the ami.  if you want to learn more about thi instance read on, otherwise skip to terraform!
+
+You will also need to allow a security group to have inbound access from your onsite public static IP adress.
+If you can succesfuly auto connect to this openvpn instance, then openFirehawk will be able to create its own OpenVPN Access Server and connect to it as well.
+
+Instances that reside in the private subnet are currently configured through openvpn.  This is why we are moving to Ansible to handle this instead, and remove openVPN as a dependency for most of the configuration of the network.  open vpn will still be needed for render nodes to establish a connection with licence servers and the render management DB.
+
+
+## Terraform
+
+Terraform is used to create all our infrastructure in the cloud provider.  It is launched from with your vm which contains all the credentials required to create resources.
+
+- From the git repo folder on your host, we will ssh into the openfirehawk server with vagrant ssh-
+    :../openfirehawk/$ vagrant ssh
+- Once in, type 
+    cd /vagrant
+    ls
+- The contents of this shared folder should be identical to the openfirehawk repository folder.
+- If you cannot see anything in here, you may need to reload the vm and try again-
+    exit
+    vagrant reload
+    vagrant ssh
+
+
+- now we will prep to initialise terraform. in the /vagrant path, first we initialse environment variables that are shared between ansible and terraform.
+these variables are secrets and unique to you, so we encrypt them for any private version control (they can also be added to .gitignore if you don't want them in version control)
+
+-create your own vault file from the template, and place the password for that vault file in ~/.vault_pass
+
+    echo 'MyVaultPassword' > ~/.vault_pass
+    cp secrets_template.txt ansible/group_vars/all/secrets.txt
+    ansible-vault view ansible/group_vars/all/secrets.txt
+
+- edit the variables for your setup
+    ansible-vault edit ansible/group_vars/all/secrets.txt
+
+- next step, is making those variables available to terraform and ansible.
+We will always run this scrupt to update the variables for our environment from this script, before we run a terraform apply.
+    source ./update_var.sh
+
+- now initialise terraform.
+    terraform init
+
+- when it completes, spin up the infrastructure.
+    terraform plan -out=plan
+
+- if all seem well, apply the plan.
+    terraform apply plan
+
+- now provision openvpn.
+cd /vagrant && ansible-playbook -i /usr/local/bin/terraform-inventory /vagrant/ansible/openvpn.yaml
+
 
 ## Configuring private variables
 
-Next you can clone the git repository into your ubuntu vm-
-git clone https://github.com/firehawkvfx/openfirehawk.git
+Next you can clone the git repository into your ubuntu vm with the submodules as well-
+git clone --recurse-submodules -j8 https://github.com/firehawkvfx/openfirehawk.git
 
 I do need to make it known that the way we are storing private variables is not best practice, and I intend to move to a product called vault to handle the storing of secrets in the future in an encrypted format.
 
@@ -181,12 +337,116 @@ Execute the plan.  Writing out a plan before execution and reviewing it is best 
 
     terraform apply plan
 
+If at any point you want to remove all the infrastructure (to save cost, perhaps you don't need it anymore, or you want to start over)
+
+    terraform destroy
+
+Keep in mind that you may still have ebs volumes, s3 usage or other resources to consider in your account costs that will remain.
+
+openFirehawk also uses a sleep variable.  When sleep is set to true, it will shutdown all systems, including the NAT gateway.  its a good idea to do this when nothing is needed, but you want to continue working later.
+
+    terraform plan -out=plan -var sleep=true
+
+View the plan and run it if all is well to turn things off
+
+    terraform apply plan
+
+Make sure you check your aws account for any resources that haven't been turned off.
+
+## Terraform - taint
+
+if you make changes to your infrastructure that you want to recover from, a good way to replace resources is something like this...  lets say I want to destroy my openvpn instance and start over
+
+    terraform taint -module vpc.vpn.openvpn aws_instance.openvpn
+
+Now I should also taint what is downstream if there are dependencies that aren't being picked up too, like the eip.
+
+    terraform taint -module vpc.vpn.openvpn aws_eip.openvpnip
+
+The resource aws_eip.openvpnip in the module root.vpc.vpn.openvpn has been marked as tainted!
+
+    terraform taint -module vpc.vpn.openvpn aws_route53_record.openvpn_record
+
+The resource aws_route53_record.openvpn_record in the module root.vpc.vpn.openvpn has been marked as tainted!
+
+
+after I'm happy with this I can run terraform apply.
+    terraform plan -out=plan
+    terraform apply plan
+
+
 ## Preparation of open vpn
 
 Read these docs to set permissions on the autostart openvpn config and startvpn.sh script, and how to configure the access server.  Some settings are required to allow access to the ubuntu VM you have onsite, and we go through these steps in the tf_aws_openvpn readme-
 
 [README.md](https://github.com/firehawkvfx/tf_aws_openvpn/blob/master/README.md)
 [startvpn.sh](https://github.com/firehawkvfx/tf_aws_openvpn/blob/master/startvpn.sh)
+
+## Important Notes for Routing:
+
+### You can check /var/log/syslog to confirm vpn connection.
+check autoload is set to all or openvpn in /etc/default
+ensure startvpn.sh is in ~/openvpn_config.  openvpn.conf auto login files are constructed here and placed in /etc/openvpn before execution.  
+  
+read more here to learn about setting up routes  
+https://openvpn.net/vpn-server-resources/site-to-site-routing-explained-in-detail/  
+https://askubuntu.com/questions/612840/adding-route-on-client-using-openvpn  
+
+You will need ip forwarding on client and server if routing both sides.  
+https://community.openvpn.net/openvpn/wiki/265-how-do-i-enable-ip-forwarding  
+
+
+**These are the manual steps required to get both private subnets to connect, and we'd love to figure out the equivalent commands drop in when I'm provisioning the access server to automate them, but for now these are manual steps.**
+  
+-  in VPN Settings | Should VPN clients have access to private subnets  
+(non-public networks on the server side)?  
+Yes, enable routing  
+  
+- Specify the private subnets to which all clients should be given access (one per line):  
+10.0.1.0/24
+10.0.101.0/24
+172.27.232.0/24
+(these subnets are in aws, the open vpn access server resides in the 10.0.101.0/24 subnet)  
+
+- Allow access from these private subnets to all VPN client IP addresses and subnets : on  
+  
+- in user permissions | user  
+configure vpn gateway:  
+yes  
+  
+- Allow client to act as VPN gateway (enter the cidr block for your onsite network)
+for these client-side subnets:  
+192.168.92.0/24 (match the subnet your openfirehawkserver resides in)
+
+# ssh in to node in the private subnet and attempt to ping the openfirehawkserver.  if you cannot try also adding this in the vpn settings-
+- Allow client to act as VPN gateway (enter the cidr block for your onsite network)
+for these client-side subnets:  
+172.27.232.0/24
+
+At this point, your client side vpn client should be able to ping any private ip, and if you ssh into one of those ips, it whould be able to ping your client side ip with its private ip address.
+
+If not you will have to trouble shoot before you can continue further because this functionality is required.
+  
+if you intend to provide access to other systems on your local network, promiscuous mode must enabled on host ethernet adapters.  for example, if openvpn client is in ubuntu vm, and we are running the vm with bridged ethernet in a linux host, then enabling promiscuous mode, and setting up a static route is needed in the host.  
+https://askubuntu.com/questions/430355/configure-a-network-interface-into-promiscuous-mode  
+for example, if you use a rhel host run this in the host to provide static route to the adaptor inside the vm (should be on the same subnet)
+```
+sudo ip route add 10.0.0.0/16 via [ip adress of the bridged ethernet adaptor in the vm]
+```
+check routes with:
+```
+sudo route -n
+ifconfig eth1 up
+ifconfig eth1 promisc
+```
+
+In the ubuntu vm where where terraform is running, ip forwarding must be on.  You must be using a bridged adaptor.
+http://www.networkinghowtos.com/howto/enable-ip-forwarding-on-ubuntu-13-04/
+
+```
+sudo sysctl net.ipv4.ip_forward=1
+```
+
 
 This allows permission for startvpn.sh script to copy open vpn startup settings from the access server into your openvpn settings.  sudo permissions must be allowed for the specific commands executed so they can be performed without a password.
 

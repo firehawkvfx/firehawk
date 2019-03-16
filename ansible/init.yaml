@@ -1,0 +1,9 @@
+---
+- hosts: ansible_control
+  become: true
+
+  roles:
+    - role: init-host
+    - role: init-packages
+    - role: terraform
+    - role: aws-cli

@@ -1,0 +1,54 @@
+---
+# tasks file for roles/init-gui
+# these can be potentially provisioned with vagrant - its an extremely long process and its hlepful to monitor shell output incase of failure
+# When ansible allows monitoring, we should enable it here.
+
+- name: Add ubuntu gui support
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - ubuntu-desktop
+
+- name: Add  virtualbox requirements for gui support
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - virtualbox-guest-dkms
+    - virtualbox-guest-utils
+    - virtualbox-guest-x11
+    - xserver-xorg-legacy
+
+- name: Allow any user to login to gui.
+  lineinfile:
+    path: /etc/X11/Xwrapper.config
+    regexp: '^allowed_users='
+    line: 'allowed_users=anybody'
+
+- name: Disable prompts for updates.  In a prod environment we should be provision the update with a release.
+  lineinfile:
+    path: /etc/update-manager/release-upgrades
+    regexp: '^Prompt='
+    line: 'Prompt=never'
+
+- name: Check if reboot is required
+  stat:
+    path: /var/run/reboot-required
+  register: reboot_required_file
+
+- name: Unconditionally reboot the machine with all defaults
+  reboot:
+  when: reboot_required_file.stat.exists
+
+# - name: Rebooting machine
+#   shell: sleep 2 && shutdown -r now "Ansible updates triggered"
+#   async: 1
+#   poll: 0
+#   ignore_errors: true
+#   when: reboot_required_file.stat.exists
+
+# - name: Waiting for the machine to come back
+#   local_action: wait_for host={{ ansible_host }} state=started port=22 delay=30
+#   become: no
+# when: reboot_required_file.stat.exists

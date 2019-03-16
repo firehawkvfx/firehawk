@@ -1,0 +1,182 @@
+---
+# tasks file for ansible/roles/openvpn
+# - name: Ensures file exists
+#   file:
+#     path: /var/tmp/ansible-test.log
+#     state: file
+#   become: yes
+# - name: Write the new ec2 instance host key to known hosts
+#   connection: local
+#   shell: "ssh-keyscan -H {{ openvpnip }} >> ~/.ssh/known_hosts"
+
+- name: Ensures dir exists
+  file:
+    path: "~/openvpn_config"
+    state: directory
+  connection: local
+  become_user: vagrant
+  become: yes
+
+- name: contents of /usr/local/openvpn_as/scripts/seperate/
+  command: "ls /usr/local/openvpn_as/scripts/seperate/"
+  #connection: remote
+  become_user: openvpnas
+  become: yes
+  register: openvpn_contents
+
+- debug: msg="{{ openvpn_contents.stdout }}"
+- debug: msg="{{ openvpn_contents.stderr }}"
+
+- name: Ansible copy file force
+  fetch:
+    src: /usr/local/openvpn_as/scripts/seperate/{{ item }}
+    dest: ~/openvpn_config/
+    force: yes
+    flat: true
+    mode: 400
+  with_items:
+    - ca.crt
+    - client.crt
+    - client.key
+    - ta.key
+
+- name: Ansible copy client.ovpn to openvpn.conf
+  fetch:
+    src: /usr/local/openvpn_as/scripts/seperate/client.ovpn
+    dest: ~/openvpn_config/openvpn.conf
+    force: yes
+    flat: true
+    mode: 400
+
+- name: Create open vpn autologin 
+  copy:
+    content: |
+              {{ openvpn_user }}
+              {{ openvpn_user_pw }}
+    dest: ~/openvpn_config/yourserver.txt
+    mode: 400
+  connection: local
+  become_user: vagrant
+  become: yes
+
+- name: replace
+  lineinfile:
+    path: ~/openvpn_config/openvpn.conf
+    state: present
+    regexp: '^auth-user-pass\s'
+    line: 'auth-user-pass yourserver.txt'
+  connection: local
+  become_user: vagrant
+  become: yes
+
+- name: insert after
+  lineinfile:
+    path: ~/openvpn_config/openvpn.conf
+    state: present
+    line: 'push "redirect-gateway def1 bypass-dhcp"'
+    insertafter: auth-user-pass
+  connection: local
+  become_user: vagrant
+  become: yes
+
+
+- name: replace
+  lineinfile:
+    path: ~/openvpn_config/openvpn.conf
+    state: present
+    regexp: '^(.*)# OVPN_ACCESS_SERVER_PROFILE=(.*)$'
+    line: '# OVPN_ACCESS_SERVER_PROFILE={{ openvpn_user }}@vpn.firehawkfilm.com/AUTOLOGIN'
+  connection: local
+  become_user: vagrant
+  become: yes
+
+- name: insert after
+  lineinfile:
+    path: ~/openvpn_config/openvpn.conf
+    state: present
+    line: '# OVPN_ACCESS_SERVER_AUTOLOGIN=1'
+    insertafter: '# OVPN_ACCESS_SERVER_PROFILE='
+  connection: local
+  become_user: vagrant
+  become: yes
+
+- name: insert after
+  lineinfile:
+    path: ~/openvpn_config/openvpn.conf
+    state: present
+    line: '# OVPN_ACCESS_SERVER_AUTOLOGIN=1'
+    insertafter: '# OVPN_ACCESS_SERVER_PROFILE='
+  connection: local
+  become_user: vagrant
+  become: yes
+
+
+
+
+
+    
+# - name: Ansible copy to /etc/openvpn
+#   copy:
+#     src: ~/openvpn_config/{{ item }}
+#     dest: /etc/openvpn/{{ item }}
+#     #force: yes
+#   with_items:
+#     - openvpn.conf
+#     - ca.crt
+#     - client.crt
+#     - client.key
+#     - ta.key
+#   connection: local
+#   become_user: vagrant
+#   become: yes
+
+# - name: Ansible copy file force
+#   fetch:
+#     src: /usr/local/openvpn_as/scripts/seperate/client.ovpn
+#     dest: ~/openvpn_config/
+#     force: yes
+
+# - name: ensure file exists
+#   copy:
+#     content: ""
+#     dest: /var/tmp/ansible-test.log
+#     force: no
+#     mode: 0555
+
+
+    #   mkdir -p ~/openvpn_config
+    #   cd ~/openvpn_config
+    #   rm -f ~/openvpn_config/ta.key
+    #   rm -f ~/openvpn_config/client.ovpn
+    #   rm -f ~/openvpn_config/client.conf
+    #   rm -f ~/openvpn_config/client.key
+    #   rm -f ~/openvpn_config/client.crt
+    #   rm -f ~/openvpn_config/ca.crt
+    #   rm -f ~/openvpn_config/yourserver.txt
+    #   rm -f ~/openvpn_config/client_route.conf
+    #   scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r -i '${var.local_key_path}' ${var.openvpn_admin_user}@${aws_eip.openvpnip.public_ip}:/usr/local/openvpn_as/scripts/seperate/* ~/openvpn_config/
+    #   ls -la
+    #   echo '${var.openvpn_user}' >> yourserver.txt
+    #   echo '${var.openvpn_user_pw}' >> yourserver.txt
+    #   sed -i 's/auth-user-pass/auth-user-pass yourserver.txt\npush "redirect-gateway def1 bypass-dhcp"/g' client.ovpn
+    #   sed -i '/# OVPN_ACCESS_SERVER_PROFILE=/c\# OVPN_ACCESS_SERVER_PROFILE=${var.openvpn_user}@${aws_eip.openvpnip.public_ip}/AUTOLOGIN\n# OVPN_ACCESS_SERVER_AUTOLOGIN=1' client.ovpn
+    #   mv client.ovpn openvpn.conf
+
+
+#     set -x
+# mkdir -p /home/deadlineuser/openvpn_config/
+# cd /home/deadlineuser/openvpn_config/
+
+# echo '--- copying openvpn config files ---'
+# sudo /bin/cp -rfa /home/deadlineuser/openvpn_config/ca.crt /etc/openvpn/.
+# sudo /bin/cp -rfa /home/deadlineuser/openvpn_config/client.crt /etc/openvpn/.
+# sudo /bin/cp -rfa /home/deadlineuser/openvpn_config/client.key /etc/openvpn/.
+# sudo /bin/cp -rfa /home/deadlineuser/openvpn_config/openvpn.conf /etc/openvpn/.
+# sudo /bin/cp -rfa /home/deadlineuser/openvpn_config/ta.key /etc/openvpn/.
+# sudo /bin/cp -rfa /home/deadlineuser/openvpn_config/yourserver.txt /etc/openvpn/.
+
+# echo 'finished copy.' 
+# echo 'restarting service'
+# sudo systemctl daemon-reload
+# sudo /usr/sbin/service openvpn restart
+# echo '--- openvpn restarted ---'

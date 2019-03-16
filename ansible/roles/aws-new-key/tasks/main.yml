@@ -1,0 +1,9 @@
+---
+# tasks file for ansible/roles/aws-new-key
+- name: create a new ec2 key pair, returns generated private key
+  ec2_key:
+    name: new_test_key
+    #these must be defined if the module is used.
+    aws_access_key:
+    aws_secret_key:
+    ec2_region: ap-southeast-2

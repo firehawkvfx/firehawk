@@ -1,0 +1,327 @@
+- hosts: role_node_centos
+  remote_user: centos
+  become: true
+
+  vars:
+    hostname: "node1.{{ public_domain }}"
+
+  tasks:
+  - name: init authorized_keys
+    copy:
+      content: ""
+      dest: /root/.ssh/authorized_keys
+      force: no
+    become: true
+
+  - name: change hostname
+    hostname:
+      name: "{{ hostname }}"
+      
+  - name: add myself to /etc/hosts
+    lineinfile:
+      dest: /etc/hosts
+      regexp: '^127\.0\.0\.1[ \t]+localhost'
+      line: "127.0.0.1 localhost {{ hostname }}"
+      state: present
+
+  - name: Set hostname var in bash profile
+    lineinfile:
+      path: /root/.bash_profile
+      line: 'export HOSTNAME={{ hostname }}'
+
+  # - name: disable selinux
+  #   lineinfile:
+  #     path: /etc/selinux/config
+  #     regexp: '^SELINUX='
+  #     line: 'SELINUX=disabled'
+
+  - name: upgrade all packages - yum update
+    yum:
+      name: '*'
+      state: latest
+# these packages are required to pass an encrypted string via commandline into a user pass and are suited to centos.
+  - name: install mkpasswd
+    package:
+      name: expect
+      state: present
+
+  - name: install epel-release
+    package:
+      name: epel-release
+      state: present
+
+  - name: install pip
+    package:
+      name: python-pip
+      state: latest
+
+  - name: install pexpect
+    pip:
+      name: pexpect
+    become: yes
+    
+  - name: install passlib
+    pip:
+      name: passlib
+    become: yes
+
+  - name: Ensure group "deadlineuser" exists
+    group:
+      name: deadlineuser
+      state: present
+      gid: 9001
+
+  - name: Add the user 'deadlineuser' with a specific uid and a primary group of 'deadlineuser'
+    user:
+      name: deadlineuser
+      comment: A user for rendering operations.
+      groups: # Empty by default, here we give it some groups
+        - wheel
+        - deadlineuser
+      uid: 9001
+
+  - name: set user pass
+    expect:
+      command: passwd deadlineuser
+      responses:
+        (?i)password: "{{ user_deadlineuser_pw }}"
+        (?i)Retype new password: "{{ user_deadlineuser_pw }}"
+
+
+  - name: setup ssh key for deadline user by generating key identifier from pem key
+    shell: |
+      ssh-keygen -y -f {{ local_key_path }} > /home/vagrant/{{ key_name }}_public
+    connection: local
+    become_user: vagrant
+    become: yes
+
+  - name: create .ssh dir
+    file: 
+      path: /home/deadlineuser/.ssh/
+      state: directory
+      mode: 0700
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+    become_user: deadlineuser
+
+  - name: copy key for deadlineuser
+    copy:
+      src: "/home/vagrant/{{ key_name }}_public"
+      dest: /home/deadlineuser/.ssh/authorized_keys
+      mode: 0600
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+
+  - name: copy time zone info
+    copy:
+      src: "{{ time_zone_info_path_linux }}"
+      dest: /etc/localtime
+      remote_src: true
+    become: yes
+
+  - name: restart sshd.service
+    service: 
+      name: sshd
+      state: restarted
+
+  - name: create Thinkbox dir
+    file: 
+      path: /opt/Thinkbox/
+      state: directory
+      mode: 0700
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+
+  - name: create Thinkbox cert dir
+    file: 
+      path: /opt/Thinkbox/certs
+      state: directory
+      mode: 0700
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+
+  - name: set deadline remote client certificate permissions locally
+    file: 
+      path: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
+      mode: 0644
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+    connection: local
+
+  - name: Copy deadline remote client certificate
+    copy: 
+      src: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
+      dest: "/opt/Thinkbox/certs/"
+      mode: 0600
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+
+  - name: Strange requirement here.  For some reason read permissions needed for everyone to be set above or the ansible copy doesn't work.  So we set it back to normal here.
+    file: 
+      path: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
+      mode: 0640
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+    connection: local
+
+  - name: create download dir
+    file: 
+      path: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
+      state: directory
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+
+  - name: copy deadline installer
+    copy:
+      src: "{{ deadline_linux_installers_tar }}"
+      dest: "/home/deadlineuser/Downloads/{{ deadline_linux_filename }}"
+      mode: 0640
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+
+  - name: create deadline installer dir
+    file: 
+      path: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
+      state: directory
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+
+
+  - name: Extract
+    unarchive:
+      src: "/home/deadlineuser/Downloads/{{ deadline_linux_filename }}"
+      dest: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
+      owner: deadlineuser
+      mode: u+x
+      remote_src: true
+    become: yes
+
+  - name: "Ansible find files in subdirectory examples /home/deadlineuser/Downloads/Deadline-10.0.23.4-linux-installers/"
+    find:
+      paths: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
+      patterns: "*DeadlineClient-*-linux-x64-installer.run"
+    register: files_matched
+    become: true
+
+  - debug:
+      msg: "installer path: {{ files_matched.files[0].path }}"
+  
+  - name: set execute permissions on installer
+    file:
+      path: "{{ files_matched.files[0].path }}"
+      mode: 0700
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+
+  - name: deadline dependencies
+    package:
+      name: "{{ item }}"
+      state: present
+    with_items:
+      - redhat-lsb
+      - samba-client
+      - samba-common
+      - cifs-utils
+      - nfs-utils
+      - nload
+      - tree
+      - bzip2
+      - nmap
+      #- nfs-utils-lib
+      
+  # mount softnas
+  - name: create production path - this should be dynamic and based on the command showmount -e, and automount if remote
+    file: 
+      path: "{{ production_mount_target }}"
+      state: directory
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+  
+  - name: create softnas mount point
+    file: 
+      path: "{{ softnas_mount_source }}"
+      state: directory
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+
+  - name: insert marker start
+    lineinfile:
+      path: /etc/fstab
+      insertafter: "^#?UUID.*$"
+
+      line: "# BEGIN ANSIBLE MANAGED BLOCK"
+      backup: yes
+
+  - name: insert marker end
+    lineinfile:
+      path: /etc/fstab
+      insertafter: "# BEGIN ANSIBLE MANAGED BLOCK"
+      line: "# END ANSIBLE MANAGED BLOCK"
+      create: true
+ 
+  - name: insert/update block in /etc/fstab
+    blockinfile:
+      path: /etc/fstab
+      backup: yes
+      content: |
+        
+        {{ groups['role_softnas'][0] }}:{{ softnas_mount_source }} {{ softnas_mount_source }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
+        {{ softnas_mount_source }} /prod none defaults,bind 0 0
+        
+  - name: mount all changes to fstab
+    command: mount -a
+    become: true
+
+  - stat:
+      path: /var/lib/Thinkbox/Deadline10/deadline.ini
+    register: deadline_ini_file
+
+  - name: get date
+    shell: |
+      date +"%Y%m%d_%H%M%S"
+    register: current_date
+
+  - set_fact:
+      backup_dest: "/var/lib/Thinkbox/Deadline10/deadline.bak_{{ current_date.stdout }}"
+    when: deadline_ini_file.stat.exists
+
+  - debug:
+      msg: "will backup file to {{ backup_dest }}"
+    when: deadline_ini_file.stat.exists
+
+  - name: move old config to backup.  this prevents old conf settings staying around.
+    command: "mv /var/lib/Thinkbox/Deadline10/deadline.ini {{ backup_dest }}"
+    when: deadline_ini_file.stat.exists
+
+  - name: install deadline client
+    shell: |
+      cd /home/deadlineuser/Downloads/
+      set -x
+      {{ files_matched.files[0].path }} --mode unattended --debuglevel 2 --prefix {{ deadline_prefix }} --connectiontype Remote --noguimode true --licensemode UsageBased --launcherdaemon true --slavestartup 1 --daemonuser {{ user_deadlineuser_name }} --enabletls true --tlsport 4433 --httpport 8080 --proxyrootdir {{ deadline_proxy_root_dir }} --proxycertificate {{ deadline_proxy_certificate }} --proxycertificatepassword {{ deadline_proxy_certificate_password }}
+    register: deadline_client_install_output_shell
+    become: true
+    
+  - name: check deadline client install output
+    debug:
+      msg: "{{ deadline_client_install_output_shell.stdout }}"
+
+  - name: check /var/lib/Thinkbox/Deadline10/deadline.ini
+    command: cat /var/lib/Thinkbox/Deadline10/deadline.ini 
+    register: deadline_config
+
+  - debug: msg="{{ deadline_config.stdout }}"
+  - debug: msg="{{ deadline_config.stderr }}"
+

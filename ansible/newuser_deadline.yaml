@@ -1,0 +1,56 @@
+---
+- hosts: ansible_control
+  become: true
+
+  vars:
+    my_password: "{{ user_deadlineuser_pw }}"
+    no_extension: "{{ deadline_linux_installers_tar | splitext | first }}"
+    basename: "{{ no_extension.split('/')[-1] }}"
+    
+  roles:
+    - {role: 'newuser', tags: 'newuser'}
+    - role: deadlinedb
+    - role: deadlinercs
+
+# This process archives secrets.  they are copied to the repository, and encrypted by the vault id - keys/.vault-key
+# Nothing stored in the secrets path should be unencrypted.
+
+- hosts: ansible_control
+  become: true
+  remote_user: deadlineuser
+  become_user: root
+
+  vars:
+    secrets:
+      secret1:
+        location: /opt/Thinkbox/certs/ca.crt
+        target: /vagrant/secrets/opt/Thinkbox/certs/ca.crt
+      secret2:
+        location: /opt/Thinkbox/certs/Deadline10RemoteClient.pfx
+        target: /vagrant/secrets/opt/Thinkbox/certs/Deadline10RemoteClient.pfx
+      secret3:
+        location: /opt/Thinkbox/certs/localhost.pfx
+        target: /vagrant/secrets/opt/Thinkbox/certs/localhost.pfx
+      secret4:
+        location: /opt/Thinkbox/DeadlineDatabase10/certs/ca.crt
+        target: /vagrant/secrets/opt/Thinkbox/DeadlineDatabase10/certs/ca.crt
+      secret5:
+        location: /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx
+        target: /vagrant/secrets/opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx
+      secret6:
+        location: /opt/Thinkbox/DeadlineDatabase10/certs/localhost.pem
+        target: /vagrant/secrets/opt/Thinkbox/DeadlineDatabase10/certs/localhost.pem
+      secret7:
+        location: /opt/Thinkbox/DeadlineDatabase10/certs/mongo_client.pem
+        target: /vagrant/secrets/opt/Thinkbox/DeadlineDatabase10/certs/mongo_client.pem
+
+    key_name: .vault-key
+    key_path: "/vagrant/keys/{{ key_name }}"
+  
+  tasks:
+  - name: store-secret
+    with_items:
+      - "{{ lookup('dict', secrets) }}"
+    include_role:
+      name: store-secret
+    vars:

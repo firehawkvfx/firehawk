@@ -14,3 +14,14 @@ IamFleetRole.json
 modules/node_centos/file_package/submission/*
 modules/node_centos/file_package/CertificateInstaller-10.0.23.4-linux-x64-installer.run
 spot_fleet_template.json
+.vagrant/*
+ubuntu-xenial-16.04-cloudimg-console.log
+playbook.retry
+downloads/*
+ansible/*.retry
+ansible-log.txt
+ansible/modules/*.retry
+hostvars.log
+tmp/*
+keys/*
+*.DS_Store

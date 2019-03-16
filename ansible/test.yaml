@@ -1,0 +1,20 @@
+- hosts: localhost
+
+  tasks:
+  # with -v this will format correctly when read.
+  - include_vars:
+      file: test.json
+      name: softnas_list_disk_output_dict
+
+  - name: this won't format correctly with -v
+    shell: |
+      cat test.json
+    register: softnas_list_disk_output_shell
+
+  - name: all json output, wont format correctly in msg.
+    debug:
+      msg: "{{ softnas_list_disk_output_shell.stdout|from_json }}"
+
+  - name: sub json output, wont format correctly in msg.
+    debug:
+      msg: "{{ (softnas_list_disk_output_shell.stdout|from_json).result.records }}"

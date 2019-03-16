@@ -1,0 +1,16 @@
+---
+# tasks file for roles/init-packages
+- name: install mkpasswd, pip, pexpect, passlib
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - whois
+    - python-pip
+    - python-pexpect
+    - python-passlib
+    - openvpn
+    - nfs-common
+
+#nfs-common is used for showmount
+

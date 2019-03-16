@@ -1,0 +1,89 @@
+- hosts: role_node_centos
+  remote_user: centos
+  become: true
+
+  vars:
+    bastionip: "{{ groups['bastionip'][0] }}"
+    hostname: "node1.{{ public_domain }}"
+
+  tasks:
+  - file:
+      path: /opt/houdini_install_script
+      state: directory
+      mode: 0700
+      owner: centos
+
+  - pip:
+      name: beautifulsoup4
+
+  - copy:
+      src: /vagrant/modules/node_centos/modules/houdini_install_script/
+      dest: /opt/houdini_install_script/
+      directory_mode: yes
+
+  - file:
+      path: /opt/houdini_install_script/houdini_install.py
+      mode: 0700
+    
+  - shell: |
+      python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini
+    register: houdini_install_out
+    become: true
+
+  - debug:
+      msg:  "{{ houdini_install_out.stdout }}"
+
+# old terraform install for houdini.  may want to replicate when able to test again.
+#   #copy the deadline installer to the rendernode 
+#   provisioner "file" {
+#     source      = "${path.module}/file_package/${var.houdini_installer_filename}"
+#     destination = "/var/tmp/${var.houdini_installer_filename}"
+#   }
+
+#   provisioner "remote-exec" {
+#     connection {
+#       user        = "${var.deadline_user}"
+#       host        = "${aws_instance.node_centos.private_ip}"
+#       private_key = "${var.private_key}"
+#       type        = "ssh"
+#       timeout     = "10m"
+#     }
+
+#     inline = [<<EOT
+# set -x
+# sudo chmod 600 /var/tmp/${var.houdini_installer_filename}
+# #these are needed for houdini to start https://rajivpandit.wordpress.com/category/fx-pipeline/page/8/
+# sudo yum install -y mesa-libGLw
+# sudo yum install -y libXp libXp-devel 
+# cd /var/tmp
+# sudo tar -xvf /var/tmp/${var.houdini_installer_filename}
+# sudo mkdir houdini_installer
+# sudo tar -xvf ${var.houdini_installer_filename} -C houdini_installer --strip-components 1
+# cd houdini_installer
+# #sudo ./houdini.install --auto-install --accept-EULA --install-houdini --install-license --no-local-licensing --install-hfs-symlink
+# sudo ./houdini.install --auto-install --accept-EULA --install-houdini --no-local-licensing --install-hfs-symlink
+# cd /opt/hfs17.0
+# sudo sed -i '/licensingMode = sesinetd/s/^# //g' /opt/hfs17.0/houdini/Licensing.opt
+# sudo cat /opt/hfs17.0/houdini/Licensing.opt
+# /opt/hfs17.0/bin/hserver
+# #source houdini_setup
+# /opt/hfs17.0/bin/hserver -S ${var.houdini_license_server_address}
+# EOT
+#     ]
+#   }
+# }
+
+# resource "random_id" "ami_unique_name" {
+#   keepers = {
+#     # Generate a new id each time we switch to a new instance id
+#     ami_id = "${aws_instance.node_centos.id}"
+#   }
+
+#   byte_length = 8
+# }
+
+# resource "aws_ami_from_instance" "node_centos" {
+#   depends_on         = ["null_resource.install_houdini"]
+#   name               = "node_centos_houdini_${aws_instance.node_centos.id}_${random_id.ami_unique_name.hex}"
+#   source_instance_id = "${aws_instance.node_centos.id}"
+# }
