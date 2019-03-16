@@ -17,7 +17,7 @@
 
 - name: ready to encrypt
   debug:
-    msg: "use key to encrypt {{ key_path }}"
+    msg: "use key to encrypt {{ vault_key_path }}"
 
 - name: Pass secret to encrypt
   include_role:
