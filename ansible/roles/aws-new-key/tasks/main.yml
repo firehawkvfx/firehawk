@@ -10,5 +10,5 @@
   register: ec2_key_result
 
 - name: Save private key
-  copy: content="{{ ec2_key_result.key.private_key }}" dest="{{ local_key_path }}" mode=0600
+  copy: content="{{ ec2_key_result.key.private_key }}" dest="{{ local_key_path }}" mode=0400
   when: ec2_key_result.changed

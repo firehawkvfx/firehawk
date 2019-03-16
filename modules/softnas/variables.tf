@@ -31,6 +31,8 @@ variable "sleep" {
   default = false
 }
 
+variable "s3_disk_size" {}
+
 variable "bastion_private_ip" {}
 
 variable "bastion_ip" {}
