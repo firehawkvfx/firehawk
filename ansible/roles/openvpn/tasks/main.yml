@@ -85,7 +85,7 @@
     path: ~/openvpn_config/openvpn.conf
     state: present
     regexp: '^(.*)# OVPN_ACCESS_SERVER_PROFILE=(.*)$'
-    line: '# OVPN_ACCESS_SERVER_PROFILE={{ openvpn_user }}@vpn.firehawkfilm.com/AUTOLOGIN'
+    line: '# OVPN_ACCESS_SERVER_PROFILE={{ openvpn_user }}@vpn.{{ public_domain }}/AUTOLOGIN'
   connection: local
   become_user: vagrant
   become: yes

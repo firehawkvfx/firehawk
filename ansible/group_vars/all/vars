@@ -1,5 +1,5 @@
 ---
-ansible_ssh_private_key_file: /vagrant/keys/my_key_pair.pem
+ansible_ssh_private_key_file: "{{ lookup('env','TF_VAR_local_key_path') }}"
 
 debug: 0
 
@@ -8,16 +8,11 @@ production_mount_target: "/prod"
 envtier: "{{ lookup('env','TF_VAR_envtier') }}"
 
 # domains
-all_domains: {
-dev: "{{ lookup('env','TF_VAR_public_domain_dev') }}",
-prod: "{{ lookup('env','TF_VAR_public_domain_prod') }}"
-}
-
-public_domain: "{{ all_domains[envtier] }}"
-# in most cases only the above public_domain should be referenced, which can be switched between dev and prod.
+public_domain: "{{ lookup('env','TF_VAR_public_domain') }}"
+# in most cases only the above public_domain should be referenced, which can be switched between dev and prod based on the environment - envtier
 # the below public_domain_prod is used in some rare cases where multiple instances of infrastructure may not be not possible, like with a licence server.
 # eg I may need to reference houdinilicenceserver.prod.example.com in both the prod and dev environments for render nodes to be tested.
-public_domain_prod: "{{ all_domains['prod'] }}"
+public_domain_prod: "{{ lookup('env','TF_VAR_public_domain_prod') }}"
 
 ### NAS volume mounts ###
 
@@ -46,7 +41,7 @@ user_softnas_pw: "{{ lookup('env','TF_VAR_user_softnas_pw') }}"
 user_deadlineuser_name: "{{ lookup('env','TF_VAR_user_deadlineuser_name') }}"
 user_deadlineuser_pw: "{{ lookup('env','TF_VAR_user_deadlineuser_pw') }}"
 
-openfirehawkserver: "{{ TF_VAR_openfirehawkserver }}"
+openfirehawkserver: "{{ lookup('env','TF_VAR_openfirehawkserver') }}"
 deadline_proxy_root_dir: "{{ lookup('env','TF_VAR_deadline_proxy_root_dir') }}"
 deadline_proxy_certificate: "{{ lookup('env','TF_VAR_deadline_proxy_certificate') }}"
 deadline_proxy_certificate_password: "{{ lookup('env','TF_VAR_deadline_proxy_certificate_password') }}"
@@ -64,3 +59,14 @@ Australia_Sydney: "/usr/share/zoneinfo/Australia/Sydney"
 }
 
 time_zone_info_path_linux: "{{ time_zone_info_dict_linux['Australia_Sydney'] }}"
+
+### SECRETS AND PEM KEYS
+
+repo_dir: "{{ playbook_dir.split('/')[0:-1]|join('/') }}"
+
+vault_key_name: .vault-key
+
+key_folder: "{{ repo_dir }}/keys/"
+
+key_path: "{{ repo_dir }}/keys/{{ key_name }}.pem"
+secret_path: "{{ repo_dir }}/secrets/secrets.txt"

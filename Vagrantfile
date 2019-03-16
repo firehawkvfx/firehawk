@@ -7,13 +7,20 @@ Vagrant.configure("2") do |config|
   #config.vm.box = "bento/ubuntu-16.04"
   #config.ssh.username = "vagrant"
   #config.ssh.password = "vagrant"
+  stage = ENV['TF_VAR_stage']
+  if stage == 'prod'
+    mac_string = ENV['TF_VAR_vagrant_mac_prod']
+  end
+  if stage == 'dev'
+      mac_string = ENV['TF_VAR_vagrant_mac_dev']
+  end
 
   config.vm.define "ansible_control"
   config.vagrant.plugins = ['vagrant-disksize', 'vagrant-reload']
   config.disksize.size = '50GB'
   #config.vm.network "public_network", bridge: "eno1",
-  config.vm.network "public_network", mac: ENV['TF_VAR_vagrant_mac']
-
+  config.vm.network "public_network", mac: mac_string
+  
   # routing issues?  https://stackoverflow.com/questions/35208188/how-can-i-define-network-settings-with-vagrant
   config.vm.provider "virtualbox" do |vb|
     # Display the VirtualBox GUI when booting the machine
@@ -76,13 +83,21 @@ Vagrant.configure("2") do |config|
   # now we need to generate a random key for your vault.  if a key is present already in keys/.vault-key then it will be kept.
   # init-keys.yaml will also ecrypt secrets.txt if it is unencrypted with this new key.
   # ansible-playbook ansible/init-keys.yaml
-  # ensure you have a backup of the key (keys/.vault-key).  Storing it on an encryptted usb key is a good idea.
-  # now we can initialise out environment variables.
+  # ensure you have a backup of the key (keys/.vault-key).  Storing it on an encrypted usb key is a good idea!
+  # now we can initialise our environment variables.
   # source ./update_vars.sh
   # ansible-playbook -i ansible/inventory/hosts ansible/init.yaml
   # download the deadline linux installers version 10.0.23.4 into downloads/Deadline-10.0.23.4-linux-installers.tar
   # ansible-playbook -i ansible/inventory/hosts ansible/newuser_deadline.yaml
   # remember to always run source ./update_vars.sh before running any ansible playbooks, or using terraform.
+  # init your aws access key.
+  # ansible-playbook -i ansible/inventory/hosts ansible/aws-new-key.yaml
+  # subscribe to these amis-
+  # openvpn https://aws.amazon.com/marketplace/pp/B00MI40CAE
+  # centos7 https://aws.amazon.com/marketplace/pp/B00O7WM7QW?qid=1552746240289&sr=0-1&ref_=srh_res_product_title
+  # softnas cloud platinum https://aws.amazon.com/marketplace/pp/B07DGMG5ZD?qid=1552746298127&sr=0-2&ref_=srh_res_product_title
+  # softnas cloud platinum - lower compute https://aws.amazon.com/marketplace/pp/B07DGGZBCG?qid=1552746484959&sr=0-9&ref_=srh_res_product_title
+
   # now lets run out first terraform apply.
   # terraform apply
 end

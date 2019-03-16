@@ -24,11 +24,9 @@ variable "private_subnets_cidr_blocks" {
   default = []
 }
 
-variable "key_name" {
-  default = "my_key_pair"
-}
+variable "key_name" {}
 
-#contents of the my_key_pair.pem file to connect to the instance.
+#contents of the my_key.pem file to connect to the instance.
 variable "private_key" {}
 
 #CentOS Linux 7 x86_64 HVM EBS ENA 1805_01-b7ee8a69-ee97-4a49-9e68-afaee216db2e-ami-77ec9308.4 (ami-d8c21dba)
