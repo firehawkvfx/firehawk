@@ -33,8 +33,6 @@
     dest: "/home/vagrant/.ssh/config"
     mode: 0600
     owner: vagrant
-    become: true
-    become_user: vagrant
     content: |
       host bastion
         Hostname bastion.{{ public_domain }}
@@ -50,4 +48,6 @@
         IdentityFile  {{ ansible_ssh_private_key_file }}
         User centos
         ProxyCommand ssh -W %h:%p centos@bastion
+  become: true
+  become_user: vagrant
   when: set_bastion

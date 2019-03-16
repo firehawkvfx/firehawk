@@ -92,7 +92,7 @@ Vagrant.configure("2") do |config|
   # remember to always run source ./update_vars.sh before running any ansible playbooks, or using terraform.
   # init your aws access key.
   # ansible-playbook -i ansible/inventory/hosts ansible/aws-new-key.yaml
-  # subscribe to these amis-
+  # subscribe to these amis (it may take some time before your subscription is processed)-
   # openvpn https://aws.amazon.com/marketplace/pp/B00MI40CAE
   # centos7 https://aws.amazon.com/marketplace/pp/B00O7WM7QW?qid=1552746240289&sr=0-1&ref_=srh_res_product_title
   # softnas cloud platinum https://aws.amazon.com/marketplace/pp/B07DGMG5ZD?qid=1552746298127&sr=0-2&ref_=srh_res_product_title

@@ -95,3 +95,5 @@ variable "deadline_proxy_root_dir" {}
 variable "deadline_samba_server_address" {}
 
 variable "houdini_license_server_address" {}
+
+variable "s3_disk_size" {}

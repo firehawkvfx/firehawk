@@ -459,7 +459,7 @@ resource "null_resource" "provision_softnas_volumes" {
     command = <<EOT
       set -x
       cd /vagrant
-      ansible-playbook -i ansible/inventory ansible/softnas-s3-disk.yaml -v --extra-vars "pool_name=pool0 volume_name=volume0 disk_device=0 s3_disk_size_max_value={{ s3_disk_size }} encrypt_s3=true"
+      ansible-playbook -i ansible/inventory ansible/softnas-s3-disk.yaml -v --extra-vars "pool_name=pool0 volume_name=volume0 disk_device=0 s3_disk_size_max_value=${var.s3_disk_size} encrypt_s3=true"
   EOT
   }
 }
