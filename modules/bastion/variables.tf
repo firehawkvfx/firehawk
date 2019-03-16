@@ -27,11 +27,9 @@ variable "public_subnet_ids" {
   default = []
 }
 
-variable "key_name" {
-  default = "my_key_pair"
-}
+variable "key_name" {}
 
-#contents of the my_key_pair.pem file to connect to the instance.
+#contents of the my_key.pem file to connect to the instance.
 variable "private_key" {}
 
 #this ami id is for southeast-ap-2 sydney only.  todo - changes will need to be made to pull a list of ami's

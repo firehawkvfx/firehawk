@@ -110,9 +110,7 @@ resource "null_resource" "provision_bastion" {
     connection {
       user                = "centos"
       host                = "${aws_eip.bastionip.public_ip}"
-      #bastion_host        = "bastion.firehawkfilm.com"
       private_key         = "${var.private_key}"
-      #bastion_private_key = "${var.private_key}"
       type                = "ssh"
       timeout             = "10m"
     }

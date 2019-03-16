@@ -42,7 +42,7 @@ module "vpc" {
   private_key        = "${file("${var.local_key_path}")}"
   local_key_path     = "${var.local_key_path}"
   route_zone_id      = "${var.route_zone_id}"
-  public_domain_name = "${var.public_domain_dev}"
+  public_domain_name = "${var.public_domain}"
   cert_arn           = "${var.cert_arn}"
   openvpn_user       = "${var.openvpn_user}"
   openvpn_user_pw    = "${var.openvpn_user_pw}"
@@ -73,7 +73,7 @@ module "bastion" {
   private_key    = "${file("${var.local_key_path}")}"
 
   route_zone_id      = "${var.route_zone_id}"
-  public_domain_name = "${var.public_domain_dev}"
+  public_domain_name = "${var.public_domain}"
 
   #skipping os updates will allow faster rollout for testing.
   skip_update = "${var.node_skip_update}"

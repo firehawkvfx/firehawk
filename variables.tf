@@ -29,6 +29,7 @@ variable "aws_region" {}
 # once you setup an ssl certificate with your domain, it will have a route zone id.
 variable "route_zone_id" {}
 
+variable "public_domain" {}
 variable "public_domain_dev" {}
 variable "public_domain_prod" {}
 
