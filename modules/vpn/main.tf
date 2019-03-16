@@ -15,11 +15,9 @@ variable "public_subnet_ids" {
 
 variable "route_zone_id" {}
 
-variable "key_name" {
-  default = "my_key_pair"
-}
+variable "key_name" {}
 
-#contents of the my_key_pair.pem file to connect to the vpn.
+#contents of the my_key.pem file to connect to the vpn.
 variable "private_key" {}
 
 variable "ami" {

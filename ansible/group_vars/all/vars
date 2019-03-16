@@ -5,7 +5,7 @@ debug: 0
 
 production_mount_target: "/prod"
 
-stage: dev
+envtier: "{{ lookup('env','TF_VAR_envtier') }}"
 
 # domains
 all_domains: {
@@ -13,7 +13,7 @@ dev: "{{ lookup('env','TF_VAR_public_domain_dev') }}",
 prod: "{{ lookup('env','TF_VAR_public_domain_prod') }}"
 }
 
-public_domain: "{{ all_domains[stage] }}"
+public_domain: "{{ all_domains[envtier] }}"
 # in most cases only the above public_domain should be referenced, which can be switched between dev and prod.
 # the below public_domain_prod is used in some rare cases where multiple instances of infrastructure may not be not possible, like with a licence server.
 # eg I may need to reference houdinilicenceserver.prod.example.com in both the prod and dev environments for render nodes to be tested.
@@ -46,7 +46,7 @@ user_softnas_pw: "{{ lookup('env','TF_VAR_user_softnas_pw') }}"
 user_deadlineuser_name: "{{ lookup('env','TF_VAR_user_deadlineuser_name') }}"
 user_deadlineuser_pw: "{{ lookup('env','TF_VAR_user_deadlineuser_pw') }}"
 
-openfirehawkserver: "{{ lookup('env','TF_VAR_openfirehawkserver') }}"
+openfirehawkserver: "{{ TF_VAR_openfirehawkserver }}"
 deadline_proxy_root_dir: "{{ lookup('env','TF_VAR_deadline_proxy_root_dir') }}"
 deadline_proxy_certificate: "{{ lookup('env','TF_VAR_deadline_proxy_certificate') }}"
 deadline_proxy_certificate_password: "{{ lookup('env','TF_VAR_deadline_proxy_certificate_password') }}"

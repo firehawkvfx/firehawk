@@ -11,6 +11,7 @@ touch ./secrets.template
 rm ./secrets.template
 touch ./tmp/secrets.temp
 rm ./tmp/secrets.temp
+
 # IFS will allow for lop to iterate over lines instead of words seperated by ' '
 IFS='
 '
@@ -20,26 +21,75 @@ do
     export $i
 done
 
-# Update template
-for i in `ansible-vault view --vault-id ./keys/.vault-key ./secrets/secrets.txt`
-do
-    if [[ "$i" =~ ^#.*$ ]]
-    then
-        echo $i >> ./tmp/secrets.temp
-    else
-        echo ${i%%=*}'=$'${i%%=*} >> ./tmp/secrets.temp
-    fi
-done
-# substitute example var vules into the template.
-envsubst < "./tmp/secrets.temp" > "./secrets.template"
-rm ./tmp/secrets.temp
+argument="$1"
 
-# Now set environment variables to the actual values defined in the user's secrets.txt file
-for i in `ansible-vault view --vault-id ./keys/.vault-key ./secrets/secrets.txt`
+# if --init is supplied, no decryption occurs.  otherwise, we assume a key is required.
+
+if [[ -z $argument ]] ; then
+  echo "No argument supplied. assuming secrets are encrypted"
+  # Update template
+  for i in `ansible-vault view --vault-id ./keys/.vault-key ./secrets/secrets.txt`
+  do
+      if [[ "$i" =~ ^#.*$ ]]
+      then
+          echo $i >> ./tmp/secrets.temp
+      else
+          echo ${i%%=*}'=$'${i%%=*} >> ./tmp/secrets.temp
+      fi
+  done
+  # substitute example var vules into the template.
+  envsubst < "./tmp/secrets.temp" > "./secrets.template"
+  rm ./tmp/secrets.temp
+
+  # Now set environment variables to the actual values defined in the user's secrets.txt file
+  for i in `ansible-vault view --vault-id ./keys/.vault-key ./secrets/secrets.txt`
+  do
+      [[ "$i" =~ ^#.*$ ]] && continue
+      export $i
+  done
+else
+  case $argument in
+    -i|--init)
+      echo "assuming secrets are not encrypted"
+      # Update template
+      for i in `cat ./secrets/secrets.txt`
+      do
+          if [[ "$i" =~ ^#.*$ ]]
+          then
+              echo $i >> ./tmp/secrets.temp
+          else
+              echo ${i%%=*}'=$'${i%%=*} >> ./tmp/secrets.temp
+          fi
+      done
+      # substitute example var vules into the template.
+      envsubst < "./tmp/secrets.temp" > "./secrets.template"
+      rm ./tmp/secrets.temp
+
+      # Now set environment variables to the actual values defined in the user's secrets.txt file
+      for i in `cat ./secrets/secrets.txt`
+      do
+          [[ "$i" =~ ^#.*$ ]] && continue
+          export $i
+      done
+      ;;
+    *)
+      raise_error "Unknown argument: ${argument}"
+      ;;
+  esac
+fi
+
+# Determine your current public ip for security groups.
+export TF_VAR_remote_ip_cidr="$(dig +short myip.opendns.com @resolver1.opendns.com)/32"
+# this python script generates mappings based on the current environment.
+# any var ending in _prod or _dev will be stripped and mapped based on the envtier
+python ./scripts/envtier_vars.py
+envsubst < "./tmp/envtier_mapping.txt" > "./tmp/envtier_exports.txt"
+
+# using the current envtier environment, evaluate the variables
+for i in `cat ./tmp/envtier_exports.txt`
 do
     [[ "$i" =~ ^#.*$ ]] && continue
     export $i
 done
 
-# Determine your current public ip for security groups.
-export TF_VAR_remote_ip_cidr="$(dig +short myip.opendns.com @resolver1.opendns.com)/32"
+rm ./tmp/envtier_exports.txt

@@ -4,7 +4,7 @@
 # The purpose of this module is to initialise a random key password if it doesn't exist.  No data in /keys is commited to source control.  Backup keys elsewhere.
 
 - set_fact:
-    key_contents: "{{lookup('file', '/vagrant/keys/{{ key_name }}') }}"
+    key_contents: "{{lookup('file', '{{ key_path }}') }}"
 
 - debug:
     msg: "vault key is empty: {{ key_contents }}"
@@ -26,12 +26,12 @@
 - name: generate primary password for crypt
   copy:
     content: "{{ lookup('password', '/dev/null length=64 chars=ascii_letters') }}"
-    dest: "/vagrant/keys/{{ key_name }}"
+    dest: "{{ key_path }}"
   when: key_test == false
 
 # check key contents again, it should pass
 - set_fact:
-    key_contents: "{{lookup('file', '/vagrant/keys/{{ key_name }}') }}"
+    key_contents: "{{lookup('file', '{{ key_path }}') }}"
 
 - name: problem generating key
   failed_when: key_contents == ''
@@ -47,10 +47,9 @@
 
 - name: set key permissions to read only
   file:
-    path: "/vagrant/keys/{{ key_name }}"
+    path: "{{ key_path }}"
     mode: 0400
     state: touch
     access_time: preserve
     modification_time: preserve
   when: key_test == true
-  become: true
