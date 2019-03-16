@@ -18,7 +18,6 @@
 - name: encrypt
   when: check.stdout.find('ANSIBLE_VAULT') == -1
   shell: |
-    cd /vagrant/ansible
     ansible-vault encrypt --vault-id {{ key_path }} {{ secret_path }}
   register: encrypt_shell
 

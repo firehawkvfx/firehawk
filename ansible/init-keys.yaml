@@ -1,10 +1,16 @@
 - hosts: localhost
-  become: true
+  # become: true
 
   vars:
     key_name: .vault-key
-    key_path: "/vagrant/keys/{{ key_name }}"
-    secret_path: /vagrant/secrets/secrets.txt
+    repo_dir: "{{ playbook_dir.split('/')[0:-1]|join('/') }}"
+    key_folder: "{{ repo_dir }}/keys/"
+    key_path: "{{ repo_dir }}/keys/{{ key_name }}"
+    secret_path: "{{ repo_dir }}/secrets/secrets.txt"
+
+  pre_tasks:
+    - debug:
+        msg: "key_path = {{ key_path }}"
 
   # we have to ensure a blank key pass exists before starting.  we check if the file is blank before generating a key.
   # once a key is generated, the vaildate-encryption role will ensure the secrets file is encrypted with it
