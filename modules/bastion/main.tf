@@ -95,24 +95,9 @@ resource "aws_instance" "bastion" {
   user_data = <<USERDATA
 USERDATA
 
-  # provisioner "remote-exec" {
-  #   connection {
-  #     user        = "${var.user}"
-  #     host        = "${self.public_ip}"
-  #     private_key = "${var.private_key}"
-  #     timeout     = "10m"
-  #   }
-
-  #   inline = [
-  #     # Sleep 60 seconds until AMI is ready
-  #     "sleep 60",
-  #   ]
-  # }
 }
 
-output "ip" {
-  value = "${aws_eip.bastionip.public_ip}"
-}
+
 
 resource "null_resource" "provision_bastion" {
   depends_on = ["aws_instance.bastion", "aws_eip.bastionip", "aws_route53_record.bastion_record"]
@@ -139,7 +124,7 @@ resource "null_resource" "provision_bastion" {
     command = <<EOT
       set -x
       cd /vagrant
-      ansible-playbook -i ansible/inventory ansible/ssh-add-public-host.yaml -v --extra-vars "public_ip=${aws_eip.bastionip.public_ip} public_hostname=bastion.${var.public_domain_name} set_bastion=true"
+      ansible-playbook -i ansible/inventory/hosts ansible/ssh-add-public-host.yaml -v --extra-vars "public_ip=${aws_eip.bastionip.public_ip} public_hostname=bastion.${var.public_domain_name} set_bastion=true"
   EOT
   }
 }

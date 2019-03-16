@@ -32,14 +32,13 @@ module "vpc" {
   }
 }
 
-variable "remote_subnet_cidr" {
-  default = "192.168.0.0/24"
-}
+variable "remote_subnet_cidr" {}
 
 module "vpn" {
   source = "../vpn"
 
-  #create_openvpn = "${var.create_openvpn}"
+  # dummy attribute to force dependency on IGW.
+  igw_id = "${module.vpc.igw_id}"
 
   vpc_id   = "${module.vpc.vpc_id}"
   vpc_cidr = "${module.vpc.vpc_cidr_block}"
@@ -68,40 +67,6 @@ locals {
   max_subnet_length = "${length(var.private_subnets)}"
   nat_gateway_count = "${length(module.vpc.natgw_ids)}"
 }
-
-# resource "aws_route_table" "openvpn" {
-#   count = "${length(var.private_subnets)}"
-
-#   vpc_id = "${module.vpc.vpc_id}"
-
-#   tags = "${merge(map("Name", "OpenVPN_Route"))}"
-# }
-
-# resource "aws_route" "private_openvpn_dhcp_gateway" {
-#   count = "${length(var.private_subnets)}"
-
-#   route_table_id         = "${element(module.vpc.private_route_table_ids, count.index)}"
-#   destination_cidr_block = "${var.vpn_cidr}"
-#   instance_id            = "${module.vpn.id}"
-
-#   timeouts {
-#     create = "5m"
-#   }
-# }
-
-# resource "aws_route" "public_openvpn_dhcp_gateway" {
-#   count = "${length(var.public_subnets)}"
-
-#   route_table_id         = "${element(module.vpc.public_route_table_ids, count.index)}"
-#   destination_cidr_block = "${var.vpn_cidr}"
-#   instance_id            = "${module.vpn.id}"
-
-#   timeouts {
-#     create = "5m"
-#   }
-# }
-
-#192.168.92.0/24
 
 resource "aws_route" "private_openvpn_remote_subnet_gateway" {
   count = "${length(var.private_subnets)}"

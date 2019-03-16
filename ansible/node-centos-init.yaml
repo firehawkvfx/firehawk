@@ -50,10 +50,6 @@
       name: epel-release
       state: present
 
-  # - easy_install:
-  #   name: pip
-  #   state: latest
-
   - name: install pip
     package:
       name: python-pip
@@ -243,7 +239,8 @@
       - bzip2
       - nmap
       #- nfs-utils-lib
-
+      
+  # mount softnas
   - name: create production path - this should be dynamic and based on the command showmount -e, and automount if remote
     file: 
       path: "{{ production_mount_target }}"

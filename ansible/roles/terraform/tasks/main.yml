@@ -14,25 +14,25 @@
 
 - name: Download file
   get_url:
-    url: https://releases.hashicorp.com/terraform/0.11.11/terraform_0.11.11_linux_amd64.zip
-    dest: /vagrant/downloads/terraform_0.11.11_linux_amd64.zip
+    url: https://releases.hashicorp.com/terraform/0.11.13/terraform_0.11.13_linux_amd64.zip
+    dest: /vagrant/downloads/terraform_0.11.13_linux_amd64.zip
   become: yes
 
 - name: Ensures dir exists
   file:
-    path: /vagrant/downloads/terraform_0.11.11_linux_amd64/
+    path: /vagrant/downloads/terraform_0.11.13_linux_amd64/
     state: directory
   become: yes
 
 - name: Extract
   unarchive:
-    src: /vagrant/downloads/terraform_0.11.11_linux_amd64.zip
-    dest: /vagrant/downloads/terraform_0.11.11_linux_amd64/
+    src: /vagrant/downloads/terraform_0.11.13_linux_amd64.zip
+    dest: /vagrant/downloads/terraform_0.11.13_linux_amd64/
   become: yes
   
 - name: Copy terraform to binaries
   copy:
-    src: /vagrant/downloads/terraform_0.11.11_linux_amd64/terraform
+    src: /vagrant/downloads/terraform_0.11.13_linux_amd64/terraform
     dest: /usr/local/bin/terraform
     owner: vagrant
     group: vagrant
