@@ -45,6 +45,7 @@ openfirehawkserver: "{{ lookup('env','TF_VAR_openfirehawkserver') }}"
 deadline_proxy_root_dir: "{{ lookup('env','TF_VAR_deadline_proxy_root_dir') }}"
 deadline_proxy_certificate: "{{ lookup('env','TF_VAR_deadline_proxy_certificate') }}"
 deadline_proxy_certificate_password: "{{ lookup('env','TF_VAR_deadline_proxy_certificate_password') }}"
+houdini_license_server_address: "{{ lookup('env','TF_VAR_houdini_license_server_address') }}"
 
 aws_region: "{{ lookup('env','TF_VAR_aws_region') }}"
 aws_access_key: "{{ lookup('env','TF_VAR_aws_access_key') }}"

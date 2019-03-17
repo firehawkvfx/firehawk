@@ -33,6 +33,16 @@
   - debug:
       msg:  "{{ houdini_install_out.stdout }}"
 
+  - name: setup licensing mode
+    shell: |
+      cd /opt/hfs17.5
+      sudo sed -i '/licensingMode = sesinetd/s/^# //g' /opt/hfs17.5/houdini/Licensing.opt
+      sudo cat /opt/hfs17.5/houdini/Licensing.opt
+      /opt/hfs17.5/bin/hserver
+      #source houdini_setup
+      /opt/hfs17.5/bin/hserver -S {{ houdini_license_server_address }}
+    become: true
+
 # old terraform install for houdini.  may want to replicate when able to test again.
 #   #copy the deadline installer to the rendernode 
 #   provisioner "file" {
