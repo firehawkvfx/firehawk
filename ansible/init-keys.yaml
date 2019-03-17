@@ -2,11 +2,11 @@
   # become: true
 
   vars:
-    key_name: .vault-key
+    key_name: .vault-key-{{ envtier }}
     repo_dir: "{{ playbook_dir.split('/')[0:-1]|join('/') }}"
     key_folder: "{{ repo_dir }}/keys/"
     key_path: "{{ repo_dir }}/keys/{{ key_name }}"
-    secret_path: "{{ repo_dir }}/secrets/secrets.txt"
+    secret_path: "{{ repo_dir }}/secrets/secrets-{{ envtier }}"
 
   pre_tasks:
     - debug:

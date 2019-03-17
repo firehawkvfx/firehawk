@@ -77,11 +77,12 @@ Vagrant.configure("2") do |config|
   # check that the right ip you wanted assigned is used with 'ip a'
   # cd /vagrant
   # now we will setup our environment variables from a template.
-  # if you have already done this before, you will probably wan't to keep your old secrets.txt instead of copying in the template.
-  # cp secrets.template secrets/secrets.txt
-  # edit secrets/secrets.txt with your own unique values.  also copy in the mac address you set, eg TF_VAR_vagrant_mac=000D391G7C51
+  # if you have already done this before, you will probably wan't to keep your old secrets instead of copying in the template.
+  # cp secrets.template secrets/secrets-prod
+  # edit secrets/secrets-prod with your own unique values.  also copy in the mac address you set, eg TF_VAR_vagrant_mac=000D391G7C51
   # now we need to generate a random key for your vault.  if a key is present already in keys/.vault-key then it will be kept.
-  # init-keys.yaml will also ecrypt secrets.txt if it is unencrypted with this new key.
+  # source ./update_vars.sh --dev --init
+  # init-keys.yaml will also ecrypt secrets-prod if it is unencrypted with this new key.
   # ansible-playbook ansible/init-keys.yaml
   # ensure you have a backup of the key (keys/.vault-key).  Storing it on an encrypted usb key is a good idea!
   # now we can initialise our environment variables.
