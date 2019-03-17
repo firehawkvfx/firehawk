@@ -105,14 +105,17 @@ TF_VAR_vagrant_mac=c902ca64107d
 - The git repo tree we are running vagrant from is shared with the VM in /vagrant.
 
 - Before we run the first playbook, we need to set a passowrd for our vault. for example -
-    echo 'myVaultPasswordMustBeUnique' > /home/vagrant/.vault_pass
+    echo 'myVaultPasswordMustBeUnique' > /vagrant/keys/.vault-key-prod
+    echo 'myVaultPasswordMustBeUnique' > /vagrant/keys/.vault-key-dev
 - now we can initialise the secrets.
     cd /vagrant
-    cp ansible/secrets.template ansible/group_vars/all/secrets.txt
+    cp ansible/secrets.template ansible/group_vars/all/secrets-dev
+    cp ansible/secrets.template ansible/group_vars/all/secrets-prod
 - set the variables to your own unique values and encrypt it with-
-    ansible-vault encrypt ansible/group_vars/all/secrets.txt
-- now we can set our environment variables that will decrypt the secrets, and make the values available to terraform and ansible.
-    source ./update_vars.sh
+    ansible-vault encrypt --vault-id keys/.vault-key-prod ansible/group_vars/all/secrets-prod
+    ansible-vault encrypt --vault-id keys/.vault-key-dev ansible/group_vars/all/secrets-dev
+- now we can set our environment variables that will decrypt the secrets, and make the values available to terraform and ansible.  use --prod or --dev for the environment
+    source ./update_vars.sh --dev
 - now we can execute the first playbook to initialise the vm.
     ansible-playbook -i ansible/inventory ansible/init.yaml
 - We run our next playbook to create the deadlineuser and change the default password for the ubuntu user and deadlineuser.  This will also install deadline DB, and RCS, provided you have a tar downloaded in openfirehawk/downloads.
@@ -245,16 +248,16 @@ these variables are secrets and unique to you, so we encrypt them for any privat
 
 -create your own vault file from the template, and place the password for that vault file in ~/.vault_pass
 
-    echo 'MyVaultPassword' > ~/.vault_pass
-    cp secrets_template.txt ansible/group_vars/all/secrets.txt
-    ansible-vault view ansible/group_vars/all/secrets.txt
+    echo 'MyVaultPasswordShouldBeUnique' > keys/.vault-key-prod
+    cp secrets_template.txt ansible/group_vars/all/secrets-prod
+    ansible-vault encrypt --vault-id keys/.vault-key-prod secrets/secrets-prod
 
 - edit the variables for your setup
-    ansible-vault edit ansible/group_vars/all/secrets.txt
+    ansible-vault edit --vault-id keys/.vault-key-prod secrets/secrets-prod
 
 - next step, is making those variables available to terraform and ansible.
 We will always run this scrupt to update the variables for our environment from this script, before we run a terraform apply.
-    source ./update_var.sh
+    source ./update_var.sh --prod
 
 - now initialise terraform.
     terraform init
