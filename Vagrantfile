@@ -7,13 +7,8 @@ Vagrant.configure("2") do |config|
   #config.vm.box = "bento/ubuntu-16.04"
   #config.ssh.username = "vagrant"
   #config.ssh.password = "vagrant"
-  stage = ENV['TF_VAR_stage']
-  if stage == 'prod'
-    mac_string = ENV['TF_VAR_vagrant_mac_prod']
-  end
-  if stage == 'dev'
-      mac_string = ENV['TF_VAR_vagrant_mac_dev']
-  end
+  
+  mac_string = ENV['TF_VAR_vagrant_mac']
 
   config.vm.define "ansible_control"
   config.vagrant.plugins = ['vagrant-disksize', 'vagrant-reload']
