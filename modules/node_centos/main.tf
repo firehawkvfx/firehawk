@@ -181,6 +181,20 @@ resource "null_resource" "provision_node_centos" {
   }
 }
 
+resource "random_id" "ami_unique_name" {
+  keepers = {
+    # Generate a new id each time we switch to a new instance id
+    ami_id = "${aws_instance.node_centos.id}"
+  }
+  byte_length = 8
+}
+
+resource "aws_ami_from_instance" "node_centos" {
+  depends_on         = ["null_resource.provision_node_centos"]
+  name               = "node_centos_houdini_${aws_instance.node_centos.id}_${random_id.ami_unique_name.hex}"
+  source_instance_id = "${aws_instance.node_centos.id}"
+}
+
 #wakeup a node after sleep
 resource "null_resource" "start-node" {
   count = "${var.sleep ? 0 : 1}"
