@@ -86,7 +86,7 @@ Vagrant.configure("2") do |config|
   # ansible-playbook ansible/init-keys.yaml
   # ensure you have a backup of the key (keys/.vault-key).  Storing it on an encrypted usb key is a good idea!
   # now we can initialise our environment variables.
-  # source ./update_vars.sh
+  # source ./update_vars.sh --dev
   # ansible-playbook -i ansible/inventory/hosts ansible/init.yaml
   # download the deadline linux installers version 10.0.23.4 into downloads/Deadline-10.0.23.4-linux-installers.tar
   # ansible-playbook -i ansible/inventory/hosts ansible/newuser_deadline.yaml
