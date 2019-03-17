@@ -87,6 +87,16 @@
     state: restarted
   become: true
 
+- name: Allow new lines from ansible shell output.  Logout or reboot for this to take effect.
+  lineinfile:
+    path: /var/lib/Thinkbox/Deadline10/deadline.ini
+    line: "{{ item }}"
+    create: yes
+  become: true
+  with_items:
+    - "LaunchPulseAtStartup=True"
+    - "LaunchRemoteConnectionServerAtStartup=True"
+
 - name: check /var/lib/Thinkbox/Deadline10/deadline.ini
   command: cat /var/lib/Thinkbox/Deadline10/deadline.ini 
   register: deadline_config
