@@ -19,6 +19,10 @@ variable "public_subnets_cidr_blocks" {
   default = []
 }
 
+
+
+variable "public_domain" {}
+
 variable "volumes" {
   default = []
 }

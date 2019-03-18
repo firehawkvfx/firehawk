@@ -105,6 +105,7 @@ module "softnas" {
   private_key                    = "${file("${var.local_key_path}")}"
   vpc_id                         = "${module.vpc.vpc_id}"
   vpn_cidr                       = "${var.vpn_cidr}"
+  public_domain = "${var.public_domain}"
   private_subnets                = "${module.vpc.private_subnets}"
   private_subnets_cidr_blocks    = "${module.vpc.private_subnets_cidr_blocks}"
   all_private_subnets_cidr_range = "${module.vpc.all_private_subnets_cidr_range}"
