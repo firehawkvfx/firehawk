@@ -17,6 +17,10 @@
     encrypt_option: ""
     encrypt_label: "nonencrypted"
 
+- name: check s3 encrypt
+  debug:
+    msg: "s3_disk_password: {{ s3_disk_password }} \nencrypt_s3: {{ encrypt_s3 }}"
+
 - name: check if s3_disk_password is defined and encrypt is true
   set_fact:
     encrypt_option: "encrypted={{ s3_disk_password }}"
