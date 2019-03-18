@@ -19,25 +19,33 @@
       pool_name_import: {{ pool_name_import }}
 
 
-- name: check encryption
+- name: check encryption password defined
+  set_fact:
+    s3_disk_password_defined: true
+  when: s3_disk_password is defined
+
+- name: check encryption label
   set_fact:
     encrypt_s3_import: true
   when: encrypt_label is match("encrypted")
 
-- name: check if s3_disk_password is defined
+- name: check if s3_disk_password is defined and encrypt label is "encrypted"
   set_fact:
     encrypt_option: "--encrypt {{ s3_disk_password }}"
-  when: encrypt_s3_import and s3_disk_password is defined
+  when: encrypt_s3_import and s3_disk_password_defined
 
 - set_fact:
     import_s3_command: "/var/www/softnas/scripts/s3disk.sh --import --dname 's3-{{ disk_device_import }}' --bname {{ existing_bucket }} --bsize {{ s3_disk_size_import }}{{ s3_disk_size_units_import }} --region {{ bucket_location }} {{ encrypt_option }}"
-    import_s3_pool: "zpool import -a -f -d /dev"
+    import_s3_pool: "zpool import -a -f -d /dev {{ zpool_import_flags }}"
 
 - name: import s3 extender disk
   shell: |
     softnas-cmd login softnas {{ user_softnas_pw }}
     set -x
     {{ import_s3_command }} >> /tmp/softnas_s3_disk_import_output
+  register: shell_out_s3_import
+  failed_when: shell_out_s3_import.rc != 1 and shell_out_s3_import.rc != 0
+  # a failed pool import isn't a good enough reason to stop the entire deployment.  this can likely be recovered manually.
 
 - name: import s3 extender command
   shell: "cat /tmp/softnas_s3_disk_import_output"
@@ -47,7 +55,7 @@
   debug:
     msg: "{{ softnas_s3_disk_import_output.stdout }}"
 
-- name: import pool
+- name: import all pools
   shell: |
     softnas-cmd login softnas {{ user_softnas_pw }}
     set -x
