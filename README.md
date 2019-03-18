@@ -144,7 +144,7 @@ I check the plan to see that it is going to do what it should.  then run this to
     terraform apply
 - While your Infrastructure is up, you should be able to select the deadlineuser in the VM GUI, and login with a password. Open a terminal in the VM GUI, logged in as deadlineuser and run this-
     deadlinemonitor
-- INMPORTANT: After you start to render with more than 2 render nodes visible here in the monitor, you need to purchase UBL credits for deadline to play with.  Thinkbox will credit that to your AWS account on request if you email them and request it.  You won't be able to test deadline with more than 2 nodes visible to the manager.  You will configure your UBL credits to use with the deadline monitor (see deadline docs on how to do this)
+- IMPORTANT: After you start to render with more than 2 render nodes visible here in the monitor, you need to purchase UBL credits for deadline to play with.  Thinkbox will credit that to your AWS account on request if you email them and request it.  You won't be able to test deadline with more than 2 nodes visible to the manager.  You will configure your UBL credits to use with the deadline monitor (see deadline docs on how to do this)
 - To launch instances in AWS, you will configure your AWS account to be used with the Command Line Interface.  See aws documentation - https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html
 More on this below...
 
