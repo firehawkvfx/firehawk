@@ -102,35 +102,32 @@ resource "aws_iam_instance_profile" "softnas_profile" {
 # }
 
 #softnas provides no ability to query the ami you will need by region.  it must be added to the map manually.
-variable "ami_platinum_consumption_lower_compute" {
+
+variable "instance_type" {
   type = "map"
 
   default = {
-    ap-southeast-2 = "ami-a24a98c0"
+    low = "m4.xlarge",
+    high = "m5.2xlarge"
   }
 }
 
-variable "instance_type_platinum_consumption_lower_compute" {
-  type = "map"
-
-  default = {
-    "m4.xlarge" = "m4.xlarge"
-  }
+variable "softnas_mode" {
+  default="low"
 }
 
-variable "ami_platinum_consumption_higher_compute" {
-  type = "map"
+variable "aws_region" {}
 
-  default = {
-    "ap-southeast-2" = "ami-5e7ea03c"
-  }
+locals {
+  softnas_mode_ami = "${var.softnas_mode}_${var.aws_region}"
 }
 
-variable "instance_type_platinum_consumption_higher_compute" {
+variable "selected_ami" {
   type = "map"
 
   default = {
-    "m5.2xlarge" = "m5.2xlarge"
+    low_ap-southeast-2 = "ami-a24a98c0",
+    high_ap-southeast-2 = "ami-5e7ea03c"
   }
 }
 
@@ -319,8 +316,9 @@ resource "aws_network_interface" "nas1eth1" {
 }
 
 resource "aws_instance" "softnas1" {
-  ami           = "${var.ami_platinum_consumption_lower_compute["ap-southeast-2"]}"
-  instance_type = "${var.instance_type_platinum_consumption_lower_compute["m4.xlarge"]}"
+  ami           = "${lookup(var.selected_ami, local.softnas_mode_ami)}"
+ 
+  instance_type = "${lookup(var.instance_type, var.softnas_mode)}"
 
   ebs_optimized = true
 

@@ -100,6 +100,8 @@ module "softnas" {
   #softnas_role = "${module.softnas_role.softnas_role_name}"
 
   cloudformation_stack_name      = "FCB-SoftNAS1Stack"
+  aws_region = "${var.aws_region}"
+  softnas_mode = "${var.softnas_mode}"
   vpn_private_ip                 = "${module.vpc.vpn_private_ip}"
   key_name                       = "${var.key_name}"
   private_key                    = "${file("${var.local_key_path}")}"
