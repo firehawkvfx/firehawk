@@ -325,6 +325,12 @@ After I'm happy with this I can run terraform apply to recrete the vpn.
 - Validate this by pinging an ip in the private subnet
     ping 10.0.1.11
 
+## Softnas
+
+You can keep tabs on an S3 bucket's size with this command, 
+    aws s3 ls s3://bucket_name --recursive  | grep -v -E "(Bucket: |Prefix: |LastWriteTime|^$|--)" | awk 'BEGIN {total=0}{total+=$3}END{print total/1024/1024" MB"}'
+
+To improve performance, you can add a write log and read cache to the s3 pool.  Write logs should 2 ssd's mirrored since they form a dependency for writing data to your pool, a read cache doesn't require mirroring.
 
 
 
