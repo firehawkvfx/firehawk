@@ -27,8 +27,6 @@ Vagrant.configure("2") do |config|
     vb.customize ["modifyvm", :id, "--accelerate3d", "on"]
     vb.customize ['modifyvm', :id, '--clipboard', 'bidirectional']  
   end
-  # set mac
-  
   # update packages
   config.vm.provision "shell", inline: "sudo rm /etc/localtime && sudo ln -s /usr/share/zoneinfo/Australia/Brisbane /etc/localtime", run: "always"
   config.vm.provision "shell", inline: "sudo apt-get update"
@@ -60,40 +58,4 @@ Vagrant.configure("2") do |config|
   #   trigger.warn = "Taking Snapshot"
   #   trigger.run = {inline: "vagrant snapshot push"}
   # end
-  # first step before launching vagrant is to ensure an environment var is set with a random mac (you must generate it yourself)
-  # export TF_VAR_vagrant_mac=000D391G7C51
-  # if you are on a mac, install homebrew and ensure you have the command envsubst
-  # brew install gettext
-  # brew link --force gettext
-  # get your router to assign/reserve a static ip using this same mac address.
-  # run vagrant up.
-  # upon completion, we are ready to provision playbook 
-  # vagrant ssh
-  # check that the right ip you wanted assigned is used with 'ip a'
-  # cd /vagrant
-  # now we will setup our environment variables from a template.
-  # if you have already done this before, you will probably wan't to keep your old secrets instead of copying in the template.
-  # cp secrets.template secrets/secrets-prod
-  # edit secrets/secrets-prod with your own unique values.  also copy in the mac address you set, eg TF_VAR_vagrant_mac=000D391G7C51
-  # now we need to generate a random key for your vault.  if a key is present already in keys/.vault-key then it will be kept.
-  # source ./update_vars.sh --dev --init
-  # init-keys.yaml will also ecrypt secrets-prod if it is unencrypted with this new key.
-  # ansible-playbook ansible/init-keys.yaml
-  # ensure you have a backup of the key (keys/.vault-key).  Storing it on an encrypted usb key is a good idea!
-  # now we can initialise our environment variables.
-  # source ./update_vars.sh --dev
-  # ansible-playbook -i ansible/inventory/hosts ansible/init.yaml
-  # download the deadline linux installers version 10.0.23.4 into downloads/Deadline-10.0.23.4-linux-installers.tar
-  # ansible-playbook -i ansible/inventory/hosts ansible/newuser_deadline.yaml
-  # remember to always run source ./update_vars.sh before running any ansible playbooks, or using terraform.
-  # init your aws access key.
-  # ansible-playbook -i ansible/inventory/hosts ansible/aws-new-key.yaml
-  # subscribe to these amis (it may take some time before your subscription is processed)-
-  # openvpn https://aws.amazon.com/marketplace/pp/B00MI40CAE
-  # centos7 https://aws.amazon.com/marketplace/pp/B00O7WM7QW?qid=1552746240289&sr=0-1&ref_=srh_res_product_title
-  # softnas cloud platinum https://aws.amazon.com/marketplace/pp/B07DGMG5ZD?qid=1552746298127&sr=0-2&ref_=srh_res_product_title
-  # softnas cloud platinum - lower compute https://aws.amazon.com/marketplace/pp/B07DGGZBCG?qid=1552746484959&sr=0-9&ref_=srh_res_product_title
-
-  # now lets run out first terraform apply.
-  # terraform apply
 end

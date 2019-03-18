@@ -21,11 +21,12 @@ These are some good paid video courses to try-
 - Deep Dive - Terraform
 
 ### Udemy:
-- Mastering Ansible (its a little clunky at times but its still good)  
+- Mastering Ansible
 - Deploying to AWS with Ansible and Terraform - linux academy.
 
 ### Books:
 - Terraform up and running.
+- Ansible up and running.
 
 ## Getting Started
 
@@ -76,25 +77,29 @@ Currently, this has only been tested from a Linux RHEL 7.5/Centos Host.  You are
     VirtualBox
     Ansible
 
+- All these steps will get you to configure a setup in the 'prod' environment.  Later, if you with to make alterations you can use 'dev' instead.
 - Install Vagrant from Hashicorp.
 - Install Virtualbox to run our VM from.
-- Clone the openfirehawk repo
-    git clone --recurse-submodules -j8 https://github.com/firehawkvfx/openfirehawk.git
-- if you already cloned it but forgot the submodules, you can bring them in with
+- Clone the openfirehawk repo into a folder named openfirehawk-prod.  Production operates from the master branch.
+    git clone --recurse-submodules -j8 https://github.com/firehawkvfx/openfirehawk.git openfirehawk-prod
+- You may also wish to clone with the dev branch into a seperate folder - openfirehawk-dev.  It's recommended to run dev in a seperate AWS account.  No changes to the master branch should be permitted without testing in dev first, including a full 'terrraform apply' from scratch.
+- If you already cloned the repo but forgot the submodules, you can bring them in with
     git submodule update
 - Download the latest deadline installer tar, and place the .tar file in the local openfirehawk/downloads folder.
 - Download the latest houdini installer, and place the .tar file in the local openfirehawk/downloads folder.
-- Prior to running vagrant, we set an environment variable to define the mac address of the vm. it is best to define this permanently in your os-
-    https://www.browserling.com/tools/random-mac
-    https://askubuntu.com/questions/58814/how-do-i-add-environment-variables
-
-```
-sudo -H gedit /etc/environment
-TF_VAR_vagrant_mac=c902ca64107d
-```
-
+- If you are on a mac, install homebrew and ensure you have the command envsubst
+    brew install gettext
+    brew link --force gettext
+- Now we will setup our environment variables from a template. If you have already done this before, you will probably want to keep your old secrets instead of copying in the template.
+    cp secrets.template secrets/secrets-prod
+- First step before launching vagrant is to ensure an environment var is set with a random mac (you can generate it yourself with scripts/random_mac_unicast.sh) and store it as a variable in secrets/secrets-prod.  eg,
+    TF_VAR_vagrant_mac_prod=0023AE327C51
+- Set the environment variables from the secrets file.  --init assumes an unencrypted file is being used.  We always must do this before running vagrant.
+    source ./update_vars.sh --prod --init
+- Get your router to assign/reserve a static ip using this same mac address so that the address doesn't change.  if it does, then render nodes won't find the manager.
 - Run this to download an ubuntu base image and install ansible in the vm.  Provisioning the ubuntu desktop GUI may take 15mins +
     vagrant up
+- You will be asked which adaptor to bridge to. select the primary adapter for your internet connection.  This should be in the 192.168.x.x range.
 - When the the process completes, take a snapshot of this initial state and verify its there in the list.
     vagrant snapshot push
     vagrant snapshot list
@@ -103,31 +108,44 @@ TF_VAR_vagrant_mac=c902ca64107d
 - Now we will ssh into the vm and start provisioning with ansible.
     vagrant ssh
 - The git repo tree we are running vagrant from is shared with the VM in /vagrant.
-
-- Before we run the first playbook, we need to set a passowrd for our vault. for example -
-    echo 'myVaultPasswordMustBeUnique' > /vagrant/keys/.vault-key-prod
-    echo 'myVaultPasswordMustBeUnique' > /vagrant/keys/.vault-key-dev
-- now we can initialise the secrets.
+- Now edit secrets/secret-prod with your own values for configuration. If you already have AWS account keys and a aws public zone id, you will set them in this secrets file, otherwise read the steps on AWS configure, and How To Create a Hosted Zone.  Unless you are launching in Sydney, you are going to have to collect a few AMI ID's - read Getting AMI ID's for your region, and return to this step when complete.
+- After this is done,
+we can initialise the secrets keys and encrypt.
     cd /vagrant
-    cp ansible/secrets.template ansible/group_vars/all/secrets-dev
-    cp ansible/secrets.template ansible/group_vars/all/secrets-prod
-- set the variables to your own unique values and encrypt it with-
-    ansible-vault encrypt --vault-id keys/.vault-key-prod ansible/group_vars/all/secrets-prod
-    ansible-vault encrypt --vault-id keys/.vault-key-dev ansible/group_vars/all/secrets-dev
-- now we can set our environment variables that will decrypt the secrets, and make the values available to terraform and ansible.  use --prod or --dev for the environment
-    source ./update_vars.sh --dev
-- now we can execute the first playbook to initialise the vm.
-    ansible-playbook -i ansible/inventory ansible/init.yaml
-- We run our next playbook to create the deadlineuser and change the default password for the ubuntu user and deadlineuser.  This will also install deadline DB, and RCS, provided you have a tar downloaded in openfirehawk/downloads.
-    ansible-playbook -i ansible/inventory /vagrant/ansible/newuser_deadline.yaml
-
-- You should be able to select the deadlineuser in the VM GUI, and login with a password. Open a terminal in the VM GUI, logged in as deadlineuser and run these-
+    source ./update_vars.sh --prod --init
+    ansible-playbook ansible/init-keys.yaml
+- From now on, you can set environment variables without --init, which will use your now encrypted secrets file.  We can set our environment variables and make the values available to terraform and ansible.
+    source ./update_vars.sh --prod
+- If you already have an aws account,
+- Now we can execute the first playbook to initialise the vm.
+    ansible-playbook -i ansible/inventory/hosts ansible/init.yaml
+- Download the deadline linux installer version 10.0.23.4 into downloads/Deadline-10.0.23.4-linux-installers.tar, then setup the deadline user and deadline db + deadline rcs with this playbook..
+    ansible-playbook -i ansible/inventory/hosts ansible/newuser_deadline.yaml
+- Remember to always run source ./update_vars.sh before running any ansible playbooks, or using terraform.  Without your environment variables, nothing will work.
+- Init your aws access key.
+    ansible-playbook -i ansible/inventory/hosts ansible/aws-new-key.yaml
+- Subscribe to these amis (it may take some time before your subscription is processed)-
+    openvpn https://aws.amazon.com/marketplace/pp/B00MI40CAE
+    centos7 https://aws.amazon.com/marketplace/pp/B00O7WM7QW?qid=1552746240289&sr=0-1&ref_=srh_res_product_title
+    softnas cloud platinum https://aws.amazon.com/marketplace/pp/B07DGMG5ZD?qid=1552746298127&sr=0-2&ref_=srh_res_product_title
+    softnas cloud platinum - lower compute https://aws.amazon.com/marketplace/pp/B07DGGZBCG?qid=1552746484959&sr=0-9&ref_=srh_res_product_title
+- Now lets initialise terraform, and run our first terraform apply.  Read more about this here for best practice - Your first terraform apply
+    terraform init
+    terraform plan -out=plan
+- if this is without errors, apply the plan.
+    terraform apply plan
+- later, you can destroy the infrastructure if you don't need it anymore.  note that ebs volumes may not be destroyed, and s3 disks will remain.  to destroy at any point, use...
+    terraform destroy
+- Also, you should turn off the infrastructure when not using it.  When I'm done using the resources I do this-
+    terraform plan -out=plan -var sleep=true
+I check the plan to see that it is going to do what it should.  then run this to execute it.  it is your responsibility to ensure that everything is turned off so you don't incur charges, but this is provided for connvenience.
+    terraform apply plan
+- ...and to turn everything back on, just run
+    terraform apply
+- While your Infrastructure is up, you should be able to select the deadlineuser in the VM GUI, and login with a password. Open a terminal in the VM GUI, logged in as deadlineuser and run this-
     deadlinemonitor
-    deadlinepulse
-    deadlinercs
-- In the monitor You should see 1 slave exist in the bottom window, which is this vm.  since we can validate that the deadline DB and RCS is working, we will disable this because we won't want to use this server to render!
-- INMPORTANT: After you start to render with more than 2 render nodes visible here, you need to purchase UBL credits for deadline to play with.  Thinkbox will credit that to your AWS account on request if you email them and request it.  You won't be able to test deadline with more than 2 nodes visible to the manager.  You will configure your UBL credits to use with the deadline monitor (see deadline docs on how to do this)
-- to launch instances in AWS, you will configure your AWS account to be used with the Command Line Interface.  See aws documentation - https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html
+- INMPORTANT: After you start to render with more than 2 render nodes visible here in the monitor, you need to purchase UBL credits for deadline to play with.  Thinkbox will credit that to your AWS account on request if you email them and request it.  You won't be able to test deadline with more than 2 nodes visible to the manager.  You will configure your UBL credits to use with the deadline monitor (see deadline docs on how to do this)
+- To launch instances in AWS, you will configure your AWS account to be used with the Command Line Interface.  See aws documentation - https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html
 More on this below...
 
 ## AWS configure
@@ -143,22 +161,8 @@ IAMFullAccess
 Route53FullAccess
 s3AdminAcces
 
-We currently use cloudfromation and need admin access.  It will be removed in the future but for now add these permissions:
-AdministratorAccess
-
-If you think you will need Active Directory for some reason, also add these permissions:
-DirectoryServiceAdministrators
-
-- Under security credentials, create Access Keys for the CLI.  Don't write these down anywhere, you are going to copy them straight into the VM.  its easy enough to destroy them and recreate them again in the future, you would just update with "aws configure" again.
-
-- Enter the new users cli keys with:
-    aws configure
-
-- When asked for the region specify it from this list. https://docs.aws.amazon.com/general/latest/gr/rande.html
-for example sydney is-
-    ap-southeast-2
-- When asked for the default output format, enter
-    json
+- Under security credentials, create Access Keys for the CLI.  Don't write these down anywhere, you are going to copy them straight into the secrets/secret-prod file.  its easy enough to destroy them and recreate them again in the future, you would just update with the init playbook again-
+    ansible-playbook -i ansible/inventory/hosts ansible/init.yaml
 
 - Test that its working by running
     aws ec2 describe-regions --output table --debug
@@ -192,28 +196,11 @@ for example sydney is-
 
 - You now have established the ability to control instances from within this VM.
 
-## Create a key pair to manage AWS EC2
-
-- ssh into the openfirehawk server vm
-    vagrant ssh
-    cd ~
-- We should be in the vagrant user home dir within the vm.  now we generate a key pair with the AWS CLI. See this reference for more info https://sharadchhetri.com/2015/03/09/create-and-remove-aws-ec2-key-pair-by-using-command-line/
-    aws ec2 create-key-pair --key-name my_key_pair --query 'KeyMaterial' --output text > /vagrant/keys/my_key_pair.pem
-- And we set the permissions on that keypair so that only the vagrant user has read access.
-    sudo chmod 400 /vagrant/keys/my_key_pair.pem
-- Add the key for ssh forwarding.
-    ssh-add /vagrant/keys/my_key_pair.pem
-
-https://stackoverflow.com/questions/17846529/could-not-open-a-connection-to-your-authentication-agent/17848593#17848593
-
-## Create a hosted zone
+## How To Create a Hosted Zone
 If you want to be able to access your resources through a domain like the vpn, eg vpn.example.com
 you can create a public hosted zone in route53.  since this will be a permanent part of your infrastructure you will need to do this manually.
-you can either transfer an existing domain to aws (not recommended for dev if you are attached to this domain!)
-or you can purchase a new domain of some random name with a cheap extension (doesn't need to be .com)
-
-
-
+you can either transfer an existing domain to aws (not recommended for dev if you are using this domain in production!)
+or you can purchase a new domain of some random name with a cheap extension (doesn't need to be .com, there are plenty of cheap alternatives)
 
 ## OpenVPN Access Server
 
@@ -226,77 +213,27 @@ If you can succesfuly auto connect to this openvpn instance, then openFirehawk w
 
 Instances that reside in the private subnet are currently configured through openvpn.  This is why we are moving to Ansible to handle this instead, and remove openVPN as a dependency for most of the configuration of the network.  open vpn will still be needed for render nodes to establish a connection with licence servers and the render management DB.
 
+## Secrets
+In the secrets file, you will set your own values for these configuration variables.  Many will be different for your environment, and you **absolutely must use unique passwords and set your static ip address for onsite**.
 
-## Terraform
+If you ever make commits to a git repo, ensure you never commit unencrypted secrets or anything in the secrets/ path.  vault keys and pem keys for ssh access are stoed in keys/ and these should not be committed to version control.
 
-Terraform is used to create all our infrastructure in the cloud provider.  It is launched from with your vm which contains all the credentials required to create resources.
-
-- From the git repo folder on your host, we will ssh into the openfirehawk server with vagrant ssh-
-    :../openfirehawk/$ vagrant ssh
-- Once in, type 
-    cd /vagrant
-    ls
-- The contents of this shared folder should be identical to the openfirehawk repository folder.
-- If you cannot see anything in here, you may need to reload the vm and try again-
-    exit
-    vagrant reload
-    vagrant ssh
-
-
-- now we will prep to initialise terraform. in the /vagrant path, first we initialse environment variables that are shared between ansible and terraform.
-these variables are secrets and unique to you, so we encrypt them for any private version control (they can also be added to .gitignore if you don't want them in version control)
-
--create your own vault file from the template, and place the password for that vault file in ~/.vault_pass
-
-    echo 'MyVaultPasswordShouldBeUnique' > keys/.vault-key-prod
-    cp secrets_template.txt ansible/group_vars/all/secrets-prod
-    ansible-vault encrypt --vault-id keys/.vault-key-prod secrets/secrets-prod
-
-- edit the variables for your setup
-    ansible-vault edit --vault-id keys/.vault-key-prod secrets/secrets-prod
-
-- next step, is making those variables available to terraform and ansible.
-We will always run this scrupt to update the variables for our environment from this script, before we run a terraform apply.
-    source ./update_var.sh --prod
-
-- now initialise terraform.
-    terraform init
-
-- when it completes, spin up the infrastructure.
-    terraform plan -out=plan
-
-- if all seem well, apply the plan.
-    terraform apply plan
-
-- now provision openvpn.
-cd /vagrant && ansible-playbook -i /usr/local/bin/terraform-inventory /vagrant/ansible/openvpn.yaml
-
-
-## Configuring private variables
-
-Next you can clone the git repository into your ubuntu vm with the submodules as well-
-git clone --recurse-submodules -j8 https://github.com/firehawkvfx/openfirehawk.git
-
-I do need to make it known that the way we are storing private variables is not best practice, and I intend to move to a product called vault to handle the storing of secrets in the future in an encrypted format.
-
-Currently, we have a [private-variables.example](https://github.com/firehawkvfx/openfirehawk/blob/master/private-variables.example) file, which you will copy and rename to [private-variables.tf](https://github.com/firehawkvfx/openfirehawk/blob/master/private-variables.example)
-This filename is in .gitignore, so it will not be in any git commits.  You should set permissions on it so that only you have read access, and root has write access.
-
-In it you will set your own values for these variables.  Many will be different for your environment, and you **absolutely must use unique passwords and set your public static ip address for onsite**.
-
-Security groups are configured to ignore any inbound internet traffic unless it comes from your onsite public ip address
- which should be static and you’ll need to arrange that with your ISP if you are working from home.
+Security groups are configured to ignore any inbound internet traffic unless it comes from your onsite public ip address which should be static and you’ll need to arrange that with your ISP if you are working from home.  If it isn't static, this is currently an untested workflow (though we have already implemented some measures to update security groups automatically).
 
 In terraform, each instance we start will use an AMI, and these AMI’s are unique to your region.  We would like the ability to query all ami’s for all regions (https://github.com/firehawkvfx/openfirehawk/projects/1#card-17639682) but for now it doesn’t appear possible for softnas.
+
+## Getting AMI ID's for your region.
+
+Currently, all the AMI's tested have been selected for use from Sydney.
 
 So each instance like these that are used will need you to launch them once to get the AMI ID.
 - CentOS7 (search for CentOS Linux 7 x86_64 HVM in your region)
 - openvpn (search for OpenVPN Access Server in your region)
 - Teradici pcoip for centos 7  (search for Teradici Cloud Access Software for CentOS 7 in your region)
 
-You’ll need to agree to the conditions of the ami, and then enter the ami ID that resulted ) visible from the aws ec2 instance console) for your region into the map.  Feel free to commit the added AMI map back into the repo too to help others.
+You’ll need to agree to the conditions of the ami, and then enter the ami ID that resulted ) visible from the aws ec2 instance console) for your region into the map.  Feel free to commit the added AMI map back into the repo too to help others.  Here is an example of how to update that map-
 
-In terraform, a map is really a dictionary for those familiar with python.  This is an example of the ami_map variable in node_centos/variables.tf
+In terraform, a map is a dictionary for those familiar with python.  This is an example of the ami_map variable in node_centos/variables.tf
 ```
 variable "ami_map" {
   type = "map"
@@ -322,7 +259,7 @@ variable "ami_map" {
   }
 }
 ```
-and provided your region is set correctly in private-variables.tf, then that ami IDwill be looked up correctly.
+...and provided your region is set correctly in your secrets file and environment, then that ami ID can be looked up correctly.
 
 
 ## Your first terraform apply
@@ -356,108 +293,37 @@ View the plan and run it if all is well to turn things off
 
 Make sure you check your aws account for any resources that haven't been turned off.
 
+## Openvpn
+
+- If you start the vagrant vm in the future, and your openvpn access server wasn't running, then the openvpn service wont be connected.  you can start the service with- 
+    sudo service openvpn restart
+- You can check the logs after 1 minute with..
+    cat /var/log/syslog
+Here you should see the connection was initialised.  if not, try running this playbook (provided all your infrastructure is up)
+- You can also verify the connection by pinging your softnas instance, or another instance in the private subnet with
+    ping 10.0.1.11
+- If you can't establish a connection, you can try tainting the open vpn resources, rebuilding them and try again.
+
 ## Terraform - taint
 
-if you make changes to your infrastructure that you want to recover from, a good way to replace resources is something like this...  lets say I want to destroy my openvpn instance and start over
+If you make changes to your infrastructure that you want to recover from, a good way to replace resources is something like this...  lets say I want to destroy my openvpn instance and start over
 
     terraform taint -module vpc.vpn.openvpn aws_instance.openvpn
 
-Now I should also taint what is downstream if there are dependencies that aren't being picked up too, like the eip.
+- Now I should also taint what is downstream if there are dependencies that aren't being picked up too, like the eip.
 
     terraform taint -module vpc.vpn.openvpn aws_eip.openvpnip
+    The resource aws_eip.openvpnip in the module root.vpc.vpn.openvpn has been marked as tainted!
 
-The resource aws_eip.openvpnip in the module root.vpc.vpn.openvpn has been marked as tainted!
-
-    terraform taint -module vpc.vpn.openvpn aws_route53_record.openvpn_record
-
-The resource aws_route53_record.openvpn_record in the module root.vpc.vpn.openvpn has been marked as tainted!
-
-
-after I'm happy with this I can run terraform apply.
+After I'm happy with this I can run terraform apply to recrete the vpn.
     terraform plan -out=plan
     terraform apply plan
-
-
-## Preparation of open vpn
-
-Read these docs to set permissions on the autostart openvpn config and startvpn.sh script, and how to configure the access server.  Some settings are required to allow access to the ubuntu VM you have onsite, and we go through these steps in the tf_aws_openvpn readme-
-
-[README.md](https://github.com/firehawkvfx/tf_aws_openvpn/blob/master/README.md)
-[startvpn.sh](https://github.com/firehawkvfx/tf_aws_openvpn/blob/master/startvpn.sh)
-
-## Important Notes for Routing:
-
-### You can check /var/log/syslog to confirm vpn connection.
-check autoload is set to all or openvpn in /etc/default
-ensure startvpn.sh is in ~/openvpn_config.  openvpn.conf auto login files are constructed here and placed in /etc/openvpn before execution.  
-  
-read more here to learn about setting up routes  
-https://openvpn.net/vpn-server-resources/site-to-site-routing-explained-in-detail/  
-https://askubuntu.com/questions/612840/adding-route-on-client-using-openvpn  
-
-You will need ip forwarding on client and server if routing both sides.  
-https://community.openvpn.net/openvpn/wiki/265-how-do-i-enable-ip-forwarding  
-
-
-**These are the manual steps required to get both private subnets to connect, and we'd love to figure out the equivalent commands drop in when I'm provisioning the access server to automate them, but for now these are manual steps.**
-  
--  in VPN Settings | Should VPN clients have access to private subnets  
-(non-public networks on the server side)?  
-Yes, enable routing  
-  
-- Specify the private subnets to which all clients should be given access (one per line):  
-10.0.1.0/24
-10.0.101.0/24
-172.27.232.0/24
-(these subnets are in aws, the open vpn access server resides in the 10.0.101.0/24 subnet)  
-
-- Allow access from these private subnets to all VPN client IP addresses and subnets : on  
-  
-- in user permissions | user  
-configure vpn gateway:  
-yes  
-  
-- Allow client to act as VPN gateway (enter the cidr block for your onsite network)
-for these client-side subnets:  
-192.168.92.0/24 (match the subnet your openfirehawkserver resides in)
-
-# ssh in to node in the private subnet and attempt to ping the openfirehawkserver.  if you cannot try also adding this in the vpn settings-
-- Allow client to act as VPN gateway (enter the cidr block for your onsite network)
-for these client-side subnets:  
-172.27.232.0/24
-
-At this point, your client side vpn client should be able to ping any private ip, and if you ssh into one of those ips, it whould be able to ping your client side ip with its private ip address.
-
-If not you will have to trouble shoot before you can continue further because this functionality is required.
-  
-if you intend to provide access to other systems on your local network, promiscuous mode must enabled on host ethernet adapters.  for example, if openvpn client is in ubuntu vm, and we are running the vm with bridged ethernet in a linux host, then enabling promiscuous mode, and setting up a static route is needed in the host.  
-https://askubuntu.com/questions/430355/configure-a-network-interface-into-promiscuous-mode  
-for example, if you use a rhel host run this in the host to provide static route to the adaptor inside the vm (should be on the same subnet)
-```
-sudo ip route add 10.0.0.0/16 via [ip adress of the bridged ethernet adaptor in the vm]
-```
-check routes with:
-```
-sudo route -n
-ifconfig eth1 up
-ifconfig eth1 promisc
-```
-
-In the ubuntu vm where where terraform is running, ip forwarding must be on.  You must be using a bridged adaptor.
-http://www.networkinghowtos.com/howto/enable-ip-forwarding-on-ubuntu-13-04/
-
-```
-sudo sysctl net.ipv4.ip_forward=1
-```
-
-
-This allows permission for startvpn.sh script to copy open vpn startup settings from the access server into your openvpn settings.  sudo permissions must be allowed for the specific commands executed so they can be performed without a password.
-
-If all goes well, the startvpn.sh script when executed will initiate a connection with the openvpn access server, and you will be able to ping the access server's private IP.  You should also be able to ping the public ip too.  If you can’t ping the public ip you have a security group issue and your onsite static ip isn’t in the private-variables.tf file.
-
-You can also manually start open vpn with:
-
-    sudo service openvpn restart
+- When this is done, check the logs for the connection being initialised
+    sudo cat /var/log/syslog
+- You should see a line toward the end with
+    openfirehawkserver ovpn-openvpn[21984]: Initialization Sequence Completed
+- Validate this by pinging an ip in the private subnet
+    ping 10.0.1.11
 
 
 
