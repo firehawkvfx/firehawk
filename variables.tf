@@ -26,6 +26,10 @@ variable "cert_arn" {}
 
 variable "aws_region" {}
 
+variable "softnas_mode" {
+  default = "low"
+}
+
 # once you setup an ssl certificate with your domain, it will have a route zone id.
 variable "route_zone_id" {}
 
