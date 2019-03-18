@@ -356,7 +356,14 @@ resource "aws_instance" "softnas1" {
   #subnet_id              = "${var.private_subnets[0]}"
   #vpc_security_group_ids = ["${aws_security_group.node_centos.id}"]
 
-  user_data = "${file("${path.module}/user_data.yml")}"
+  #user_data = "${file("${path.module}/user_data.yml")}"
+  user_data = <<USERDATA
+#cloud-config
+hostname: nas1.${var.public_domain}
+fqdn: nas1.${var.public_domain}
+manage_etc_hosts: false
+USERDATA
+
   tags {
     Name  = "SoftNAS1_PlatinumConsumptionLowerCompute"
     Route = "private"
