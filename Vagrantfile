@@ -21,8 +21,8 @@ Vagrant.configure("2") do |config|
     # Display the VirtualBox GUI when booting the machine
     vb.gui = true
     # Customize the amount of memory on the VM:
-    vb.memory = "4096"
-    vb.cpus = 4
+    vb.memory = ENV['TF_VAR_openfirehawkserver_ram']
+    vb.cpus = ENV['TF_VAR_openfirehawkserver_vcpus']
     vb.customize ["modifyvm", :id, "--accelerate2dvideo", "on"]
     vb.customize ["modifyvm", :id, "--accelerate3d", "on"]
     vb.customize ['modifyvm', :id, '--clipboard', 'bidirectional']  
