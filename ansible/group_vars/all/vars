@@ -16,7 +16,7 @@ public_domain_prod: "{{ lookup('env','TF_VAR_public_domain_prod') }}"
 
 softnas_mount_source: "/pool0/volume0"
 # "-m" will force a pool to import, which is usefull if drives used for a write log are missing.
-zpool_import_flags: ""
+zpool_import_flags: "-m"
 
 #production mount path for all locations
 prod_mount_path: "/prod"
@@ -47,6 +47,9 @@ db_pass: "{{ lookup('env','TF_VAR_db_pass') }}"
 sesi_username: "{{ lookup('env','TF_VAR_sesi_username') }}"
 sesi_password: "{{ lookup('env','TF_VAR_sesi_password') }}"
 
+vpn_cidr: "{{ lookup('env','TF_VAR_vpn_cidr') }}"
+remote_subnet_cidr: "{{ lookup('env', TF_VAR_remote_subnet_cidr) }}"
+
 openvpn_user: openvpnas
 openvpn_user_pw: "{{ lookup('env','TF_VAR_openvpn_user_pw') }}"
 
@@ -65,6 +68,7 @@ aws_region: "{{ lookup('env','TF_VAR_aws_region') }}"
 aws_access_key: "{{ lookup('env','TF_VAR_aws_access_key') }}"
 aws_secret_key: "{{ lookup('env','TF_VAR_aws_secret_key') }}"
 s3_disk_password: "{{ lookup('env','TF_VAR_s3_disk_password') }}"
+s3_disk_size: "{{ lookup('env','TF_VAR_s3_disk_size') }}"
 
 key_name: "{{ lookup('env','TF_VAR_key_name') }}"
 local_key_path: "{{ lookup('env','TF_VAR_local_key_path') }}"

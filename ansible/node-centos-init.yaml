@@ -282,12 +282,12 @@
       path: /etc/fstab
       backup: yes
       content: |
-        
+
         {{ groups['role_softnas'][0] }}:{{ softnas_mount_source }} {{ softnas1_path_abs }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
-        {{ softnas1_path_abs }} {{ prod_mount_path }} none defaults,bind 0 0
+        {{ softnas1_path_abs }} {{ prod_mount_path }} none defaults,bind,timeo=14 0 0
 
         {{ localnas1_private_ip }}:{{ localnas1_mount_path }} {{ localnas1_path_abs }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
-        {{ localnas1_path_abs }} {{ localnas1_remote_mount_path }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
+        {{ localnas1_path_abs }} {{ localnas1_remote_mount_path }} none defaults,bind,timeo=14 0 0
         
   - name: mount all changes to fstab
     command: mount -a
