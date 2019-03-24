@@ -1,6 +1,6 @@
 ---
 # tasks file for roles/init-host
-- name: change hostname to myserver
+- name: change hostname
   hostname:
     name: "openfirehawkserver.{{ public_domain_prod }}"
 
@@ -34,7 +34,7 @@
 
 - name: insert/update block in /etc/fstab
   blockinfile:
-    path: /etc/fstab
+    path: /etc/rc.local
     backup: yes
     content: |
       #promiscuous mode required for routing
