@@ -240,18 +240,23 @@
       - nmap
       #- nfs-utils-lib
       
-  # mount softnas
-  - name: create production path - this should be dynamic and based on the command showmount -e, and automount if remote
+  # mount softnas and remote nas
+  - name: create mount directories
     file: 
-      path: "{{ production_mount_target }}"
+      path: "{{ item }}"
       state: directory
       owner: deadlineuser
       group: deadlineuser
     become: yes
-  
-  - name: create softnas mount point
+    with_items:
+      - "{{ softnas1_path_abs }}"
+      - "{{ localnas1_path_abs }}"
+      - "{{ prod_mount_path }}"
+      - "{{ localnas1_remote_mount_path }}"
+
+  - name: create localnas mount point based on location
     file: 
-      path: "{{ softnas_mount_source }}"
+      path: "{{ localnas1_path_abs }}"
       state: directory
       owner: deadlineuser
       group: deadlineuser
@@ -278,8 +283,11 @@
       backup: yes
       content: |
         
-        {{ groups['role_softnas'][0] }}:{{ softnas_mount_source }} {{ softnas_mount_source }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
-        {{ softnas_mount_source }} /prod none defaults,bind 0 0
+        {{ groups['role_softnas'][0] }}:{{ softnas_mount_source }} {{ softnas1_path_abs }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
+        {{ softnas1_path_abs }} {{ prod_mount_path }} none defaults,bind 0 0
+
+        {{ localnas1_private_ip }}:{{ localnas1_mount_path }} {{ localnas1_path_abs }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
+        {{ localnas1_path_abs }} {{ localnas1_remote_mount_path }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
         
   - name: mount all changes to fstab
     command: mount -a

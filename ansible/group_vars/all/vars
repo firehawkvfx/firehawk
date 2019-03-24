@@ -3,8 +3,6 @@ ansible_ssh_private_key_file: "{{ lookup('env','TF_VAR_local_key_path') }}"
 
 debug: 0
 
-production_mount_target: "/prod"
-
 envtier: "{{ lookup('env','TF_VAR_envtier') }}"
 
 # domains
@@ -19,6 +17,20 @@ public_domain_prod: "{{ lookup('env','TF_VAR_public_domain_prod') }}"
 softnas_mount_source: "/pool0/volume0"
 # "-m" will force a pool to import, which is usefull if drives used for a write log are missing.
 zpool_import_flags: ""
+
+#production mount path for all locations
+prod_mount_path: "/prod"
+
+#the ip of your onsite storage to be mounted
+localnas1_private_ip: "{{ lookup('env','TF_VAR_localnas1_private_ip') }}"
+#the mount path of your onsite storage eg "/prod"
+localnas1_mount_path: "{{ lookup('env','TF_VAR_localnas1_mount_path') }}"
+#the relative path to access the production volume remotely eg "/prod_remote"
+localnas1_remote_mount_path: "{{ lookup('env','TF_VAR_localnas1_remote_mount_path') }}"
+#the absolute path to access the onsite nas mount by location eg "/prod_cairns"
+localnas1_path_abs: "{{ lookup('env', 'TF_VAR_localnas1_path_abs') }}"
+#the absolute path to access the cloud nfs mount by location eg "/prod_sydney_aws"
+softnas1_path_abs: "{{ lookup('env', 'TF_VAR_softnas1_path_abs') }}"
 
 deadline_certificates_location: "/opt/Thinkbox/certs"
 deadline_linux_installers_tar: "/vagrant/downloads/Deadline-10.0.23.4-linux-installers.tar"
