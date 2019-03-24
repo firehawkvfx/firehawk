@@ -7,3 +7,4 @@
     - role: init-packages
     - role: terraform
     - role: aws-cli
+    #- role: nfs-mounts-local

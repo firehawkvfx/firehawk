@@ -125,7 +125,7 @@ we can initialise the secrets keys and encrypt.
 - Download the deadline linux installer version 10.0.23.4 into downloads/Deadline-10.0.23.4-linux-installers.tar, then setup the deadline user and deadline db + deadline rcs with this playbook..
     ansible-playbook -i ansible/inventory/hosts ansible/newuser_deadline.yaml
 - Remember to always run source ./update_vars.sh before running any ansible playbooks, or using terraform.  Without your environment variables, nothing will work.
-- Init your aws access key.
+- Init your aws access key if you don't already have one setup from a previous installation of open firehawk
     ansible-playbook -i ansible/inventory/hosts ansible/aws-new-key.yaml
 - Subscribe to these amis (it may take some time before your subscription is processed)-
     openvpn https://aws.amazon.com/marketplace/pp/B00MI40CAE

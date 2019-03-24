@@ -1,0 +1,36 @@
+- file:
+    path: /opt/houdini_install_script
+    state: directory
+    mode: 0700
+    owner: vagrant
+
+- pip:
+    name: beautifulsoup4
+
+- copy:
+    src: /vagrant/modules/node_centos/modules/houdini_install_script/
+    dest: /opt/houdini_install_script/
+    directory_mode: yes
+
+- file:
+    path: /opt/houdini_install_script/houdini_install.py
+    mode: 0700
+    owner: vagrant
+  
+- shell: |
+    python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini
+  register: houdini_install_out
+  become: true
+
+- debug:
+    msg:  "{{ houdini_install_out.stdout }}"
+
+- name: setup licensing mode
+  shell: |
+    cd /opt/hfs17.5
+    sudo sed -i '/licensingMode = sesinetd/s/^# //g' /opt/hfs17.5/houdini/Licensing.opt
+    sudo cat /opt/hfs17.5/houdini/Licensing.opt
+    /opt/hfs17.5/bin/hserver
+    #source houdini_setup
+    #/opt/hfs17.5/bin/hserver -S {{ houdini_license_server_address }}
+  become: true

@@ -1,0 +1,57 @@
+- name: create softnas mount point
+  file: 
+    path: "{{ item }}"
+    state: directory
+  become: yes
+  with_items:
+  - "/prod"
+  - "/data"
+  - "/prod_sydney_aws"
+  - "/prod_cairns"
+  - "/remote_prod"
+
+- name: create softnas mount point
+  file: 
+    path: /data
+    state: directory
+  become: yes
+
+- name: insert marker start
+  lineinfile:
+    path: /etc/fstab
+    insertafter: "^#?/dev/mapper.*$"
+    line: "# BEGIN ANSIBLE MANAGED BLOCK"
+    backup: yes
+
+- name: insert marker end
+  lineinfile:
+    path: /etc/fstab
+    insertafter: "# BEGIN ANSIBLE MANAGED BLOCK"
+    line: "# END ANSIBLE MANAGED BLOCK"
+    create: true
+    backup: yes
+
+- name: insert/update block in /etc/fstab
+  blockinfile:
+    path: /etc/fstab
+    backup: yes
+    content: |
+      
+      :/data /data nfs defaults,_netdev,rsize=8192,wsize=8192,timeo=14,intr 0 0
+      :/prod /prod nfs defaults,_netdev,rsize=8192,wsize=8192,timeo=14,intr 0 0
+      /prod /prod_cairns none defaults,bind,timeo=14 0 0
+      #remote mounts from aws via vpn nensure your routes are configured
+      # 10.0.1.11:/pool0/volume0 /remote_prod nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
+      # /remote_prod /prod_sydney_aws none defaults,bind,timeo=14 0 0
+
+# - name: Mount nfs read-only
+#   mount:
+#     path: /mnt/dvd
+#     src: /dev/sr0
+#     fstype: iso9660
+#     opts: ro,noauto
+#     state: present
+
+- name: mount all changes to fstab
+  command: mount -a
+  become: true
