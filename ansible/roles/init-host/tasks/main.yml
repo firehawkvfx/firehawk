@@ -3,6 +3,7 @@
 - name: change hostname to myserver
   hostname:
     name: "openfirehawkserver.{{ public_domain_prod }}"
+
 - name: add myself to /etc/hosts
   lineinfile:
     dest: /etc/hosts
@@ -16,3 +17,26 @@
     line: "ANSIBLE_STDOUT_CALLBACK=debug"
     create: yes
     
+- name: insert marker start
+  lineinfile:
+    path: /etc/rc.local
+    insertafter: "^#?By default this script does nothing.*$"
+
+    line: "# BEGIN ANSIBLE MANAGED BLOCK"
+    backup: yes
+
+- name: insert marker end
+  lineinfile:
+    path: /etc/rc.local
+    insertafter: "# BEGIN ANSIBLE MANAGED BLOCK"
+    line: "# END ANSIBLE MANAGED BLOCK"
+    create: true
+
+- name: insert/update block in /etc/fstab
+  blockinfile:
+    path: /etc/fstab
+    backup: yes
+    content: |
+      #promiscuous mode required for routing
+      /sbin/ifconfig enp0s8 up
+      /sbin/ifconfig enp0s8 promisc

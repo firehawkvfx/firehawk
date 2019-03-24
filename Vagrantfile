@@ -25,9 +25,19 @@ Vagrant.configure("2") do |config|
     vb.cpus = ENV['TF_VAR_openfirehawkserver_vcpus']
     vb.customize ["modifyvm", :id, "--accelerate2dvideo", "on"]
     vb.customize ["modifyvm", :id, "--accelerate3d", "on"]
-    vb.customize ['modifyvm', :id, '--clipboard', 'bidirectional']  
+    vb.customize ['modifyvm', :id, '--clipboard', 'bidirectional']
+    #enable promiscuous mode to enable routes from aws through the openfirehawkserver vpn into your local network
+    vb.customize ["modifyvm", :id, "--nicpromisc0", "allow-all"]
+    vb.customize ["modifyvm", :id, "--nicpromisc1", "allow-all"]
+    vb.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
+    vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
   end
-  # update packages
+  # enable promiscuous mode for the nic.  check with netstat -i once logged in.  promiscuous mode allows routes through the remote vpn to access your local private subnet.
+  # config.vm.provision "shell", inline: "echo 'up /sbin/ifconfig enp0s8 promisc on' | sudo tee -a /etc/network/interfaces"
+  # put below in /etc/rc.local with ansible
+  # By default this script does nothing.
+  # /sbin/ifconfig enp0s8 up
+  # /sbin/ifconfig enp0s8 promisc
   config.vm.provision "shell", inline: "sudo rm /etc/localtime && sudo ln -s /usr/share/zoneinfo/Australia/Brisbane /etc/localtime", run: "always"
   config.vm.provision "shell", inline: "sudo apt-get update"
   config.vm.provision "shell", inline: "sudo apt-get install -y sshpass"

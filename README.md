@@ -68,7 +68,7 @@ terraform apply plan
 - The NAT gateway is another sneaky cost visible in your AWS VPC console, usually around $5 /day if you forget about it.  It allows your private network (systems in the private subnet) outbound access to the internet.  Security groups can lock down any internet access to the minimum adresses required for licencing things like softnas or other software.  Licensing configuration with most software you would use makes possible to not need any NAT gateway but that is beyond the scope of openFirehawk at this point in time.
 
 
-## Running an onsite management VM with Vagrant
+## Preparing an onsite management VM with Vagrant
 
 Vagrant is a tool that manages your initial VM configuration onsite.  It allows us to create a consistent environment to launch our infrastructure from.  From there we will provision the software installed on it with Ansible.
 
@@ -97,6 +97,9 @@ Currently, this has only been tested from a Linux RHEL 7.5/Centos Host.  You are
 - Set the environment variables from the secrets file.  --init assumes an unencrypted file is being used.  We always must do this before running vagrant.
     source ./update_vars.sh --prod --init
 - Get your router to assign/reserve a static ip using this same mac address so that the address doesn't change.  if it does, then render nodes won't find the manager.
+
+## Running Vagrant and configuring with Ansible
+
 - Run this to download an ubuntu base image and install ansible in the vm.  Provisioning the ubuntu desktop GUI may take 15mins +
     vagrant up
 - You will be asked which adaptor to bridge to. select the primary adapter for your internet connection.  This should be in the 192.168.x.x range.
@@ -306,7 +309,7 @@ Here you should see the connection was initialised.  if not, try running this pl
 
 ## Terraform - taint
 
-If you make changes to your infrastructure that you want to recover from, a good way to replace resources is something like this...  lets say I want to destroy my openvpn instance and start over
+If you make changes to your infrastructure that you want to recover from, a good way to replace resources is something like this...  lets say I just moved to a different network that has a different subnet, or my local IP changes for openfirehawkserver.  its easy to to destroy my openvpn instance and start over
 
     terraform taint -module vpc.vpn.openvpn aws_instance.openvpn
 
