@@ -6,6 +6,7 @@
 # 3) Example values for the secrets.template file are defined in secrets.example. Ensure you have placed an example key=value for any new vars in secrets.example. 
 # If any changes have resulted in a new variable name, then example values helps other understand what they should be using for their own infrastructure.
 mkdir -p ./tmp/
+mkdir -p ./secrets/
 # The template will be updated by this script
 touch ./secrets.template
 rm ./secrets.template

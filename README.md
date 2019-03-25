@@ -141,6 +141,7 @@ we can initialise the secrets keys and encrypt.
     terraform apply plan
 - later, you can destroy the infrastructure if you don't need it anymore.  note that ebs volumes may not be destroyed, and s3 disks will remain.  to destroy at any point, use...
     terraform destroy
+Note: there are currently bugs with the way the aws terraform provider resolves dependencies to destroy in the correct order.  currently if you repeat is 3 times, it should remove the resources.  you can verify by checking the vpc is deleted from the aws management console.
 - Also, you should turn off the infrastructure when not using it.  When I'm done using the resources I do this-
     terraform plan -out=plan -var sleep=true
 I check the plan to see that it is going to do what it should.  then run this to execute it.  it is your responsibility to ensure that everything is turned off so you don't incur charges, but this is provided for connvenience.
