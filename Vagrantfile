@@ -14,7 +14,7 @@ Vagrant.configure("2") do |config|
   envtier = ENV['TF_VAR_envtier']
   name = ENV['TF_VAR_openfirehawkserver_name']
 
-  config.vm.define envtier
+  config.vm.define "ansible_control"
   config.vagrant.plugins = ['vagrant-disksize', 'vagrant-reload']
   config.disksize.size = '50GB'
   #config.vm.network "public_network", bridge: "eno1",
@@ -39,7 +39,8 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "sudo rm /etc/localtime && sudo ln -s /usr/share/zoneinfo/Australia/Brisbane /etc/localtime", run: "always"
   config.vm.provision "shell", inline: "sudo apt-get update"
   config.vm.provision "shell", inline: "sudo apt-get install -y sshpass"
-  # Install ubuntu desktop and virtualbox additions.  Because a reboot is required only two choices to provision-
+
+  ### Install ubuntu desktop and virtualbox additions.  Because a reboot is required, provisioning is handled here. ###
   # Install the gui with vagrant or install the gui with ansible installed on the host.  
   # This creates potentiall issues because ideally, Ansible should be used within the vm only to limit ansible version issues if the user updates vagrant on their host.
   config.vm.provision "shell", inline: "sudo apt-get install -y ubuntu-desktop virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11 xserver-xorg-legacy"
@@ -47,13 +48,17 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "sudo sed -i 's/allowed_users=.*$/allowed_users=anybody/' /etc/X11/Xwrapper.config"
   #disable the update notifier.  We do not want to update to ubuntu 18, currently deadline installer gui doesn't work in 18.
   config.vm.provision "shell", inline: "sudo sed -i 's/Prompt=.*$/Prompt=never/' /etc/update-manager/release-upgrades"
-  # install ansible
+  ### End Ubuntu Desktop block ###
+
+  ### Install Ansible Block ###
   config.vm.provision "shell", inline: "sudo apt-get install -y software-properties-common"
   config.vm.provision "shell", inline: "sudo apt-add-repository --yes --update ppa:ansible/ansible"
   config.vm.provision "shell", inline: "sudo apt-get install -y ansible"
   # we define the location of the ansible hosts file in an environment variable.
   config.vm.provision "shell", inline: "grep -qxF 'ANSIBLE_INVENTORY=/vagrant/ansible/hosts' /etc/environment || echo 'ANSIBLE_INVENTORY=/vagrant/ansible/hosts' | sudo tee -a /etc/environment"
   #reboot required for desktop to function.
+  ### End Install Ansible Block ###
+
   config.vm.provision "shell", inline: "sudo reboot"
   # trigger reload
   config.vm.provision :reload
