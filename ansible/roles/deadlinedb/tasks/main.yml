@@ -33,7 +33,7 @@
     mode: u+x
   become: yes
 
-- name: "Ansible find files in subdirectory examples /home/deadlineuser/Downloads/Deadline-10.0.23.4-linux-installers/"
+- name: "Ansible find files in subdirectory downloads"
   find:
     paths: /home/deadlineuser/Downloads/{{ deadline_linux_basename }}
     patterns: "*DeadlineRepository-*-linux-x64-installer.run"

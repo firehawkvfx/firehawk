@@ -122,9 +122,11 @@ we can initialise the secrets keys and encrypt.
 - If you already have an aws account,
 - Now we can execute the first playbook to initialise the vm.
     ansible-playbook -i ansible/inventory/hosts ansible/init.yaml
-- Download the deadline linux installer version 10.0.23.4 into downloads/Deadline-10.0.23.4-linux-installers.tar, then setup the deadline user and deadline db + deadline rcs with this playbook..
-    ansible-playbook -i ansible/inventory/hosts ansible/newuser_deadline.yaml
+- Download the deadline linux installer version 10.0.23.4 (or latest version) into downloads/Deadline-10.0.23.4-linux-installers.tar, then setup the deadline user and deadline db + deadline rcs with this playbook. set the version in your secrets file.
+    ansible-playbook -i ansible/inventory/hosts ansible/newuser_deadline.yaml -v
 - Remember to always run source ./update_vars.sh before running any ansible playbooks, or using terraform.  Without your environment variables, nothing will work.
+- Download the latest houdini installer tar to the downloads folder.
+    ansible-playbook -i ansible/inventory/hosts ansible/openfirehawkserver_houdini.yaml -v
 - Init your aws access key if you don't already have one setup from a previous installation of open firehawk
     ansible-playbook -i ansible/inventory/hosts ansible/aws-new-key.yaml
 - Subscribe to these amis (it may take some time before your subscription is processed)-

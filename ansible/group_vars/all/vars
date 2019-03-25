@@ -32,8 +32,10 @@ localnas1_path_abs: "{{ lookup('env', 'TF_VAR_localnas1_path_abs') }}"
 #the absolute path to access the cloud nfs mount by location eg "/prod_sydney_aws"
 softnas1_path_abs: "{{ lookup('env', 'TF_VAR_softnas1_path_abs') }}"
 
+deadlineversion: "{{ lookup('env', 'TF_VAR_deadlineversion') }}"
+
 deadline_certificates_location: "/opt/Thinkbox/certs"
-deadline_linux_installers_tar: "/vagrant/downloads/Deadline-10.0.23.4-linux-installers.tar"
+deadline_linux_installers_tar: "/vagrant/downloads/Deadline-{{ deadlineversion }}-linux-installers.tar"
 deadline_prefix: "/opt/Thinkbox/Deadline10"
 
 deadline_linux_no_extension: "{{ deadline_linux_installers_tar | splitext | first }}"
@@ -59,6 +61,8 @@ user_deadlineuser_name: "{{ lookup('env','TF_VAR_user_deadlineuser_name') }}"
 user_deadlineuser_pw: "{{ lookup('env','TF_VAR_user_deadlineuser_pw') }}"
 
 openfirehawkserver: "{{ lookup('env','TF_VAR_openfirehawkserver') }}"
+openfirehawkserver_name: "{{ lookup('env', 'TF_VAR_openfirehawkserver_name') }}"
+
 deadline_proxy_root_dir: "{{ lookup('env','TF_VAR_deadline_proxy_root_dir') }}"
 deadline_proxy_certificate: "{{ lookup('env','TF_VAR_deadline_proxy_certificate') }}"
 deadline_proxy_certificate_password: "{{ lookup('env','TF_VAR_deadline_proxy_certificate_password') }}"
