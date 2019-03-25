@@ -39,12 +39,7 @@
         User centos 
         IdentityFile  {{ ansible_ssh_private_key_file }}
 
-      Host 10.0.1.*
-        IdentityFile  {{ ansible_ssh_private_key_file }}
-        User centos
-        ProxyCommand ssh -W %h:%p centos@bastion
-      
-      Host 10.0.2.*
+      Host "10.0.1.*", "10.0.2.*", "10.0.11.*", "10.0.12.*"
         IdentityFile  {{ ansible_ssh_private_key_file }}
         User centos
         ProxyCommand ssh -W %h:%p centos@bastion
