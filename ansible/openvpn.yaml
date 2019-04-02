@@ -43,6 +43,10 @@
   become: true
 
   tasks:
+    - name: test update -
+      debug:
+        msg: "updateing autologin."
+        
     - name: Ansible copy local openvpn files to /etc/openvpn
       copy:
         src: ~/openvpn_config/{{ item }}
@@ -95,23 +99,27 @@
 
     - name: configure routes to opposite dev/prod environment so that nodes in both envs can access licence server
       shell: |
-        sudo ip route add {{ item.prefix }} via {{ item.next_hop }} dev enp0s8
+        ip route del {{ item.prefix }}
+        ip route add {{ item.prefix }} via {{ item.next_hop }} dev enp0s8
       with_items:
         - { prefix: "{{ private_subnet1_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
         - { prefix: "{{ public_subnet1_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
         - { prefix: "{{ vpn_cidr_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
       when: envtier == 'dev'
+      become: yes
       tags:
         - add-routes
 
-    - name: configure routes to opposite dev/prod environment so that nodes in both envs can access licence server
+    - name: configure routes to opposite dev/prod environment so that nodes in both envs can access licence server.  Remove route if it exists and re apply it.
       shell: |
-        sudo ip route add {{ item.prefix }} via {{ item.next_hop }} dev enp0s8
+        ip route del {{ item.prefix }}
+        ip route add {{ item.prefix }} via {{ item.next_hop }} dev enp0s8
       with_items:
         - { prefix: "{{ private_subnet1_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
         - { prefix: "{{ public_subnet1_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
         - { prefix: "{{ vpn_cidr_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
       when: envtier == 'prod'
+      become: yes
       tags:
         - add-routes
 
@@ -121,10 +129,15 @@
         block: |
           {{ item.source }} {{ item.target }} {{ item.settings }}
         marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.target }}"
+      become: yes
       with_items:
         - { source: "{{ softnas1_private_ip1 }}:/pool0/volume0", target: /prod_sydney_aws, settings: "nfs defaults,_netdev,rsize=8192,wsize=8192,timeo=14,intr 0 0"}
         - { source: /prod_sydney_aws, target: /remote_prod, settings: "none defaults,bind,timeo=14 0 0"}
+      tags:
+        - add-mounts
 
     - name: mount all changes to fstab
       command: mount -a
-      become: true
+      become: yes
+      tags:
+        - add-mounts

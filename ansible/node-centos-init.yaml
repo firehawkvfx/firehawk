@@ -179,6 +179,16 @@
       group: deadlineuser
     become: yes
 
+  - name: ensure an s3 bucket exists to store large files / installers for faster redeployment.
+    s3_bucket:
+      name: "mys3bucket.{{ public_domain }}"
+
+  - name: ensure the downloads folder is syncronised with the bucket
+    s3_sync:
+      bucket: "installers.{{ public_domain }}"
+      file_root: downloads/
+      include: "{{ deadline_linux_filename }}"
+
   - name: copy deadline installer
     copy:
       src: "{{ deadline_linux_installers_tar }}"
