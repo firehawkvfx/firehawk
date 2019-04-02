@@ -7,6 +7,17 @@
     hostname: "node1.{{ public_domain }}"
 
   tasks:
+
+  - package:
+      name: "{{ item }}"
+      state: present
+    with_items:
+      - mesa-libGLw
+      - libXp
+      - libXp-devel
+    tags:
+      - packages
+
   - file:
       path: /opt/houdini_install_script
       state: directory

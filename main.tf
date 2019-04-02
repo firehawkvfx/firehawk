@@ -36,7 +36,7 @@ module "vpc" {
   private_subnets = ["${var.private_subnet1}", "${var.private_subnet2}"]
   public_subnets = ["${var.public_subnet1}", "${var.public_subnet2}"]
   
-  all_private_subnets_cidr_range = "10.0.0.0/18"
+  all_private_subnets_cidr_range = "10.0.0.0/16"
 
   #vpn variables
 
