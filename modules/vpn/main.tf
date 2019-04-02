@@ -52,6 +52,13 @@ variable "remote_subnet_cidr" {}
 
 variable "igw_id" {}
 
+variable "private_subnets" {
+  default = []
+}
+variable "public_subnets" {
+  default = []
+}
+
 module "openvpn" {
   #source = "github.com/firehawkvfx/tf_aws_openvpn"
 
@@ -62,6 +69,8 @@ module "openvpn" {
   igw_id = "${var.igw_id}"
 
   #create_openvpn = "${var.create_openvpn}"
+  public_subnets = "${var.public_subnets}"
+  private_subnets = "${var.private_subnets}"
 
   name = "openvpn_ec2"
   # VPC Inputs

@@ -20,12 +20,23 @@ variable "enable_nat_gateway" {
   default = true
 }
 
+variable "private_subnet1" {}
+variable "private_subnet2" {}
+variable "public_subnet1" {}
+variable "public_subnet2" {}
+
+
 module "vpc" {
   source = "./modules/vpc"
 
   #sleep will disable the nat gateway to save cost during idle time.
   sleep              = "${var.sleep}"
   enable_nat_gateway = "${var.enable_nat_gateway}"
+
+  private_subnets = ["${var.private_subnet1}", "${var.private_subnet2}"]
+  public_subnets = ["${var.public_subnet1}", "${var.public_subnet2}"]
+  
+  all_private_subnets_cidr_range = "10.0.0.0/16"
 
   #vpn variables
 

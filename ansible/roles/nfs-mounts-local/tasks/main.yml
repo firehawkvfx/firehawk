@@ -19,7 +19,7 @@
 - name: insert marker start
   lineinfile:
     path: /etc/fstab
-    insertafter: "^#?/dev/mapper.*$"
+    #insertafter: "^#?/dev/mapper.*$"
     line: "# BEGIN ANSIBLE MANAGED BLOCK"
     backup: yes
 
@@ -37,12 +37,14 @@
     backup: yes
     content: |
       
-      :/data /data nfs defaults,_netdev,rsize=8192,wsize=8192,timeo=14,intr 0 0
-      :/prod /prod nfs defaults,_netdev,rsize=8192,wsize=8192,timeo=14,intr 0 0
-      /prod /prod_cairns none defaults,bind,timeo=14 0 0
+      {{ localnas1_private_ip }}:/data /data nfs defaults,_netdev,rsize=8192,wsize=8192,timeo=14,intr 0 0
+      {{ localnas1_private_ip }}:/prod /prod_cairns nfs defaults,_netdev,rsize=8192,wsize=8192,timeo=14,intr 0 0
+      /prod_cairns /prod none defaults,bind,timeo=14 0 0
       #remote mounts from aws via vpn nensure your routes are configured
-      # 10.0.1.11:/pool0/volume0 /remote_prod nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
+      # softnasip:/pool0/volume0 /remote_prod nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
       # /remote_prod /prod_sydney_aws none defaults,bind,timeo=14 0 0
+
+
 
 # - name: Mount nfs read-only
 #   mount:

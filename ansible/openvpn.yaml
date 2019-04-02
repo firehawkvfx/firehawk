@@ -19,8 +19,8 @@
         /usr/local/openvpn_as/scripts/sacli -k vpn.daemon.0.client.netmask_bits -v {{ client_netmask_bits }} ConfigPut
         /usr/local/openvpn_as/scripts/sacli --key 'vpn.server.tls_auth' --value 'true' ConfigPut
         /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.gateway_access --value 'true' ConfigPut
-        /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.private_network.0 --value '10.0.1.0/24' ConfigPut
-        /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.private_network.1 --value '10.0.101.0/24' ConfigPut
+        /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.private_network.0 --value '{{ private_subnet1 }}' ConfigPut
+        /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.private_network.1 --value '{{ public_subnet1 }}' ConfigPut
         /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.private_network.2 --value '{{ client_network }}/{{ client_netmask_bits }}' ConfigPut
         /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.private_access --value 'route' ConfigPut
         /usr/local/openvpn_as/scripts/sacli start
@@ -92,3 +92,39 @@
         state: restarted
         enabled: yes
       become: yes
+
+    - name: configure routes to opposite dev/prod environment so that nodes in both envs can access licence server
+      shell: |
+        sudo ip route add {{ item.prefix }} via {{ item.next_hop }} dev enp0s8
+      with_items:
+        - { prefix: "{{ private_subnet1_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
+        - { prefix: "{{ public_subnet1_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
+        - { prefix: "{{ vpn_cidr_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
+      when: envtier == 'dev'
+      tags:
+        - add-routes
+
+    - name: configure routes to opposite dev/prod environment so that nodes in both envs can access licence server
+      shell: |
+        sudo ip route add {{ item.prefix }} via {{ item.next_hop }} dev enp0s8
+      with_items:
+        - { prefix: "{{ private_subnet1_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
+        - { prefix: "{{ public_subnet1_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
+        - { prefix: "{{ vpn_cidr_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
+      when: envtier == 'prod'
+      tags:
+        - add-routes
+
+    - name: insert/update block in /etc/fstab for mounts
+      blockinfile:
+        path: /etc/fstab
+        block: |
+          {{ item.source }} {{ item.target }} {{ item.settings }}
+        marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.target }}"
+      with_items:
+        - { source: "{{ softnas1_private_ip1 }}:/pool0/volume0", target: /prod_sydney_aws, settings: "nfs defaults,_netdev,rsize=8192,wsize=8192,timeo=14,intr 0 0"}
+        - { source: /prod_sydney_aws, target: /remote_prod, settings: "none defaults,bind,timeo=14 0 0"}
+
+    - name: mount all changes to fstab
+      command: mount -a
+      become: true

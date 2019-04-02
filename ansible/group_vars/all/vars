@@ -12,6 +12,22 @@ public_domain: "{{ lookup('env','TF_VAR_public_domain') }}"
 # eg I may need to reference houdinilicenceserver.prod.example.com in both the prod and dev environments for render nodes to be tested.
 public_domain_prod: "{{ lookup('env','TF_VAR_public_domain_prod') }}"
 
+private_subnet1: "{{ lookup('env', 'TF_VAR_private_subnet1') }}"
+private_subnet1_dev: "{{ lookup('env', 'TF_VAR_private_subnet1_dev') }}"
+private_subnet1_prod: "{{ lookup('env', 'TF_VAR_private_subnet1_prod') }}"
+
+private_subnet2: "{{ lookup('env', 'TF_VAR_private_subnet2') }}"
+private_subnet2_dev: "{{ lookup('env', 'TF_VAR_private_subnet2_dev') }}"
+private_subnet2_prod: "{{ lookup('env', 'TF_VAR_private_subnet2_prod') }}"
+
+public_subnet1: "{{ lookup('env', 'TF_VAR_public_subnet1') }}"
+public_subnet1_dev: "{{ lookup('env', 'TF_VAR_public_subnet1_dev') }}"
+public_subnet1_prod: "{{ lookup('env', 'TF_VAR_public_subnet1_prod') }}"
+
+public_subnet2: "{{ lookup('env', 'TF_VAR_public_subnet2') }}"
+public_subnet2_dev: "{{ lookup('env', 'TF_VAR_public_subnet2_dev') }}"
+public_subnet2_prod: "{{ lookup('env', 'TF_VAR_public_subnet2_prod') }}"
+
 ### NAS volume mounts ###
 
 softnas_mount_source: "/pool0/volume0"
@@ -50,6 +66,8 @@ sesi_username: "{{ lookup('env','TF_VAR_sesi_username') }}"
 sesi_password: "{{ lookup('env','TF_VAR_sesi_password') }}"
 
 vpn_cidr: "{{ lookup('env','TF_VAR_vpn_cidr') }}"
+vpn_cidr_dev: "{{ lookup('env','TF_VAR_vpn_cidr_prod') }}"
+vpn_cidr_prod: "{{ lookup('env','TF_VAR_vpn_cidr_prod') }}"
 remote_subnet_cidr: "{{ lookup('env', TF_VAR_remote_subnet_cidr) }}"
 
 openvpn_user: openvpnas
@@ -61,6 +79,8 @@ user_deadlineuser_name: "{{ lookup('env','TF_VAR_user_deadlineuser_name') }}"
 user_deadlineuser_pw: "{{ lookup('env','TF_VAR_user_deadlineuser_pw') }}"
 
 openfirehawkserver: "{{ lookup('env','TF_VAR_openfirehawkserver') }}"
+openfirehawkserver_dev: "{{ lookup('env','TF_VAR_openfirehawkserver_dev') }}"
+openfirehawkserver_prod: "{{ lookup('env','TF_VAR_openfirehawkserver_prod') }}"
 openfirehawkserver_name: "{{ lookup('env', 'TF_VAR_openfirehawkserver_name') }}"
 
 deadline_proxy_root_dir: "{{ lookup('env','TF_VAR_deadline_proxy_root_dir') }}"

@@ -121,7 +121,7 @@ we can initialise the secrets keys and encrypt.
     source ./update_vars.sh --prod
 - If you already have an aws account,
 - Now we can execute the first playbook to initialise the vm.
-    ansible-playbook -i ansible/inventory/hosts ansible/init.yaml
+    ansible-playbook -i ansible/inventory/hosts ansible/init.yaml -v
 - Download the deadline linux installer version 10.0.23.4 (or latest version) into downloads/Deadline-10.0.23.4-linux-installers.tar, then setup the deadline user and deadline db + deadline rcs with this playbook. set the version in your secrets file.
     ansible-playbook -i ansible/inventory/hosts ansible/newuser_deadline.yaml -v
 - Remember to always run source ./update_vars.sh before running any ansible playbooks, or using terraform.  Without your environment variables, nothing will work.
@@ -134,6 +134,11 @@ we can initialise the secrets keys and encrypt.
     centos7 https://aws.amazon.com/marketplace/pp/B00O7WM7QW?qid=1552746240289&sr=0-1&ref_=srh_res_product_title
     softnas cloud platinum https://aws.amazon.com/marketplace/pp/B07DGMG5ZD?qid=1552746298127&sr=0-2&ref_=srh_res_product_title
     softnas cloud platinum - lower compute https://aws.amazon.com/marketplace/pp/B07DGGZBCG?qid=1552746484959&sr=0-9&ref_=srh_res_product_title
+- before we run terraform, exit the vm and reload to reboot
+    exit
+    source ./update_vars.sh --prod
+    vagrant reload
+    vagrant ssh
 - Now lets initialise terraform, and run our first terraform apply.  Read more about this here for best practice - Your first terraform apply
     terraform init
     terraform plan -out=plan
@@ -223,6 +228,13 @@ Instances that reside in the private subnet are currently configured through ope
 In the secrets file, you will set your own values for these configuration variables.  Many will be different for your environment, and you **absolutely must use unique passwords and set your static ip address for onsite**.
 
 If you ever make commits to a git repo, ensure you never commit unencrypted secrets or anything in the secrets/ path.  vault keys and pem keys for ssh access are stoed in keys/ and these should not be committed to version control.
+
+if you happen to accidentally publish private information you can remove it with this example to remove the secrets-prod file form the repository.  ensure you have a local backup - this operation will strip all branches.
+https://help.github.com/en/articles/removing-sensitive-data-from-a-repository
+
+    git clone (my repo)
+    cd (my repo)
+    git filter-branch --force --index-filter \ 'git rm --cached --ignore-unmatch secrets/secrets-prod' \ --prune-empty --tag-name-filter cat -- --all
 
 Security groups are configured to ignore any inbound internet traffic unless it comes from your onsite public ip address which should be static and you’ll need to arrange that with your ISP if you are working from home.  If it isn't static, this is currently an untested workflow (though we have already implemented some measures to update security groups automatically).
 
