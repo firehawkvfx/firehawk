@@ -119,7 +119,7 @@ we can initialise the secrets keys and encrypt.
     ansible-playbook ansible/init-keys.yaml
 - From now on, you can set environment variables without --init, which will use your now encrypted secrets file.  We can set our environment variables and make the values available to terraform and ansible.
     source ./update_vars.sh --prod
-- If you already have an aws account,
+- If you already have an aws account, ensure you have secret keys setup in your secrets file so that the aws CLI will be installed correctly.
 - Now we can execute the first playbook to initialise the vm.
     ansible-playbook -i ansible/inventory/hosts ansible/init.yaml -v
 - Download the deadline linux installer version 10.0.23.4 (or latest version) into downloads/Deadline-10.0.23.4-linux-installers.tar, then setup the deadline user and deadline db + deadline rcs with this playbook. set the version in your secrets file.
