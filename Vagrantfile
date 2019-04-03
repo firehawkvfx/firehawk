@@ -77,7 +77,9 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.provision "shell", inline: "sudo reboot"
-
+  # trigger reload
+  config.vm.provision :reload
+  
   # ansible_inventory_dir = "ansible/inventory/hosts"
   # config.vm.define "autoconfig" do |autoconfig|
   #   #this currently has issues in replicating identical behaviour to running ansible within the vm and errors occur.

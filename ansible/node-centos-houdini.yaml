@@ -15,6 +15,7 @@
       - mesa-libGLw
       - libXp
       - libXp-devel
+      - mesa-libGLU
     tags:
       - packages
 
