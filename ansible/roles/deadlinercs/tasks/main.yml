@@ -35,6 +35,7 @@
     owner: deadlineuser
     mode: u=rwX,g=rwX,o=r
     recurse: yes
+  become: yes
 
 - name: check permissions and ownership on certificates
   command: ls -ltria /opt/Thinkbox/DeadlineDatabase10/certs/

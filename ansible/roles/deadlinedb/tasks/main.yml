@@ -49,10 +49,12 @@
     path: "{{ files_matched.files[0].path }}"
     mode: +r+x-w
     owner: deadlineuser
+  become: true
 
 - name: install deadline db
   command: "{{ files_matched.files[0].path }} --mode unattended --debuglevel 2 --prefix /opt/Thinkbox/DeadlineRepository10 --setpermissions true --installmongodb true --dbOverwrite true --mongodir /opt/Thinkbox/DeadlineDatabase10 --dbListeningPort 27017 --certgen_outdir /opt/Thinkbox/DeadlineDatabase10/certs --certgen_password {{ deadline_proxy_certificate_password }} --createX509dbuser true --requireSSL true --dbhost {{ openfirehawkserver }} --dbport 27017 --dbuser {{ user_deadlineuser_name }} --dbpassword {{ deadline_proxy_certificate_password }} --dbauth true --dbcertpass {{ deadline_proxy_certificate_password }} --dbssl true"
   become: true
+
 - name: Restart service for deadlinedb
   service:
     name: Deadline10db
