@@ -144,6 +144,12 @@ we can initialise the secrets keys and encrypt.
     terraform plan -out=plan
 - if this is without errors, apply the plan.
     terraform apply plan
+- The terraform apply openvpn module will have altered the network settings, so a reboot may be necesary for routes to work through your local network.
+    exit
+    vagrant reload
+    vagrant ssh
+    cd /vagrant
+    source ./update-vars.sh --prod
 - later, you can destroy the infrastructure if you don't need it anymore.  note that ebs volumes may not be destroyed, and s3 disks will remain.  to destroy at any point, use...
     terraform destroy
 Note: there are currently bugs with the way the aws terraform provider resolves dependencies to destroy in the correct order.  currently if you repeat is 3 times, it should remove the resources.  you can verify by checking the vpc is deleted from the aws management console.
