@@ -100,7 +100,7 @@ Currently, this has only been tested from a Linux RHEL 7.5/Centos Host.  You are
 
 ## Running Vagrant and configuring with Ansible
 
-- Run this to download an ubuntu base image and install ansible in the vm.  Provisioning the ubuntu desktop GUI may take 15mins +
+- Run this to download an ubuntu base image and install ansible in the vm.  Provisioning the ubuntu desktop GUI may take 15mins +. in case you are resinstalling, you may want to tun 'vagrant box update'.
     vagrant up
 - You will be asked which adaptor to bridge to. select the primary adapter for your internet connection.  This should be in the 192.168.x.x range.
 - When the the process completes, take a snapshot of this initial state and verify its there in the list.

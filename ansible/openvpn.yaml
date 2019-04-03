@@ -1,3 +1,11 @@
+- hosts: ansible_control
+  remote_user: vagrant
+  become: true
+
+  tasks:
+    - name: Test local connection.
+      debug:
+        msg: "test local connection"
 
 - hosts: openvpnip
   remote_user: openvpnas
@@ -45,8 +53,8 @@
   tasks:
     - name: test update -
       debug:
-        msg: "updateing autologin."
-        
+        msg: "updating autologin. {{ softnas1_private_ip1 }}"
+
     - name: Ansible copy local openvpn files to /etc/openvpn
       copy:
         src: ~/openvpn_config/{{ item }}
@@ -123,21 +131,21 @@
       tags:
         - add-routes
 
-    - name: insert/update block in /etc/fstab for mounts
-      blockinfile:
-        path: /etc/fstab
-        block: |
-          {{ item.source }} {{ item.target }} {{ item.settings }}
-        marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.target }}"
-      become: yes
-      with_items:
-        - { source: "{{ softnas1_private_ip1 }}:/pool0/volume0", target: /prod_sydney_aws, settings: "nfs defaults,_netdev,rsize=8192,wsize=8192,timeo=14,intr 0 0"}
-        - { source: /prod_sydney_aws, target: /remote_prod, settings: "none defaults,bind,timeo=14 0 0"}
-      tags:
-        - add-mounts
+    # - name: insert/update block in /etc/fstab for mounts
+    #   blockinfile:
+    #     path: /etc/fstab
+    #     block: |
+    #       {{ item.source }} {{ item.target }} {{ item.settings }}
+    #     marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.target }}"
+    #   become: yes
+    #   with_items:
+    #     - { source: "{{ softnas1_private_ip1 }}:/pool0/volume0", target: /prod_sydney_aws, settings: "nfs defaults,_netdev,rsize=8192,wsize=8192,timeo=14,intr 0 0"}
+    #     - { source: /prod_sydney_aws, target: /remote_prod, settings: "none defaults,bind,timeo=14 0 0"}
+    #   tags:
+    #     - add-mounts
 
-    - name: mount all changes to fstab
-      command: mount -a
-      become: yes
-      tags:
-        - add-mounts
+    # - name: mount all changes to fstab
+    #   command: mount -a
+    #   become: yes
+    #   tags:
+    #     - add-mounts

@@ -13,7 +13,8 @@
 
 - name: File is not encrypted
   when: check.stdout.find('ANSIBLE_VAULT') == -1
-  debug: msg="Secrets file at {{ secret_path }} is not encrypted.  Will encrypt"
+  debug:
+    msg: "Secrets file at {{ secret_path }} is not encrypted.  Will encrypt"
 
 - name: encrypt
   when: check.stdout.find('ANSIBLE_VAULT') == -1
@@ -23,7 +24,8 @@
 
 - name: encrypt result
   when: check.stdout.find('ANSIBLE_VAULT') == -1
-  debug: msg="{{ encrypt_shell.stdout }}"
+  debug:
+    msg: "{{ encrypt_shell.stdout }}"
 
 - name: read the passwd file - validate update
   shell: "cat {{ secret_path }}"
@@ -31,4 +33,5 @@
 
 - name: validate check
   failed_when: check_post.stdout.find('ANSIBLE_VAULT') == -1
-  fail: msg="Warning, wasn't able to encrypt secrets file."
+  fail:
+    msg: "Warning, wasn't able to encrypt secrets file."

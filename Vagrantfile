@@ -4,6 +4,8 @@
 Vagrant.configure("2") do |config|
   # Ubuntu 16.04
   config.vm.box = "ubuntu/xenial64"
+  config.vm.box_version = "20190325.0.0"
+  #config.vm.box_version = "20190308.0.0"
   #config.vm.box = "bento/ubuntu-16.04"
   #config.ssh.username = "vagrant"
   #config.ssh.password = "vagrant"
@@ -36,9 +38,19 @@ Vagrant.configure("2") do |config|
     vb.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
     vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
   end
+
   config.vm.provision "shell", inline: "sudo rm /etc/localtime && sudo ln -s /usr/share/zoneinfo/Australia/Brisbane /etc/localtime", run: "always"
   config.vm.provision "shell", inline: "sudo apt-get update"
   config.vm.provision "shell", inline: "sudo apt-get install -y sshpass"
+
+  ### Install Ansible Block ###
+  config.vm.provision "shell", inline: "sudo apt-get install -y software-properties-common"
+  config.vm.provision "shell", inline: "sudo apt-add-repository --yes --update ppa:ansible/ansible"
+  config.vm.provision "shell", inline: "sudo apt-get install -y ansible='2.7.9-1ppa~xenial'"
+  # we define the location of the ansible hosts file in an environment variable.
+  config.vm.provision "shell", inline: "grep -qxF 'ANSIBLE_INVENTORY=/vagrant/ansible/hosts' /etc/environment || echo 'ANSIBLE_INVENTORY=/vagrant/ansible/hosts' | sudo tee -a /etc/environment"
+  #reboot required for desktop to function.
+  ### End Install Ansible Block ###
 
   ### Install ubuntu desktop and virtualbox additions.  Because a reboot is required, provisioning is handled here. ###
   # Install the gui with vagrant or install the gui with ansible installed on the host.  
@@ -49,15 +61,6 @@ Vagrant.configure("2") do |config|
   #disable the update notifier.  We do not want to update to ubuntu 18, currently deadline installer gui doesn't work in 18.
   config.vm.provision "shell", inline: "sudo sed -i 's/Prompt=.*$/Prompt=never/' /etc/update-manager/release-upgrades"
   ### End Ubuntu Desktop block ###
-
-  ### Install Ansible Block ###
-  config.vm.provision "shell", inline: "sudo apt-get install -y software-properties-common"
-  config.vm.provision "shell", inline: "sudo apt-add-repository --yes --update ppa:ansible/ansible"
-  config.vm.provision "shell", inline: "sudo apt-get install -y ansible"
-  # we define the location of the ansible hosts file in an environment variable.
-  config.vm.provision "shell", inline: "grep -qxF 'ANSIBLE_INVENTORY=/vagrant/ansible/hosts' /etc/environment || echo 'ANSIBLE_INVENTORY=/vagrant/ansible/hosts' | sudo tee -a /etc/environment"
-  #reboot required for desktop to function.
-  ### End Install Ansible Block ###
 
   config.vm.provision "shell", inline: "sudo reboot"
   # trigger reload
@@ -72,6 +75,8 @@ Vagrant.configure("2") do |config|
     trigger.warn = "Taking Snapshot"
     trigger.run = {inline: "vagrant snapshot push"}
   end
+
+  config.vm.provision "shell", inline: "sudo reboot"
 
   # ansible_inventory_dir = "ansible/inventory/hosts"
   # config.vm.define "autoconfig" do |autoconfig|
