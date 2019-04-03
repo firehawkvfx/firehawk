@@ -19,7 +19,8 @@
   become: true
   remote_user: deadlineuser
   become_user: root
-
+  
+  # secret 2 seems to occaisionally have issues and corrupts the shell output somehow.
   vars:
     secrets:
       secret1:
@@ -53,4 +54,3 @@
       - "{{ lookup('dict', secrets) }}"
     include_role:
       name: store-secret
-    vars:

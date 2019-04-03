@@ -17,6 +17,10 @@
     encrypt_option: ""
     encrypt_label: "nonencrypted"
 
+- name: check s3 encrypt
+  debug:
+    msg: "s3_disk_password: {{ s3_disk_password }} \nencrypt_s3: {{ encrypt_s3 }}"
+
 - name: check if s3_disk_password is defined and encrypt is true
   set_fact:
     encrypt_option: "encrypted={{ s3_disk_password }}"
@@ -77,7 +81,7 @@
 - name: create pool
   shell: |
     softnas-cmd login softnas {{ user_softnas_pw }}
-    softnas-cmd createpool {{ new_s3_disk_name }} -n={{ pool_name }} -r=0 -f=on -sync=standard -cs=off -shared=on -t > /tmp/softnas_init_pool_output_dict.json
+    softnas-cmd createpool {{ new_s3_disk_name }} -n={{ pool_name }} -r=0 -f=on -sync=standard -cs=off -shared={{ share_pool }} -t > /tmp/softnas_init_pool_output_dict.json
 
 - fetch:
     src: /tmp/softnas_init_pool_output_dict.json

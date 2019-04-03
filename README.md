@@ -68,7 +68,7 @@ terraform apply plan
 - The NAT gateway is another sneaky cost visible in your AWS VPC console, usually around $5 /day if you forget about it.  It allows your private network (systems in the private subnet) outbound access to the internet.  Security groups can lock down any internet access to the minimum adresses required for licencing things like softnas or other software.  Licensing configuration with most software you would use makes possible to not need any NAT gateway but that is beyond the scope of openFirehawk at this point in time.
 
 
-## Running an onsite management VM with Vagrant
+## Preparing an onsite management VM with Vagrant
 
 Vagrant is a tool that manages your initial VM configuration onsite.  It allows us to create a consistent environment to launch our infrastructure from.  From there we will provision the software installed on it with Ansible.
 
@@ -97,7 +97,10 @@ Currently, this has only been tested from a Linux RHEL 7.5/Centos Host.  You are
 - Set the environment variables from the secrets file.  --init assumes an unencrypted file is being used.  We always must do this before running vagrant.
     source ./update_vars.sh --prod --init
 - Get your router to assign/reserve a static ip using this same mac address so that the address doesn't change.  if it does, then render nodes won't find the manager.
-- Run this to download an ubuntu base image and install ansible in the vm.  Provisioning the ubuntu desktop GUI may take 15mins +
+
+## Running Vagrant and configuring with Ansible
+
+- Run this to download an ubuntu base image and install ansible in the vm.  Provisioning the ubuntu desktop GUI may take 15mins +. in case you are resinstalling, you may want to tun 'vagrant box update'.
     vagrant up
 - You will be asked which adaptor to bridge to. select the primary adapter for your internet connection.  This should be in the 192.168.x.x range.
 - When the the process completes, take a snapshot of this initial state and verify its there in the list.
@@ -116,19 +119,26 @@ we can initialise the secrets keys and encrypt.
     ansible-playbook ansible/init-keys.yaml
 - From now on, you can set environment variables without --init, which will use your now encrypted secrets file.  We can set our environment variables and make the values available to terraform and ansible.
     source ./update_vars.sh --prod
-- If you already have an aws account,
+- If you already have an aws account, ensure you have secret keys setup in your secrets file so that the aws CLI will be installed correctly.
 - Now we can execute the first playbook to initialise the vm.
-    ansible-playbook -i ansible/inventory/hosts ansible/init.yaml
-- Download the deadline linux installer version 10.0.23.4 into downloads/Deadline-10.0.23.4-linux-installers.tar, then setup the deadline user and deadline db + deadline rcs with this playbook..
-    ansible-playbook -i ansible/inventory/hosts ansible/newuser_deadline.yaml
+    ansible-playbook -i ansible/inventory/hosts ansible/init.yaml -v
+- Download the deadline linux installer version 10.0.23.4 (or latest version) into downloads/Deadline-10.0.23.4-linux-installers.tar, then setup the deadline user and deadline db + deadline rcs with this playbook. set the version in your secrets file.
+    ansible-playbook -i ansible/inventory/hosts ansible/newuser_deadline.yaml -v
 - Remember to always run source ./update_vars.sh before running any ansible playbooks, or using terraform.  Without your environment variables, nothing will work.
-- Init your aws access key.
+- Download the latest houdini installer tar to the downloads folder.
+    ansible-playbook -i ansible/inventory/hosts ansible/openfirehawkserver_houdini.yaml -v
+- Init your aws access key if you don't already have one setup from a previous installation of open firehawk
     ansible-playbook -i ansible/inventory/hosts ansible/aws-new-key.yaml
 - Subscribe to these amis (it may take some time before your subscription is processed)-
     openvpn https://aws.amazon.com/marketplace/pp/B00MI40CAE
     centos7 https://aws.amazon.com/marketplace/pp/B00O7WM7QW?qid=1552746240289&sr=0-1&ref_=srh_res_product_title
     softnas cloud platinum https://aws.amazon.com/marketplace/pp/B07DGMG5ZD?qid=1552746298127&sr=0-2&ref_=srh_res_product_title
     softnas cloud platinum - lower compute https://aws.amazon.com/marketplace/pp/B07DGGZBCG?qid=1552746484959&sr=0-9&ref_=srh_res_product_title
+- before we run terraform, exit the vm and reload to reboot
+    exit
+    source ./update_vars.sh --prod
+    vagrant reload
+    vagrant ssh
 - Now lets initialise terraform, and run our first terraform apply.  Read more about this here for best practice - Your first terraform apply
     terraform init
     terraform plan -out=plan
@@ -136,6 +146,7 @@ we can initialise the secrets keys and encrypt.
     terraform apply plan
 - later, you can destroy the infrastructure if you don't need it anymore.  note that ebs volumes may not be destroyed, and s3 disks will remain.  to destroy at any point, use...
     terraform destroy
+Note: there are currently bugs with the way the aws terraform provider resolves dependencies to destroy in the correct order.  currently if you repeat is 3 times, it should remove the resources.  you can verify by checking the vpc is deleted from the aws management console.
 - Also, you should turn off the infrastructure when not using it.  When I'm done using the resources I do this-
     terraform plan -out=plan -var sleep=true
 I check the plan to see that it is going to do what it should.  then run this to execute it.  it is your responsibility to ensure that everything is turned off so you don't incur charges, but this is provided for connvenience.
@@ -144,7 +155,7 @@ I check the plan to see that it is going to do what it should.  then run this to
     terraform apply
 - While your Infrastructure is up, you should be able to select the deadlineuser in the VM GUI, and login with a password. Open a terminal in the VM GUI, logged in as deadlineuser and run this-
     deadlinemonitor
-- INMPORTANT: After you start to render with more than 2 render nodes visible here in the monitor, you need to purchase UBL credits for deadline to play with.  Thinkbox will credit that to your AWS account on request if you email them and request it.  You won't be able to test deadline with more than 2 nodes visible to the manager.  You will configure your UBL credits to use with the deadline monitor (see deadline docs on how to do this)
+- IMPORTANT: After you start to render with more than 2 render nodes visible here in the monitor, you need to purchase UBL credits for deadline to play with.  Thinkbox will credit that to your AWS account on request if you email them and request it.  You won't be able to test deadline with more than 2 nodes visible to the manager.  You will configure your UBL credits to use with the deadline monitor (see deadline docs on how to do this)
 - To launch instances in AWS, you will configure your AWS account to be used with the Command Line Interface.  See aws documentation - https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html
 More on this below...
 
@@ -217,6 +228,13 @@ Instances that reside in the private subnet are currently configured through ope
 In the secrets file, you will set your own values for these configuration variables.  Many will be different for your environment, and you **absolutely must use unique passwords and set your static ip address for onsite**.
 
 If you ever make commits to a git repo, ensure you never commit unencrypted secrets or anything in the secrets/ path.  vault keys and pem keys for ssh access are stoed in keys/ and these should not be committed to version control.
+
+if you happen to accidentally publish private information you can remove it with this example to remove the secrets-prod file form the repository.  ensure you have a local backup - this operation will strip all branches.
+https://help.github.com/en/articles/removing-sensitive-data-from-a-repository
+
+    git clone (my repo)
+    cd (my repo)
+    git filter-branch --force --index-filter \ 'git rm --cached --ignore-unmatch secrets/secrets-prod' \ --prune-empty --tag-name-filter cat -- --all
 
 Security groups are configured to ignore any inbound internet traffic unless it comes from your onsite public ip address which should be static and you’ll need to arrange that with your ISP if you are working from home.  If it isn't static, this is currently an untested workflow (though we have already implemented some measures to update security groups automatically).
 
@@ -306,7 +324,7 @@ Here you should see the connection was initialised.  if not, try running this pl
 
 ## Terraform - taint
 
-If you make changes to your infrastructure that you want to recover from, a good way to replace resources is something like this...  lets say I want to destroy my openvpn instance and start over
+If you make changes to your infrastructure that you want to recover from, a good way to replace resources is something like this...  lets say I just moved to a different network that has a different subnet, or my local IP changes for openfirehawkserver.  its easy to to destroy my openvpn instance and start over
 
     terraform taint -module vpc.vpn.openvpn aws_instance.openvpn
 
@@ -325,6 +343,12 @@ After I'm happy with this I can run terraform apply to recrete the vpn.
 - Validate this by pinging an ip in the private subnet
     ping 10.0.1.11
 
+## Softnas
+
+You can keep tabs on an S3 bucket's size with this command, 
+    aws s3 ls s3://bucket_name --recursive  | grep -v -E "(Bucket: |Prefix: |LastWriteTime|^$|--)" | awk 'BEGIN {total=0}{total+=$3}END{print total/1024/1024" MB"}'
+
+To improve performance, you can add a write log and read cache to the s3 pool.  Write logs should 2 ssd's mirrored since they form a dependency for writing data to your pool, a read cache doesn't require mirroring.
 
 
 

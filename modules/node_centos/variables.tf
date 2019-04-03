@@ -72,13 +72,7 @@ variable "bastion_ip" {}
 
 variable "houdini_license_server_address" {}
 
-variable "softnas_private_ip1" {
-  default = "10.0.1.11"
-}
-
-variable "softnas_private_ip2" {
-  default = "10.0.1.12"
-}
+variable "softnas_private_ip1" {}
 
 variable "softnas_export_path" {
   default = "/naspool2/nasvol2"

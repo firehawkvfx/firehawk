@@ -1,13 +1,14 @@
 ---
 # tasks file for roles/init-host
-- name: change hostname to myserver
+- name: change hostname
   hostname:
-    name: "openfirehawkserver.{{ public_domain_prod }}"
+    name: "{{ openfirehawkserver_name }}"
+
 - name: add myself to /etc/hosts
   lineinfile:
     dest: /etc/hosts
     regexp: '^127\.0\.0\.1[ \t]+localhost'
-    line: "127.0.0.1 localhost openfirehawkserver.{{ public_domain_prod }}"
+    line: "127.0.0.1 localhost {{ openfirehawkserver_name }}"
     state: present
 
 - name: Allow new lines from ansible shell output.  Logout or reboot for this to take effect.
@@ -16,3 +17,36 @@
     line: "ANSIBLE_STDOUT_CALLBACK=debug"
     create: yes
     
+- name: insert marker start
+  lineinfile:
+    path: /etc/rc.local
+    insertafter: "^#?.By default.*$"
+
+    line: "# BEGIN ANSIBLE MANAGED BLOCK"
+    backup: yes
+
+- name: insert marker end
+  lineinfile:
+    path: /etc/rc.local
+    insertafter: "# BEGIN ANSIBLE MANAGED BLOCK"
+    line: "# END ANSIBLE MANAGED BLOCK"
+    create: true
+
+- name: insert/update block in /etc/rc.local
+  blockinfile:
+    path: /etc/rc.local
+    backup: yes
+    content: |
+      #promiscuous mode required for routing
+      /sbin/ifconfig enp0s8 up
+      /sbin/ifconfig enp0s8 promisc
+
+- name: execute and check with netstat
+  shell: |
+    /etc/rc.local
+    netstat -i
+  register: netstatout
+  become: true
+
+- debug:
+    msg: "{{ netstatout.stdout }}"

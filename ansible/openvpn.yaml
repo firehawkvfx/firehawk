@@ -1,3 +1,11 @@
+- hosts: ansible_control
+  remote_user: vagrant
+  become: true
+
+  tasks:
+    - name: Test local connection.
+      debug:
+        msg: "test local connection"
 
 - hosts: openvpnip
   remote_user: openvpnas
@@ -19,59 +27,34 @@
         /usr/local/openvpn_as/scripts/sacli -k vpn.daemon.0.client.netmask_bits -v {{ client_netmask_bits }} ConfigPut
         /usr/local/openvpn_as/scripts/sacli --key 'vpn.server.tls_auth' --value 'true' ConfigPut
         /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.gateway_access --value 'true' ConfigPut
-        /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.private_network.0 --value '10.0.1.0/24' ConfigPut
-        /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.private_network.1 --value '10.0.101.0/24' ConfigPut
-        /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.private_network.2 --value '172.27.232.0/24' ConfigPut
+        /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.private_network.0 --value '{{ private_subnet1 }}' ConfigPut
+        /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.private_network.1 --value '{{ public_subnet1 }}' ConfigPut
+        /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.private_network.2 --value '{{ client_network }}/{{ client_netmask_bits }}' ConfigPut
         /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.private_access --value 'route' ConfigPut
         /usr/local/openvpn_as/scripts/sacli start
         cd /usr/local/openvpn_as/scripts/
-        #mkdir seperate
         ./sacli --user {{ openvpn_user }} --key 'prop_autologin' --value 'true' UserPropPut
-        ./sacli --user {{ openvpn_user }} --key 'c2s_route.0' --value '192.168.10.0/24' UserPropPut
+        ./sacli --user {{ openvpn_user }} --key 'c2s_route.0' --value '{{ remote_subnet_cidr }}' UserPropPut
         ./sacli --user {{ openvpn_user }} AutoGenerateOnBehalfOf
         ./sacli -o ./seperate --cn {{ openvpn_user }} get5
         chown {{ openvpn_user }} seperate/*
         /usr/local/openvpn_as/scripts/sacli start
         ls -la seperate
 
-      #     # Set VPN network info
-  #     "sudo /usr/local/openvpn_as/scripts/sacli -k vpn.daemon.0.client.network -v ${element(split("/", var.vpn_cidr), 0)} ConfigPut",
-
-  #     "sudo /usr/local/openvpn_as/scripts/sacli -k vpn.daemon.0.client.netmask_bits -v ${element(split("/", var.vpn_cidr), 1)} ConfigPut",
-
-  #     # here we enable tls which is required if we are to generate ta.key and client.ovpn files
-  #     "sudo /usr/local/openvpn_as/scripts/sacli --key 'vpn.server.tls_auth' --value ='true' ConfigPut",
-
-  #     # Do a warm restart so the config is picked up
-  #     "sudo /usr/local/openvpn_as/scripts/sacli start",
-
-    #     "cd /usr/local/openvpn_as/scripts/",
-
-  #     # todo : need to add a user that is different to the admin user.  currently they must be identical.
-  #     "echo ${var.openvpn_admin_pw} | sudo -S mkdir seperate",
-
-  #     "set -x",
-
-  #     # this enables auto login: todo : check if theres a problem with not having this above the start command
-  #     "sudo ./sacli --user ${var.openvpn_user} --key 'prop_autologin' --value 'true' UserPropPut",
-
-  #     "sudo ./sacli --user ${var.openvpn_user} AutoGenerateOnBehalfOf",
-  #     "sudo ./sacli -o ./seperate --cn ${var.openvpn_user} get5",
-  #     "sudo chown ${var.openvpn_user} seperate/*",
-  #     "ls -la seperate",
 
   roles:
     - role: openvpn
 
-# pull current config with these commands.  use them to resolve automation of the interface.
-# sudo ./sacli userpropget
-# sudo ./sacli userpropget
 
 - hosts: ansible_control
   remote_user: vagrant
   become: true
 
   tasks:
+    - name: test update -
+      debug:
+        msg: "updating autologin. {{ softnas1_private_ip1 }}"
+
     - name: Ansible copy local openvpn files to /etc/openvpn
       copy:
         src: ~/openvpn_config/{{ item }}
@@ -121,3 +104,48 @@
         state: restarted
         enabled: yes
       become: yes
+
+    - name: configure routes to opposite dev/prod environment so that nodes in both envs can access licence server
+      shell: |
+        ip route del {{ item.prefix }}
+        ip route add {{ item.prefix }} via {{ item.next_hop }} dev enp0s8
+      with_items:
+        - { prefix: "{{ private_subnet1_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
+        - { prefix: "{{ public_subnet1_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
+        - { prefix: "{{ vpn_cidr_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
+      when: envtier == 'dev'
+      become: yes
+      tags:
+        - add-routes
+
+    - name: configure routes to opposite dev/prod environment so that nodes in both envs can access licence server.  Remove route if it exists and re apply it.
+      shell: |
+        ip route del {{ item.prefix }}
+        ip route add {{ item.prefix }} via {{ item.next_hop }} dev enp0s8
+      with_items:
+        - { prefix: "{{ private_subnet1_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
+        - { prefix: "{{ public_subnet1_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
+        - { prefix: "{{ vpn_cidr_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
+      when: envtier == 'prod'
+      become: yes
+      tags:
+        - add-routes
+
+    # - name: insert/update block in /etc/fstab for mounts
+    #   blockinfile:
+    #     path: /etc/fstab
+    #     block: |
+    #       {{ item.source }} {{ item.target }} {{ item.settings }}
+    #     marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.target }}"
+    #   become: yes
+    #   with_items:
+    #     - { source: "{{ softnas1_private_ip1 }}:/pool0/volume0", target: /prod_sydney_aws, settings: "nfs defaults,_netdev,rsize=8192,wsize=8192,timeo=14,intr 0 0"}
+    #     - { source: /prod_sydney_aws, target: /remote_prod, settings: "none defaults,bind,timeo=14 0 0"}
+    #   tags:
+    #     - add-mounts
+
+    # - name: mount all changes to fstab
+    #   command: mount -a
+    #   become: yes
+    #   tags:
+    #     - add-mounts

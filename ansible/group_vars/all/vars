@@ -3,8 +3,6 @@ ansible_ssh_private_key_file: "{{ lookup('env','TF_VAR_local_key_path') }}"
 
 debug: 0
 
-production_mount_target: "/prod"
-
 envtier: "{{ lookup('env','TF_VAR_envtier') }}"
 
 # domains
@@ -14,12 +12,50 @@ public_domain: "{{ lookup('env','TF_VAR_public_domain') }}"
 # eg I may need to reference houdinilicenceserver.prod.example.com in both the prod and dev environments for render nodes to be tested.
 public_domain_prod: "{{ lookup('env','TF_VAR_public_domain_prod') }}"
 
+private_subnet1: "{{ lookup('env', 'TF_VAR_private_subnet1') }}"
+private_subnet1_dev: "{{ lookup('env', 'TF_VAR_private_subnet1_dev') }}"
+private_subnet1_prod: "{{ lookup('env', 'TF_VAR_private_subnet1_prod') }}"
+
+private_subnet2: "{{ lookup('env', 'TF_VAR_private_subnet2') }}"
+private_subnet2_dev: "{{ lookup('env', 'TF_VAR_private_subnet2_dev') }}"
+private_subnet2_prod: "{{ lookup('env', 'TF_VAR_private_subnet2_prod') }}"
+
+public_subnet1: "{{ lookup('env', 'TF_VAR_public_subnet1') }}"
+public_subnet1_dev: "{{ lookup('env', 'TF_VAR_public_subnet1_dev') }}"
+public_subnet1_prod: "{{ lookup('env', 'TF_VAR_public_subnet1_prod') }}"
+
+public_subnet2: "{{ lookup('env', 'TF_VAR_public_subnet2') }}"
+public_subnet2_dev: "{{ lookup('env', 'TF_VAR_public_subnet2_dev') }}"
+public_subnet2_prod: "{{ lookup('env', 'TF_VAR_public_subnet2_prod') }}"
+
 ### NAS volume mounts ###
 
 softnas_mount_source: "/pool0/volume0"
+# "-m" will force a pool to import, which is usefull if drives used for a write log are missing.
+zpool_import_flags: "-m"
+
+#production mount path for all locations
+prod_mount_path: "/prod"
+
+#the ip of your onsite storage to be mounted
+localnas1_private_ip: "{{ lookup('env','TF_VAR_localnas1_private_ip') }}"
+#the mount path of your onsite storage eg "/prod"
+localnas1_mount_path: "{{ lookup('env','TF_VAR_localnas1_mount_path') }}"
+#the relative path to access the production volume remotely eg "/prod_remote"
+localnas1_remote_mount_path: "{{ lookup('env','TF_VAR_localnas1_remote_mount_path') }}"
+#the absolute path to access the onsite nas mount by location eg "/prod_cairns"
+localnas1_path_abs: "{{ lookup('env', 'TF_VAR_localnas1_path_abs') }}"
+#the absolute path to access the cloud nfs mount by location eg "/prod_sydney_aws"
+softnas1_path_abs: "{{ lookup('env', 'TF_VAR_softnas1_path_abs') }}"
+
+softnas1_private_ip1: "{{ lookup('env', 'TF_VAR_softnas1_private_ip1') }}"
+softnas1_private_ip1_dev: "{{ lookup('env', 'TF_VAR_softnas1_private_ip1_dev') }}"
+softnas1_private_ip1_prod: "{{ lookup('env', 'TF_VAR_softnas1_private_ip1_prod') }}"
+
+deadlineversion: "{{ lookup('env', 'TF_VAR_deadlineversion') }}"
 
 deadline_certificates_location: "/opt/Thinkbox/certs"
-deadline_linux_installers_tar: "/vagrant/downloads/Deadline-10.0.23.4-linux-installers.tar"
+deadline_linux_installers_tar: "/vagrant/downloads/Deadline-{{ deadlineversion }}-linux-installers.tar"
 deadline_prefix: "/opt/Thinkbox/Deadline10"
 
 deadline_linux_no_extension: "{{ deadline_linux_installers_tar | splitext | first }}"
@@ -33,6 +69,11 @@ db_pass: "{{ lookup('env','TF_VAR_db_pass') }}"
 sesi_username: "{{ lookup('env','TF_VAR_sesi_username') }}"
 sesi_password: "{{ lookup('env','TF_VAR_sesi_password') }}"
 
+vpn_cidr: "{{ lookup('env','TF_VAR_vpn_cidr') }}"
+vpn_cidr_dev: "{{ lookup('env','TF_VAR_vpn_cidr_prod') }}"
+vpn_cidr_prod: "{{ lookup('env','TF_VAR_vpn_cidr_prod') }}"
+remote_subnet_cidr: "{{ lookup('env', TF_VAR_remote_subnet_cidr) }}"
+
 openvpn_user: openvpnas
 openvpn_user_pw: "{{ lookup('env','TF_VAR_openvpn_user_pw') }}"
 
@@ -42,6 +83,10 @@ user_deadlineuser_name: "{{ lookup('env','TF_VAR_user_deadlineuser_name') }}"
 user_deadlineuser_pw: "{{ lookup('env','TF_VAR_user_deadlineuser_pw') }}"
 
 openfirehawkserver: "{{ lookup('env','TF_VAR_openfirehawkserver') }}"
+openfirehawkserver_dev: "{{ lookup('env','TF_VAR_openfirehawkserver_dev') }}"
+openfirehawkserver_prod: "{{ lookup('env','TF_VAR_openfirehawkserver_prod') }}"
+openfirehawkserver_name: "{{ lookup('env', 'TF_VAR_openfirehawkserver_name') }}"
+
 deadline_proxy_root_dir: "{{ lookup('env','TF_VAR_deadline_proxy_root_dir') }}"
 deadline_proxy_certificate: "{{ lookup('env','TF_VAR_deadline_proxy_certificate') }}"
 deadline_proxy_certificate_password: "{{ lookup('env','TF_VAR_deadline_proxy_certificate_password') }}"
@@ -51,6 +96,7 @@ aws_region: "{{ lookup('env','TF_VAR_aws_region') }}"
 aws_access_key: "{{ lookup('env','TF_VAR_aws_access_key') }}"
 aws_secret_key: "{{ lookup('env','TF_VAR_aws_secret_key') }}"
 s3_disk_password: "{{ lookup('env','TF_VAR_s3_disk_password') }}"
+s3_disk_size: "{{ lookup('env','TF_VAR_s3_disk_size') }}"
 
 key_name: "{{ lookup('env','TF_VAR_key_name') }}"
 local_key_path: "{{ lookup('env','TF_VAR_local_key_path') }}"

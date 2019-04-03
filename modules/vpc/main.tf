@@ -48,6 +48,9 @@ module "vpn" {
   #the remote public address that will connect to the openvpn instance
   remote_vpn_ip_cidr = "${var.remote_ip_cidr}"
   public_subnet_ids  = "${module.vpc.public_subnets}"
+
+  private_subnets = "${var.private_subnets}"
+  public_subnets  = "${var.public_subnets}"
   #a provided route 53 zone id will be modified to have a subdomain to access vpn.  you will need to manually setup a route 53 zone for a domain with an ssl certificate.
   route_zone_id      = "${var.route_zone_id}"
   key_name           = "${var.key_name}"

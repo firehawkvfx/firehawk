@@ -79,7 +79,6 @@
   become_user: vagrant
   become: yes
 
-
 - name: replace
   lineinfile:
     path: ~/openvpn_config/openvpn.conf

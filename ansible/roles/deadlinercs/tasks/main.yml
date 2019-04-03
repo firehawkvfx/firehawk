@@ -2,7 +2,7 @@
 # tasks file for roles/deadlinercs
 - name: Ensures dir exists
   file:
-    path: /home/deadlineuser/Downloads/Deadline-10.0.23.4-linux-installers/
+    path: "/home/deadlineuser/Downloads/Deadline-{{ deadlineversion }}-linux-installers/"
     state: directory
     owner: deadlineuser
   become: yes
@@ -44,7 +44,7 @@
 - debug: msg="{{ cert_permissions.stderr }}"
 
 
-- name: "Ansible find files in subdirectory examples /home/deadlineuser/Downloads/Deadline-10.0.23.4-linux-installers/"
+- name: "Ansible find files in subdirectory download"
   find:
     paths: /home/deadlineuser/Downloads/{{ deadline_linux_basename }}
     patterns: "*DeadlineClient-*-linux-x64-installer.run"
@@ -79,7 +79,7 @@
   command: "{{ files_matched.files[0].path }} --mode unattended --launcherdaemon true --enable-components proxyconfig --servercert /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --debuglevel 2 --prefix /opt/Thinkbox/Deadline10 --connectiontype Repository --repositorydir /opt/Thinkbox/DeadlineRepository10/ --proxyrootdir {{ deadline_proxy_root_dir }} --dbsslcertificate /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --dbsslpassword {{ deadline_proxy_certificate_password }} --licensemode UsageBased --daemonuser deadlineuser --connserveruser deadlineuser --httpport 8080 --tlsport 4433 --enabletls true --tlscertificates generate  --generatedcertdir /opt/Thinkbox/certs/ --clientcert_pass {{ deadline_proxy_certificate_password }} --slavestartup false"
   become: true
 
-# /home/deadlineuser/Downloads/Deadline-10.0.23.4-linux-installers/DeadlineRepository-10.0.23.4-linux-x64-installer.run --mode unattended --launcherdaemon true --enable-components proxyconfig --servercert /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --debuglevel 2 --prefix /opt/Thinkbox/Deadline10 --connectiontype Repository --repositorydir /opt/Thinkbox/DeadlineRepository10/ --proxyrootdir {{ deadline_proxy_root_dir }} --dbsslcertificate /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --dbsslpassword {{ deadline_proxy_certificate_password }} --licensemode UsageBased --daemonuser deadlineuser --connserveruser deadlineuser --httpport 8080 --tlsport 4433 --enabletls true --tlscertificates generate  --generatedcertdir /opt/Thinkbox/certs/ --clientcert_pass {{ deadline_proxy_certificate_password }} --slavestartup false"
+# /home/deadlineuser/Downloads/Deadline-{{ deadlineversion }}-linux-installers/DeadlineRepository-{{ deadlineversion }}-linux-x64-installer.run --mode unattended --launcherdaemon true --enable-components proxyconfig --servercert /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --debuglevel 2 --prefix /opt/Thinkbox/Deadline10 --connectiontype Repository --repositorydir /opt/Thinkbox/DeadlineRepository10/ --proxyrootdir {{ deadline_proxy_root_dir }} --dbsslcertificate /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --dbsslpassword {{ deadline_proxy_certificate_password }} --licensemode UsageBased --daemonuser deadlineuser --connserveruser deadlineuser --httpport 8080 --tlsport 4433 --enabletls true --tlscertificates generate  --generatedcertdir /opt/Thinkbox/certs/ --clientcert_pass {{ deadline_proxy_certificate_password }} --slavestartup false"
 
 - name: Restart service for deadlinedb
   service:

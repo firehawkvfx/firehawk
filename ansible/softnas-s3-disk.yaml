@@ -10,6 +10,8 @@
 
     pool_name: pool0
     volume_name: volume0
+    # shared pools should be enabled for DCHA.  caching is unavailable if this is used. tiering must be used insterad of caching for DCHA.
+    share_pool: off
     disk_device: 0
     nas_name: softnas
     encrypt_s3: true
@@ -25,6 +27,7 @@
   - set_fact:
       pool_name: "{{ pool_name }}"
       volume_name: "{{ volume_name }}"
+      share_pool: "{{ share_pool }}"
       disk_device: "{{ disk_device }}"
       nas_name: "{{ nas_name }}"
       encrypt_s3: "{{ encrypt_s3 }}"
@@ -66,7 +69,7 @@
   - name: check existing disk_device for nas.
     fail:
       msg: |
-        disk_device name already exists for this nas name in s3 bucket: "{{ item }}"
+        disk_device name already exists for this nas name in s3 bucket- "{{ item }}"
         Choose a different disk device name or nas name target to mount
     failed_when: (search_string_domain in item) and (search_string_nas_name in item) and (search_string_device in item) and (existing_bucket == false)
     with_items:
@@ -102,6 +105,7 @@
   vars:
     pool_name: "{{ hostvars['ansible_control']['pool_name'] }}"
     volume_name: "{{ hostvars['ansible_control']['volume_name'] }}"
+    share_pool: "{{ hostvars['ansible_control']['share_pool'] }}"
     disk_device: "{{ hostvars['ansible_control']['disk_device'] }}"
     nas_name: "{{ hostvars['ansible_control']['nas_name'] }}"
     encrypt_s3: "{{ hostvars['ansible_control']['encrypt_s3'] }}"
@@ -150,6 +154,7 @@
   vars:
     pool_name: "{{ hostvars['ansible_control']['pool_name'] }}"
     volume_name: "{{ hostvars['ansible_control']['volume_name'] }}"
+    share_pool: "{{ hostvars['ansible_control']['share_pool'] }}"
     disk_device: "{{ hostvars['ansible_control']['disk_device'] }}"
     nas_name: "{{ hostvars['ansible_control']['nas_name'] }}"
     encrypt_s3: "{{ hostvars['ansible_control']['encrypt_s3'] }}"
@@ -189,6 +194,7 @@
   vars:
     pool_name: "{{ hostvars['ansible_control']['pool_name'] }}"
     volume_name: "{{ hostvars['ansible_control']['volume_name'] }}"
+    share_pool: "{{ hostvars['ansible_control']['share_pool'] }}"
     disk_device: "{{ hostvars['ansible_control']['disk_device'] }}"
     nas_name: "{{ hostvars['ansible_control']['nas_name'] }}"
     encrypt_s3: "{{ hostvars['ansible_control']['encrypt_s3'] }}"

@@ -5,10 +5,10 @@
   tasks:
     - name: change hostname to myserver
       hostname:
-        name: "openfirehawkserver.firehawkvfx.com"
+        name: "{{ openfirehawkserver_name }}"
     - name: add myself to /etc/hosts
       lineinfile:
         dest: /etc/hosts
         regexp: '^127\.0\.0\.1[ \t]+localhost'
-        line: "127.0.0.1 localhost openfirehawkserver.firehawkvfx.com"
+        line: "127.0.0.1 localhost {{ openfirehawkserver_name }}"
         state: present

@@ -1,9 +1,34 @@
 ---
 - hosts: ansible_control
+  remote_user: vagrant
   become: true
 
+  tasks:
+    - name: test local connection.
+      debug:
+        msg: "test local connection"
+
+- hosts: ansible_control
+  become: true
+  
+  pre_tasks:
+    - name: ensure source ./update_vars.sh initialised
+      fail:
+        msg: "A tier has not been defined. ensure you run 'source ./update_vars.sh --dev' or 'source ./update_vars.sh --prod' from the path /vagrant"
+      when: envtier is not defined
+
   roles:
-    - role: init-host
+    - {role: 'init-host', tags: 'init-host'}
     - role: init-packages
     - role: terraform
     - role: aws-cli
+    - {role: nfs-mounts-local, tags: 'nfs-mounts-local'}
+
+- hosts: ansible_control
+  remote_user: vagrant
+  become: true
+
+  tasks:
+    - name: Test local connection.  Bad mounts may break local connection
+      debug:
+        msg: "test local connection"
