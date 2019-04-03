@@ -25,3 +25,4 @@ hostvars.log
 tmp/*
 keys/*
 *.DS_Store
+secrets/*
