@@ -1,5 +1,10 @@
 ---
 # tasks file for ansible/roles/aws-new-key
+- name: check if a pem key exists
+  stat:
+    path: "{{ local_key_path }}"
+  register: key_result
+
 - name: create a new ec2 key pair, returns generated private key
   ec2_key:
     name: "{{ key_name }}"
@@ -8,7 +13,8 @@
     aws_secret_key: "{{ aws_secret_key }}"
     ec2_region: "{{ aws_region }}"
   register: ec2_key_result
+  when: (key_result.stat.exists == False)
 
 - name: Save private key
   copy: content="{{ ec2_key_result.key.private_key }}" dest="{{ local_key_path }}" mode=0400
-  when: ec2_key_result.changed
+  when: (key_result.stat.exists == False) and ec2_key_result.changed
