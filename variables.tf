@@ -37,6 +37,8 @@ variable "public_domain" {}
 variable "public_domain_dev" {}
 variable "public_domain_prod" {}
 
+variable "openfirehawkserver" {}
+
 variable "openvpn_user" {}
 
 variable "openvpn_user_pw" {}

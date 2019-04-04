@@ -36,13 +36,9 @@
 - name: "Ansible find files in subdirectory downloads"
   find:
     paths: /home/deadlineuser/Downloads/{{ deadline_linux_basename }}
-    patterns: "*DeadlineRepository-*-linux-x64-installer.run"
+    patterns: "*DeadlineRepository-{{ deadlineversion }}-linux-x64-installer.run"
   register: files_matched
   become: true
-
-- name: installation command.
-  debug:
-    msg: "{{ files_matched.files[0].path }} --mode unattended --debuglevel 2 --prefix /opt/Thinkbox/DeadlineRepository10 --setpermissions true --installmongodb true --dbOverwrite true --mongodir /opt/Thinkbox/DeadlineDatabase10 --dbListeningPort 27017 --certgen_outdir /opt/Thinkbox/DeadlineDatabase10/certs --certgen_password {{ deadline_proxy_certificate_password }} --createX509dbuser true --requireSSL true --dbhost {{ openfirehawkserver }} --dbport 27017 --dbuser {{ user_deadlineuser_name }} --dbpassword {{ deadline_proxy_certificate_password }} --dbauth true --dbcertpass {{ deadline_proxy_certificate_password }} --dbssl true"
 
 - name: set permissions
   file:
@@ -52,8 +48,32 @@
   become: true
 
 - name: install deadline db
-  command: "{{ files_matched.files[0].path }} --mode unattended --debuglevel 2 --prefix /opt/Thinkbox/DeadlineRepository10 --setpermissions true --installmongodb true --dbOverwrite true --mongodir /opt/Thinkbox/DeadlineDatabase10 --dbListeningPort 27017 --certgen_outdir /opt/Thinkbox/DeadlineDatabase10/certs --certgen_password {{ deadline_proxy_certificate_password }} --createX509dbuser true --requireSSL true --dbhost {{ openfirehawkserver }} --dbport 27017 --dbuser {{ user_deadlineuser_name }} --dbpassword {{ deadline_proxy_certificate_password }} --dbauth true --dbcertpass {{ deadline_proxy_certificate_password }} --dbssl true"
+  shell: |
+    set -x
+    {{ files_matched.files[0].path }} --mode unattended --debuglevel 2 --prefix /opt/Thinkbox/DeadlineRepository10 --setpermissions true --installmongodb true --dbOverwrite true --mongodir /opt/Thinkbox/DeadlineDatabase10 --dbListeningPort 27017 --certgen_outdir /opt/Thinkbox/DeadlineDatabase10/certs --certgen_password {{ deadline_proxy_certificate_password }} --createX509dbuser true --requireSSL true --dbhost {{ openfirehawkserver }} --dbport 27017 --dbuser {{ user_deadlineuser_name }} --dbpassword {{ deadline_proxy_certificate_password }} --dbauth true --dbcertpass {{ deadline_proxy_certificate_password }} --dbssl true
+  register: deadline_db_install_output_shell
   become: true
+
+# - name: deadline must have read access to remote certs
+#   file: 
+#     path: /opt/Thinkbox/certs/Deadline10RemoteClient.pfx
+#     owner: deadlineuser
+#     mode: 0600
+#     recurse: yes
+#   become: yes
+
+- name: set read permissions for remote cert
+  file: 
+    path: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
+    mode: 0640
+    owner: deadlineuser
+    group: deadlineuser
+  become: yes
+  connection: local
+
+- name: check deadline db install output
+  debug:
+    msg: "{{ deadline_db_install_output_shell.stdout }}"
 
 - name: Restart service for deadlinedb
   service:

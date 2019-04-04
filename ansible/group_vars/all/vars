@@ -93,8 +93,15 @@ deadline_proxy_certificate_password: "{{ lookup('env','TF_VAR_deadline_proxy_cer
 houdini_license_server_address: "{{ lookup('env','TF_VAR_houdini_license_server_address') }}"
 
 aws_region: "{{ lookup('env','TF_VAR_aws_region') }}"
+AWS_REGION: "{{ lookup('env','TF_VAR_aws_region') }}"
+
 aws_access_key: "{{ lookup('env','TF_VAR_aws_access_key') }}"
+AWS_ACCESS_KEY: "{{ lookup('env','TF_VAR_aws_access_key') }}"
+
 aws_secret_key: "{{ lookup('env','TF_VAR_aws_secret_key') }}"
+AWS_SECRET_KEY: "{{ lookup('env','TF_VAR_aws_secret_key') }}"
+
+
 s3_disk_password: "{{ lookup('env','TF_VAR_s3_disk_password') }}"
 s3_disk_size: "{{ lookup('env','TF_VAR_s3_disk_size') }}"
 

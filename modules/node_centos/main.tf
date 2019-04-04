@@ -41,7 +41,15 @@ resource "aws_security_group" "node_centos" {
     from_port   = 0
     to_port     = 0
     cidr_blocks = ["${var.houdini_license_server_address}/32"]
-    description = "Houdini License Server and Deadline DB"
+    description = "Houdini License Server"
+  }
+
+  ingress {
+    protocol    = "-1"
+    from_port   = 0
+    to_port     = 0
+    cidr_blocks = ["${var.openfirehawkserver}/32"]
+    description = "Deadline DB"
   }
 
   # For OpenVPN Client Web Server & Admin Web UI

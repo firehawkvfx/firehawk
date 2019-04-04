@@ -72,6 +72,8 @@ variable "bastion_ip" {}
 
 variable "houdini_license_server_address" {}
 
+variable "openfirehawkserver" {}
+
 variable "softnas_private_ip1" {}
 
 variable "softnas_export_path" {

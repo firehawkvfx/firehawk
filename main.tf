@@ -199,6 +199,7 @@ module "node" {
   remote_subnet_cidr          = "${var.remote_subnet_cidr}"
   provision_softnas_volumes = "${module.softnas.provision_softnas_volumes}"
   bastion_ip = "${module.bastion.public_ip}"
+  openfirehawkserver = "${var.openfirehawkserver}"
 
   key_name       = "${var.key_name}"
   local_key_path = "${var.local_key_path}"

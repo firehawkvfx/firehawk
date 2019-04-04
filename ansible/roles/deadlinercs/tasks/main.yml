@@ -29,6 +29,13 @@
     owner: deadlineuser
   become: yes
 
+- name: set permissions
+  file:
+    path: /opt/Thinkbox/certs/Deadline10RemoteClient.pfx
+    mode: u=r,g=r,o=r
+    owner: deadlineuser
+  become: yes
+
 - name: deadline must have full access to repository
   file: 
     path: /opt/Thinkbox/DeadlineRepository10
@@ -48,7 +55,7 @@
 - name: "Ansible find files in subdirectory download"
   find:
     paths: /home/deadlineuser/Downloads/{{ deadline_linux_basename }}
-    patterns: "*DeadlineClient-*-linux-x64-installer.run"
+    patterns: "*DeadlineClient-{{ deadlineversion }}-linux-x64-installer.run"
   register: files_matched
   become: true
 
@@ -77,10 +84,29 @@
   when: deadline_ini_file.stat.exists
 
 - name: install deadline rcs
-  command: "{{ files_matched.files[0].path }} --mode unattended --launcherdaemon true --enable-components proxyconfig --servercert /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --debuglevel 2 --prefix /opt/Thinkbox/Deadline10 --connectiontype Repository --repositorydir /opt/Thinkbox/DeadlineRepository10/ --proxyrootdir {{ deadline_proxy_root_dir }} --dbsslcertificate /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --dbsslpassword {{ deadline_proxy_certificate_password }} --licensemode UsageBased --daemonuser deadlineuser --connserveruser deadlineuser --httpport 8080 --tlsport 4433 --enabletls true --tlscertificates generate  --generatedcertdir /opt/Thinkbox/certs/ --clientcert_pass {{ deadline_proxy_certificate_password }} --slavestartup false"
+  shell: |
+    set -x
+    {{ files_matched.files[0].path }} --mode unattended --launcherdaemon true --enable-components proxyconfig --servercert /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --debuglevel 2 --prefix /opt/Thinkbox/Deadline10 --connectiontype Repository --repositorydir /opt/Thinkbox/DeadlineRepository10/ --dbsslcertificate /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --dbsslpassword {{ deadline_proxy_certificate_password }} --licensemode UsageBased --daemonuser deadlineuser --connserveruser deadlineuser --httpport 8080 --tlsport 4433 --enabletls true --tlscertificates generate  --generatedcertdir /opt/Thinkbox/certs/ --clientcert_pass {{ deadline_proxy_certificate_password }} --slavestartup false --proxycertificatepassword 684HeftyPlanes --proxyrootdir {{ deadline_proxy_root_dir }} --proxycertificate /opt/Thinkbox/certs/Deadline10RemoteClient.pfx
+  register: deadline_rcs_install_output_shell
   become: true
+    
+- name: check deadline rcs install output
+  debug:
+    msg: "{{ deadline_rcs_install_output_shell.stdout }}"
 
-# /home/deadlineuser/Downloads/Deadline-{{ deadlineversion }}-linux-installers/DeadlineRepository-{{ deadlineversion }}-linux-x64-installer.run --mode unattended --launcherdaemon true --enable-components proxyconfig --servercert /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --debuglevel 2 --prefix /opt/Thinkbox/Deadline10 --connectiontype Repository --repositorydir /opt/Thinkbox/DeadlineRepository10/ --proxyrootdir {{ deadline_proxy_root_dir }} --dbsslcertificate /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --dbsslpassword {{ deadline_proxy_certificate_password }} --licensemode UsageBased --daemonuser deadlineuser --connserveruser deadlineuser --httpport 8080 --tlsport 4433 --enabletls true --tlscertificates generate  --generatedcertdir /opt/Thinkbox/certs/ --clientcert_pass {{ deadline_proxy_certificate_password }} --slavestartup false"
+- name: check /var/lib/Thinkbox/Deadline10/deadline.ini
+  command: cat /var/lib/Thinkbox/Deadline10/deadline.ini 
+  register: deadline_config
+
+- debug: msg="{{ deadline_config.stdout }}"
+- debug: msg="{{ deadline_config.stderr }}"
+
+- name: set permissions, deadline installer may be interfering.
+  file:
+    path: /opt/Thinkbox/certs/Deadline10RemoteClient.pfx
+    mode: u=r,g=r,o=r
+    owner: deadlineuser
+  become: yes
 
 - name: Restart service for deadlinedb
   service:
@@ -111,6 +137,6 @@
     line: "{{ item }}"
     create: yes
   with_items:
-    - "alias deadlinemonitor='cd /opt/Thinkbox/Deadline10/bin && ./deadlinemonitor'"
+    - "alias deadlinemonitor='cd /opt/Thinkbox/Deadline10/bin && ./deadlinemonitor -proxyserver {{ deadline_proxy_root_dir }}'"
     - "alias deadlinercs='cd /opt/Thinkbox/Deadline10/bin && ./deadlinercs'"
     - "alias deadlinepulse='cd /opt/Thinkbox/Deadline10/bin && ./deadlinepulse'"
