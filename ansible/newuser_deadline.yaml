@@ -31,7 +31,7 @@
         target: "{{ secrets_archive }}/opt/Thinkbox/certs/Deadline10RemoteClient.pfx"
       secret3:
         location: /opt/Thinkbox/certs/localhost.pfx
-        target: "{{ secrets_archive }}/opt/Thinkbox/certs/localhost.pfx"
+        target: "{{ secrets_archive }}/opt/Thinkbox/certs/{{ openfirehawkserver_name }}.pfx"
       secret4:
         location: /opt/Thinkbox/DeadlineDatabase10/certs/ca.crt
         target: "{{ secrets_archive }}/opt/Thinkbox/DeadlineDatabase10/certs/ca.crt"
@@ -40,13 +40,10 @@
         target: "{{ secrets_archive }}/opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx"
       secret6:
         location: /opt/Thinkbox/DeadlineDatabase10/certs/localhost.pem
-        target: "{{ secrets_archive }}/opt/Thinkbox/DeadlineDatabase10/certs/localhost.pem"
+        target: "{{ secrets_archive }}/opt/Thinkbox/DeadlineDatabase10/certs/{{ openfirehawkserver_name }}.pem"
       secret7:
         location: /opt/Thinkbox/DeadlineDatabase10/certs/mongo_client.pem
         target: "{{ secrets_archive }}/opt/Thinkbox/DeadlineDatabase10/certs/mongo_client.pem"
-
-    # key_name: .vault-key
-    # key_path: "/vagrant/keys/{{ key_name }}"
   
   tasks:
   - name: store-secret

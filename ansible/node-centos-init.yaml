@@ -65,6 +65,16 @@
       name: passlib
     become: yes
 
+  - name: install the package, force upgrade
+    package: 
+      name: python-boto
+    become: true
+
+  - name: install the package, force upgrade
+    pip: 
+      name: boto3
+    become: true
+
   - name: Ensure group "deadlineuser" exists
     group:
       name: deadlineuser
@@ -181,13 +191,19 @@
 
   - name: ensure an s3 bucket exists to store large files / installers for faster redeployment.
     s3_bucket:
-      name: "mys3bucket.{{ public_domain }}"
+      name: "installers.{{ public_domain }}"
+      aws_access_key: "{{ aws_access_key }}"
+      aws_secret_key: "{{ aws_secret_key }}"
+      region: "{{ aws_region }}"
 
   - name: ensure the downloads folder is syncronised with the bucket
     s3_sync:
       bucket: "installers.{{ public_domain }}"
       file_root: downloads/
       include: "{{ deadline_linux_filename }}"
+      aws_access_key: "{{ aws_access_key }}"
+      aws_secret_key: "{{ aws_secret_key }}"
+      region: "{{ aws_region }}"
 
   - name: copy deadline installer
     copy:
@@ -219,7 +235,7 @@
   - name: "Ansible find files in subdirectory downloads"
     find:
       paths: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
-      patterns: "*DeadlineClient-*-linux-x64-installer.run"
+      patterns: "*DeadlineClient-{{ deadlineversion }}-linux-x64-installer.run"
     register: files_matched
     become: true
 
