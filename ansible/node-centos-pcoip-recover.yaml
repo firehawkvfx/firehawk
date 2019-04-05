@@ -1,0 +1,151 @@
+- hosts: ansible_control
+  remote_user: vagrant
+  become: true
+
+  vars:
+    nvidia_driver: 410.92
+    driver_file: NVIDIA-Linux-x86_64-{{ nvidia_driver }}-grid.run
+    driver_url: http://us.download.nvidia.com/XFree86/Linux-x86_64/{{ driver_file }}
+  
+  tasks:
+  - name: ensure dir exists
+    file:
+      path: /vagrant/Downloads/nvidia/latest/
+      state: directory
+
+  - name: check if driver version exists
+    stat: 
+      path: "/vagrant/downloads/nvidia/{{ driver_file }}"
+    register: driver_stat
+
+  - name: get nvidia driver
+    shell: |
+      set -x
+      cd /vagrant/downloads/nvidia/latest
+      aws s3 sync s3://ec2-linux-nvidia-drivers/latest/ . --delete
+      cp *.run /vagrant/downloads/nvidia/.
+    become_user: vagrant
+    when: driver_stat.stat.exists == false
+
+  - name: "Ansible find files in subdirectory downloads"
+    find:
+      paths: "/vagrant/downloads/nvidia/"
+      patterns: "*{{ nvidia_driver }}-grid.run"
+    register: files_matched
+    become: true
+
+  - debug:
+      msg: "installer path: {{ files_matched.files[0].path }}"
+
+  - name: ensure an s3 bucket exists to store large files / installers for faster redeployment.
+    s3_bucket:
+      name: "installers.{{ public_domain }}"
+      aws_access_key: "{{ aws_access_key }}"
+      aws_secret_key: "{{ aws_secret_key }}"
+      region: "{{ aws_region }}"
+    tags:
+      - sync_installers
+
+  - name: ensure the nvidia installer is syncronised with the bucket
+    s3_sync:
+      bucket: "installers.{{ public_domain }}"
+      file_root: /vagrant/downloads/nvidia
+      include: "{{ files_matched.files[0].path | basename }}"
+      aws_access_key: "{{ aws_access_key }}"
+      aws_secret_key: "{{ aws_secret_key }}"
+      region: "{{ aws_region }}"
+    tags:
+      - sync_installers
+
+- hosts: "{{ variable_host | default('role_node_centos') }}"
+  remote_user: centos
+  become: true
+  vars:
+    nvidia_driver: 410.92
+    driver_file: NVIDIA-Linux-x86_64-{{ nvidia_driver }}-grid.run
+    driver_url: http://us.download.nvidia.com/XFree86/Linux-x86_64/{{ driver_file }}
+    epel_url: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    epel_dest: /var/tmp/epel-release-latest-7.noarch.rpm
+    grub_mod: "rd.driver.blacklist=nouveau nouveau.modeset=0"
+
+  tasks:
+  - name: upgrade all packages - yum update
+    yum:
+      name: '*'
+      state: latest
+
+  - name: install mkpasswd
+    package:
+      name: expect
+      state: present
+
+  - name: install epel-release
+    package:
+      name: epel-release
+      state: present
+
+  - name: install pip
+    package:
+      name: python-pip
+      state: latest
+
+  - name: install pexpect
+    pip:
+      name: pexpect
+    become: yes
+    
+  - name: install passlib
+    pip:
+      name: passlib
+    become: yes
+
+  - name: install the package, force upgrade
+    package: 
+      name: python-boto
+    become: true
+
+  - name: install the package, force upgrade
+    pip: 
+      name: boto3
+    become: true
+
+  - name: ensure download exists
+    file:
+      path: /home/centos/Downloads/
+      mode: 0755
+      owner: centos
+      state: directory
+
+  - name: S3 GET nvidia driver
+    aws_s3:
+      bucket: "installers.{{ public_domain }}"
+      object: "{{ driver_file }}"
+      dest: "/home/centos/Downloads/{{ driver_file }}"
+      mode: get
+      aws_access_key: "{{ aws_access_key }}"
+      aws_secret_key: "{{ aws_secret_key }}"
+      region: "{{ aws_region }}"
+
+  - name: check if epel rpm exists
+    stat: 
+      path: "{{ epel_dest }}"
+    register: epel_stat
+
+  - get_url:
+      dest: "{{ epel_dest }}"
+      url: "{{ epel_url }}"
+      mode: 700
+    when: epel_stat.stat.exists == false
+  
+  - name: fix boot and gui
+    shell: |
+      set -x
+      uptime
+      systemctl restart pcoip.service
+      /bin/sh /home/centos/Downloads/{{ driver_file }} --dkms -s --install-libglvnd
+      dracut -fv
+    become: true
+    register: recover_output
+
+  - debug:
+      msg:  "{{ recover_output.stdout }}"

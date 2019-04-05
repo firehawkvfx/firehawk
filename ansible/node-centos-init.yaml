@@ -1,9 +1,51 @@
-- hosts: role_node_centos
+- hosts: ansible_control
+  remote_user: vagrant
+  become: true
+  
+  vars:
+    sync_downloads: false
+
+  tasks:
+  - name: ensure an s3 bucket exists to store large files / installers for faster redeployment.
+    s3_bucket:
+      name: "installers.{{ public_domain }}"
+      aws_access_key: "{{ aws_access_key }}"
+      aws_secret_key: "{{ aws_secret_key }}"
+      region: "{{ aws_region }}"
+    tags:
+      - sync_installers
+
+  - name: ensure the deadline installer is syncronised with the bucket
+    s3_sync:
+      bucket: "installers.{{ public_domain }}"
+      file_root: /vagrant/downloads/
+      include: "{{ deadline_linux_filename }}"
+      aws_access_key: "{{ aws_access_key }}"
+      aws_secret_key: "{{ aws_secret_key }}"
+      region: "{{ aws_region }}"
+    tags:
+      - sync_installers
+
+  - name: ensure the downloads folder is syncronised with the bucket
+    s3_sync:
+      bucket: "installers.{{ public_domain }}"
+      file_root: /vagrant/downloads/
+      include: "*"
+      aws_access_key: "{{ aws_access_key }}"
+      aws_secret_key: "{{ aws_secret_key }}"
+      region: "{{ aws_region }}"
+    when: sync_downloads
+    tags:
+      - sync_installers
+
+
+- hosts: "{{ variable_host | default('role_node_centos') }}"
   remote_user: centos
   become: true
 
   vars:
     hostname: "node1.{{ public_domain }}"
+    pcoip: False
 
   tasks:
   - name: init authorized_keys
@@ -90,13 +132,25 @@
         - deadlineuser
       uid: 9001
 
-  - name: set user pass
+  - name: set user pass centos
+    expect:
+      command: passwd centos
+      responses:
+        (?i)password: "{{ user_deadlineuser_pw }}"
+        (?i)Retype new password: "{{ user_deadlineuser_pw }}"
+
+  - name: set user pass deadlineuser
     expect:
       command: passwd deadlineuser
       responses:
         (?i)password: "{{ user_deadlineuser_pw }}"
         (?i)Retype new password: "{{ user_deadlineuser_pw }}"
 
+  - name: adding a new user requires a restart of pcoip service if present
+    shell: |
+      systemctl restart pcoip
+    become: true
+    when: pcoip
 
   - name: setup ssh key for deadline user by generating key identifier from pem key
     shell: |
@@ -189,30 +243,15 @@
       group: deadlineuser
     become: yes
 
-  - name: ensure an s3 bucket exists to store large files / installers for faster redeployment.
-    s3_bucket:
-      name: "installers.{{ public_domain }}"
-      aws_access_key: "{{ aws_access_key }}"
-      aws_secret_key: "{{ aws_secret_key }}"
-      region: "{{ aws_region }}"
-
-  - name: ensure the downloads folder is syncronised with the bucket
-    s3_sync:
+  - name: S3 GET deadline
+    aws_s3:
       bucket: "installers.{{ public_domain }}"
-      file_root: downloads/
-      include: "{{ deadline_linux_filename }}"
+      object: "{{ deadline_linux_filename }}"
+      dest: "/home/deadlineuser/Downloads/{{ deadline_linux_filename }}"
+      mode: get
       aws_access_key: "{{ aws_access_key }}"
       aws_secret_key: "{{ aws_secret_key }}"
       region: "{{ aws_region }}"
-
-  - name: copy deadline installer
-    copy:
-      src: "{{ deadline_linux_installers_tar }}"
-      dest: "/home/deadlineuser/Downloads/{{ deadline_linux_filename }}"
-      mode: 0640
-      owner: deadlineuser
-      group: deadlineuser
-    become: yes
 
   - name: create deadline installer dir
     file: 
@@ -312,8 +351,8 @@
         {{ groups['role_softnas'][0] }}:{{ softnas_mount_source }} {{ softnas1_path_abs }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
         {{ softnas1_path_abs }} {{ prod_mount_path }} none defaults,bind,timeo=14 0 0
 
-        {{ localnas1_private_ip }}:{{ localnas1_mount_path }} {{ localnas1_path_abs }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
-        {{ localnas1_path_abs }} {{ localnas1_remote_mount_path }} none defaults,bind,timeo=14 0 0
+        # {{ localnas1_private_ip }}:{{ localnas1_mount_path }} {{ localnas1_path_abs }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
+        # {{ localnas1_path_abs }} {{ localnas1_remote_mount_path }} none defaults,bind,timeo=14 0 0
         
   - name: mount all changes to fstab
     command: mount -a

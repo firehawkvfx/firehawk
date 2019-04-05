@@ -1,4 +1,4 @@
-- hosts: role_node_centos
+- hosts: "{{ variable_host | default('role_node_centos') }}"
   remote_user: centos
   become: true
 

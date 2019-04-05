@@ -108,12 +108,6 @@
     owner: deadlineuser
   become: yes
 
-- name: Restart service for deadlinedb
-  service:
-    name: deadline10launcher
-    state: restarted
-  become: true
-
 - name: Allow new lines from ansible shell output.  Logout or reboot for this to take effect.
   lineinfile:
     path: /var/lib/Thinkbox/Deadline10/deadline.ini
@@ -123,6 +117,16 @@
   with_items:
     - "LaunchPulseAtStartup=True"
     - "LaunchRemoteConnectionServerAtStartup=True"
+    - "ProxyRoot={{ deadline_proxy_root_dir }}"
+    - "ProxyUseSSL=True"
+    - "ProxySSLCertificate=/opt/Thinkbox/certs/Deadline10RemoteClient.pfx"
+    - "ProxyRoot0={{ deadline_proxy_root_dir }};/opt/Thinkbox/certs/Deadline10RemoteClient.pfx"
+
+- name: Restart service for deadlinedb
+  service:
+    name: deadline10launcher
+    state: restarted
+  become: true
 
 - name: check /var/lib/Thinkbox/Deadline10/deadline.ini
   command: cat /var/lib/Thinkbox/Deadline10/deadline.ini 
