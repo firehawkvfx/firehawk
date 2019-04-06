@@ -18,6 +18,7 @@
     s3_disk_size_max_value: 500
     s3_disk_size_max_units: GB
     s3_disk_region: "{{ aws_region }}"
+    import_pool: true
 
     # this will be calculated later-
     existing_bucket: false
@@ -145,7 +146,7 @@
         name: softnas-s3-disk-create
       when: existing_bucket == false
 
-# mount / import an existing bucket if pool and volume name match
+# mount / import an existing bucket if pool and volume name match.  import pool.
 - hosts: role_softnas
   remote_user: centos
   become_user: root
@@ -165,6 +166,7 @@
     bucket_location: "{{ hostvars['ansible_control']['bucket_location'] }}"
     # need to pull this data from the softnas instance, not defaults.
     existing_volume: "{{ hostvars['ansible_control']['existing_volume'] }}"
+    import_pool: "{{ hostvars['ansible_control']['import_pool'] }}"
   
   # import by bucket name if bucket name exists, then import, else create.
   # if created, then also:

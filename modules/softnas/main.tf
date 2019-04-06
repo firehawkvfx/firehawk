@@ -421,6 +421,19 @@ resource "aws_ami_from_instance" "softnas1" {
   }
 }
 
+# When using ssd tiering, you must manually create the ebs volumes and specify the ebs id's in your secrets.  Then they can be locally restored automatically and attached to the instance.
+resource "aws_volume_attachment" "softnas1_ebs_att" {
+  count       = "${length(var.softnas1_volumes)}"
+  device_name = "${element(var.softnas1_mounts, count.index)}"
+  volume_id   = "${element(var.softnas1_volumes, count.index)}"
+  instance_id = "${aws_instance.softnas1.id}"
+}
+
+# If ebs volumes are attached, don't automatically import the pool. manual intervention may be required.
+locals {
+  import_pool = "${length(var.softnas1_volumes) > 0 ? false : true}"
+}
+
 # Once an AMI is built above, then we test the connection to the instance via a bastion below.
 # When connection to softnas is established, we know the instance has booted.  We continue to provision an s3 extender disk below.
 # this creates an s3 bucket if it doesn't already exist.  if there is a bucket with the same disk_device number, same nas name, and same domain,
@@ -466,7 +479,7 @@ resource "null_resource" "provision_softnas_volumes" {
     command = <<EOT
       set -x
       cd /vagrant
-      ansible-playbook -i ansible/inventory ansible/softnas-s3-disk.yaml -v --extra-vars "pool_name=pool0 volume_name=volume0 disk_device=0 s3_disk_size_max_value=${var.s3_disk_size} encrypt_s3=true"
+      ansible-playbook -i ansible/inventory ansible/softnas-s3-disk.yaml -v --extra-vars "pool_name=pool0 volume_name=volume0 disk_device=0 s3_disk_size_max_value=${var.s3_disk_size} encrypt_s3=true import_pool=${local.import_pool}"
   EOT
   }
 }
