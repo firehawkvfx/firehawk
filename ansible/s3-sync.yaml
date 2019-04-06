@@ -1,0 +1,174 @@
+- hosts: ansible_control
+  remote_user: vagrant
+  become: true
+  
+  vars:
+    show: bht
+    seq: shp
+    shot: shp_0010
+    bucket: "{{ show }}.{{ public_domain }}"
+
+  tasks:
+  - name: ensure an s3 bucket exists
+    s3_bucket:
+      name: "{{ bucket }}"
+      aws_access_key: "{{ aws_access_key }}"
+      aws_secret_key: "{{ aws_secret_key }}"
+      region: "{{ aws_region }}"
+    tags:
+      - sync-local
+
+  - name: sync hip files
+    shell: |
+      set -x
+      cd /prod/{{ show }}/{{ seq }}/{{ shot }}/houdini
+      aws s3 sync . s3://{{ bucket }}/{{ show }}/{{ seq }}/{{ shot }}/houdini --include "*.hip" --exclude "*backup/*" --exclude "*geo/*" --exclude "*pdgtemp/*"
+    become_user: vagrant
+    tags:
+      - sync-local
+
+  - name: sync asset files
+    shell: |
+      set -x
+      cd /prod/{{ show }}/{{ seq }}/{{ shot }}/asset
+      aws s3 sync . s3://{{ bucket }}/{{ show }}/{{ seq }}/{{ shot }}/asset --include "*"
+    become_user: vagrant
+    tags:
+      - sync-local
+
+  - name: sync cache files
+    shell: |
+      set -x
+      cd /prod/{{ show }}/{{ seq }}/{{ shot }}/cache
+      aws s3 sync . s3://{{ bucket }}/{{ show }}/{{ seq }}/{{ shot }}/cache --include "*"
+    become_user: vagrant
+    tags:
+      - sync-local
+
+  # - name: ensure the houdini path is syncronised with the bucket
+  #   s3_sync:
+  #     bucket: "{{ bucket }}"
+  #     permission: private
+  #     file_root: /prod/{{ show }}/{{ seq }}/{{ shot }}/houdini
+  #     include: "*.hip"
+  #     exclude: "backup/*"
+  #     key_prefix: "{{ show }}/{{ seq }}/{{ shot }}/houdini"
+  #     aws_access_key: "{{ aws_access_key }}"
+  #     aws_secret_key: "{{ aws_secret_key }}"
+  #     region: "{{ aws_region }}"
+  #   tags:
+  #     - sync_hip
+
+  # - name: ensure the asset path is syncronised with the bucket
+  #   s3_sync:
+  #     bucket: "{{ bucket }}"
+  #     permission: private
+  #     file_root: "/prod/{{ show }}/{{ seq }}/{{ shot }}/asset"
+  #     include: "*"
+  #     key_prefix: "{{ show }}/{{ seq }}/{{ shot }}/asset"
+  #     aws_access_key: "{{ aws_access_key }}"
+  #     aws_secret_key: "{{ aws_secret_key }}"
+  #     region: "{{ aws_region }}"
+  #   tags:
+  #     - sync_asset
+
+      # consider aws s3 cp s3://bucket/large-object . &> out.log & tail -f out.log
+      # https://github.com/aws/aws-cli/issues/2598
+
+#after aws configure, you can sync with this example
+# ansible-playbook -i "ansible/inventory" ansible/s3-sync.yaml --tags "sync-remote" --extra-vars "variable_user=centos variable_host=role_node_centos volume_path=/prod"
+
+- hosts: "{{ variable_host | default('role_softnas') }}"
+  remote_user: "{{ variable_user | default('centos') }}"
+  #become_user: root
+  become: true
+
+  vars:
+    variable_user: centos
+    pool_name: pool0
+    volume_name: volume0
+
+    show: bht
+    seq: shp
+    shot: shp_0010
+    bucket: "{{ show }}.{{ public_domain }}"
+
+    volume_path: "/{{ pool_name }}/{{ volume_name }}"
+    
+    asset_path_nas: "{{ volume_path }}/{{ show }}/{{ seq }}/{{ shot }}/asset"
+    asset_path_bucket: "s3://{{ bucket }}/{{ show }}/{{ seq }}/{{ shot }}/asset"
+
+    shot_path_nas: "{{ volume_path }}/{{ show }}/{{ seq }}/{{ shot }}"
+    shot_path_bucket: "s3://{{ bucket }}/{{ show }}/{{ seq }}/{{ shot }}"
+
+
+  tasks:
+  - name: ensure mounts are present
+    shell: |
+      mount -a
+    become: true
+    
+  - name: ensure dir exists.
+    file:
+      path: "{{ asset_path_nas }}"
+      state: directory
+      owner: "{{ variable_user }}"
+    become: true
+    tags:
+      - sync-remote
+
+  - name: sync asset files
+    shell: |
+      set -x
+      cd {{ asset_path_nas }}
+      /home/centos/.local/bin/aws s3 sync {{ asset_path_bucket }} . --include "*"
+    become_user: centos
+    tags:
+      - sync-remote
+
+  - name: ensure dir exists.
+    file:
+      path: "{{ shot_path_nas }}/cache"
+      state: directory
+      owner: "{{ variable_user }}"
+    become: true
+    tags:
+      - sync-remote
+
+  - name: sync cache files
+    shell: |
+      set -x
+      cd {{ shot_path_nas }}/cache
+      /home/centos/.local/bin/aws s3 sync {{ shot_path_bucket }}/cache . --include "*"
+    become_user: centos
+    tags:
+      - sync-remote
+
+  - name: ensure dir exists.
+    file:
+      path: "{{ shot_path_nas }}/houdini"
+      state: directory
+      owner: "{{ variable_user }}"
+    become: true
+    tags:
+      - sync-remote
+
+  - name: sync houdini files
+    shell: |
+      set -x
+      cd {{ shot_path_nas }}/houdini
+      /home/centos/.local/bin/aws s3 sync {{ shot_path_bucket }}/houdini . --include "*"
+    become_user: centos
+    tags:
+      - sync-remote
+
+
+#   - name: S3 GET objects
+#     aws_s3:
+#       bucket: "{{ bucket }}"
+#       object: "{{ show }}/{{ seq }}/{{ shot }}/asset"
+#       dest: "/{{ pool_name }}/{{ volume_name }}/"
+#       mode: get
+#       aws_access_key: "{{ aws_access_key }}"
+#       aws_secret_key: "{{ aws_secret_key }}"
+#       region: "{{ aws_region }}"

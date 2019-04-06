@@ -1,0 +1,68 @@
+---
+#tasks file for roles/aws-cli
+
+- name: install mkpasswd, pip, pexpect, passlib
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - whois
+    - python-pip
+    # - python-pexpect
+    - python-passlib
+    - zip
+    # - openvpn
+    # - nfs-common
+
+- name: upgrade pip
+  shell: |
+    pip install --upgrade pip
+  become: true
+  
+# - name: upgrade pip, force upgrade
+#   pip:
+#     name: pip
+#     extra_args: --upgrade
+#   become_user: centos
+#   become: true
+
+- name: install awscli, force upgrade
+  pip: 
+    name: awscli
+    extra_args: --upgrade --user
+  become_user: centos
+  become: true
+
+- name: install pexpect
+  pip: 
+    name: pexpect
+    extra_args: --upgrade --user
+  become_user: centos
+  become: true
+
+# - name: install the python boto package, force upgrade
+#   apt: 
+#     name: python-boto
+#   become_user: centos
+#   become: true
+
+- name: install the boto package, force upgrade
+  pip: 
+    name: boto3
+  become_user: centos
+  become: true
+
+- name: Case insensitive password string match
+  expect:
+    command: /home/centos/.local/bin/aws configure
+    responses:
+      .*Access Key ID \[.*\]: "{{ aws_access_key }}"
+      .*Secret Access Key \[.*\]: "{{ aws_secret_key }}"
+      .*region name \[.*\]: "{{ aws_region }}"
+      .*output format \[.*\]: json
+  become_user: centos
+  become: true
+  #no_log: true
+
+# example usage:
+# ansible-playbook -i ansible/inventory ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_node_centos"

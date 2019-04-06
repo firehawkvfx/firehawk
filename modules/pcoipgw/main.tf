@@ -264,7 +264,7 @@ resource "aws_instance" "pcoipgw" {
   }
 
   tags {
-    Name  = "workstation_centos"
+    Name  = "gateway_centos"
     Route = "public"
     #Role  = "workstation_centos"
   }

@@ -108,7 +108,7 @@ variable "instance_type" {
 
   default = {
     low = "m4.xlarge",
-    high = "m5.4xlarge"
+    high = "m5.12xlarge"
   }
 }
 
@@ -363,7 +363,7 @@ manage_etc_hosts: false
 USERDATA
 
   tags {
-    Name  = "SoftNAS1_PlatinumConsumptionLowerCompute"
+    Name  = "SoftNAS1_PlatinumConsumption${var.softnas_mode}Compute"
     Route = "private"
     Role  = "softnas"
   }
@@ -396,6 +396,8 @@ resource "null_resource" "provision_softnas" {
       ansible-playbook -i ansible/inventory ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.softnas1.private_ip} bastion_ip=${var.bastion_ip}"
       ansible-playbook -i ansible/inventory ansible/softnas-init.yaml -v
       ansible-playbook -i ansible/inventory ansible/softnas-update.yaml -v
+      #ansible-playbook -i ansible/inventory ansible/aws-cli.yaml -v --extra-vars "variable_user=centos variable_host=role_softnas"
+      #ansible-playbook -i ansible/inventory ansible/aws-cli-ec2.yaml -v --extra-vars "variable_user=centos variable_host=role_softnas"
   EOT
   }
 }
