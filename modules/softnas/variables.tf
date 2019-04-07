@@ -45,16 +45,11 @@ variable "skip_update" {
   default = false
 }
 
-# variable "softnas_export_path" {
-#   default = "/naspool2/nasvol2"
-# }
-
 variable "vpn_cidr" {}
 variable "remote_subnet_cidr" {}
 
 variable "remote_ip_cidr" {}
 
-# variable "softnas_user_password" {}
 
 variable "softnas_role_name" {
   default = "SoftNAS_HA_IAM"
@@ -71,22 +66,27 @@ variable "softnas2_private_ip1" {}
 
 variable "softnas2_private_ip2" {}
 
-# variable "softnas1_export_path" {}
+#softnas provides no ability to query the ami you will need by region.  it must be added to the map manually.
+variable "instance_type" {
+  type = "map"
 
-# variable "softnas2_export_path" {}
-
-variable "softnas1_volumes" {
-  default = []
+  default = {
+    low = "m4.xlarge",
+    high = "m5.2xlarge"
+  }
 }
 
-variable "softnas2_volumes" {
-  default = []
+variable "softnas_mode" {
+  default="low"
 }
 
-variable "softnas1_mounts" {
-  default = []
-}
+variable "aws_region" {}
 
-variable "softnas2_mounts" {
-  default = []
+variable "selected_ami" {
+  type = "map"
+
+  default = {
+    low_ap-southeast-2 = "ami-a24a98c0",
+    high_ap-southeast-2 = "ami-5e7ea03c"
+  }
 }
