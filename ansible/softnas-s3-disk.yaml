@@ -205,6 +205,7 @@
     s3_disk_region: "{{ hostvars['ansible_control']['s3_disk_region'] }}"
     existing_bucket: "{{ hostvars['ansible_control']['existing_bucket'] }}"
     bucket_location: "{{ hostvars['ansible_control']['bucket_location'] }}"
+    import_pool: "{{ hostvars['ansible_control']['import_pool'] }}"
   
   # create nfs share.
 
@@ -214,6 +215,7 @@
       path: /etc/exports
       line: "# These mounts are managed in that ansible playbook softnas-s3-disk.yaml and only one volume is exported currently for testing"
       backup: yes
+    when: import_pool
 
   - name: insert marker start
     lineinfile:
@@ -221,6 +223,7 @@
       insertafter: "^# These mounts.*$"
       line: "# BEGIN ANSIBLE MANAGED BLOCK"
       backup: yes
+    when: import_pool
 
   - name: insert marker end
     lineinfile:
@@ -228,6 +231,7 @@
       insertafter: "# BEGIN ANSIBLE MANAGED BLOCK"
       line: "# END ANSIBLE MANAGED BLOCK"
       create: true
+    when: import_pool
 
   - name: insert/update block 
     blockinfile:
@@ -236,14 +240,17 @@
       content: |
         /{{ pool_name }}/{{ volume_name }}/ *(async,insecure,no_subtree_check,no_root_squash,rw,nohide)
         # /export *(async,insecure,no_subtree_check,no_root_squash,rw,nohide,fsid=0)
+    when: import_pool
 
   - name: update exports
     command: "exportfs -r -a"
     register: update_exports_output
     become: true
+    when: import_pool
 
   - debug:
       msg: "{{ update_exports_output.stdout }}"
+    when: import_pool
         
   # - name: restart services after export updates originally recommended by softnas, but after testing may be not needed.
   #   service:

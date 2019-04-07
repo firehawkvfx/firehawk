@@ -2,25 +2,6 @@ variable "sleep" {
   default = false
 }
 
-variable "softnas1_volumes" {
-  #default = "['vol-0dfdb2894360f63c', 'vol-071223525b8153d6a', 'vol-0a21c23523507a753', 'vol-0c07032346264cef86']"
-}
-
-variable "softnas2_volumes" {
-  default = []
-
-  #"vol-0b0477246246cd10", "vol-0772424689c232", "vol-09d246246316c47", "vol-0346247235647834"
-}
-
-variable "softnas1_mounts" {
-  default = ["/dev/sdf", "/dev/sdg", "/dev/sdh", "/dev/sdi"]
-}
-
-variable "softnas2_mounts" {
-  default = ["/dev/sdf", "/dev/sdg", "/dev/sdh", "/dev/sdi"]
-}
-
-
 #you can get an ssl certificate arn by verifying your domain with aws certificate manager.
 variable "cert_arn" {}
 
@@ -73,6 +54,7 @@ variable "softnas2_cloudformation_role_name" {
   default = "FCB-Softnas2Role"
 }
 
+variable "envtier" {}
 variable "softnas1_private_ip1" {}
 
 variable "softnas1_private_ip2" {}

@@ -104,9 +104,18 @@ variable "softnas_skip_update" {
   default = false
 }
 
+
+variable "softnas_use_custom_ami" {}
+variable "softnas_custom_ami" {}
+
 module "softnas" {
   source                         = "./modules/softnas"
   cloudformation_role_stack_name = "${var.softnas1_cloudformation_role_name}"
+
+  envtier = "${var.envtier}"
+
+  softnas_use_custom_ami = "${var.softnas_use_custom_ami}"
+  softnas_custom_ami = "${var.softnas_custom_ami}"
 
   #softnas_role = "${module.softnas_role.softnas_role_name}"
 
@@ -129,10 +138,9 @@ module "softnas" {
   bastion_ip = "${module.bastion.public_ip}"
   softnas1_private_ip1 = "${var.softnas1_private_ip1}"
   softnas1_private_ip2 = "${var.softnas1_private_ip2}"
-  softnas1_mounts = "${var.softnas1_mounts}"
   softnas2_private_ip1 = "${var.softnas2_private_ip1}"
   softnas2_private_ip2 = "${var.softnas2_private_ip2}"
-  softnas2_mounts = "${var.softnas2_mounts}"
+
   s3_disk_size = "${var.s3_disk_size}"
   #skipping os updates will allow faster rollout, but may be non functional
   skip_update = "${var.softnas_skip_update}"

@@ -16,7 +16,7 @@
       aws_secret_key: "{{ aws_secret_key }}"
       region: "{{ aws_region }}"
     tags:
-      - sync-local
+      - sync-local-push
 
   - name: sync hip files
     shell: |
@@ -25,7 +25,7 @@
       aws s3 sync . s3://{{ bucket }}/{{ show }}/{{ seq }}/{{ shot }}/houdini --include "*.hip" --exclude "*backup/*" --exclude "*geo/*" --exclude "*pdgtemp/*"
     become_user: vagrant
     tags:
-      - sync-local
+      - sync-local-push
 
   - name: sync asset files
     shell: |
@@ -34,7 +34,7 @@
       aws s3 sync . s3://{{ bucket }}/{{ show }}/{{ seq }}/{{ shot }}/asset --include "*"
     become_user: vagrant
     tags:
-      - sync-local
+      - sync-local-push
 
   - name: sync cache files
     shell: |
@@ -43,7 +43,7 @@
       aws s3 sync . s3://{{ bucket }}/{{ show }}/{{ seq }}/{{ shot }}/cache --include "*"
     become_user: vagrant
     tags:
-      - sync-local
+      - sync-local-push
 
   # - name: ensure the houdini path is syncronised with the bucket
   #   s3_sync:
@@ -76,7 +76,8 @@
       # https://github.com/aws/aws-cli/issues/2598
 
 #after aws configure, you can sync with this example
-# ansible-playbook -i "ansible/inventory" ansible/s3-sync.yaml --tags "sync-remote" --extra-vars "variable_user=centos variable_host=role_node_centos volume_path=/prod"
+# ansible-playbook -i "ansible/inventory" ansible/s3-sync.yaml --tags "sync-remote-pull" --extra-vars "variable_user=centos variable_host=role_node_centos volume_path=/prod"
+# ansible-playbook -i "ansible/inventory" ansible/s3-sync.yaml --tags "sync-remote-push" --extra-vars "variable_user=centos variable_host=role_softnas volume_path=/pool0/volume0"
 
 - hosts: "{{ variable_host | default('role_softnas') }}"
   remote_user: "{{ variable_user | default('centos') }}"
@@ -107,6 +108,21 @@
     shell: |
       mount -a
     become: true
+    tags:
+      - sync-remote-pull
+      - sync-remote-push
+
+  - name: set aws environment variables and test connection
+    shell: |
+      export HISTCONTROL=ignorespace
+        export AWS_ACCESS_KEY_ID={{ aws_access_key }}
+        export AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
+        export AWS_DEFAULT_REGION={{ aws_region }}
+      aws s3 ls
+    become: true
+    tags:
+      - sync-remote-pull
+      - sync-remote-push
     
   - name: ensure dir exists.
     file:
@@ -115,16 +131,32 @@
       owner: "{{ variable_user }}"
     become: true
     tags:
-      - sync-remote
+      - sync-remote-pull
+      - sync-remote-push
 
-  - name: sync asset files
+# aws command may need to be /home/{{ variable_user }}/.local/bin/
+  - name: sync asset files pull
     shell: |
       set -x
       cd {{ asset_path_nas }}
-      /home/centos/.local/bin/aws s3 sync {{ asset_path_bucket }} . --include "*"
-    become_user: centos
+      aws s3 sync {{ shot_path_bucket }}/asset . --include "*"
+    become_user: "{{ variable_user }}"
     tags:
-      - sync-remote
+      - sync-remote-pull
+
+  - name: sync asset files push
+    shell: |
+      export HISTCONTROL=ignorespace
+        export AWS_ACCESS_KEY_ID={{ aws_access_key }}
+        export AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
+        export AWS_DEFAULT_REGION={{ aws_region }}
+      set -x
+      cd {{ asset_path_nas }}
+      aws s3 sync . {{ shot_path_bucket }}/asset --include "*"
+    become_user: "{{ variable_user }}"
+    tags:
+      - sync-remote-pull
+      - sync-remote-push
 
   - name: ensure dir exists.
     file:
@@ -133,16 +165,34 @@
       owner: "{{ variable_user }}"
     become: true
     tags:
-      - sync-remote
+      - sync-remote-pull
+      - sync-remote-push
 
-  - name: sync cache files
+  - name: sync cache files pull
     shell: |
+      export HISTCONTROL=ignorespace
+        export AWS_ACCESS_KEY_ID={{ aws_access_key }}
+        export AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
+        export AWS_DEFAULT_REGION={{ aws_region }}
       set -x
       cd {{ shot_path_nas }}/cache
-      /home/centos/.local/bin/aws s3 sync {{ shot_path_bucket }}/cache . --include "*"
-    become_user: centos
+      aws s3 sync {{ shot_path_bucket }}/cache . --include "*"
+    become_user: "{{ variable_user }}"
     tags:
-      - sync-remote
+      - sync-remote-pull
+
+  - name: sync cache files push
+    shell: |
+      export HISTCONTROL=ignorespace
+        export AWS_ACCESS_KEY_ID={{ aws_access_key }}
+        export AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
+        export AWS_DEFAULT_REGION={{ aws_region }}
+      set -x
+      cd {{ shot_path_nas }}/cache
+      aws s3 sync . {{ shot_path_bucket }}/cache --include "*"
+    become_user: "{{ variable_user }}"
+    tags:
+      - sync-remote-push
 
   - name: ensure dir exists.
     file:
@@ -151,16 +201,34 @@
       owner: "{{ variable_user }}"
     become: true
     tags:
-      - sync-remote
+      - sync-remote-pull
+      - sync-remote-push
 
-  - name: sync houdini files
+  - name: sync houdini files pull
     shell: |
+      export HISTCONTROL=ignorespace
+        export AWS_ACCESS_KEY_ID={{ aws_access_key }}
+        export AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
+        export AWS_DEFAULT_REGION={{ aws_region }}
       set -x
       cd {{ shot_path_nas }}/houdini
-      /home/centos/.local/bin/aws s3 sync {{ shot_path_bucket }}/houdini . --include "*"
-    become_user: centos
+      aws s3 sync {{ shot_path_bucket }}/houdini . --include "*"
+    become_user: "{{ variable_user }}"
     tags:
-      - sync-remote
+      - sync-remote-pull
+
+  - name: sync houdini files push
+    shell: |
+      export HISTCONTROL=ignorespace
+        export AWS_ACCESS_KEY_ID={{ aws_access_key }}
+        export AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
+        export AWS_DEFAULT_REGION={{ aws_region }}
+      set -x
+      cd {{ shot_path_nas }}/houdini
+      aws s3 sync . {{ shot_path_bucket }}/houdini --include "*"
+    become_user: "{{ variable_user }}"
+    tags:
+      - sync-remote-push
 
 
 #   - name: S3 GET objects

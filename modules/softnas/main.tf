@@ -101,34 +101,10 @@ resource "aws_iam_instance_profile" "softnas_profile" {
 #   value = "${aws_cloudformation_stack.SoftNASRole.outputs["SoftNasRoleName"]}"
 # }
 
-#softnas provides no ability to query the ami you will need by region.  it must be added to the map manually.
 
-variable "instance_type" {
-  type = "map"
-
-  default = {
-    low = "m4.xlarge",
-    high = "m5.12xlarge"
-  }
-}
-
-variable "softnas_mode" {
-  default="low"
-}
-
-variable "aws_region" {}
 
 locals {
   softnas_mode_ami = "${var.softnas_mode}_${var.aws_region}"
-}
-
-variable "selected_ami" {
-  type = "map"
-
-  default = {
-    low_ap-southeast-2 = "ami-a24a98c0",
-    high_ap-southeast-2 = "ami-5e7ea03c"
-  }
 }
 
 resource "random_uuid" "test" {}
@@ -315,8 +291,12 @@ resource "aws_network_interface" "nas1eth1" {
   }
 }
 
+variable "softnas_use_custom_ami" {}
+
+variable "softnas_custom_ami" {}
+
 resource "aws_instance" "softnas1" {
-  ami           = "${lookup(var.selected_ami, local.softnas_mode_ami)}"
+  ami           = "${var.softnas_use_custom_ami ? var.softnas_custom_ami : lookup(var.selected_ami, local.softnas_mode_ami)}"
  
   instance_type = "${lookup(var.instance_type, var.softnas_mode)}"
 
@@ -369,6 +349,9 @@ USERDATA
   }
 }
 
+
+# When using ssd tiering, you must manually create the ebs volumes and specify the ebs id's in your secrets.  Then they can be locally restored automatically and attached to the instance.
+
 resource "null_resource" "provision_softnas" {
   depends_on = ["aws_instance.softnas1"]
 
@@ -396,8 +379,8 @@ resource "null_resource" "provision_softnas" {
       ansible-playbook -i ansible/inventory ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.softnas1.private_ip} bastion_ip=${var.bastion_ip}"
       ansible-playbook -i ansible/inventory ansible/softnas-init.yaml -v
       ansible-playbook -i ansible/inventory ansible/softnas-update.yaml -v
-      #ansible-playbook -i ansible/inventory ansible/aws-cli.yaml -v --extra-vars "variable_user=centos variable_host=role_softnas"
-      #ansible-playbook -i ansible/inventory ansible/aws-cli-ec2.yaml -v --extra-vars "variable_user=centos variable_host=role_softnas"
+      # #ansible-playbook -i ansible/inventory ansible/aws-cli.yaml -v --extra-vars "variable_user=centos variable_host=role_softnas"
+      # #ansible-playbook -i ansible/inventory ansible/aws-cli-ec2.yaml -v --extra-vars "variable_user=centos variable_host=role_softnas"
   EOT
   }
 }
@@ -411,27 +394,72 @@ resource "random_id" "ami_unique_name" {
   byte_length = 8
 }
 
-resource "aws_ami_from_instance" "softnas1" {
-  depends_on         = ["null_resource.provision_softnas"]
-  name               = "softnas1_${aws_instance.softnas1.id}_${random_id.ami_unique_name.hex}"
-  source_instance_id = "${aws_instance.softnas1.id}"
+variable "testing" {
+  default = false
+}
 
-  tags {
-    Name = "softnas1_${aws_instance.softnas1.id}_${random_id.ami_unique_name.hex}"
+# when testing, the local can be set to disable ami creation in a dev environment only - for faster iteration.
+locals {
+  testing = "${ var.envtier=="prod" ? false : var.testing }"
+  create_ami_testing = "${local.testing ? 0 : 1}"
+  create_ami = "${var.softnas_use_custom_ami ? false : local.create_ami_testing}"
+}
+
+
+# At this point in time, AMI's created by terraform are destroyed with terraform destroy.  we desire the ami to be persistant for faster future redeployment, so we create the ami with ansible instead.
+resource "null_resource" "create_ami" {
+  count       = "${local.create_ami ? 1 : 0}"
+  depends_on = ["aws_instance.softnas1", "null_resource.provision_softnas"]
+
+  triggers {
+    instanceid = "${ aws_instance.softnas1.id }"
+  }
+
+  provisioner "remote-exec" {
+    connection {
+      user                = "centos"
+      host                = "${aws_instance.softnas1.private_ip}"
+      bastion_host        = "${var.bastion_ip}"
+      private_key         = "${var.private_key}"
+      bastion_private_key = "${var.private_key}"
+      type                = "ssh"
+      timeout             = "10m"
+    }
+
+    inline = ["set -x && echo 'booted'"]
+  }
+  provisioner "local-exec" {
+    command = <<EOT
+      set -x
+      cd /vagrant
+      ansible-playbook -i ansible/inventory ansible/aws-ami.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.id} ami_name=softnas_ami description=softnas1_${aws_instance.softnas1.id}_${random_id.ami_unique_name.hex}"
+      # aws ec2 start-instances --instance-ids ${aws_instance.softnas1.id}
+  EOT
   }
 }
 
-# When using ssd tiering, you must manually create the ebs volumes and specify the ebs id's in your secrets.  Then they can be locally restored automatically and attached to the instance.
+
+# While instance is stopped, we attach ebs volumes.
 resource "aws_volume_attachment" "softnas1_ebs_att" {
-  count       = "${length(var.softnas1_volumes)}"
-  device_name = "${element(var.softnas1_mounts, count.index)}"
-  volume_id   = "${element(var.softnas1_volumes, count.index)}"
+  depends_on         = ["aws_instance.softnas1", "null_resource.create_ami"]
+  count       = "${length(local.softnas1_volumes)}"
+  device_name = "${element(local.softnas1_mounts, count.index)}"
+  volume_id   = "${element(local.softnas1_volumes, count.index)}"
   instance_id = "${aws_instance.softnas1.id}"
+}
+
+# Start instance so that s3 disks can be attached
+resource "null_resource" "start-softnas-after-ebs-attach" {
+  depends_on         = ["aws_volume_attachment.softnas1_ebs_att"]
+
+  provisioner "local-exec" {
+    command = "aws ec2 start-instances --instance-ids ${aws_instance.softnas1.id}"
+  }
 }
 
 # If ebs volumes are attached, don't automatically import the pool. manual intervention may be required.
 locals {
-  import_pool = "${length(var.softnas1_volumes) > 0 ? false : true}"
+  import_pool = "${length(local.softnas1_volumes) > 0 ? false : true}"
 }
 
 # Once an AMI is built above, then we test the connection to the instance via a bastion below.
@@ -454,8 +482,9 @@ output "softnas1_instanceid" {
 output "softnas1_private_ip" {
   value = "${aws_instance.softnas1.private_ip}"
 }
+
 resource "null_resource" "provision_softnas_volumes" {
-  depends_on = ["aws_ami_from_instance.softnas1"]
+  depends_on = ["aws_volume_attachment.softnas1_ebs_att"]
 
   triggers {
     instanceid = "${ aws_instance.softnas1.id }"

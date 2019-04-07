@@ -93,6 +93,7 @@
       sleep: 5
       delay: 180
       timeout: 600
+    when: update_file.stat.exists and softnas_runupdate
 
   - name: "Verify update completed"
     wait_for:
