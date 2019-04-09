@@ -4,11 +4,35 @@
   hostname:
     name: "{{ openfirehawkserver_name }}"
 
-- name: add myself to /etc/hosts
-  lineinfile:
-    dest: /etc/hosts
-    line: "{{ openfirehawkserver }} {{ openfirehawkserver_name }}"
-    state: present
+# - name: add myself to /etc/hosts
+#   lineinfile:
+#     dest: /etc/hosts
+#     line: "{{ openfirehawkserver }} {{ openfirehawkserver_name }}"
+#     state: present
+
+- name: insert/update block in /etc/hosts
+  blockinfile:
+    path: /etc/hosts
+    block: |
+      {{ item.ip }} {{ item.hostname }}
+    marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.hostname }}"
+  with_items:
+    - { ip: "{{ openfirehawkserver }}", hostname: "{{ openfirehawkserver_name }}" }
+
+- name: check if hosts template exists
+  stat:
+    path: /vagrant/secrets/hosts
+  register: hosts_template
+
+- name: insert/update block in /etc/hosts from template
+  blockinfile:
+    path: /etc/hosts
+    block: |
+      {{ item.content }}
+    marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.path }}"
+  with_items:
+    - { path: "/vagrant/secrets/hosts", content: "{{ lookup('file', '/vagrant/secrets/hosts') }}" }
+  when: hosts_template.stat.exists == True
 
 - name: Allow new lines from ansible shell output.  Logout or reboot for this to take effect.
   lineinfile:

@@ -78,6 +78,7 @@
 #after aws configure, you can sync with this example
 # ansible-playbook -i "ansible/inventory" ansible/s3-sync.yaml --tags "sync-remote-pull" --extra-vars "variable_user=centos variable_host=role_node_centos volume_path=/prod"
 # ansible-playbook -i "ansible/inventory" ansible/s3-sync.yaml --tags "sync-remote-push" --extra-vars "variable_user=centos variable_host=role_softnas volume_path=/pool0/volume0"
+# ansible-playbook -i "ansible/inventory" ansible/s3-sync.yaml --tags "sync-remote-pull" --extra-vars "variable_user=centos variable_host=role_softnas volume_path=/pool1/volume1"
 
 - hosts: "{{ variable_host | default('role_softnas') }}"
   remote_user: "{{ variable_user | default('centos') }}"
@@ -137,6 +138,10 @@
 # aws command may need to be /home/{{ variable_user }}/.local/bin/
   - name: sync asset files pull
     shell: |
+      export HISTCONTROL=ignorespace
+        export AWS_ACCESS_KEY_ID={{ aws_access_key }}
+        export AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
+        export AWS_DEFAULT_REGION={{ aws_region }}
       set -x
       cd {{ asset_path_nas }}
       aws s3 sync {{ shot_path_bucket }}/asset . --include "*"

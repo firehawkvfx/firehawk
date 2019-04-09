@@ -80,3 +80,30 @@
     name: Deadline10db
     state: restarted
   become: true
+
+  # set permissions on deadline repository so that scripts can be copied by the vagrant user to remote hosts
+# - name: Ensure group "syscontrol" exists
+#   group:
+#     name: syscontrol
+#     state: present
+#     gid: 9003
+#   become: true
+
+# - name: adding existing users to group syscontrol
+#   user:
+#     name: item
+#     groups: syscontrol
+#     append: yes
+#   with_items:
+#   - deadlineuser
+#   - vagrant
+#   become: true
+
+# - name: set permissions
+#   file:
+#     path: /opt/Thinkbox/DeadlineRepository10/
+#     owner: deadlineuser
+#     group: syscontrol
+#     mode: u+r,g+r
+#     recurse: yes
+#   become: true

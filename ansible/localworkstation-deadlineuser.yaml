@@ -1,0 +1,593 @@
+# To configure ssh for a local workstation, read https://www.tecmint.com/ssh-passwordless-login-using-ssh-keygen-in-5-easy-steps/
+
+#then run these two commmands.  for some reason ping is required first or hang on gathering facts occurs.
+# ansible -m ping workstation.firehawkvfx.com -i "$TF_VAR_inventory"
+# ansible-playbook -i "$TF_VAR_inventory" ansible/localworkstation-deadlineuser.yaml --tags "onsite-install"
+
+# these permissions are now handled post install of the deadline db.
+- hosts: ansible_control
+  become: true
+
+  # set permissions on dealine repository so that scripts can be copied by the vagrant user.
+  tasks:
+  - name: Ensure group "syscontrol" exists
+    group:
+      name: syscontrol
+      state: present
+      gid: 9003
+    become: true
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: adding existing user "{{ item }}" to group syscontrol
+    user:
+      name: "{{ item }}"
+      groups: syscontrol
+      append: yes
+    with_items:
+    - deadlineuser
+    - vagrant
+    become: true
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: Kill SSH because otherwise the user will not be added to the group.
+    shell: sleep 1; pkill -u {{ ansible_ssh_user }} sshd
+    async: 3
+    poll: 2
+
+  - name: reset ssh connection to allow user changes to affect 'current login user'
+    meta: reset_connection
+
+# these permissions are now handled post install of the deadline db.
+- hosts: ansible_control
+  become: true
+
+  tasks:
+  - name: set permissions
+    file:
+      path: /opt/Thinkbox/DeadlineRepository10/
+      owner: deadlineuser
+      group: syscontrol
+      mode: u+r,g+r
+      recurse: yes
+    become: true
+    tags:
+    - cloud-install
+    - onsite-install
+
+- hosts: workstation.firehawkvfx.com
+  remote_user: user
+  become: true
+
+  tasks:
+  - name: establish connect test
+    stat:
+      path: "/home/deadlineuser"
+    register: result
+    tags:
+    - cloud-install
+    - onsite-install
+
+# - hosts: workstation.firehawkvfx.com
+#   remote_user: user
+#   become: true
+
+#   vars_prompt:
+#   - name: "my_password"
+#     prompt: "Enter password for new deadlineuser"
+#     private: yes
+#     encrypt: "sha512_crypt"
+#     confirm: yes
+#     salt_size: 7
+
+#   tasks:
+#   - stat:
+#       path: "/home/deadlineuser"
+#     register: result
+
+#   - debug:
+#       msg: "deadlineuser home directory exists already.  Will not create user or make any changes.  The password was not set."
+#     when: result.stat.exists == true and result.stat.isdir == true
+
+#   - debug:
+#       msg: "deadlineuser home directory doesn't exist.  Will create user and set password."
+#     when: result.stat.exists == false
+
+#   - name: new group
+#     group:
+#       name: deadlineuser
+#       gid: 9001
+#       state: present
+
+#   - name: Create a login user
+#     user:
+#       name: deadlineuser
+#       uid: 9001
+#       password: "{{ my_password }}"
+#       groups: # Empty by default, here we give it some groups
+#         - wheel
+#         - deadlineuser
+#       state: present
+#       shell: /bin/bash # Defaults to /bin/bash
+#       system: no # Defaults to no
+#       createhome: yes # Defaults to yes
+#     when: result.stat.exists == false
+
+- hosts: workstation.firehawkvfx.com
+  remote_user: user
+  become: true
+
+  vars:
+    hostname: workstation.firehawkvfx.com
+    pcoip: False
+
+  tasks:
+  - name: Create submission scripts dir
+    file: 
+      path: /opt/Thinkbox/DeadlineRepository10/submission
+      state: directory
+      mode: 0700
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: Ansible copy directory to the remote server
+    copy:
+      src: "/opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/{{ item }}"
+      dest: "/home/deadlineuser/Thinkbox/Deadline10/submitters/HoudiniSubmitter"
+      # mode: 0700
+      owner: deadlineuser
+      group: deadlineuser
+    become_user: deadlineuser
+    with_items:
+    - otls
+    - soho
+    - DeadlineHoudiniClient.py
+    - MainMenuCommon.xml
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: set homedir in xml.
+    replace:
+      path: /home/deadlineuser/Thinkbox/Deadline10/submitters/HoudiniSubmitter/MainMenuCommon.xml
+      regexp: 'HOMEDIR'
+      replace: '~/Thinkbox/Deadline10'
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: set HOUDINI_PATH in houdini.env.
+    replace:
+      path: /home/deadlineuser/houdini17.5/houdini.env
+      regexp: '.*HOUDINI_PATH =.*'
+      replace: 'HOUDINI_PATH = "$HOUDINI_PATH; ~/Thinkbox/Deadline10/submitters/HoudiniSubmitter;&"'
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: set HOUDINI_MENU_PATH in houdini.env.
+    replace:
+      path: /home/deadlineuser/houdini17.5/houdini.env
+      regexp: '.*HOUDINI_MENU_PATH =.*'
+      replace: 'HOUDINI_MENU_PATH = "$HOUDINI_MENU_PATH; ~/Thinkbox/Deadline10/submitters/HoudiniSubmitter;&"'
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: Ansible copy directory to the remote server
+    copy:
+      src: "/opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/CallDeadlineCommand.py"
+      dest: "/home/deadlineuser/houdini17.5/python2.7libs/"
+    become_user: deadlineuser
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: Ansible copy directory to the remote server
+    copy:
+      src: "/opt/Thinkbox/DeadlineRepository10/submission/{{ item }}"
+      dest: "/opt/Thinkbox/DeadlineRepository10/submission/{{ item }}"
+      owner: deadlineuser
+      group: deadlineuser
+    with_items:
+    - HServer
+    - Houdini
+    - Nuke
+    become_user: deadlineuser
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: upgrade all packages - yum update
+    yum:
+      name: '*'
+      state: latest
+    tags:
+    - cloud-install
+    - onsite-install
+
+# these packages are required to pass an encrypted string via commandline into a user pass and are suited to centos.
+  - name: install mkpasswd
+    package:
+      name: expect
+      state: present
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: install epel-release
+    package:
+      name: epel-release
+      state: present
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: install pip
+    package:
+      name: python-pip
+      state: latest
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: install pexpect
+    pip:
+      name: pexpect
+    become: yes
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: install passlib
+    pip:
+      name: passlib
+    become: yes
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: install the package, force upgrade
+    package: 
+      name: python-boto
+    become: true
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: install the package, force upgrade
+    pip: 
+      name: boto3
+    become: true
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: restart sshd.service
+    service: 
+      name: sshd
+      state: restarted
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: create Thinkbox dir
+    file: 
+      path: /opt/Thinkbox/
+      state: directory
+      mode: 0700
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: create Thinkbox cert dir
+    file: 
+      path: /opt/Thinkbox/certs
+      state: directory
+      mode: 0700
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: set deadline remote client certificate permissions locally
+    file: 
+      path: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
+      mode: 0644
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+    connection: local
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: Copy deadline remote client certificate
+    copy: 
+      src: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
+      dest: "/opt/Thinkbox/certs/"
+      mode: 0600
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: Strange requirement here.  For some reason read permissions needed for everyone to be set above or the ansible copy doesn't work.  So we set it back to normal here.
+    file: 
+      path: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
+      mode: 0640
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+    connection: local
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: create download dir
+    file: 
+      path: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
+      state: directory
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: S3 GET deadline
+    aws_s3:
+      bucket: "installers.{{ public_domain }}"
+      object: "{{ deadline_linux_filename }}"
+      dest: "/home/deadlineuser/Downloads/{{ deadline_linux_filename }}"
+      mode: get
+      aws_access_key: "{{ aws_access_key }}"
+      aws_secret_key: "{{ aws_secret_key }}"
+      region: "{{ aws_region }}"
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: create deadline installer dir
+    file: 
+      path: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
+      state: directory
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: Extract
+    unarchive:
+      src: "/home/deadlineuser/Downloads/{{ deadline_linux_filename }}"
+      dest: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
+      owner: deadlineuser
+      mode: u+x
+      remote_src: true
+    become: yes
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: "Ansible find files in subdirectory downloads"
+    find:
+      paths: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
+      patterns: "*DeadlineClient-{{ deadlineversion }}-linux-x64-installer.run"
+    register: files_matched
+    become: true
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - debug:
+      msg: "installer path: {{ files_matched.files[0].path }}"
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: set execute permissions on installer
+    file:
+      path: "{{ files_matched.files[0].path }}"
+      mode: 0700
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: deadline dependencies
+    package:
+      name: "{{ item }}"
+      state: present
+    with_items:
+      - redhat-lsb
+      - samba-client
+      - samba-common
+      - cifs-utils
+      - nfs-utils
+      - nload
+      - tree
+      - bzip2
+      - nmap
+      #- nfs-utils-lib
+    tags:
+    - cloud-install
+    - onsite-install
+
+  # mount softnas and remote nas
+  - name: create mount directories
+    file: 
+      path: "{{ item }}"
+      state: directory
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+    with_items:
+      - "{{ softnas1_path_abs }}"
+      - "{{ localnas1_path_abs }}"
+      - "{{ prod_mount_path }}"
+      - "{{ localnas1_remote_mount_path }}"
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: create localnas mount point based on location
+    file: 
+      path: "{{ localnas1_path_abs }}"
+      state: directory
+      owner: deadlineuser
+      group: deadlineuser
+    become: yes
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: insert marker start
+    lineinfile:
+      path: /etc/fstab
+      insertafter: "^#?UUID.*$"
+
+      line: "# BEGIN ANSIBLE MANAGED BLOCK"
+      backup: yes
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: insert marker end
+    lineinfile:
+      path: /etc/fstab
+      insertafter: "# BEGIN ANSIBLE MANAGED BLOCK"
+      line: "# END ANSIBLE MANAGED BLOCK"
+      create: true
+    tags:
+    - cloud-install
+    - onsite-install
+ 
+  - name: insert/update block in /etc/fstab
+    blockinfile:
+      path: /etc/fstab
+      backup: yes
+      content: |
+
+        {{ groups['role_softnas'][0] }}:{{ softnas_mount_source }} {{ softnas1_path_abs }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
+        {{ softnas1_path_abs }} {{ prod_mount_path }} none defaults,bind,timeo=14 0 0
+
+        # {{ localnas1_private_ip }}:{{ localnas1_mount_path }} {{ localnas1_path_abs }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
+        # {{ localnas1_path_abs }} {{ localnas1_remote_mount_path }} none defaults,bind,timeo=14 0 0
+    tags:
+    - cloud-install
+
+  - name: insert/update block in /etc/fstab
+    blockinfile:
+      path: /etc/fstab
+      backup: yes
+      content: |
+        {{ localnas1_private_ip }}:/data /data nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
+        {{ localnas1_private_ip }}:{{ localnas1_mount_path }} {{ localnas1_path_abs }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
+        {{ localnas1_path_abs }} {{ localnas1_mount_path }} none defaults,bind 0 0
+    tags:
+    - onsite-install
+
+  - name: insert/update block in /etc/sysconfig/network
+    blockinfile:
+      path: /etc/sysconfig/network
+      backup: yes
+      content: |
+        NETWORKDELAY=20
+    tags:
+    - onsite-install
+
+  - name: mount all changes to fstab
+    command: mount -a
+    become: true
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - stat:
+      path: /var/lib/Thinkbox/Deadline10/deadline.ini
+    register: deadline_ini_file
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: get date
+    shell: |
+      date +"%Y%m%d_%H%M%S"
+    register: current_date
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - set_fact:
+      backup_dest: "/var/lib/Thinkbox/Deadline10/deadline.bak_{{ current_date.stdout }}"
+    when: deadline_ini_file.stat.exists
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - debug:
+      msg: "will backup file to {{ backup_dest }}"
+    when: deadline_ini_file.stat.exists
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: move old config to backup.  this prevents old conf settings staying around.
+    command: "mv /var/lib/Thinkbox/Deadline10/deadline.ini {{ backup_dest }}"
+    when: deadline_ini_file.stat.exists
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: install deadline client
+    shell: |
+      cd /home/deadlineuser/Downloads/
+      set -x
+      {{ files_matched.files[0].path }} --mode unattended --debuglevel 2 --prefix {{ deadline_prefix }} --connectiontype Remote --noguimode true --licensemode UsageBased --launcherdaemon true --slavestartup 1 --daemonuser {{ user_deadlineuser_name }} --enabletls true --tlsport 4433 --httpport 8080 --proxyrootdir {{ deadline_proxy_root_dir }} --proxycertificate {{ deadline_proxy_certificate }} --proxycertificatepassword {{ deadline_proxy_certificate_password }}
+    register: deadline_client_install_output_shell
+    become: true
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: check deadline client install output
+    debug:
+      msg: "{{ deadline_client_install_output_shell.stdout }}"
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: check /var/lib/Thinkbox/Deadline10/deadline.ini
+    command: cat /var/lib/Thinkbox/Deadline10/deadline.ini 
+    register: deadline_config
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - debug: msg="{{ deadline_config.stdout }}"
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - debug: msg="{{ deadline_config.stderr }}"
+    tags:
+    - cloud-install
+    - onsite-install

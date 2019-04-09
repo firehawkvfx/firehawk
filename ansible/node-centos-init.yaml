@@ -40,7 +40,7 @@
 
 
 - hosts: "{{ variable_host | default('role_node_centos') }}"
-  remote_user: centos
+  remote_user: "{{ variable_user | default('centos') }}"
   become: true
 
   vars:
@@ -81,6 +81,7 @@
     yum:
       name: '*'
       state: latest
+
 # these packages are required to pass an encrypted string via commandline into a user pass and are suited to centos.
   - name: install mkpasswd
     package:
@@ -138,6 +139,8 @@
       responses:
         (?i)password: "{{ user_deadlineuser_pw }}"
         (?i)Retype new password: "{{ user_deadlineuser_pw }}"
+    
+    
 
   - name: set user pass deadlineuser
     expect:
@@ -145,6 +148,8 @@
       responses:
         (?i)password: "{{ user_deadlineuser_pw }}"
         (?i)Retype new password: "{{ user_deadlineuser_pw }}"
+    
+    
 
   - name: adding a new user requires a restart of pcoip service if present
     shell: |
