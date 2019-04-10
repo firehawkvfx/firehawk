@@ -140,16 +140,12 @@
         (?i)password: "{{ user_deadlineuser_pw }}"
         (?i)Retype new password: "{{ user_deadlineuser_pw }}"
     
-    
-
   - name: set user pass deadlineuser
     expect:
       command: passwd deadlineuser
       responses:
         (?i)password: "{{ user_deadlineuser_pw }}"
         (?i)Retype new password: "{{ user_deadlineuser_pw }}"
-    
-    
 
   - name: adding a new user requires a restart of pcoip service if present
     shell: |

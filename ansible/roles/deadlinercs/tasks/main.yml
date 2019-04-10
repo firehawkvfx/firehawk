@@ -29,13 +29,6 @@
     owner: deadlineuser
   become: yes
 
-- name: set permissions
-  file:
-    path: /opt/Thinkbox/certs/Deadline10RemoteClient.pfx
-    mode: u=r,g=r,o=r
-    owner: deadlineuser
-  become: yes
-
 - name: deadline must have full access to repository
   file: 
     path: /opt/Thinkbox/DeadlineRepository10

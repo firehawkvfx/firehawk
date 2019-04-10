@@ -6,8 +6,8 @@ ansible-playbook -i ansible/inventory/hosts ansible/openfirehawkserver_houdini.y
 ansible-playbook -i ansible/inventory/hosts ansible/aws-new-key.yaml -v
 
 # This provisions the deadline slave and monitor on another local workstation.
-ansible -m ping workstation.firehawkvfx.com -i "$TF_VAR_inventory"
-ansible-playbook -i "$TF_VAR_inventory" ansible/localworkstation-deadlineuser.yaml --tags "onsite-install"
+# ansible -m ping workstation.firehawkvfx.com -i "$TF_VAR_inventory"
+# ansible-playbook -i "$TF_VAR_inventory" ansible/localworkstation-deadlineuser.yaml --tags "onsite-install"
 
 #reboot
 # terraform apply --auto-approve

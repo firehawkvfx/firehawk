@@ -62,14 +62,14 @@
 #     recurse: yes
 #   become: yes
 
-- name: set read permissions for remote cert
-  file: 
-    path: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
-    mode: 0640
-    owner: deadlineuser
-    group: deadlineuser
-  become: yes
-  connection: local
+# - name: set read permissions for remote cert
+#   file: 
+#     path: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
+#     mode: 0640
+#     owner: deadlineuser
+#     group: deadlineuser
+#   become: yes
+#   connection: local
 
 - name: check deadline db install output
   debug:

@@ -117,7 +117,7 @@
 #     when: result.stat.exists == false
 
 - hosts: workstation.firehawkvfx.com
-  remote_user: user
+  remote_user: root
   become: true
 
   vars:
@@ -144,7 +144,7 @@
       # mode: 0700
       owner: deadlineuser
       group: deadlineuser
-    become_user: deadlineuser
+    #become_user: deadlineuser
     with_items:
     - otls
     - soho
@@ -185,7 +185,7 @@
     copy:
       src: "/opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/CallDeadlineCommand.py"
       dest: "/home/deadlineuser/houdini17.5/python2.7libs/"
-    become_user: deadlineuser
+    #become_user: deadlineuser
     tags:
     - cloud-install
     - onsite-install
@@ -200,7 +200,7 @@
     - HServer
     - Houdini
     - Nuke
-    become_user: deadlineuser
+    #become_user: deadlineuser
     tags:
     - cloud-install
     - onsite-install
@@ -494,25 +494,25 @@
     tags:
     - cloud-install
 
-  - name: insert/update block in /etc/fstab
-    blockinfile:
-      path: /etc/fstab
-      backup: yes
-      content: |
-        {{ localnas1_private_ip }}:/data /data nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
-        {{ localnas1_private_ip }}:{{ localnas1_mount_path }} {{ localnas1_path_abs }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
-        {{ localnas1_path_abs }} {{ localnas1_mount_path }} none defaults,bind 0 0
-    tags:
-    - onsite-install
+  # - name: insert/update block in /etc/fstab
+  #   blockinfile:
+  #     path: /etc/fstab
+  #     backup: yes
+  #     content: |
+  #       {{ localnas1_private_ip }}:/data /data nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
+  #       {{ localnas1_private_ip }}:{{ localnas1_mount_path }} {{ localnas1_path_abs }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
+  #       {{ localnas1_path_abs }} {{ localnas1_mount_path }} none defaults,bind 0 0
+  #   tags:
+  #   - onsite-install
 
-  - name: insert/update block in /etc/sysconfig/network
-    blockinfile:
-      path: /etc/sysconfig/network
-      backup: yes
-      content: |
-        NETWORKDELAY=20
-    tags:
-    - onsite-install
+  # - name: insert/update block in /etc/sysconfig/network
+  #   blockinfile:
+  #     path: /etc/sysconfig/network
+  #     backup: yes
+  #     content: |
+  #       NETWORKDELAY=20
+  #   tags:
+  #   - onsite-install
 
   - name: mount all changes to fstab
     command: mount -a

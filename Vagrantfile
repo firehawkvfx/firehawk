@@ -4,19 +4,17 @@
 Vagrant.configure("2") do |config|
   # Ubuntu 16.04
   config.vm.box = "ubuntu/xenial64"
-  config.vm.box_version = "20190325.0.0"
-  #config.vm.box_version = "20190308.0.0"
-  #config.vm.box = "bento/ubuntu-16.04"
+  config.vm.box_version = "20190406.0.0"
   #config.ssh.username = "vagrant"
-  #config.ssh.password = "vagrant"
-  
+  #config.ssh.password = ENV['TF_VAR_vagrant_password']
+
   mac_string = ENV['TF_VAR_vagrant_mac']
   vaultkeypresent = ENV['TF_VAR_vaultkeypresent']
   bridgenic = ENV['TF_VAR_bridgenic']
   envtier = ENV['TF_VAR_envtier']
   name = ENV['TF_VAR_openfirehawkserver_name']
 
-  config.vm.define "ansible_control"
+  config.vm.define "ansible_control_"+envtier
   config.vagrant.plugins = ['vagrant-disksize', 'vagrant-reload']
   config.disksize.size = '50GB'
   #config.vm.network "public_network", bridge: "eno1",
@@ -46,7 +44,7 @@ Vagrant.configure("2") do |config|
   ### Install Ansible Block ###
   config.vm.provision "shell", inline: "sudo apt-get install -y software-properties-common"
   config.vm.provision "shell", inline: "sudo apt-add-repository --yes --update ppa:ansible/ansible"
-  config.vm.provision "shell", inline: "sudo apt-get install -y ansible='2.7.9-1ppa~xenial'"
+  config.vm.provision "shell", inline: "sudo apt-get install -y ansible='2.7.10-1ppa~xenial'"
   # we define the location of the ansible hosts file in an environment variable.
   config.vm.provision "shell", inline: "grep -qxF 'ANSIBLE_INVENTORY=/vagrant/ansible/hosts' /etc/environment || echo 'ANSIBLE_INVENTORY=/vagrant/ansible/hosts' | sudo tee -a /etc/environment"
   #reboot required for desktop to function.

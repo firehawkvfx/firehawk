@@ -1,13 +1,27 @@
+# example
+# ansible-playbook -i ansible/inventory ansible/node-centos-houdini.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=workstation1.${var.public_domain_name}"
+# example local install
+# ansible-playbook -i ansible/inventory ansible/node-centos-houdini.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_become_pass=sompass"
+
 - hosts: "{{ variable_host | default('role_node_centos') }}"
-  remote_user: centos
+  remote_user: "{{ variable_user | default('centos') }}"
+  become: true
+
+  tasks:
+  - name: test connection
+    debug:
+      msg: "connection established"
+
+- hosts: "{{ variable_host | default('role_node_centos') }}"
+  remote_user: "{{ variable_user | default('centos') }}"
   become: true
 
   vars:
+    variable_user: centos
     bastionip: "{{ groups['bastionip'][0] }}"
     hostname: "node1.{{ public_domain }}"
 
   tasks:
-
   - package:
       name: "{{ item }}"
       state: present
@@ -19,11 +33,16 @@
     tags:
       - packages
 
+  - name: install pip
+    package:
+      name: python-pip
+      state: latest
+
   - file:
       path: /opt/houdini_install_script
       state: directory
       mode: 0700
-      owner: centos
+      owner: "{{ variable_user }}"
 
   - pip:
       name: beautifulsoup4
