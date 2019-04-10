@@ -442,7 +442,8 @@ resource "null_resource" "create_ami" {
 # While instance is stopped, we attach ebs volumes.
 resource "aws_volume_attachment" "softnas1_ebs_att" {
   depends_on         = ["aws_instance.softnas1", "null_resource.create_ami"]
-  count       = "${length(local.softnas1_volumes)}"
+  count       = "0"
+  #count       = "${length(local.softnas1_volumes)}"
   device_name = "${element(local.softnas1_mounts, count.index)}"
   volume_id   = "${element(local.softnas1_volumes, count.index)}"
   instance_id = "${aws_instance.softnas1.id}"
