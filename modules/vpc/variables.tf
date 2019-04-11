@@ -32,7 +32,7 @@ variable "vpc_cidr" {
 }
 
 variable "azs" {
-  default = ["ap-southeast-2a", "ap-southeast-2b"]
+  default = []
 }
 
 variable "private_subnets" {

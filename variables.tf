@@ -11,6 +11,10 @@ variable "softnas_mode" {
   default = "low"
 }
 
+variable "azs" {
+  default = ["ap-southeast-2a", "ap-southeast-2b"]
+}
+
 # once you setup an ssl certificate with your domain, it will have a route zone id.
 variable "route_zone_id" {}
 

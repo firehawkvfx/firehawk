@@ -54,23 +54,6 @@
   register: deadline_db_install_output_shell
   become: true
 
-# - name: deadline must have read access to remote certs
-#   file: 
-#     path: /opt/Thinkbox/certs/Deadline10RemoteClient.pfx
-#     owner: deadlineuser
-#     mode: 0600
-#     recurse: yes
-#   become: yes
-
-# - name: set read permissions for remote cert
-#   file: 
-#     path: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
-#     mode: 0640
-#     owner: deadlineuser
-#     group: deadlineuser
-#   become: yes
-#   connection: local
-
 - name: check deadline db install output
   debug:
     msg: "{{ deadline_db_install_output_shell.stdout }}"
@@ -81,29 +64,61 @@
     state: restarted
   become: true
 
-  # set permissions on deadline repository so that scripts can be copied by the vagrant user to remote hosts
-# - name: Ensure group "syscontrol" exists
-#   group:
-#     name: syscontrol
-#     state: present
-#     gid: 9003
-#   become: true
+- name: Check content of file
+  replace:
+    path: /opt/Thinkbox/DeadlineRepository10/plugins/Houdini/Houdini.param
+    regexp: |
+      [Houdini17_5_Hython_Executable]
+  check_mode: yes
+  register: hython_block_exists
 
-# - name: adding existing users to group syscontrol
-#   user:
-#     name: item
-#     groups: syscontrol
-#     append: yes
-#   with_items:
-#   - deadlineuser
-#   - vagrant
-#   become: true
+- name: "Check if settings for 17.5 are present in plugin settings"
+  lineinfile:
+    name: /opt/Thinkbox/DeadlineRepository10/plugins/Houdini/Houdini.param
+    line: [Houdini17_5_Hython_Executable]
+    state: present
+  check_mode: yes
+  register: hython_block_exists
 
-# - name: set permissions
-#   file:
-#     path: /opt/Thinkbox/DeadlineRepository10/
-#     owner: deadlineuser
-#     group: syscontrol
-#     mode: u+r,g+r
-#     recurse: yes
-#   become: true
+- debug:
+    msg: "hython_block_exists={{ hython_block_exists }}"
+
+- name: Blockin file to add h17.5 support
+  blockinfile:
+    path: /opt/Thinkbox/DeadlineRepository10/plugins/Houdini/Houdini.param
+    backup: true
+    block: |
+      [Houdini17_5_Hython_Executable]
+      Label=Houdini 17.5 Hython Executable
+      Category=Render Executables
+      CategoryOrder=0
+      Type=multilinemultifilename
+      Index=11
+      Default=C:\Program Files\Side Effects Software\Houdini 17.5.000\bin\Hython.exe;/Applications/Houdini/Houdini17.0.000/Frameworks/Houdini.framework/Versions/17.5.000/Resources/bin/hython;/opt/hfs17.5/bin/hython
+      Description=The path to the hython executable. It can be found in the Houdini bin folder.
+    marker: "# {mark} ANSIBLE MANAGED BLOCK Houdini17_5_Hython_Executable"
+  when: (hython_block_exists is changed) or (hython_block_exists is failed)
+
+- name: "Check if settings for 17.5 simtracker are present in plugin settings"
+  lineinfile:
+    name: /opt/Thinkbox/DeadlineRepository10/plugins/Houdini/Houdini.param
+    line: [Houdini17_5_SimTracker]
+    state: present
+  check_mode: yes
+  register: simtracker_block_exists
+
+- name: Blockin file to add h17.5 support
+  blockinfile:
+    path: /opt/Thinkbox/DeadlineRepository10/plugins/Houdini/Houdini.param
+    backup: true
+    block: |
+      [Houdini17_5_SimTracker]
+      Label=Houdini 17.5 Sim Tracker File
+      Category=HQueue Simulation Job Options
+      CategoryOrder=1
+      Type=multilinemultifilename
+      Index=7
+      Default=C:\Program Files\Side Effects Software\Houdini 17.5.000\houdini\python2.7libs\simtracker.py;/Applications/Houdini/Houdini17.5.000/Frameworks/Houdini.framework/Versions/17.5.000/Resources/houdini/python2.7libs/simtracker.py;/opt/hfs17.5/houdini/python2.7libs/simtracker.py
+      Description=The path to the simtracker.py file that is used when distributing HQueue sim jobs. This file can be found in the Houdini install.
+    marker: "# {mark} ANSIBLE MANAGED BLOCK Houdini17_5_SimTracker"
+  when: (simtracker_block_exists is changed) or (simtracker_block_exists is failed)

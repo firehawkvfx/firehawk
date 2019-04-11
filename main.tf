@@ -33,6 +33,8 @@ module "vpc" {
   sleep              = "${var.sleep}"
   enable_nat_gateway = "${var.enable_nat_gateway}"
 
+  azs                = "${var.azs}"
+
   private_subnets = ["${var.private_subnet1}", "${var.private_subnet2}"]
   public_subnets = ["${var.public_subnet1}", "${var.public_subnet2}"]
   

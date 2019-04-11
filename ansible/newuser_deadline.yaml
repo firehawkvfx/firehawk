@@ -9,7 +9,7 @@
     
   roles:
     - {role: 'newuser', tags: 'newuser'}
-    - role: deadlinedb
+    - {role: deadlinedb, tags: 'deadlinedb'}
     - role: deadlinercs
 
 # This process archives secrets.  they are copied to the repository, and encrypted by the vault id - keys/.vault-key
