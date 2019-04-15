@@ -22,7 +22,7 @@
     - role: init-packages
     - role: terraform
     - role: aws-cli
-    - {role: nfs-mounts-local, tags: 'nfs-mounts-local'}
+    #- {role: nfs-mounts-local, tags: 'nfs-mounts-local'}
 
 - hosts: ansible_control
   remote_user: vagrant

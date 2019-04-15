@@ -139,6 +139,8 @@ we can initialise the secrets keys and encrypt.
     source ./update_vars.sh --prod
     vagrant reload
     vagrant ssh
+- you should also ensure you have set correct Amazon Machine Image ID's for your regions and for each instance.  eg we can query for Softnas like this-
+    aws ec2 describe-images --region ap-southeast-2 --filters Name=is-public,Values=true Name=name,Values=SoftNAS* Name=description,Values='*Platinum - Consumption - 4.2.3*' --query 'Images[*].{ID:ImageId}'
 - Now lets initialise terraform, and run our first terraform apply.  Read more about this here for best practice - Your first terraform apply
     terraform init
     terraform plan -out=plan

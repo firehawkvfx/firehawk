@@ -87,6 +87,7 @@ variable "selected_ami" {
 
   default = {
     low_ap-southeast-2 = "ami-a24a98c0",
-    high_ap-southeast-2 = "ami-5e7ea03c"
+    #high_ap-southeast-2 = "ami-5e7ea03c"
+    high_ap-southeast-2 = "ami-058203bb6a3250775"
   }
 }

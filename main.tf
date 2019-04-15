@@ -196,40 +196,40 @@ variable "pcoip_skip_update" {
 #   houdini_license_server_address = "${var.houdini_license_server_address}"
 # }
 
-module "workstation" {
-  source = "./modules/workstation_pcoip"
-  name   = "workstation"
+# module "workstation" {
+#   source = "./modules/workstation_pcoip"
+#   name   = "workstation"
 
-  #options for gateway type are centos7 and pcoip
-  gateway_type      = "${var.gateway_type}"
-  vpc_id            = "${module.vpc.vpc_id}"
-  vpc_cidr          = "${module.vpc.vpc_cidr_block}"
-  vpn_cidr          = "${var.vpn_cidr}"
-  remote_ip_cidr    = "${var.remote_ip_cidr}"
-  #public_subnet_ids = "${module.vpc.public_subnets}"
+#   #options for gateway type are centos7 and pcoip
+#   gateway_type      = "${var.gateway_type}"
+#   vpc_id            = "${module.vpc.vpc_id}"
+#   vpc_cidr          = "${module.vpc.vpc_cidr_block}"
+#   vpn_cidr          = "${var.vpn_cidr}"
+#   remote_ip_cidr    = "${var.remote_ip_cidr}"
+#   #public_subnet_ids = "${module.vpc.public_subnets}"
 
-  bastion_ip = "${module.bastion.public_ip}"
+#   bastion_ip = "${module.bastion.public_ip}"
 
-  key_name    = "${var.key_name}"
-  private_key = "${file("${var.local_key_path}")}"
+#   key_name    = "${var.key_name}"
+#   private_key = "${file("${var.local_key_path}")}"
 
-  #skipping os updates will allow faster rollout for testing, but may be non functional
-  skip_update = "${var.pcoip_skip_update}"
+#   #skipping os updates will allow faster rollout for testing, but may be non functional
+#   skip_update = "${var.pcoip_skip_update}"
 
-  public_domain_name = "${var.public_domain}"
+#   public_domain_name = "${var.public_domain}"
 
-  #sleep will stop instances to save cost during idle time.
-  sleep                      = "${var.sleep}"
-  pcoip_sleep_after_creation = "${var.pcoip_sleep_after_creation}"
+#   #sleep will stop instances to save cost during idle time.
+#   sleep                      = "${var.sleep}"
+#   pcoip_sleep_after_creation = "${var.pcoip_sleep_after_creation}"
 
-  private_subnet_ids          = "${module.vpc.private_subnets}"
-  private_subnets_cidr_blocks = "${module.vpc.private_subnets_cidr_blocks}"
-  remote_subnet_cidr          = "${var.remote_subnet_cidr}"
+#   private_subnet_ids          = "${module.vpc.private_subnets}"
+#   private_subnets_cidr_blocks = "${module.vpc.private_subnets_cidr_blocks}"
+#   remote_subnet_cidr          = "${var.remote_subnet_cidr}"
 
-  openfirehawkserver = "${var.openfirehawkserver}"
+#   openfirehawkserver = "${var.openfirehawkserver}"
   
-  houdini_license_server_address = "${var.houdini_license_server_address}"
-}
+#   houdini_license_server_address = "${var.houdini_license_server_address}"
+# }
 
 variable "node_skip_update" {
   default = false

@@ -440,23 +440,22 @@ resource "null_resource" "create_ami" {
 
 
 # While instance is stopped, we attach ebs volumes.
-resource "aws_volume_attachment" "softnas1_ebs_att" {
-  depends_on         = ["aws_instance.softnas1", "null_resource.create_ami"]
-  count       = "0"
-  #count       = "${length(local.softnas1_volumes)}"
-  device_name = "${element(local.softnas1_mounts, count.index)}"
-  volume_id   = "${element(local.softnas1_volumes, count.index)}"
-  instance_id = "${aws_instance.softnas1.id}"
-}
+# resource "aws_volume_attachment" "softnas1_ebs_att" {
+#   depends_on         = ["aws_instance.softnas1", "null_resource.create_ami"]
+#   count       = "${length(local.softnas1_volumes)}"
+#   device_name = "${element(local.softnas1_mounts, count.index)}"
+#   volume_id   = "${element(local.softnas1_volumes, count.index)}"
+#   instance_id = "${aws_instance.softnas1.id}"
+# }
 
-# Start instance so that s3 disks can be attached
-resource "null_resource" "start-softnas-after-ebs-attach" {
-  depends_on         = ["aws_volume_attachment.softnas1_ebs_att"]
+# # Start instance so that s3 disks can be attached
+# resource "null_resource" "start-softnas-after-ebs-attach" {
+#   depends_on         = ["aws_volume_attachment.softnas1_ebs_att"]
 
-  provisioner "local-exec" {
-    command = "aws ec2 start-instances --instance-ids ${aws_instance.softnas1.id}"
-  }
-}
+#   provisioner "local-exec" {
+#     command = "aws ec2 start-instances --instance-ids ${aws_instance.softnas1.id}"
+#   }
+# }
 
 # If ebs volumes are attached, don't automatically import the pool. manual intervention may be required.
 locals {
@@ -485,8 +484,8 @@ output "softnas1_private_ip" {
 }
 
 resource "null_resource" "provision_softnas_volumes" {
-  depends_on = ["aws_volume_attachment.softnas1_ebs_att"]
-
+  depends_on = ["null_resource.provision_softnas", "null_resource.create_ami"]
+  # "null_resource.start-softnas-after-ebs-attach"
   triggers {
     instanceid = "${ aws_instance.softnas1.id }"
   }
@@ -522,6 +521,10 @@ output "provision_softnas_volumes" {
 # wakeup a node after sleep
 resource "null_resource" "start-softnas" {
   count = "${var.sleep ? 0 : 1}"
+  
+  triggers {
+    instanceid = "${ aws_instance.softnas1.id }"
+  }
 
   provisioner "local-exec" {
     command = "aws ec2 start-instances --instance-ids ${aws_instance.softnas1.id}"
@@ -530,6 +533,10 @@ resource "null_resource" "start-softnas" {
 
 resource "null_resource" "shutdown-softnas" {
   count = "${var.sleep ? 1 : 0}"
+  
+  triggers {
+    instanceid = "${ aws_instance.softnas1.id }"
+  }
 
   provisioner "local-exec" {
     #command = "aws ec2 stop-instances --instance-ids ${aws_instance.softnas1.id}"
