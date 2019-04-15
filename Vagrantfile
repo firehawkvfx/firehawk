@@ -56,15 +56,15 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "echo 'source /vagrant/scripts/env.sh' > /etc/profile.d/sa-environment.sh", :run => 'always'
   config.vm.provision "shell", inline: "echo DEBIAN_FRONTEND=$DEBIAN_FRONTEND"
 
-  ## block to install custom private key
-  config.ssh.insert_key = false
-  config.ssh.private_key_path = ["keys/my_key_pair_dev.pem", "~/.vagrant.d/insecure_private_key"]
-  config.vm.provision "file", source: "keys/my_key_pair_dev.pub", destination: "~/.ssh/authorized_keys"
-  config.vm.provision "shell", inline: <<-EOC
-    sudo sed -i -e "\\#PasswordAuthentication yes# s#PasswordAuthentication yes#PasswordAuthentication no#g" /etc/ssh/sshd_config
-    sudo service ssh restart
-  EOC
-  ## end block for custom private key
+  # ## block to install custom private key
+  # config.ssh.insert_key = false
+  # config.ssh.private_key_path = ["keys/my_key_pair_"+envtier+".pem", "~/.vagrant.d/insecure_private_key"]
+  # config.vm.provision "file", source: "keys/my_key_pair_"+envtier+".pub", destination: "~/.ssh/authorized_keys"
+  # config.vm.provision "shell", inline: <<-EOC
+  #   sudo sed -i -e "\\#PasswordAuthentication yes# s#PasswordAuthentication yes#PasswordAuthentication no#g" /etc/ssh/sshd_config
+  #   sudo service ssh restart
+  # EOC
+  # ## end block for custom private key
 
   config.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive"
   config.vm.provision "shell", inline: "sudo rm /etc/localtime && sudo ln -s /usr/share/zoneinfo/Australia/Brisbane /etc/localtime", run: "always"
