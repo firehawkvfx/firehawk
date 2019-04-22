@@ -12,6 +12,43 @@
     - {role: deadlinedb, tags: 'deadlinedb'}
     - role: deadlinercs
 
+# after deadline install we need to ensure vagrant is part of the syscontrol group.
+- hosts: ansible_control
+  become: true
+
+  # set permissions on dealine repository so that scripts can be copied by the vagrant user.
+  tasks:
+  - name: Ensure group "syscontrol" exists
+    group:
+      name: syscontrol
+      state: present
+      gid: 9003
+    become: true
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: adding existing user "{{ item }}" to group syscontrol
+    user:
+      name: "{{ item }}"
+      groups: syscontrol
+      append: yes
+    with_items:
+    - deadlineuser
+    - vagrant
+    become: true
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: Kill SSH because otherwise the user will not be added to the group.
+    shell: sleep 1; pkill -u {{ ansible_ssh_user }} sshd
+    async: 3
+    poll: 2
+
+  - name: reset ssh connection to allow user changes to affect 'current login user'
+    meta: reset_connection
+
 # This process archives secrets.  they are copied to the repository, and encrypted by the vault id - keys/.vault-key
 # Nothing stored in the secrets path should be unencrypted.
 

@@ -175,7 +175,12 @@ resource "null_resource" "provision_node_centos" {
       timeout             = "10m"
     }
     # First we install python remotely via the bastion to bootstrap the instance.  We also need this remote-exec to ensure the host is up.
-    inline = ["sleep 10 && set -x && sudo yum install -y python"]
+    inline = [
+      "sleep 10",
+      "set -x",
+      "sudo yum install -y python",
+      "ssh-keyscan ${aws_instance.node_centos.private_ip}"
+    ]
   }
 
   provisioner "local-exec" {
@@ -183,7 +188,7 @@ resource "null_resource" "provision_node_centos" {
       set -x
       cd /vagrant
       ansible-playbook -i ansible/inventory ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.node_centos.private_ip} bastion_ip=${var.bastion_ip}"
-      ansible-playbook -i ansible/inventory ansible/node-centos-init.yaml -v
+      ansible-playbook -i ansible/inventory ansible/node-centos-init.yaml -vvv
       ansible-playbook -i ansible/inventory ansible/node-centos-houdini.yaml -v
   EOT
   }

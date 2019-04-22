@@ -3,12 +3,24 @@
   become: true
   become_user: vagrant
 
+- name: msg delegate to bastion ip
+  debug:
+    msg: "{{ bastion_ip }}"
+
+- name: msg delegate to get key for private_ip
+  debug:
+    msg: "{{ private_ip }}"
+
 - name: delegate keyscan to add keys from remote subnet via bastion host.
   command: "ssh-keyscan {{ private_ip }}"
   register: new_host_fingerprint
   delegate_to: "centos@{{ bastion_ip }}"
+  remote_user: centos
+  become_user: centos
+  become: true
 
-- debug:
+- name: retrieved new_host_fingerprint
+  debug:
     msg: "{{ new_host_fingerprint.stdout_lines }}"
 
 - name: add keyscan to known hosts

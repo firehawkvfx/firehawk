@@ -4,7 +4,7 @@
 # ansible -m ping workstation.firehawkvfx.com -i "$TF_VAR_inventory"
 # ansible-playbook -i "$TF_VAR_inventory" ansible/localworkstation-deadlineuser.yaml --tags "onsite-install"
 
-# these permissions are now handled post install of the deadline db.
+# these permissions are now handled post install of the deadline db. should be removed
 - hosts: ansible_control
   become: true
 
@@ -137,6 +137,20 @@
     - cloud-install
     - onsite-install
 
+  - name: ensure local submission scripts dir permissions are readable
+    file: 
+      path: /opt/Thinkbox/DeadlineRepository10/submission
+      state: directory
+      mode: u+r,g+r
+      owner: deadlineuser
+      group: syscontrol
+      recurse: yes
+    become: yes
+    connection: local
+    tags:
+    - cloud-install
+    - onsite-install
+
   - name: Ansible copy directory to the remote server
     copy:
       src: "/opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/{{ item }}"
@@ -163,20 +177,51 @@
     - cloud-install
     - onsite-install
 
-  - name: set HOUDINI_PATH in houdini.env.
-    replace:
+  - name: ensure houdini.env file is present
+    file:
       path: /home/deadlineuser/houdini17.5/houdini.env
-      regexp: '.*HOUDINI_PATH =.*'
-      replace: 'HOUDINI_PATH = "$HOUDINI_PATH; ~/Thinkbox/Deadline10/submitters/HoudiniSubmitter;&"'
+      owner: deadlineuser
+      group: deadlineuser
+      state: touch
+    become: yes
     tags:
     - cloud-install
     - onsite-install
 
+  # - name: set HOUDINI_PATH in houdini.env.
+  #   replace:
+  #     path: /home/deadlineuser/houdini17.5/houdini.env
+  #     regexp: '.*HOUDINI_PATH =.*'
+  #     replace: 'HOUDINI_PATH = "$HOUDINI_PATH; ~/Thinkbox/Deadline10/submitters/HoudiniSubmitter;&"'
+  #   tags:
+  #   - cloud-install
+  #   - onsite-install
+
+  - name: set HOUDINI_PATH in houdini.env file.
+    lineinfile:
+      path: /home/deadlineuser/houdini17.5/houdini.env
+      state: present
+      regexp: '.*HOUDINI_PATH =.*'
+      line: 'HOUDINI_PATH = "$HOUDINI_PATH; ~/Thinkbox/Deadline10/submitters/HoudiniSubmitter;&"'
+    tags:
+    - cloud-install
+    - onsite-install
+
+  # - name: set HOUDINI_MENU_PATH in houdini.env.
+  #   replace:
+  #     path: /home/deadlineuser/houdini17.5/houdini.env
+  #     regexp: '.*HOUDINI_MENU_PATH =.*'
+  #     replace: 'HOUDINI_MENU_PATH = "$HOUDINI_MENU_PATH; ~/Thinkbox/Deadline10/submitters/HoudiniSubmitter;&"'
+  #   tags:
+  #   - cloud-install
+  #   - onsite-install
+
   - name: set HOUDINI_MENU_PATH in houdini.env.
-    replace:
+    lineinfile:
+      state: present
       path: /home/deadlineuser/houdini17.5/houdini.env
       regexp: '.*HOUDINI_MENU_PATH =.*'
-      replace: 'HOUDINI_MENU_PATH = "$HOUDINI_MENU_PATH; ~/Thinkbox/Deadline10/submitters/HoudiniSubmitter;&"'
+      line: 'HOUDINI_MENU_PATH = "$HOUDINI_MENU_PATH; ~/Thinkbox/Deadline10/submitters/HoudiniSubmitter;&"'
     tags:
     - cloud-install
     - onsite-install

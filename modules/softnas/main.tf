@@ -319,7 +319,7 @@ resource "aws_instance" "softnas1" {
   }
 
   root_block_device {
-    volume_size = "30"
+    volume_size = "100"
     volume_type = "gp2"
 
     #device_name = "/dev/sda1"
@@ -358,7 +358,7 @@ resource "null_resource" "provision_softnas" {
   triggers {
     instanceid = "${ aws_instance.softnas1.id }"
   }
-
+  # some time is required before the ecdsa key file exists.
   provisioner "remote-exec" {
     connection {
       user                = "centos"
@@ -369,15 +369,29 @@ resource "null_resource" "provision_softnas" {
       type                = "ssh"
       timeout             = "10m"
     }
-
-    inline = ["sleep 10 && set -x && sudo yum install -y python"]
+    inline = [
+      "sleep 300",
+      "set -x",
+      "sudo yum install -y python",
+      "while [ ! -f /etc/ssh/ssh_host_ecdsa_key.pub ]",
+      "do",
+      "  sleep 2",
+      "done",
+      "cat /etc/ssh/ssh_host_ecdsa_key.pub",
+      "cat /etc/ssh/ssh_host_rsa_key.pub",
+      "cat /etc/ssh/ssh_host_ecdsa_key.pub",
+      "ssh-keyscan ${aws_instance.softnas1.private_ip}"
+    ]
   }
   provisioner "local-exec" {
     command = <<EOT
       set -x
       cd /vagrant
+      sleep 90
       ansible-playbook -i ansible/inventory ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.softnas1.private_ip} bastion_ip=${var.bastion_ip}"
       ansible-playbook -i ansible/inventory ansible/softnas-init.yaml -v
+      # two kinds of ssh key are required and for some reason the second isnt retrieved until here since a softnas update.
+      ansible-playbook -i ansible/inventory ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.softnas1.private_ip} bastion_ip=${var.bastion_ip}"
       ansible-playbook -i ansible/inventory ansible/softnas-update.yaml -v
       # #ansible-playbook -i ansible/inventory ansible/aws-cli.yaml -v --extra-vars "variable_user=centos variable_host=role_softnas"
       # #ansible-playbook -i ansible/inventory ansible/aws-cli-ec2.yaml -v --extra-vars "variable_user=centos variable_host=role_softnas"
@@ -433,7 +447,7 @@ resource "null_resource" "create_ami" {
       set -x
       cd /vagrant
       ansible-playbook -i ansible/inventory ansible/aws-ami.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.id} ami_name=softnas_ami description=softnas1_${aws_instance.softnas1.id}_${random_id.ami_unique_name.hex}"
-      # aws ec2 start-instances --instance-ids ${aws_instance.softnas1.id}
+      aws ec2 start-instances --instance-ids ${aws_instance.softnas1.id}
   EOT
   }
 }
@@ -448,14 +462,14 @@ resource "null_resource" "create_ami" {
 #   instance_id = "${aws_instance.softnas1.id}"
 # }
 
-# # Start instance so that s3 disks can be attached
-# resource "null_resource" "start-softnas-after-ebs-attach" {
-#   depends_on         = ["aws_volume_attachment.softnas1_ebs_att"]
-
-#   provisioner "local-exec" {
-#     command = "aws ec2 start-instances --instance-ids ${aws_instance.softnas1.id}"
-#   }
-# }
+# Start instance so that s3 disks can be attached
+resource "null_resource" "start-softnas-after-create_ami" {
+  #depends_on         = ["aws_volume_attachment.softnas1_ebs_att"]
+  depends_on         = ["null_resource.provision_softnas", "null_resource.create_ami"]
+  provisioner "local-exec" {
+    command = "aws ec2 start-instances --instance-ids ${aws_instance.softnas1.id}"
+  }
+}
 
 # If ebs volumes are attached, don't automatically import the pool. manual intervention may be required.
 locals {
@@ -484,7 +498,7 @@ output "softnas1_private_ip" {
 }
 
 resource "null_resource" "provision_softnas_volumes" {
-  depends_on = ["null_resource.provision_softnas", "null_resource.create_ami"]
+  depends_on = ["null_resource.provision_softnas", "null_resource.start-softnas-after-create_ami", "null_resource.create_ami"]
   # "null_resource.start-softnas-after-ebs-attach"
   triggers {
     instanceid = "${ aws_instance.softnas1.id }"
