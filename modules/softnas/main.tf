@@ -370,8 +370,8 @@ resource "null_resource" "provision_softnas" {
       timeout             = "10m"
     }
     inline = [
-      "sleep 300",
       "set -x",
+      "sleep 300",
       "sudo yum install -y python",
       "while [ ! -f /etc/ssh/ssh_host_ecdsa_key.pub ]",
       "do",
@@ -387,11 +387,8 @@ resource "null_resource" "provision_softnas" {
     command = <<EOT
       set -x
       cd /vagrant
-      sleep 90
       ansible-playbook -i ansible/inventory ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.softnas1.private_ip} bastion_ip=${var.bastion_ip}"
       ansible-playbook -i ansible/inventory ansible/softnas-init.yaml -v
-      # two kinds of ssh key are required and for some reason the second isnt retrieved until here since a softnas update.
-      ansible-playbook -i ansible/inventory ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.softnas1.private_ip} bastion_ip=${var.bastion_ip}"
       ansible-playbook -i ansible/inventory ansible/softnas-update.yaml -v
       # #ansible-playbook -i ansible/inventory ansible/aws-cli.yaml -v --extra-vars "variable_user=centos variable_host=role_softnas"
       # #ansible-playbook -i ansible/inventory ansible/aws-cli-ec2.yaml -v --extra-vars "variable_user=centos variable_host=role_softnas"
@@ -473,7 +470,8 @@ resource "null_resource" "start-softnas-after-create_ami" {
 
 # If ebs volumes are attached, don't automatically import the pool. manual intervention may be required.
 locals {
-  import_pool = "${length(local.softnas1_volumes) > 0 ? false : true}"
+  import_pool = true
+  #"${length(local.softnas1_volumes) > 0 ? false : true}"
 }
 
 # Once an AMI is built above, then we test the connection to the instance via a bastion below.
@@ -522,7 +520,9 @@ resource "null_resource" "provision_softnas_volumes" {
     command = <<EOT
       set -x
       cd /vagrant
+      ansible-playbook -i ansible/inventory ansible/softnas-ebs-disk.yaml -v --extra-vars "ebs_disk_size=${var.ebs_disk_size} instance_id=${aws_instance.softnas1.id}"
       ansible-playbook -i ansible/inventory ansible/softnas-s3-disk.yaml -v --extra-vars "pool_name=pool0 volume_name=volume0 disk_device=0 s3_disk_size_max_value=${var.s3_disk_size} encrypt_s3=true import_pool=${local.import_pool}"
+      ansible-playbook -i ansible/inventory ansible/softnas-s3-disk.yaml -v --extra-vars "pool_name=pool1 volume_name=volume1 disk_device=1 s3_disk_size_max_value=${var.s3_disk_size} encrypt_s3=true import_pool=${local.import_pool}"
   EOT
   }
 }

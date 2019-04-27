@@ -1,0 +1,16 @@
+- name: 'create a new ebs volume'
+  debug:
+    msg: "create a new ebs volume {{ item.item.int }} {{ item.item.path }}"
+
+- name: create ebs volume
+  ec2_vol:
+    region: "{{ aws_region }}"
+    instance: "{{ instance_id }}"
+    name: "softnas_volume_{{ item.item.int }}"
+    volume_size: "{{ ebs_disk_size }}"
+    volume_type: "{{ ebs_disk_type }}"
+    device_name: "{{ item.item.path }}"
+    delete_on_termination: no
+    tags:
+      Role: Softnas
+      Mount: "{{ item.item.path }}"

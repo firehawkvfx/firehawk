@@ -1,0 +1,7 @@
+- name: attach existing ebs volume
+  ec2_vol:
+    region: "{{ ebs_disk_region }}"
+    instance: "{{ instance_id }}"
+    name: "softnas_volume_{{ item.item.int }}"
+    device_name: "{{ item.item.path }}"
+

@@ -81,6 +81,7 @@ variable "softnas_mode" {
 }
 
 variable "aws_region" {}
+variable "ebs_disk_size" {}
 
 variable "selected_ami" {
   type = "map"

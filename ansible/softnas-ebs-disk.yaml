@@ -1,0 +1,71 @@
+- hosts: ansible_control
+  remote_user: vagrant
+
+  vars:
+    #  creates ebs volumes.  example -
+    #  ansible-playbook -i ansible/inventory ansible/softnas-ebs-disk.yaml -v --extra-vars "ebs_disk_size=200 instance_id=i-654654354"
+    # another example for idempotenccy.  good read!
+    # https://medium.com/devopslinks/attaching-a-persistent-ebs-volume-to-a-self-healing-instance-with-ansible-d0140431a22a
+
+    pool_name: pool2
+    volume_name: volume2
+    instance_id: undefined
+    disk_device: 2
+    nas_name: softnas
+    ebs_disk_size: 50
+    # read docs on types.  standard, gp2 etc
+    ebs_disk_type: standard
+    ebs_disk_region: "{{ aws_region }}"
+    import_pool: true
+
+    # this will be calculated later-
+    existing_bucket: false
+    existing_volume: false
+
+    mounts:
+      - path: "/dev/sdf"
+        int: "1"
+      - path: "/dev/sdg"
+        int: "2"
+      - path: "/dev/sdh"
+        int: "3"
+      - path: "/dev/sdi"
+        int: "4"
+
+  tasks:
+  - name: search for existing volume
+    ec2_vol_facts:
+      filters:
+        "tag:Role": "Softnas"
+      region: "{{ ebs_disk_region }}"
+    register: existing_volume_single
+      
+  - debug:
+      msg: "{{ existing_volume_single }}"
+
+  - name: search for existing volume
+    ec2_vol_facts:
+      filters:
+        "tag:Role": "Softnas"
+        "tag:Mount": "{{ item.path }}"
+      region: "{{ ebs_disk_region }}"
+    register: existing_volume
+    with_items:
+      - "{{ mounts }}"
+
+  - name: all volumes retrieved
+    debug:
+      msg: "{{ existing_volume }}"
+
+  - name: iterate over data
+    debug:
+      msg: "{{ item }}"
+    with_items: "{{ existing_volume.results }}"      
+
+  - include_tasks: softnas-ebs-first-time-installation.yaml
+    when: not item.volumes
+    with_items: "{{ existing_volume.results }}"
+
+  - include_tasks: softnas-ebs-existing-volume.yaml
+    when: item.volumes
+    with_items: "{{ existing_volume.results }}"

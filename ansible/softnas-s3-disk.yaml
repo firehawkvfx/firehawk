@@ -213,33 +213,18 @@
   - name: set /etc/exports
     lineinfile:
       path: /etc/exports
-      line: "# These mounts are managed in that ansible playbook softnas-s3-disk.yaml and only one volume is exported currently for testing"
+      line: "# These mounts are managed in ansible playbook softnas-s3-disk.yaml and only one volume is exported currently for testing"
       backup: yes
     when: import_pool
 
-  - name: insert marker start
-    lineinfile:
-      path: /etc/exports
-      insertafter: "^# These mounts.*$"
-      line: "# BEGIN ANSIBLE MANAGED BLOCK"
-      backup: yes
-    when: import_pool
-
-  - name: insert marker end
-    lineinfile:
-      path: /etc/exports
-      insertafter: "# BEGIN ANSIBLE MANAGED BLOCK"
-      line: "# END ANSIBLE MANAGED BLOCK"
-      create: true
-    when: import_pool
-
-  - name: insert/update block 
+  - name: insert/update block in in /etc/exports for volume
     blockinfile:
       path: /etc/exports
-      backup: yes
-      content: |
-        /{{ pool_name }}/{{ volume_name }}/ *(async,insecure,no_subtree_check,no_root_squash,rw,nohide)
-        # /export *(async,insecure,no_subtree_check,no_root_squash,rw,nohide,fsid=0)
+      block: |
+        /{{ item.pool_name }}/{{ item.volume_name }}/ *(async,insecure,no_subtree_check,no_root_squash,rw,nohide)
+      marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.volume_name }}"
+    with_items:
+      - { pool_name: "{{ pool_name }}", volume_name: "{{ volume_name }}" }
     when: import_pool
 
   - name: update exports

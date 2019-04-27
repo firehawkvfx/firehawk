@@ -144,6 +144,8 @@ module "softnas" {
   softnas2_private_ip2 = "${var.softnas2_private_ip2}"
 
   s3_disk_size = "${var.s3_disk_size}"
+
+  ebs_disk_size = "${var.ebs_disk_size}"
   #skipping os updates will allow faster rollout, but may be non functional
   skip_update = "${var.softnas_skip_update}"
   #sleep will stop instances to save cost during idle time.
