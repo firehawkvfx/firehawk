@@ -188,7 +188,8 @@ resource "null_resource" "provision_node_centos" {
       set -x
       cd /vagrant
       ansible-playbook -i ansible/inventory ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.node_centos.private_ip} bastion_ip=${var.bastion_ip}"
-      ansible-playbook -i ansible/inventory ansible/node-centos-init.yaml -vvv
+      ansible-playbook -i ansible/inventory ansible/node-centos-init.yaml -v
+      ansible-playbook -i ansible/inventory ansible/node-centos-mounts.yaml -v
       ansible-playbook -i ansible/inventory ansible/node-centos-houdini.yaml -v
   EOT
   }

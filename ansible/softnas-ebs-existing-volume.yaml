@@ -4,4 +4,3 @@
     instance: "{{ instance_id }}"
     name: "softnas_volume_{{ item.item.int }}"
     device_name: "{{ item.item.path }}"
-

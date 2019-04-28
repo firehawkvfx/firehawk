@@ -217,6 +217,16 @@
       backup: yes
     when: import_pool
 
+  - name: ensure after a pool import that the path actually exists.  if so then exports will be updated
+    stat:
+      path: "/{{ pool_name }}/{{ volume_name }}/"
+    register: volume_mount
+    when: import_pool
+
+  - debug:
+      msg: "/{{ pool_name }}/{{ volume_name }}/ exists on softnas instance"
+    when: volume_mount.stat.exists and volume_mount.stat.isdir and import_pool
+
   - name: insert/update block in in /etc/exports for volume
     blockinfile:
       path: /etc/exports
@@ -225,23 +235,14 @@
       marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.volume_name }}"
     with_items:
       - { pool_name: "{{ pool_name }}", volume_name: "{{ volume_name }}" }
-    when: import_pool
+    when: volume_mount.stat.exists and volume_mount.stat.isdir and import_pool
 
   - name: update exports
     command: "exportfs -r -a"
     register: update_exports_output
     become: true
-    when: import_pool
+    when: volume_mount.stat.exists and volume_mount.stat.isdir and import_pool
 
   - debug:
       msg: "{{ update_exports_output.stdout }}"
-    when: import_pool
-        
-  # - name: restart services after export updates originally recommended by softnas, but after testing may be not needed.
-  #   service:
-  #     name: "{{ item }}"
-  #     state: restarted
-  #   with_items:
-  #     - nfs
-  #     - softnas
-  #     - monit
+    when: volume_mount.stat.exists and volume_mount.stat.isdir and import_pool

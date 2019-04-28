@@ -1,0 +1,51 @@
+# backup the data necesary to restor a tiered volume. 
+# ansible-playbook -i ansible/inventory ansible/softnas-backup-btier.yaml -v
+
+# restore with
+# ansible-playbook -i ansible/inventory ansible/softnas-backup-btier.yaml -v --extra-vars "restore=true"
+
+- hosts: role_softnas
+  remote_user: centos
+  become: true
+
+  vars:
+    restore: false
+    btier_local_path: /vagrant/secrets/{{ envtier }}/ebs-volumes/btier.json
+
+  tasks:
+  - name: backup tier - /var/www/softnas/config/btier.json
+    fetch:
+      src: /var/www/softnas/config/btier.json
+      dest: "{{ btier_local_path }}"
+      flat: yes
+    when: not restore
+
+  - name: check btier exists at "{{ btier_local_path }}"
+    stat:
+      path: "{{ btier_local_path }}"
+    register: btier
+    when: restore
+    connection: local
+
+  - name: btier info
+    debug:
+      msg: "{{ btier }}"
+    when: restore
+
+  - name: restore tier
+    copy:
+      src: "{{ btier_local_path }}"
+      dest: /var/www/softnas/config/btier.json
+    when: restore and btier.stat.exists
+
+  - name: login and import btier
+    shell: |
+      softnas-cmd login softnas {{ user_softnas_pw }} && php /var/www/softnas/snserver/btier.php
+    register: btier_import
+    when: restore and btier.stat.exists
+
+  - name: btier output
+    debug:
+      var: btier_import.stdout
+    when: restore and btier.stat.exists
+    

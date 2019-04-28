@@ -443,8 +443,9 @@ resource "null_resource" "create_ami" {
     command = <<EOT
       set -x
       cd /vagrant
-      ansible-playbook -i ansible/inventory ansible/aws-ami.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.id} ami_name=softnas_ami description=softnas1_${aws_instance.softnas1.id}_${random_id.ami_unique_name.hex}"
-      aws ec2 start-instances --instance-ids ${aws_instance.softnas1.id}
+      # ami creation is unnecesary since softnas ami update.  will be needed in future again if softnas updates slow down deployment.
+      # ansible-playbook -i ansible/inventory ansible/aws-ami.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.id} ami_name=softnas_ami description=softnas1_${aws_instance.softnas1.id}_${random_id.ami_unique_name.hex}"
+      # aws ec2 start-instances --instance-ids ${aws_instance.softnas1.id}
   EOT
   }
 }
@@ -520,9 +521,12 @@ resource "null_resource" "provision_softnas_volumes" {
     command = <<EOT
       set -x
       cd /vagrant
-      ansible-playbook -i ansible/inventory ansible/softnas-ebs-disk.yaml -v --extra-vars "ebs_disk_size=${var.ebs_disk_size} instance_id=${aws_instance.softnas1.id}"
+      ansible-playbook -i ansible/inventory ansible/softnas-ebs-disk.yaml -v --extra-vars "ebs_disk_size=${var.ebs_disk_size} instance_id=${aws_instance.softnas1.id} stop_softnas_instance=true"
       ansible-playbook -i ansible/inventory ansible/softnas-s3-disk.yaml -v --extra-vars "pool_name=pool0 volume_name=volume0 disk_device=0 s3_disk_size_max_value=${var.s3_disk_size} encrypt_s3=true import_pool=${local.import_pool}"
       ansible-playbook -i ansible/inventory ansible/softnas-s3-disk.yaml -v --extra-vars "pool_name=pool1 volume_name=volume1 disk_device=1 s3_disk_size_max_value=${var.s3_disk_size} encrypt_s3=true import_pool=${local.import_pool}"
+      # exports should be updated here.
+      # if btier.json exists in /vagrant/secrets/${var.envtier}/ebs-volumes/ then the tiers will be imported.
+      # ansible-playbook -i ansible/inventory ansible/softnas-backup-btier.yaml -v --extra-vars "restore=true"
   EOT
   }
 }
