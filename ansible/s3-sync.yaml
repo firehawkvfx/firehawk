@@ -1,14 +1,52 @@
+# this wil synchronise a shot to and from s3.
+
 - hosts: ansible_control
   remote_user: vagrant
   become: true
   
   vars:
-    show: bht
-    seq: shp
-    shot: shp_0010
     bucket: "{{ show }}.{{ public_domain }}"
+    volume_path: "{{ localnas1_mount_path }}"
+    default_s3_push_args: --include "*"
+    debug: false
+    # these sync paths can be customised with your own by creating /vagrant/secrets/vars/sync-paths.yaml and use this var as its contents
+    sync_paths:
+      - path: "{{ show }}/{{ seq }}/{{ shot }}/houdini"
+        s3_push_args: --include "*.hip" --exclude "*backup/*" --exclude "*geo/*" --exclude "*pdgtemp/*"
+      - path: "{{ show }}/{{ seq }}/{{ shot }}/assets"
+    remote_push_paths:
+      - path: "{{ show }}/{{ seq }}/{{ shot }}/render"
+      - path: "{{ show }}/{{ seq }}/{{ shot }}/houdini"
+        s3_push_args: --include "*.hip" --exclude "*backup/*" --exclude "*geo/*" --exclude "*pdgtemp/*"
+      - path: "{{ show }}/{{ seq }}/{{ shot }}/assets"
 
   tasks:
+  - name: Check for existance of custom sync paths and override default mounts
+    stat:
+      path: ../secrets/vars/sync-paths.yaml
+    register: custom_sync_paths
+    tags:
+      - sync-local-push
+
+  - name: Override default mounts
+    include_vars:
+      file: ../secrets/vars/sync-paths.yaml
+    when: custom_sync_paths.stat.exists
+    tags:
+      - sync-local-push
+
+  - name: Mount up prod with nfs
+    mount:
+      fstype: nfs4
+      name: "{{ localnas1_mount_path }}"
+      src: "{{ localnas1_private_ip }}:{{ localnas1_mount_path }}"
+      path: "{{ localnas1_mount_path }}"
+      opts: noatime
+      state: mounted
+    tags:
+      - sync-local-push
+      - mounts
+
   - name: ensure an s3 bucket exists
     s3_bucket:
       name: "{{ bucket }}"
@@ -18,71 +56,98 @@
     tags:
       - sync-local-push
 
-  - name: sync hip files
-    shell: |
-      set -x
-      cd /prod/{{ show }}/{{ seq }}/{{ shot }}/houdini
-      aws s3 sync . s3://{{ bucket }}/{{ show }}/{{ seq }}/{{ shot }}/houdini --include "*.hip" --exclude "*backup/*" --exclude "*geo/*" --exclude "*pdgtemp/*"
-    become_user: vagrant
+  - name: validate path existence
+    stat:
+      path: "{{ volume_path }}/{{ item.path }}"
+    register: local_path_presence
+    with_items:
+      - "{{ sync_paths }}"
     tags:
       - sync-local-push
 
-  - name: sync asset files
-    shell: |
-      set -x
-      cd /prod/{{ show }}/{{ seq }}/{{ shot }}/asset
-      aws s3 sync . s3://{{ bucket }}/{{ show }}/{{ seq }}/{{ shot }}/asset --include "*"
-    become_user: vagrant
+  - name: path data
+    debug:
+      var: item
+    with_items: "{{ local_path_presence.results }}"
+    when: debug
     tags:
       - sync-local-push
 
-  - name: sync cache files
-    shell: |
-      set -x
-      cd /prod/{{ show }}/{{ seq }}/{{ shot }}/cache
-      aws s3 sync . s3://{{ bucket }}/{{ show }}/{{ seq }}/{{ shot }}/cache --include "*"
+  - name: sync_paths existance check
+    debug:
+      msg: "path does not exist {{ item.item.path }}"
     become_user: vagrant
+    when: not item.stat.exists
+    with_items:
+      - "{{ local_path_presence.results }}"
     tags:
       - sync-local-push
 
-  # - name: ensure the houdini path is syncronised with the bucket
-  #   s3_sync:
-  #     bucket: "{{ bucket }}"
-  #     permission: private
-  #     file_root: /prod/{{ show }}/{{ seq }}/{{ shot }}/houdini
-  #     include: "*.hip"
-  #     exclude: "backup/*"
-  #     key_prefix: "{{ show }}/{{ seq }}/{{ shot }}/houdini"
-  #     aws_access_key: "{{ aws_access_key }}"
-  #     aws_secret_key: "{{ aws_secret_key }}"
-  #     region: "{{ aws_region }}"
-  #   tags:
-  #     - sync_hip
+  - name: sync_paths
+    shell: |
+      set -x
+      cd {{ volume_path }}/{{ item.item.path }}
+      aws s3 sync . s3://{{ bucket }}/{{ item.item.path }} {{ item.item.s3_push_args | default( default_s3_push_args ) }}
+    become_user: vagrant
+    when: item.stat.exists
+    with_items:
+      - "{{ local_path_presence.results }}"
+    tags:
+      - sync-local-push
 
-  # - name: ensure the asset path is syncronised with the bucket
-  #   s3_sync:
-  #     bucket: "{{ bucket }}"
-  #     permission: private
-  #     file_root: "/prod/{{ show }}/{{ seq }}/{{ shot }}/asset"
-  #     include: "*"
-  #     key_prefix: "{{ show }}/{{ seq }}/{{ shot }}/asset"
-  #     aws_access_key: "{{ aws_access_key }}"
-  #     aws_secret_key: "{{ aws_secret_key }}"
-  #     region: "{{ aws_region }}"
-  #   tags:
-  #     - sync_asset
+  - name: ensure dir exists when pulling
+    file:
+      path: "{{ volume_path }}/{{ item.path }}"
+      state: directory
+      owner: deadlineuser
+      group: syscontrol
+      mode: g+rw
+    become: true
+    with_items:
+      - "{{ remote_push_paths }}"
+    tags:
+      - sync-local-pull
+
+  - name: sync paths local pull
+    shell: |
+      export HISTCONTROL=ignorespace
+        export AWS_ACCESS_KEY_ID={{ aws_access_key }}
+        export AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
+        export AWS_DEFAULT_REGION={{ aws_region }}
+      set -x
+      cd {{ volume_path }}/{{ item.path }}
+      aws s3 sync s3://{{ bucket }}/{{ item.path }} . --include "*"
+    become_user: vagrant
+    with_items:
+      - "{{ remote_push_paths }}"
+    tags:
+      - sync-local-pull
+
+  - name: set permissions on paths from local pull recursively.
+    file:
+      dest: "{{ volume_path }}/{{ item.path }}"
+      owner: deadlineuser
+      group: syscontrol
+      mode: u+rwX,g+rwX
+      recurse: true 
+    with_items:
+      - "{{ remote_push_paths }}"
+    tags:
+      - sync-local-pull
+
 
       # consider aws s3 cp s3://bucket/large-object . &> out.log & tail -f out.log
       # https://github.com/aws/aws-cli/issues/2598
 
 #after aws configure, you can sync with this example
+# ansible-playbook -i "ansible/inventory" ansible/s3-sync.yaml --tags "sync-local-push" --extra-vars "volume_path=/prod"
+# ansible-playbook -i "ansible/inventory" ansible/s3-sync.yaml --tags "sync-local-pull" --extra-vars "volume_path=/prod"
 # ansible-playbook -i "ansible/inventory" ansible/s3-sync.yaml --tags "sync-remote-pull" --extra-vars "variable_user=centos variable_host=role_node_centos volume_path=/prod"
-# ansible-playbook -i "ansible/inventory" ansible/s3-sync.yaml --tags "sync-remote-push" --extra-vars "variable_user=centos variable_host=role_softnas volume_path=/pool0/volume0"
-# ansible-playbook -i "ansible/inventory" ansible/s3-sync.yaml --tags "sync-remote-pull" --extra-vars "variable_user=centos variable_host=role_softnas volume_path=/pool1/volume1"
+# ansible-playbook -i "ansible/inventory" ansible/s3-sync.yaml --tags "sync-remote-push" --extra-vars "volume_path=/pool0/volume0"
+# ansible-playbook -i "ansible/inventory" ansible/s3-sync.yaml --tags "sync-remote-pull" --extra-vars "volume_path=/pool1/volume1"
 
 - hosts: "{{ variable_host | default('role_softnas') }}"
   remote_user: "{{ variable_user | default('centos') }}"
-  #become_user: root
   become: true
 
   vars:
@@ -90,9 +155,6 @@
     pool_name: pool0
     volume_name: volume0
 
-    show: bht
-    seq: shp
-    shot: shp_0010
     bucket: "{{ show }}.{{ public_domain }}"
 
     volume_path: "/{{ pool_name }}/{{ volume_name }}"
@@ -103,8 +165,33 @@
     shot_path_nas: "{{ volume_path }}/{{ show }}/{{ seq }}/{{ shot }}"
     shot_path_bucket: "s3://{{ bucket }}/{{ show }}/{{ seq }}/{{ shot }}"
 
+    default_s3_push_args: --include "*"
+    debug: false
+    # these sync paths can be customised with your own by creating /vagrant/secrets/vars/sync-paths.yaml and use this var as its contents
+    sync_paths:
+      - path: "{{ show }}/{{ seq }}/{{ shot }}/houdini"
+        s3_push_args: --include "*.hip" --exclude "*backup/*" --exclude "*geo/*" --exclude "*pdgtemp/*"
+      - path: "{{ show }}/{{ seq }}/{{ shot }}/assets"
 
   tasks:
+  - name: Check for existance of custom sync paths and override default sync paths
+    stat:
+      path: ../secrets/vars/sync-paths.yaml
+    register: custom_sync_paths
+    connection: local
+    tags:
+      - sync-remote-pull
+      - sync-remote-push
+
+  - name: Override default paths
+    include_vars:
+      file: ../secrets/vars/sync-paths.yaml
+    when: custom_sync_paths.stat.exists
+    connection: local
+    tags:
+      - sync-remote-pull
+      - sync-remote-push
+
   - name: ensure mounts are present
     shell: |
       mount -a
@@ -124,116 +211,197 @@
     tags:
       - sync-remote-pull
       - sync-remote-push
-    
-  - name: ensure dir exists.
+
+  - name: ensure dir exists when pulling
     file:
-      path: "{{ asset_path_nas }}"
+      path: "{{ volume_path }}/{{ item.path }}"
       state: directory
-      owner: "{{ variable_user }}"
+      owner: deadlineuser
     become: true
+    with_items:
+      - "{{ sync_paths }}"
     tags:
       - sync-remote-pull
-      - sync-remote-push
 
-# aws command may need to be /home/{{ variable_user }}/.local/bin/
-  - name: sync asset files pull
+  - name: sync paths remote pull
     shell: |
       export HISTCONTROL=ignorespace
         export AWS_ACCESS_KEY_ID={{ aws_access_key }}
         export AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
         export AWS_DEFAULT_REGION={{ aws_region }}
       set -x
-      cd {{ asset_path_nas }}
-      aws s3 sync {{ shot_path_bucket }}/asset . --include "*"
-    become_user: "{{ variable_user }}"
+      cd {{ volume_path }}/{{ item.path }}
+      aws s3 sync s3://{{ bucket }}/{{ item.path }} . --include "*"
+    become_user: deadlineuser
+    with_items:
+      - "{{ sync_paths }}"
     tags:
       - sync-remote-pull
 
-  - name: sync asset files push
-    shell: |
-      export HISTCONTROL=ignorespace
-        export AWS_ACCESS_KEY_ID={{ aws_access_key }}
-        export AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
-        export AWS_DEFAULT_REGION={{ aws_region }}
-      set -x
-      cd {{ asset_path_nas }}
-      aws s3 sync . {{ shot_path_bucket }}/asset --include "*"
-    become_user: "{{ variable_user }}"
-    tags:
-      - sync-remote-pull
-      - sync-remote-push
-
-  - name: ensure dir exists.
+  - name: set permissions on paths after pull
     file:
-      path: "{{ shot_path_nas }}/cache"
-      state: directory
-      owner: "{{ variable_user }}"
-    become: true
+      dest: "{{ volume_path }}/{{ item.path }}"
+      owner: deadlineuser
+      group: syscontrol
+      mode: u+rwX,g+rwX
+      recurse: true 
+    with_items:
+      - "{{ sync_paths }}"
     tags:
       - sync-remote-pull
+
+  - name: validate path existence when pushing
+    stat:
+      path: "{{ volume_path }}/{{ item.path }}"
+    register: remote_path_presence
+    with_items:
+      - "{{ remote_push_paths }}"
+    tags:
       - sync-remote-push
 
-  - name: sync cache files pull
+  - name: path data
+    debug:
+      var: item
+    with_items: "{{ remote_path_presence.results }}"
+    when: debug
+    tags:
+      - sync-remote-push
+
+  - name: sync_paths existance check
+    debug:
+      msg: "path does not exist {{ item.item.path }}"
+    become_user: "{{ variable_user }}"
+    when: not item.stat.exists
+    with_items:
+      - "{{ remote_path_presence.results }}"
+    tags:
+      - sync-remote-push
+
+  - name: sync_paths remote push
     shell: |
       export HISTCONTROL=ignorespace
         export AWS_ACCESS_KEY_ID={{ aws_access_key }}
         export AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
         export AWS_DEFAULT_REGION={{ aws_region }}
       set -x
-      cd {{ shot_path_nas }}/cache
-      aws s3 sync {{ shot_path_bucket }}/cache . --include "*"
+      cd {{ volume_path }}/{{ item.item.path }}
+      aws s3 sync . s3://{{ bucket }}/{{ item.item.path }} {{ item.item.s3_push_args | default( default_s3_push_args ) }}
     become_user: "{{ variable_user }}"
-    tags:
-      - sync-remote-pull
-
-  - name: sync cache files push
-    shell: |
-      export HISTCONTROL=ignorespace
-        export AWS_ACCESS_KEY_ID={{ aws_access_key }}
-        export AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
-        export AWS_DEFAULT_REGION={{ aws_region }}
-      set -x
-      cd {{ shot_path_nas }}/cache
-      aws s3 sync . {{ shot_path_bucket }}/cache --include "*"
-    become_user: "{{ variable_user }}"
+    register: sync_remote_push_output
+    when: item.stat.exists
+    with_items:
+      - "{{ remote_path_presence.results }}"
     tags:
       - sync-remote-push
 
-  - name: ensure dir exists.
-    file:
-      path: "{{ shot_path_nas }}/houdini"
-      state: directory
-      owner: "{{ variable_user }}"
-    become: true
-    tags:
-      - sync-remote-pull
-      - sync-remote-push
-
-  - name: sync houdini files pull
-    shell: |
-      export HISTCONTROL=ignorespace
-        export AWS_ACCESS_KEY_ID={{ aws_access_key }}
-        export AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
-        export AWS_DEFAULT_REGION={{ aws_region }}
-      set -x
-      cd {{ shot_path_nas }}/houdini
-      aws s3 sync {{ shot_path_bucket }}/houdini . --include "*"
-    become_user: "{{ variable_user }}"
-    tags:
-      - sync-remote-pull
-
-  - name: sync houdini files push
-    shell: |
-      export HISTCONTROL=ignorespace
-        export AWS_ACCESS_KEY_ID={{ aws_access_key }}
-        export AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
-        export AWS_DEFAULT_REGION={{ aws_region }}
-      set -x
-      cd {{ shot_path_nas }}/houdini
-      aws s3 sync . {{ shot_path_bucket }}/houdini --include "*"
-    become_user: "{{ variable_user }}"
+  - name: output from remote push
+    debug:
+      var: item
+    with_items:
+      - "{{ sync_remote_push_output.results }}"
     tags:
       - sync-remote-push
+
+
+
+# # aws command may need to be /home/{{ variable_user }}/.local/bin/
+#   - name: sync asset files pull
+#     shell: |
+#       export HISTCONTROL=ignorespace
+#         export AWS_ACCESS_KEY_ID={{ aws_access_key }}
+#         export AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
+#         export AWS_DEFAULT_REGION={{ aws_region }}
+#       set -x
+#       cd {{ asset_path_nas }}
+#       aws s3 sync {{ shot_path_bucket }}/asset . --include "*"
+#     become_user: "{{ variable_user }}"
+#     tags:
+#       - sync-remote-pull
+
+#   - name: sync asset files push
+#     shell: |
+#       export HISTCONTROL=ignorespace
+#         export AWS_ACCESS_KEY_ID={{ aws_access_key }}
+#         export AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
+#         export AWS_DEFAULT_REGION={{ aws_region }}
+#       set -x
+#       cd {{ asset_path_nas }}
+#       aws s3 sync . {{ shot_path_bucket }}/asset --include "*"
+#     become_user: "{{ variable_user }}"
+#     tags:
+#       - sync-remote-push
+
+#   - name: ensure dir exists.
+#     file:
+#       path: "{{ shot_path_nas }}/cache"
+#       state: directory
+#       owner: "{{ variable_user }}"
+#     become: true
+#     tags:
+#       - sync-remote-pull
+#       - sync-remote-push
+
+#   - name: sync cache files pull
+#     shell: |
+#       export HISTCONTROL=ignorespace
+#         export AWS_ACCESS_KEY_ID={{ aws_access_key }}
+#         export AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
+#         export AWS_DEFAULT_REGION={{ aws_region }}
+#       set -x
+#       cd {{ shot_path_nas }}/cache
+#       aws s3 sync {{ shot_path_bucket }}/cache . --include "*"
+#     become_user: "{{ variable_user }}"
+#     tags:
+#       - sync-remote-pull
+
+#   - name: sync cache files push
+#     shell: |
+#       export HISTCONTROL=ignorespace
+#         export AWS_ACCESS_KEY_ID={{ aws_access_key }}
+#         export AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
+#         export AWS_DEFAULT_REGION={{ aws_region }}
+#       set -x
+#       cd {{ shot_path_nas }}/cache
+#       aws s3 sync . {{ shot_path_bucket }}/cache --include "*"
+#     become_user: "{{ variable_user }}"
+#     tags:
+#       - sync-remote-push
+
+#   - name: ensure dir exists.
+#     file:
+#       path: "{{ shot_path_nas }}/houdini"
+#       state: directory
+#       owner: "{{ variable_user }}"
+#     become: true
+#     tags:
+#       - sync-remote-pull
+#       - sync-remote-push
+
+#   - name: sync houdini files pull
+#     shell: |
+#       export HISTCONTROL=ignorespace
+#         export AWS_ACCESS_KEY_ID={{ aws_access_key }}
+#         export AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
+#         export AWS_DEFAULT_REGION={{ aws_region }}
+#       set -x
+#       cd {{ shot_path_nas }}/houdini
+#       aws s3 sync {{ shot_path_bucket }}/houdini . --include "*"
+#     become_user: "{{ variable_user }}"
+#     tags:
+#       - sync-remote-pull
+
+#   - name: sync houdini files push
+#     shell: |
+#       export HISTCONTROL=ignorespace
+#         export AWS_ACCESS_KEY_ID={{ aws_access_key }}
+#         export AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
+#         export AWS_DEFAULT_REGION={{ aws_region }}
+#       set -x
+#       cd {{ shot_path_nas }}/houdini
+#       aws s3 sync . {{ shot_path_bucket }}/houdini --include "*"
+#     become_user: "{{ variable_user }}"
+#     tags:
+#       - sync-remote-push
 
 
 #   - name: S3 GET objects

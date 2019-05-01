@@ -22,7 +22,6 @@ Vagrant.configure("2") do |config|
   name = ENV['TF_VAR_openfirehawkserver_name']
   openfirehawkserver = ENV['TF_VAR_openfirehawkserver']
   network = ENV['TF_VAR_network']
-  #'private'
 
   config.vm.define "ansible_control_"+envtier
   config.vagrant.plugins = ['vagrant-disksize', 'vagrant-reload']
@@ -108,7 +107,8 @@ Vagrant.configure("2") do |config|
   # trigger reload
   config.vm.provision :reload
 
-
+  # configure routes on startup.  not working for unknown reason.
+  # config.vm.provision "shell", inline: "set -x && cd /vagrant && source ./update_vars.sh $TF_VAR_envtier && ansible-playbook -i ansible/inventory ansible/openvpn.yaml -v --tags add-routes --extra-vars 'variable_gather_facts=false' ", run:"always"
 
   #config.vm.provision "shell", inline: "sudo VBoxClient-all"
   #config.vm.provision "shell", inline: "sudo startxfce4&"

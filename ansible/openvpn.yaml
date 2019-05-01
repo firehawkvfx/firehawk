@@ -1,5 +1,11 @@
+# configures autoligin for open vpn and routes.
+
+# to update routes only for the vagrant host, execute 
+# ansible-playbook -i ansible/inventory ansible/openvpn.yaml -v --extra-vars "" --tags add-routes
+
 - hosts: ansible_control
   remote_user: vagrant
+  gather_facts: "{{ variable_gather_facts | default('true') }}"
   become: true
 
   tasks:
@@ -47,6 +53,7 @@
 
 - hosts: ansible_control
   remote_user: vagrant
+  gather_facts: "{{ variable_gather_facts | default('true') }}"
   become: true
 
   tasks:

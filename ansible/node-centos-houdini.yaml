@@ -20,11 +20,13 @@
     variable_user: centos
     bastionip: "{{ groups['bastionip'][0] }}"
     hostname: "node1.{{ public_domain }}"
+    skip_packages: false
 
   tasks:
   - package:
       name: "{{ item }}"
       state: present
+    when: not skip_packages
     with_items:
       - mesa-libGLw
       - libXp
@@ -32,11 +34,13 @@
       - mesa-libGLU
     tags:
       - packages
+    
 
   - name: install pip
     package:
       name: python-pip
       state: latest
+    when: not skip_packages
 
   - file:
       path: /opt/houdini_install_script
@@ -46,6 +50,7 @@
 
   - pip:
       name: beautifulsoup4
+    when: not skip_packages
 
   - copy:
       src: /vagrant/modules/node_centos/modules/houdini_install_script/
