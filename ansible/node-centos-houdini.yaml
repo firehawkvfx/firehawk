@@ -20,7 +20,9 @@
     variable_user: centos
     bastionip: "{{ groups['bastionip'][0] }}"
     hostname: "node1.{{ public_domain }}"
+    houdini_build: "{{ lookup('env','TF_VAR_houdini_build') }}"
     skip_packages: false
+    skip_install: false
 
   tasks:
   - package:
@@ -60,14 +62,29 @@
   - file:
       path: /opt/houdini_install_script/houdini_install.py
       mode: 0700
+
+  # - copy:
+  #     src: /vagrant/modules/node_centos/modules/houdini-download/
+  #     dest: /opt/houdini-download/
+  #     directory_mode: yes
+
+  # - file:
+  #     path: /opt/houdini-download/houdini-download.py
+  #     mode: 0700
     
+  # - file:
+  #     path: /opt/houdini-download/houdini-feed.py
+  #     mode: 0700
+
   - shell: |
-      python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini
+      python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini -b {{ houdini_build }}
     register: houdini_install_out
     become: true
+    when: not skip_install
 
   - debug:
       msg:  "{{ houdini_install_out.stdout }}"
+    when: not skip_install
 
   - name: setup licensing mode
     shell: |
@@ -77,7 +94,14 @@
       source ./houdini_setup
       /opt/hfs17.5/bin/hserver
       /opt/hfs17.5/bin/hserver -S {{ houdini_license_server_address }}
+      /opt/hfs17.5/bin/hserver -l
+    register: houdini_hserver_out
     become: true
+    when: not skip_install
+
+  - debug:
+      var: houdini_hserver_out.stdout
+    when: not skip_install
 
 # old terraform install for houdini.  may want to replicate when able to test again.
 #   #copy the deadline installer to the rendernode 

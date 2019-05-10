@@ -1,0 +1,38 @@
+---
+# example local install
+# ansible-playbook -i "$TF_VAR_inventory" ansible/init-centos-aws-cli.yaml -v --extra-vars "ansible_ssh_user=deadlineuser variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_become_pass=somepass"
+
+# make sure with local hosts in ubuntu that you are ussing ssh correctly - https://docs.ansible.com/ansible/latest/user_guide/intro_getting_started.html
+# $ ssh-agent bash
+# $ ssh-add ~/.ssh/id_rsa
+
+- hosts: "{{ variable_host | default('role_node_centos') }}"
+  remote_user: "{{ variable_user | default('centos') }}"
+  become: true
+
+  tasks:
+  - name: test connection
+    debug:
+      msg: "connection established"
+
+- hosts: "{{ variable_host | default('role_node_centos') }}"
+  remote_user: "{{ variable_user | default('centos') }}"
+  become: true
+
+  vars:
+    variable_user: centos
+    bastionip: "{{ groups['bastionip'][0] }}"
+    hostname: "node1.{{ public_domain }}"
+    houdini_build: "{{ lookup('env','TF_VAR_houdini_build') }}"
+    skip_packages: false
+    skip_install: false
+  
+  pre_tasks:
+    - name: ensure source ./update_vars.sh initialised
+      fail:
+        msg: "A tier has not been defined. ensure you run 'source ./update_vars.sh --dev' or 'source ./update_vars.sh --prod' from the path /vagrant"
+      when: envtier is not defined
+
+  roles:
+    - role: init-packages
+    - role: aws-cli

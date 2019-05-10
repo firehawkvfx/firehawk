@@ -1,5 +1,9 @@
 ---
 # tasks file for roles/init-packages
+- name: ansible distro
+  debug:
+    var: ansible_distribution
+
 - name: install mkpasswd, pip, pexpect, passlib
   package:
     name: "{{ item }}"
@@ -7,10 +11,27 @@
   with_items:
     - whois
     - python-pip
-    - python-pexpect
+    #- python-pexpect
     - python-passlib
     - zip
     - openvpn
-    - nfs-common
+    #- nfs-common
 #nfs-common is used for showmount
 
+- name: install pexpect for rhel / centos,
+  pip:
+    name: pexpect
+  become: true
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+
+# Enterprise Linux'
+# Above is for RHEL and Centos, the following is for Debian/Ubuntu:
+
+- name: install pexpect for ubuntu
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - python-pexpect
+    - nfs-common
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
