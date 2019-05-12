@@ -86,22 +86,57 @@
       msg:  "{{ houdini_install_out.stdout }}"
     when: not skip_install
 
-  - name: setup licensing mode
+  - name: setup licensing mode will write to /opt/hfs17.5/houdini/Licensing.opt
     shell: |
       cd /opt/hfs17.5
       sudo sed -i '/licensingMode = sesinetd/s/^# //g' /opt/hfs17.5/houdini/Licensing.opt
       sudo cat /opt/hfs17.5/houdini/Licensing.opt
-      source ./houdini_setup
-      /opt/hfs17.5/bin/hserver
-      /opt/hfs17.5/bin/hserver -S {{ houdini_license_server_address }}
-      /opt/hfs17.5/bin/hserver -l
     register: houdini_hserver_out
     become: true
     when: not skip_install
-
-  - debug:
-      var: houdini_hserver_out.stdout
+  
+  - name: setup licensing server ip as deadline user will write to $HOME/.sesi_licenses.pref
+    shell: |
+      cd /opt/hfs17.5
+      source ./houdini_setup
+      hserver
+      hserver -S {{ houdini_license_server_address }}
+      hserver -l
+      echo $HOME
+      #cat $HOME/.sesi_licenses.pref
+    register: houdini_hserver_deadlineuser_out
+    become_user: deadlineuser
     when: not skip_install
+
+  # - debug:
+  #     var: houdini_hserver_out.stdout
+  #   when: not skip_install
+
+  # - name: setup licensing mode for centos will write to $HOME/.sesi_licenses.pref
+  #   shell: |
+  #     cd /opt/hfs17.5
+  #     source ./houdini_setup
+  #     hserver -S {{ houdini_license_server_address }}
+  #     hserver -l
+  #     echo $HOME
+  #     cat $HOME/.sesi_licenses.pref
+  #   register: houdini_hserver_out_centos
+  #   become_user: centos
+  #   when: not skip_install
+
+  # - name: setup licensing mode for deadlineuser will write to $HOME/.sesi_licenses.pref
+  #   shell: |
+  #     cd /opt/hfs17.5
+  #     source ./houdini_setup
+  #     hserver -S {{ houdini_license_server_address }}
+  #     hserver -l
+  #   register: houdini_hserver_out_deadlineuser
+  #   become_user: deadlineuser
+  #   when: not skip_install
+
+  # - debug:
+  #     var: houdini_hserver_out_deadlineuser.stdout
+  #   when: not skip_install
 
 # old terraform install for houdini.  may want to replicate when able to test again.
 #   #copy the deadline installer to the rendernode 
