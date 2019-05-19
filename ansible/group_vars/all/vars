@@ -107,6 +107,9 @@ AWS_ACCESS_KEY: "{{ lookup('env','TF_VAR_aws_access_key') }}"
 aws_secret_key: "{{ lookup('env','TF_VAR_aws_secret_key') }}"
 AWS_SECRET_KEY: "{{ lookup('env','TF_VAR_aws_secret_key') }}"
 
+aws_access_key_s3user: "{{ lookup('env','TF_VAR_aws_access_key_s3user') }}"
+aws_secret_key_s3user: "{{ lookup('env','TF_VAR_aws_secret_key_s3user') }}"
+
 
 s3_disk_password: "{{ lookup('env','TF_VAR_s3_disk_password') }}"
 s3_disk_size: "{{ lookup('env','TF_VAR_s3_disk_size') }}"
