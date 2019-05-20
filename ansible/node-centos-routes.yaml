@@ -1,15 +1,15 @@
 # This configures routes for an onsite render node/workstation to allows access to the cloud based NFS share via vpn.
 
 # example local install
-<<<<<<< HEAD
+
 # ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-routes.yaml -v -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_become_pass=somepass ansible_ssh_private_key_file=/home/vagrant/.ssh/id_rsa"
-=======
-# ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-routes.yaml -v -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_become_pass=somepass houdini_build=production ansible_ssh_private_key_file=/home/vagrant/.ssh/id_rsa"
->>>>>>> 38164b58868a2d50a7fe55ba4a9ab6d52fbc9827
 
 - hosts: "{{ variable_host | default('role_node_centos') }}"
   remote_user: "{{ variable_user | default('centos') }}"
   become: true
+
+  vars:
+    ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
 
   tasks:
   - name: test connection
@@ -28,6 +28,7 @@
     skip_packages: false
     skip_install: false
     ethernet_device: enp9s0f0
+    ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
 
   tasks:
   - name: configure routes for an onsite workstation or render node

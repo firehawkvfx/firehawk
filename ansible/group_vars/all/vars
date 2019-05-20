@@ -86,6 +86,8 @@ user_softnas_pw: "{{ lookup('env','TF_VAR_user_softnas_pw') }}"
 user_deadlineuser_name: "{{ lookup('env','TF_VAR_user_deadlineuser_name') }}"
 user_deadlineuser_pw: "{{ lookup('env','TF_VAR_user_deadlineuser_pw') }}"
 
+user_deadlineuser_pw_local: "{{ lookup('env','TF_VAR_user_deadlineuser_pw_local') }}"
+
 openfirehawkserver: "{{ lookup('env','TF_VAR_openfirehawkserver') }}"
 openfirehawkserver_dev: "{{ lookup('env','TF_VAR_openfirehawkserver_dev') }}"
 openfirehawkserver_prod: "{{ lookup('env','TF_VAR_openfirehawkserver_prod') }}"
