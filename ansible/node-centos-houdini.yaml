@@ -63,18 +63,24 @@
       path: /opt/houdini_install_script/houdini_install.py
       mode: 0700
 
-  # - copy:
-  #     src: /vagrant/modules/node_centos/modules/houdini-download/
-  #     dest: /opt/houdini-download/
-  #     directory_mode: yes
+  - file:
+      path: /home/deadlineuser/houdini17.5/scripts/
+      state: directory
+      mode: 0700
+      owner: deadlineuser
 
-  # - file:
-  #     path: /opt/houdini-download/houdini-download.py
-  #     mode: 0700
-    
-  # - file:
-  #     path: /opt/houdini-download/houdini-feed.py
-  #     mode: 0700
+  - copy:
+      src: /vagrant/modules/node_centos/modules/houdini-scripts/
+      dest: /home/deadlineuser/houdini17.5/scripts/
+      directory_mode: yes
+      owner: deadlineuser
+    become: true
+
+  - file: 
+      dest: /home/deadlineuser/houdini17.5/scripts/ 
+      owner: deadlineuser 
+      mode: u=rwX,g=r 
+      recurse: yes
 
   - shell: |
       python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini -b {{ houdini_build }}
@@ -103,7 +109,6 @@
       hserver -S {{ houdini_license_server_address }}
       hserver -l
       echo $HOME
-      #cat $HOME/.sesi_licenses.pref
     register: houdini_hserver_deadlineuser_out
     become_user: deadlineuser
     when: not skip_install

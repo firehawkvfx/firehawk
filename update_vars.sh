@@ -147,3 +147,7 @@ do
 done
 
 rm ./tmp/envtier_exports.txt
+
+# in the ubuntu vagrant image, for some reason the ssh bash agent needs to be initialised or keys cannot be added with ssh-add
+
+ssh-agent bash
