@@ -107,18 +107,20 @@ fi
 printf "\nTF_VAR_envtier=$TF_VAR_envtier\n"
 printf "vault_command=$vault_command\n"
 
-
+export vault_examples_command="cat ./secrets.example"
+# we need to handle this in python instead.  if environment vars aren't in the example, they should be blank, rather than using real values.
 for i in `eval $vault_command`
 do
     if [[ "$i" =~ ^#.*$ ]]
     then
         echo $i >> ./tmp/secrets.temp
     else
-        echo ${i%%=*}'=$'${i%%=*} >> ./tmp/secrets.temp
+        #echo ${i%%=*}'=$'${i%%=*} >> ./tmp/secrets.temp
+        echo ${i%%=*}'=insertvalue' >> ./tmp/secrets.temp
     fi
 done
 
-# substitute example var vules into the template.
+# substitute example var values into the template.
 
 envsubst < "./tmp/secrets.temp" > "./secrets.template"
 rm ./tmp/secrets.temp
