@@ -12,7 +12,7 @@
     ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
 
   tasks:
-  - name: test connection
+  - name: test connection and permissions
     debug:
       msg: "connection established"
 
@@ -21,6 +21,7 @@
   become: true
 
   vars:
+    ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
     variable_user: centos
     bastionip: "{{ groups['bastionip'][0] }}"
     #hostname: "node1.{{ public_domain }}"
@@ -28,7 +29,7 @@
     skip_packages: false
     skip_install: false
     ethernet_device: enp9s0f0
-    ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
+
 
   tasks:
   - name: configure routes for an onsite workstation or render node

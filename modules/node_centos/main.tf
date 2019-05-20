@@ -190,8 +190,8 @@ resource "null_resource" "provision_node_centos" {
       ansible-playbook -i ansible/inventory ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.node_centos.private_ip} bastion_ip=${var.bastion_ip}"
       ansible-playbook -i ansible/inventory ansible/node-centos-init-users.yaml -v
       ansible-playbook -i ansible/inventory ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_node_centos variable_user=deadlineuser"
+      ansible-playbook -i ansible/inventory ansible/node-centos-mounts.yaml -v --skip-tags "local_install"
       ansible-playbook -i ansible/inventory ansible/node-centos-init-deadline.yaml -v
-      ansible-playbook -i ansible/inventory ansible/node-centos-mounts.yaml -v
       ansible-playbook -i ansible/inventory ansible/node-centos-houdini.yaml -v
   EOT
   }

@@ -2,17 +2,35 @@
 
 # to update a workstation after altering any softnas mounts for the first time use the command -
 # ansible-playbook -i ansible/inventory ansible/node-centos-mounts.yaml --extra-vars "variable_host=role_workstation_centos hostname=workstation1.$TF_VAR_public_domain pcoip=true"
+
 # to update a render node, just use -
 # ansible-playbook -i ansible/inventory ansible/node-centos-mounts.yaml
 
+# to update an onsite centos workstation use-
+# ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_ssh_private_key_file=/home/vagrant/.ssh/id_rsa" --skip-tags 'cloud_install'
+
+- hosts: "{{ variable_host | default('role_node_centos') }}"
+  remote_user: "{{ variable_user | default('centos') }}"
+  become: true
+
+  vars:
+    ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
+    destroy: false
+
+  tasks:
+  - name: test connection and permissions
+    debug:
+      msg: "connection established"
 
 # check exports on softnas.
 - hosts: role_softnas
   remote_user: centos
   become_user: root
   become: true
+  gather_facts: "{{ variable_gather_facts | default('yes') }}"
 
   vars:
+    destroy: false
     # when paths are found at these locations, they will be added to exports.
     exports:
       - path: "/pool1/volume1/"
@@ -29,17 +47,19 @@
       path: ../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
     register: custom_ebs_list
     connection: local
+    when: destroy == false
 
   - name: Override default exports
     include_vars:
       file: ../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
-    when: custom_ebs_list.stat.exists
+    when: destroy == false and custom_ebs_list.stat.exists
     connection: local
 
   - name: exports
     debug:
       var: item
     with_items: "{{ exports }}"
+    when: destroy == false
 
   - name: Check whether /etc/exports contains the mount
     command: grep -E "^\/{{ item.pool_name }}\/{{ item.volume_name }}.*" /etc/exports
@@ -48,28 +68,60 @@
     ignore_errors: yes
     changed_when: no
     with_items: "{{ exports }}"
+    when: destroy == false
 
   - name: export existance test
     debug:
       var: item
-    when: item.rc == 0
+    when: destroy == false and item.rc == 0
     with_items: "{{ presence.results }}"
 
   - name: export output always
     set_fact: exported_softnas_mounts="{{item}}"
     with_items: "{{ presence.results }}"
+    when: destroy == false
 
 # update fstab with valid mounts
+
 - hosts: "{{ variable_host | default('role_node_centos') }}"
   remote_user: "{{ variable_user | default('centos') }}"
   become: true
 
   vars:
+    ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
     softnas_exports: "{{ hostvars[groups['role_softnas'][0]]['presence']['results'] }}"
     hostname: "node1.{{ public_domain }}"
-    pcoip: False
+    pcoip: false
+    destroy: false
+    exports:
+      - path: "/pool1/volume1/"
+        pool_name: pool1
+        volume_name: volume1
+        state: present
+        bind: /prod
+
+    import_pool: true
 
   tasks:
+  - name: Check for existance of custom exports in /vagrant/secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml and override default mounts
+    stat:
+      path: ../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
+    register: custom_ebs_list
+    connection: local
+    when: destroy
+
+  - name: Override default exports if destroying mounts.
+    include_vars:
+      file: ../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
+    when: destroy and custom_ebs_list.stat.exists
+    connection: local
+
+  - name: exports
+    debug:
+      var: item
+    with_items: "{{ exports }}"
+    when: destroy
+
   - name: exports to mount to this instance
     debug:
       var: item
@@ -82,7 +134,7 @@
       state: directory
       owner: deadlineuser
       group: deadlineuser
-    when: item.rc == 0
+    when: destroy == false and item.rc == 0
     with_items: 
     - "{{ softnas_exports }}"
 
@@ -92,7 +144,7 @@
       state: directory
       owner: deadlineuser
       group: deadlineuser
-    when: item.item.bind1 and item.rc == 0
+    when: destroy == false and item.item.bind1 and item.rc == 0
     with_items: 
     - "{{ softnas_exports }}"
 
@@ -102,49 +154,182 @@
       state: directory
       owner: deadlineuser
       group: deadlineuser
-    when: item.item.bind2 and item.rc == 0
+    when: destroy == false and item.item.bind2 and item.rc == 0
     with_items: 
     - "{{ softnas_exports }}"
 
   - fail:
       msg: "{{ item.item.path }} is set to be present in exports dict but doesn't exist in /etc/exports"
-    when: item.item.state == "present" and item.rc == 1
+    when: destroy == false and item.item.state == "present" and item.rc == 1
     with_items:
     - "{{ softnas_exports }}"
 
-  - name: insert/update block in in /etc/fstab for found exports
-    blockinfile:
-      path: /etc/fstab
-      block: |
-        {{ groups['role_softnas'][0] }}:{{ item.item.path }} {{ item.item.path }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
-      marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.item.path }} PRIMARY MOUNT"
-      state: "{{ ( item.item.path and item.rc == 0 ) | ternary( item.item.state , 'absent' ) }}"
-    with_items:
-    - "{{ softnas_exports }}"
+  - debug:
+      msg: 'local onsite install will use different mounts'
+    tags:
+    - local_install
 
-  - name: insert/update block in in /etc/fstab for found exports and bind1 points
-    blockinfile:
-      path: /etc/fstab
-      block: |
-        {{ item.item.path }} {{ item.item.bind1 }} none defaults,bind,timeo=14 0 0
-      marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.item.path }} BIND1"
-      state: "{{ ( item.item.path and item.item.bind1 and item.rc == 0 ) | ternary( item.item.state , 'absent' ) }}"
-    with_items:
-    - "{{ softnas_exports }}"
+  - name: mount softnas NFS volume on local site based workstation/render nodes using original unique pool and volume names - master
+    become: yes
+    mount:
+      fstype: nfs4
+      path: "{{ item.item.path }}"
+      opts: rsize=8192,wsize=8192,timeo=14,intr,_netdev
+      src: "{{ groups['role_softnas'][0] }}:{{ item.item.path }}"
+      state: "{{ ( destroy == false and item.item.path and item.rc == 0 and item.item.state == 'present') | ternary( 'mounted' , 'absent' ) }}"
+    when: destroy == false
+    with_items: "{{ softnas_exports }}"
+    tags:
+    - local_install
 
-  - name: insert/update block in in /etc/fstab for found exports and bind2 points
-    blockinfile:
-      path: /etc/fstab
-      block: |
-        {{ item.item.path }} {{ item.item.bind2 }} none defaults,bind,timeo=14 0 0
-      marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.item.path }} BIND2"
-      state: "{{ ( item.item.path and item.item.bind2 and item.rc == 0 ) | ternary( item.item.state , 'absent' ) }}"
-    with_items:
-    - "{{ softnas_exports }}"
+  - name: exports check
+    debug:
+      var: item.bind2
+    with_items: "{{ exports }}"
+    when: destroy
 
-  - name: mount all changes to fstab
-    command: mount -a
-    become: true
+  - name: bind master mounts to named paths.  bind2 references the absolute mount names such as /aws_sydney_prod.  bind1 is relative site names such as /prod, which are not pushed from cloud to onsite since those paths should exist onsite from a high performance local mount
+    become: yes
+    mount:
+      fstype: none
+      path: "{{ item.item.bind2 }}"
+      opts: bind
+      src: "{{ item.item.path }}"
+      # if the path exists, and it was found in the exports, then set to mounted, else remove.
+      state: "{{ ( destroy == false and item.item.path and item.item.bind2 and item.rc == 0 and item.item.state == 'present' ) | ternary( 'mounted' , 'absent' ) }}"
+    when: destroy == false
+    with_items: "{{ softnas_exports }}"
+    tags:
+    - local_install
+
+  - name: unmount when destroy is true.  bind must be removed before the hard mount - master.
+    become: yes
+    mount:
+      path: "{{ item.bind2 }}"
+      state: unmounted
+    when: destroy
+    with_items: "{{ exports }}"
+    tags:
+    - local_install
+
+  - name: remove mounts from fstab when destroy is true.  bind must be removed before the hard mount - master.
+    become: yes
+    mount:
+      path: "{{ item.bind2 }}"
+      state: absent
+    when: destroy
+    with_items: "{{ exports }}"
+    tags:
+    - local_install
+
+  - name: unmount when destroy is true for NFS softnas master on workstation.  this will not check the softnas instance, and use the mounts originally defined in your ebs settings in secrets
+    become: yes
+    mount:
+      path: "{{ item.path }}"
+      state: unmounted
+    when: destroy
+    with_items: "{{ exports }}"
+    tags:
+    - local_install
+
+  - name: remove mounts from fstab when destroy is true for NFS softnas master on workstation.  this will not check the softnas instance, and use the mounts originally defined in your ebs settings in secrets
+    become: yes
+    mount:
+      path: "{{ item.path }}"
+      state: absent
+    when: destroy
+    with_items: "{{ exports }}"
+    tags:
+    - local_install
+
+
+### cloud based mounts with ansible mount command
+
+  - name: insert/update block in in /etc/fstab on remote host for found exports using original unique pool and volume names - master
+    become: yes
+    mount:
+      fstype: nfs4
+      path: "{{ item.item.path }}"
+      opts: rsize=8192,wsize=8192,timeo=14,intr,_netdev
+      src: "{{ groups['role_softnas'][0] }}:{{ item.item.path }}"
+      state: "{{ ( item.item.path and item.rc == 0 and item.item.state == 'present') | ternary( 'mounted' , 'absent' ) }}"
+    when: destroy == false
+    with_items: "{{ softnas_exports }}"
+    tags:
+    - cloud_install
+
+  - name: bind1 master mounts to named paths.  bind2 references the absolute mount names such as /aws_sydney_prod.  bind1 is relative site names such as /prod, which are not pushed from cloud to onsite since those paths should exist onsite from a high performance local mount
+    become: yes
+    mount:
+      fstype: none
+      path: "{{ item.item.bind1 }}"
+      opts: bind
+      src: "{{ item.item.path }}"
+      # if the path exists, and it was found in the exports, then set to mounted, else remove.
+      state: "{{ ( item.item.path and item.item.bind1 and item.rc == 0 and item.item.state == 'present' ) | ternary( 'mounted' , 'absent' ) }}"
+    when: destroy == false
+    with_items: "{{ softnas_exports }}"
+    tags:
+    - cloud_install
+
+  - name: bind2 master mounts to named paths.  bind2 references the absolute mount names such as /aws_sydney_prod.  bind1 is relative site names such as /prod, which are not pushed from cloud to onsite since those paths should exist onsite from a high performance local mount
+    become: yes
+    mount:
+      fstype: none
+      path: "{{ item.item.bind2 }}"
+      opts: bind
+      src: "{{ item.item.path }}"
+      # if the path exists, and it was found in the exports, then set to mounted, else remove.
+      state: "{{ ( item.item.path and item.item.bind2 and item.rc == 0 and item.item.state == 'present' ) | ternary( 'mounted' , 'absent' ) }}"
+    when: destroy == false
+    with_items: "{{ softnas_exports }}"
+    tags:
+    - cloud_install
+
+####
+
+  # - name: insert/update block in in /etc/fstab for found exports
+  #   blockinfile:
+  #     path: /etc/fstab
+  #     block: |
+  #       {{ groups['role_softnas'][0] }}:{{ item.item.path }} {{ item.item.path }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
+  #     marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.item.path }} PRIMARY MOUNT"
+  #     state: "{{ ( item.item.path and item.rc == 0 ) | ternary( item.item.state , 'absent' ) }}"
+  #   when: destroy == false
+  #   with_items:
+  #   - "{{ softnas_exports }}"
+  #   tags:
+  #   - cloud_install
+
+  # - name: insert/update block in in /etc/fstab for found exports and bind1 points
+  #   blockinfile:
+  #     path: /etc/fstab
+  #     block: |
+  #       {{ item.item.path }} {{ item.item.bind1 }} none defaults,bind,timeo=14 0 0
+  #     marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.item.path }} BIND1"
+  #     state: "{{ ( item.item.path and item.item.bind1 and item.rc == 0 ) | ternary( item.item.state , 'absent' ) }}"
+  #   with_items:
+  #   - "{{ softnas_exports }}"
+  #   tags:
+  #   - cloud_install
+
+  # - name: insert/update block in in /etc/fstab for found exports and bind2 points
+  #   blockinfile:
+  #     path: /etc/fstab
+  #     block: |
+  #       {{ item.item.path }} {{ item.item.bind2 }} none defaults,bind,timeo=14 0 0
+  #     marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.item.path }} BIND2"
+  #     state: "{{ ( item.item.path and item.item.bind2 and item.rc == 0 ) | ternary( item.item.state , 'absent' ) }}"
+  #   with_items:
+  #   - "{{ softnas_exports }}"
+  #   tags:
+  #   - cloud_install
+
+  # - name: mount all changes to fstab for softnas exports
+  #   command: mount -a
+  #   become: true
+  #   tags:
+  #   - cloud_install
 
 ### check exports of remote nas are available on cloud based host.
 - hosts: "{{ variable_host | default('role_node_centos') }}"
@@ -152,6 +337,7 @@
   become: true
 
   vars:
+    ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
     softnas_exports: "{{ hostvars[groups['role_softnas'][0]]['presence']['results'] }}"
     hostname: "node1.{{ public_domain }}"
     pcoip: False
@@ -170,35 +356,47 @@
       path: ../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
     register: custom_ebs_list
     connection: local
+    tags:
+    - cloud_install
 
   - name: Override default exports
     include_vars:
       file: ../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
     when: custom_ebs_list.stat.exists
     connection: local
+    tags:
+    - cloud_install
 
   - name: site_mounts
     debug:
       var: item
     with_items: "{{ site_mounts }}"
+    tags:
+    - cloud_install
 
-  - name: Check whether /etc/exports contains the mount
+  - name: Check showmount to see whether /etc/exports contains the mount
     shell: showmount -e {{ localnas1_private_ip }} | grep -E "^\/{{ item.volume_name }}.*"
     register: site_presence
     check_mode: no
     ignore_errors: yes
     changed_when: no
     with_items: "{{ site_mounts }}"
+    tags:
+    - cloud_install
 
   - name: export existance test
     debug:
       var: item
     when: item.rc == 0
     with_items: "{{ site_presence.results }}"
+    tags:
+    - cloud_install
 
   - name: export output always
     set_fact: exported_site_mounts="{{item}}"
     with_items: "{{ site_presence.results }}"
+    tags:
+    - cloud_install
 
 ### update fstab with found mounts
 
@@ -207,16 +405,20 @@
       var: item
     with_items: 
     - "{{ site_presence.results }}"
+    tags:
+    - cloud_install
 
   - name: create mount directories
     file: 
-      path: "{{ item.item.path }}"
+      path: "{{ item.item.mount_path }}"
       state: directory
       owner: deadlineuser
       group: deadlineuser
     when: item.rc == 0
     with_items: 
     - "{{ site_presence.results }}"
+    tags:
+    - cloud_install
 
   - name: create bind1 directories
     file: 
@@ -227,6 +429,8 @@
     when: item.item.bind1 and item.rc == 0
     with_items: 
     - "{{ site_presence.results }}"
+    tags:
+    - cloud_install
 
   - name: create bind2 directories
     file: 
@@ -237,43 +441,100 @@
     when: item.item.bind2 and item.rc == 0
     with_items: 
     - "{{ site_presence.results }}"
+    tags:
+    - cloud_install
 
   - fail:
       msg: "{{ item.item.path }} is set to be present in exports dict but doesn't exist in /etc/exports"
     when: item.item.state == "present" and item.rc == 1
     with_items:
     - "{{ site_presence.results }}"
+    tags:
+    - cloud_install
 
-  - name: insert/update block in in /etc/fstab for found exports and path
-    blockinfile:
-      path: /etc/fstab
-      block: |
-        {{ item.item.ip }}:{{ item.item.path }} {{ item.item.mount_path }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
-      marker: "# {mark} ANSIBLE MANAGED BLOCK SITE MOUNT {{ item.item.ip }} {{ item.item.path }} PRIMARY MOUNT"
-      state: "{{ ( item.item.mount_path and item.rc == 0 ) | ternary( item.item.state , 'absent' ) }}"
+### cloud based mounts with ansible mount command
+
+  - name: insert/update block in in /etc/fstab on remote host for found exports from onsite nas using original unique pool and volume names - master
+    become: yes
+    mount:
+      fstype: nfs4
+      path: "{{ item.item.mount_path }}"
+      opts: rsize=8192,wsize=8192,timeo=14,intr,_netdev
+      src: "{{ item.item.ip }}:{{ item.item.path }}"
+      state: "{{ ( item.item.mount_path and item.rc == 0 and item.item.state == 'present') | ternary( 'mounted' , 'absent' ) }}"
     with_items:
     - "{{ site_presence.results }}"
+    tags:
+    - cloud_install
 
-  - name: insert/update block in in /etc/fstab for found exports and bind1 points
-    blockinfile:
-      path: /etc/fstab
-      block: |
-        {{ item.item.mount_path }} {{ item.item.bind1 }} none defaults,bind,timeo=14 0 0
-      marker: "# {mark} ANSIBLE MANAGED BLOCK SITE MOUNT {{ item.item.ip }} {{ item.item.path }} BIND1"
-      state: "{{ ( item.item.mount_path and item.item.bind1 and item.rc == 0 ) | ternary( item.item.state , 'absent' ) }}"
+  - name: bind1 master mounts to named paths from local onsit nas to remote host.  bind2 references the absolute mount names such as /aws_sydney_prod.  bind1 is relative site names such as /prod, which are not pushed from cloud to onsite since those paths should exist onsite from a high performance local mount
+    become: yes
+    mount:
+      fstype: none
+      path: "{{ item.item.bind1 }}"
+      opts: bind
+      src: "{{ item.item.mount_path }}"
+      # if the path exists, and it was found in the exports, then set to mounted, else remove.
+      state: "{{ ( item.item.mount_path and item.item.bind1 and item.rc == 0 and item.item.state == 'present' ) | ternary( 'mounted' , 'absent' ) }}"
     with_items:
     - "{{ site_presence.results }}"
+    tags:
+    - cloud_install
 
-  - name: insert/update block in in /etc/fstab for found exports and bind2 points
-    blockinfile:
-      path: /etc/fstab
-      block: |
-        {{ item.item.mount_path }} {{ item.item.bind2 }} none defaults,bind,timeo=14 0 0
-      marker: "# {mark} ANSIBLE MANAGED BLOCK SITE MOUNT {{ item.item.ip }} {{ item.item.path }} BIND2"
-      state: "{{ ( item.item.mount_path and item.item.bind2 and item.rc == 0 ) | ternary( item.item.state , 'absent' ) }}"
+  - name: bind2 master mounts to named paths.  bind2 references the absolute mount names such as /aws_sydney_prod.  bind1 is relative site names such as /prod, which are not pushed from cloud to onsite since those paths should exist onsite from a high performance local mount
+    become: yes
+    mount:
+      fstype: none
+      path: "{{ item.item.bind2 }}"
+      opts: bind
+      src: "{{ item.item.mount_path }}"
+      # if the path exists, and it was found in the exports, then set to mounted, else remove.
+      state: "{{ ( item.item.mount_path and item.item.bind2 and item.rc == 0 and item.item.state == 'present' ) | ternary( 'mounted' , 'absent' ) }}"
     with_items:
     - "{{ site_presence.results }}"
+    tags:
+    - cloud_install
 
-  - name: mount all changes to fstab
-    command: mount -a
-    become: true
+####
+
+  # - name: insert/update block in in /etc/fstab for found exports and path
+  #   blockinfile:
+  #     path: /etc/fstab
+  #     block: |
+  #       {{ item.item.ip }}:{{ item.item.path }} {{ item.item.mount_path }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
+  #     marker: "# {mark} ANSIBLE MANAGED BLOCK SITE MOUNT {{ item.item.ip }} {{ item.item.path }} PRIMARY MOUNT"
+  #     state: "{{ ( item.item.mount_path and item.rc == 0 ) | ternary( item.item.state , 'absent' ) }}"
+  #   with_items:
+  #   - "{{ site_presence.results }}"
+  #   tags:
+  #   - cloud_install
+
+  # - name: insert/update block in in /etc/fstab for found exports and bind1 points
+  #   blockinfile:
+  #     path: /etc/fstab
+  #     block: |
+  #       {{ item.item.mount_path }} {{ item.item.bind1 }} none defaults,bind,timeo=14 0 0
+  #     marker: "# {mark} ANSIBLE MANAGED BLOCK SITE MOUNT {{ item.item.ip }} {{ item.item.path }} BIND1"
+  #     state: "{{ ( item.item.mount_path and item.item.bind1 and item.rc == 0 ) | ternary( item.item.state , 'absent' ) }}"
+  #   with_items:
+  #   - "{{ site_presence.results }}"
+  #   tags:
+  #   - cloud_install
+
+  # - name: insert/update block in in /etc/fstab for found exports and bind2 points
+  #   blockinfile:
+  #     path: /etc/fstab
+  #     block: |
+  #       {{ item.item.mount_path }} {{ item.item.bind2 }} none defaults,bind,timeo=14 0 0
+  #     marker: "# {mark} ANSIBLE MANAGED BLOCK SITE MOUNT {{ item.item.ip }} {{ item.item.path }} BIND2"
+  #     state: "{{ ( item.item.mount_path and item.item.bind2 and item.rc == 0 ) | ternary( item.item.state , 'absent' ) }}"
+  #   with_items:
+  #   - "{{ site_presence.results }}"
+  #   tags:
+  #   - cloud_install
+
+  # - name: mount all changes to fstab for onsite local nas
+  #   command: mount -a
+  #   become: true
+  #   tags:
+  #   - cloud_install

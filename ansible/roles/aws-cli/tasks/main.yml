@@ -16,7 +16,6 @@
   pip: 
     name: awscli
     extra_args: --upgrade --user
-  #become_user: vagrant
   become_user: "{{ variable_user }}"
   become: true
 
