@@ -10,3 +10,6 @@
 [submodule "secrets"]
 	path = secrets
 	url = https://houdinifxtd@bitbucket.org/houdinifxtd/secrets.git
+[submodule "modules/node_centos/modules/houdini-scripts"]
+	path = modules/node_centos/modules/houdini-scripts
+	url = https://houdinifxtd@bitbucket.org/houdinifxtd/houdini-scripts-openfirehawk.git
