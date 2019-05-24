@@ -33,8 +33,17 @@ resource "aws_security_group" "node_centos" {
     from_port   = 0
     to_port     = 0
     cidr_blocks = ["${var.vpn_cidr}"]
+    description = "all incoming traffic from remote subnet range vpn dhcp"
+  }
+  
+  ingress {
+    protocol    = "-1"
+    from_port   = 0
+    to_port     = 0
+    cidr_blocks = ["${var.remote_subnet_cidr}"]
     description = "all incoming traffic from remote subnet range"
   }
+  
 
   ingress {
     protocol    = "-1"

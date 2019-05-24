@@ -202,6 +202,51 @@
     tags:
     - local_install
 
+### Force removal of bind2 mounts.  currently the ansible command to unmount will hang if the connetion has been broken.
+  - debug:
+      var: item
+    when: destroy
+    with_items: "{{ exports }}"
+    tags:
+    - local_install
+
+  - name: check if bind2 mount points exist for forced removal
+    command: timeout 5 mountpoint -q {{ item.bind2 }}
+    become: yes
+    register: volume_stat_bind2
+    failed_when: False
+    changed_when: False
+    when: destroy
+    with_items: "{{ exports }}"
+    tags:
+    - local_install
+
+  - debug:
+      var: item
+    when: destroy
+    with_items: "{{ volume_stat_bind2.results }}"
+    tags:
+    - local_install
+
+  - name: report mount points
+    debug:
+      msg: "This is a mountpoint that will be removed"
+    when: destroy and ( item.rc == 0 or item.rc == 124 )
+    with_items: "{{ volume_stat_bind2.results }}"
+    tags:
+    - local_install
+
+  - name: force unmount with shell when destroy is true.  bind must be removed before the hard mount - master.
+    become: yes
+    shell: |
+      umount -l {{ item.item.bind2 }}
+    when: destroy and ( item.rc == 0 or item.rc == 124 )
+    with_items: "{{ volume_stat_bind2.results }}"
+    tags:
+    - local_install
+
+### End force removal of mounts
+
   - name: unmount when destroy is true.  bind must be removed before the hard mount - master.
     become: yes
     mount:
@@ -221,6 +266,45 @@
     with_items: "{{ exports }}"
     tags:
     - local_install
+
+### Force removal of master mounts.  currently the ansible command to unmount will hang if the connetion has been broken.
+
+  - name: check if master mount points exist for forced removal
+    command: timeout 5 mountpoint -q {{ item.path }}
+    become: yes
+    register: volume_stat_path
+    failed_when: False
+    changed_when: False
+    when: destroy
+    with_items: "{{ exports }}"
+    tags:
+    - local_install
+
+  - debug:
+      var: item
+    when: destroy
+    with_items: "{{ volume_stat_path.results }}"
+    tags:
+    - local_install
+
+  - name: report mount points.  if previous command timed out, then it was a mount point that is causing problems and should also be removed
+    debug:
+      msg: "This is a mountpoint that will be removed"
+    when: destroy and ( item.rc == 0 or item.rc == 124 )
+    with_items: "{{ volume_stat_path.results }}"
+    tags:
+    - local_install
+
+  - name: force unmount with shell when destroy is true.  bind must be removed before the hard mount - master.
+    become: yes
+    shell: |
+      umount -l {{ item.item.path }}
+    when: destroy and ( item.rc == 0 or item.rc == 124 )
+    with_items: "{{ volume_stat_path.results }}"
+    tags:
+    - local_install
+
+### End force removal of mounts
 
   - name: unmount when destroy is true for NFS softnas master on workstation.  this will not check the softnas instance, and use the mounts originally defined in your ebs settings in secrets
     become: yes

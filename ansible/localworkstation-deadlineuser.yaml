@@ -58,8 +58,8 @@
     - cloud-install
     - onsite-install
 
-- hosts: workstation.firehawkvfx.com
-  remote_user: user
+- hosts: "{{ variable_host | default('workstation.firehawkvfx.com') }}"
+  remote_user: "{{ variable_user | default('user') }}"
   become: true
 
   tasks:
@@ -71,57 +71,12 @@
     - cloud-install
     - onsite-install
 
-# - hosts: workstation.firehawkvfx.com
-#   remote_user: user
-#   become: true
-
-#   vars_prompt:
-#   - name: "my_password"
-#     prompt: "Enter password for new deadlineuser"
-#     private: yes
-#     encrypt: "sha512_crypt"
-#     confirm: yes
-#     salt_size: 7
-
-#   tasks:
-#   - stat:
-#       path: "/home/deadlineuser"
-#     register: result
-
-#   - debug:
-#       msg: "deadlineuser home directory exists already.  Will not create user or make any changes.  The password was not set."
-#     when: result.stat.exists == true and result.stat.isdir == true
-
-#   - debug:
-#       msg: "deadlineuser home directory doesn't exist.  Will create user and set password."
-#     when: result.stat.exists == false
-
-#   - name: new group
-#     group:
-#       name: deadlineuser
-#       gid: 9001
-#       state: present
-
-#   - name: Create a login user
-#     user:
-#       name: deadlineuser
-#       uid: 9001
-#       password: "{{ my_password }}"
-#       groups: # Empty by default, here we give it some groups
-#         - wheel
-#         - deadlineuser
-#       state: present
-#       shell: /bin/bash # Defaults to /bin/bash
-#       system: no # Defaults to no
-#       createhome: yes # Defaults to yes
-#     when: result.stat.exists == false
-
-- hosts: workstation.firehawkvfx.com
-  remote_user: root
+- hosts: "{{ variable_host | default('workstation.firehawkvfx.com') }}"
+  remote_user: "{{ variable_user | default('root') }}"
   become: true
 
   vars:
-    hostname: workstation.firehawkvfx.com
+    #hostname: workstation.firehawkvfx.com
     pcoip: False
 
   tasks:
@@ -155,10 +110,8 @@
     copy:
       src: "/opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/{{ item }}"
       dest: "/home/deadlineuser/Thinkbox/Deadline10/submitters/HoudiniSubmitter"
-      # mode: 0700
       owner: deadlineuser
       group: deadlineuser
-    #become_user: deadlineuser
     with_items:
     - otls
     - soho
@@ -188,15 +141,6 @@
     - cloud-install
     - onsite-install
 
-  # - name: set HOUDINI_PATH in houdini.env.
-  #   replace:
-  #     path: /home/deadlineuser/houdini17.5/houdini.env
-  #     regexp: '.*HOUDINI_PATH =.*'
-  #     replace: 'HOUDINI_PATH = "$HOUDINI_PATH; ~/Thinkbox/Deadline10/submitters/HoudiniSubmitter;&"'
-  #   tags:
-  #   - cloud-install
-  #   - onsite-install
-
   - name: set HOUDINI_PATH in houdini.env file.
     lineinfile:
       path: /home/deadlineuser/houdini17.5/houdini.env
@@ -206,15 +150,6 @@
     tags:
     - cloud-install
     - onsite-install
-
-  # - name: set HOUDINI_MENU_PATH in houdini.env.
-  #   replace:
-  #     path: /home/deadlineuser/houdini17.5/houdini.env
-  #     regexp: '.*HOUDINI_MENU_PATH =.*'
-  #     replace: 'HOUDINI_MENU_PATH = "$HOUDINI_MENU_PATH; ~/Thinkbox/Deadline10/submitters/HoudiniSubmitter;&"'
-  #   tags:
-  #   - cloud-install
-  #   - onsite-install
 
   - name: set HOUDINI_MENU_PATH in houdini.env.
     lineinfile:
@@ -226,11 +161,30 @@
     - cloud-install
     - onsite-install
 
+  - name: set HOUDINI_OTL_SCAN_PATH in houdini.env.
+    lineinfile:
+      state: present
+      path: /home/deadlineuser/houdini17.5/houdini.env
+      regexp: '.*HOUDINI_OTL_SCAN_PATH =.*'
+      line: 'HOUDINI_OTL_SCAN_PATH = "@/OTLS:/prod/asset"'
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: set PYTHON path in houdini.env.
+    lineinfile:
+      state: present
+      path: /home/deadlineuser/houdini17.5/houdini.env
+      regexp: '.*PYTHON =.*'
+      line: 'PYTHON = "/opt/hfs17.5/python/bin/python"'
+    tags:
+    - cloud-install
+    - onsite-install
+
   - name: Ansible copy directory to the remote server
     copy:
       src: "/opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/CallDeadlineCommand.py"
       dest: "/home/deadlineuser/houdini17.5/python2.7libs/"
-    #become_user: deadlineuser
     tags:
     - cloud-install
     - onsite-install
@@ -245,7 +199,6 @@
     - HServer
     - Houdini
     - Nuke
-    #become_user: deadlineuser
     tags:
     - cloud-install
     - onsite-install
@@ -476,68 +429,68 @@
     - cloud-install
     - onsite-install
 
-  # mount softnas and remote nas
-  - name: create mount directories
-    file: 
-      path: "{{ item }}"
-      state: directory
-      owner: deadlineuser
-      group: deadlineuser
-    become: yes
-    with_items:
-      - "{{ softnas1_path_abs }}"
-      - "{{ localnas1_path_abs }}"
-      - "{{ prod_mount_path }}"
-      - "{{ localnas1_remote_mount_path }}"
-    tags:
-    - cloud-install
-    - onsite-install
+  # # mount softnas and remote nas
+  # - name: create mount directories
+  #   file: 
+  #     path: "{{ item }}"
+  #     state: directory
+  #     owner: deadlineuser
+  #     group: deadlineuser
+  #   become: yes
+  #   with_items:
+  #     - "{{ softnas1_path_abs }}"
+  #     - "{{ localnas1_path_abs }}"
+  #     - "{{ prod_mount_path }}"
+  #     - "{{ localnas1_remote_mount_path }}"
+  #   tags:
+  #   - cloud-install
+  #   - onsite-install
 
-  - name: create localnas mount point based on location
-    file: 
-      path: "{{ localnas1_path_abs }}"
-      state: directory
-      owner: deadlineuser
-      group: deadlineuser
-    become: yes
-    tags:
-    - cloud-install
-    - onsite-install
+  # - name: create localnas mount point based on location
+  #   file: 
+  #     path: "{{ localnas1_path_abs }}"
+  #     state: directory
+  #     owner: deadlineuser
+  #     group: deadlineuser
+  #   become: yes
+  #   tags:
+  #   - cloud-install
+  #   - onsite-install
 
-  - name: insert marker start
-    lineinfile:
-      path: /etc/fstab
-      insertafter: "^#?UUID.*$"
+  # - name: insert marker start
+  #   lineinfile:
+  #     path: /etc/fstab
+  #     insertafter: "^#?UUID.*$"
 
-      line: "# BEGIN ANSIBLE MANAGED BLOCK"
-      backup: yes
-    tags:
-    - cloud-install
-    - onsite-install
+  #     line: "# BEGIN ANSIBLE MANAGED BLOCK"
+  #     backup: yes
+  #   tags:
+  #   - cloud-install
+  #   - onsite-install
 
-  - name: insert marker end
-    lineinfile:
-      path: /etc/fstab
-      insertafter: "# BEGIN ANSIBLE MANAGED BLOCK"
-      line: "# END ANSIBLE MANAGED BLOCK"
-      create: true
-    tags:
-    - cloud-install
-    - onsite-install
+  # - name: insert marker end
+  #   lineinfile:
+  #     path: /etc/fstab
+  #     insertafter: "# BEGIN ANSIBLE MANAGED BLOCK"
+  #     line: "# END ANSIBLE MANAGED BLOCK"
+  #     create: true
+  #   tags:
+  #   - cloud-install
+  #   - onsite-install
  
-  - name: insert/update block in /etc/fstab
-    blockinfile:
-      path: /etc/fstab
-      backup: yes
-      content: |
+  # - name: insert/update block in /etc/fstab
+  #   blockinfile:
+  #     path: /etc/fstab
+  #     backup: yes
+  #     content: |
 
-        {{ groups['role_softnas'][0] }}:{{ softnas_mount_source }} {{ softnas1_path_abs }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
-        {{ softnas1_path_abs }} {{ prod_mount_path }} none defaults,bind,timeo=14 0 0
+  #       {{ groups['role_softnas'][0] }}:{{ softnas_mount_source }} {{ softnas1_path_abs }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
+  #       {{ softnas1_path_abs }} {{ prod_mount_path }} none defaults,bind,timeo=14 0 0
 
-        # {{ localnas1_private_ip }}:{{ localnas1_mount_path }} {{ localnas1_path_abs }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
-        # {{ localnas1_path_abs }} {{ localnas1_remote_mount_path }} none defaults,bind,timeo=14 0 0
-    tags:
-    - cloud-install
+  #       # {{ localnas1_private_ip }}:{{ localnas1_mount_path }} {{ localnas1_path_abs }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
+  #       # {{ localnas1_path_abs }} {{ localnas1_remote_mount_path }} none defaults,bind,timeo=14 0 0
+  #   tags:
+  #   - cloud-install
 
   # - name: insert/update block in /etc/fstab
   #   blockinfile:
@@ -559,12 +512,12 @@
   #   tags:
   #   - onsite-install
 
-  - name: mount all changes to fstab
-    command: mount -a
-    become: true
-    tags:
-    - cloud-install
-    - onsite-install
+  # - name: mount all changes to fstab
+  #   command: mount -a
+  #   become: true
+  #   tags:
+  #   - cloud-install
+  #   - onsite-install
 
   - stat:
       path: /var/lib/Thinkbox/Deadline10/deadline.ini
@@ -599,7 +552,7 @@
     command: "mv /var/lib/Thinkbox/Deadline10/deadline.ini {{ backup_dest }}"
     when: deadline_ini_file.stat.exists
     tags:
-    - cloud-install
+    # - cloud-install
     - onsite-install
 
   - name: install deadline client
@@ -610,29 +563,29 @@
     register: deadline_client_install_output_shell
     become: true
     tags:
-    - cloud-install
+    # - cloud-install
     - onsite-install
 
   - name: check deadline client install output
     debug:
       msg: "{{ deadline_client_install_output_shell.stdout }}"
     tags:
-    - cloud-install
+    # - cloud-install
     - onsite-install
 
   - name: check /var/lib/Thinkbox/Deadline10/deadline.ini
     command: cat /var/lib/Thinkbox/Deadline10/deadline.ini 
     register: deadline_config
     tags:
-    - cloud-install
+    # - cloud-install
     - onsite-install
 
   - debug: msg="{{ deadline_config.stdout }}"
     tags:
-    - cloud-install
+    # - cloud-install
     - onsite-install
 
   - debug: msg="{{ deadline_config.stderr }}"
     tags:
-    - cloud-install
+    # - cloud-install
     - onsite-install
