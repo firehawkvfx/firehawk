@@ -5,8 +5,7 @@
   vars:
     bastion_ip: false
     local: false
-    ansible_ssh_private_key_file: /home/vagrant/.ssh/id_rsa
-    #variable_host=workstation.firehawkvfx.com variable_user=deadlineuser ansible_ssh_private_key_file=/home/vagrant/.ssh/id_rsa
+    ansible_ssh_private_key_file: "{{ onsite_workstation_ssh_key }}"
     
     #"{{ variable_user | default('user') }}"
 
@@ -26,7 +25,7 @@
   gather_facts: false
 
   vars:
-    ansible_ssh_public_key_file: /home/vagrant/.ssh/id_rsa.pub
+    ansible_ssh_public_key_file: "{{ onsite_workstation_ssh_key }}.pub"
     ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
     ansible_password: "{{ user_deadlineuser_pw_local }}"
 
