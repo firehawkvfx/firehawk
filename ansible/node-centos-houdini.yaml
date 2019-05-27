@@ -1,7 +1,46 @@
-# example
+# This script will query the latest daily or production build with side fx and install it.
+# if the file exists in s3, it will be downloaded and installed.  aws cli must be configured with a key that has permission to access s3.
+# Do not install the cli on cloud nodes with root permissions!  A seperate user / key with the minimum s3 permissions required is recommended.
+
+# If the file doesn't exist in the s3 bucket, it will be downloaded from side fx, and then pushed to the bucket after install.
+
+# Example
 # ansible-playbook -i ansible/inventory ansible/node-centos-houdini.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=workstation1.${var.public_domain_name}"
 # example local install
 # ansible-playbook -i ansible/inventory ansible/node-centos-houdini.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_become_pass=sompass"
+
+# sync installers from/to s3 bucket.  any new houdini versions will be pushed from ansible control to the bucket.
+
+- hosts: ansible_control
+  remote_user: vagrant
+  become: true
+  
+  vars:
+    sync_downloads: false
+    bucket: "installers.{{ public_domain }}"
+
+  tasks:
+  - name: ensure an s3 bucket exists to store large files / installers for faster redeployment.
+    s3_bucket:
+      name: "{{ bucket }}"
+      aws_access_key: "{{ aws_access_key }}"
+      aws_secret_key: "{{ aws_secret_key }}"
+      region: "{{ aws_region }}"
+    tags:
+      - sync_installers
+
+  - name: ensure the downloads folder is syncronised with the bucket
+    s3_sync:
+      bucket: "{{ bucket }}"
+      file_root: /vagrant/downloads/
+      include: "*"
+      aws_access_key: "{{ aws_access_key }}"
+      aws_secret_key: "{{ aws_secret_key }}"
+      region: "{{ aws_region }}"
+    when: sync_downloads
+    tags:
+      - sync_installers
+
 
 - hosts: "{{ variable_host | default('role_node_centos') }}"
   remote_user: "{{ variable_user | default('centos') }}"
@@ -21,8 +60,10 @@
     bastionip: "{{ groups['bastionip'][0] }}"
     hostname: "node1.{{ public_domain }}"
     houdini_build: "{{ lookup('env','TF_VAR_houdini_build') }}"
+    download_to_dir: /var/tmp/openfirehawk
     skip_packages: false
     skip_install: false
+    bucket: "installers.{{ public_domain }}"
 
   tasks:
   - package:
@@ -44,46 +85,93 @@
       state: latest
     when: not skip_packages
 
-  - file:
+  - name: dir permissions on /opt/houdini_install_script
+    file:
       path: /opt/houdini_install_script
       state: directory
       mode: 0700
       owner: "{{ variable_user }}"
 
-  - pip:
+  - name: dir permissions on "{{ download_to_dir }}"
+    file:
+      path: "{{ download_to_dir }}"
+      state: directory
+      mode: 0700
+      owner: "{{ variable_user }}"
+
+  - name: Install beautifulsoup4 for web page crawling
+    pip:
       name: beautifulsoup4
     when: not skip_packages
 
-  - copy:
+  - name: Copy Houdini auto install script to remote host from ansible control.
+    copy:
       src: /vagrant/modules/node_centos/modules/houdini_install_script/
       dest: /opt/houdini_install_script/
       directory_mode: yes
 
-  - file:
+  - name: set permissions on houdini_install.py
+    file:
       path: /opt/houdini_install_script/houdini_install.py
       mode: 0700
 
-  - file:
+  - name: set permissions on /home/deadlineuser/houdini17.5/scripts/
+    file:
       path: /home/deadlineuser/houdini17.5/scripts/
       state: directory
       mode: 0700
       owner: deadlineuser
 
-  - copy:
+  - name: copy houdini-scripts to /home/deadlineuser/houdini17.5/scripts/
+    copy:
       src: /vagrant/modules/node_centos/modules/houdini-scripts/
       dest: /home/deadlineuser/houdini17.5/scripts/
       directory_mode: yes
       owner: deadlineuser
     become: true
 
-  - file: 
+  - name: set permissions on /home/deadlineuser/houdini17.5/scripts/
+    file: 
       dest: /home/deadlineuser/houdini17.5/scripts/ 
       owner: deadlineuser 
       mode: u=rwX,g=r 
       recurse: yes
 
-  - shell: |
-      python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini -b {{ houdini_build }}
+  - name: Query houdini filename - Houdini python script
+    shell: |
+      python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini -b {{ houdini_build }} -t {{ download_to_dir }} -q true
+    register: houdini_query_out
+    become: true
+    when: not skip_install
+
+  - name: Python output
+    debug:
+      var: item
+    with_items:
+    - "{{ houdini_query_out.stdout_lines }}"
+
+
+  - set_fact:
+      houdini_linux_filename: "{{ item | regex_search(regexp) }}"
+    vars:
+      regexp: '(houdini.*.tar.*)'
+    with_items:
+    - "{{ houdini_query_out.stdout_lines }}"
+
+  - name: Houdini filename to install from sidefx website result
+    debug:
+      var: houdini_linux_filename
+
+  - name: Sync houdini from s3 if exist - pull
+    shell: |
+      set -x
+      cd {{ download_to_dir }}/
+      ~/.local/bin/aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ houdini_linux_filename }}"
+    become_user: "{{ variable_user }}"
+
+  - name: Auto download and install Houdini python script
+    shell: |
+      python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini -b {{ houdini_build }} -t {{ download_to_dir }}
     register: houdini_install_out
     become: true
     when: not skip_install
@@ -113,87 +201,16 @@
     become_user: deadlineuser
     when: not skip_install
 
-  # - debug:
-  #     var: houdini_hserver_out.stdout
-  #   when: not skip_install
+# After install sync houdini download with bucket
 
-  # - name: setup licensing mode for centos will write to $HOME/.sesi_licenses.pref
-  #   shell: |
-  #     cd /opt/hfs17.5
-  #     source ./houdini_setup
-  #     hserver -S {{ houdini_license_server_address }}
-  #     hserver -l
-  #     echo $HOME
-  #     cat $HOME/.sesi_licenses.pref
-  #   register: houdini_hserver_out_centos
-  #   become_user: centos
-  #   when: not skip_install
-
-  # - name: setup licensing mode for deadlineuser will write to $HOME/.sesi_licenses.pref
-  #   shell: |
-  #     cd /opt/hfs17.5
-  #     source ./houdini_setup
-  #     hserver -S {{ houdini_license_server_address }}
-  #     hserver -l
-  #   register: houdini_hserver_out_deadlineuser
-  #   become_user: deadlineuser
-  #   when: not skip_install
-
-  # - debug:
-  #     var: houdini_hserver_out_deadlineuser.stdout
-  #   when: not skip_install
-
-# old terraform install for houdini.  may want to replicate when able to test again.
-#   #copy the deadline installer to the rendernode 
-#   provisioner "file" {
-#     source      = "${path.module}/file_package/${var.houdini_installer_filename}"
-#     destination = "/var/tmp/${var.houdini_installer_filename}"
-#   }
-
-#   provisioner "remote-exec" {
-#     connection {
-#       user        = "${var.deadline_user}"
-#       host        = "${aws_instance.node_centos.private_ip}"
-#       private_key = "${var.private_key}"
-#       type        = "ssh"
-#       timeout     = "10m"
-#     }
-
-#     inline = [<<EOT
-# set -x
-# sudo chmod 600 /var/tmp/${var.houdini_installer_filename}
-# #these are needed for houdini to start https://rajivpandit.wordpress.com/category/fx-pipeline/page/8/
-# sudo yum install -y mesa-libGLw
-# sudo yum install -y libXp libXp-devel 
-# cd /var/tmp
-# sudo tar -xvf /var/tmp/${var.houdini_installer_filename}
-# sudo mkdir houdini_installer
-# sudo tar -xvf ${var.houdini_installer_filename} -C houdini_installer --strip-components 1
-# cd houdini_installer
-# #sudo ./houdini.install --auto-install --accept-EULA --install-houdini --install-license --no-local-licensing --install-hfs-symlink
-# sudo ./houdini.install --auto-install --accept-EULA --install-houdini --no-local-licensing --install-hfs-symlink
-# cd /opt/hfs17.0
-# sudo sed -i '/licensingMode = sesinetd/s/^# //g' /opt/hfs17.0/houdini/Licensing.opt
-# sudo cat /opt/hfs17.0/houdini/Licensing.opt
-# /opt/hfs17.0/bin/hserver
-# #source houdini_setup
-# /opt/hfs17.0/bin/hserver -S ${var.houdini_license_server_address}
-# EOT
-#     ]
-#   }
-# }
-
-# resource "random_id" "ami_unique_name" {
-#   keepers = {
-#     # Generate a new id each time we switch to a new instance id
-#     ami_id = "${aws_instance.node_centos.id}"
-#   }
-
-#   byte_length = 8
-# }
-
-# resource "aws_ami_from_instance" "node_centos" {
-#   depends_on         = ["null_resource.install_houdini"]
-#   name               = "node_centos_houdini_${aws_instance.node_centos.id}_${random_id.ami_unique_name.hex}"
-#   source_instance_id = "${aws_instance.node_centos.id}"
-# }
+  - name: ensure the houdini installer is pushed to the bucket
+    s3_sync:
+      bucket: "installers.{{ public_domain }}"
+      file_root: "{{ download_to_dir }}"
+      include: "{{ houdini_linux_filename }}"
+      aws_access_key: "{{ aws_access_key_s3user }}"
+      aws_secret_key: "{{ aws_secret_key_s3user }}"
+      region: "{{ aws_region }}"
+      mode: push
+    tags:
+      - sync_installers

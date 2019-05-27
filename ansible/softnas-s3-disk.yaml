@@ -186,63 +186,63 @@
         name: softnas-s3-disk-import
       when: (existing_bucket != false) and (existing_volume == false)
 
-# after an import or creation of new disk, we need to setup the export.
+# after an import or creation of new disk, we need to setup the export.  currently disabled here.  now managed in softnas-ebs-disk-update-exports.yaml
 
-- hosts: role_softnas
-  remote_user: centos
-  become_user: root
-  become: true
+# - hosts: role_softnas
+#   remote_user: centos
+#   become_user: root
+#   become: true
 
-  vars:
-    pool_name: "{{ hostvars['ansible_control']['pool_name'] }}"
-    volume_name: "{{ hostvars['ansible_control']['volume_name'] }}"
-    share_pool: "{{ hostvars['ansible_control']['share_pool'] }}"
-    disk_device: "{{ hostvars['ansible_control']['disk_device'] }}"
-    nas_name: "{{ hostvars['ansible_control']['nas_name'] }}"
-    encrypt_s3: "{{ hostvars['ansible_control']['encrypt_s3'] }}"
-    s3_disk_size_max_value: "{{ hostvars['ansible_control']['s3_disk_size_max_value'] }}"
-    s3_disk_size_max_units: "{{ hostvars['ansible_control']['s3_disk_size_max_units'] }}"
-    s3_disk_region: "{{ hostvars['ansible_control']['s3_disk_region'] }}"
-    existing_bucket: "{{ hostvars['ansible_control']['existing_bucket'] }}"
-    bucket_location: "{{ hostvars['ansible_control']['bucket_location'] }}"
-    import_pool: "{{ hostvars['ansible_control']['import_pool'] }}"
+#   vars:
+#     pool_name: "{{ hostvars['ansible_control']['pool_name'] }}"
+#     volume_name: "{{ hostvars['ansible_control']['volume_name'] }}"
+#     share_pool: "{{ hostvars['ansible_control']['share_pool'] }}"
+#     disk_device: "{{ hostvars['ansible_control']['disk_device'] }}"
+#     nas_name: "{{ hostvars['ansible_control']['nas_name'] }}"
+#     encrypt_s3: "{{ hostvars['ansible_control']['encrypt_s3'] }}"
+#     s3_disk_size_max_value: "{{ hostvars['ansible_control']['s3_disk_size_max_value'] }}"
+#     s3_disk_size_max_units: "{{ hostvars['ansible_control']['s3_disk_size_max_units'] }}"
+#     s3_disk_region: "{{ hostvars['ansible_control']['s3_disk_region'] }}"
+#     existing_bucket: "{{ hostvars['ansible_control']['existing_bucket'] }}"
+#     bucket_location: "{{ hostvars['ansible_control']['bucket_location'] }}"
+#     import_pool: "{{ hostvars['ansible_control']['import_pool'] }}"
   
-  # create nfs share.
+#   # create nfs share.
 
-  tasks:
-  - name: set /etc/exports
-    lineinfile:
-      path: /etc/exports
-      line: "# These mounts are managed in ansible playbook softnas-s3-disk.yaml and only one volume is exported currently for testing"
-      backup: yes
-    when: import_pool
+#   tasks:
+#   - name: set /etc/exports
+#     lineinfile:
+#       path: /etc/exports
+#       line: "# These mounts are managed in ansible playbook softnas-s3-disk.yaml and only one volume is exported currently for testing"
+#       backup: yes
+#     when: import_pool
 
-  - name: ensure after a pool import that the path actually exists.  if so then exports will be updated
-    stat:
-      path: "/{{ pool_name }}/{{ volume_name }}/"
-    register: volume_mount
-    when: import_pool
+#   - name: ensure after a pool import that the path actually exists.  if so then exports will be updated
+#     stat:
+#       path: "/{{ pool_name }}/{{ volume_name }}/"
+#     register: volume_mount
+#     when: import_pool
 
-  - debug:
-      msg: "/{{ pool_name }}/{{ volume_name }}/ exists on softnas instance"
-    when: volume_mount.stat.exists and volume_mount.stat.isdir and import_pool
+#   - debug:
+#       msg: "/{{ pool_name }}/{{ volume_name }}/ exists on softnas instance"
+#     when: volume_mount.stat.exists and volume_mount.stat.isdir and import_pool
 
-  - name: insert/update block in in /etc/exports for volume
-    blockinfile:
-      path: /etc/exports
-      block: |
-        /{{ item.pool_name }}/{{ item.volume_name }}/ *(async,insecure,no_subtree_check,no_root_squash,rw,nohide)
-      marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.volume_name }}"
-    with_items:
-      - { pool_name: "{{ pool_name }}", volume_name: "{{ volume_name }}" }
-    when: volume_mount.stat.exists and volume_mount.stat.isdir and import_pool
+#   - name: insert/update block in in /etc/exports for volume
+#     blockinfile:
+#       path: /etc/exports
+#       block: |
+#         /{{ item.pool_name }}/{{ item.volume_name }}/ *(async,insecure,no_subtree_check,no_root_squash,rw,nohide)
+#       marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.volume_name }}"
+#     with_items:
+#       - { pool_name: "{{ pool_name }}", volume_name: "{{ volume_name }}" }
+#     when: volume_mount.stat.exists and volume_mount.stat.isdir and import_pool
 
-  - name: update exports
-    command: "exportfs -r -a"
-    register: update_exports_output
-    become: true
-    when: volume_mount.stat.exists and volume_mount.stat.isdir and import_pool
+#   - name: update exports
+#     command: "exportfs -r -a"
+#     register: update_exports_output
+#     become: true
+#     when: volume_mount.stat.exists and volume_mount.stat.isdir and import_pool
 
-  - debug:
-      msg: "{{ update_exports_output.stdout }}"
-    when: volume_mount.stat.exists and volume_mount.stat.isdir and import_pool
+#   - debug:
+#       msg: "{{ update_exports_output.stdout }}"
+#     when: volume_mount.stat.exists and volume_mount.stat.isdir and import_pool

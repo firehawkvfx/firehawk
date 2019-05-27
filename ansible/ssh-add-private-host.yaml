@@ -3,5 +3,11 @@
   become: true
   gather_facts: no
 
+  vars:
+    bastion_ip: false
+    local: false
+    
+    #"{{ variable_user | default('user') }}"
+
   roles:
   - ssh-add-private-host 

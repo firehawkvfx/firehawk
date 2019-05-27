@@ -1,0 +1,45 @@
+# softnas hotfix to improove boot / shutdown times
+- hosts: role_softnas
+  remote_user: centos
+  become: true
+
+  vars:
+    copy: true
+    file_copy_local_path: /vagrant/modules/softnas/install_acpid.sh
+
+  tasks:
+  - name: Check file exists at "{{ file_copy_local_path }}"
+    stat:
+      path: "{{ file_copy_local_path }}"
+    register: file
+    when: copy
+    connection: local
+
+  - name: file info
+    debug:
+      msg: "{{ file }}"
+    when: copy
+
+  - name: copy install_acpid.sh
+    copy:
+      src: "{{ file_copy_local_path }}"
+      dest: /tmp/install_acpid.sh
+    when: copy and file.stat.exists
+
+  - name: set permissions on install_acpid.sh
+    file:
+      path: /tmp/install_acpid.sh
+      mode: 700
+      owner: root
+
+  - name: login and import install_acpid
+    shell: |
+      bash -x /tmp/install_acpid.sh
+    register: install_acpid
+    become: true
+    when: copy and file.stat.exists
+
+  - name: install_acpid output
+    debug:
+      var: install_acpid
+    

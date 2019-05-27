@@ -32,6 +32,8 @@
     owner: deadlineuser
     mode: u+x
   become: yes
+  tags:
+  - install
 
 - name: "Ansible find files in subdirectory downloads"
   find:
@@ -39,6 +41,8 @@
     patterns: "*DeadlineRepository-{{ deadlineversion }}-linux-x64-installer.run"
   register: files_matched
   become: true
+  tags:
+  - install
 
 - name: set permissions
   file:
@@ -46,25 +50,33 @@
     mode: +r+x-w
     owner: deadlineuser
   become: true
-
+  tags:
+  - install
+  
 - name: install deadline db
   shell: |
     set -x
     {{ files_matched.files[0].path }} --mode unattended --debuglevel 2 --prefix /opt/Thinkbox/DeadlineRepository10 --setpermissions true --installmongodb true --dbOverwrite true --mongodir /opt/Thinkbox/DeadlineDatabase10 --dbListeningPort 27017 --certgen_outdir /opt/Thinkbox/DeadlineDatabase10/certs --certgen_password {{ deadline_proxy_certificate_password }} --createX509dbuser true --requireSSL true --dbhost {{ openfirehawkserver }} --dbport 27017 --dbuser {{ user_deadlineuser_name }} --dbpassword {{ deadline_proxy_certificate_password }} --dbauth true --dbcertpass {{ deadline_proxy_certificate_password }} --dbssl true
   register: deadline_db_install_output_shell
   become: true
+  tags:
+  - install
 
 - name: check deadline db install output
   debug:
     msg: "{{ deadline_db_install_output_shell.stdout }}"
+  tags:
+  - install
 
 - name: Restart service for deadlinedb
   service:
     name: Deadline10db
     state: restarted
   become: true
+  tags:
+  - install
 
-- name: Check content of file
+- name: Check content of file /opt/Thinkbox/DeadlineRepository10/plugins/Houdini/Houdini.param
   replace:
     path: /opt/Thinkbox/DeadlineRepository10/plugins/Houdini/Houdini.param
     regexp: |
@@ -122,3 +134,40 @@
       Description=The path to the simtracker.py file that is used when distributing HQueue sim jobs. This file can be found in the Houdini install.
     marker: "# {mark} ANSIBLE MANAGED BLOCK Houdini17_5_SimTracker"
   when: (simtracker_block_exists is changed) or (simtracker_block_exists is failed)
+
+- name: Check content of file /opt/Thinkbox/DeadlineRepository10/plugins/Houdini/Houdini.param for hython block
+  replace:
+    path: /opt/Thinkbox/DeadlineRepository10/plugins/Houdini/Houdini.param
+    regexp: |
+      [Houdini17_5_Hython_Executable]
+  check_mode: yes
+  register: hython_block_exists
+
+- name: "Check if settings for Mantra 17.5 are present in plugin settings"
+  lineinfile:
+    name: /opt/Thinkbox/DeadlineRepository10/plugins/Mantra/Mantra.param
+    line: [Houdini17_5_Mantra_Executable]
+    state: present
+  check_mode: yes
+  register: mantra_block_exists
+
+- debug:
+    msg: "mantra_block_exists={{ mantra_block_exists }}"
+
+- name: Blockin file to add h17.5 Mantra support
+  blockinfile:
+    path: /opt/Thinkbox/DeadlineRepository10/plugins/Mantra/Mantra.param
+    backup: true
+    block: |
+      [Mantra17_5_Executable]
+      Label=Mantra 17.5 Executable
+      Category=Render Executables
+      CategoryOrder=0
+      Type=multilinemultifilename
+      Index=12
+      Default=C:\Program Files\Side Effects Software\Houdini 17.0.000\bin\mantra.exe;/Applications/Houdini/Houdini17.0.000/Frameworks/Houdini.framework/Versions/17.0.000/Resources/bin/mantra;/opt/hfs17.5/bin/mantra
+      Description=The path to the Mantra executable used for rendering.
+    marker: "# {mark} ANSIBLE MANAGED BLOCK Houdini17_5_Mantra_Executable"
+  when: (mantra_block_exists is changed) or (mantra_block_exists is failed)
+
+

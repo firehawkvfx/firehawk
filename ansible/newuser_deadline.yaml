@@ -45,6 +45,8 @@
     shell: sleep 1; pkill -u {{ ansible_ssh_user }} sshd
     async: 3
     poll: 2
+    tags:
+    - onsite-install
 
   - name: reset ssh connection to allow user changes to affect 'current login user'
     meta: reset_connection

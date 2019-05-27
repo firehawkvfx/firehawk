@@ -50,6 +50,8 @@ variable "remote_subnet_cidr" {}
 
 variable "remote_ip_cidr" {}
 
+variable "softnas_config_mounts_on_local_workstation" {}
+
 
 variable "softnas_role_name" {
   default = "SoftNAS_HA_IAM"

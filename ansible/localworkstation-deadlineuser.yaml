@@ -62,6 +62,10 @@
   remote_user: "{{ variable_user | default('user') }}"
   become: true
 
+  vars:
+    ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
+    ansible_ssh_pass: "{{ user_deadlineuser_pw_local }}"
+
   tasks:
   - name: establish connect test
     stat:
@@ -78,6 +82,7 @@
   vars:
     #hostname: workstation.firehawkvfx.com
     pcoip: False
+    ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
 
   tasks:
   - name: Create submission scripts dir
@@ -106,7 +111,7 @@
     - cloud-install
     - onsite-install
 
-  - name: Ansible copy directory to the remote server
+  - name: Ansible copy directory to the remote server.  if failure - ensure you exist the shell and vagrant ssh in before trying again.  vagerant user and deadlineuser were added to a group and this will not refresh until exiting ssh.
     copy:
       src: "/opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/{{ item }}"
       dest: "/home/deadlineuser/Thinkbox/Deadline10/submitters/HoudiniSubmitter"

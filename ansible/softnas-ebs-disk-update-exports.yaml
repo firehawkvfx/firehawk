@@ -31,7 +31,7 @@
   - name: set /etc/exports
     lineinfile:
       path: /etc/exports
-      line: "# These mounts are managed in ansible playbook softnas-s3-disk.yaml and only one volume is exported currently for testing"
+      line: "# These mounts are managed in ansible playbook softnas-ebs-disk-update-exports.yaml and only one volume is exported currently for testing"
       backup: yes
     when: import_pool
 

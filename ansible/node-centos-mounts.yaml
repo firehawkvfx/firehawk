@@ -7,7 +7,7 @@
 # ansible-playbook -i ansible/inventory ansible/node-centos-mounts.yaml
 
 # to update an onsite centos workstation use-
-# ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_ssh_private_key_file=/home/vagrant/.ssh/id_rsa" --skip-tags 'cloud_install'
+# ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key" --skip-tags 'cloud_install'
 
 - hosts: "{{ variable_host | default('role_node_centos') }}"
   remote_user: "{{ variable_user | default('centos') }}"
@@ -528,8 +528,9 @@
     tags:
     - cloud_install
 
-  - fail:
-      msg: "{{ item.item.path }} is set to be present in exports dict but doesn't exist in /etc/exports"
+  - name: check if path is /etc/exports
+    fail:
+      msg: "{{ item.item.path }} to mount at {{ item.item.mount_path }} is set to be present in exports dict but was not found with showmount from softnas host"
     when: item.item.state == "present" and item.rc == 1
     with_items:
     - "{{ site_presence.results }}"

@@ -1,0 +1,39 @@
+- hosts: localhost
+  remote_user: vagrant
+  gather_facts: no
+
+  vars:
+    bastion_ip: false
+    local: false
+    ansible_ssh_private_key_file: /home/vagrant/.ssh/id_rsa
+    #variable_host=workstation.firehawkvfx.com variable_user=deadlineuser ansible_ssh_private_key_file=/home/vagrant/.ssh/id_rsa
+    
+    #"{{ variable_user | default('user') }}"
+
+  tasks:
+  - name: Generate /etc/ssh/ RSA host key
+    shell: |
+      ssh-agent bash && ssh-keygen -q -t rsa -f {{ ansible_ssh_private_key_file }} -C '' -N ''
+      ssh-agent bash && ssh-add {{ ansible_ssh_private_key_file }}
+    args:
+      creates: "{{ ansible_ssh_private_key_file }}"
+# may need to try different location - /etc/ssh/ssh_onsite_workstation_rsa_key
+# vagrant is having issues
+
+- hosts: "{{ variable_host | default('workstation.example.com') }}"
+  remote_user: "{{ variable_user | default('deadlineuser') }}"
+  become: true
+  gather_facts: false
+
+  vars:
+    ansible_ssh_public_key_file: /home/vagrant/.ssh/id_rsa.pub
+    ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
+    ansible_password: "{{ user_deadlineuser_pw_local }}"
+
+  tasks:
+  - command: echo 'test'
+
+  - authorized_key:
+      user: "{{ variable_user }}"
+      state: present
+      key: "{{ lookup('file', ansible_ssh_public_key_file) }}"

@@ -308,12 +308,14 @@ resource "null_resource" "workstation_pcoip" {
       ansible-playbook -i ansible/inventory ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.workstation_pcoip.private_ip} bastion_ip=${var.bastion_ip}"
       ansible-playbook -i ansible/inventory ansible/node-centos-init-users.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=workstation1.${var.public_domain_name} pcoip=true"
       ansible-playbook -i ansible/inventory ansible/node-centos-init-deadline.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=workstation1.${var.public_domain_name} pcoip=true"
+      ansible-playbook -i ansible/inventory ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_workstation_centos variable_user=deadlineuser"
+      ansible-playbook -i ansible/inventory ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_workstation_centos variable_user=centos"
       ansible-playbook -i ansible/inventory ansible/node-centos-mounts.yaml --extra-vars "variable_host=role_workstation_centos hostname=workstation1.${var.public_domain_name} pcoip=true"
       ansible-playbook -i ansible/inventory ansible/node-centos-houdini.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=workstation1.${var.public_domain_name}"
       # to configure deadline submission scripts, currently this installs deadline again which is messy and needs to be cleaned up
-      ansible-playbook -i ansible/inventory ansible/localworkstation-deadlineuser.yaml --tags "cloud-install" --extra-vars "variable_host=role_workstation_centos variable_user=centos"
+      # ansible-playbook -i ansible/inventory ansible/localworkstation-deadlineuser.yaml --tags "cloud-install" --extra-vars "variable_host=role_workstation_centos variable_user=centos"
       # using tag onsite-install will make this install procedure identical, but will also reinstall deadline.
-      # ansible-playbook -i ansible/inventory ansible/localworkstation-deadlineuser.yaml --tags "onsite-install" --extra-vars "variable_host=role_workstation_centos variable_user=centos"
+      ansible-playbook -i ansible/inventory ansible/localworkstation-deadlineuser.yaml --tags "onsite-install" --extra-vars "variable_host=role_workstation_centos variable_user=centos"
       # to recover from yum update breaking pcoip we reinstall the nvidia driver and dracut to fix pcoip.
       ansible-playbook -i ansible/inventory ansible/node-centos-pcoip-recover.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=workstation1.${var.public_domain_name}"
   EOT

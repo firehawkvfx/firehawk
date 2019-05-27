@@ -391,6 +391,8 @@ resource "null_resource" "provision_softnas" {
       ansible-playbook -i ansible/inventory ansible/softnas-init.yaml -v
       ansible-playbook -i ansible/inventory ansible/node-centos-init-users.yaml -v --extra-vars "variable_host=role_softnas init_ssh=false"
       ansible-playbook -i ansible/inventory ansible/softnas-update.yaml -v
+      # hotfix script to speed up instance start and shutdown
+      ansible-playbook -i ansible/inventory ansible/softnas-install-acpid.yaml -v
       # #ansible-playbook -i ansible/inventory ansible/aws-cli.yaml -v --extra-vars "variable_user=centos variable_host=role_softnas"
       # #ansible-playbook -i ansible/inventory ansible/aws-cli-ec2.yaml -v --extra-vars "variable_user=centos variable_host=role_softnas"
   EOT
@@ -497,6 +499,9 @@ output "softnas1_private_ip" {
   value = "${aws_instance.softnas1.private_ip}"
 }
 
+
+# there is currently too much activity here, but due to the way dependencies work in tf 0.11 its better to keep it in one block.
+# in tf .12 we should split these up and handle dependencies properly.
 resource "null_resource" "provision_softnas_volumes" {
   depends_on = ["null_resource.provision_softnas", "null_resource.start-softnas-after-create_ami", "null_resource.create_ami"]
   # "null_resource.start-softnas-after-ebs-attach"
@@ -527,15 +532,47 @@ resource "null_resource" "provision_softnas_volumes" {
       aws ec2 start-instances --instance-ids ${aws_instance.softnas1.id}
       ansible-playbook -i ansible/inventory ansible/softnas-s3-disk.yaml -v --extra-vars "pool_name=pool0 volume_name=volume0 disk_device=0 s3_disk_size_max_value=${var.s3_disk_size} encrypt_s3=true import_pool=${local.import_pool}"
       ansible-playbook -i ansible/inventory ansible/softnas-s3-disk.yaml -v --extra-vars "pool_name=pool1 volume_name=volume1 disk_device=1 s3_disk_size_max_value=${var.s3_disk_size} encrypt_s3=true import_pool=${local.import_pool}"
+
       # exports should be updated here.
       # if btier.json exists in /vagrant/secrets/${var.envtier}/ebs-volumes/ then the tiers will be imported.
+      
       ansible-playbook -i ansible/inventory ansible/softnas-backup-btier.yaml -v --extra-vars "restore=true"
       ansible-playbook -i ansible/inventory ansible/softnas-ebs-disk-update-exports.yaml -v --extra-vars "ebs_disk_size=${var.ebs_disk_size} instance_id=${aws_instance.softnas1.id} stop_softnas_instance=true"
-      # configure mounts on local workstation or render node.
+  EOT
+  }
+}
+
+resource "null_resource" "mount_volumes_onsite" {
+  count = "${ var.softnas_config_mounts_on_local_workstation ? 1 : 0 }"
+  depends_on = ["null_resource.provision_softnas_volumes"]
+  triggers {
+    instanceid = "${ aws_instance.softnas1.id }"
+  }
+
+  provisioner "remote-exec" {
+    connection {
+      user                = "centos"
+      host                = "${aws_instance.softnas1.private_ip}"
+      bastion_host        = "${var.bastion_ip}"
+      private_key         = "${var.private_key}"
+      bastion_private_key = "${var.private_key}"
+      type                = "ssh"
+      timeout             = "10m"
+    }
+
+    inline = ["set -x && echo 'booted'"]
+  }
+
+  provisioner "local-exec" {
+    command = <<EOT
+      set -x
+      cd /vagrant
+      # configure mounts on local workstation
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_ssh_private_key_file=/home/vagrant/.ssh/id_rsa" --skip-tags 'cloud_install'
   EOT
   }
 }
+
 output "provision_softnas_volumes" {
   value = "${null_resource.provision_softnas_volumes.id}"
 }
@@ -574,6 +611,35 @@ resource "null_resource" "start-softnas" {
     command = <<EOT
       # ensure mounts are present on other nodes after softnas is started.
       ansible-playbook -i ansible/inventory ansible/node-centos-mounts.yaml -v --skip-tags "local_install"
+  EOT
+  }
+}
+
+resource "null_resource" "attach-local-mounts-after-start" {
+  count = "${!var.sleep && var.softnas_config_mounts_on_local_workstation ? 1 : 0 }"
+  depends_on = ["null_resource.start-softnas","null_resource.mount_volumes_onsite"]
+
+  triggers {
+    instanceid = "${ aws_instance.softnas1.id }"
+    startsoftnas = "${null_resource.start-softnas.id}"
+  }
+  provisioner "remote-exec" {
+    connection {
+      user                = "centos"
+      host                = "${aws_instance.softnas1.private_ip}"
+      bastion_host        = "${var.bastion_ip}"
+      private_key         = "${var.private_key}"
+      bastion_private_key = "${var.private_key}"
+      type                = "ssh"
+      timeout             = "10m"
+    }
+    inline = [
+      "set -x",
+      "echo 'connection established'"
+    ]
+  }
+  provisioner "local-exec" {
+    command = <<EOT
       # mount volumes to local site when softnas is started
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_ssh_private_key_file=/home/vagrant/.ssh/id_rsa" --skip-tags 'cloud_install'
   EOT
@@ -592,7 +658,36 @@ resource "null_resource" "shutdown-softnas" {
 
     command = <<EOT
       aws ec2 stop-instances --instance-ids ${aws_instance.softnas1.id}
-      # unmount volumes from local site when softnas is shutdown.  
+  EOT
+  }
+}
+
+resource "null_resource" "detach-local-mounts-after-stop" {
+  count = "${var.sleep && var.softnas_config_mounts_on_local_workstation ? 1 : 0 }"
+  depends_on = ["null_resource.shutdown-softnas","null_resource.mount_volumes_onsite"]
+
+  triggers {
+    instanceid = "${ aws_instance.softnas1.id }"
+    startsoftnas = "${null_resource.shutdown-softnas.id}"
+  }
+  provisioner "remote-exec" {
+    connection {
+      user                = "centos"
+      host                = "${aws_instance.softnas1.private_ip}"
+      bastion_host        = "${var.bastion_ip}"
+      private_key         = "${var.private_key}"
+      bastion_private_key = "${var.private_key}"
+      type                = "ssh"
+      timeout             = "10m"
+    }
+    inline = [
+      "set -x",
+      "echo 'connection established'"
+    ]
+  }
+  provisioner "local-exec" {
+    command = <<EOT
+      # unmount volumes from local site when softnas is shutdown.
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_ssh_private_key_file=/home/vagrant/.ssh/id_rsa destroy=true variable_gather_facts=no" --skip-tags 'cloud_install'
   EOT
   }
