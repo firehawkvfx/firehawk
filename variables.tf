@@ -25,6 +25,9 @@ variable "public_domain_prod" {}
 variable "openfirehawkserver" {}
 
 variable "openvpn_user" {}
+variable "site_mounts" {
+  default = true
+}
 
 variable "openvpn_user_pw" {}
 

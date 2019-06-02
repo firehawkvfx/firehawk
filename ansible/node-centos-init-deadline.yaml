@@ -4,6 +4,7 @@
   
   vars:
     sync_downloads: false
+    bucket: "installers.{{ public_domain }}"
 
   tasks:
   - name: ensure an s3 bucket exists to store large files / installers for faster redeployment.
@@ -46,7 +47,7 @@
       state: directory
       mode: 0700
       owner: deadlineuser
-      group: deadlineuser
+      group: syscontrol
     become: yes
 
   - name: create Thinkbox cert dir
@@ -55,7 +56,7 @@
       state: directory
       mode: 0700
       owner: deadlineuser
-      group: deadlineuser
+      group: syscontrol
     become: yes
 
   - name: set deadline remote client certificate permissions locally
@@ -63,7 +64,7 @@
       path: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
       mode: 0644
       owner: deadlineuser
-      group: deadlineuser
+      group: syscontrol
     become: yes
     connection: local
 
@@ -73,7 +74,7 @@
       dest: "/opt/Thinkbox/certs/"
       mode: 0600
       owner: deadlineuser
-      group: deadlineuser
+      group: syscontrol
     become: yes
 
   - name: Strange requirement here.  For some reason read permissions needed for everyone to be set above or the ansible copy doesn't work.  So we set it back to normal here.
@@ -81,7 +82,7 @@
       path: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
       mode: 0640
       owner: deadlineuser
-      group: deadlineuser
+      group: syscontrol
     become: yes
     connection: local
 
@@ -90,7 +91,7 @@
       path: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
       state: directory
       owner: deadlineuser
-      group: deadlineuser
+      group: syscontrol
     become: yes
 
   - name: S3 GET deadline
@@ -103,12 +104,19 @@
       aws_secret_key: "{{ aws_secret_key }}"
       region: "{{ aws_region }}"
 
+  # - name: Sync deadline from s3 if exist and not present on file system- pull
+  #   shell: |
+  #     set -x
+  #     cd /home/deadlineuser/Downloads/
+  #     ~/.local/bin/aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ deadline_linux_filename }}"
+  #   become_user: "{{ variable_user }}"
+
   - name: create deadline installer dir
     file: 
       path: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
       state: directory
       owner: deadlineuser
-      group: deadlineuser
+      group: syscontrol
     become: yes
 
 
@@ -136,7 +144,7 @@
       path: "{{ files_matched.files[0].path }}"
       mode: 0700
       owner: deadlineuser
-      group: deadlineuser
+      group: syscontrol
     become: yes
 
   - name: deadline dependencies

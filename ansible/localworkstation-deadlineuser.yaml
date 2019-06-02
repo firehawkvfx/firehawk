@@ -5,58 +5,98 @@
 # ansible-playbook -i "$TF_VAR_inventory" ansible/localworkstation-deadlineuser.yaml --tags "onsite-install"
 
 # these permissions are now handled post install of the deadline db. should be removed
+# - hosts: ansible_control
+#   become: true
+
+#   # set permissions on dealine repository so that scripts can be copied by the vagrant user.
+#   tasks:
+#   - name: Ensure group "syscontrol" exists
+#     group:
+#       name: syscontrol
+#       state: present
+#       gid: 9003
+#     become: true
+#     tags:
+#     - cloud-install
+#     - onsite-install
+
+#   - name: adding existing user "{{ item }}" to group syscontrol
+#     user:
+#       name: "{{ item }}"
+#       groups: syscontrol
+#       append: yes
+#     with_items:
+#     - deadlineuser
+#     - vagrant
+#     become: true
+#     tags:
+#     - cloud-install
+#     - onsite-install
+
+#   - name: Kill SSH because otherwise the user will not be added to the group.
+#     shell: sleep 1; pkill -u {{ ansible_ssh_user }} sshd
+#     async: 3
+#     poll: 2
+
+#   - name: reset ssh connection to allow user changes to affect 'current login user'
+#     meta: reset_connection
+
+# # these permissions are now handled post install of the deadline db.
 - hosts: ansible_control
   become: true
 
-  # set permissions on dealine repository so that scripts can be copied by the vagrant user.
   tasks:
-  - name: Ensure group "syscontrol" exists
-    group:
-      name: syscontrol
-      state: present
-      gid: 9003
-    become: true
+  - name: set permissions Thinkbox dir
+    file: 
+      path: /opt/Thinkbox/
+      state: directory
+      mode: u=rwX,g=rX,o-rwx
+      owner: deadlineuser
+      group: syscontrol
+    become: yes
     tags:
     - cloud-install
     - onsite-install
 
-  - name: adding existing user "{{ item }}" to group syscontrol
-    user:
-      name: "{{ item }}"
-      groups: syscontrol
-      append: yes
-    with_items:
-    - deadlineuser
-    - vagrant
-    become: true
+  - name: set permissions Thinkbox cert dir
+    file: 
+      path: /opt/Thinkbox/certs
+      state: directory
+      mode: u=rwX,g=rX,o-rwx
+      owner: deadlineuser
+      group: syscontrol
+    become: yes
     tags:
     - cloud-install
     - onsite-install
 
-  - name: Kill SSH because otherwise the user will not be added to the group.
-    shell: sleep 1; pkill -u {{ ansible_ssh_user }} sshd
-    async: 3
-    poll: 2
-
-  - name: reset ssh connection to allow user changes to affect 'current login user'
-    meta: reset_connection
-
-# these permissions are now handled post install of the deadline db.
-- hosts: ansible_control
-  become: true
-
-  tasks:
-  - name: set permissions
+  - name: set permissions DeadlineRepository10
     file:
       path: /opt/Thinkbox/DeadlineRepository10/
       owner: deadlineuser
       group: syscontrol
-      mode: u+r,g+r
+      mode: u=rX,g=rX,o-rwx
       recurse: yes
     become: true
     tags:
     - cloud-install
     - onsite-install
+
+  - name: set permissions DeadlineRepository10/jobs jobsArchived reports
+    file:
+      path: "{{ item }}"
+      owner: deadlineuser
+      group: syscontrol
+      mode: u=rwX,g=rwX,o-rwx
+      recurse: yes
+    become: true
+    tags:
+    - cloud-install
+    - onsite-install
+    with_items:
+    - /opt/Thinkbox/DeadlineRepository10/jobs
+    - /opt/Thinkbox/DeadlineRepository10/jobsArchived
+    - /opt/Thinkbox/DeadlineRepository10/reports
 
 - hosts: "{{ variable_host | default('workstation.firehawkvfx.com') }}"
   remote_user: "{{ variable_user | default('user') }}"
@@ -85,23 +125,75 @@
     ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
 
   tasks:
-  - name: Create submission scripts dir
+  # the syscontrol group is normally created when a host and user is first configured, but for a local install we ensure that it is created here in any case, since its possible that new users may not have this group.
+  - name: Ensure group "syscontrol" exists
+    group:
+      name: syscontrol
+      state: present
+      gid: 9003
+    become: true
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: adding existing user "{{ item }}" to group syscontrol
+    user:
+      name: "{{ item }}"
+      groups: syscontrol
+      append: yes
+    with_items:
+    - deadlineuser
+    become: true
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: create Thinkbox dir
+    file: 
+      path: /opt/Thinkbox/
+      state: directory
+      mode: u=rwX,g=rX,o-rwx
+      #mode: 0700
+      owner: deadlineuser
+      group: syscontrol
+    become: yes
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: create Thinkbox cert dir
+    file: 
+      path: /opt/Thinkbox/certs
+      state: directory
+      mode: u=rwX,g=rX,o-rwx
+      #mode: 0700
+      owner: deadlineuser
+      group: syscontrol
+    become: yes
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: Create submission scripts dir if it doesn't exist
     file: 
       path: /opt/Thinkbox/DeadlineRepository10/submission
       state: directory
-      mode: 0700
+      mode: u=rwX,g=rX,o-rwx
+      #mode: 0700
       owner: deadlineuser
-      group: deadlineuser
+      group: syscontrol
     become: yes
     tags:
     - cloud-install
     - onsite-install
 
   - name: ensure local submission scripts dir permissions are readable
-    file: 
+    file:
       path: /opt/Thinkbox/DeadlineRepository10/submission
       state: directory
-      mode: u+r,g+r
+      #mode: u+r,g+r
+      mode: u=rwX,g=rwX
+      #,o=rX
       owner: deadlineuser
       group: syscontrol
       recurse: yes
@@ -116,7 +208,8 @@
       src: "/opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/{{ item }}"
       dest: "/home/deadlineuser/Thinkbox/Deadline10/submitters/HoudiniSubmitter"
       owner: deadlineuser
-      group: deadlineuser
+      group: syscontrol
+    become: yes
     with_items:
     - otls
     - soho
@@ -131,6 +224,7 @@
       path: /home/deadlineuser/Thinkbox/Deadline10/submitters/HoudiniSubmitter/MainMenuCommon.xml
       regexp: 'HOMEDIR'
       replace: '~/Thinkbox/Deadline10'
+    become: yes
     tags:
     - cloud-install
     - onsite-install
@@ -139,7 +233,7 @@
     file:
       path: /home/deadlineuser/houdini17.5/houdini.env
       owner: deadlineuser
-      group: deadlineuser
+      group: syscontrol
       state: touch
     become: yes
     tags:
@@ -152,6 +246,7 @@
       state: present
       regexp: '.*HOUDINI_PATH =.*'
       line: 'HOUDINI_PATH = "$HOUDINI_PATH; ~/Thinkbox/Deadline10/submitters/HoudiniSubmitter;&"'
+    become: yes
     tags:
     - cloud-install
     - onsite-install
@@ -161,17 +256,19 @@
       state: present
       path: /home/deadlineuser/houdini17.5/houdini.env
       regexp: '.*HOUDINI_MENU_PATH =.*'
-      line: 'HOUDINI_MENU_PATH = "$HOUDINI_MENU_PATH; ~/Thinkbox/Deadline10/submitters/HoudiniSubmitter;&"'
+      line: 'HOUDINI_MENU_PATH = "$HOUDINI_MENU_PATH; /home/deadlineuser/houdini17.5/scripts/menus; ~/Thinkbox/Deadline10/submitters/HoudiniSubmitter;&"'
+    become: yes
     tags:
     - cloud-install
     - onsite-install
 
-  - name: set HOUDINI_OTL_SCAN_PATH in houdini.env.
+  - name: set HOUDINI_OTLSCAN_PATH in houdini.env.
     lineinfile:
       state: present
       path: /home/deadlineuser/houdini17.5/houdini.env
-      regexp: '.*HOUDINI_OTL_SCAN_PATH =.*'
-      line: 'HOUDINI_OTL_SCAN_PATH = "@/OTLS:/prod/asset"'
+      regexp: '.*HOUDINI_OTLSCAN_PATH.=.*'
+      line: 'HOUDINI_OTLSCAN_PATH = "@/otls:/prod/asset/hda:/prod/asset/openfirehawk-houdini-tools/hda"'
+    become: yes
     tags:
     - cloud-install
     - onsite-install
@@ -182,6 +279,7 @@
       path: /home/deadlineuser/houdini17.5/houdini.env
       regexp: '.*PYTHON =.*'
       line: 'PYTHON = "/opt/hfs17.5/python/bin/python"'
+    become: yes
     tags:
     - cloud-install
     - onsite-install
@@ -190,6 +288,7 @@
     copy:
       src: "/opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/CallDeadlineCommand.py"
       dest: "/home/deadlineuser/houdini17.5/python2.7libs/"
+    become: yes
     tags:
     - cloud-install
     - onsite-install
@@ -199,7 +298,8 @@
       src: "/opt/Thinkbox/DeadlineRepository10/submission/{{ item }}"
       dest: "/opt/Thinkbox/DeadlineRepository10/submission/{{ item }}"
       owner: deadlineuser
-      group: deadlineuser
+      group: syscontrol
+    become: yes
     with_items:
     - HServer
     - Houdini
@@ -212,6 +312,7 @@
     yum:
       name: '*'
       state: latest
+    become: yes
     tags:
     - cloud-install
     - onsite-install
@@ -281,36 +382,12 @@
     - cloud-install
     - onsite-install
 
-  - name: create Thinkbox dir
-    file: 
-      path: /opt/Thinkbox/
-      state: directory
-      mode: 0700
-      owner: deadlineuser
-      group: deadlineuser
-    become: yes
-    tags:
-    - cloud-install
-    - onsite-install
-
-  - name: create Thinkbox cert dir
-    file: 
-      path: /opt/Thinkbox/certs
-      state: directory
-      mode: 0700
-      owner: deadlineuser
-      group: deadlineuser
-    become: yes
-    tags:
-    - cloud-install
-    - onsite-install
-
   - name: set deadline remote client certificate permissions locally
     file: 
       path: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
       mode: 0644
       owner: deadlineuser
-      group: deadlineuser
+      group: syscontrol
     become: yes
     connection: local
     tags:
@@ -323,7 +400,7 @@
       dest: "/opt/Thinkbox/certs/"
       mode: 0600
       owner: deadlineuser
-      group: deadlineuser
+      group: syscontrol
     become: yes
     tags:
     - cloud-install
@@ -334,7 +411,7 @@
       path: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
       mode: 0640
       owner: deadlineuser
-      group: deadlineuser
+      group: syscontrol
     become: yes
     connection: local
     tags:
@@ -346,7 +423,7 @@
       path: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
       state: directory
       owner: deadlineuser
-      group: deadlineuser
+      group: syscontrol
     become: yes
     tags:
     - cloud-install
@@ -365,12 +442,19 @@
     - cloud-install
     - onsite-install
 
+  # - name: Sync deadline from s3 if exist and not present on file system- pull
+  #   shell: |
+  #     set -x
+  #     cd /home/deadlineuser/Downloads/
+  #     ~/.local/bin/aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ deadline_linux_filename }}"
+  #   become_user: "{{ variable_user }}"
+
   - name: create deadline installer dir
     file: 
       path: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
       state: directory
       owner: deadlineuser
-      group: deadlineuser
+      group: syscontrol
     become: yes
     tags:
     - cloud-install
@@ -409,7 +493,7 @@
       path: "{{ files_matched.files[0].path }}"
       mode: 0700
       owner: deadlineuser
-      group: deadlineuser
+      group: syscontrol
     become: yes
     tags:
     - cloud-install
@@ -557,7 +641,7 @@
     command: "mv /var/lib/Thinkbox/Deadline10/deadline.ini {{ backup_dest }}"
     when: deadline_ini_file.stat.exists
     tags:
-    # - cloud-install
+    - cloud-install
     - onsite-install
 
   - name: install deadline client
@@ -568,29 +652,29 @@
     register: deadline_client_install_output_shell
     become: true
     tags:
-    # - cloud-install
+    - cloud-install
     - onsite-install
 
   - name: check deadline client install output
     debug:
       msg: "{{ deadline_client_install_output_shell.stdout }}"
     tags:
-    # - cloud-install
+    - cloud-install
     - onsite-install
 
   - name: check /var/lib/Thinkbox/Deadline10/deadline.ini
     command: cat /var/lib/Thinkbox/Deadline10/deadline.ini 
     register: deadline_config
     tags:
-    # - cloud-install
+    - cloud-install
     - onsite-install
 
   - debug: msg="{{ deadline_config.stdout }}"
     tags:
-    # - cloud-install
+    - cloud-install
     - onsite-install
 
   - debug: msg="{{ deadline_config.stderr }}"
     tags:
-    # - cloud-install
+    - cloud-install
     - onsite-install

@@ -45,8 +45,8 @@ Vagrant.configure("2") do |config|
     vb.customize ["modifyvm", :id, "--accelerate3d", "on"]
     vb.customize ['modifyvm', :id, '--clipboard', 'bidirectional']
     #enable promiscuous mode to enable routes from aws through the openfirehawkserver vpn into your local network
-    vb.customize ["modifyvm", :id, "--nicpromisc0", "allow-all"]
-    vb.customize ["modifyvm", :id, "--nicpromisc1", "allow-all"]
+    #vb.customize ["modifyvm", :id, "--nicpromisc0", "allow-all"]
+    #vb.customize ["modifyvm", :id, "--nicpromisc1", "allow-all"]
     vb.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
     vb.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
   end
@@ -57,10 +57,15 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "sudo rm /etc/localtime && sudo ln -s /usr/share/zoneinfo/Australia/Brisbane /etc/localtime", run: "always"
   config.vm.provision "shell", inline: "sudo apt-get update"
   # temp disable as we are getting freezing with ssh issues
-  #config.vm.provision "shell", inline: "sudo apt-get install -y sshpass"
+  config.vm.provision "shell", inline: "sudo apt-get install -y sshpass"
 
   ### Install Ansible Block ###
   config.vm.provision "shell", inline: "sudo apt-get install -y software-properties-common"
+  #config.vm.provision "shell", inline: "pip install --upgrade pip"
+  #config.vm.provision "shell", inline: "sudo apt-get install -y python-pip python-dev"
+  #pip install --upgrade pip
+  #config.vm.provision "shell", inline: "sudo -H pip install ansible==2.7.11"
+  # to list available versions - pip install ansible==
   config.vm.provision "shell", inline: "sudo apt-add-repository --yes --update ppa:ansible/ansible"
   config.vm.provision "shell", inline: "sudo apt-get install -y ansible"
 
@@ -69,8 +74,9 @@ Vagrant.configure("2") do |config|
   
   # these utils are likely require dfor promisc mode on ethernet which is required if routing on a local network.
   config.vm.provision "shell", inline: "sudo apt-get install -y virtualbox-guest-dkms"
+  # looks like guest utils is the culprit
   config.vm.provision "shell", inline: "sudo apt-get install -y virtualbox-guest-utils"
-  
+
   #reboot required for desktop to function.
 
   # ### Install ubuntu desktop and virtualbox additions.  Because a reboot is required, provisioning is handled here. ###
@@ -82,7 +88,7 @@ Vagrant.configure("2") do |config|
   # config.vm.provision "shell", inline: "sudo apt-get install -y virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11 xserver-xorg-legacy"
   # # Permit anyone to start the GUI
   # config.vm.provision "shell", inline: "sudo sed -i 's/allowed_users=.*$/allowed_users=anybody/' /etc/X11/Xwrapper.config"
-  ### End Ubuntu Desktop block ###
+  # ## End Ubuntu Desktop block ###
 
   # #disable the update notifier.  We do not want to update to ubuntu 18, currently deadline installer gui doesn't work in 18.
   config.vm.provision "shell", inline: "sudo sed -i 's/Prompt=.*$/Prompt=never/' /etc/update-manager/release-upgrades"

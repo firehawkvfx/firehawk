@@ -1,20 +1,25 @@
+- name: check if /home/vagrant/.ssh/known_hosts file exists
+  stat: 
+    path: /home/vagrant/.ssh/known_hosts
+  register: known_hosts
+
+- debug:
+    var: known_hosts
+
 - name: clean known hosts
-  shell: "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R {{ private_ip }}"
+  shell: "ssh-agent bash && ssh-keygen -f /home/vagrant/.ssh/known_hosts -R {{ private_ip }}"
   become: true
   become_user: vagrant
+  when: known_hosts.stat.exists == true
 
 - name: msg delegate to bastion ip
   debug:
-    msg: "{{ bastion_ip }}"
-  when: bastion_ip
+    var: bastion_ip
+  when: '"." in bastion_ip'
 
 - name: msg delegate to get key for private_ip
   debug:
-    msg: "{{ private_ip }}"
-
-- name: bastion_ip
-  debug:
-    var: bastion_ip
+    var: private_ip
 
 - name: delegate keyscan to add keys from remote subnet via bastion host.
   command: "ssh-keyscan {{ private_ip }}"
@@ -23,22 +28,40 @@
   remote_user: centos
   become_user: centos
   become: true
-  when: bastion_ip 
+  when: '"." in bastion_ip'
 
-- name: delegate keyscan to add keys from remote subnet on this host.
-  command: "ssh-keyscan {{ private_ip }}"
-  register: new_host_fingerprint
-  become: true
-  when: local
-
-- name: retrieved new_host_fingerprint
+- name: retrieved new_host_fingerprint via bastion
   debug:
-    var: "{{ new_host_fingerprint }}"
+    var: new_host_fingerprint
 
 - name: add keyscan to known hosts
   lineinfile:
     dest: /home/vagrant/.ssh/known_hosts
     line: "{{ item }}"
+    create: true
+    mode: '600'
   with_items: "{{ new_host_fingerprint.stdout_lines }}"
   become: true
   become_user: vagrant
+  when: '"." in bastion_ip'
+
+- name: keyscan to add keys from remote subnet on this host.
+  command: "ssh-keyscan {{ private_ip }}"
+  register: new_host_fingerprint
+  become: true
+  when: local
+
+- name: retrieved new_host_fingerprint locally
+  debug:
+    var: new_host_fingerprint
+
+- name: add keyscan to known hosts
+  lineinfile:
+    dest: /home/vagrant/.ssh/known_hosts
+    line: "{{ item }}"
+    create: true
+    mode: '600'
+  with_items: "{{ new_host_fingerprint.stdout_lines }}"
+  become: true
+  become_user: vagrant
+  when: local

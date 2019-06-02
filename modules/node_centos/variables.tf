@@ -56,6 +56,10 @@ variable "skip_update" {
 
 variable "vpn_cidr" {}
 
+variable "site_mounts" {
+  default = false
+}
+
 variable "region" {}
 
 variable "local_key_path" {}

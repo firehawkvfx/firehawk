@@ -369,9 +369,11 @@ resource "null_resource" "provision_softnas" {
       type                = "ssh"
       timeout             = "10m"
     }
+
+    # sleep 300 is required because ecdsa key wont exist for a while, and you can't continue without it.
     inline = [
       "set -x",
-      "sleep 300",
+      "sleep 30",
       "sudo yum install -y python",
       "while [ ! -f /etc/ssh/ssh_host_ecdsa_key.pub ]",
       "do",
@@ -582,6 +584,7 @@ output "provision_softnas_volumes" {
 # wakeup a node after sleep
 resource "null_resource" "start-softnas" {
   count = "${var.sleep ? 0 : 1}"
+  depends_on = ["null_resource.provision_softnas_volumes","null_resource.mount_volumes_onsite"]
   
   triggers {
     instanceid = "${ aws_instance.softnas1.id }"
@@ -592,27 +595,27 @@ resource "null_resource" "start-softnas" {
       aws ec2 start-instances --instance-ids ${aws_instance.softnas1.id}
   EOT
   }
-  provisioner "remote-exec" {
-    connection {
-      user                = "centos"
-      host                = "${aws_instance.softnas1.private_ip}"
-      bastion_host        = "${var.bastion_ip}"
-      private_key         = "${var.private_key}"
-      bastion_private_key = "${var.private_key}"
-      type                = "ssh"
-      timeout             = "10m"
-    }
-    inline = [
-      "set -x",
-      "echo 'connection established'"
-    ]
-  }
-  provisioner "local-exec" {
-    command = <<EOT
-      # ensure mounts are present on other nodes after softnas is started.
-      ansible-playbook -i ansible/inventory ansible/node-centos-mounts.yaml -v --skip-tags "local_install"
-  EOT
-  }
+  # provisioner "remote-exec" {
+  #   connection {
+  #     user                = "centos"
+  #     host                = "${aws_instance.softnas1.private_ip}"
+  #     bastion_host        = "${var.bastion_ip}"
+  #     private_key         = "${var.private_key}"
+  #     bastion_private_key = "${var.private_key}"
+  #     type                = "ssh"
+  #     timeout             = "10m"
+  #   }
+  #   inline = [
+  #     "set -x",
+  #     "echo 'connection established'"
+  #   ]
+  # }
+  # provisioner "local-exec" {
+  #   command = <<EOT
+  #     # ensure mounts are present on other nodes after softnas is started.
+  #     ansible-playbook -i ansible/inventory ansible/node-centos-mounts.yaml -v --skip-tags "local_install"
+  # EOT
+  # }
 }
 
 resource "null_resource" "attach-local-mounts-after-start" {

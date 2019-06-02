@@ -238,6 +238,7 @@ locals {
 
 resource "aws_instance" "workstation_pcoip" {
   #instance type and ami are determined by the gateway type variable for if you want a graphical or non graphical instance.
+  count = "${var.site_mounts ? 1 : 0}"
   ami           = "${var.use_custom_ami ? var.custom_ami : lookup(var.ami_map, var.gateway_type)}"
   instance_type = "${lookup(var.instance_type_map, var.gateway_type)}"
 
@@ -280,7 +281,8 @@ resource "aws_instance" "workstation_pcoip" {
 variable "public_domain_name" {}
 
 resource "null_resource" "workstation_pcoip" {
-  count = "${local.skip_update ? 0 : 1}"
+  depends_on = ["aws_instance.workstation_pcoip"]
+  count = "${local.skip_update==false && var.site_mounts ? 1 : 0}"
 
   triggers {
     instanceid = "${ aws_instance.workstation_pcoip.id }"
@@ -316,6 +318,7 @@ resource "null_resource" "workstation_pcoip" {
       # ansible-playbook -i ansible/inventory ansible/localworkstation-deadlineuser.yaml --tags "cloud-install" --extra-vars "variable_host=role_workstation_centos variable_user=centos"
       # using tag onsite-install will make this install procedure identical, but will also reinstall deadline.
       ansible-playbook -i ansible/inventory ansible/localworkstation-deadlineuser.yaml --tags "onsite-install" --extra-vars "variable_host=role_workstation_centos variable_user=centos"
+      
       # to recover from yum update breaking pcoip we reinstall the nvidia driver and dracut to fix pcoip.
       ansible-playbook -i ansible/inventory ansible/node-centos-pcoip-recover.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=workstation1.${var.public_domain_name}"
   EOT
@@ -363,7 +366,7 @@ resource "null_resource" "workstation_pcoip" {
 }
 
 resource "null_resource" "shutdown_workstation_pcoip" {
-  count = "${var.sleep ? 1 : 0}"
+  count = "${var.sleep && var.site_mounts ? 1 : 0}"
 
   provisioner "local-exec" {
     command = "aws ec2 stop-instances --instance-ids ${aws_instance.workstation_pcoip.id}"

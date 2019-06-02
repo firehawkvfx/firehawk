@@ -162,12 +162,6 @@
       gid: 9003
     become: true
 
-  # - name: ensure the user 'deadlineuser' exists with a specific uid and a primary group of 'syscontrol'
-  #   user:
-  #     name: deadlineuser
-  #     uid: 9001
-  #   become: true
-
   - name: adding existing user "{{ item }}" to group syscontrol
     user:
       name: "{{ item }}"

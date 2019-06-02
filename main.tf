@@ -110,57 +110,57 @@ variable "softnas_skip_update" {
 variable "softnas_use_custom_ami" {}
 variable "softnas_custom_ami" {}
 
-# module "softnas" {
-#   source                         = "./modules/softnas"
-#   cloudformation_role_stack_name = "${var.softnas1_cloudformation_role_name}"
+module "softnas" {
+  source                         = "./modules/softnas"
+  cloudformation_role_stack_name = "${var.softnas1_cloudformation_role_name}"
 
-#   envtier = "${var.envtier}"
+  envtier = "${var.envtier}"
 
-#   softnas_use_custom_ami = "${var.softnas_use_custom_ami}"
-#   softnas_custom_ami = "${var.softnas_custom_ami}"
+  softnas_use_custom_ami = "${var.softnas_use_custom_ami}"
+  softnas_custom_ami = "${var.softnas_custom_ami}"
 
-#   #softnas_role = "${module.softnas_role.softnas_role_name}"
+  #softnas_role = "${module.softnas_role.softnas_role_name}"
 
-#   cloudformation_stack_name      = "FCB-SoftNAS1Stack"
-#   aws_region = "${var.aws_region}"
-#   softnas_mode = "${var.softnas_mode}"
-#   vpn_private_ip                 = "${module.vpc.vpn_private_ip}"
-#   key_name                       = "${var.key_name}"
-#   private_key                    = "${file("${var.local_key_path}")}"
-#   vpc_id                         = "${module.vpc.vpc_id}"
-#   vpn_cidr                       = "${var.vpn_cidr}"
-#   public_domain = "${var.public_domain}"
-#   private_subnets                = "${module.vpc.private_subnets}"
-#   private_subnets_cidr_blocks    = "${module.vpc.private_subnets_cidr_blocks}"
-#   all_private_subnets_cidr_range = "${module.vpc.all_private_subnets_cidr_range}"
-#   public_subnets_cidr_blocks     = "${module.vpc.public_subnets_cidr_blocks}"
-#   remote_subnet_cidr             = "${var.remote_subnet_cidr}"
-#   remote_ip_cidr                 = "${var.remote_ip_cidr}"
-#   bastion_private_ip             = "${module.vpc.vpn_private_ip}"
-#   bastion_ip = "${module.bastion.public_ip}"
-#   softnas1_private_ip1 = "${var.softnas1_private_ip1}"
-#   softnas1_private_ip2 = "${var.softnas1_private_ip2}"
-#   softnas2_private_ip1 = "${var.softnas2_private_ip1}"
-#   softnas2_private_ip2 = "${var.softnas2_private_ip2}"
+  cloudformation_stack_name      = "FCB-SoftNAS1Stack"
+  aws_region = "${var.aws_region}"
+  softnas_mode = "${var.softnas_mode}"
+  vpn_private_ip                 = "${module.vpc.vpn_private_ip}"
+  key_name                       = "${var.key_name}"
+  private_key                    = "${file("${var.local_key_path}")}"
+  vpc_id                         = "${module.vpc.vpc_id}"
+  vpn_cidr                       = "${var.vpn_cidr}"
+  public_domain = "${var.public_domain}"
+  private_subnets                = "${module.vpc.private_subnets}"
+  private_subnets_cidr_blocks    = "${module.vpc.private_subnets_cidr_blocks}"
+  all_private_subnets_cidr_range = "${module.vpc.all_private_subnets_cidr_range}"
+  public_subnets_cidr_blocks     = "${module.vpc.public_subnets_cidr_blocks}"
+  remote_subnet_cidr             = "${var.remote_subnet_cidr}"
+  remote_ip_cidr                 = "${var.remote_ip_cidr}"
+  bastion_private_ip             = "${module.vpc.vpn_private_ip}"
+  bastion_ip = "${module.bastion.public_ip}"
+  softnas1_private_ip1 = "${var.softnas1_private_ip1}"
+  softnas1_private_ip2 = "${var.softnas1_private_ip2}"
+  softnas2_private_ip1 = "${var.softnas2_private_ip1}"
+  softnas2_private_ip2 = "${var.softnas2_private_ip2}"
   
-#   softnas_config_mounts_on_local_workstation = "${var.softnas_config_mounts_on_local_workstation}"
+  softnas_config_mounts_on_local_workstation = "${var.softnas_config_mounts_on_local_workstation}"
 
-#   s3_disk_size = "${var.s3_disk_size}"
+  s3_disk_size = "${var.s3_disk_size}"
 
-#   ebs_disk_size = "${var.ebs_disk_size}"
-#   #skipping os updates will allow faster rollout, but may be non functional
-#   skip_update = "${var.softnas_skip_update}"
-#   #sleep will stop instances to save cost during idle time.
-#   sleep = "${var.sleep}"
-# }
+  ebs_disk_size = "${var.ebs_disk_size}"
+  #skipping os updates will allow faster rollout, but may be non functional
+  skip_update = "${var.softnas_skip_update}"
+  #sleep will stop instances to save cost during idle time.
+  sleep = "${var.sleep}"
+}
 
-# variable "pcoip_sleep_after_creation" {
-#   default = false
-# }
+variable "pcoip_sleep_after_creation" {
+  default = false
+}
 
-# variable "pcoip_skip_update" {
-#   default = false
-# }
+variable "pcoip_skip_update" {
+  default = false
+}
 
 # module "pcoipgw" {
 #   source = "./modules/pcoipgw"
@@ -198,40 +198,41 @@ variable "softnas_custom_ami" {}
 # }
 
 
-# module "workstation" {
-#   source = "./modules/workstation_pcoip"
-#   name   = "workstation"
+module "workstation" {
+  source = "./modules/workstation_pcoip"
+  name   = "workstation"
 
-#   #options for gateway type are centos7 and pcoip
-#   gateway_type      = "${var.gateway_type}"
-#   vpc_id            = "${module.vpc.vpc_id}"
-#   vpc_cidr          = "${module.vpc.vpc_cidr_block}"
-#   vpn_cidr          = "${var.vpn_cidr}"
-#   remote_ip_cidr    = "${var.remote_ip_cidr}"
-#   #public_subnet_ids = "${module.vpc.public_subnets}"
+  #options for gateway type are centos7 and pcoip
+  gateway_type      = "${var.gateway_type}"
+  vpc_id            = "${module.vpc.vpc_id}"
+  vpc_cidr          = "${module.vpc.vpc_cidr_block}"
+  vpn_cidr          = "${var.vpn_cidr}"
+  remote_ip_cidr    = "${var.remote_ip_cidr}"
+  #public_subnet_ids = "${module.vpc.public_subnets}"
 
-#   bastion_ip = "${module.bastion.public_ip}"
+  bastion_ip = "${module.bastion.public_ip}"
 
-#   key_name    = "${var.key_name}"
-#   private_key = "${file("${var.local_key_path}")}"
+  key_name    = "${var.key_name}"
+  private_key = "${file("${var.local_key_path}")}"
 
-#   #skipping os updates will allow faster rollout for testing, but may be non functional
-#   skip_update = "${var.pcoip_skip_update}"
+  #skipping os updates will allow faster rollout for testing, but may be non functional
+  skip_update = "${var.pcoip_skip_update}"
+  site_mounts = "${var.site_mounts}"
 
-#   public_domain_name = "${var.public_domain}"
+  public_domain_name = "${var.public_domain}"
 
-#   #sleep will stop instances to save cost during idle time.
-#   sleep                      = "${var.sleep}"
-#   pcoip_sleep_after_creation = "${var.pcoip_sleep_after_creation}"
+  #sleep will stop instances to save cost during idle time.
+  sleep                      = "${var.sleep}"
+  pcoip_sleep_after_creation = "${var.pcoip_sleep_after_creation}"
 
-#   private_subnet_ids          = "${module.vpc.private_subnets}"
-#   private_subnets_cidr_blocks = "${module.vpc.private_subnets_cidr_blocks}"
-#   remote_subnet_cidr          = "${var.remote_subnet_cidr}"
+  private_subnet_ids          = "${module.vpc.private_subnets}"
+  private_subnets_cidr_blocks = "${module.vpc.private_subnets_cidr_blocks}"
+  remote_subnet_cidr          = "${var.remote_subnet_cidr}"
 
-#   openfirehawkserver = "${var.openfirehawkserver}"
+  openfirehawkserver = "${var.openfirehawkserver}"
   
-#   houdini_license_server_address = "${var.houdini_license_server_address}"
-# }
+  houdini_license_server_address = "${var.houdini_license_server_address}"
+}
 
 variable "node_skip_update" {
   default = false
@@ -241,34 +242,36 @@ variable "node_sleep_on_create" {
   default = true
 }
 
-# module "node" {
-#   source = "./modules/node_centos"
-#   name   = "centos"
+module "node" {
+  source = "./modules/node_centos"
+  name   = "centos"
 
-#   # region will determine the ami
-#   region = "${var.aws_region}"
+  # region will determine the ami
+  region = "${var.aws_region}"
 
-#   # options for gateway type are centos7 and pcoip
-#   vpc_id                      = "${module.vpc.vpc_id}"
-#   vpc_cidr                    = "${module.vpc.vpc_cidr_block}"
-#   vpn_cidr                    = "${var.vpn_cidr}"
-#   remote_ip_cidr              = "${var.remote_ip_cidr}"
-#   private_subnet_ids          = "${module.vpc.private_subnets}"
-#   private_subnets_cidr_blocks = "${module.vpc.private_subnets_cidr_blocks}"
-#   remote_subnet_cidr          = "${var.remote_subnet_cidr}"
-#   provision_softnas_volumes = "${module.softnas.provision_softnas_volumes}"
-#   bastion_ip = "${module.bastion.public_ip}"
-#   openfirehawkserver = "${var.openfirehawkserver}"
+  # options for gateway type are centos7 and pcoip
+  vpc_id                      = "${module.vpc.vpc_id}"
+  vpc_cidr                    = "${module.vpc.vpc_cidr_block}"
+  vpn_cidr                    = "${var.vpn_cidr}"
+  remote_ip_cidr              = "${var.remote_ip_cidr}"
+  private_subnet_ids          = "${module.vpc.private_subnets}"
+  private_subnets_cidr_blocks = "${module.vpc.private_subnets_cidr_blocks}"
+  remote_subnet_cidr          = "${var.remote_subnet_cidr}"
+  provision_softnas_volumes = "${module.softnas.provision_softnas_volumes}"
+  bastion_ip = "${module.bastion.public_ip}"
+  openfirehawkserver = "${var.openfirehawkserver}"
 
-#   key_name       = "${var.key_name}"
-#   local_key_path = "${var.local_key_path}"
-#   private_key    = "${file("${var.local_key_path}")}"
+  key_name       = "${var.key_name}"
+  local_key_path = "${var.local_key_path}"
+  private_key    = "${file("${var.local_key_path}")}"
 
-#   #skipping os updates will allow faster rollout for testing.
-#   skip_update = "${var.node_skip_update}"
-#   #sleep will stop instances to save cost during idle time.
-#   sleep = "${var.sleep}"
+  #skipping os updates will allow faster rollout for testing.
+  skip_update = "${var.node_skip_update}"
+  # when a vpn is being installed, or before that point, site mounts must be disabled
+  site_mounts = "${var.site_mounts}"
+  #sleep will stop instances to save cost during idle time.
+  sleep = "${var.sleep}"
 
-#   houdini_license_server_address = "${var.houdini_license_server_address}"
-#   softnas_private_ip1            = "${module.softnas.softnas1_private_ip}"
-# }
+  houdini_license_server_address = "${var.houdini_license_server_address}"
+  softnas_private_ip1            = "${module.softnas.softnas1_private_ip}"
+}
