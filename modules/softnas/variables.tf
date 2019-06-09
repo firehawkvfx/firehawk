@@ -50,6 +50,8 @@ variable "remote_subnet_cidr" {}
 
 variable "remote_ip_cidr" {}
 
+variable "softnas_storage" {}
+
 variable "softnas_config_mounts_on_local_workstation" {}
 
 
