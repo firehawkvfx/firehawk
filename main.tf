@@ -111,6 +111,7 @@ variable "softnas_use_custom_ami" {}
 variable "softnas_custom_ami" {}
 
 module "softnas" {
+  softnas_storage = "${var.softnas_storage}"
   source                         = "./modules/softnas"
   cloudformation_role_stack_name = "${var.softnas1_cloudformation_role_name}"
 
@@ -210,7 +211,7 @@ module "workstation" {
   remote_ip_cidr    = "${var.remote_ip_cidr}"
   #public_subnet_ids = "${module.vpc.public_subnets}"
 
-  bastion_ip = "${module.bastion.public_ip}"
+  #bastion_ip = "${module.bastion.public_ip}"
 
   key_name    = "${var.key_name}"
   private_key = "${file("${var.local_key_path}")}"
@@ -220,6 +221,11 @@ module "workstation" {
   site_mounts = "${var.site_mounts}"
 
   public_domain_name = "${var.public_domain}"
+
+  # dependencies
+  softnas_private_ip1            = "${module.softnas.softnas1_private_ip}"
+  provision_softnas_volumes = "${module.softnas.provision_softnas_volumes}"
+  bastion_ip = "${module.bastion.public_ip}"
 
   #sleep will stop instances to save cost during idle time.
   sleep                      = "${var.sleep}"
@@ -257,8 +263,12 @@ module "node" {
   private_subnet_ids          = "${module.vpc.private_subnets}"
   private_subnets_cidr_blocks = "${module.vpc.private_subnets_cidr_blocks}"
   remote_subnet_cidr          = "${var.remote_subnet_cidr}"
+
+  # dependencies
+  softnas_private_ip1            = "${module.softnas.softnas1_private_ip}"
   provision_softnas_volumes = "${module.softnas.provision_softnas_volumes}"
   bastion_ip = "${module.bastion.public_ip}"
+  
   openfirehawkserver = "${var.openfirehawkserver}"
 
   key_name       = "${var.key_name}"
@@ -273,5 +283,5 @@ module "node" {
   sleep = "${var.sleep}"
 
   houdini_license_server_address = "${var.houdini_license_server_address}"
-  softnas_private_ip1            = "${module.softnas.softnas1_private_ip}"
+  
 }
