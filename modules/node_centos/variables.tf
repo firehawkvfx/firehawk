@@ -39,7 +39,8 @@ variable "ami_map" {
 }
 
 variable "instance_type" {
-  default = "t2.micro"
+  #default = "t2.micro"
+  default = "m5.4xlarge"
 }
 
 variable "user" {
@@ -78,7 +79,9 @@ variable "houdini_license_server_address" {}
 
 variable "openfirehawkserver" {}
 
-variable "softnas_private_ip1" {}
+variable "softnas_private_ip1" {
+  default =[]
+}
 
 variable "softnas_export_path" {
   default = "/naspool2/nasvol2"
