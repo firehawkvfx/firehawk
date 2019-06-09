@@ -37,12 +37,15 @@
 - name: softnas login
   shell: |
     softnas-cmd login softnas {{ user_softnas_pw }}
+  no_log: true
 
 - name: create s3 extender disk
   shell: |
     softnas-cmd login softnas {{ user_softnas_pw }}
     set -x
     softnas-cmd diskmgmt createExtenderDisk type=amazon accessKey={{ aws_access_key }} secretKey={{ aws_secret_key }} bucketName={{ s3_disk_bucket_name }} sizeMaxValue={{ s3_disk_size_max_value }} sizeMaxUnits={{ s3_disk_size_max_units }} region={{ s3_disk_region }} {{ encrypt_option }}> /tmp/softnas_init_s3_disk_output_dict.json
+  no_log: true
+
 - fetch:
     src: /tmp/softnas_init_s3_disk_output_dict.json
     dest: /tmp/
@@ -82,6 +85,7 @@
   shell: |
     softnas-cmd login softnas {{ user_softnas_pw }}
     softnas-cmd createpool {{ new_s3_disk_name }} -n={{ pool_name }} -r=0 -f=on -sync=standard -cs=off -shared={{ share_pool }} -t > /tmp/softnas_init_pool_output_dict.json
+  no_log: true
 
 - fetch:
     src: /tmp/softnas_init_pool_output_dict.json
@@ -117,7 +121,8 @@
   shell: |
     softnas-cmd login softnas {{ user_softnas_pw }}
     softnas-cmd createvolume vol_name={{ volume_name }} pool={{ pool_name }} vol_type=filesystem provisioning=thin exportNFS=on shareCIFS=on enable_snapshot=off sync=always replication=off > /tmp/softnas_init_volume_output_dict.json
-
+  no_log: true
+  
 - fetch:
     src: /tmp/softnas_init_volume_output_dict.json
     dest: /tmp/

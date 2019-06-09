@@ -64,6 +64,10 @@ variable "softnas2_cloudformation_role_name" {
 variable "envtier" {}
 
 variable "softnas_config_mounts_on_local_workstation" {}
+
+variable "softnas_storage" {
+  default = true
+}
 variable "softnas1_private_ip1" {}
 
 variable "softnas1_private_ip2" {}
