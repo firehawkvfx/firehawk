@@ -3,9 +3,10 @@
 
 Vagrant.configure("2") do |config|
   # Ubuntu 16.04
-  config.vm.box = "ubuntu/xenial64"
+  # config.vm.box = "ubuntu/xenial64"
   # networking issues
-  #config.vm.box = "bento/ubuntu-16.04"
+  config.vm.box = "bento/ubuntu-16.04"
+  config.vm.box_version = "201812.27.0"
   # cant install xserver-xorg-legacy
   # config.vm.box = "ubuntu/trusty64"
   #config.vm.box = "bento/ubuntu-17.10"
@@ -25,7 +26,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "ansible_control_"+envtier
   config.vagrant.plugins = ['vagrant-disksize', 'vagrant-reload']
-  config.disksize.size = '50GB'
+  config.disksize.size = '65536MB'
 
   if network == 'public'
       config.vm.network "public_network", mac: mac_string, bridge: bridgenic
