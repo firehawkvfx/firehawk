@@ -166,6 +166,14 @@ resource "aws_security_group" "softnas" {
     description = "https"
   }
 
+  # ingress {
+  #   protocol    = "udp"
+  #   from_port   = 1194
+  #   to_port     = 1194
+  #   cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.public_subnets_cidr_blocks[0]}", "${var.vpn_cidr}"]
+  #   description = "from softnas default template"
+  # }
+
   ingress {
     protocol    = "tcp"
     from_port   = 0
@@ -375,7 +383,7 @@ resource "null_resource" "provision_softnas" {
     # sleep 300 is required because ecdsa key wont exist for a while, and you can't continue without it.
     inline = [
       "set -x",
-      "sleep 30",
+      "sleep 300",
       "sudo yum install -y python",
       "while [ ! -f /etc/ssh/ssh_host_ecdsa_key.pub ]",
       "do",
@@ -397,6 +405,8 @@ resource "null_resource" "provision_softnas" {
       ansible-playbook -i ansible/inventory ansible/softnas-update.yaml -v
       # hotfix script to speed up instance start and shutdown
       ansible-playbook -i ansible/inventory ansible/softnas-install-acpid.yaml -v
+
+      # cli is only needed if sync operations with s3 will be run on this instance.
       # #ansible-playbook -i ansible/inventory ansible/aws-cli.yaml -v --extra-vars "variable_user=centos variable_host=role_softnas"
       # #ansible-playbook -i ansible/inventory ansible/aws-cli-ec2.yaml -v --extra-vars "variable_user=centos variable_host=role_softnas"
   EOT
@@ -534,7 +544,7 @@ resource "null_resource" "provision_softnas_volumes" {
     command = <<EOT
       set -x
       cd /vagrant
-      ansible-playbook -i ansible/inventory ansible/softnas-ebs-disk.yaml -v --extra-vars "ebs_disk_size=${var.ebs_disk_size} instance_id=${aws_instance.softnas1.id} stop_softnas_instance=true"
+      ansible-playbook -i ansible/inventory ansible/softnas-ebs-disk.yaml -v --extra-vars "ebs_disk_size=$TF_VAR_ebs_disk_size instance_id=${aws_instance.softnas1.id} stop_softnas_instance=true"
       # Although we start the instance in ansible, the aws cli can be more reliable to ensure this.
       aws ec2 start-instances --instance-ids ${aws_instance.softnas1.id}
   EOT
@@ -569,37 +579,6 @@ resource "null_resource" "provision_softnas_volumes" {
   }
 
 }
-# this shoudl occur after instance start operation.  this allows a sleep to be performed if not working.
-# resource "null_resource" "mount_volumes_onsite" {
-#   count = "${ var.softnas_config_mounts_on_local_workstation && var.softnas_storage ? 1 : 0 }"
-#   depends_on = ["null_resource.provision_softnas_volumes"]
-#   triggers {
-#     instanceid = "${ aws_instance.softnas1.id }"
-#   }
-
-#   provisioner "remote-exec" {
-#     connection {
-#       user                = "centos"
-#       host                = "${aws_instance.softnas1.private_ip}"
-#       bastion_host        = "${var.bastion_ip}"
-#       private_key         = "${var.private_key}"
-#       bastion_private_key = "${var.private_key}"
-#       type                = "ssh"
-#       timeout             = "10m"
-#     }
-
-#     inline = ["set -x && echo 'booted'"]
-#   }
-
-#   provisioner "local-exec" {
-#     command = <<EOT
-#       set -x
-#       cd /vagrant
-#       # configure mounts on local workstation
-#       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key" --skip-tags 'cloud_install'
-#   EOT
-#   }
-# }
 
 output "provision_softnas_volumes" {
   value = "${null_resource.provision_softnas_volumes.*.id}"
@@ -622,27 +601,22 @@ resource "null_resource" "start-softnas" {
       aws ec2 start-instances --instance-ids ${aws_instance.softnas1.id}
   EOT
   }
-  # provisioner "remote-exec" {
-  #   connection {
-  #     user                = "centos"
-  #     host                = "${aws_instance.softnas1.private_ip}"
-  #     bastion_host        = "${var.bastion_ip}"
-  #     private_key         = "${var.private_key}"
-  #     bastion_private_key = "${var.private_key}"
-  #     type                = "ssh"
-  #     timeout             = "10m"
-  #   }
-  #   inline = [
-  #     "set -x",
-  #     "echo 'connection established'"
-  #   ]
-  # }
-  # provisioner "local-exec" {
-  #   command = <<EOT
-  #     # ensure mounts are present on other nodes after softnas is started.
-  #     ansible-playbook -i ansible/inventory ansible/node-centos-mounts.yaml -v --skip-tags "local_install"
-  # EOT
-  # }
+}
+
+resource "null_resource" "shutdown-softnas" {
+  count = "${var.sleep && var.softnas_storage? 1 : 0}"
+  
+  triggers {
+    instanceid = "${ aws_instance.softnas1.id }"
+  }
+
+  provisioner "local-exec" {
+    #command = "aws ec2 stop-instances --instance-ids ${aws_instance.softnas1.id}"
+
+    command = <<EOT
+      aws ec2 stop-instances --instance-ids ${aws_instance.softnas1.id}
+  EOT
+  }
 }
 
 resource "null_resource" "attach-local-mounts-after-start" {
@@ -677,21 +651,7 @@ resource "null_resource" "attach-local-mounts-after-start" {
   }
 }
 
-resource "null_resource" "shutdown-softnas" {
-  count = "${var.sleep && var.softnas_storage? 1 : 0}"
-  
-  triggers {
-    instanceid = "${ aws_instance.softnas1.id }"
-  }
 
-  provisioner "local-exec" {
-    #command = "aws ec2 stop-instances --instance-ids ${aws_instance.softnas1.id}"
-
-    command = <<EOT
-      aws ec2 stop-instances --instance-ids ${aws_instance.softnas1.id}
-  EOT
-  }
-}
 
 resource "null_resource" "detach-local-mounts-after-stop" {
   count = "${var.sleep && var.softnas_config_mounts_on_local_workstation && var.softnas_storage? 1 : 0 }"
@@ -702,21 +662,6 @@ resource "null_resource" "detach-local-mounts-after-stop" {
     instanceid = "${ aws_instance.softnas1.id }"
     startsoftnas = "${null_resource.shutdown-softnas.id}"
   }
-  # provisioner "remote-exec" {
-  #   connection {
-  #     user                = "centos"
-  #     host                = "${aws_instance.softnas1.private_ip}"
-  #     bastion_host        = "${var.bastion_ip}"
-  #     private_key         = "${var.private_key}"
-  #     bastion_private_key = "${var.private_key}"
-  #     type                = "ssh"
-  #     timeout             = "10m"
-  #   }
-  #   inline = [
-  #     "set -x",
-  #     "echo 'connection established'"
-  #   ]
-  # }
   provisioner "local-exec" {
     command = <<EOT
       # unmount volumes from local site when softnas is shutdown.
