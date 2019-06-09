@@ -236,8 +236,26 @@ locals {
   skip_update = "${(var.skip_update || var.use_custom_ami)}"
 }
 
+variable "softnas_private_ip1" {
+  default = []
+}
+
+variable "provision_softnas_volumes" {
+  default = []
+}
+
+# This null resource creates a dependency on the completed volume provisioning from the softnas instance, and the existance of the bastion host.
+resource "null_resource" "dependency_softnas_and_bastion" {
+  triggers {
+    softnas_private_ip1 = "${join(",", var.softnas_private_ip1)}"
+    bastion_ip = "${var.bastion_ip}"
+    provision_softnas_volumes = "${join(",", var.provision_softnas_volumes)}"
+  }
+}
+
 resource "aws_instance" "workstation_pcoip" {
   #instance type and ami are determined by the gateway type variable for if you want a graphical or non graphical instance.
+  depends_on = ["null_resource.dependency_softnas_and_bastion"]
   count = "${var.site_mounts ? 1 : 0}"
   ami           = "${var.use_custom_ami ? var.custom_ami : lookup(var.ami_map, var.gateway_type)}"
   instance_type = "${lookup(var.instance_type_map, var.gateway_type)}"
@@ -313,10 +331,9 @@ resource "null_resource" "workstation_pcoip" {
       ansible-playbook -i ansible/inventory ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_workstation_centos variable_user=deadlineuser"
       ansible-playbook -i ansible/inventory ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_workstation_centos variable_user=centos"
       ansible-playbook -i ansible/inventory ansible/node-centos-mounts.yaml --extra-vars "variable_host=role_workstation_centos hostname=workstation1.${var.public_domain_name} pcoip=true"
-      ansible-playbook -i ansible/inventory ansible/node-centos-houdini.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=workstation1.${var.public_domain_name}"
-      # to configure deadline submission scripts, currently this installs deadline again which is messy and needs to be cleaned up
-      # ansible-playbook -i ansible/inventory ansible/localworkstation-deadlineuser.yaml --tags "cloud-install" --extra-vars "variable_host=role_workstation_centos variable_user=centos"
-      # using tag onsite-install will make this install procedure identical, but will also reinstall deadline.
+      # ansible-playbook -i ansible/inventory ansible/node-centos-houdini.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=workstation1.${var.public_domain_name}"
+      ansible-playbook -i ansible/inventory ansible/node-centos-houdini.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=workstation1.${var.public_domain_name} sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password houdini_build=$TF_VAR_houdini_build"
+      # to configure deadline submission scripts-
       ansible-playbook -i ansible/inventory ansible/localworkstation-deadlineuser.yaml --tags "onsite-install" --extra-vars "variable_host=role_workstation_centos variable_user=centos"
       
       # to recover from yum update breaking pcoip we reinstall the nvidia driver and dracut to fix pcoip.
