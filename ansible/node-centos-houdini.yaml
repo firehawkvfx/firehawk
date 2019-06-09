@@ -1,13 +1,22 @@
 # This script will query the latest daily or production build with side fx and install it.
 # if the file exists in s3, it will be downloaded and installed.  aws cli must be configured with a key that has permission to access s3.
-# Do not install the cli on cloud nodes with root permissions!  A seperate user / key with the minimum s3 permissions required is recommended.
+# Do not install the cli on cloud nodes with aws account root permissions!  A seperate user / key with the minimum s3 permissions required is recommended.
 
 # If the file doesn't exist in the s3 bucket, it will be downloaded from side fx, and then pushed to the bucket after install.
 
-# Example
+# Example install on an aws instance
 # ansible-playbook -i ansible/inventory ansible/node-centos-houdini.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=workstation1.${var.public_domain_name}"
-# example local install
+# Example local install on a RHEL 7.6 / CENTOS workstation / render node.
 # ansible-playbook -i ansible/inventory ansible/node-centos-houdini.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_become_pass=sompass"
+
+- hosts: "{{ variable_host | default('role_node_centos') }}"
+  remote_user: "{{ variable_user | default('centos') }}"
+  become: true
+
+  tasks:
+  - name: test connection
+    debug:
+      msg: "connection established"
 
 # sync installers from/to s3 bucket.  any new houdini versions will be pushed from ansible control to the bucket.
 
@@ -41,29 +50,23 @@
     tags:
       - sync_installers
 
-
-- hosts: "{{ variable_host | default('role_node_centos') }}"
-  remote_user: "{{ variable_user | default('centos') }}"
-  become: true
-
-  tasks:
-  - name: test connection
-    debug:
-      msg: "connection established"
-
 - hosts: "{{ variable_host | default('role_node_centos') }}"
   remote_user: "{{ variable_user | default('centos') }}"
   become: true
 
   vars:
+    sesi_username: myemaillogin@sidefxwebsite
+    sesi_password: mypassword@sidefxwebiste
+    houdini_build: daily
+    download_to_dir: /var/tmp/openfirehawk
+    
     variable_user: centos
     bastionip: "{{ groups['bastionip'][0] }}"
     hostname: "node1.{{ public_domain }}"
-    houdini_build: "{{ lookup('env','TF_VAR_houdini_build') }}"
-    download_to_dir: /var/tmp/openfirehawk
     skip_packages: false
     skip_install: false
     bucket: "installers.{{ public_domain }}"
+
 
   tasks:
   - package:
@@ -84,6 +87,30 @@
       name: python-pip
       state: latest
     when: not skip_packages
+
+  - name: install nmap to open port range for tops
+    package:
+      name: "{{ item }}"
+      state: present
+    with_items:
+      - nmap
+
+  - name: Open port ranges for Houdini TOP's PDG
+    command: "nmap -p  {{ item.port }} {{ item.dest }}"
+    register: nmap_result
+    with_items:
+      - { port: '49152-65535', dest: remote_subnet_cidr }
+      - { port: '49152-65535', dest: vpn_cidr }
+      - { port: '49152-65535', dest: private_subnet1 }
+      - { port: '49152-65535', dest: private_subnet2 } 
+      - { port: '49152-65535', dest: public_subnet1 }
+      - { port: '49152-65535', dest: public_subnet2 }
+
+  - debug:
+      msg: "{{ item.stdout }}"
+    with_items:
+      - "{{ nmap_result.results }}"
+    when: debug > 0
 
   - name: dir permissions on /opt/houdini_install_script
     file:
@@ -139,6 +166,7 @@
 
   - name: Query houdini filename - Houdini python script
     shell: |
+      cd /opt/houdini_install_script/
       python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini -b {{ houdini_build }} -t {{ download_to_dir }} -q true
     register: houdini_query_out
     become: true
@@ -171,7 +199,8 @@
 
   - name: Auto download and install Houdini python script
     shell: |
-      python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini -b {{ houdini_build }} -t {{ download_to_dir }}
+      cd /opt/houdini_install_script/
+      sudo python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini -b {{ houdini_build }} -t {{ download_to_dir }} -q false
     register: houdini_install_out
     become: true
     when: not skip_install
@@ -214,3 +243,15 @@
       mode: push
     tags:
       - sync_installers
+
+  - name: enforce houdini environment variables for all users in all bash shells always.  this is a temporary fix to enforce available env vars for tops to workaround a bug.
+    copy:
+      dest: /etc/profile.d/houdini_init.sh
+      content: |
+        cwd="$(pwd)" && cd /opt/hfs17.5/ && source ./houdini_setup && cd $cwd
+      mode: u=rw,g=r,o=r
+      owner: root
+      group: root 
+    become: true
+    tags:
+      - enforce_houdini_env_vars
