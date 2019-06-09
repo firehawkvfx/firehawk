@@ -1,3 +1,4 @@
+echo 'Use vagrant reload and vagrant ssh after eexecuting each .sh script'
 
 cd /vagrant
 source ./update_vars.sh --dev
