@@ -32,6 +32,7 @@
   vars:
     destroy: false
     # when paths are found at these locations, they will be added to exports.
+    # these defaults can be overidden by storing a config in /vagrant/secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
     exports:
       - path: "/pool1/volume1/"
         pool_name: pool1
@@ -93,6 +94,7 @@
     hostname: "node1.{{ public_domain }}"
     pcoip: false
     destroy: false
+    # these defaults can be overidden by storing a config in /vagrant/secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
     exports:
       - path: "/pool1/volume1/"
         pool_name: pool1
