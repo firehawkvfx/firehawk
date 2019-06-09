@@ -135,18 +135,20 @@ resource "aws_security_group" "node_centos" {
   }
 }
 
-variable "provision_softnas_volumes" {}
+variable "provision_softnas_volumes" {
+  default =[]
+}
 
-resource "null_resource" "dependency_softnas_bastion" {
+resource "null_resource" "dependency_softnas_and_bastion" {
   triggers {
-    softnas_private_ip1 = "${var.softnas_private_ip1}"
+    softnas_private_ip1 = "${join(",", var.softnas_private_ip1)}"
     bastion_ip = "${var.bastion_ip}"
-    provision_softnas_volumes = "${var.provision_softnas_volumes}"
+    provision_softnas_volumes = "${join(",", var.provision_softnas_volumes)}"
   }
 }
 resource "aws_instance" "node_centos" {
   count = "${var.site_mounts ? 1 : 0}"
-  depends_on = ["null_resource.dependency_softnas_bastion"]
+  depends_on = ["null_resource.dependency_softnas_and_bastion"]
   #instance type and ami are determined by the gateway type variable for if you want a graphical or non graphical instance.
   ami           = "${var.use_custom_ami ? var.custom_ami : lookup(var.ami_map, var.region)}"
   instance_type = "${var.instance_type}"
@@ -204,7 +206,7 @@ resource "null_resource" "provision_node_centos" {
       ansible-playbook -i ansible/inventory ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_node_centos variable_user=centos"
       ansible-playbook -i ansible/inventory ansible/node-centos-mounts.yaml -v --skip-tags "local_install"
       # ansible-playbook -i ansible/inventory ansible/node-centos-init-deadline.yaml -v
-      ansible-playbook -i ansible/inventory ansible/node-centos-houdini.yaml -v
+      ansible-playbook -i ansible/inventory ansible/node-centos-houdini.yaml -v --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password houdini_build=$TF_VAR_houdini_build"
       ansible-playbook -i ansible/inventory ansible/localworkstation-deadlineuser.yaml --tags "onsite-install" --extra-vars "variable_host=role_node_centos variable_user=centos"
   EOT
   }
@@ -234,7 +236,6 @@ resource "null_resource" "start-node" {
     command = "aws ec2 start-instances --instance-ids ${aws_instance.node_centos.id}"
   }
 }
-
 
 resource "null_resource" "shutdown-node" {
   count = "${var.sleep && var.site_mounts ? 1 : 0}"
