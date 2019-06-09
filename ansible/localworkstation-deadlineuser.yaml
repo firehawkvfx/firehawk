@@ -46,11 +46,11 @@
   become: true
 
   tasks:
-  - name: set permissions Thinkbox dir
+  - name: set permissions Thinkbox dir - non recursive
     file: 
       path: /opt/Thinkbox/
       state: directory
-      mode: u=rwX,g=rX,o-rwx
+      mode: u+rX,g+rX,o-rwx
       owner: deadlineuser
       group: syscontrol
     become: yes
@@ -58,7 +58,7 @@
     - cloud-install
     - onsite-install
 
-  - name: set permissions Thinkbox cert dir
+  - name: set permissions Thinkbox cert dir - non recursive
     file: 
       path: /opt/Thinkbox/certs
       state: directory
@@ -70,7 +70,7 @@
     - cloud-install
     - onsite-install
 
-  - name: set permissions DeadlineRepository10
+  - name: set permissions DeadlineRepository10 - recursive
     file:
       path: /opt/Thinkbox/DeadlineRepository10/
       owner: deadlineuser
@@ -174,26 +174,24 @@
     - cloud-install
     - onsite-install
 
-  - name: Create submission scripts dir if it doesn't exist
+  - name: Create submission scripts dir if it doesn't exist on remote
     file: 
       path: /opt/Thinkbox/DeadlineRepository10/submission
       state: directory
-      mode: u=rwX,g=rX,o-rwx
-      #mode: 0700
+      mode: u=rX,g=rX,o-rwx
       owner: deadlineuser
       group: syscontrol
+      recurse: yes
     become: yes
     tags:
     - cloud-install
     - onsite-install
 
-  - name: ensure local submission scripts dir permissions are readable
+  - name: ensure local submission scripts dir permissions are readable on the ansible control
     file:
       path: /opt/Thinkbox/DeadlineRepository10/submission
       state: directory
-      #mode: u+r,g+r
-      mode: u=rwX,g=rwX
-      #,o=rX
+      mode: u=rX,g=rX,o=r
       owner: deadlineuser
       group: syscontrol
       recurse: yes
@@ -203,7 +201,25 @@
     - cloud-install
     - onsite-install
 
-  - name: Ansible copy directory to the remote server.  if failure - ensure you exist the shell and vagrant ssh in before trying again.  vagerant user and deadlineuser were added to a group and this will not refresh until exiting ssh.
+  - name: Ansible set local permissions for items to be copied - /opt/Thinkbox/DeadlineRepository10/submission/... - should not be necesary since root is covered prior, but may fix issues.
+    file:
+      path: "/opt/Thinkbox/DeadlineRepository10/submission/{{ item }}"
+      state: directory
+      mode: u=rX,g=rX,o=r
+      owner: deadlineuser
+      group: syscontrol
+      recurse: yes
+    become: yes
+    connection: local
+    with_items:
+    - HServer
+    - Houdini
+    - Nuke
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: Ansible copy directory to the remote server.  if failure - ensure you exit the shell and vagrant ssh in before trying again.  vagerant user and deadlineuser were added to a group and this will not refresh until exiting ssh.
     copy:
       src: "/opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/{{ item }}"
       dest: "/home/deadlineuser/Thinkbox/Deadline10/submitters/HoudiniSubmitter"
@@ -284,7 +300,7 @@
     - cloud-install
     - onsite-install
 
-  - name: Ansible copy directory to the remote server
+  - name: Ansible copy directory to the remote server /opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/CallDeadlineCommand.py
     copy:
       src: "/opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/CallDeadlineCommand.py"
       dest: "/home/deadlineuser/houdini17.5/python2.7libs/"
@@ -293,7 +309,7 @@
     - cloud-install
     - onsite-install
 
-  - name: Ansible copy directory to the remote server
+  - name: Ansible copy directory to the remote server /opt/Thinkbox/DeadlineRepository10/submission/...
     copy:
       src: "/opt/Thinkbox/DeadlineRepository10/submission/{{ item }}"
       dest: "/opt/Thinkbox/DeadlineRepository10/submission/{{ item }}"
@@ -303,10 +319,11 @@
     with_items:
     - HServer
     - Houdini
-    - Nuke
+    #- Nuke
     tags:
     - cloud-install
     - onsite-install
+  # Note: getting a strange permissions issue with copying the nuke subfolder.  upon a second run of the playbook in the shell it is fine.  only the first run in terraform creates the issue.
 
   - name: upgrade all packages - yum update
     yum:
