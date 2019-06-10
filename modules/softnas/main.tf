@@ -402,7 +402,7 @@ resource "null_resource" "provision_softnas" {
       ansible-playbook -i ansible/inventory ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.softnas1.private_ip} bastion_ip=${var.bastion_ip}"
       ansible-playbook -i ansible/inventory ansible/softnas-init.yaml -v
       ansible-playbook -i ansible/inventory ansible/node-centos-init-users.yaml -v --extra-vars "variable_host=role_softnas init_ssh=false"
-      ansible-playbook -i ansible/inventory ansible/softnas-update.yaml -v
+      # ansible-playbook -i ansible/inventory ansible/softnas-update.yaml -v
       # hotfix script to speed up instance start and shutdown
       ansible-playbook -i ansible/inventory ansible/softnas-install-acpid.yaml -v
 
