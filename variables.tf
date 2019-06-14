@@ -63,7 +63,9 @@ variable "softnas2_cloudformation_role_name" {
 
 variable "envtier" {}
 
-variable "softnas_config_mounts_on_local_workstation" {}
+variable "remote_mounts_on_local" {
+  default = true
+}
 
 variable "softnas_storage" {
   default = true

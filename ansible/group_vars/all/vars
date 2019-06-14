@@ -10,6 +10,8 @@ show: "{{ lookup('env','TF_VAR_SHOW') }}"
 seq: "{{ lookup('env','TF_VAR_SEQ') }}"
 shot: "{{ lookup('env','TF_VAR_SHOT') }}"
 
+gatewaynic: "{{ lookup('env','TF_VAR_gatewaynic') }}"
+
 # domains
 public_domain: "{{ lookup('env','TF_VAR_public_domain') }}"
 # in most cases only the above public_domain should be referenced, which can be switched between dev and prod based on the environment - envtier

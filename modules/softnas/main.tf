@@ -620,7 +620,7 @@ resource "null_resource" "shutdown-softnas" {
 }
 
 resource "null_resource" "attach-local-mounts-after-start" {
-  count = "${!var.sleep && var.softnas_config_mounts_on_local_workstation && var.softnas_storage ? 1 : 0 }"
+  count = "${!var.sleep && var.remote_mounts_on_local && var.softnas_storage ? 1 : 0 }"
   depends_on = ["null_resource.start-softnas"]
   #,"null_resource.mount_volumes_onsite"]
 
@@ -654,7 +654,7 @@ resource "null_resource" "attach-local-mounts-after-start" {
 
 
 resource "null_resource" "detach-local-mounts-after-stop" {
-  count = "${var.sleep && var.softnas_config_mounts_on_local_workstation && var.softnas_storage? 1 : 0 }"
+  count = "${var.sleep && var.remote_mounts_on_local && var.softnas_storage? 1 : 0 }"
   depends_on = ["null_resource.shutdown-softnas"]
   #,"null_resource.mount_volumes_onsite"]
 

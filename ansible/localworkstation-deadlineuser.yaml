@@ -1,45 +1,7 @@
 # To configure ssh for a local workstation, read https://www.tecmint.com/ssh-passwordless-login-using-ssh-keygen-in-5-easy-steps/
 
 #then run these two commmands.  for some reason ping is required first or hang on gathering facts occurs.
-# ansible -m ping workstation.firehawkvfx.com -i "$TF_VAR_inventory"
 # ansible-playbook -i "$TF_VAR_inventory" ansible/localworkstation-deadlineuser.yaml --tags "onsite-install"
-
-# these permissions are now handled post install of the deadline db. should be removed
-# - hosts: ansible_control
-#   become: true
-
-#   # set permissions on dealine repository so that scripts can be copied by the vagrant user.
-#   tasks:
-#   - name: Ensure group "syscontrol" exists
-#     group:
-#       name: syscontrol
-#       state: present
-#       gid: 9003
-#     become: true
-#     tags:
-#     - cloud-install
-#     - onsite-install
-
-#   - name: adding existing user "{{ item }}" to group syscontrol
-#     user:
-#       name: "{{ item }}"
-#       groups: syscontrol
-#       append: yes
-#     with_items:
-#     - deadlineuser
-#     - vagrant
-#     become: true
-#     tags:
-#     - cloud-install
-#     - onsite-install
-
-#   - name: Kill SSH because otherwise the user will not be added to the group.
-#     shell: sleep 1; pkill -u {{ ansible_ssh_user }} sshd
-#     async: 3
-#     poll: 2
-
-#   - name: reset ssh connection to allow user changes to affect 'current login user'
-#     meta: reset_connection
 
 # # these permissions are now handled post install of the deadline db.
 - hosts: ansible_control

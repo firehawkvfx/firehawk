@@ -52,7 +52,7 @@ variable "remote_ip_cidr" {}
 
 variable "softnas_storage" {}
 
-variable "softnas_config_mounts_on_local_workstation" {}
+variable "remote_mounts_on_local" {}
 
 
 variable "softnas_role_name" {

@@ -164,6 +164,87 @@
       mode: u=rwX,g=r 
       recurse: yes
 
+  # - name: set permissions on /home/deadlineuser/houdini17.5/scripts/
+  #   file:
+  #     path: /home/deadlineuser/houdini17.5/scripts/
+  #     state: directory
+  #     mode: 0700
+  #     owner: deadlineuser
+
+  - name: dir permissions on /prod/asset/
+    file:
+      path: /prod/asset/
+      state: directory
+      mode: u=rX,g=rX,o-rwx
+      owner: deadlineuser
+      group: syscontrol
+      recurse: true
+    become: true
+    tags:
+      - sync_scripts
+
+  # - name: ensure the openfirehawk-houdini-tools exist in the s3 bucket.  Push if it push if it doesn't.
+  #   s3_sync:
+  #     bucket: "installers.{{ public_domain }}"
+  #     file_root: /vagrant/modules/node_centos/modules/openfirehawk-houdini-tools/
+  #     include: "*"
+  #     aws_access_key: "{{ aws_access_key_s3user }}"
+  #     aws_secret_key: "{{ aws_secret_key_s3user }}"
+  #     region: "{{ aws_region }}"
+  #     mode: push
+  #   tags:
+  #     - sync_scripts
+
+  - name: Sync openfirehawk-houdini-tools from s3 - push
+    shell: |
+      set -x
+      cd /vagrant/modules/node_centos/modules/
+      aws s3 sync . s3://{{ bucket }}/ --exclude "*" --include "openfirehawk-houdini-tools/*"
+    become_user: vagrant
+    connection: local
+    tags:
+      - sync_scripts
+
+  - name: Sync openfirehawk-houdini-tools from s3
+    shell: |
+      set -x
+      cd /prod/asset/
+      ~/.local/bin/aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "openfirehawk-houdini-tools/*"
+    become_user: "{{ variable_user }}"
+    tags:
+      - sync_scripts
+
+  - name: dir permissions on /prod/asset/openfirehawk-houdini-tools.  note permissions aren't being set correctly for group for some reason.
+    file:
+      path: /prod/asset/openfirehawk-houdini-tools
+      state: directory
+      owner: deadlineuser
+      group: syscontrol
+      mode: u=rX,g+rX,o-rwx
+      recurse: true
+    become: true
+    tags:
+      - sync_scripts
+
+  # - name: copy openfirehawk-houdini-tools to /prod/asset/
+  #   copy:
+  #     src: /vagrant/modules/node_centos/modules/openfirehawk-houdini-tools/
+  #     dest: /prod/asset/
+  #     directory_mode: yes
+  #     #owner: deadlineuser
+  #   become: true
+  #   tags:
+  #     - sync_scripts
+
+  - name: set permissions on /prod/asset/openfirehawk-houdini-tools
+    file: 
+      dest: /prod/asset/openfirehawk-houdini-tools
+      owner: deadlineuser
+      mode: u=rwX,g=r 
+      recurse: yes
+    tags:
+      - sync_scripts
+
   - name: Query houdini filename - Houdini python script
     shell: |
       cd /opt/houdini_install_script/

@@ -1,0 +1,97 @@
+# configures autoligin for open vpn and routes.
+
+# to update routes only for the vagrant host, execute 
+# 
+# ansible-playbook -i ansible/inventory ansible/ansible-control-update-routes.yaml --extra-vars "gatewaynic=eth1"
+
+
+- hosts: ansible_control
+  remote_user: vagrant
+  gather_facts: "{{ variable_gather_facts | default('true') }}"
+  become: true
+  vars:
+    gatewaynic: eth1
+
+  tasks:
+    - name: Remove route if it exists and re apply it later
+      shell: |
+        ip route del {{ item.subnet }}
+      with_items:
+        - { subnet: "{{ private_subnet1_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
+        - { subnet: "{{ public_subnet1_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
+        - { subnet: "{{ vpn_cidr_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
+      when: envtier == 'dev'
+      ignore_errors: true
+      become: yes
+      tags:
+        - add-routes
+
+    - name: configure routes to opposite dev/prod environment so that nodes in both envs can access licence server
+      shell: |
+        #ip route del {{ item.subnet }}
+        ip route add {{ item.subnet }} via {{ item.next_hop }} dev {{ gatewaynic }}
+      with_items:
+        - { subnet: "{{ private_subnet1_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
+        - { subnet: "{{ public_subnet1_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
+        - { subnet: "{{ vpn_cidr_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
+      when: envtier == 'dev'
+      become: yes
+      tags:
+        - add-routes
+
+    - name: insert/update block in /etc/network/interfaces for routes. configure routes to opposite dev/prod environment so that nodes in both envs can access licence server.  Remove route if it exists and re apply it.
+      blockinfile:
+        path: /etc/network/interfaces
+        block: |
+          up route add -net {{ item.subnet }} gw {{ item.next_hop }}
+        marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.subnet }}"
+      with_items:
+        - { subnet: "{{ private_subnet1_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
+        - { subnet: "{{ public_subnet1_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
+        - { subnet: "{{ vpn_cidr_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
+      when: envtier == 'dev'
+      become: yes
+      tags:
+        - add-routes
+
+    - name: Remove route if it exists and re apply it later
+      shell: |
+        ip route del {{ item.subnet }}
+        #ip route add {{ item.subnet }} via {{ item.next_hop }} dev {{ gatewaynic }}
+      with_items:
+        - { subnet: "{{ private_subnet1_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
+        - { subnet: "{{ public_subnet1_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
+        - { subnet: "{{ vpn_cidr_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
+      when: envtier == 'prod'
+      ignore_errors: true
+      become: yes
+      tags:
+        - add-routes
+
+    - name: configure routes to opposite dev/prod environment so that nodes in both envs can access licence server.  Remove route if it exists and re apply it.
+      shell: |
+        #ip route del {{ item.subnet }}
+        ip route add {{ item.subnet }} via {{ item.next_hop }} dev {{ gatewaynic }}
+      with_items:
+        - { subnet: "{{ private_subnet1_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
+        - { subnet: "{{ public_subnet1_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
+        - { subnet: "{{ vpn_cidr_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
+      when: envtier == 'prod'
+      become: yes
+      tags:
+        - add-routes
+
+    - name: insert/update block in /etc/network/interfaces for routes.  configure routes to opposite dev/prod environment so that nodes in both envs can access licence server.  Remove route if it exists and re apply it.
+      blockinfile:
+        path: /etc/network/interfaces
+        block: |
+          up route add -net {{ item.subnet }} gw {{ item.next_hop }}
+        marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.subnet }}"
+      with_items:
+        - { subnet: "{{ private_subnet1_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
+        - { subnet: "{{ public_subnet1_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
+        - { subnet: "{{ vpn_cidr_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
+      when: envtier == 'prod'
+      become: yes
+      tags:
+        - add-routes

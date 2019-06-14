@@ -13,7 +13,7 @@ source ./update_vars.sh --dev
 echo 'site mounts will not be mounted in cloud.  currently this will disable provisioning any render node or remote workstation until vpn is confirmed to function after this step'
 export TF_VAR_site_mounts=False
 echo 'softnas nfs exports will not be mounted on local site'
-export TF_VAR_softnas_config_mounts_on_local_workstation=False
+export TF_VAR_remote_mounts_on_local=False
 echo 'on first apply, dont create softnas instance until vpn is working'
 export TF_VAR_softnas_storage=False
 

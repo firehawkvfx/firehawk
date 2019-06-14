@@ -144,7 +144,7 @@ module "softnas" {
   softnas2_private_ip1 = "${var.softnas2_private_ip1}"
   softnas2_private_ip2 = "${var.softnas2_private_ip2}"
   
-  softnas_config_mounts_on_local_workstation = "${var.softnas_config_mounts_on_local_workstation}"
+  remote_mounts_on_local = "${var.remote_mounts_on_local}"
 
   s3_disk_size = "${var.s3_disk_size}"
 

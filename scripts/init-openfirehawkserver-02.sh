@@ -19,4 +19,7 @@ ansible-playbook -i secrets/dev/inventory/hosts ansible/ssh-copy-id-private-host
 # configure deadline on the local workstation with the keys from this install to run deadline slave and monitor
 ansible-playbook -i secrets/dev/inventory/hosts ansible/localworkstation-deadlineuser.yaml --tags "onsite-install" --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key"
 
+# configure routes to opposite environment for licence server to communicate if in dev environment
+ansible-playbook -i ansible/inventory ansible/ansible-control-update-routes.yaml
+
 echo "if above was succesful, exit the vm and use 'vagrant reload' before continuing with the next script"
