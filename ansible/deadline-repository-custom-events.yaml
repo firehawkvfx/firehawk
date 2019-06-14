@@ -1,0 +1,20 @@
+---
+- hosts: ansible_control
+  become: true
+
+  # set permissions on dealine repository so that scripts can be copied by the vagrant user.
+  tasks:
+  - name: copy deadline event to repository
+    copy:
+      src: /vagrant/scripts/deadline/SlaveAutoconf
+      dest: /opt/Thinkbox/DeadlineRepository10/events
+      owner: deadlineuser
+      group: syscontrol
+      mode: u+rX-w,g=rX-w,o-rwx
+      force: true
+    become: true
+
+  - file:
+      path: /opt/Thinkbox/DeadlineRepository10/events/SlaveAutoconf
+      mode: u+rX-w,g=rX-w,o-rwx
+      recurse: true
