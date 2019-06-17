@@ -48,9 +48,11 @@ for i in $(seq $SLAVECOUNT $END); do
     then
         echo 'Shut down sequentially'
         /opt/Thinkbox/Deadline10/bin/deadlineslave -name "i-$digit" -nogui $ARGS;
+        disown
     else
         echo 'Launch parallel'
-        /opt/Thinkbox/Deadline10/bin/deadlineslave -name "i-$digit" -nogui $ARGS &
+        su deadlineuser -c '/opt/Thinkbox/Deadline10/bin/deadlineslave -name "i-$digit" -nogui $ARGS &'
+        disown
     fi
     
 done
