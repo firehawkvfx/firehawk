@@ -41,28 +41,56 @@ declare $( cat /proc/cpuinfo | grep "cpu cores" | awk -F: '{ num+=1 } END{
 echo "CPUCORES=$CPUCORES"
 echo "SLAVECOUNT=$SLAVECOUNT"
 
-for i in $(seq $SLAVECOUNT $END); do 
+startslave () {
+  local digit=$1
+  echo 'Launch Slave Instance "i-$digit"'
+  su deadlineuser -c '/opt/Thinkbox/Deadline10/bin/deadlineslave -name "i-$digit" -nogui'
+  # su deadlineuser -c 'disown'
+}
+
+stopslave () {
+  local digit=$1
+  echo 'shutdown Slave Instance i-'$digit
+  su deadlineuser -c '/opt/Thinkbox/Deadline10/bin/deadlineslave -name "i-$digit" -nogui -shutdown;'
+  #disown
+  echo 'end i-'$digit
+  file=/var/lib/Thinkbox/Deadline10/slaves/i-"$digit".ini
+  if $remove ; then
+    echo 'remove '$file
+    rm -fv "$file"
+  fi
+  # su deadlineuser -c 'disown'
+}
+
+for i in $(seq 2 $END); do 
     digit=$(printf "%02d" $i);
     echo 'deadlineslave -name "i-'$digit'"';
     if [[ $ARGS = "-shutdown" ]]
     then
-        echo 'Shut down sequentially'
-        /opt/Thinkbox/Deadline10/bin/deadlineslave -name "i-$digit" -nogui $ARGS;
-        disown
+        # {
+        #   echo 'Shut down sequentially i-$digit'
+        #   su deadlineuser -c '/opt/Thinkbox/Deadline10/bin/deadlineslave -name "i-$digit" -nogui $ARGS;'
+        #   disown
+        # }&
+        stopslave "$digit" &
     else
-        echo 'Launch parallel'
-        su deadlineuser -c '/opt/Thinkbox/Deadline10/bin/deadlineslave -name "i-$digit" -nogui $ARGS &'
-        disown
+        # {
+        #   echo 'Launch parallel i-$digit'
+        #   su deadlineuser -c '/opt/Thinkbox/Deadline10/bin/deadlineslave -name "i-$digit" -nogui $ARGS'
+        #   disown
+        #   #FILE=/var/lib/Thinkbox/Deadline10/slaves/i-$digit.ini
+        #   #grep -q '^LaunchSlaveAtStartup' FILE && sed -i 's/^LaunchSlaveAtStartup.*/LaunchSlaveAtStartup=False/' FILE || echo 'LaunchSlaveAtStartup=False' >> FILE
+        # }&
+        startslave "$digit" &
     fi
-    
 done
 
-if $remove ; then
-  echo 'removing all slave .ini files from /var/lib/Thinkbox/Deadline10/slaves/'
-  for i in /var/lib/Thinkbox/Deadline10/slaves/*; do
-    file="$i"
-    echo 'remove '$i
-    rm -fv "$file"
-  done
-  #/usr/bin/rm -f "/var/lib/Thinkbox/Deadline10/slaves/*.ini"
-fi
+# if $remove ; then
+#   echo 'removing all slave .ini files from /var/lib/Thinkbox/Deadline10/slaves/'
+#   for i in /var/lib/Thinkbox/Deadline10/slaves/*; do
+#     file="$i"
+#     echo 'remove '$i
+#     rm -fv "$file"
+#   done
+#   #/usr/bin/rm -f "/var/lib/Thinkbox/Deadline10/slaves/*.ini"
+# fi
