@@ -12,6 +12,7 @@ echo ""
 ARGS=''
 remove=false
 delaytime=2
+configfiledelay=2
 
 if [[ -z $argument ]] ; then
   echo "Starting one slave per core."
@@ -44,6 +45,7 @@ echo "SLAVECOUNT=$SLAVECOUNT"
 
 startslave () {
   local digit=$1
+  local file=/var/lib/Thinkbox/Deadline10/slaves/i-"$digit".ini
 
   # test digit was provided, else an invalid name may be produced.
   re='^[0-9]+$'
@@ -55,11 +57,20 @@ startslave () {
   local name="i-$digit"
   echo "Launch Slave Instance $name"
   su --login -s /bin/bash -c "/opt/Thinkbox/Deadline10/bin/deadlineslave -name $name -nogui;" deadlineuser
+
+  sleep $configfiledelay
+
+  # Ensure slave launch at startup is false.  if 96 cores become 16 after between launches, we don't want extra slaves being launched.
+  #set -x
+  
+  #set +x
+  #LaunchSlaveAtStartup=False
+
 }
 
 stopslave () {
   local digit=$1
-  
+  local file=/var/lib/Thinkbox/Deadline10/slaves/i-"$digit".ini
   # test digit was provided, else an invalid name may be produced.
   re='^[0-9]+$'
   
@@ -73,7 +84,6 @@ stopslave () {
   #disown
   echo 'end i-'$digit
 
-  file=/var/lib/Thinkbox/Deadline10/slaves/i-"$digit".ini
   if $remove ; then
     echo 'remove '$file
     rm -fv "$file"
@@ -84,6 +94,7 @@ stopslave () {
 for i in $(seq $SLAVECOUNT $END); do 
     digit=$(printf "%02d" $i);
     name="i-$digit";
+    file=/var/lib/Thinkbox/Deadline10/slaves/i-"$digit".ini
 
     echo "deadlineslave -name $name";
     if [[ $ARGS = "-shutdown" ]]
@@ -92,7 +103,17 @@ for i in $(seq $SLAVECOUNT $END); do
         sleep $delaytime
     else
         startslave "$digit" &
+        # delay to not overload db with requests.
         sleep $delaytime
+
+        while [ ! -f $file ]
+        do
+          sleep 2
+        done
+
+        # Ensure slave launch at startup is false.  if 96 cores become 16 after between launches, we don't want extra slaves being launched.
+        grep -q "^LaunchSlaveAtStartup=" $file && sed "s/^LaunchSlaveAtStartup=.*/LaunchSlaveAtStartup=False/" -i $file || sed "$ a\LaunchSlaveAtStartup=False" -i $file
+        
     fi
 done
 
