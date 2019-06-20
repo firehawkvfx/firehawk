@@ -35,7 +35,7 @@ unset SLAVECOUNT
 
 declare $( cat /proc/cpuinfo | grep "cpu cores" | awk -F: '{ num+=1 } END{ 
     print "CPUCORES="num
-    print "SLAVECOUNT="num-1
+    print "SLAVECOUNT="(num/4)-1
     }' )
 
 echo "CPUCORES=$CPUCORES"
@@ -43,17 +43,35 @@ echo "SLAVECOUNT=$SLAVECOUNT"
 
 startslave () {
   local digit=$1
-  echo 'Launch Slave Instance "i-$digit"'
-  su deadlineuser -c '/opt/Thinkbox/Deadline10/bin/deadlineslave -name "i-$digit" -nogui'
-  # su deadlineuser -c 'disown'
+
+  # test digit was provided, else an invalid name may be produced.
+  re='^[0-9]+$'
+  
+  if ! [[ $digit =~ $re ]] ; then
+    echo "error: Not a number $digit" >&2; exit 1
+  fi
+
+  local name="i-$digit"
+  echo "Launch Slave Instance $name"
+  su --login -s /bin/bash -c "/opt/Thinkbox/Deadline10/bin/deadlineslave -name $name -nogui;" deadlineuser
 }
 
 stopslave () {
   local digit=$1
-  echo 'shutdown Slave Instance i-'$digit
-  su deadlineuser -c '/opt/Thinkbox/Deadline10/bin/deadlineslave -name "i-$digit" -nogui -shutdown;'
+  
+  # test digit was provided, else an invalid name may be produced.
+  re='^[0-9]+$'
+  
+  if ! [[ $digit =~ $re ]] ; then
+    echo "error: Not a number $digit" >&2; exit 1
+  fi
+  
+  local name="i-$digit"
+  echo "shutdown Slave Instance $name"
+  su --login -s /bin/bash -c "/opt/Thinkbox/Deadline10/bin/deadlineslave -name $name -nogui -shutdown;" deadlineuser
   #disown
   echo 'end i-'$digit
+
   file=/var/lib/Thinkbox/Deadline10/slaves/i-"$digit".ini
   if $remove ; then
     echo 'remove '$file
@@ -62,26 +80,18 @@ stopslave () {
   # su deadlineuser -c 'disown'
 }
 
-for i in $(seq 2 $END); do 
+for i in $(seq $SLAVECOUNT $END); do 
     digit=$(printf "%02d" $i);
-    echo 'deadlineslave -name "i-'$digit'"';
+    name="i-$digit";
+
+    echo "deadlineslave -name $name";
     if [[ $ARGS = "-shutdown" ]]
     then
-        # {
-        #   echo 'Shut down sequentially i-$digit'
-        #   su deadlineuser -c '/opt/Thinkbox/Deadline10/bin/deadlineslave -name "i-$digit" -nogui $ARGS;'
-        #   disown
-        # }&
         stopslave "$digit" &
+        sleep 1
     else
-        # {
-        #   echo 'Launch parallel i-$digit'
-        #   su deadlineuser -c '/opt/Thinkbox/Deadline10/bin/deadlineslave -name "i-$digit" -nogui $ARGS'
-        #   disown
-        #   #FILE=/var/lib/Thinkbox/Deadline10/slaves/i-$digit.ini
-        #   #grep -q '^LaunchSlaveAtStartup' FILE && sed -i 's/^LaunchSlaveAtStartup.*/LaunchSlaveAtStartup=False/' FILE || echo 'LaunchSlaveAtStartup=False' >> FILE
-        # }&
         startslave "$digit" &
+        sleep 1
     fi
 done
 
