@@ -11,6 +11,7 @@ argument="$1"
 echo ""
 ARGS=''
 remove=false
+delaytime=2
 
 if [[ -z $argument ]] ; then
   echo "Starting one slave per core."
@@ -88,10 +89,10 @@ for i in $(seq $SLAVECOUNT $END); do
     if [[ $ARGS = "-shutdown" ]]
     then
         stopslave "$digit" &
-        sleep 1
+        sleep $delaytime
     else
         startslave "$digit" &
-        sleep 1
+        sleep $delaytime
     fi
 done
 
