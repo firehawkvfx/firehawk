@@ -1,10 +1,7 @@
 #!/bin/bash
 
-# This shell script executes a new deadline slave instance for every core present on the system.  run it once.  
-# slaves should auto start on next reboot if the daemon is configured correctly.
-
-#. /home/usr/.bashrc 
-#. /home/usr/.profile
+# This shell script removes all existing claves based on the files in path /var/lib/Thinkbox/Deadline10/slaves.
+# after removing all slaves, if executes a new deadline slave instance for every 4 cores present on the system.  it should execute on boot
 
 argument="$1"
 
@@ -20,10 +17,6 @@ else
   case $argument in
     -s|--shutdown)
       ARGS='-shutdown'
-      ;;
-    -r|--remove)
-      ARGS='-shutdown'
-      remove=true
       ;;
     *)
       raise_error "Unknown argument: ${argument}"
@@ -59,21 +52,16 @@ startslave () {
   su --login -s /bin/bash -c "/opt/Thinkbox/Deadline10/bin/deadlineslave -name $name -nogui;" deadlineuser
 
   sleep $configfiledelay
-
-  # Ensure slave launch at startup is false.  if 96 cores become 16 after between launches, we don't want extra slaves being launched.
-  #set -x
-  
-  #set +x
-  #LaunchSlaveAtStartup=False
-
 }
 
 stopslave () {
   local digit=$1
-  local file=/var/lib/Thinkbox/Deadline10/slaves/i-"$digit".ini
+  local file=$2
+  local remove=$3
+  #local file=/var/lib/Thinkbox/Deadline10/slaves/i-"$digit".ini
   # test digit was provided, else an invalid name may be produced.
-  re='^[0-9]+$'
   
+  re='^[0-9]+$'
   if ! [[ $digit =~ $re ]] ; then
     echo "error: Not a number $digit" >&2; exit 1
   fi
@@ -91,6 +79,25 @@ stopslave () {
   # su deadlineuser -c 'disown'
 }
 
+
+# remove all slaves based on the contents of path
+existingFiles=/var/lib/Thinkbox/Deadline10/slaves/i-*.ini
+for file in $existingFiles
+do
+  echo "Processing $file file for removal of existing slaves..."
+  basename=$(basename $file)
+
+  digit=$(echo $basename | sed -e 's/[^(0-9|)]//g' | sed -e 's/|/,/g')
+  
+  re='^[0-9]+$'
+  if [[ $digit =~ $re ]] ; then
+    echo $digit
+    stopslave "$digit" "$file" "true" &
+    sleep $delaytime
+  fi
+done
+
+# normal behaviour is to relaunch.  unless -s is specified then nothing will be done.
 for i in $(seq $SLAVECOUNT $END); do 
     digit=$(printf "%02d" $i);
     name="i-$digit";
@@ -99,8 +106,7 @@ for i in $(seq $SLAVECOUNT $END); do
     echo "deadlineslave -name $name";
     if [[ $ARGS = "-shutdown" ]]
     then
-        stopslave "$digit" &
-        sleep $delaytime
+        echo "slaves stopped"
     else
         startslave "$digit" &
         # delay to not overload db with requests.
@@ -112,17 +118,7 @@ for i in $(seq $SLAVECOUNT $END); do
         done
 
         # Ensure slave launch at startup is false.  if 96 cores become 16 after between launches, we don't want extra slaves being launched.
-        grep -q "^LaunchSlaveAtStartup=" $file && sed "s/^LaunchSlaveAtStartup=.*/LaunchSlaveAtStartup=False/" -i $file || sed "$ a\LaunchSlaveAtStartup=False" -i $file
+        # grep -q "^LaunchSlaveAtStartup=" $file && sed "s/^LaunchSlaveAtStartup=.*/LaunchSlaveAtStartup=False/" -i $file || sed "$ a\LaunchSlaveAtStartup=False" -i $file
         
     fi
 done
-
-# if $remove ; then
-#   echo 'removing all slave .ini files from /var/lib/Thinkbox/Deadline10/slaves/'
-#   for i in /var/lib/Thinkbox/Deadline10/slaves/*; do
-#     file="$i"
-#     echo 'remove '$i
-#     rm -fv "$file"
-#   done
-#   #/usr/bin/rm -f "/var/lib/Thinkbox/Deadline10/slaves/*.ini"
-# fi
