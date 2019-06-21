@@ -17,11 +17,20 @@ import subprocess
 import traceback
 import shlex
 
-SLAVE_NAME_PREFIX = "ip-" # Example: "mobile-"
-POOLS = ["one", "two", "three"] # Example: ["one", "two", "three"]
-GROUPS = ["cloud"]
-# LISTENING_PORT=None # or 27100
-LISTENING_PORT=27100
+SLAVE_NAME_PREFIX_CLOUD = "ip-"
+POOLS_CLOUD = ["one", "two", "three"] # Example: ["one", "two", "three"]
+GROUPS_CLOUD = ["cloud"]
+
+SLAVE_NAME_PREFIX_CLOUD_WORKSTATION = "cloud_workstation"
+POOLS_CLOUD_WORKSTATION = ["one", "two", "three"] # Example: ["one", "two", "three"]
+GROUPS_CLOUD_WORKSTATION = ["cloud_workstation"]
+
+SLAVE_NAME_PREFIX_LOCAL = "workstation"
+POOLS_LOCAL = ["one", "two", "three"] # Example: ["one", "two", "three"]
+GROUPS_LOCAL = ["local"]
+
+LISTENING_PORT=None # or 27100
+
 
 def GetDeadlineEventListener():
     return ConfigSlaveEventListener()
@@ -44,32 +53,35 @@ class ConfigSlaveEventListener (DeadlineEventListener):
         slave = RepositoryUtils.GetSlaveSettings(slavename, True)
 
         # Skip over Slaves that don't match the prefix
-        if not slavename.lower().startswith(SLAVE_NAME_PREFIX):
+        if slavename.lower().startswith(SLAVE_NAME_PREFIX_CLOUD.lower()):
+            print("Slave automatic configuration CLOUD for {0}".format(slavename))
+            newPools = POOLS_CLOUD
+            newGroups = GROUPS_CLOUD
+        elif slavename.lower().startswith(SLAVE_NAME_PREFIX_CLOUD_WORKSTATION.lower()):
+            print("Slave automatic configuration CLOUD_WORKSTATION for {0}".format(slavename))
+            newPools = POOLS_CLOUD_WORKSTATION
+            newGroups = GROUPS_CLOUD_WORKSTATION
+        elif slavename.lower().startswith(SLAVE_NAME_PREFIX_LOCAL.lower()):
+            print("Slave automatic configuration LOCAL for {0}".format(slavename))
+            newPools = POOLS_LOCAL
+            newGroups = GROUPS_LOCAL
+        else:
             return
-
-        print("Slave automatic configuration for {0}".format(slavename))
-
-        # Set up the Groups we want to use
-        for group in GROUPS:
-            try:
-                print("   Adding group {0}".format(group))
-                RepositoryUtils.AddGroupToSlave(slavename, group)
-            except:
-                ClientUtils.LogText(traceback.format_exc())
-
-        # Set up the Pools we want to use
-        for pool in POOLS:
-            try:
-                print("   Adding pool {0}".format(pool))
-                RepositoryUtils.AddPoolToSlave(slavename, pool)
-
-                # Power management example:
-                # pmanage = RepositoryUtils.GetPowerManagementOptions()
-                # pmanage.Groups[0].SlaveNames.append(slavename)
-
-            except:
-                ClientUtils.LogText(traceback.format_exc())
-
+        # if didn't exit, then continue to setup pools and groups
+        for x in slave.Pools:
+            if x not in newPools:
+                newPools.append(x)
+        
+        slave.Pools = newPools 
+        print("Updated slave pools to be '%s'" % ",".join(newPools))
+        
+        for x in slave.Groups:
+            if x not in newGroups:
+                newGroups.append(x)
+        
+        slave.Groups = newGroups 
+        print("Updated slave groups to be '%s'" % ",".join(newGroups))
+        
         # Set up the listening port
         if LISTENING_PORT:
             print("   Configuring Slave to listen on port {0}".format(LISTENING_PORT))

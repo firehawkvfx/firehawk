@@ -657,3 +657,82 @@
     tags:
     - cloud-install
     - onsite-install
+
+  - file:
+      path: /opt/dlmultislave
+      state: directory
+      owner: deadlineuser
+      group: syscontrol
+      mode: u+rX,g+rX,o-rwx
+    become: yes
+    tags:
+    - cloud-install
+    - onsite-install
+    - multi-slave
+
+  - copy:
+      src: /vagrant/scripts/deadline-multi-slave.sh
+      dest: /opt/dlmultislave/dlmultislave.sh
+      owner: deadlineuser
+      group: syscontrol
+      mode: u=rx,g=rx,o-rwx
+    become: yes
+    tags:
+    - cloud-install
+    - onsite-install
+    - multi-slave
+
+  # - copy:
+  #     src: /vagrant/scripts/deadline-multi-slave-init.service
+  #     dest: /etc/init.d/deadline-multi-slave-init.service
+  #     owner: root
+  #     group: root
+  #     mode: u=rx,g=rx,o=rx
+  #   become: yes
+  #   tags:
+  #   - cloud-install
+  #   - onsite-install
+  #   - multi-slave
+
+  # - shell: |
+  #     chkconfig --add deadline-multi-slave-init.service
+  #     chkconfig deadline-multi-slave-init.service on
+  #     chkconfig --list deadline-multi-slave-init.service
+  #   become: yes
+  #   tags:
+  #   - cloud-install
+  #   - onsite-install
+  #   - multi-slave
+
+  # - name: Run a script to launch a slave per core
+  #   script: /vagrant/scripts/deadline-multi-slave.sh
+  #   args:
+  #     creates: /var/lib/Thinkbox/Deadline10/slaves/i-03.ini
+  #   become: deadlineuser
+  #   register: out
+  #   async: 45
+  #   poll: 0
+  #   tags:
+  #   - cloud-install
+  #   - onsite-install
+  #   - multi-slave
+
+  # - shell: |
+  #     /opt/Thinkbox/Deadline10/bin/deadlineslave -name "i-03" -nogui &
+  #     disown
+  #   args:
+  #     creates: /var/lib/Thinkbox/Deadline10/slaves/i-03.ini
+  #   async: 60
+  #   poll: 0
+  #   become: deadlineuser
+  #   register: out
+  #   tags:
+  #   - cloud-install
+  #   - onsite-install
+  #   - multi-slave
+
+  # - debug: var=out.stdout_lines
+  #   tags:
+  #   - cloud-install
+  #   - onsite-install
+  #   - multi-slave

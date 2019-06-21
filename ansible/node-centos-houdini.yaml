@@ -5,7 +5,7 @@
 # If the file doesn't exist in the s3 bucket, it will be downloaded from side fx, and then pushed to the bucket after install.
 
 # Example install on an aws instance
-# ansible-playbook -i ansible/inventory ansible/node-centos-houdini.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=workstation1.${var.public_domain_name}"
+# ansible-playbook -i ansible/inventory ansible/node-centos-houdini.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.${var.public_domain_name}"
 # Example local install on a RHEL 7.6 / CENTOS workstation / render node.
 # ansible-playbook -i ansible/inventory ansible/node-centos-houdini.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_become_pass=sompass"
 
@@ -175,7 +175,7 @@
     file:
       path: /prod/asset/
       state: directory
-      mode: u=rX,g=rX,o-rwx
+      mode: u=wrX,g=wrX,o-rwx
       owner: deadlineuser
       group: syscontrol
       recurse: true
@@ -183,19 +183,7 @@
     tags:
       - sync_scripts
 
-  # - name: ensure the openfirehawk-houdini-tools exist in the s3 bucket.  Push if it push if it doesn't.
-  #   s3_sync:
-  #     bucket: "installers.{{ public_domain }}"
-  #     file_root: /vagrant/modules/node_centos/modules/openfirehawk-houdini-tools/
-  #     include: "*"
-  #     aws_access_key: "{{ aws_access_key_s3user }}"
-  #     aws_secret_key: "{{ aws_secret_key_s3user }}"
-  #     region: "{{ aws_region }}"
-  #     mode: push
-  #   tags:
-  #     - sync_scripts
-
-  - name: Sync openfirehawk-houdini-tools from s3 - push
+  - name: Sync openfirehawk-houdini-tools to s3 - push
     shell: |
       set -x
       cd /vagrant/modules/node_centos/modules/

@@ -324,20 +324,20 @@ resource "null_resource" "workstation_pcoip" {
     command = <<EOT
       set -x
       cd /vagrant
-      #ansible-playbook -i ansible/inventory/hosts ansible/ssh-add-public-host.yaml -v --extra-vars "public_ip=${aws_instance.workstation_pcoip.public_ip} public_hostname=workstation1.${var.public_domain_name} set_bastion=false"
+      #ansible-playbook -i ansible/inventory/hosts ansible/ssh-add-public-host.yaml -v --extra-vars "public_ip=${aws_instance.workstation_pcoip.public_ip} public_hostname=cloud_workstation1.${var.public_domain_name} set_bastion=false"
       ansible-playbook -i ansible/inventory ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.workstation_pcoip.private_ip} bastion_ip=${var.bastion_ip}"
-      ansible-playbook -i ansible/inventory ansible/node-centos-init-users.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=workstation1.${var.public_domain_name} pcoip=true"
-      ansible-playbook -i ansible/inventory ansible/node-centos-init-deadline.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=workstation1.${var.public_domain_name} pcoip=true"
+      ansible-playbook -i ansible/inventory ansible/node-centos-init-users.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.${var.public_domain_name} pcoip=true"
+      ansible-playbook -i ansible/inventory ansible/node-centos-init-deadline.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.${var.public_domain_name} pcoip=true"
       ansible-playbook -i ansible/inventory ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_workstation_centos variable_user=deadlineuser"
       ansible-playbook -i ansible/inventory ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_workstation_centos variable_user=centos"
-      ansible-playbook -i ansible/inventory ansible/node-centos-mounts.yaml --extra-vars "variable_host=role_workstation_centos hostname=workstation1.${var.public_domain_name} pcoip=true"
-      # ansible-playbook -i ansible/inventory ansible/node-centos-houdini.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=workstation1.${var.public_domain_name}"
-      ansible-playbook -i ansible/inventory ansible/node-centos-houdini.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=workstation1.${var.public_domain_name} sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password houdini_build=$TF_VAR_houdini_build"
+      ansible-playbook -i ansible/inventory ansible/node-centos-mounts.yaml --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.${var.public_domain_name} pcoip=true"
+      # ansible-playbook -i ansible/inventory ansible/node-centos-houdini.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.${var.public_domain_name}"
+      ansible-playbook -i ansible/inventory ansible/node-centos-houdini.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.${var.public_domain_name} sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password houdini_build=$TF_VAR_houdini_build"
       # to configure deadline submission scripts-
       ansible-playbook -i ansible/inventory ansible/localworkstation-deadlineuser.yaml --tags "onsite-install" --extra-vars "variable_host=role_workstation_centos variable_user=centos"
       
       # to recover from yum update breaking pcoip we reinstall the nvidia driver and dracut to fix pcoip.
-      ansible-playbook -i ansible/inventory ansible/node-centos-pcoip-recover.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=workstation1.${var.public_domain_name}"
+      ansible-playbook -i ansible/inventory ansible/node-centos-pcoip-recover.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.${var.public_domain_name}"
   EOT
   }
 
