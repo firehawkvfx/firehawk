@@ -301,7 +301,7 @@
 
 # After install sync houdini download with bucket
 
-  - name: ensure the houdini installer exist in the s3 bucket.  Push if it push if it doesn't.
+  - name: ensure the houdini installer exist in the s3 bucket.  Push if it doesn't.
     s3_sync:
       bucket: "installers.{{ public_domain }}"
       file_root: "{{ download_to_dir }}"

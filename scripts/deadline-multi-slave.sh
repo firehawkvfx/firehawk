@@ -78,8 +78,9 @@ stopslave () {
   fi
   # su deadlineuser -c 'disown'
 }
-
-
+echo ""
+echo "### ALL PRIOR SLAVES REMOVED ###"
+echo ""
 # remove all slaves based on the contents of path
 existingFiles=/var/lib/Thinkbox/Deadline10/slaves/i-*.ini
 for file in $existingFiles
@@ -102,12 +103,9 @@ for i in $(seq $SLAVECOUNT $END); do
     digit=$(printf "%02d" $i);
     name="i-$digit";
     file=/var/lib/Thinkbox/Deadline10/slaves/i-"$digit".ini
-
-    echo "deadlineslave -name $name";
-    if [[ $ARGS = "-shutdown" ]]
-    then
-        echo "slaves stopped"
-    else
+    
+    if ! [[ $ARGS = "-shutdown" ]] ; then
+        echo "start deadlineslave -name $name";
         startslave "$digit" &
         # delay to not overload db with requests.
         sleep $delaytime
