@@ -694,9 +694,9 @@
     - onsite-install
     - multi-slave
     
-  - name: Start service myservice, if not started
+  - name: Start service multislaveservice, if not started
     service:
-      name: myservice
+      name: multislaveservice
       state: started
       daemon_reload: true
       enabled: true

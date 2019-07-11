@@ -176,6 +176,10 @@ resource "null_resource" "provision_node_centos" {
   triggers {
     instanceid = "${ aws_instance.node_centos.id }"
   }
+  
+  provisioner "local-exec" {
+    command = "aws ec2 start-instances --instance-ids ${aws_instance.node_centos.id}"
+  }
 
   provisioner "remote-exec" {
     connection {

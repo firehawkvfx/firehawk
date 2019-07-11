@@ -6,8 +6,8 @@
   with_items:
   - "/prod"
   - "/data"
-  - "/prod_sydney_aws"
-  - "/prod_cairns"
+  - "/aws_sydney_prod"
+  - "/cairns_prod"
   - "/remote_prod"
 
 - name: create softnas mount point
@@ -38,8 +38,8 @@
     content: |
       
       {{ localnas1_private_ip }}:/data /data nfs defaults,_netdev,rsize=8192,wsize=8192,timeo=14,intr 0 0
-      {{ localnas1_private_ip }}:/prod /prod_cairns nfs defaults,_netdev,rsize=8192,wsize=8192,timeo=14,intr 0 0
-      /prod_cairns /prod none defaults,bind,timeo=14 0 0
+      {{ localnas1_private_ip }}:/prod /cairns_prod nfs defaults,_netdev,rsize=8192,wsize=8192,timeo=14,intr 0 0
+      /cairns_prod /prod none defaults,bind,timeo=14 0 0
 
 - name: mount all changes to fstab
   command: mount -a
