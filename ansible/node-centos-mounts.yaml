@@ -136,6 +136,7 @@
       state: directory
       owner: deadlineuser
       group: deadlineuser
+    become: true
     when: destroy == false and item.rc == 0
     with_items: 
     - "{{ softnas_exports }}"
@@ -175,9 +176,11 @@
     become: yes
     mount:
       fstype: nfs4
+      opts: nfsvers=4.1
       path: "{{ item.item.path }}"
       opts: rsize=8192,wsize=8192,timeo=14,intr,_netdev
-      src: "{{ groups['role_softnas'][0] }}:{{ item.item.path }}"
+      src: "{{ groups['role_softnas'][0] }}:/"
+      # {{ item.item.path }}"
       state: "{{ ( destroy == false and item.item.path and item.rc == 0 and item.item.state == 'present') | ternary( 'mounted' , 'absent' ) }}"
     when: destroy == false
     with_items: "{{ softnas_exports }}"
@@ -335,9 +338,11 @@
     become: yes
     mount:
       fstype: nfs4
+      opts: nfsvers=4.1
       path: "{{ item.item.path }}"
       opts: rsize=8192,wsize=8192,timeo=14,intr,_netdev
-      src: "{{ groups['role_softnas'][0] }}:{{ item.item.path }}"
+      src: "{{ groups['role_softnas'][0] }}:/"
+      # {{ item.item.path }}"
       state: "{{ ( item.item.path and item.rc == 0 and item.item.state == 'present') | ternary( 'mounted' , 'absent' ) }}"
     when: destroy == false
     with_items: "{{ softnas_exports }}"
@@ -494,12 +499,13 @@
     tags:
     - cloud_install
 
-  - name: create mount directories
+  - name: create mount directories (cloud)
     file: 
       path: "{{ item.item.mount_path }}"
       state: directory
       owner: deadlineuser
       group: deadlineuser
+    become: true
     when: item.rc == 0
     with_items: 
     - "{{ site_presence.results }}"
@@ -545,9 +551,11 @@
     become: yes
     mount:
       fstype: nfs4
+      opts: nfsvers=4.1
       path: "{{ item.item.mount_path }}"
       opts: rsize=8192,wsize=8192,timeo=14,intr,_netdev
-      src: "{{ item.item.ip }}:{{ item.item.path }}"
+      src: "{{ item.item.ip }}:/"
+      #{{ item.item.path }}"
       state: "{{ ( item.item.mount_path and item.rc == 0 and item.item.state == 'present') | ternary( 'mounted' , 'absent' ) }}"
     with_items:
     - "{{ site_presence.results }}"
