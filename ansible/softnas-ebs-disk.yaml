@@ -1,31 +1,3 @@
-- hosts: role_softnas
-  remote_user: centos
-  become: true
-  
-  tasks:
-  - name: Slurp file state
-    slurp:
-      src: /tmp/softnas.boot
-    register: slurpfile
-    become: true
-  
-  - debug: msg="{{ slurpfile['content'] | b64decode }}"
-  
-  - name: "Wait until Softnas Boot Init completes before Stopping the instance."
-    wait_for:
-      path: /tmp/softnas.boot
-      search_regex: "^SoftNAS user initialization completed.*$"
-      timeout: 3600
-    become: true
-
-  - name: Slurp file state post
-    slurp:
-      src: /tmp/softnas.boot
-    register: slurpfilepost
-    become: true
-  
-  - debug: msg="{{ slurpfilepost['content'] | b64decode }}"
-
 - hosts: ansible_control
   remote_user: vagrant
 
@@ -61,6 +33,7 @@
     # stopping the softnas instance ensures that any non present ebs volume pool will be available on boot.
     # this is not desirable if adding volumes to an existing pool that is in use.
     stop_softnas_instance: false
+    mode: attach
 
     # this will be calculated later-
     existing_bucket: false
@@ -130,13 +103,29 @@
     with_items: "{{ existing_volume.results }}"      
 
   - include_tasks: softnas-ebs-first-time-installation.yaml
-    when: not item.volumes
+    when: not item.volumes and mode == 'attach'
     with_items: "{{ existing_volume.results }}"
-
+    
   - include_tasks: softnas-ebs-existing-volume.yaml
     when: item.volumes
     with_items: "{{ existing_volume.results }}"
+    when: mode == 'attach'
 
+  - name: search for existing volume
+    ec2_vol_facts:
+      filters:
+        "tag:Role": "Softnas"
+        "tag:Mount": "{{ item.path }}"
+      region: "{{ ebs_disk_region }}"
+    register: existing_volume
+    with_items:
+      - "{{ mounts }}"
+    when: mode == 'destroy'
+    
+  - include_tasks: softnas-ebs-delete-volume.yaml
+    when: mode == 'destroy' and item.volumes
+    with_items: "{{ existing_volume.results }}"
+    
   - name: Start the softnas instance after updating mounts
     ec2:
       instance_ids: '{{ instance_id }}'
@@ -144,7 +133,64 @@
       state: running
       wait: True
     become_user: vagrant
-    when: stop_softnas_instance
+    when: stop_softnas_instance and mode == 'attach'
+    
+    # for each unique pool, in the list, if it doesn't exist, create it.
+#     # 
+# - hosts: role_softnas
+#   remote_user: centos
+#   become: true
+
+#   vars:
+#     mounts:
+#       - path: "/dev/sdf"
+#         int: "1"
+#       - path: "/dev/sdg"
+#         int: "2"
+#       - path: "/dev/sdh"
+#         int: "3"
+#       - path: "/dev/sdi"
+#         int: "4"
+
+#   tasks:
+#   - name: Check for existance of custom mounts in /vagrant/secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml and override default mounts
+#     stat:
+#       path: ../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
+#     register: custom_ebs_list
+
+#   - name: Override default mounts
+#     include_vars:
+#       file: ../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
+#     when: custom_ebs_list.stat.exists
+
+#   # - name: Search for existing softnas instance by tag.  If no instance id is defined via command line, then the found instance id by tag wil be used.
+#   #   ec2_instance_facts:
+#   #     filters:
+#   #       "tag:Role": "softnas"
+#   #     #region: "{{ ebs_disk_region }}"
+#   #   register: existing_softnas_instance
+
+#   # - debug:
+#   #     msg: "{{ existing_softnas_instance.instances[0].instance_id }}"
+
+#   # - set_fact:
+#   #     instance_id: "{{ existing_softnas_instance.instances[0].instance_id }}"
+#   #   when: instance_id is undefined  
+
+#   - name: search for existing pools
+#     stat:
+#       path: "/{{ item.pool_name }}/"
+#     register: existing_pools
+#     with_items:
+#       - "{{ mounts }}"
+
+#   - name: all volumes retrieved
+#     debug:
+#       msg: "{{ existing_pools }}"
+
+  # - include_tasks: softnas-ebs-pool-create.yaml
+  #   when: not item.volumes
+  #   with_items: "{{ existing_volume.results }}"
 
 # # update exports on softnas.
 # - hosts: role_softnas

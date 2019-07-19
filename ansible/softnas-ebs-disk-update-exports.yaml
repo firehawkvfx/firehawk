@@ -29,10 +29,22 @@
     when: custom_ebs_list.stat.exists
     connection: local
 
+  - name: set /etc/exports to allow ro on root per red hat docs https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/5/html/deployment_guide/s1-nfs-server-config-exports
+    lineinfile:
+      path: /etc/exports
+      #regexp: '^(.*)\/export \*\(ro,fsid=0\)(.*)'
+      #regexp: '^(.*)\*\(ro,fsid=0\)(.*)'
+      regexp: '^(.*)fsid=0(.*)'
+      line: "/export *(rw,fsid=0,insecure,no_subtree_check,no_root_squash,nohide,async)"
+      #(async,insecure,no_subtree_check,no_root_squash,rw,nohide)
+      #line: "/ *(ro,fsid=0)"
+      backup: yes
+    when: import_pool
+
   - name: set /etc/exports
     lineinfile:
       path: /etc/exports
-      line: "# These mounts are managed in ansible playbook softnas-ebs-disk-update-exports.yaml and only one volume is exported currently for testing"
+      line: "# These mounts are managed in ansible playbook softnas-ebs-disk-update-exports.yaml"
       backup: yes
     when: import_pool
 
@@ -55,13 +67,40 @@
     when: item.stat.exists and item.stat.isdir and import_pool
     with_items: "{{ volume_mount.results }}"
 
+  - name: create mount directories in /export for bind
+    file:
+      path: "/export/{{ item.item.pool_name }}/{{ item.item.volume_name }}"
+      state: directory
+      owner: deadlineuser
+      group: deadlineuser
+    become: true
+    when: item.stat.exists and item.stat.isdir and import_pool
+    with_items:
+      - "{{ volume_mount.results }}"
+
+  - name: bind prep for exports and nfs4 compatibility
+    become: yes
+    mount:
+      fstype: none
+      path: "/export/{{ item.item.pool_name }}/{{ item.item.volume_name }}"
+      opts: bind
+      src: "/{{ item.item.pool_name }}/{{ item.item.volume_name }}/"
+      # if the path exists, and it was found in the exports, then set to mounted, else remove.
+      # state: "{{ ( item.item.path and item.item.bind1 and item.rc == 0 and item.item.state == 'present' ) | ternary( 'mounted' , 'absent' ) }}"
+      state: "{{ item.item.state }}"
+    when: item.stat.exists and item.stat.isdir and import_pool
+    with_items:
+      - "{{ volume_mount.results }}"
+
   - name: insert/update block in in /etc/exports for volume
     blockinfile:
       path: /etc/exports
       block: |
-        /{{ item.item.pool_name }}/{{ item.item.volume_name }}/ *(async,insecure,no_subtree_check,no_root_squash,rw,nohide)
+        # /{{ item.item.pool_name }}/{{ item.item.volume_name }} *(async,insecure,no_subtree_check,no_root_squash,rw,nohide)
+        /export/{{ item.item.pool_name }}/{{ item.item.volume_name }} *(async,insecure,no_subtree_check,no_root_squash,rw,nohide)
       marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.item.path }}"
       state: "{{ item.item.state }}"
+    become: true
     when: item.stat.exists and item.stat.isdir and import_pool
     with_items:
       - "{{ volume_mount.results }}"

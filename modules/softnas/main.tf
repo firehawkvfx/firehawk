@@ -544,7 +544,11 @@ resource "null_resource" "provision_softnas_volumes" {
     command = <<EOT
       set -x
       cd /vagrant
-      ansible-playbook -i ansible/inventory ansible/softnas-ebs-disk.yaml -v --extra-vars "ebs_disk_size=$TF_VAR_ebs_disk_size instance_id=${aws_instance.softnas1.id} stop_softnas_instance=true"
+      # ensure all old mounts onsite are removed if they exist.
+      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install'
+      # mount all ebs disks before s3
+      ansible-playbook -i ansible/inventory ansible/softnas-check-able-to-stop.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.id}"
+      ansible-playbook -i ansible/inventory ansible/softnas-ebs-disk.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.id} stop_softnas_instance=true mode=attach"
       # Although we start the instance in ansible, the aws cli can be more reliable to ensure this.
       aws ec2 start-instances --instance-ids ${aws_instance.softnas1.id}
   EOT
@@ -567,14 +571,17 @@ resource "null_resource" "provision_softnas_volumes" {
     command = <<EOT
       set -x
       cd /vagrant
+      # ensure volumes and pools exist after disks are ensured to exist.
+      ansible-playbook -i ansible/inventory ansible/softnas-ebs-pool.yaml -v
+      # ensure s3 disks exist and are mounted
       ansible-playbook -i ansible/inventory ansible/softnas-s3-disk.yaml -v --extra-vars "pool_name=pool0 volume_name=volume0 disk_device=0 s3_disk_size_max_value=${var.s3_disk_size} encrypt_s3=true import_pool=${local.import_pool}"
-      ansible-playbook -i ansible/inventory ansible/softnas-s3-disk.yaml -v --extra-vars "pool_name=pool1 volume_name=volume1 disk_device=1 s3_disk_size_max_value=${var.s3_disk_size} encrypt_s3=true import_pool=${local.import_pool}"
+      # ansible-playbook -i ansible/inventory ansible/softnas-s3-disk.yaml -v --extra-vars "pool_name=pool1 volume_name=volume1 disk_device=1 s3_disk_size_max_value=${var.s3_disk_size} encrypt_s3=true import_pool=${local.import_pool}"
 
       # exports should be updated here.
       # if btier.json exists in /vagrant/secrets/${var.envtier}/ebs-volumes/ then the tiers will be imported.
       
       ansible-playbook -i ansible/inventory ansible/softnas-backup-btier.yaml -v --extra-vars "restore=true"
-      ansible-playbook -i ansible/inventory ansible/softnas-ebs-disk-update-exports.yaml -v --extra-vars "ebs_disk_size=${var.ebs_disk_size} instance_id=${aws_instance.softnas1.id} stop_softnas_instance=true"
+      ansible-playbook -i ansible/inventory ansible/softnas-ebs-disk-update-exports.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.id}"
   EOT
   }
 
@@ -598,6 +605,8 @@ resource "null_resource" "start-softnas" {
 
   provisioner "local-exec" {
     command = <<EOT
+      # create volatile storage
+      ansible-playbook -i ansible/inventory ansible/softnas-ebs-disk.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.id} stop_softnas_instance=true mode=attach"
       aws ec2 start-instances --instance-ids ${aws_instance.softnas1.id}
   EOT
   }
@@ -615,6 +624,8 @@ resource "null_resource" "shutdown-softnas" {
 
     command = <<EOT
       aws ec2 stop-instances --instance-ids ${aws_instance.softnas1.id}
+      # delete volatile storage
+      ansible-playbook -i ansible/inventory ansible/softnas-ebs-disk.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.id} stop_softnas_instance=true mode=destroy"
   EOT
   }
 }
@@ -645,6 +656,10 @@ resource "null_resource" "attach-local-mounts-after-start" {
   }
   provisioner "local-exec" {
     command = <<EOT
+      # ensure volumes and pools exist after the disks were ensured to exist - this was done before starting instance.
+      ansible-playbook -i ansible/inventory ansible/softnas-ebs-pool.yaml -v
+      #ensure exports are correct
+      ansible-playbook -i ansible/inventory ansible/softnas-ebs-disk-update-exports.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.id}"
       # mount volumes to local site when softnas is started
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key" --skip-tags 'cloud_install'
   EOT

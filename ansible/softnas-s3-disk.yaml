@@ -10,7 +10,7 @@
 
     pool_name: pool0
     volume_name: volume0
-    # shared pools should be enabled for DCHA.  caching is unavailable if this is used. tiering must be used insterad of caching for DCHA.
+    # shared pools should be enabled for DCHA if you need that.  caching is unavailable if this is used. tiering must be used insterad of caching for DCHA.
     share_pool: off
     disk_device: 0
     nas_name: softnas

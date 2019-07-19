@@ -1,0 +1,68 @@
+---
+# tasks file for ansible/roles/softnas-s3-ebs-pool-create
+
+- debug:
+    msg: "create new volume"
+
+- debug:
+    var: outer_item
+
+- set_fact:
+    pool_name: "{{ outer_item.item.pool_name }}"
+
+- set_fact:
+    volume_name: "{{ outer_item.item.volume_name }}"
+
+- name: check pool_name is defined
+  fail:
+    msg: "Bailing out: creating a disk requires a 'pool_name'"
+  when: pool_name is not defined
+
+- name: check volume_name is defined
+  fail:
+    msg: "Bailing out: creating a disk requires a 'volume_name'"
+  when: volume_name is not defined
+
+- name: softnas login
+  shell: |
+    softnas-cmd login softnas {{ user_softnas_pw }}
+  no_log: true
+
+- name: create volume
+  shell: |
+    softnas-cmd login softnas {{ user_softnas_pw }}
+    softnas-cmd createvolume vol_name={{ volume_name }} pool={{ pool_name }} vol_type=filesystem provisioning=thin exportNFS=off shareCIFS=off dedup=off compression=on sync=always replication=standard enable_snapshot=off > /tmp/softnas_init_volume_output_dict.json
+  no_log: true
+  
+- fetch:
+    src: /tmp/softnas_init_volume_output_dict.json
+    dest: /tmp/
+    flat: true
+
+- include_vars:
+    file: /tmp/softnas_init_volume_output_dict.json
+    name: softnas_init_volume_output_dict
+
+- name: create volume all json output
+  debug:
+    msg: "{{ softnas_init_volume_output_dict }}"
+
+- name: check if softnas cli login succeeded
+  debug:
+    msg: "softnas-cli login succeeded"
+  when: softnas_init_volume_output_dict.success
+
+- name: check if softnas cli login failed
+  fail:
+    msg: "{{softnas_init_volume_output_dict}}"
+  failed_when: softnas_init_volume_output_dict.success == false
+
+- name: Check volume create failed
+  fail:
+    msg: "{{softnas_init_volume_output_dict.result.msg}}"
+  failed_when: softnas_init_volume_output_dict.result.success == false
+
+- name: Check volume create succeeded
+  debug:
+    msg: "success.  created vol_name={{ volume_name }} pool={{ pool_name }}"
+  when: softnas_init_volume_output_dict.result.success

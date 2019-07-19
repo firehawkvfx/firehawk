@@ -1,0 +1,50 @@
+- hosts: ansible_control
+  remote_user: vagrant
+
+  vars:
+    init: true
+
+  tasks:
+  - name: ensure the softnas instance was started before updating mounts (since after initial install it must be complete, even though we are about to stop the instance anyway, we must validate).
+    ec2:
+      instance_ids: '{{ instance_id }}'
+      region: '{{ aws_region }}'
+      state: running
+      wait: True
+    become_user: vagrant
+    when: init
+
+- hosts: role_softnas
+  remote_user: centos
+  become: true
+  
+  vars:
+    init: false
+  
+  tasks:
+  - name: Slurp file state
+    slurp:
+      src: /tmp/softnas.boot
+    register: slurpfile
+    become: true
+    when: init
+  
+  - debug: msg="{{ slurpfile['content'] | b64decode }}"
+  
+  - name: "Wait until Softnas Boot Init completes before Stopping the instance."
+    wait_for:
+      path: /tmp/softnas.boot
+      search_regex: "^SoftNAS user initialization completed.*$"
+      timeout: 3600
+    become: true
+    when: init
+
+  - name: Slurp file state post
+    slurp:
+      src: /tmp/softnas.boot
+    register: slurpfilepost
+    become: true
+    when: init
+  
+  - debug: msg="{{ slurpfilepost['content'] | b64decode }}"
+    when: init

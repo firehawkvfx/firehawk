@@ -7,10 +7,12 @@
     region: "{{ aws_region }}"
     instance: "{{ instance_id }}"
     name: "softnas_volume_{{ item.item.int }}"
-    volume_size: "{{ ebs_disk_size }}"
-    volume_type: "{{ ebs_disk_type }}"
+    volume_size: "{{ item.item.ebs_disk_size }}"
+    volume_type: "{{ item.item.ebs_disk_type }}"
     device_name: "{{ item.item.path }}"
-    delete_on_termination: no
+    delete_on_termination: "{{ item.item.volatile }}"
     tags:
       Role: Softnas
       Mount: "{{ item.item.path }}"
+      Pool: "{{ item.item.pool_name }}"
+      Volatile: "{{ item.item.volatile }}"
