@@ -29,8 +29,7 @@ Vagrant.configure("2") do |config|
   config.disksize.size = '65536MB'
 
   if network == 'public'
-      config.vm.network "public_network", mac: mac_string, use_dhcp_assigned_default_route: true
-      #, bridge: bridgenic
+      config.vm.network "public_network", mac: mac_string, use_dhcp_assigned_default_route: true, bridge: bridgenic
     else
       # use a private network mode if you don't have control over the network environment - eg wifi in a cafe / other location.
       config.vm.network "private_network", ip: openfirehawkserver, mac: mac_string, use_dhcp_assigned_default_route: true
