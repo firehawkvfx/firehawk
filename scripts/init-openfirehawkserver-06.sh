@@ -27,8 +27,15 @@ fi
 echo 'Use vagrant reload and vagrant ssh after eexecuting each .sh script'
 echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 
-ansible-playbook -i ansible/inventory/hosts ansible/init.yaml --extra-vars "variable_user=vagrant"
-ansible-playbook -i ansible/inventory/hosts ansible/newuser_deadline.yaml
-ansible-playbook -i ansible/inventory/hosts ansible/deadline-repository-custom-events.yaml
+# this stage will configure mounts from onsite onto the cloud site, and vice versa.
 
-echo "if above was succesful, exit the vm and use 'vagrant reload' before continuing with the next script.  New user group added wont have user added until reload."
+# vagrant reload
+# vagrant ssh
+
+# test the vpn buy logging into softnas and ping another system on your local network.
+
+export TF_VAR_softnas_storage=True
+export TF_VAR_site_mounts=True
+export TF_VAR_remote_mounts_on_local=True
+terraform apply --auto-approve
+#should add a test script at this point to validate vpn connection is established, or licence servers may not work.

@@ -1,10 +1,35 @@
-# ssh will be killed from the above command because users were added to a new group and this will not update unless your ssh session is restarted.
-# login again and continue...
-# vagrant reload
-# vagrant ssh
+#!/bin/bash
+argument="$1"
+
+echo "Argument $1"
+echo ""
+ARGS=''
 
 cd /vagrant
-source ./update_vars.sh --dev
+
+if [[ -z $argument ]] ; then
+  echo "Assuming prod environment without args --dev."
+    source ./update_vars.sh --prod
+else
+  case $argument in
+    -d|--dev)
+      ARGS='--dev'
+      echo "using dev environment"
+      source ./update_vars.sh --dev
+      ;;
+    *)
+      raise_error "Unknown argument: ${argument}"
+      return
+      ;;
+  esac
+fi
+
+echo 'Use vagrant reload and vagrant ssh after eexecuting each .sh script'
+echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
+
+# ssh will be killed from the previous script because users were added to a new group and this will not update unless your ssh session is restarted.
+# login again and continue...
+
 ansible-playbook -i ansible/inventory/hosts ansible/openfirehawkserver_houdini.yaml
 ansible-playbook -i ansible/inventory/hosts ansible/aws-new-key.yaml
 
@@ -15,9 +40,6 @@ ansible-playbook -i secrets/dev/inventory/hosts ansible/ssh-add-private-host.yam
 # create and copy an ssh rsa key from ansible control to the workstation for provisioning.  1st time will error, run it twice
 ansible-playbook -i secrets/dev/inventory/hosts ansible/ssh-copy-id-private-host.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser"
 ansible-playbook -i secrets/dev/inventory/hosts ansible/ssh-copy-id-private-host.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser"
-
-# configure deadline on the local workstation with the keys from this install to run deadline slave and monitor
-ansible-playbook -i secrets/dev/inventory/hosts ansible/localworkstation-deadlineuser.yaml --tags "onsite-install" --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key"
 
 # configure routes to opposite environment for licence server to communicate if in dev environment
 ansible-playbook -i ansible/inventory ansible/ansible-control-update-routes.yaml

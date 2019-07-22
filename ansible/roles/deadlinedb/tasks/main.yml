@@ -6,9 +6,9 @@
   register: deadline_linux_installers_tar_stat
   become: yes
 
-- name: "Test: Fail if not existing tar"
+- name: "Test: Fail if not existing tar."
   fail:
-    msg: "Bailing out: file not found - {{ deadline_linux_installers_tar }}"
+    msg: "Bailing out: You need to place the installer in the download directory.  Installer not found - {{ deadline_linux_installers_tar }}"
   when: deadline_linux_installers_tar_stat.stat.exists == false or deadline_linux_installers_tar_stat.stat.isdir == True
 
 - name: Ensures dir exists
