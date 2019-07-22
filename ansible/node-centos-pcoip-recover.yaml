@@ -3,6 +3,8 @@
   become: true
 
   vars:
+    # if true, teradici pcoip service will be restarted
+    pcoip: true
     nvidia_driver: 410.92
     driver_file: NVIDIA-Linux-x86_64-{{ nvidia_driver }}-grid.run
     driver_url: http://us.download.nvidia.com/XFree86/Linux-x86_64/{{ driver_file }}
@@ -137,11 +139,18 @@
       mode: 700
     when: epel_stat.stat.exists == false
   
+  - name: restart pcoip.service on centos, also issue daemon-reload to pick up config changes
+    systemd:
+      state: restarted
+      daemon_reload: yes
+      name: pcoip.service
+    when: pcoip
+
   - name: fix boot and gui
     shell: |
       set -x
       uptime
-      systemctl restart pcoip.service
+      #systemctl restart pcoip.service
       /bin/sh /home/centos/Downloads/{{ driver_file }} --dkms -s --install-libglvnd
       dracut -fv
     become: true
