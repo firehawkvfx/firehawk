@@ -55,6 +55,7 @@
   become: true
 
   vars:
+    houdini_version: 17.5
     sesi_username: myemaillogin@sidefxwebsite
     sesi_password: mypassword@sidefxwebiste
     houdini_build: daily
@@ -142,34 +143,27 @@
       path: /opt/houdini_install_script/houdini_install.py
       mode: 0700
 
-  - name: set permissions on /home/deadlineuser/houdini17.5/scripts/
+  - name: "set permissions on /home/deadlineuser/houdini{{ houdini_version }}/scripts/"
     file:
-      path: /home/deadlineuser/houdini17.5/scripts/
+      path: "/home/deadlineuser/houdini{{ houdini_version }}/scripts/"
       state: directory
       mode: 0700
       owner: deadlineuser
 
-  - name: copy houdini-scripts to /home/deadlineuser/houdini17.5/scripts/
+  - name: "copy houdini-scripts to /home/deadlineuser/houdini{{ houdini_version }}/scripts/"
     copy:
       src: /vagrant/modules/node_centos/modules/houdini-scripts/
-      dest: /home/deadlineuser/houdini17.5/scripts/
+      dest: "/home/deadlineuser/houdini{{ houdini_version }}/scripts/"
       directory_mode: yes
       owner: deadlineuser
     become: true
 
-  - name: set permissions on /home/deadlineuser/houdini17.5/scripts/
+  - name: "set permissions on /home/deadlineuser/houdini{{ houdini_version }}/scripts/"
     file: 
-      dest: /home/deadlineuser/houdini17.5/scripts/ 
+      dest: "/home/deadlineuser/houdini{{ houdini_version }}/scripts/"
       owner: deadlineuser 
       mode: u=rwX,g=r 
       recurse: yes
-
-  # - name: set permissions on /home/deadlineuser/houdini17.5/scripts/
-  #   file:
-  #     path: /home/deadlineuser/houdini17.5/scripts/
-  #     state: directory
-  #     mode: 0700
-  #     owner: deadlineuser
 
   - name: dir permissions on /prod/asset/
     file:
@@ -278,18 +272,18 @@
       msg:  "{{ houdini_install_out.stdout }}"
     when: not skip_install
 
-  - name: setup licensing mode will write to /opt/hfs17.5/houdini/Licensing.opt
+  - name: "setup licensing mode will write to /opt/hfs{{ houdini_version }}/houdini/Licensing.opt"
     shell: |
-      cd /opt/hfs17.5
-      sudo sed -i '/licensingMode = sesinetd/s/^# //g' /opt/hfs17.5/houdini/Licensing.opt
-      sudo cat /opt/hfs17.5/houdini/Licensing.opt
+      cd /opt/hfs{{ houdini_version }}
+      sudo sed -i '/licensingMode = sesinetd/s/^# //g' /opt/hfs{{ houdini_version }}/houdini/Licensing.opt
+      sudo cat /opt/hfs{{ houdini_version }}/houdini/Licensing.opt
     register: houdini_hserver_out
     become: true
     when: not skip_install
   
   - name: setup licensing server ip as deadline user will write to $HOME/.sesi_licenses.pref
     shell: |
-      cd /opt/hfs17.5
+      cd /opt/hfs{{ houdini_version }}
       source ./houdini_setup
       hserver
       hserver -S {{ houdini_license_server_address }}
@@ -317,7 +311,7 @@
     copy:
       dest: /etc/profile.d/houdini_init.sh
       content: |
-        cwd="$(pwd)" && cd /opt/hfs17.5/ && source ./houdini_setup && cd $cwd
+        cwd="$(pwd)" && cd /opt/hfs{{ houdini_version }}/ && source ./houdini_setup && cd $cwd
       mode: u=rw,g=r,o=r
       owner: root
       group: root 
