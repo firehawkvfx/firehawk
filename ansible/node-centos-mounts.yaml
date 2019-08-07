@@ -566,9 +566,9 @@
     mount:
       fstype: nfs4
       opts: nfsvers=4.1
-      path: "/{{ item.item.mount_path }}"
+      path: "{{ item.item.mount_path }}"
       opts: rsize=8192,wsize=8192,timeo=14,intr,_netdev
-      src: "{{ item.item.ip }}:/{{ item.item.path }}"
+      src: "{{ item.item.ip }}:{{ item.item.path }}"
       state: "{{ ( item.item.mount_path and item.rc == 0 and item.item.state == 'present') | ternary( 'mounted' , 'absent' ) }}"
     with_items:
     - "{{ site_presence.results }}"
