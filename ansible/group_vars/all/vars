@@ -103,6 +103,8 @@ deadline_proxy_certificate_password: "{{ lookup('env','TF_VAR_deadline_proxy_cer
 
 houdini_license_server_address: "{{ lookup('env','TF_VAR_houdini_license_server_address') }}"
 houdini_build: "{{ lookup('env','TF_VAR_houdini_build') }}"
+houdini_major_version: "18.0"
+houdini_minor_version: "auto"
 
 aws_region: "{{ lookup('env','TF_VAR_aws_region') }}"
 AWS_REGION: "{{ lookup('env','TF_VAR_aws_region') }}"

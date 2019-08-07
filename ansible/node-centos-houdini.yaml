@@ -55,7 +55,13 @@
   become: true
 
   vars:
-    houdini_version: 17.5
+    houdini_major_version: 18.0
+    # houdini_linux_filename (to install from): 
+    # when not set to a specific string eg "houdini-17.5.326-linux_x86_64_gcc6.3.tar.gz", instead use the string "auto"
+    # specific versions must exist in your s3 bucket for retrieval which you can place there manually, or if you use
+    # a version you have installed previously, it should already exist in the bucket.
+    houdini_linux_filename: "auto"
+    houdini_auto_version: True
     sesi_username: myemaillogin@sidefxwebsite
     sesi_password: mypassword@sidefxwebiste
     houdini_build: daily
@@ -143,24 +149,24 @@
       path: /opt/houdini_install_script/houdini_install.py
       mode: 0700
 
-  - name: "set permissions on /home/deadlineuser/houdini{{ houdini_version }}/scripts/"
+  - name: "set permissions on /home/deadlineuser/houdini{{ houdini_major_version }}/scripts/"
     file:
-      path: "/home/deadlineuser/houdini{{ houdini_version }}/scripts/"
+      path: "/home/deadlineuser/houdini{{ houdini_major_version }}/scripts/"
       state: directory
       mode: 0700
       owner: deadlineuser
 
-  - name: "copy houdini-scripts to /home/deadlineuser/houdini{{ houdini_version }}/scripts/"
+  - name: "copy houdini-scripts to /home/deadlineuser/houdini{{ houdini_major_version }}/scripts/"
     copy:
       src: /vagrant/modules/node_centos/modules/houdini-scripts/
-      dest: "/home/deadlineuser/houdini{{ houdini_version }}/scripts/"
+      dest: "/home/deadlineuser/houdini{{ houdini_major_version }}/scripts/"
       directory_mode: yes
       owner: deadlineuser
     become: true
 
-  - name: "set permissions on /home/deadlineuser/houdini{{ houdini_version }}/scripts/"
+  - name: "set permissions on /home/deadlineuser/houdini{{ houdini_major_version }}/scripts/"
     file: 
-      dest: "/home/deadlineuser/houdini{{ houdini_version }}/scripts/"
+      dest: "/home/deadlineuser/houdini{{ houdini_major_version }}/scripts/"
       owner: deadlineuser 
       mode: u=rwX,g=r 
       recurse: yes
@@ -230,16 +236,17 @@
   - name: Query houdini filename - Houdini python script
     shell: |
       cd /opt/houdini_install_script/
-      python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini -b {{ houdini_build }} -t {{ download_to_dir }} -q true
+      python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini -b {{ houdini_build }} -t {{ download_to_dir }} -q true -f {{ houdini_linux_filename }}
     register: houdini_query_out
     become: true
-    when: not skip_install
+    when: not skip_install and houdini_auto_version
 
   - name: Python output
     debug:
       var: item
     with_items:
     - "{{ houdini_query_out.stdout_lines }}"
+    when: houdini_auto_version
 
 
   - set_fact:
@@ -248,6 +255,7 @@
       regexp: '(houdini.*.tar.*)'
     with_items:
     - "{{ houdini_query_out.stdout_lines }}"
+    when: houdini_auto_version
 
   - name: Houdini filename to install from sidefx website result
     debug:
@@ -260,30 +268,42 @@
       ~/.local/bin/aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ houdini_linux_filename }}"
     become_user: "{{ variable_user }}"
 
-  - name: Auto download and install Houdini python script
+  - name: Auto download and install Houdini with python script - auto version
     shell: |
       cd /opt/houdini_install_script/
       sudo python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini -b {{ houdini_build }} -t {{ download_to_dir }} -q false
     register: houdini_install_out
     become: true
-    when: not skip_install
+    when: not skip_install and houdini_auto_version
 
   - debug:
       msg:  "{{ houdini_install_out.stdout }}"
-    when: not skip_install
+    when: not skip_install and houdini_auto_version
 
-  - name: "setup licensing mode will write to /opt/hfs{{ houdini_version }}/houdini/Licensing.opt"
+  - name: Auto download and install Houdini with python script - specific existing version in s3
     shell: |
-      cd /opt/hfs{{ houdini_version }}
-      sudo sed -i '/licensingMode = sesinetd/s/^# //g' /opt/hfs{{ houdini_version }}/houdini/Licensing.opt
-      sudo cat /opt/hfs{{ houdini_version }}/houdini/Licensing.opt
+      cd /opt/houdini_install_script/
+      sudo python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini -b {{ houdini_build }} -t {{ download_to_dir }} -q false -f {{ houdini_linux_filename }}
+    register: houdini_install_out
+    become: true
+    when: not skip_install and not houdini_auto_version
+
+  - debug:
+      msg:  "{{ houdini_install_out.stdout }}"
+    when: not skip_install and not houdini_auto_version
+    
+  - name: "setup licensing mode will write to /opt/hfs{{ houdini_major_version }}/houdini/Licensing.opt"
+    shell: |
+      cd /opt/hfs{{ houdini_major_version }}
+      sudo sed -i '/licensingMode = sesinetd/s/^# //g' /opt/hfs{{ houdini_major_version }}/houdini/Licensing.opt
+      sudo cat /opt/hfs{{ houdini_major_version }}/houdini/Licensing.opt
     register: houdini_hserver_out
     become: true
     when: not skip_install
   
   - name: setup licensing server ip as deadline user will write to $HOME/.sesi_licenses.pref
     shell: |
-      cd /opt/hfs{{ houdini_version }}
+      cd /opt/hfs{{ houdini_major_version }}
       source ./houdini_setup
       hserver
       hserver -S {{ houdini_license_server_address }}
@@ -311,7 +331,7 @@
     copy:
       dest: /etc/profile.d/houdini_init.sh
       content: |
-        cwd="$(pwd)" && cd /opt/hfs{{ houdini_version }}/ && source ./houdini_setup && cd $cwd
+        cwd="$(pwd)" && cd /opt/hfs{{ houdini_major_version }}/ && source ./houdini_setup && cd $cwd
       mode: u=rw,g=r,o=r
       owner: root
       group: root 
