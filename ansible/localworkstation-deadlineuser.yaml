@@ -67,7 +67,6 @@
   vars:
     ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
     ansible_ssh_pass: "{{ user_deadlineuser_pw_local }}"
-    houdini_major_version: 18.0
 
   tasks:
   - name: establish connect test
@@ -203,61 +202,6 @@
       path: /home/deadlineuser/Thinkbox/Deadline10/submitters/HoudiniSubmitter/MainMenuCommon.xml
       regexp: 'HOMEDIR'
       replace: '~/Thinkbox/Deadline10'
-    become: yes
-    tags:
-    - cloud-install
-    - onsite-install
-
-  - name: ensure houdini.env file is present
-    file:
-      path: "/home/deadlineuser/houdini{{ houdini_major_version }}/houdini.env"
-      owner: deadlineuser
-      group: syscontrol
-      state: touch
-    become: yes
-    tags:
-    - cloud-install
-    - onsite-install
-
-  - name: set HOUDINI_PATH in houdini.env file.
-    lineinfile:
-      path: "/home/deadlineuser/houdini{{ houdini_major_version }}/houdini.env"
-      state: present
-      regexp: '.*HOUDINI_PATH =.*'
-      line: 'HOUDINI_PATH = "$HOUDINI_PATH; ~/Thinkbox/Deadline10/submitters/HoudiniSubmitter;&"'
-    become: yes
-    tags:
-    - cloud-install
-    - onsite-install
-
-  - name: set HOUDINI_MENU_PATH in houdini.env.
-    lineinfile:
-      state: present
-      path: "/home/deadlineuser/houdini{{ houdini_major_version }}/houdini.env"
-      regexp: '.*HOUDINI_MENU_PATH =.*'
-      line: 'HOUDINI_MENU_PATH = "$HOUDINI_MENU_PATH; /home/deadlineuser/houdini{{ houdini_major_version }}/scripts/menus; ~/Thinkbox/Deadline10/submitters/HoudiniSubmitter;&"'
-    become: yes
-    tags:
-    - cloud-install
-    - onsite-install
-
-  - name: set HOUDINI_OTLSCAN_PATH in houdini.env.
-    lineinfile:
-      state: present
-      path: "/home/deadlineuser/houdini{{ houdini_major_version }}/houdini.env"
-      regexp: '.*HOUDINI_OTLSCAN_PATH.=.*'
-      line: 'HOUDINI_OTLSCAN_PATH = "@/otls:/prod/asset/hda:/prod/asset/openfirehawk-houdini-tools/hda"'
-    become: yes
-    tags:
-    - cloud-install
-    - onsite-install
-
-  - name: set PYTHON path in houdini.env.
-    lineinfile:
-      state: present
-      path: "/home/deadlineuser/houdini{{ houdini_major_version }}/houdini.env"
-      regexp: '.*PYTHON =.*'
-      line: 'PYTHON = "/opt/hfs{{ houdini_major_version }}/python/bin/python"'
     become: yes
     tags:
     - cloud-install

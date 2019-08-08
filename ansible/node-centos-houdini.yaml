@@ -13,6 +13,9 @@
   remote_user: "{{ variable_user | default('centos') }}"
   become: true
 
+  vars:
+    ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
+
   tasks:
   - name: test connection
     debug:
@@ -55,16 +58,21 @@
   become: true
 
   vars:
+    # the become sudo pass is only relevent for local installation if required on the host specified.
+    ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
     houdini_major_version: 18.0
     # houdini_linux_filename (to install from): 
     # when not set to a specific string eg "houdini-17.5.326-linux_x86_64_gcc6.3.tar.gz", instead use the string "auto"
     # specific versions must exist in your s3 bucket for retrieval which you can place there manually, or if you use
     # a version you have installed previously, it should already exist in the bucket.
-    houdini_linux_filename: "auto"
-    houdini_auto_version: True
-    sesi_username: myemaillogin@sidefxwebsite
-    sesi_password: mypassword@sidefxwebiste
-    houdini_build: daily
+    #houdini_linux_filename: "auto"
+    #houdini_auto_version: True
+    # sesi_username: "{{ sesi_username }}"
+    # eg: myemaillogin@sidefxwebsite
+    # sesi_password: "{{ sesi_password }}"
+    # eg: mypassword@sidefxwebiste
+    # houdini_build: "{{ houdini_build }}"
+    # eg: daily
     download_to_dir: /var/tmp/openfirehawk
     
     variable_user: centos
@@ -73,7 +81,6 @@
     skip_packages: false
     skip_install: false
     bucket: "installers.{{ public_domain }}"
-
 
   tasks:
   - package:
@@ -149,192 +156,33 @@
       path: /opt/houdini_install_script/houdini_install.py
       mode: 0700
 
-  - name: "set permissions on /home/deadlineuser/houdini{{ houdini_major_version }}/scripts/"
-    file:
-      path: "/home/deadlineuser/houdini{{ houdini_major_version }}/scripts/"
-      state: directory
-      mode: 0700
-      owner: deadlineuser
+  - name: install houdini for items in list
+    include_role:
+      name: houdini-install
+    loop: "{{ houdini_version_list }}"
+    loop_control:
+      loop_var: houdini_version_item
 
-  - name: "copy houdini-scripts to /home/deadlineuser/houdini{{ houdini_major_version }}/scripts/"
-    copy:
-      src: /vagrant/modules/node_centos/modules/houdini-scripts/
-      dest: "/home/deadlineuser/houdini{{ houdini_major_version }}/scripts/"
-      directory_mode: yes
-      owner: deadlineuser
-    become: true
+  - name: configure houdini.env for items in list
+    include_role:
+      name: houdini-env-config
+    loop: "{{ houdini_version_list }}"
+    loop_control:
+      loop_var: houdini_version_item
 
-  - name: "set permissions on /home/deadlineuser/houdini{{ houdini_major_version }}/scripts/"
-    file: 
-      dest: "/home/deadlineuser/houdini{{ houdini_major_version }}/scripts/"
-      owner: deadlineuser 
-      mode: u=rwX,g=r 
-      recurse: yes
+- hosts: ansible_control
+  become: true
 
-  - name: dir permissions on /prod/asset/
-    file:
-      path: /prod/asset/
-      state: directory
-      mode: u=wrX,g=wrX,o-rwx
-      owner: deadlineuser
-      group: syscontrol
-      recurse: true
-    become: true
-    tags:
-      - sync_scripts
-
-  - name: Sync openfirehawk-houdini-tools to s3 - push
-    shell: |
-      set -x
-      cd /vagrant/modules/node_centos/modules/
-      aws s3 sync . s3://{{ bucket }}/ --exclude "*" --include "openfirehawk-houdini-tools/*"
-    become_user: vagrant
-    connection: local
-    tags:
-      - sync_scripts
-
-  - name: Sync openfirehawk-houdini-tools from s3
-    shell: |
-      set -x
-      cd /prod/asset/
-      ~/.local/bin/aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "openfirehawk-houdini-tools/*"
-    become_user: "{{ variable_user }}"
-    tags:
-      - sync_scripts
-
-  - name: dir permissions on /prod/asset/openfirehawk-houdini-tools.  note permissions aren't being set correctly for group for some reason.
-    file:
-      path: /prod/asset/openfirehawk-houdini-tools
-      state: directory
-      owner: deadlineuser
-      group: syscontrol
-      mode: u=rX,g+rX,o-rwx
-      recurse: true
-    become: true
-    tags:
-      - sync_scripts
-
-  # - name: copy openfirehawk-houdini-tools to /prod/asset/
-  #   copy:
-  #     src: /vagrant/modules/node_centos/modules/openfirehawk-houdini-tools/
-  #     dest: /prod/asset/
-  #     directory_mode: yes
-  #     #owner: deadlineuser
-  #   become: true
-  #   tags:
-  #     - sync_scripts
-
-  - name: set permissions on /prod/asset/openfirehawk-houdini-tools
-    file: 
-      dest: /prod/asset/openfirehawk-houdini-tools
-      owner: deadlineuser
-      mode: u=rwX,g=r 
-      recurse: yes
-    tags:
-      - sync_scripts
-
-  - name: Query houdini filename - Houdini python script
-    shell: |
-      cd /opt/houdini_install_script/
-      python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini -b {{ houdini_build }} -t {{ download_to_dir }} -q true -f {{ houdini_linux_filename }}
-    register: houdini_query_out
-    become: true
-    when: not skip_install and houdini_auto_version
-
-  - name: Python output
-    debug:
-      var: item
-    with_items:
-    - "{{ houdini_query_out.stdout_lines }}"
-    when: houdini_auto_version
-
-
-  - set_fact:
-      houdini_linux_filename: "{{ item | regex_search(regexp) }}"
-    vars:
-      regexp: '(houdini.*.tar.*)'
-    with_items:
-    - "{{ houdini_query_out.stdout_lines }}"
-    when: houdini_auto_version
-
-  - name: Houdini filename to install from sidefx website result
-    debug:
-      var: houdini_linux_filename
-
-  - name: Sync houdini from s3 if exist - pull
-    shell: |
-      set -x
-      cd {{ download_to_dir }}/
-      ~/.local/bin/aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ houdini_linux_filename }}"
-    become_user: "{{ variable_user }}"
-
-  - name: Auto download and install Houdini with python script - auto version
-    shell: |
-      cd /opt/houdini_install_script/
-      sudo python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini -b {{ houdini_build }} -t {{ download_to_dir }} -q false
-    register: houdini_install_out
-    become: true
-    when: not skip_install and houdini_auto_version
-
-  - debug:
-      msg:  "{{ houdini_install_out.stdout }}"
-    when: not skip_install and houdini_auto_version
-
-  - name: Auto download and install Houdini with python script - specific existing version in s3
-    shell: |
-      cd /opt/houdini_install_script/
-      sudo python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini -b {{ houdini_build }} -t {{ download_to_dir }} -q false -f {{ houdini_linux_filename }}
-    register: houdini_install_out
-    become: true
-    when: not skip_install and not houdini_auto_version
-
-  - debug:
-      msg:  "{{ houdini_install_out.stdout }}"
-    when: not skip_install and not houdini_auto_version
+  vars:
+    my_password: "{{ user_deadlineuser_pw }}"
+    no_extension: "{{ deadline_linux_installers_tar | splitext | first }}"
+    basename: "{{ no_extension.split('/')[-1] }}"
+    houdini_major_version: 18.0
     
-  - name: "setup licensing mode will write to /opt/hfs{{ houdini_major_version }}/houdini/Licensing.opt"
-    shell: |
-      cd /opt/hfs{{ houdini_major_version }}
-      sudo sed -i '/licensingMode = sesinetd/s/^# //g' /opt/hfs{{ houdini_major_version }}/houdini/Licensing.opt
-      sudo cat /opt/hfs{{ houdini_major_version }}/houdini/Licensing.opt
-    register: houdini_hserver_out
-    become: true
-    when: not skip_install
-  
-  - name: setup licensing server ip as deadline user will write to $HOME/.sesi_licenses.pref
-    shell: |
-      cd /opt/hfs{{ houdini_major_version }}
-      source ./houdini_setup
-      hserver
-      hserver -S {{ houdini_license_server_address }}
-      hserver -l
-      echo $HOME
-    register: houdini_hserver_deadlineuser_out
-    become_user: deadlineuser
-    when: not skip_install
-
-# After install sync houdini download with bucket
-
-  - name: ensure the houdini installer exist in the s3 bucket.  Push if it doesn't.
-    s3_sync:
-      bucket: "installers.{{ public_domain }}"
-      file_root: "{{ download_to_dir }}"
-      include: "{{ houdini_linux_filename }}"
-      aws_access_key: "{{ aws_access_key_s3user }}"
-      aws_secret_key: "{{ aws_secret_key_s3user }}"
-      region: "{{ aws_region }}"
-      mode: push
-    tags:
-      - sync_installers
-
-  - name: enforce houdini environment variables for all users in all bash shells always.  this is a temporary fix to enforce available env vars for tops to workaround a bug.
-    copy:
-      dest: /etc/profile.d/houdini_init.sh
-      content: |
-        cwd="$(pwd)" && cd /opt/hfs{{ houdini_major_version }}/ && source ./houdini_setup && cd $cwd
-      mode: u=rw,g=r,o=r
-      owner: root
-      group: root 
-    become: true
-    tags:
-      - enforce_houdini_env_vars
+  tasks:
+  - name: setup houdini plugin in deadline for each major version.  This identical role use occurs in 2 locations - after deadline install and with install of Houdini
+    include_role:
+      name: 'deadlinedb-houdini-plugins'
+    loop: "{{ houdini_major_version_list }}"
+    loop_control:
+      loop_var: houdini_major_version

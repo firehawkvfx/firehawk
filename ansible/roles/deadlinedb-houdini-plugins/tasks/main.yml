@@ -1,0 +1,102 @@
+---
+# tasks file for roles/deadlinedb-houdini-plugins
+
+- name: validate version var
+  debug:
+    var: houdini_major_version
+
+- name: Check content of file /opt/Thinkbox/DeadlineRepository10/plugins/Houdini/Houdini.param
+  replace:
+    path: /opt/Thinkbox/DeadlineRepository10/plugins/Houdini/Houdini.param
+    regexp: |
+      [Houdini{{ houdini_major_version | replace('.', '_') }}_Hython_Executable]
+  check_mode: yes
+  register: hython_block_exists
+
+- name: "Check if settings for {{ houdini_major_version }} are present in plugin settings"
+  lineinfile:
+    name: /opt/Thinkbox/DeadlineRepository10/plugins/Houdini/Houdini.param
+    line: "[Houdini{{ houdini_major_version | replace('.', '_') }}_Hython_Executable]"
+    state: present
+  check_mode: yes
+  register: hython_block_exists
+
+- debug:
+    msg: "hython_block_exists={{ hython_block_exists }}"
+
+- name: "Blockin file to add h{{ houdini_major_version }} support"
+  blockinfile:
+    path: /opt/Thinkbox/DeadlineRepository10/plugins/Houdini/Houdini.param
+    backup: true
+    block: |
+      [Houdini{{ houdini_major_version | replace('.', '_') }}_Hython_Executable]
+      Label=Houdini {{ houdini_major_version }} Hython Executable
+      Category=Render Executables
+      CategoryOrder=0
+      Type=multilinemultifilename
+      Index=11
+      Default=C:\Program Files\Side Effects Software\Houdini {{ houdini_major_version }}.000\bin\Hython.exe;/Applications/Houdini/Houdini{{ houdini_major_version }}.000/Frameworks/Houdini.framework/Versions/{{ houdini_major_version }}.000/Resources/bin/hython;/opt/hfs{{ houdini_major_version }}/bin/hython
+      Description=The path to the hython executable. It can be found in the Houdini bin folder.
+    marker: "\n# {mark} ANSIBLE MANAGED BLOCK Houdini{{ houdini_major_version | replace('.', '_') }}_Hython_Executable\n"
+  when: (hython_block_exists is changed) or (hython_block_exists is failed)
+
+- name: "Check if settings for {{ houdini_major_version }} simtracker are present in plugin settings"
+  lineinfile:
+    name: /opt/Thinkbox/DeadlineRepository10/plugins/Houdini/Houdini.param
+    line: "[Houdini{{ houdini_major_version | replace('.', '_') }}_SimTracker]"
+    state: present
+  check_mode: yes
+  register: simtracker_block_exists
+
+- name: "Blockin file to add h{{ houdini_major_version }} support"
+  blockinfile:
+    path: /opt/Thinkbox/DeadlineRepository10/plugins/Houdini/Houdini.param
+    backup: true
+    block: |
+      [Houdini{{ houdini_major_version | replace('.', '_') }}_SimTracker]
+      Label=Houdini {{ houdini_major_version }} Sim Tracker File
+      Category=HQueue Simulation Job Options
+      CategoryOrder=1
+      Type=multilinemultifilename
+      Index=7
+      Default=C:\Program Files\Side Effects Software\Houdini {{ houdini_major_version }}.000\houdini\python2.7libs\simtracker.py;/Applications/Houdini/Houdini{{ houdini_major_version }}.000/Frameworks/Houdini.framework/Versions/{{ houdini_major_version }}.000/Resources/houdini/python2.7libs/simtracker.py;/opt/hfs{{ houdini_major_version }}/houdini/python2.7libs/simtracker.py
+      Description=The path to the simtracker.py file that is used when distributing HQueue sim jobs. This file can be found in the Houdini install.
+    marker: "\n# {mark} ANSIBLE MANAGED BLOCK Houdini{{ houdini_major_version | replace('.', '_') }}_SimTracker\n"
+  when: (simtracker_block_exists is changed) or (simtracker_block_exists is failed)
+
+- name: Check content of file /opt/Thinkbox/DeadlineRepository10/plugins/Houdini/Houdini.param for hython block
+  replace:
+    path: /opt/Thinkbox/DeadlineRepository10/plugins/Houdini/Houdini.param
+    regexp: |
+      [Houdini{{ houdini_major_version | replace('.', '_') }}_Hython_Executable]
+  check_mode: yes
+  register: hython_block_exists
+
+- name: "Check if settings for Mantra {{ houdini_major_version }} are present in plugin settings"
+  lineinfile:
+    name: /opt/Thinkbox/DeadlineRepository10/plugins/Mantra/Mantra.param
+    line: "[Houdini{{ houdini_major_version | replace('.', '_') }}_Mantra_Executable]"
+    state: present
+  check_mode: yes
+  register: mantra_block_exists
+
+- debug:
+    msg: "mantra_block_exists={{ mantra_block_exists }}"
+
+- name: "Blockin file to add h{{ houdini_major_version }} Mantra support"
+  blockinfile:
+    path: /opt/Thinkbox/DeadlineRepository10/plugins/Mantra/Mantra.param
+    backup: true
+    block: |
+      [Mantra{{ houdini_major_version | replace('.', '_') }}_Executable]
+      Label=Mantra {{ houdini_major_version }} Executable
+      Category=Render Executables
+      CategoryOrder=0
+      Type=multilinemultifilename
+      Index=12
+      Default=C:\Program Files\Side Effects Software\Houdini {{ houdini_major_version }}.000\bin\mantra.exe;/Applications/Houdini/Houdini{{ houdini_major_version }}.000/Frameworks/Houdini.framework/Versions/{{ houdini_major_version }}.000/Resources/bin/mantra;/opt/hfs{{ houdini_major_version }}/bin/mantra
+      Description=The path to the Mantra executable used for rendering.
+    marker: "\n# {mark} ANSIBLE MANAGED BLOCK Houdini{{ houdini_major_version | replace('.', '_') }}_Mantra_Executable\n"
+  when: (mantra_block_exists is changed) or (mantra_block_exists is failed)
+
+

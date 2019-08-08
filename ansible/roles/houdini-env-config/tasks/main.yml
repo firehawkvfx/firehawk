@@ -1,0 +1,79 @@
+
+### modify houdini environment vars
+
+- name: houdini_version_item
+  debug:
+    var: houdini_version_item
+
+- name: ensure houdini.env file is present
+  file:
+    path: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env"
+    owner: deadlineuser
+    group: syscontrol
+    state: touch
+  become: yes
+  tags:
+  - cloud-install
+  - onsite-install
+
+- name: firehawk vars in beggining of in houdini.env file.
+  blockinfile:
+    path: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env"
+    backup: true
+    insertbefore: BOF
+    block: |
+      FIREHAWK_HOUDINI_TOOLS = "{{ firehawk_houdini_tools }}"
+      PROD_ROOT = "{{ localnas1_mount_path }}"
+      PROD_ONSITE_ROOT = "{{ localnas1_path_abs }}"
+      PROD_CLOUD_ROOT = "{{ softnas1_path_abs }}"
+    marker: "\n# {mark} ANSIBLE MANAGED BLOCK HOUDINI{{ houdini_version_item.houdini_major_version | replace('.', '_') }} FIREHAWK VARIABLES \n"
+  become: yes
+  tags:
+  - cloud-install
+  - onsite-install
+
+- name: set HOUDINI_PATH in houdini.env file.
+  lineinfile:
+    path: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env"
+    state: present
+    regexp: '.*HOUDINI_PATH =.*'
+    line: 'HOUDINI_PATH = "$HOUDINI_PATH; ~/Thinkbox/Deadline10/submitters/HoudiniSubmitter; $FIREHAWK_HOUDINI_TOOLS; &"'
+  become: yes
+  tags:
+  - cloud-install
+  - onsite-install
+
+- name: set HOUDINI_MENU_PATH in houdini.env.
+  lineinfile:
+    state: present
+    path: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env"
+    regexp: '.*HOUDINI_MENU_PATH =.*'
+    line: 'HOUDINI_MENU_PATH = "$HOUDINI_MENU_PATH; /home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/scripts/menus; $FIREHAWK_HOUDINI_TOOLS/scripts/menus; ~/Thinkbox/Deadline10/submitters/HoudiniSubmitter;&"'
+  become: yes
+  tags:
+  - cloud-install
+  - onsite-install
+
+- name: set HOUDINI_OTLSCAN_PATH in houdini.env.
+  lineinfile:
+    state: present
+    path: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env"
+    regexp: '.*HOUDINI_OTLSCAN_PATH.=.*'
+    line: 'HOUDINI_OTLSCAN_PATH = "@/otls:/prod/assets/hda:$FIREHAWK_HOUDINI_TOOLS/hda"'
+  become: yes
+  tags:
+  - cloud-install
+  - onsite-install
+
+- name: set PYTHON path in houdini.env.
+  lineinfile:
+    state: present
+    path: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env"
+    regexp: '.*PYTHON =.*'
+    line: 'PYTHON = "/opt/hfs{{ houdini_version_item.houdini_major_version }}/python/bin/python"'
+  become: yes
+  tags:
+  - cloud-install
+  - onsite-install
+
+### end modify houdini environment vars
