@@ -83,7 +83,7 @@
     mount:
       fstype: none
       path: "/export/{{ item.item.pool_name }}/{{ item.item.volume_name }}"
-      opts: bind
+      opts: "x-systemd.requires=/{{ item.item.pool_name }}/{{ item.item.volume_name }}/,bind"
       src: "/{{ item.item.pool_name }}/{{ item.item.volume_name }}/"
       # if the path exists, and it was found in the exports, then set to mounted, else remove.
       # state: "{{ ( item.item.path and item.item.bind1 and item.rc == 0 and item.item.state == 'present' ) | ternary( 'mounted' , 'absent' ) }}"

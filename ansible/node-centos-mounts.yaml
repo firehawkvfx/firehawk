@@ -192,9 +192,8 @@
     become: yes
     mount:
       fstype: nfs4
-      opts: nfsvers=4.1
       path: "/{{ item.item.pool_name }}/{{ item.item.volume_name }}"
-      opts: rsize=8192,wsize=8192,timeo=14,intr,_netdev
+      opts: nfsvers=4.1,rsize=8192,wsize=8192,timeo=14,intr,_netdev
       src: "{{ groups['role_softnas'][0] }}:/{{ item.item.pool_name }}/{{ item.item.volume_name }}"
       state: "{{ ( destroy == false and item.item.path and item.rc == 0 and item.item.state == 'present') | ternary( 'mounted' , 'absent' ) }}"
     when: destroy == false
@@ -213,7 +212,7 @@
     mount:
       fstype: none
       path: "{{ item.item.bind2 }}"
-      opts: bind
+      opts: "x-systemd.requires={{ item.item.path }},bind"
       src: "{{ item.item.path }}"
       # if the path exists, and it was found in the exports, then set to mounted, else remove.
       state: "{{ ( destroy == false and item.item.path and item.item.bind2 and item.rc == 0 and item.item.state == 'present' ) | ternary( 'mounted' , 'absent' ) }}"
@@ -353,9 +352,8 @@
     become: yes
     mount:
       fstype: nfs4
-      opts: nfsvers=4.1
       path: "/{{ item.item.pool_name }}/{{ item.item.volume_name }}"
-      opts: rsize=8192,wsize=8192,timeo=14,intr,_netdev
+      opts: nfsvers=4.1,rsize=8192,wsize=8192,timeo=14,intr,_netdev
       src: "{{ groups['role_softnas'][0] }}:/{{ item.item.pool_name }}/{{ item.item.volume_name }}"
       state: "{{ ( item.item.path and item.rc == 0 and item.item.state == 'present') | ternary( 'mounted' , 'absent' ) }}"
     when: destroy == false
@@ -368,7 +366,7 @@
     mount:
       fstype: none
       path: "{{ item.item.bind1 }}"
-      opts: bind
+      opts: "x-systemd.requires={{ item.item.path }},bind"
       src: "{{ item.item.path }}"
       # if the path exists, and it was found in the exports, then set to mounted, else remove.
       state: "{{ ( item.item.path and item.item.bind1 and item.rc == 0 and item.item.state == 'present' ) | ternary( 'mounted' , 'absent' ) }}"
@@ -382,7 +380,7 @@
     mount:
       fstype: none
       path: "{{ item.item.bind2 }}"
-      opts: bind
+      opts: "x-systemd.requires={{ item.item.path }},bind"
       src: "{{ item.item.path }}"
       # if the path exists, and it was found in the exports, then set to mounted, else remove.
       state: "{{ ( item.item.path and item.item.bind2 and item.rc == 0 and item.item.state == 'present' ) | ternary( 'mounted' , 'absent' ) }}"
@@ -565,9 +563,8 @@
     become: yes
     mount:
       fstype: nfs4
-      opts: nfsvers=4.1
       path: "{{ item.item.mount_path }}"
-      opts: rsize=8192,wsize=8192,timeo=14,intr,_netdev
+      opts: nfsvers=4.1,rsize=8192,wsize=8192,timeo=14,intr,_netdev
       src: "{{ item.item.ip }}:{{ item.item.path }}"
       state: "{{ ( item.item.mount_path and item.rc == 0 and item.item.state == 'present') | ternary( 'mounted' , 'absent' ) }}"
     with_items:
@@ -580,7 +577,7 @@
     mount:
       fstype: none
       path: "{{ item.item.bind1 }}"
-      opts: bind
+      opts: "x-systemd.requires={{ item.item.mount_path }},bind"
       src: "{{ item.item.mount_path }}"
       # if the path exists, and it was found in the exports, then set to mounted, else remove.
       state: "{{ ( item.item.mount_path and item.item.bind1 and item.rc == 0 and item.item.state == 'present' ) | ternary( 'mounted' , 'absent' ) }}"
@@ -594,7 +591,7 @@
     mount:
       fstype: none
       path: "{{ item.item.bind2 }}"
-      opts: bind
+      opts: "x-systemd.requires={{ item.item.mount_path }},bind"
       src: "{{ item.item.mount_path }}"
       # if the path exists, and it was found in the exports, then set to mounted, else remove.
       state: "{{ ( item.item.mount_path and item.item.bind2 and item.rc == 0 and item.item.state == 'present' ) | ternary( 'mounted' , 'absent' ) }}"
