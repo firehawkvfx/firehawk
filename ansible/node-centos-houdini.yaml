@@ -32,6 +32,51 @@
     bucket: "installers.{{ public_domain }}"
 
   tasks:
+  - debug:
+      msg: "Many ports are open for testing.  These should be tightened to minimum necesary advised by SESI"
+      
+  - name: Allow all access from networks to this host for tops.
+    ufw:
+      rule: allow
+      port: "{{ item.port | replace('-',':')}}"
+      src: "{{ item.dest }}"
+      proto: tcp
+    with_items:
+    - { port: '49152-65535', dest: "{{ remote_subnet_cidr }}" }
+    - { port: '49152-65535', dest: "{{ vpn_cidr }}" }
+    - { port: '49152-65535', dest: "{{ private_subnet1 }}" }
+    - { port: '49152-65535', dest: "{{ private_subnet2 }}" } 
+    - { port: '49152-65535', dest: "{{ public_subnet1 }}" }
+    - { port: '49152-65535', dest: "{{ public_subnet2 }}" }
+    # # port for tops callback and relay.
+    - { port: '1024', dest: "{{ remote_subnet_cidr }}" }
+    - { port: '1024', dest: "{{ vpn_cidr }}" }
+    - { port: '1024', dest: "{{ private_subnet1 }}" }
+    - { port: '1024', dest: "{{ private_subnet2 }}" } 
+    - { port: '1024', dest: "{{ public_subnet1 }}" }
+    - { port: '1024', dest: "{{ public_subnet2 }}" }
+
+  - name: Allow all access from networks to this host for tops.
+    ufw:
+      rule: allow
+      port: "{{ item.port | replace('-',':')}}"
+      src: "{{ item.dest }}"
+      proto: udp
+    with_items:
+    - { port: '49152-65535', dest: "{{ remote_subnet_cidr }}" }
+    - { port: '49152-65535', dest: "{{ vpn_cidr }}" }
+    - { port: '49152-65535', dest: "{{ private_subnet1 }}" }
+    - { port: '49152-65535', dest: "{{ private_subnet2 }}" } 
+    - { port: '49152-65535', dest: "{{ public_subnet1 }}" }
+    - { port: '49152-65535', dest: "{{ public_subnet2 }}" }
+    # # port for tops callback and relay.
+    - { port: '1024', dest: "{{ remote_subnet_cidr }}" }
+    - { port: '1024', dest: "{{ vpn_cidr }}" }
+    - { port: '1024', dest: "{{ private_subnet1 }}" }
+    - { port: '1024', dest: "{{ private_subnet2 }}" } 
+    - { port: '1024', dest: "{{ public_subnet1 }}" }
+    - { port: '1024', dest: "{{ public_subnet2 }}" }
+
   - name: ensure an s3 bucket exists to store large files / installers for faster redeployment.
     s3_bucket:
       name: "{{ bucket }}"
@@ -83,6 +128,47 @@
     bucket: "installers.{{ public_domain }}"
 
   tasks:
+  # Open ports for tops schedulers.
+  - firewalld:
+      port: "{{ item.port }}/udp"
+      permanent: yes
+      state: enabled
+      source: "{{ item.dest }}"
+    with_items:
+    - { port: '49152-65535', dest: "{{ remote_subnet_cidr }}" }
+    - { port: '49152-65535', dest: "{{ vpn_cidr }}" }
+    - { port: '49152-65535', dest: "{{ private_subnet1 }}" }
+    - { port: '49152-65535', dest: "{{ private_subnet2 }}" } 
+    - { port: '49152-65535', dest: "{{ public_subnet1 }}" }
+    - { port: '49152-65535', dest: "{{ public_subnet2 }}" }
+    # # port for tops callback and relay.
+    - { port: '1024', dest: "{{ remote_subnet_cidr }}" }
+    - { port: '1024', dest: "{{ vpn_cidr }}" }
+    - { port: '1024', dest: "{{ private_subnet1 }}" }
+    - { port: '1024', dest: "{{ private_subnet2 }}" } 
+    - { port: '1024', dest: "{{ public_subnet1 }}" }
+    - { port: '1024', dest: "{{ public_subnet2 }}" }
+
+  - firewalld:
+      port: "{{ item.port }}/tcp"
+      permanent: yes
+      state: enabled
+      source: "{{ item.dest }}"
+    with_items:
+    - { port: '49152-65535', dest: "{{ remote_subnet_cidr }}" }
+    - { port: '49152-65535', dest: "{{ vpn_cidr }}" }
+    - { port: '49152-65535', dest: "{{ private_subnet1 }}" }
+    - { port: '49152-65535', dest: "{{ private_subnet2 }}" } 
+    - { port: '49152-65535', dest: "{{ public_subnet1 }}" }
+    - { port: '49152-65535', dest: "{{ public_subnet2 }}" }
+    # # port for tops callback and relay.
+    - { port: '1024', dest: "{{ remote_subnet_cidr }}" }
+    - { port: '1024', dest: "{{ vpn_cidr }}" }
+    - { port: '1024', dest: "{{ private_subnet1 }}" }
+    - { port: '1024', dest: "{{ private_subnet2 }}" } 
+    - { port: '1024', dest: "{{ public_subnet1 }}" }
+    - { port: '1024', dest: "{{ public_subnet2 }}" }
+
   - package:
       name: "{{ item }}"
       state: present
@@ -108,23 +194,6 @@
       state: present
     with_items:
       - nmap
-
-  - name: Open port ranges for Houdini TOP's PDG
-    command: "nmap -p  {{ item.port }} {{ item.dest }}"
-    register: nmap_result
-    with_items:
-      - { port: '49152-65535', dest: remote_subnet_cidr }
-      - { port: '49152-65535', dest: vpn_cidr }
-      - { port: '49152-65535', dest: private_subnet1 }
-      - { port: '49152-65535', dest: private_subnet2 } 
-      - { port: '49152-65535', dest: public_subnet1 }
-      - { port: '49152-65535', dest: public_subnet2 }
-
-  - debug:
-      msg: "{{ item.stdout }}"
-    with_items:
-      - "{{ nmap_result.results }}"
-    when: debug > 0
 
   - name: dir permissions on /opt/houdini_install_script
     file:
