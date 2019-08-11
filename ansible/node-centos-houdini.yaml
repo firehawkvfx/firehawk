@@ -163,12 +163,16 @@
     loop_control:
       loop_var: houdini_version_item
 
-  - name: configure houdini.env for items in list
+  - name: configure houdini.env and deadline for items in list
     include_role:
       name: houdini-env-config
     loop: "{{ houdini_version_list }}"
     loop_control:
       loop_var: houdini_version_item
+
+  - name: configure houdini and deadline config
+    include_role:
+      name: houdini-deadline-config
 
 - hosts: ansible_control
   become: true
@@ -180,7 +184,7 @@
     houdini_major_version: 18.0
     
   tasks:
-  - name: setup houdini plugin in deadline for each major version.  This identical role use occurs in 2 locations - after deadline install and with install of Houdini
+  - name: setup houdini plugin in deadline repository for each major version.  This identical role use occurs in 2 locations - after deadline install and with install of Houdini
     include_role:
       name: 'deadlinedb-houdini-plugins'
     loop: "{{ houdini_major_version_list }}"
