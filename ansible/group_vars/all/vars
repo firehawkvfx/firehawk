@@ -82,7 +82,7 @@ sesi_password: "{{ lookup('env','TF_VAR_sesi_password') }}"
 vpn_cidr: "{{ lookup('env','TF_VAR_vpn_cidr') }}"
 vpn_cidr_dev: "{{ lookup('env','TF_VAR_vpn_cidr_prod') }}"
 vpn_cidr_prod: "{{ lookup('env','TF_VAR_vpn_cidr_prod') }}"
-remote_subnet_cidr: "{{ lookup('env', TF_VAR_remote_subnet_cidr) }}"
+remote_subnet_cidr: "{{ lookup('env','TF_VAR_remote_subnet_cidr') }}"
 
 openvpn_user: openvpnas
 openvpn_user_pw: "{{ lookup('env','TF_VAR_openvpn_user_pw') }}"
