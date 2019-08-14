@@ -172,10 +172,13 @@
     - centos
     become: true
 
-  - name: Kill SSH because otherwise the user will not be added to the group.
-    shell: sleep 1; pkill -u {{ ansible_ssh_user }} sshd
-    async: 3
-    poll: 2
+  # this may not be working well with aws.
+  # - name: Kill SSH because otherwise the user will not be added to the group.
+  #   shell: sleep 1; pkill -u {{ ansible_user }} sshd
+  #   async: 3
+  #   poll: 2
 
-  - name: reset ssh connection to allow user changes to affect 'current login user'
-    meta: reset_connection
+  # - name: reset ssh connection to allow user changes to affect 'current login user'
+  #   meta: reset_connection
+
+  # ensure no other tasks occur without another ssh session after this point.
