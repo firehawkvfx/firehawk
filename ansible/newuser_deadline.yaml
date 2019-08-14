@@ -43,7 +43,7 @@
     - onsite-install
 
   - name: Kill SSH because otherwise the user will not be added to the group.
-    shell: sleep 1; pkill -u {{ ansible_ssh_user }} sshd
+    shell: sleep 1; pkill -u {{ ansible_user }} sshd
     async: 3
     poll: 2
     tags:
