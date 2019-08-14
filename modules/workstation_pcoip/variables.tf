@@ -18,6 +18,8 @@ variable "private_subnet_ids" {
 
 variable "key_name" {}
 
+variable "workstation_enabled" {}
+
 #contents of the my_key.pem file to connect to the instance.
 variable "private_key" {}
 
