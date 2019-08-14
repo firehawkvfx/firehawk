@@ -13,3 +13,6 @@
 [submodule "modules/node_centos/modules/houdini-scripts"]
 	path = modules/node_centos/modules/houdini-scripts
 	url = https://houdinifxtd@bitbucket.org/houdinifxtd/houdini-scripts-openfirehawk.git
+[submodule "modules/node_centos/modules/openfirehawk-houdini-tools"]
+	path = modules/node_centos/modules/openfirehawk-houdini-tools
+	url = https://github.com/firehawkvfx/openfirehawk-houdini-tools.git
