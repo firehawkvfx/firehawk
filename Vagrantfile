@@ -37,6 +37,8 @@ Vagrant.configure("2") do |config|
   
   # routing issues?  https://stackoverflow.com/questions/35208188/how-can-i-define-network-settings-with-vagrant
   config.vm.provider "virtualbox" do |vb|
+    # fix time sync threshold to 10 seconds.  otherwise sleep on the host can cause time offset on wake.
+    vb.customize [ "guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-set-threshold", 1000 ]
     # Display the VirtualBox GUI when booting the machine
     vb.gui = true
     # Customize the amount of memory on the VM:
