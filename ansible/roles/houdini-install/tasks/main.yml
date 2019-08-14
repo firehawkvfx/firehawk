@@ -27,9 +27,9 @@
     mode: u=rwX,g=r 
     recurse: yes
 
-- name: dir permissions on /prod/asset/
+- name: dir permissions on /prod/assets/
   file:
-    path: /prod/asset/
+    path: /prod/assets/
     state: directory
     mode: u=wrX,g=wrX,o-rwx
     owner: deadlineuser
@@ -52,37 +52,37 @@
 - name: Sync openfirehawk-houdini-tools from s3
   shell: |
     set -x
-    cd /prod/asset/
+    cd /prod/assets/
     ~/.local/bin/aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "openfirehawk-houdini-tools/*"
   become_user: "{{ variable_user }}"
   tags:
     - sync_scripts
 
-- name: dir permissions on /prod/asset/openfirehawk-houdini-tools.  note permissions aren't being set correctly for group for some reason.
+- name: dir permissions on /prod/assets/openfirehawk-houdini-tools.  note permissions aren't being set correctly for group for some reason.
   file:
-    path: /prod/asset/openfirehawk-houdini-tools
+    path: /prod/assets/openfirehawk-houdini-tools
     state: directory
     owner: deadlineuser
     group: syscontrol
-    mode: u=rX,g+rX,o-rwx
+    mode: u=wrX,g=wrX,o-rwx
     recurse: true
   become: true
   tags:
     - sync_scripts
 
-# - name: copy openfirehawk-houdini-tools to /prod/asset/
+# - name: copy openfirehawk-houdini-tools to /prod/assets/
 #   copy:
 #     src: /vagrant/modules/node_centos/modules/openfirehawk-houdini-tools/
-#     dest: /prod/asset/
+#     dest: /prod/assets/
 #     directory_mode: yes
 #     #owner: deadlineuser
 #   become: true
 #   tags:
 #     - sync_scripts
 
-- name: set permissions on /prod/asset/openfirehawk-houdini-tools
+- name: set permissions on /prod/assets/openfirehawk-houdini-tools
   file: 
-    dest: /prod/asset/openfirehawk-houdini-tools
+    dest: /prod/assets/openfirehawk-houdini-tools
     owner: deadlineuser
     mode: u=rwX,g=r 
     recurse: yes

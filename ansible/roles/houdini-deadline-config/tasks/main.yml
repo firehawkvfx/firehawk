@@ -1,0 +1,91 @@
+# Configure houdini and deadline compatibility
+- name: houdini_version_item
+  debug:
+    var: item
+  with_items: "{{ houdini_version_list }}"
+
+
+- name: Ansible set local permissions for items to be copied - /opt/Thinkbox/DeadlineRepository10/submission/... - should not be necesary since root is covered prior, but may fix issues.
+  file:
+    path: "/opt/Thinkbox/DeadlineRepository10/submission/{{ item }}"
+    state: directory
+    mode: u=rX,g=rX,o=r
+    owner: deadlineuser
+    group: syscontrol
+    recurse: yes
+  become: yes
+  connection: local
+  with_items:
+  - HServer
+  - Houdini
+  - Nuke
+  tags:
+  - cloud-install
+  - onsite-install
+
+- name: Ansible ensure python2.7libs dir exists
+  file:
+    path: "/home/deadlineuser/houdini{{ item.houdini_major_version }}/python2.7libs/"
+    # strange since this dir doesn't exist
+    state: directory
+    mode: u=rX,g=rX,o=r
+    owner: deadlineuser
+    group: syscontrol
+    recurse: yes
+  become: yes
+  with_items: "{{ houdini_version_list }}"
+  tags:
+  - cloud-install
+  - onsite-install
+
+- name: Ansible copy directory to the remote server.  if failure - ensure you exit the shell and vagrant ssh in before trying again.  vagerant user and deadlineuser were added to a group and this will not refresh until exiting ssh.
+  copy:
+    src: "/opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/{{ item }}"
+    dest: "/home/deadlineuser/Thinkbox/Deadline10/submitters/HoudiniSubmitter"
+    owner: deadlineuser
+    group: syscontrol
+  become: yes
+  with_items:
+  - otls
+  - soho
+  - DeadlineHoudiniClient.py
+  - MainMenuCommon.xml
+  tags:
+  - cloud-install
+  - onsite-install
+
+- name: set homedir in xml.
+  replace:
+    path: /home/deadlineuser/Thinkbox/Deadline10/submitters/HoudiniSubmitter/MainMenuCommon.xml
+    regexp: 'HOMEDIR'
+    replace: '~/Thinkbox/Deadline10'
+  become: yes
+  tags:
+  - cloud-install
+  - onsite-install
+
+- name: Ansible copy CallDeadlineCommand.py to the remote server /opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/CallDeadlineCommand.py
+  copy:
+    src: "/opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/CallDeadlineCommand.py"
+    dest: "/home/deadlineuser/houdini{{ item.houdini_major_version }}/python2.7libs/"
+  become: yes
+  tags:
+  - cloud-install
+  - onsite-install
+  with_items: "{{ houdini_version_list }}"
+
+- name: Ansible copy directory to the remote server /opt/Thinkbox/DeadlineRepository10/submission/...
+  copy:
+    src: "/opt/Thinkbox/DeadlineRepository10/submission/{{ item }}"
+    dest: "/opt/Thinkbox/DeadlineRepository10/submission/"
+    owner: deadlineuser
+    group: syscontrol
+  become: yes
+  with_items:
+  - HServer
+  - Houdini
+  #- Nuke
+  tags:
+  - cloud-install
+  - onsite-install
+# Note: getting a strange permissions issue with copying the nuke subfolder.  upon a second run of the playbook in the shell it is fine.  only the first run in terraform creates the issue.

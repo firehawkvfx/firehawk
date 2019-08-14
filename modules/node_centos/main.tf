@@ -210,8 +210,9 @@ resource "null_resource" "provision_node_centos" {
       ansible-playbook -i ansible/inventory ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_node_centos variable_user=centos"
       ansible-playbook -i ansible/inventory ansible/node-centos-mounts.yaml -v --skip-tags "local_install"
       # ansible-playbook -i ansible/inventory ansible/node-centos-init-deadline.yaml -v
-      ansible-playbook -i ansible/inventory ansible/node-centos-houdini.yaml -v --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password houdini_build=$TF_VAR_houdini_build"
       ansible-playbook -i ansible/inventory ansible/localworkstation-deadlineuser.yaml --tags "onsite-install" --extra-vars "variable_host=role_node_centos variable_user=centos"
+      ansible-playbook -i ansible/inventory ansible/node-centos-houdini.yaml -v
+      # ansible-playbook -i ansible/inventory ansible/localworkstation-deadlineuser.yaml --tags "onsite-install" --extra-vars "variable_host=role_node_centos variable_user=centos"
       ansible-playbook -i ansible/inventory ansible/node-centos-ffmpeg.yaml -v
   EOT
   }

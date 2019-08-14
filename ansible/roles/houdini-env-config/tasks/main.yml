@@ -26,7 +26,7 @@
       PROD_ROOT = "{{ localnas1_mount_path }}"
       PROD_ONSITE_ROOT = "{{ localnas1_path_abs }}"
       PROD_CLOUD_ROOT = "{{ softnas1_path_abs }}"
-    marker: "\n# {mark} ANSIBLE MANAGED BLOCK HOUDINI{{ houdini_version_item.houdini_major_version | replace('.', '_') }} FIREHAWK VARIABLES \n"
+    marker: "### {mark} ANSIBLE MANAGED BLOCK HOUDINI{{ houdini_version_item.houdini_major_version }} FIREHAWK VARIABLES ###"
   become: yes
   tags:
   - cloud-install
@@ -35,6 +35,7 @@
 - name: set HOUDINI_PATH in houdini.env file.
   lineinfile:
     path: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env"
+    backup: true
     state: present
     regexp: '.*HOUDINI_PATH =.*'
     line: 'HOUDINI_PATH = "$HOUDINI_PATH; ~/Thinkbox/Deadline10/submitters/HoudiniSubmitter; $FIREHAWK_HOUDINI_TOOLS; &"'
@@ -47,6 +48,7 @@
   lineinfile:
     state: present
     path: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env"
+    backup: true
     regexp: '.*HOUDINI_MENU_PATH =.*'
     line: 'HOUDINI_MENU_PATH = "$HOUDINI_MENU_PATH; /home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/scripts/menus; $FIREHAWK_HOUDINI_TOOLS/scripts/menus; ~/Thinkbox/Deadline10/submitters/HoudiniSubmitter;&"'
   become: yes
@@ -58,6 +60,7 @@
   lineinfile:
     state: present
     path: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env"
+    backup: true
     regexp: '.*HOUDINI_OTLSCAN_PATH.=.*'
     line: 'HOUDINI_OTLSCAN_PATH = "@/otls:/prod/assets/hda:$FIREHAWK_HOUDINI_TOOLS/hda"'
   become: yes
@@ -69,11 +72,37 @@
   lineinfile:
     state: present
     path: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env"
+    backup: true
     regexp: '.*PYTHON =.*'
     line: 'PYTHON = "/opt/hfs{{ houdini_version_item.houdini_major_version }}/python/bin/python"'
   become: yes
   tags:
   - cloud-install
   - onsite-install
+
+- name: set PYTHON path in houdini.env.
+  lineinfile:
+    state: present
+    path: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env"
+    backup: true
+    regexp: '.*HOUDINI_TEMP_DIR =.*'
+    line: 'HOUDINI_TEMP_DIR = "/prod/tmp"'
+  become: yes
+  tags:
+  - cloud-install
+  - onsite-install
+
+- name: Add alias for houdini
+  lineinfile:
+    state: present
+    path: /home/deadlineuser/.bashrc
+    line: "alias h{{ houdini_version_item.houdini_major_version }}='cwd=\"$(pwd)\" && cd /opt/hfs{{ houdini_version_item.houdini_major_version }}/ && source houdini_setup && cd $cwd && houdinifx'"
+    backup: true
+    owner: deadlineuser
+    regexp: '.*alias h{{ houdini_version_item.houdini_major_version }}=.*'
+  become: yes
+    #state: present
+    #insertafter: EOF
+    #create: True
 
 ### end modify houdini environment vars
