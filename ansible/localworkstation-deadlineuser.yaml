@@ -537,6 +537,7 @@
     - cloud-install
     - onsite-install
 
+# multislave functionality
   - copy:
       src: /vagrant/scripts/deadline-multi-slave.sh
       dest: /usr/bin/dlmultislave.sh
@@ -549,6 +550,7 @@
     - onsite-install
     - multi-slave
 
+# wrapper for multislave script to run as service
   - copy:
       src: /vagrant/scripts/multislaveservice.sh
       dest: /usr/bin/multislaveservice.sh
@@ -561,6 +563,7 @@
     - onsite-install
     - multi-slave
 
+# service wraper for multislave
   - copy:
       src: /vagrant/scripts/multislaveservice.service
       dest: /etc/systemd/system/multislaveservice.service
@@ -584,3 +587,6 @@
     - cloud-install
     - onsite-install
     - multi-slave
+
+  - debug:
+      msg: "to disable multilsave service for deadline use 'systemctl disable multislaveservice.service'"
