@@ -34,3 +34,7 @@ echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 
 # configure deadline on the local workstation with the keys from this install to run deadline slave and monitor
 ansible-playbook -i secrets/dev/inventory/hosts ansible/localworkstation-deadlineuser.yaml --tags "onsite-install" --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key"
+
+#need to fix houdini executable for deadline install and houdini install stages - both.
+
+echo 'Use vagrant reload and vagrant ssh after eexecuting each .sh script'

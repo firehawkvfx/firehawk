@@ -41,3 +41,5 @@ export TF_VAR_softnas_storage=True
 export TF_VAR_site_mounts=False
 export TF_VAR_remote_mounts_on_local=False
 terraform apply --auto-approve
+
+echo 'Use vagrant reload and vagrant ssh after eexecuting each .sh script'

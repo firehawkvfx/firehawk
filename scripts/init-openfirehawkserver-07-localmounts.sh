@@ -39,3 +39,5 @@ export TF_VAR_site_mounts=True
 export TF_VAR_remote_mounts_on_local=True
 terraform apply --auto-approve
 #should add a test script at this point to validate vpn connection is established, or licence servers may not work.
+
+echo 'Use vagrant reload and vagrant ssh after eexecuting each .sh script'
