@@ -12,6 +12,7 @@
       group: syscontrol
       mode: u+rX-w,g=rX-w,o-rwx
       force: true
+      directory_mode: true
     become: true
 
   - file:
