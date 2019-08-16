@@ -291,9 +291,6 @@ resource "aws_instance" "workstation_pcoip" {
       "sleep 60",
     ]
   }
-  # provisioner "local-exec" {
-  #   command = "${var.pcoip_sleep_after_creation && local.skip_update ? "aws ec2 stop-instances --instance-ids ${aws_instance.pcoipgw.id}" : ""}"
-  # }
 }
 
 variable "public_domain_name" {}
@@ -317,70 +314,70 @@ resource "null_resource" "workstation_pcoip" {
       timeout             = "10m"
     }
     # First we install python remotely via the bastion to bootstrap the instance.  We also need this remote-exec to ensure the host is up.
-    inline = ["sleep 10 && set -x && sudo yum install -y python"]
+    inline = [
+      "sleep 10",
+      "set -x",
+      "sudo yum install -y python",
+      # wait until ssh keys exist before commencing provisioning.
+      "while [ ! -f /etc/ssh/ssh_host_ecdsa_key.pub ]",
+      "do",
+      "  sleep 2",
+      "done",
+      "cat /etc/ssh/ssh_host_ecdsa_key.pub",
+      "cat /etc/ssh/ssh_host_rsa_key.pub",
+      "cat /etc/ssh/ssh_host_ecdsa_key.pub",
+      "ssh-keyscan ${aws_instance.workstation_pcoip.private_ip}"
+    ]
+  }
+
+  # add ssh keys and initialise users
+  provisioner "local-exec" {
+    command = <<EOT
+      set -x
+      cd /vagrant
+      ansible-playbook -i ansible/inventory ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.workstation_pcoip.private_ip} bastion_ip=${var.bastion_ip}"
+  EOT
+  }
+  provisioner "remote-exec" {
+    connection {
+      user                = "centos"
+      host                = "${aws_instance.workstation_pcoip.private_ip}"
+      bastion_host        = "${var.bastion_ip}"
+      private_key         = "${var.private_key}"
+      bastion_private_key = "${var.private_key}"
+      type                = "ssh"
+      timeout             = "10m"
+    }
+    # ensure connection is healthy
+    inline = [
+      "sleep 10",
+      "set -x",
+      "echo 'remote connection ok'"
+    ]
   }
 
   provisioner "local-exec" {
     command = <<EOT
       set -x
       cd /vagrant
-      #ansible-playbook -i ansible/inventory/hosts ansible/ssh-add-public-host.yaml -v --extra-vars "public_ip=${aws_instance.workstation_pcoip.public_ip} public_hostname=cloud_workstation1.$TF_VAR_public_domain set_bastion=false"
-      ansible-playbook -i ansible/inventory ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.workstation_pcoip.private_ip} bastion_ip=${var.bastion_ip}"
       ansible-playbook -i ansible/inventory ansible/node-centos-init-users.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.$TF_VAR_public_domain pcoip=true"
-      ansible-playbook -i ansible/inventory ansible/node-centos-init-deadline.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.$TF_VAR_public_domain pcoip=true"
+      # ansible-playbook -i ansible/inventory ansible/node-centos-init-deadline.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.$TF_VAR_public_domain pcoip=true"
       ansible-playbook -i ansible/inventory ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_workstation_centos variable_user=deadlineuser"
       ansible-playbook -i ansible/inventory ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_workstation_centos variable_user=centos"
-      ansible-playbook -i ansible/inventory ansible/node-centos-mounts.yaml --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.$TF_VAR_public_domain pcoip=true"
-      # to configure deadline submission scripts-
+      ansible-playbook -i ansible/inventory ansible/node-centos-mounts.yaml --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.$TF_VAR_public_domain pcoip=true" --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"
+      # to configure deadline scripts-
       ansible-playbook -i ansible/inventory ansible/localworkstation-deadlineuser.yaml --tags "onsite-install" --extra-vars "variable_host=role_workstation_centos variable_user=centos"
-
-      # ansible-playbook -i ansible/inventory ansible/node-centos-houdini.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.$TF_VAR_public_domain"
-      ansible-playbook -i ansible/inventory ansible/node-centos-houdini.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.$TF_VAR_public_domain sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password houdini_build=$TF_VAR_houdini_build"
-      
+      # configure houdini and submission scripts
+      ansible-playbook -i ansible/inventory ansible/node-centos-houdini.yaml -v --extra-vars "variable_host=role_workstation_centos sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source"
+      ansible-playbook -i ansible/inventory ansible/node-centos-ffmpeg.yaml -v --extra-vars "variable_host=role_workstation_centos"
       # to recover from yum update breaking pcoip we reinstall the nvidia driver and dracut to fix pcoip.
       ansible-playbook -i ansible/inventory ansible/node-centos-pcoip-recover.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.$TF_VAR_public_domain pcoip=true"
   EOT
   }
-
-  #after dracut, we reboot the instance locally.  annoyingly, a reboot command will cause a terraform error.
+  #after dracut, we reboot the instance locally.  A reboot command will otherwise cause a terraform error.
   provisioner "local-exec" {
     command = "${var.pcoip_sleep_after_creation ? "aws ec2 stop-instances --instance-ids ${aws_instance.workstation_pcoip.id}" : "aws ec2 reboot-instances --instance-ids ${aws_instance.workstation_pcoip.id}"}"
   }
-
-
-  #transfer the gpu driver
-  # provisioner "file" {
-  #   source      = "${path.module}/gpudriver/NVIDIA-Linux-x86_64-390.96-grid.run"
-  #   destination = "/home/centos/NVIDIA-Linux-x86_64-390.96-grid.run"
-
-  #   connection {
-  #     user        = "centos"
-  #     host        = "${aws_instance.pcoipgw.public_ip}"
-  #     private_key = "${var.private_key}"
-  #     type        = "ssh"
-  #     timeout     = "10m"
-  #   }
-  # }
-
-  # provisioner "remote-exec" {
-  #   connection {
-  #     user        = "centos"
-  #     host        = "${aws_instance.pcoipgw.public_ip}"
-  #     private_key = "${var.private_key}"
-  #     type        = "ssh"
-  #     timeout     = "10m"
-  #   }
-
-  #   inline = [
-  #     #"sudo yum update -y",
-
-  #     # these are deadline dependencies
-  #     "sudo yum install redhat-lsb libX11 libXext -y",
-
-  #     "sudo yum install libMesaGL1 -y",
-  #     "sudo yum install mesa-libGL mesa-libGLU -y",
-  #   ]
-  # }
 }
 
 resource "null_resource" "shutdown_workstation_pcoip" {
