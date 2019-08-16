@@ -32,5 +32,5 @@ echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 
 #ssh-agent bash
 ssh-add /home/vagrant/.ssh/id_rsa
-ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-houdini.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com" --skip-tags "sync_scripts"
+ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-houdini.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser" --skip-tags "sync_scripts"
 eval $(ssh-agent -k)
