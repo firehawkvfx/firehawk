@@ -9,8 +9,10 @@
   file:
     path: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/scripts/"
     state: directory
-    mode: 0700
+    mode: u=rwX,g=r
     owner: deadlineuser
+    group: deadlineuser
+  become: true
 
 - name: "copy houdini-scripts to /home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/scripts/"
   copy:
@@ -24,70 +26,20 @@
   file: 
     dest: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/scripts/"
     owner: deadlineuser 
-    mode: u=rwX,g=r 
+    group: deadlineuser
+    mode: u=rwX,g=r
     recurse: yes
-
-- name: dir permissions on /prod/assets/
-  file:
-    path: /prod/assets/
-    state: directory
-    mode: u=wrX,g=wrX,o-rwx
-    owner: deadlineuser
-    group: syscontrol
-    recurse: true
   become: true
-  tags:
-    - sync_scripts
 
-- name: Sync openfirehawk-houdini-tools to s3 - push
-  shell: |
-    set -x
-    cd /vagrant/modules/node_centos/modules/
-    aws s3 sync . s3://{{ bucket }}/ --exclude "*" --include "openfirehawk-houdini-tools/*"
-  become_user: vagrant
-  connection: local
-  tags:
-    - sync_scripts
 
-- name: Sync openfirehawk-houdini-tools from s3
-  shell: |
-    set -x
-    cd /prod/assets/
-    ~/.local/bin/aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "openfirehawk-houdini-tools/*"
-  become_user: "{{ variable_user }}"
-  tags:
-    - sync_scripts
-
-- name: dir permissions on /prod/assets/openfirehawk-houdini-tools.  note permissions aren't being set correctly for group for some reason.
-  file:
-    path: /prod/assets/openfirehawk-houdini-tools
-    state: directory
-    owner: deadlineuser
-    group: syscontrol
-    mode: u=wrX,g=wrX,o-rwx
-    recurse: true
-  become: true
-  tags:
-    - sync_scripts
-
-# - name: copy openfirehawk-houdini-tools to /prod/assets/
-#   copy:
-#     src: /vagrant/modules/node_centos/modules/openfirehawk-houdini-tools/
-#     dest: /prod/assets/
-#     directory_mode: yes
-#     #owner: deadlineuser
-#   become: true
-#   tags:
-#     - sync_scripts
-
-- name: set permissions on /prod/assets/openfirehawk-houdini-tools
+- name: "set permissions on /home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/scripts/"
   file: 
-    dest: /prod/assets/openfirehawk-houdini-tools
-    owner: deadlineuser
-    mode: u=rwX,g=r 
+    dest: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/scripts/menus/"
+    owner: deadlineuser 
+    group: deadlineuser
+    mode: u=rwX,g=r
     recurse: yes
-  tags:
-    - sync_scripts
+  become: true
 
 - set_fact:
     houdini_linux_filename: "{{ houdini_version_item.houdini_linux_filename }}"
@@ -185,19 +137,6 @@
     mode: push
   tags:
     - sync_installers
-
-# - name: enforce houdini environment variables for all users in all bash shells always.  this is a temporary fix to enforce available env vars for tops to workaround a bug.
-#   copy:
-#     dest: /etc/profile.d/houdini_init.sh
-#     content: |
-#       cwd="$(pwd)" && cd /opt/hfs{{ houdini_version_item.houdini_major_version }}/ && source ./houdini_setup && cd $cwd
-#     mode: u=rw,g=r,o=r
-#     owner: root
-#     group: root 
-#   become: true
-#   when: houdini_version_item.enforce_env
-#   tags:
-#     - enforce_houdini_env_vars
 
 - name: comment out file to enforce env
   copy:
