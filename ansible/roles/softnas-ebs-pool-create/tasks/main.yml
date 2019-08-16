@@ -26,23 +26,12 @@
   with_items:
     - "{{ device_links.results }}"
 
-# - name: register device list for pool
-#   set_fact:
-#     device_list: "{{ device_list + [ item.path ] }}"
-#   register: list_result
-#   when: outer_item.item.pool_name == item.pool_name
-#   with_items:
-#     - "{{ mounts }}"
-
 - debug:
     var: list_result
 
 - name: Concatenate the device names
   set_fact:
     devices_for_pool: "{{ device_list | join(':') }}"
-
-# - debug:
-#     var: my_joined_list
 
 - debug:
     var: devices_for_pool
