@@ -27,6 +27,9 @@ fi
 echo 'Use vagrant reload and vagrant ssh after eexecuting each .sh script'
 echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 
+# configure onsite NAS mounts to ansible control
+ansible-playbook -i ansible/inventory/hosts ansible/node-centos-mounts.yaml -v -v --extra-vars "variable_host=localhost variable_user=vagrant softnas_hosts=none" --tags 'local_install_onsite_mounts'
+
 ansible-playbook -i ansible/inventory/hosts ansible/init.yaml --extra-vars "variable_user=vagrant"
 ansible-playbook -i ansible/inventory/hosts ansible/newuser_deadline.yaml
 # custom events auto assign groups to slaves on startup
