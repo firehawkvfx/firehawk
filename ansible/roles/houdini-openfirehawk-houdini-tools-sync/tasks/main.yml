@@ -1,0 +1,56 @@
+- name: dir permissions on /prod/assets/
+  file:
+    path: /prod/assets/
+    state: directory
+    mode: u=wrX,g=wrX,o-rwx
+    owner: deadlineuser
+    group: syscontrol
+    recurse: true
+  become: true
+  tags:
+    - sync_scripts
+
+- name: dir permissions on /prod/assets/openfirehawk-houdini-tools.  note permissions aren't being set correctly for group for some reason.
+  file:
+    path: /prod/assets/openfirehawk-houdini-tools/
+    state: directory
+    owner: deadlineuser
+    group: syscontrol
+    mode: u=wrX,g=wrX,o-rwx
+    recurse: true
+  become: true
+  tags:
+    - sync_scripts
+
+- name: Sync openfirehawk-houdini-tools to s3 - push
+  shell: |
+    set -x
+    cd {{ firehawk_sync_source }}
+    aws s3 sync . s3://{{ bucket }}/openfirehawk-houdini-tools/ --include "*" --exclude ".git/*"
+  become_user: vagrant
+  connection: local
+  tags:
+    - sync_scripts
+
+- name: Sync openfirehawk-houdini-tools from s3
+  shell: |
+    set -x
+    mount
+    cat /etc/fstab
+    cd /prod/assets/openfirehawk-houdini-tools
+    ~/.local/bin/aws s3 sync s3://{{ bucket }}/openfirehawk-houdini-tools/ . --include "*" --exclude ".git/*"
+  become_user: deadlineuser
+  tags:
+    - sync_scripts
+
+- name: dir permissions on /prod/assets/hda.  note permissions aren't being set correctly for group for some reason.
+  file:
+    path: /prod/assets/hda
+    state: directory
+    owner: deadlineuser
+    group: syscontrol
+    mode: u=wrX,g=wrX,o-rwx
+    recurse: true
+  become: true
+  tags:
+    - sync_scripts
