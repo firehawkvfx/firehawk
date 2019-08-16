@@ -30,7 +30,7 @@ unset SLAVECOUNT
 
 declare $( cat /proc/cpuinfo | grep "cpu cores" | awk -F: '{ num+=1 } END{ 
     print "CPUCORES="num
-    print "SLAVECOUNT="(num/4)-1
+    print "SLAVECOUNT="(num/4)
     }' )
 
 echo "CPUCORES=$CPUCORES"
