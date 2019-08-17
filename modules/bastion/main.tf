@@ -80,7 +80,7 @@ resource "aws_instance" "bastion" {
   ami           = var.ami_map[var.region]
   instance_type = var.instance_type
   key_name      = var.key_name
-  subnet_id     = element(var.public_subnet_ids, count.index)
+  subnet_id     = element(var.public_subnet_ids, 0)
 
   vpc_security_group_ids = [aws_security_group.bastion.id]
 
