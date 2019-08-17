@@ -10,16 +10,24 @@ variable "softnas1_volumes_prod" {
 }
 
 variable "softnas1_mounts_dev" {
-  default = ["/dev/sdf","/dev/sdg","/dev/sdh","/dev/sdi"]
+  default = ["/dev/sdf", "/dev/sdg", "/dev/sdh", "/dev/sdi"]
 }
 
 variable "softnas1_mounts_prod" {
   default = []
 }
 
-variable "envtier" {}
+variable "envtier" {
+}
 
 locals {
-  softnas1_volumes = ["${split(",", var.envtier=="dev" ? join(",", var.softnas1_volumes_dev) : join(",", var.softnas1_volumes_prod))}"]
-  softnas1_mounts = ["${split(",", var.envtier=="dev" ? join(",", var.softnas1_mounts_dev) : join(",", var.softnas1_mounts_prod))}"]
+  softnas1_volumes = [split(
+    ",",
+    var.envtier == "dev" ? join(",", var.softnas1_volumes_dev) : join(",", var.softnas1_volumes_prod),
+  )]
+  softnas1_mounts = [split(
+    ",",
+    var.envtier == "dev" ? join(",", var.softnas1_mounts_dev) : join(",", var.softnas1_mounts_prod),
+  )]
 }
+
