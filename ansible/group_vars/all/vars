@@ -12,6 +12,9 @@ shot: "{{ lookup('env','TF_VAR_SHOT') }}"
 
 gatewaynic: "{{ lookup('env','TF_VAR_gatewaynic') }}"
 
+terraform_version: "0.11.14"
+terraform_inventory_version: "0.8"
+
 # domains
 public_domain: "{{ lookup('env','TF_VAR_public_domain') }}"
 # in most cases only the above public_domain should be referenced, which can be switched between dev and prod based on the environment - envtier

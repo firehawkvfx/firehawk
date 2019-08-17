@@ -9,25 +9,25 @@
 
 - name: Download Terraform
   get_url:
-    url: https://releases.hashicorp.com/terraform/0.11.14/terraform_0.11.14_linux_amd64.zip
-    dest: /vagrant/downloads/terraform_0.11.14_linux_amd64.zip
+    url: "https://releases.hashicorp.com/terraform/{{ terraform_version }}/terraform_{{ terraform_version }}_linux_amd64.zip"
+    dest: "/vagrant/downloads/terraform_{{ terraform_version }}_linux_amd64.zip"
   become: yes
 
-- name: Ensures dir exists /vagrant/downloads/terraform_0.11.14_linux_amd64/
+- name: "Ensures dir exists /vagrant/downloads/terraform_{{ terraform_version }}_linux_amd64/"
   file:
-    path: /vagrant/downloads/terraform_0.11.14_linux_amd64/
+    path: "/vagrant/downloads/terraform_{{ terraform_version }}_linux_amd64/"
     state: directory
   become: yes
 
 - name: Extract
   unarchive:
-    src: /vagrant/downloads/terraform_0.11.14_linux_amd64.zip
-    dest: /vagrant/downloads/terraform_0.11.14_linux_amd64/
+    src: "/vagrant/downloads/terraform_{{ terraform_version }}_linux_amd64.zip"
+    dest: "/vagrant/downloads/terraform_{{ terraform_version }}_linux_amd64/"
   become: yes
   
 - name: Copy terraform to binaries
   copy:
-    src: /vagrant/downloads/terraform_0.11.14_linux_amd64/terraform
+    src: "/vagrant/downloads/terraform_{{ terraform_version }}_linux_amd64/terraform"
     dest: /usr/local/bin/terraform
     owner: vagrant
     group: vagrant
@@ -36,25 +36,25 @@
 
 - name: Download terraform-inventory
   get_url:
-    url: https://github.com/adammck/terraform-inventory/releases/download/v0.8/terraform-inventory_v0.8_linux_amd64.zip
+    url: "https://github.com/adammck/terraform-inventory/releases/download/v{{ terraform_inventory_version }}/terraform-inventory_v{{ terraform_inventory_version }}_linux_amd64.zip"
     dest: /vagrant/downloads
     mode: 0440
 
 - name: Ensures dir exists
   file:
-    path: /vagrant/downloads/terraform-inventory_v0.8_linux_amd64/
+    path: "/vagrant/downloads/terraform-inventory_v{{ terraform_inventory_version }}_linux_amd64/"
     state: directory
   become: yes
 
 - name: Extract
   unarchive:
-    src: /vagrant/downloads/terraform-inventory_v0.8_linux_amd64.zip
-    dest: /vagrant/downloads/terraform-inventory_v0.8_linux_amd64/
+    src: "/vagrant/downloads/terraform-inventory_v{{ terraform_inventory_version }}_linux_amd64.zip"
+    dest: "/vagrant/downloads/terraform-inventory_v{{ terraform_inventory_version }}_linux_amd64/"
   become: yes
   
 - name: Copy terraform-inventory to binaries.
   copy:
-    src: /vagrant/downloads/terraform-inventory_v0.8_linux_amd64/terraform-inventory
+    src: "/vagrant/downloads/terraform-inventory_v{{ terraform_inventory_version }}_linux_amd64/terraform-inventory"
     dest: /usr/local/bin/terraform-inventory
     owner: vagrant
     group: vagrant
