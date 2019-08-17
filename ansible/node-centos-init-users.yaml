@@ -35,12 +35,6 @@
       path: /root/.bash_profile
       line: 'export HOSTNAME={{ hostname }}'
     when: init_ssh
-      
-  # - name: upgrade all packages - yum update
-  #   yum:
-  #     name: '*'
-  #     state: latest
-
 # these packages are required to pass an encrypted string via commandline into a user pass and are suited to centos.
   - name: install mkpasswd
     package:
