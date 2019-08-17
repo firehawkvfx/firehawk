@@ -376,96 +376,6 @@
     - cloud-install
     - onsite-install
 
-  # # mount softnas and remote nas
-  # - name: create mount directories
-  #   file: 
-  #     path: "{{ item }}"
-  #     state: directory
-  #     owner: deadlineuser
-  #     group: deadlineuser
-  #   become: yes
-  #   with_items:
-  #     - "{{ softnas1_path_abs }}"
-  #     - "{{ localnas1_path_abs }}"
-  #     - "{{ prod_mount_path }}"
-  #     - "{{ localnas1_remote_mount_path }}"
-  #   tags:
-  #   - cloud-install
-  #   - onsite-install
-
-  # - name: create localnas mount point based on location
-  #   file: 
-  #     path: "{{ localnas1_path_abs }}"
-  #     state: directory
-  #     owner: deadlineuser
-  #     group: deadlineuser
-  #   become: yes
-  #   tags:
-  #   - cloud-install
-  #   - onsite-install
-
-  # - name: insert marker start
-  #   lineinfile:
-  #     path: /etc/fstab
-  #     insertafter: "^#?UUID.*$"
-
-  #     line: "# BEGIN ANSIBLE MANAGED BLOCK"
-  #     backup: yes
-  #   tags:
-  #   - cloud-install
-  #   - onsite-install
-
-  # - name: insert marker end
-  #   lineinfile:
-  #     path: /etc/fstab
-  #     insertafter: "# BEGIN ANSIBLE MANAGED BLOCK"
-  #     line: "# END ANSIBLE MANAGED BLOCK"
-  #     create: true
-  #   tags:
-  #   - cloud-install
-  #   - onsite-install
- 
-  # - name: insert/update block in /etc/fstab
-  #   blockinfile:
-  #     path: /etc/fstab
-  #     backup: yes
-  #     content: |
-
-  #       {{ groups['role_softnas'][0] }}:{{ softnas_mount_source }} {{ softnas1_path_abs }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
-  #       {{ softnas1_path_abs }} {{ prod_mount_path }} none defaults,bind,timeo=14 0 0
-
-  #       # {{ localnas1_private_ip }}:{{ localnas1_mount_path }} {{ localnas1_path_abs }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
-  #       # {{ localnas1_path_abs }} {{ localnas1_remote_mount_path }} none defaults,bind,timeo=14 0 0
-  #   tags:
-  #   - cloud-install
-
-  # - name: insert/update block in /etc/fstab
-  #   blockinfile:
-  #     path: /etc/fstab
-  #     backup: yes
-  #     content: |
-  #       {{ localnas1_private_ip }}:/data /data nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
-  #       {{ localnas1_private_ip }}:{{ localnas1_mount_path }} {{ localnas1_path_abs }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
-  #       {{ localnas1_path_abs }} {{ localnas1_mount_path }} none defaults,bind 0 0
-  #   tags:
-  #   - onsite-install
-
-  # - name: insert/update block in /etc/sysconfig/network
-  #   blockinfile:
-  #     path: /etc/sysconfig/network
-  #     backup: yes
-  #     content: |
-  #       NETWORKDELAY=20
-  #   tags:
-  #   - onsite-install
-
-  # - name: mount all changes to fstab
-  #   command: mount -a
-  #   become: true
-  #   tags:
-  #   - cloud-install
-  #   - onsite-install
-
   - stat:
       path: /var/lib/Thinkbox/Deadline10/deadline.ini
     register: deadline_ini_file
@@ -533,6 +443,19 @@
     - onsite-install
 
   - debug: msg="{{ deadline_config.stderr }}"
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: Add alias for deadlinemonitor
+    lineinfile:
+      state: present
+      path: /home/deadlineuser/.bashrc
+      line: "alias deadlinemonitor='cwd=\"$(pwd)\" && cd /opt/Thinkbox/Deadline10/bin && ./deadlinemonitor'"
+      backup: true
+      owner: deadlineuser
+      regexp: ".*alias deadlinemonitor=.*"
+    become: yes
     tags:
     - cloud-install
     - onsite-install
