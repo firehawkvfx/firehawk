@@ -137,6 +137,8 @@ houdini_version_list:
   houdini_build: "daily"
   # enforce_env: False
 
+firehawk_sync_source: "{{ lookup('env','TF_VAR_firehawk_sync_source') }}"
+
 aws_region: "{{ lookup('env','TF_VAR_aws_region') }}"
 AWS_REGION: "{{ lookup('env','TF_VAR_aws_region') }}"
 
