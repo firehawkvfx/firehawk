@@ -6,8 +6,8 @@ provider "aws" {
 }
 
 module "vpc" {
-  #source     = "terraform-aws-modules/vpc/aws"
-  source = "../terraform-aws-vpc"
+  source     = "terraform-aws-modules/vpc/aws"
+  #source = "../terraform-aws-vpc"
   create_vpc = true
 
   name = "firehawk-compute"

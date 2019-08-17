@@ -5,7 +5,10 @@ provider "aws" {
   region = "${var.aws_region}"
 
   # in a dev environment these 3 version locks below can be disabled.  in production, they should be locked based on the suggested versions from terraform init.
-  version = "~> 1.60"
+  #version = "~> 1.60"
+  #version = "~> 1.66.0"
+  #version = "~> 2.24.0"
+  version = "~> 2.24"
 }
 
 provider "null" {
@@ -144,7 +147,7 @@ module "softnas" {
   softnas2_private_ip1 = "${var.softnas2_private_ip1}"
   softnas2_private_ip2 = "${var.softnas2_private_ip2}"
   
-  remote_mounts_on_local = "${var.remote_mounts_on_local}"
+  remote_mounts_on_local = "${var.remote_mounts_on_local == true ? true : false}"
 
   s3_disk_size = "${var.s3_disk_size}"
 

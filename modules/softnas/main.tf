@@ -413,6 +413,19 @@ resource "null_resource" "provision_softnas" {
   }
 }
 
+resource "aws_network_interface_attachment" "nic0" {
+  count = "${var.softnas_storage ? 1 : 0}"
+  instance_id          = "${aws_instance.softnas1.id}"
+  network_interface_id = "${aws_network_interface.nas1eth0.id}"
+  device_index         = 0
+}
+resource "aws_network_interface_attachment" "nic1" {
+  count = "${var.softnas_storage ? 1 : 0}"
+  instance_id          = "${aws_instance.softnas1.id}"
+  network_interface_id = "${aws_network_interface.nas1eth1.id}"
+  device_index         = 1
+}
+
 resource "random_id" "ami_unique_name" {
   count = "${var.softnas_storage ? 1 : 0}"
   keepers = {
