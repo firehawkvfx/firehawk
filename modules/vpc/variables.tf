@@ -38,34 +38,50 @@ variable "azs" {
 variable "private_subnets" {
   default = []
 }
+
 variable "public_subnets" {
   default = []
 }
 
 # due to aws security group limits, we need a single range to encompass all private subnets for softnas security groups to not exceed the limit.
-variable "all_private_subnets_cidr_range" {}
+variable "all_private_subnets_cidr_range" {
+}
 
 #vpn variables
 
-variable "remote_ip_cidr" {}
+variable "remote_ip_cidr" {
+}
 
-variable "route_zone_id" {}
+variable "route_zone_id" {
+}
 
-variable "key_name" {}
+variable "key_name" {
+}
 
-variable "private_key" {}
+variable "private_key" {
+}
 
-variable "local_key_path" {}
+variable "local_key_path" {
+}
 
-variable "cert_arn" {}
+variable "cert_arn" {
+}
 
-variable "public_domain_name" {}
+variable "public_domain_name" {
+}
 
-variable "openvpn_user" {}
-variable "openvpn_user_pw" {}
+variable "openvpn_user" {
+}
 
-variable "openvpn_admin_user" {}
+variable "openvpn_user_pw" {
+}
 
-variable "openvpn_admin_pw" {}
+variable "openvpn_admin_user" {
+}
 
-variable "vpn_cidr" {}
+variable "openvpn_admin_pw" {
+}
+
+variable "vpn_cidr" {
+}
+

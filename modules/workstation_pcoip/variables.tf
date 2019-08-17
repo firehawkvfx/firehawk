@@ -1,13 +1,19 @@
-variable "name" {}
+variable "name" {
+}
 
-variable "vpc_id" {}
+variable "vpc_id" {
+}
 
-variable "vpc_cidr" {}
+variable "vpc_cidr" {
+}
 
 # remote_ip_cidr is the ip address of the remote host / user intending to connect over vpn. eg '197.125.62.53/32'
-variable "remote_ip_cidr" {}
+variable "remote_ip_cidr" {
+}
 
-variable "vpn_cidr" {}
+variable "vpn_cidr" {
+}
+
 variable "public_subnet_ids" {
   default = []
 }
@@ -16,12 +22,15 @@ variable "private_subnet_ids" {
   default = []
 }
 
-variable "key_name" {}
+variable "key_name" {
+}
 
-variable "workstation_enabled" {}
+variable "workstation_enabled" {
+}
 
 #contents of the my_key.pem file to connect to the instance.
-variable "private_key" {}
+variable "private_key" {
+}
 
 #this ami id is for southeast-ap-2 sydney only.  todo - changes will need to be made to pull a list of ami's
 
@@ -36,7 +45,7 @@ variable "site_mounts" {
 
 #CentOS Linux 7 x86_64 HVM EBS ENA 1805_01-b7ee8a69-ee97-4a49-9e68-afaee216db2e-ami-77ec9308.4 (ami-d8c21dba)
 variable "ami_map" {
-  type = "map"
+  type = map(string)
 
   default = {
     pcoip   = "ami-03d2725a19593c9e6"
@@ -45,7 +54,7 @@ variable "ami_map" {
 }
 
 variable "instance_type_map" {
-  type = "map"
+  type = map(string)
 
   default = {
     pcoip   = "g3.4xlarge"
@@ -69,8 +78,10 @@ variable "skip_update" {
   default = false
 }
 
-variable "bastion_ip" {}
+variable "bastion_ip" {
+}
 
 variable "pcoip_sleep_after_creation" {
   default = false
 }
+
