@@ -66,7 +66,6 @@ resource "aws_security_group" "node_centos" {
     protocol    = "tcp"
     from_port   = 22
     to_port     = 22
-    cidr_blocks = [var.remote_ip_cidr]
     # TF-UPGRADE-TODO: In Terraform v0.10 and earlier, it was sometimes necessary to
     # force an interpolation expression to be interpreted as a list by wrapping it
     # in an extra set of list brackets. That form was supported for compatibilty in

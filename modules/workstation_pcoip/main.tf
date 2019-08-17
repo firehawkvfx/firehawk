@@ -158,7 +158,6 @@ resource "aws_security_group" "workstation_centos" {
     protocol    = "tcp"
     from_port   = 22
     to_port     = 22
-    cidr_blocks = [var.remote_ip_cidr]
     # TF-UPGRADE-TODO: In Terraform v0.10 and earlier, it was sometimes necessary to
     # force an interpolation expression to be interpreted as a list by wrapping it
     # in an extra set of list brackets. That form was supported for compatibilty in
@@ -167,10 +166,7 @@ resource "aws_security_group" "workstation_centos" {
     # If the expression in the following list itself returns a list, remove the
     # brackets to avoid interpretation as a list of lists. If the expression
     # returns a single list item then leave it as-is and remove this TODO comment.
-    cidr_blocks = [concat(
-      [var.remote_subnet_cidr, var.remote_ip_cidr],
-      var.private_subnets_cidr_blocks,
-    )]
+    cidr_blocks = concat([var.remote_subnet_cidr, var.remote_ip_cidr], var.private_subnets_cidr_blocks)
     description = "ssh"
   }
   ingress {
