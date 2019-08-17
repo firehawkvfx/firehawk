@@ -4,6 +4,9 @@
 - name: houdini_version_item
   debug:
     var: houdini_version_item
+  tags:
+  - cloud-install
+  - onsite-install
 
 - name: ensure houdini.env file is present
   file:
@@ -38,7 +41,7 @@
     backup: true
     state: present
     regexp: '.*HOUDINI_PATH =.*'
-    line: 'HOUDINI_PATH = "$HOUDINI_PATH; ~/Thinkbox/Deadline10/submitters/HoudiniSubmitter; $FIREHAWK_HOUDINI_TOOLS; &"'
+    line: 'HOUDINI_PATH = "$HOUDINI_PATH; $FIREHAWK_HOUDINI_TOOLS/scripts/menus; ~/Thinkbox/Deadline10/submitters/HoudiniSubmitter; $FIREHAWK_HOUDINI_TOOLS; &"'
   become: yes
   tags:
   - cloud-install
@@ -50,7 +53,19 @@
     path: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env"
     backup: true
     regexp: '.*HOUDINI_MENU_PATH =.*'
-    line: 'HOUDINI_MENU_PATH = "$HOUDINI_MENU_PATH; /home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/scripts/menus; $FIREHAWK_HOUDINI_TOOLS/scripts/menus; ~/Thinkbox/Deadline10/submitters/HoudiniSubmitter;&"'
+    line: 'HOUDINI_MENU_PATH = "$HOUDINI_MENU_PATH; $FIREHAWK_HOUDINI_TOOLS/scripts/menus; $FIREHAWK_HOUDINI_TOOLS/toolbar; ~/Thinkbox/Deadline10/submitters/HoudiniSubmitter; /home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/scripts/menus;&"'
+  become: yes
+  tags:
+  - cloud-install
+  - onsite-install
+
+- name: set HOUDINI_MENU_PATH in houdini.env.
+  lineinfile:
+    state: present
+    path: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env"
+    backup: true
+    regexp: '.*HOUDINI_TOOLBAR_PATH =.*'
+    line: 'HOUDINI_TOOLBAR_PATH = "$FIREHAWK_HOUDINI_TOOLS/toolbar; @/toolbar;&"'
   become: yes
   tags:
   - cloud-install
@@ -62,7 +77,7 @@
     path: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env"
     backup: true
     regexp: '.*HOUDINI_OTLSCAN_PATH.=.*'
-    line: 'HOUDINI_OTLSCAN_PATH = "@/otls:/prod/assets/hda:$FIREHAWK_HOUDINI_TOOLS/hda"'
+    line: 'HOUDINI_OTLSCAN_PATH = "@/otls:$FIREHAWK_HOUDINI_TOOLS/hda:/prod/assets/hda"'
   become: yes
   tags:
   - cloud-install
@@ -99,10 +114,36 @@
     line: "alias h{{ houdini_version_item.houdini_major_version }}='cwd=\"$(pwd)\" && cd /opt/hfs{{ houdini_version_item.houdini_major_version }}/ && source houdini_setup && cd $cwd && houdinifx'"
     backup: true
     owner: deadlineuser
-    regexp: '.*alias h{{ houdini_version_item.houdini_major_version }}=.*'
+    regexp: ".*alias h{{ houdini_version_item.houdini_major_version }}=.*"
   become: yes
-    #state: present
-    #insertafter: EOF
-    #create: True
+  tags:
+  - cloud-install
+  - onsite-install
 
+- name: Add alias for hython
+  lineinfile:
+    state: present
+    path: /home/deadlineuser/.bashrc
+    line: "alias hy{{ houdini_version_item.houdini_major_version }}='cwd=\"$(pwd)\" && cd /opt/hfs{{ houdini_version_item.houdini_major_version }}/ && source houdini_setup && cd $cwd && hython'"
+    backup: true
+    owner: deadlineuser
+    regexp: ".*alias hy{{ houdini_version_item.houdini_major_version }}=.*"
+  become: yes 
+  tags:
+  - cloud-install
+  - onsite-install
+
+- name: Add alias for houdini_setup environment
+  lineinfile:
+    state: present
+    path: /home/deadlineuser/.bashrc
+    line: "alias henv{{ houdini_version_item.houdini_major_version }}='cwd=\"$(pwd)\" && cd /opt/hfs{{ houdini_version_item.houdini_major_version }}/ && source houdini_setup && cd $cwd'"
+    backup: true
+    owner: deadlineuser
+    regexp: ".*alias henv{{ houdini_version_item.houdini_major_version }}=.*"
+  become: yes 
+  tags:
+  - cloud-install
+  - onsite-install
+  
 ### end modify houdini environment vars
