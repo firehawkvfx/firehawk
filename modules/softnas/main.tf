@@ -448,7 +448,7 @@ variable "testing" {
 # when testing, the local can be set to disable ami creation in a dev environment only - for faster iteration.
 locals {
   testing            = var.envtier == "prod" ? false : var.testing
-  create_ami_testing = local.testing ? 0 : 1
+  create_ami_testing = local.testing ? false : true
   create_ami         = var.softnas_use_custom_ami ? false : local.create_ami_testing
 }
 
