@@ -5,7 +5,7 @@
   register: result
 
 - debug:
-    msg: "deadlineuser home directory exists already.  Will not create user or make any changes.  The password was not set."
+    msg: "deadlineuser home directory exists already.  Will not create user or make any changes.  The password was not changed/set."
   when: result.stat.exists == true and result.stat.isdir == true
 
 - debug:
