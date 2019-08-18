@@ -10,14 +10,19 @@ ARGS=''
 cd /vagrant
 
 if [[ -z $argument ]] ; then
-  echo "Assuming prod environment without args --dev."
-    source ./update_vars.sh --prod
+  echo "Error! you must specify an environment --dev or --prod" 1>&2
+  exit 64
 else
   case $argument in
     -d|--dev)
       ARGS='--dev'
       echo "using dev environment"
       source ./update_vars.sh --dev
+      ;;
+    -p|--prod)
+      ARGS='--prod'
+      echo "using prod environment"
+      source ./update_vars.sh --prod
       ;;
     *)
       raise_error "Unknown argument: ${argument}"
