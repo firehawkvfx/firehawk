@@ -1,0 +1,81 @@
+- hosts: ansible_control
+  remote_user: vagrant
+  gather_facts: "{{ variable_gather_facts | default('true') }}"
+  become: true
+  
+  vars:
+    hosts_file: "/vagrant/{{ inventory }}/hosts"
+    group_name: ''
+  
+  tasks:
+    - name: update ansible_control or add if not exist
+      lineinfile:
+        state: present
+        path: "{{ hosts_file }}"
+        line: "ansible_control ansible_connection=local"
+        backup: true
+        owner: vagrant
+        regexp: ".*ansible_control ansible_connection=.*"
+      become: yes
+
+    - name: update group or add if not exist
+      lineinfile:
+        state: present
+        path: "{{ hosts_file }}"
+        line: "[{{ group_name }}]\n"
+        backup: true
+        owner: vagrant
+        #regexp: ".*\n[{{ group_name }}].*"
+        regexp: ".{{ group_name }}."
+      when: group_name != ''
+      become: yes
+
+    - name: ensure a new line exists at end of file always
+      lineinfile:
+        state: present
+        path: "{{ hosts_file }}"
+        line: ' '
+        regexp: ' '
+        backup: true
+        owner: vagrant
+        insertafter: EOF
+      become: yes
+
+    - name: group add host- update host or add if not exist
+      lineinfile:
+        state: present
+        path: "{{ hosts_file }}"
+        line: "{{ host_name }} ansible_host={{ host_ip }}"
+        backup: true
+        owner: vagrant
+        regexp: ".*{{ host_name }} ansible_host=.*"
+        insertafter: "[{{ group_name }}]"
+        firstmatch: true
+        create: true
+      when: group_name != ''
+      become: yes
+
+    - name: update host or add if not exist
+      lineinfile:
+        state: present
+        path: "{{ hosts_file }}"
+        line: "{{ host_name }} ansible_host={{ host_ip }}"
+        backup: true
+        owner: vagrant
+        regexp: ".*{{ host_name }} ansible_host=.*"
+        firstmatch: true
+        insertafter: ' '
+      when: group_name == ''
+      become: yes
+
+    # - name: update newline before host
+    #   lineinfile:
+    #     state: present
+    #     path: "{{ hosts_file }}"
+    #     line: "\n"
+    #     backup: true
+    #     owner: vagrant
+    #     regexp: "\n"
+    #     insertbefore: "{{ host_name }} ansible_host={{ host_ip }}"
+    #   when: group_name == ''
+    #   become: yes
