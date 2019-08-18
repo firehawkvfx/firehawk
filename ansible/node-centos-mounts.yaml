@@ -441,6 +441,7 @@
       state: absent
       bind1: "/remote_prod/"
       bind2: "/mycity_prod/"
+      site_bind1:
 
   tasks:
   - name: Check for existance of custom exports in /vagrant/secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml and override default mounts
@@ -528,7 +529,7 @@
       owner: deadlineuser
       group: deadlineuser
     become: true
-    when: item.rc == 0
+    when: item.item.site_bind1 and item.rc == 0
     with_items: 
     - "{{ site_presence.results }}"
     tags:
