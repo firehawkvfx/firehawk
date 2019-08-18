@@ -61,8 +61,8 @@
     backup: yes
     content: |
       #promiscuous mode required for routing
-      /sbin/ifconfig enp0s8 up
-      /sbin/ifconfig enp0s8 promisc
+      /sbin/ifconfig {{ vpn_nic }} up
+      /sbin/ifconfig {{ vpn_nic }} promisc
 
 - name: execute and check with netstat
   shell: |
