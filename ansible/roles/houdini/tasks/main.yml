@@ -30,10 +30,18 @@
     dest: /var/tmp/
   become: true
 
+- name: check if hserver file exists
+  stat: 
+    path: /opt/hfs17.5/bin/hserver
+  register: hserver_check
+  become: true
+
 - name: Stop licensing server if already running / installed.  Please ignore any error if hserver not running.
   shell: |
     /opt/hfs17.5/bin/hserver -q
   ignore_errors: yes
+  become: true
+  when: hserver_check.stat.exists == true
 
 - name: install houdini
   shell: |
