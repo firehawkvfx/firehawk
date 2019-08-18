@@ -14,6 +14,7 @@ gatewaynic: "{{ lookup('env','TF_VAR_gatewaynic') }}"
 
 terraform_version: "0.12.6"
 terraform_inventory_version: "0.8"
+inventory: "{{ lookup('env','TF_VAR_inventory') }}"
 
 # domains
 public_domain: "{{ lookup('env','TF_VAR_public_domain') }}"
@@ -86,6 +87,8 @@ vpn_cidr: "{{ lookup('env','TF_VAR_vpn_cidr') }}"
 vpn_cidr_dev: "{{ lookup('env','TF_VAR_vpn_cidr_prod') }}"
 vpn_cidr_prod: "{{ lookup('env','TF_VAR_vpn_cidr_prod') }}"
 remote_subnet_cidr: "{{ lookup('env','TF_VAR_remote_subnet_cidr') }}"
+
+vpn_nic: eth1
 
 openvpn_user: openvpnas
 openvpn_user_pw: "{{ lookup('env','TF_VAR_openvpn_user_pw') }}"
