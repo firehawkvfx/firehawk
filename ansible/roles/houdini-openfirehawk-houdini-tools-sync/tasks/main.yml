@@ -22,6 +22,13 @@
   tags:
     - sync_scripts
 
+- name: ensure all mounts are present
+  command: sudo mount -a
+  become_user: vagrant
+  connection: local
+  tags:
+    - sync_scripts
+
 - name: Sync openfirehawk-houdini-tools to s3 - push
   shell: |
     set -x
