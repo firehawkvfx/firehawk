@@ -37,6 +37,8 @@ echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 # add local host ssh keys to list of accepted keys on ansible control, example for another onsite workstation-
 ansible-playbook -i secrets/dev/inventory/hosts ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=192.168.92.12 local=True"
 
+ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=workstation.firehawkvfx.com host_ip=192.168.92.12 group_name=role_local_workstation"
+
 # create and copy an ssh rsa key from ansible control to the workstation for provisioning.  1st time will error, run it twice
 ansible-playbook -i secrets/dev/inventory/hosts ansible/ssh-copy-id-private-host.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser"
 # ansible-playbook -i secrets/dev/inventory/hosts ansible/ssh-copy-id-private-host.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser"

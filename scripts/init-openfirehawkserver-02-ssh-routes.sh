@@ -43,7 +43,7 @@ ansible-playbook -i ansible/inventory/hosts ansible/aws-new-key.yaml
 # configure routes to opposite environment for licence server to communicate if in dev environment
 ansible-playbook -i ansible/inventory ansible/ansible-control-update-routes.yaml
 
-echo "If above was succesful, exit the vm and use 'vagrant reload' before continuing with the next script.  New user group added wont have user added until reload."
+echo -e "\nIf above was succesful, exit the vm and use 'vagrant reload' before continuing with the next script.  New user group added wont have user added until reload."
 echo -e "\nFor deadline to work, ensure you have follow these steps:"
 echo "1. in deadline monitor create groups under super user mode: tools/create groups and ensure the groups exist for all groups slave appear under"
 echo "eg cloud, local, local_workstation, cloud_workstation"
