@@ -3,18 +3,10 @@
 
 Vagrant.configure("2") do |config|
   # Ubuntu 16.04
-  # config.vm.box = "ubuntu/xenial64"
-  # networking issues
+  # ensure you have install the vbguest plugin with
+  # vagrant plugin install vagrant-vbguest
   config.vm.box = "bento/ubuntu-16.04"
-  config.vm.box_version = "201812.27.0"
-  # cant install xserver-xorg-legacy
-  # config.vm.box = "ubuntu/trusty64"
-  #config.vm.box = "bento/ubuntu-17.10"
-  #18 has no rc.local
-  #config.vm.box = "bento/ubuntu-18.04"
-  #config.vm.box_version = "20190411.0.0"
-  #config.ssh.username = "vagrant"
-  #config.ssh.password = ENV['TF_VAR_vagrant_password']
+  config.vm.box_version = "201906.18.0"
 
   mac_string = ENV['TF_VAR_vagrant_mac']
   vaultkeypresent = ENV['TF_VAR_vaultkeypresent']
@@ -77,7 +69,6 @@ Vagrant.configure("2") do |config|
   
   # these utils are likely require dfor promisc mode on ethernet which is required if routing on a local network.
   config.vm.provision "shell", inline: "sudo apt-get install -y virtualbox-guest-dkms"
-  # looks like guest utils is the culprit
   config.vm.provision "shell", inline: "sudo apt-get install -y virtualbox-guest-utils"
 
   #reboot required for desktop to function.
