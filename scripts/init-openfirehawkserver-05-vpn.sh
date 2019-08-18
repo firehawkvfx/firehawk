@@ -44,11 +44,11 @@ echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 # vagrant ssh
 
 echo 'site mounts will not be mounted in cloud.  currently this will disable provisioning any render node or remote workstation until vpn is confirmed to function after this step'
-export TF_VAR_site_mounts=False
+export TF_VAR_site_mounts=false
 echo 'softnas nfs exports will not be mounted on local site'
-export TF_VAR_remote_mounts_on_local=False
+export TF_VAR_remote_mounts_on_local=false
 echo 'on first apply, dont create softnas instance until vpn is working'
-export TF_VAR_softnas_storage=False
+export TF_VAR_softnas_storage=false
 
 terraform init
 terraform apply --auto-approve

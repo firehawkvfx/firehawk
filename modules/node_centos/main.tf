@@ -178,7 +178,7 @@ resource "null_resource" "dependency_softnas_and_bastion" {
 }
 
 resource "aws_instance" "node_centos" {
-  count      = var.site_mounts==true ? 1 : 0
+  count      = var.site_mounts ? 1 : 0
   depends_on = [null_resource.dependency_softnas_and_bastion]
 
   #instance type and ami are determined by the gateway type variable for if you want a graphical or non graphical instance.
@@ -202,7 +202,7 @@ resource "aws_instance" "node_centos" {
 }
 
 resource "null_resource" "provision_node_centos" {
-  count      = var.site_mounts==true ? 1 : 0
+  count      = var.site_mounts ? 1 : 0
   depends_on = [aws_instance.node_centos]
 
   triggers = {
@@ -252,7 +252,7 @@ EOT
 }
 
 resource "random_id" "ami_unique_name" {
-  count = var.site_mounts==true ? 1 : 0
+  count = var.site_mounts ? 1 : 0
   keepers = {
     # Generate a new id each time we switch to a new instance id
     ami_id = aws_instance.node_centos[0].id
@@ -261,7 +261,7 @@ resource "random_id" "ami_unique_name" {
 }
 
 resource "aws_ami_from_instance" "node_centos" {
-  count              = var.site_mounts==true ? 1 : 0
+  count              = var.site_mounts ? 1 : 0
   depends_on         = [null_resource.provision_node_centos]
   name               = "node_centos_houdini_${aws_instance.node_centos[0].id}_${random_id.ami_unique_name[0].hex}"
   source_instance_id = aws_instance.node_centos[0].id
@@ -269,7 +269,7 @@ resource "aws_ami_from_instance" "node_centos" {
 
 #wakeup a node after sleep
 resource "null_resource" "start-node" {
-  count = var.sleep == false && var.site_mounts==true ? 1 : 0
+  count = var.sleep == false && var.site_mounts ? 1 : 0
 
   provisioner "local-exec" {
     command = "aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id}"
@@ -277,7 +277,7 @@ resource "null_resource" "start-node" {
 }
 
 resource "null_resource" "shutdown-node" {
-  count = var.sleep && var.site_mounts==true ? 1 : 0
+  count = var.sleep && var.site_mounts ? 1 : 0
 
   provisioner "local-exec" {
     command = "aws ec2 stop-instances --instance-ids ${aws_instance.node_centos[0].id}"

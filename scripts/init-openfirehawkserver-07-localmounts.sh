@@ -39,9 +39,9 @@ echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 
 # test the vpn buy logging into softnas and ping another system on your local network.
 
-export TF_VAR_softnas_storage=True
-export TF_VAR_site_mounts=True
-export TF_VAR_remote_mounts_on_local=True
+export TF_VAR_softnas_storage=true
+export TF_VAR_site_mounts=true
+export TF_VAR_remote_mounts_on_local=true
 terraform apply --auto-approve
 #should add a test script at this point to validate vpn connection is established, or licence servers may not work.
 

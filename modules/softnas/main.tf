@@ -307,7 +307,7 @@ variable "softnas_custom_ami" {
 }
 
 resource "aws_instance" "softnas1" {
-  count = var.softnas_storage==true ? 1 : 0
+  count = var.softnas_storage ? 1 : 0
   ami   = var.softnas_use_custom_ami ? var.softnas_custom_ami : var.selected_ami[local.softnas_mode_ami]
 
   instance_type = var.instance_type[var.softnas_mode]
@@ -419,21 +419,21 @@ EOT
 }
 
 resource "aws_network_interface_attachment" "nic0" {
-  count                = var.softnas_storage==true ? 1 : 0
+  count                = var.softnas_storage ? 1 : 0
   instance_id          = aws_instance.softnas1[0].id
   network_interface_id = aws_network_interface.nas1eth0.id
   device_index         = 0
 }
 
 resource "aws_network_interface_attachment" "nic1" {
-  count                = var.softnas_storage==true ? 1 : 0
+  count                = var.softnas_storage ? 1 : 0
   instance_id          = aws_instance.softnas1[0].id
   network_interface_id = aws_network_interface.nas1eth1.id
   device_index         = 1
 }
 
 resource "random_id" "ami_unique_name" {
-  count = var.softnas_storage==true ? 1 : 0
+  count = var.softnas_storage ? 1 : 0
   keepers = {
     # Generate a new id each time we switch to a new instance id
     ami_id = aws_instance.softnas1[0].id
@@ -455,7 +455,7 @@ locals {
 
 # At this point in time, AMI's created by terraform are destroyed with terraform destroy.  we desire the ami to be persistant for faster future redeployment, so we create the ami with ansible instead.
 resource "null_resource" "create_ami" {
-  count = local.create_ami && var.softnas_storage==true ? 1 : 0
+  count = local.create_ami && var.softnas_storage ? 1 : 0
   depends_on = [
     aws_instance.softnas1,
     null_resource.provision_softnas,
@@ -502,7 +502,7 @@ EOT
 
 # Start instance so that s3 disks can be attached
 resource "null_resource" "start-softnas-after-create_ami" {
-  count = local.create_ami && var.softnas_storage==true ? 1 : 0
+  count = local.create_ami && var.softnas_storage ? 1 : 0
 
   #depends_on         = ["aws_volume_attachment.softnas1_ebs_att"]
   depends_on = [
@@ -544,7 +544,7 @@ output "softnas1_private_ip" {
 # there is currently too much activity here, but due to the way dependencies work in tf 0.11 its better to keep it in one block.
 # in tf .12 we should split these up and handle dependencies properly.
 resource "null_resource" "provision_softnas_volumes" {
-  count = var.softnas_storage==true ? 1 : 0
+  count = var.softnas_storage ? 1 : 0
   depends_on = [
     null_resource.provision_softnas,
     null_resource.start-softnas-after-create_ami,
@@ -630,7 +630,7 @@ output "provision_softnas_volumes" {
 
 # wakeup a node after sleep
 resource "null_resource" "start-softnas" {
-  count      = false == var.sleep && var.softnas_storage==true ? 1 : 0
+  count      = false == var.sleep && var.softnas_storage ? 1 : 0
   depends_on = [null_resource.provision_softnas_volumes]
 
   #,"null_resource.mount_volumes_onsite"]
@@ -651,7 +651,7 @@ EOT
 }
 
 resource "null_resource" "shutdown-softnas" {
-  count = var.sleep && var.softnas_storage==true ? 1 : 0
+  count = var.sleep && var.softnas_storage ? 1 : 0
 
   triggers = {
     instanceid = aws_instance.softnas1[0].id
@@ -671,7 +671,7 @@ EOT
 }
 
 resource "null_resource" "attach-local-mounts-after-start" {
-  count      = false == var.sleep && var.remote_mounts_on_local && var.softnas_storage==true ? 1 : 0
+  count      = false == var.sleep && var.remote_mounts_on_local && var.softnas_storage ? 1 : 0
   depends_on = [null_resource.start-softnas]
 
   #,"null_resource.mount_volumes_onsite"]
@@ -713,7 +713,7 @@ EOT
 }
 
 resource "null_resource" "detach-local-mounts-after-stop" {
-  count      = var.sleep && var.remote_mounts_on_local && var.softnas_storage==true ? 1 : 0
+  count      = var.sleep && var.remote_mounts_on_local && var.softnas_storage ? 1 : 0
   depends_on = [null_resource.shutdown-softnas]
 
   #,"null_resource.mount_volumes_onsite"]
