@@ -8,7 +8,7 @@ Vagrant.configure("2") do |config|
   config.vm.box = "bento/ubuntu-16.04"
   config.vm.box_version = "201906.18.0"
 
-  config.vm.synced_folder "../firehawk-conf", "/firehawk-conf"
+  config.vm.synced_folder "../firehawk-conf", "/firehawk-conf", create: true
 
   mac_string = ENV['TF_VAR_vagrant_mac']
   vaultkeypresent = ENV['TF_VAR_vaultkeypresent']
