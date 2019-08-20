@@ -418,20 +418,6 @@ EOT
   }
 }
 
-resource "aws_network_interface_attachment" "nic0" {
-  count                = var.softnas_storage ? 1 : 0
-  instance_id          = aws_instance.softnas1[0].id
-  network_interface_id = aws_network_interface.nas1eth0.id
-  device_index         = 0
-}
-
-resource "aws_network_interface_attachment" "nic1" {
-  count                = var.softnas_storage ? 1 : 0
-  instance_id          = aws_instance.softnas1[0].id
-  network_interface_id = aws_network_interface.nas1eth1.id
-  device_index         = 1
-}
-
 resource "random_id" "ami_unique_name" {
   count = var.softnas_storage ? 1 : 0
   keepers = {
@@ -575,7 +561,9 @@ resource "null_resource" "provision_softnas_volumes" {
       set -x
       cd /vagrant
       # ensure all old mounts onsite are removed if they exist.
-      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'
+      if [[ $TF_VAR_remote_mounts_on_local ]] ; then
+        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'
+      fi
       # mount all ebs disks before s3
       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-check-able-to-stop.yaml -v --extra-vars "instance_id=${aws_instance.softnas1[0].id}"
       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk.yaml -v --extra-vars "instance_id=${aws_instance.softnas1[0].id} stop_softnas_instance=true mode=attach"
@@ -630,7 +618,7 @@ output "provision_softnas_volumes" {
 
 # wakeup a node after sleep
 resource "null_resource" "start-softnas" {
-  count      = false == var.sleep && var.softnas_storage ? 1 : 0
+  count      =  !var.sleep && var.softnas_storage ? 1 : 0
   depends_on = [null_resource.provision_softnas_volumes]
 
   #,"null_resource.mount_volumes_onsite"]
@@ -671,7 +659,7 @@ EOT
 }
 
 resource "null_resource" "attach-local-mounts-after-start" {
-  count      = false == var.sleep && var.remote_mounts_on_local && var.softnas_storage ? 1 : 0
+  count      =  !var.sleep && var.softnas_storage ? 1 : 0
   depends_on = [null_resource.start-softnas]
 
   #,"null_resource.mount_volumes_onsite"]
@@ -697,14 +685,20 @@ resource "null_resource" "attach-local-mounts-after-start" {
   }
   provisioner "local-exec" {
     command = <<EOT
+      set -x
+      echo "TF_VAR_remote_mounts_on_local= $TF_VAR_remote_mounts_on_local"
       # ensure routes on workstation exist
-      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-routes.yaml -v -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key"
+      if [ $TF_VAR_remote_mounts_on_local ] ; then
+        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-routes.yaml -v -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key"
+      fi
       # ensure volumes and pools exist after the disks were ensured to exist - this was done before starting instance.
       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-pool.yaml -v
       #ensure exports are correct
       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk-update-exports.yaml -v --extra-vars "instance_id=${aws_instance.softnas1[0].id}"
       # mount volumes to local site when softnas is started
-      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'
+      if [ $TF_VAR_remote_mounts_on_local ] ; then
+        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'
+      fi
       # ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v -v --extra-vars "variable_host=localhost variable_user=vagrant" --skip-tags 'cloud_install local_install_onsite_mounts'
   
 EOT
@@ -713,7 +707,7 @@ EOT
 }
 
 resource "null_resource" "detach-local-mounts-after-stop" {
-  count      = var.sleep && var.remote_mounts_on_local && var.softnas_storage ? 1 : 0
+  count      = var.sleep && var.softnas_storage ? 1 : 0
   depends_on = [null_resource.shutdown-softnas]
 
   #,"null_resource.mount_volumes_onsite"]
@@ -724,8 +718,11 @@ resource "null_resource" "detach-local-mounts-after-stop" {
   }
   provisioner "local-exec" {
     command = <<EOT
+      set -x
       # unmount volumes from local site when softnas is shutdown.
-      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'
+      if [ $TF_VAR_remote_mounts_on_local ] ; then
+        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'
+      fi
       # ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=localhost variable_user=vagrant destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'
   
 EOT
