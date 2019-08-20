@@ -107,6 +107,17 @@
   - cloud-install
   - onsite-install
 
+- name: dir permissions on /prod/tmp
+  file:
+    path: /prod/tmp"
+    state: directory
+    mode: 0700
+    owner: deadlineuser
+  become: yes
+  tags:
+  - cloud-install
+  - onsite-install
+
 - name: Add alias for houdini
   lineinfile:
     state: present
