@@ -67,10 +67,7 @@
       ### These lines are created by the new user playbook. ansible-playbook -i ansible/inventory ansible/newuser_deadline.yaml --tags "newuser"
       
       showenv='. /vagrant/showenv.sh'
-      #edit_vault='cd /vagrant && ansible-vault edit --vault-id /vagrant/keys/.vault-key /vagrant/secrets/secrets-{{ envtier }}'
-      #public_ip='dig /+short myip.opendns.com /@resolver1.opendns.com'
       refresh_alias='cd /vagrant && ansible-playbook -i ansible/inventory ansible/newuser_deadline.yaml --tags newuser && source ~/.bashrc'
-      #tfnuke='terraform destroy -target aws_eip.openvpnip -target aws_route.public_openvpn_remote_subnet_vpndhcp_gateway -target aws_route.public_openvpn_remote_subnet_gateway -target aws_instance.openvpn --auto-approve && terraform destroy --auto-approve'
       ec2_list_running='aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId]' --filters Name=instance-state-name,Values=running --output text'
   with_items:
     - /home/deadlineuser/.bashrc

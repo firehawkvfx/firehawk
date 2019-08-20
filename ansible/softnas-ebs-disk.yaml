@@ -52,12 +52,12 @@
   tasks:
   - name: Check for existance of custom mounts in /vagrant/secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml and override default mounts
     stat:
-      path: ../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
+      path:  ../../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
     register: custom_ebs_list
 
   - name: Override default mounts
     include_vars:
-      file: ../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
+      file:  ../../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
     when: custom_ebs_list.stat.exists
 
   - name: Search for existing softnas instance by tag.  If no instance id is defined via command line, then the found instance id by tag wil be used.
@@ -155,12 +155,12 @@
 #   tasks:
 #   - name: Check for existance of custom mounts in /vagrant/secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml and override default mounts
 #     stat:
-#       path: ../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
+#       path:  ../../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
 #     register: custom_ebs_list
 
 #   - name: Override default mounts
 #     include_vars:
-#       file: ../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
+#       file:  ../../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
 #     when: custom_ebs_list.stat.exists
 
 #   # - name: Search for existing softnas instance by tag.  If no instance id is defined via command line, then the found instance id by tag wil be used.
@@ -212,13 +212,13 @@
 #   tasks:
 #   - name: Check for existance of custom exports in /vagrant/secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml and override default mounts
 #     stat:
-#       path: ../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
+#       path:  ../../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
 #     register: custom_ebs_list
 #     connection: local
 
 #   - name: Override default exports
 #     include_vars:
-#       file: ../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
+#       file:  ../../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
 #     when: custom_ebs_list.stat.exists
 #     connection: local
 

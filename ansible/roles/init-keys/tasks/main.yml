@@ -20,7 +20,7 @@
 
 - name: notify
   debug:
-    msg: "A new random key will be generated in ./keys/{{ key_name }}.  It will not be kept in version control, but it will be used to encrypt anything in ./secrets/ which are kept in version control.  It is important you store this key safely because if lost you will not have access to any secrets that define your current infrastructure state."
+    msg: "A new random key will be generated in  ../../secrets/keys/{{ key_name }}.  It will not be kept in version control, but it will be used to encrypt anything in  ../../secrets/ which are kept in version control.  It is important you store this key safely because if lost you will not have access to any secrets that define your current infrastructure state."
   when: key_test == false
 
 - name: generate primary password for crypt

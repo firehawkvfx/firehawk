@@ -50,7 +50,7 @@
   tasks:
   - name: Check for existance of custom exports in /vagrant/secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml and override default mounts
     stat:
-      path: ../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
+      path:  ../../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
     register: custom_ebs_list
     connection: local
     when: destroy == false
@@ -60,7 +60,7 @@
 
   - name: Override default exports
     include_vars:
-      file: ../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
+      file:  ../../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
     when: destroy == false and custom_ebs_list.stat.exists
     connection: local
     tags:
@@ -130,7 +130,7 @@
   tasks:
   - name: Check for existance of custom exports in /vagrant/secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml and override default mounts
     stat:
-      path: ../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
+      path:  ../../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
     register: custom_ebs_list
     connection: local
     when: destroy
@@ -140,7 +140,7 @@
 
   - name: Override default exports if destroying mounts.
     include_vars:
-      file: ../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
+      file:  ../../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
     when: destroy and custom_ebs_list.stat.exists
     connection: local
     tags:
@@ -454,7 +454,7 @@
   tasks:
   - name: Check for existance of custom exports in /vagrant/secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml and override default mounts
     stat:
-      path: ../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
+      path:  ../../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
     register: custom_ebs_list
     connection: local
     tags:
@@ -463,7 +463,7 @@
 
   - name: Override default exports
     include_vars:
-      file: ../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
+      file:  ../../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
     when: custom_ebs_list.stat.exists
     connection: local
     tags:

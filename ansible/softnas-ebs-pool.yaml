@@ -43,13 +43,13 @@
   tasks:
   - name: Check for existance of custom mounts in /vagrant/secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml and override default mounts
     stat:
-      path: ../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
+      path:  ../../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
     connection: local
     register: custom_ebs_list
 
   - name: Override default mounts
     include_vars:
-      file: ../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
+      file:  ../../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
     connection: local
     when: custom_ebs_list.stat.exists
 

@@ -23,14 +23,14 @@
   tasks:
   - name: Check for existance of custom sync paths and override default mounts
     stat:
-      path: ../secrets/vars/sync-paths.yaml
+      path:  ../../secrets/vars/sync-paths.yaml
     register: custom_sync_paths
     tags:
       - sync-local-push
 
   - name: Override default mounts
     include_vars:
-      file: ../secrets/vars/sync-paths.yaml
+      file:  ../../secrets/vars/sync-paths.yaml
     when: custom_sync_paths.stat.exists
     tags:
       - sync-local-push
@@ -176,7 +176,7 @@
   tasks:
   - name: Check for existance of custom sync paths and override default sync paths
     stat:
-      path: ../secrets/vars/sync-paths.yaml
+      path:  ../../secrets/vars/sync-paths.yaml
     register: custom_sync_paths
     connection: local
     tags:
@@ -185,7 +185,7 @@
 
   - name: Override default paths
     include_vars:
-      file: ../secrets/vars/sync-paths.yaml
+      file:  ../../secrets/vars/sync-paths.yaml
     when: custom_sync_paths.stat.exists
     connection: local
     tags:
