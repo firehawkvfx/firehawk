@@ -1,0 +1,3 @@
+[submodule "firehawk"]
+	path = firehawk
+	url = https://github.com/firehawkvfx/firehawk.git
