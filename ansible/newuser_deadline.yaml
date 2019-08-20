@@ -42,16 +42,6 @@
     - cloud-install
     - onsite-install
 
-  - name: Kill SSH because otherwise the user will not be added to the group.
-    shell: sleep 1; pkill -u {{ ansible_user }} sshd
-    async: 3
-    poll: 2
-    tags:
-    - onsite-install
-
-  - name: reset ssh connection to allow user changes to affect 'current login user'
-    meta: reset_connection
-
 # This process archives secrets.  they are copied to the repository, and encrypted by the vault id - keys/.vault-key
 # Nothing stored in the secrets path should be unencrypted.
 
@@ -91,3 +81,28 @@
       - "{{ lookup('dict', secrets) }}"
     include_role:
       name: store-secret
+
+  - name: add groups
+    shell: |
+      /opt/Thinkbox/Deadline10/bin/deadlinecommand -AddGroup {{ item }}
+    with_items:
+    - local
+    - cloud
+    - local_workstation
+    - cloud_workstation
+    - local_all
+    - cloud_all
+
+- hosts: ansible_control
+  become: true
+  
+  tasks:
+  - name: Kill SSH because otherwise the user will not be added to the group.
+    shell: sleep 1; pkill -u {{ ansible_user }} sshd
+    async: 3
+    poll: 2
+    tags:
+    - onsite-install
+
+  - name: reset ssh connection to allow user changes to affect 'current login user'
+    meta: reset_connection
