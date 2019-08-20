@@ -225,7 +225,7 @@
       fstype: nfs4
       path: "/{{ item.item.pool_name }}/{{ item.item.volume_name }}"
       opts: nfsvers=4.1,rsize=8192,wsize=8192,timeo=14,intr,_netdev
-      src: "{{ groups['role_softnas'][0] }}:/{{ item.item.pool_name }}/{{ item.item.volume_name }}"
+      src: "{{ groups['role_softnas'] | map('extract', hostvars, ['ansible_host']) | first }}:/{{ item.item.pool_name }}/{{ item.item.volume_name }}"
       state: "{{ ( destroy == false and item.item.path and item.rc == 0 and item.item.state == 'present') | ternary( 'mounted' , 'absent' ) }}"
     when: destroy == false
     with_items: "{{ softnas_exports }}"
@@ -382,13 +382,21 @@
 
 ### cloud based mounts with ansible mount command
 
+  - name: softnas ip
+    debug:
+      msg: "{{ groups['role_softnas'] | map('extract', hostvars, ['ansible_host']) | first }}"
+    when: destroy == false
+    tags:
+    - cloud_install
+
   - name: insert/update block in in /etc/fstab on remote host for found exports using original unique pool and volume names - master
     become: yes
     mount:
       fstype: nfs4
       path: "/{{ item.item.pool_name }}/{{ item.item.volume_name }}"
       opts: nfsvers=4.1,rsize=8192,wsize=8192,timeo=14,intr,_netdev
-      src: "{{ groups['role_softnas'][0] }}:/{{ item.item.pool_name }}/{{ item.item.volume_name }}"
+      # source must pull the ip from the softnas hostname
+      src: "{{ groups['role_softnas'] | map('extract', hostvars, ['ansible_host']) | first }}:/{{ item.item.pool_name }}/{{ item.item.volume_name }}"
       state: "{{ ( item.item.path and item.rc == 0 and item.item.state == 'present') | ternary( 'mounted' , 'absent' ) }}"
     when: destroy == false
     with_items: "{{ softnas_exports }}"
