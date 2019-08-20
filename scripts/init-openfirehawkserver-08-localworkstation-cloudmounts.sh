@@ -46,3 +46,5 @@ terraform apply --auto-approve
 #should add a test script at this point to validate vpn connection is established, or licence servers may not work.
 
 echo 'Use vagrant reload and vagrant ssh after eexecuting each .sh script'
+# kill the current session to ensure any new groups can be used in next script
+sleep 1; pkill -u vagrant sshd

@@ -1,6 +1,4 @@
 #!/bin/bash
-eval $(ssh-agent)
-
 argument="$1"
 
 echo "Argument $1"
@@ -31,14 +29,22 @@ else
   esac
 fi
 
+echo 'Use vagrant reload and vagrant ssh after eexecuting each .sh script'
 echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 
-# install houdini on a local workstation with deadline submitters and environment vars.
+# this stage will configure mounts from onsite onto the cloud site, and vice versa.
 
-#ssh-agent bash
-ssh-add /home/vagrant/.ssh/id_rsa
-ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-houdini.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser" --skip-tags "sync_scripts"
-eval $(ssh-agent -k)
+# vagrant reload
+# vagrant ssh
 
+# test the vpn buy logging into softnas and ping another system on your local network.
+
+export TF_VAR_softnas_storage=true
+export TF_VAR_site_mounts=true
+export TF_VAR_remote_mounts_on_local=false
+terraform apply --auto-approve
+#should add a test script at this point to validate vpn connection is established, or licence servers may not work.
+
+echo 'Use vagrant reload and vagrant ssh after eexecuting each .sh script'
 # kill the current session to ensure any new groups can be used in next script
 sleep 1; pkill -u vagrant sshd

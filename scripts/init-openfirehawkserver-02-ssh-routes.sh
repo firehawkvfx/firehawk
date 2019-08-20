@@ -32,8 +32,11 @@ fi
 echo 'Use vagrant reload and vagrant ssh after eexecuting each .sh script'
 echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 
+# custom events auto assign groups to slaves on startup
+ansible-playbook -i ansible/inventory/hosts ansible/deadline-repository-custom-events.yaml
+
 # configure onsite NAS mounts to ansible control
-ansible-playbook -i ansible/inventory/hosts ansible/node-centos-mounts.yaml -vvvv --extra-vars "variable_host=localhost variable_user=vagrant softnas_hosts=none" --tags 'local_install_onsite_mounts'
+ansible-playbook -i ansible/inventory/hosts ansible/node-centos-mounts.yaml --extra-vars "variable_host=localhost variable_user=vagrant softnas_hosts=none" --tags 'local_install_onsite_mounts'
 
 # ssh will be killed from the previous script because users were added to a new group and this will not update unless your ssh session is restarted.
 # login again and continue...
@@ -50,3 +53,6 @@ echo "eg cloud, local, local_workstation, cloud_workstation"
 echo "2. ensure you have entered your ubl information for the repository"
 echo "3. ensure you have enabled the commandline plugin in tools configure plugins"
 echo "4. ensure slaveautoconf is enabled up configure event plugins"
+
+# kill the current session to ensure any new groups can be used in next script
+sleep 1; pkill -u vagrant sshd

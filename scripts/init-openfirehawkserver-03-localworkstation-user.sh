@@ -44,7 +44,6 @@ ansible-playbook -i secrets/dev/inventory/hosts ansible/ssh-copy-id-private-host
 # ansible-playbook -i secrets/dev/inventory/hosts ansible/ssh-copy-id-private-host.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser"
 
 # This stage configures deadline on the local workstation
-
 # REBOOT required for network interface modes to update.  Then launch terraform
 
 # configure deadline on the local workstation with the keys from this install to run deadline slave and monitor
@@ -52,4 +51,6 @@ ansible-playbook -i secrets/dev/inventory/hosts ansible/localworkstation-deadlin
 
 #need to fix houdini executable for deadline install and houdini install stages - both.
 
-echo 'Use vagrant reload and vagrant ssh after eexecuting each .sh script'
+echo 'exit and use vagrant reload, then vagrant ssh back in after executing each .sh script'
+# kill the current session to ensure any new groups can be used in next script
+sleep 1; pkill -u vagrant sshd

@@ -34,6 +34,4 @@ echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 
 ansible-playbook -i ansible/inventory/hosts ansible/init.yaml --extra-vars "variable_user=vagrant"
 ansible-playbook -i ansible/inventory/hosts ansible/newuser_deadline.yaml
-# custom events auto assign groups to slaves on startup
-ansible-playbook -i ansible/inventory/hosts ansible/deadline-repository-custom-events.yaml
-
+# shell will exit at this point, no commands possible here on.
