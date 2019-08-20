@@ -28,6 +28,7 @@ module "vpc" {
 
   enable_dns_support   = true
   enable_dns_hostnames = true
+  
   tags = {
     Terraform   = "true"
     Environment = "dev"
@@ -68,6 +69,8 @@ module "vpn" {
   openvpn_user_pw    = var.openvpn_user_pw
   openvpn_admin_user = var.openvpn_admin_user
   openvpn_admin_pw   = var.openvpn_admin_pw
+
+  bastion_ip = var.bastion_ip
 
   #sleep will stop instances to save cost during idle time.
   sleep = var.sleep

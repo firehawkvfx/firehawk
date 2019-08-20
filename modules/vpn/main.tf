@@ -8,6 +8,9 @@ variable "vpc_cidr" {
 variable "vpn_cidr" {
 }
 
+variable "bastion_ip" {
+}
+
 # remote_vpn_ip_cidr is the ip address of the remote host / user intending to connect over vpn. eg '197.125.62.53/32'
 variable "remote_vpn_ip_cidr" {
 }
@@ -123,6 +126,8 @@ module "openvpn" {
   openvpn_user_pw    = var.openvpn_user_pw
   openvpn_admin_user = var.openvpn_admin_user # Note: Don't choose "admin" username. Looks like it's already reserved.
   openvpn_admin_pw   = var.openvpn_admin_pw
+
+  bastion_ip = var.bastion_ip
 
   #sleep will stop instances to save cost during idle time.
   sleep = var.sleep

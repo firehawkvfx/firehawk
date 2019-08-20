@@ -72,6 +72,8 @@ module "vpc" {
   openvpn_user_pw    = var.openvpn_user_pw
   openvpn_admin_user = var.openvpn_admin_user
   openvpn_admin_pw   = var.openvpn_admin_pw
+
+  bastion_ip                     = module.bastion.public_ip
 }
 
 module "bastion" {

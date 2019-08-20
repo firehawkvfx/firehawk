@@ -85,3 +85,5 @@ variable "openvpn_admin_pw" {
 variable "vpn_cidr" {
 }
 
+variable "bastion_ip" {
+}
