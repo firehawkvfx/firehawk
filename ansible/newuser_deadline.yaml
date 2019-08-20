@@ -42,7 +42,7 @@
     - cloud-install
     - onsite-install
 
-# This process archives secrets.  they are copied to the repository, and encrypted by the vault id - keys/.vault-key
+# This process archives secrets, and configures some settins.  they are copied to the repository, and encrypted by the vault id - keys/.vault-key
 # Nothing stored in the secrets path should be unencrypted.
 
 - hosts: ansible_control
@@ -52,6 +52,7 @@
   
   # secret 2 seems to occaisionally have issues and corrupts the shell output somehow.
   vars:
+    ubl: true
     secrets:
       secret1:
         location: /opt/Thinkbox/certs/ca.crt
@@ -92,6 +93,15 @@
     - cloud_workstation
     - local_all
     - cloud_all
+
+  - name: set ubl licence info
+    shell: | 
+      cd /opt/Thinkbox/DeadlineDatabase10/mongo/application/bin/
+      ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval 'db.DeadlineSettings.update({"_id": "deadline_network_settings"},{$set:{UsageBasedURL: "{{ usage_based_url }}"}})'
+      ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval 'db.DeadlineSettings.update({
+        "_id": "deadline_network_settings"},{$set:{UsageBasedActivationCode: "{{ usage_based_activation_code }}"}})'
+    when: ubl
+    become: true
 
 - hosts: ansible_control
   become: true

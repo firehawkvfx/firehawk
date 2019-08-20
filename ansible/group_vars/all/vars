@@ -106,6 +106,9 @@ openfirehawkserver_dev: "{{ lookup('env','TF_VAR_openfirehawkserver_dev') }}"
 openfirehawkserver_prod: "{{ lookup('env','TF_VAR_openfirehawkserver_prod') }}"
 openfirehawkserver_name: "{{ lookup('env', 'TF_VAR_openfirehawkserver_name') }}"
 
+usage_based_url: "{{ lookup('env', 'TF_VAR_usage_based_url') }}"
+usage_based_activation_code: "{{ lookup('env', 'TF_VAR_usage_based_activation_code') }}"
+
 deadline_proxy_root_dir: "{{ lookup('env','TF_VAR_deadline_proxy_root_dir') }}"
 deadline_proxy_certificate: "{{ lookup('env','TF_VAR_deadline_proxy_certificate') }}"
 deadline_proxy_certificate_password: "{{ lookup('env','TF_VAR_deadline_proxy_certificate_password') }}"
