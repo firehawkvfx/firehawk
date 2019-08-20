@@ -1,4 +1,4 @@
-# configures autoligin for open vpn and routes.
+# configures autologin for open vpn and routes.
 
 # to update routes only for the vagrant host, execute 
 # ansible-playbook -i ansible/inventory ansible/openvpn.yaml -v --extra-vars "" --tags add-routes
@@ -47,6 +47,9 @@
         /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.private_network.1 --value '{{ public_subnet1 }}' ConfigPut
         /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.private_network.2 --value '{{ client_network }}/{{ client_netmask_bits }}' ConfigPut
         /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.private_access --value 'route' ConfigPut
+        /usr/local/openvpn_as/scripts/sacli --key 'vpn.client.routing.reroute_dns' --value 'true' ConfigPut
+        /usr/local/openvpn_as/scripts/sacli --key 'vpn.server.dhcp_option.domain' --value 'ap-southeast-2.compute.internal' ConfigPut
+        /usr/local/openvpn_as/scripts/sacli --key 'vpn.server.routing.allow_private_nets_to_clients' --value 'true' ConfigPut
         /usr/local/openvpn_as/scripts/sacli start
         cd /usr/local/openvpn_as/scripts/
         ./sacli --user {{ openvpn_user }} --key 'prop_autologin' --value 'true' UserPropPut
