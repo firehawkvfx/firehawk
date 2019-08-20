@@ -1,3 +1,30 @@
+- hosts: ansible_control
+  remote_user: vagrant
+  become: true
+
+  tasks:
+    - name: test local connection.
+      debug:
+        msg: "test local connection"
+
+- hosts: softnas0
+  remote_user: centos
+  become: true
+
+  tasks:
+    - name: test softnas0 connection.
+      debug:
+        msg: "test softnas0 connection"
+
+- hosts: role_softnas
+  remote_user: centos
+  become: true
+
+  tasks:
+    - name: test role_softnas connection.
+      debug:
+        msg: "test role_softnas connection"
+
 - hosts: role_softnas
   remote_user: centos
   become: true
