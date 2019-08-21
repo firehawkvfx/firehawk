@@ -29,7 +29,7 @@ else
   esac
 fi
 
-echo 'Use vagrant reload and vagrant ssh after eexecuting each .sh script'
+echo 'Use vagrant reload and vagrant ssh after executing each .sh script'
 echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 
 # This stage configures softnas, but optionally doesn't not setup any mounts reliant on a vpn.
@@ -47,6 +47,6 @@ export TF_VAR_site_mounts=false
 export TF_VAR_remote_mounts_on_local=false
 terraform apply --auto-approve
 
-echo 'Use vagrant reload and vagrant ssh after eexecuting each .sh script'
+echo 'Use vagrant reload and vagrant ssh after executing each .sh script'
 # kill the current session to ensure any new groups can be used in next script
 sleep 1; pkill -u vagrant sshd

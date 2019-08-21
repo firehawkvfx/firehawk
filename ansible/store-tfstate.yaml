@@ -12,10 +12,10 @@
     secrets:
       secret1:
         location: /vagrant/errored.tfstate
-        target: /vagrant/secrets/vagrant/errored.tfstate
+        target: /secrets/vagrant/errored.tfstate
       secret2:
         location: /vagrant/terraform.tfstate
-        target: /vagrant/secrets/vagrant/terraform.tfstate
+        target: /secrets/vagrant/terraform.tfstate
     key_name: .vault-key
     key_path: "/secrets/keys/{{ key_name }}"
   

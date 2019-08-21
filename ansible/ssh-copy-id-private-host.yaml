@@ -14,6 +14,8 @@
     shell: |
       ssh-agent bash
       echo "SSH_AUTH_SOCK= $SSH_AUTH_SOCK"
+      eval "$(ssh-agent)"
+      echo "SSH_AUTH_SOCK= $SSH_AUTH_SOCK"
       
   - name: Generate /etc/ssh/ RSA host key
     shell: |

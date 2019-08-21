@@ -9,7 +9,7 @@
     volume_path: "{{ localnas1_mount_path }}"
     default_s3_push_args: --include "*"
     debug: false
-    # these sync paths can be customised with your own by creating /vagrant/secrets/vars/sync-paths.yaml and use this var as its contents
+    # these sync paths can be customised with your own by creating /secrets/vars/sync-paths.yaml and use this var as its contents
     sync_paths:
       - path: "{{ show }}/{{ seq }}/{{ shot }}/houdini"
         s3_push_args: --include "*.hip" --exclude "*backup/*" --exclude "*geo/*" --exclude "*pdgtemp/*"
@@ -167,7 +167,7 @@
 
     default_s3_push_args: --include "*"
     debug: false
-    # these sync paths can be customised with your own by creating /vagrant/secrets/vars/sync-paths.yaml and use this var as its contents
+    # these sync paths can be customised with your own by creating /secrets/vars/sync-paths.yaml and use this var as its contents
     sync_paths:
       - path: "{{ show }}/{{ seq }}/{{ shot }}/houdini"
         s3_push_args: --include "*.hip" --exclude "*backup/*" --exclude "*geo/*" --exclude "*pdgtemp/*"

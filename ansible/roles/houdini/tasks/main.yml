@@ -47,22 +47,11 @@
   shell: |
     set -x
     sudo chmod 600 /var/tmp/houdini-17.5.173-linux_x86_64_gcc6.3.tar
-    #these are needed for houdini to start https://rajivpandit.wordpress.com/category/fx-pipeline/page/8/
-    #sudo yum install -y mesa-libGLw
-    #sudo yum install -y libXp libXp-devel 
     cd /var/tmp
-    #sudo tar -xvf /var/tmp/houdini-17.5.173-linux_x86_64_gcc6.3.tar
     sudo mkdir houdini_installer
     sudo tar -xvf houdini-17.5.173-linux_x86_64_gcc6.3.tar -C houdini_installer --strip-components 1
     cd houdini_installer
-    #sudo ./houdini.install --auto-install --accept-EULA --install-houdini --install-license --no-local-licensing --install-hfs-symlink
     sudo ./houdini.install --auto-install --accept-EULA --install-houdini --install-license --no-local-licensing --install-hfs-symlink
-    #cd /opt/hfs17.0
-    #sudo sed -i '/licensingMode = sesinetd/s/^# //g' /opt/hfs17.0/houdini/Licensing.opt
-    #sudo cat /opt/hfs17.0/houdini/Licensing.opt
-    #/opt/hfs17.0/bin/hserver
-    #source houdini_setup
-    #/opt/hfs17.0/bin/hserver -S ${var.houdini_license_server_address}
   register: houdini_install_out
   become: true
 
@@ -75,6 +64,4 @@
     sudo sed -i '/licensingMode = sesinetd/s/^# //g' /opt/hfs17.5/houdini/Licensing.opt
     sudo cat /opt/hfs17.5/houdini/Licensing.opt
     /opt/hfs17.5/bin/hserver
-    #source houdini_setup
-    #/opt/hfs17.5/bin/hserver -S {{ houdini_license_server_address }}
   become: true

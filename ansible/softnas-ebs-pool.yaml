@@ -41,7 +41,7 @@
         int: "4"
 
   tasks:
-  - name: Check for existance of custom mounts in /vagrant/secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml and override default mounts
+  - name: Check for existance of custom mounts in /secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml and override default mounts
     stat:
       path:  ../../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
     connection: local

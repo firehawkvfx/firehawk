@@ -29,9 +29,9 @@ else
   esac
 fi
 
-echo 'Use vagrant reload and vagrant ssh after eexecuting each .sh script'
+echo 'Use vagrant reload and vagrant ssh after executing each .sh script'
 echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 
 ansible-playbook -i ansible/inventory/hosts ansible/init.yaml --extra-vars "variable_user=vagrant"
-ansible-playbook -i ansible/inventory/hosts ansible/newuser_deadline.yaml
+ansible-playbook -i ansible/inventory/hosts ansible/newuser_deadline.yaml -v
 # shell will exit at this point, no commands possible here on.

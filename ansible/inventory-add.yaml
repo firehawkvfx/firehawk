@@ -11,6 +11,10 @@
     backup: false
   
   tasks:
+    - name: hosts file path is
+      debug:
+        var: hosts_file
+        
     - name: ensure a 2 new lines exist at end of file always
       shell: |
         /vagrant/scripts/append_blank_line.sh {{ hosts_file }}

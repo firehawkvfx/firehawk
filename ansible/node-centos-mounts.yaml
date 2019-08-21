@@ -37,7 +37,7 @@
   vars:
     destroy: false
     # when paths are found at these locations, they will be added to exports.
-    # these defaults can be overidden by storing a config in /vagrant/secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
+    # these defaults can be overidden by storing a config in /secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
     exports:
       - path: "/pool1/volume1/"
         pool_name: pool1
@@ -48,7 +48,7 @@
     import_pool: true
 
   tasks:
-  - name: Check for existance of custom exports in /vagrant/secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml and override default mounts
+  - name: Check for existance of custom exports in /secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml and override default mounts
     stat:
       path:  ../../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
     register: custom_ebs_list
@@ -117,7 +117,7 @@
     #hostname: "node1.{{ public_domain }}"
     pcoip: false
     destroy: false
-    # these defaults can be overidden by storing a config in /vagrant/secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
+    # these defaults can be overidden by storing a config in /secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
     exports:
       - path: "/pool1/volume1/"
         pool_name: pool1
@@ -128,7 +128,7 @@
     import_pool: true
 
   tasks:
-  - name: Check for existance of custom exports in /vagrant/secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml and override default mounts
+  - name: Check for existance of custom exports in /secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml and override default mounts
     stat:
       path:  ../../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
     register: custom_ebs_list
@@ -452,7 +452,7 @@
       site_bind1:
 
   tasks:
-  - name: Check for existance of custom exports in /vagrant/secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml and override default mounts
+  - name: Check for existance of custom exports in /secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml and override default mounts
     stat:
       path:  ../../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
     register: custom_ebs_list

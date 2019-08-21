@@ -10,7 +10,7 @@
 
   vars:
     restore: false
-    btier_local_path: /vagrant/secrets/{{ envtier }}/ebs-volumes/btier.json
+    btier_local_path: /secrets/{{ envtier }}/ebs-volumes/btier.json
 
   tasks:
   - name: backup tier - /var/www/softnas/config/btier.json

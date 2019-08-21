@@ -29,7 +29,7 @@ else
   esac
 fi
 
-echo 'Use vagrant reload and vagrant ssh after eexecuting each .sh script'
+echo 'Use vagrant reload and vagrant ssh after executing each .sh script'
 echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 
 
