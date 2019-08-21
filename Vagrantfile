@@ -25,9 +25,11 @@ Vagrant.configure("2") do |config|
   if network == 'public'
       # if you don't know the exact string for the bridgenic, eg '1) en0: Wi-Fi (AirPort)' then leave it as 'none'
       if bridgenic == 'none'
-          config.vm.network "public_network", ip: openfirehawkserver, mac: mac_string, use_dhcp_assigned_default_route: true
+          #config.vm.network "public_network", ip: openfirehawkserver, mac: mac_string, use_dhcp_assigned_default_route: true
+          config.vm.network "public_network", mac: mac_string, use_dhcp_assigned_default_route: true
         else
-          config.vm.network "public_network", ip: openfirehawkserver, mac: mac_string, use_dhcp_assigned_default_route: true, bridge: bridgenic
+          #config.vm.network "public_network", ip: openfirehawkserver, mac: mac_string, use_dhcp_assigned_default_route: true, bridge: bridgenic
+          config.vm.network "public_network", mac: mac_string, use_dhcp_assigned_default_route: true, bridge: bridgenic
         end
     else
       # use a private network mode if you don't have control over the network environment - eg wifi in a cafe / other location.
