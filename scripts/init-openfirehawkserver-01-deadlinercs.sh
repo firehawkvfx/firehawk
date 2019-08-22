@@ -33,5 +33,10 @@ echo 'Use vagrant reload and vagrant ssh after executing each .sh script'
 echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 
 ansible-playbook -i ansible/inventory/hosts ansible/init.yaml --extra-vars "variable_user=vagrant"
+
+#install aws cli for deadline user with s3 credentials
+ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=ansible_control variable_user=vagrant"
+ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=ansible_control variable_user=root"
+
 ansible-playbook -i ansible/inventory/hosts ansible/newuser_deadline.yaml -v
 # shell will exit at this point, no commands possible here on.
