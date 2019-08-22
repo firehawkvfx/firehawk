@@ -32,7 +32,7 @@ fi
 echo 'Use vagrant reload and vagrant ssh after executing each .sh script'
 echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 
-# This stage configures softnas, but optionally doesn't not setup any mounts reliant on a vpn.
+# This stage configures softnas, but optionally doesn't not setup any mounts reliant on a vpn. it wont commence installing render nodes until the next stage.
 
 # vagrant reload
 # vagrant ssh

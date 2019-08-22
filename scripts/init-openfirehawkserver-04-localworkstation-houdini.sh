@@ -39,6 +39,3 @@ echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 ssh-add /home/vagrant/.ssh/id_rsa
 ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-houdini.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser" --skip-tags "sync_scripts"
 eval $(ssh-agent -k)
-
-# kill the current session to ensure any new groups can be used in next script
-sleep 1; pkill -u vagrant sshd
