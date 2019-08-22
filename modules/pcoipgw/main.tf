@@ -374,44 +374,10 @@ EOT
 
   }
 
-  #after dracut, we reboot the instance locally.  annoyingly, a reboot command will cause a terraform error.
-  #after dracut, we reboot the instance locally.  annoyingly, a reboot command will cause a terraform error.
+  #after dracut, we reboot the instance locally.  A terraform reboot command will cause a terraform error.
   provisioner "local-exec" {
     command = var.pcoip_sleep_after_creation ? "aws ec2 stop-instances --instance-ids ${aws_instance.pcoipgw.id}" : "aws ec2 reboot-instances --instance-ids ${aws_instance.pcoipgw.id}"
   }
-  #transfer the gpu driver
-  # provisioner "file" {
-  #   source      = "${path.module}/gpudriver/NVIDIA-Linux-x86_64-390.96-grid.run"
-  #   destination = "/home/centos/NVIDIA-Linux-x86_64-390.96-grid.run"
-
-  #   connection {
-  #     user        = "centos"
-  #     host        = "${aws_instance.pcoipgw.public_ip}"
-  #     private_key = "${var.private_key}"
-  #     type        = "ssh"
-  #     timeout     = "10m"
-  #   }
-  # }
-
-  # provisioner "remote-exec" {
-  #   connection {
-  #     user        = "centos"
-  #     host        = "${aws_instance.pcoipgw.public_ip}"
-  #     private_key = "${var.private_key}"
-  #     type        = "ssh"
-  #     timeout     = "10m"
-  #   }
-
-  #   inline = [
-  #     #"sudo yum update -y",
-
-  #     # these are deadline dependencies
-  #     "sudo yum install redhat-lsb libX11 libXext -y",
-
-  #     "sudo yum install libMesaGL1 -y",
-  #     "sudo yum install mesa-libGL mesa-libGLU -y",
-  #   ]
-  # }
 }
 
 resource "null_resource" "shutdownpcoipgw" {
