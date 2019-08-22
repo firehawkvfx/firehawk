@@ -3,7 +3,10 @@
 
 - name: houdini_version_item
   debug:
-    var: houdini_version_item
+    var: item
+  with_items:
+  - "{{ houdini_version_item }}"
+  - "{{ houdini_install_type }}"
 
 - name: "set permissions and ensure dir exists /home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/scripts/"
   file:
@@ -72,12 +75,21 @@
   debug:
     var: houdini_linux_filename
 
-- name: Sync houdini from s3 if exist - pull
+- name: (UBUNTU) Sync houdini from s3 if exist - pull
+  shell: |
+    set -x
+    cd {{ download_to_dir }}/
+    aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ houdini_linux_filename }}"
+  become_user: "{{ variable_user }}"
+  when: houdini_install_type == "server"
+
+- name: (CENTOS) Sync houdini from s3 if exist - pull
   shell: |
     set -x
     cd {{ download_to_dir }}/
     ~/.local/bin/aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ houdini_linux_filename }}"
   become_user: "{{ variable_user }}"
+  when: houdini_install_type != "server"
 
 - name: Auto download and install Houdini with python script - auto version
   shell: |
@@ -85,11 +97,11 @@
     sudo python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini -b {{ houdini_version_item.houdini_build }} -t {{ download_to_dir }} -q false
   register: houdini_install_out
   become: true
-  when: not skip_install and houdini_version_item.houdini_auto_version
+  when: houdini_install_type != "server" and houdini_version_item.houdini_auto_version
 
 - debug:
     msg:  "{{ houdini_install_out.stdout }}"
-  when: not skip_install and houdini_version_item.houdini_auto_version
+  when: houdini_install_type != "server" and houdini_version_item.houdini_auto_version
 
 - name: Install Houdini with python script - specific existing version from s3 bucket
   shell: |
@@ -97,11 +109,11 @@
     sudo python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini -b {{ houdini_version_item.houdini_build }} -t {{ download_to_dir }} -q false -f {{ houdini_linux_filename }}
   register: houdini_install_out
   become: true
-  when: not skip_install and not houdini_version_item.houdini_auto_version
+  when: houdini_install_type != "server" and not houdini_version_item.houdini_auto_version
 
 - debug:
     msg:  "{{ houdini_install_out.stdout }}"
-  when: not skip_install and not houdini_version_item.houdini_auto_version
+  when: houdini_install_type != "server" and not houdini_version_item.houdini_auto_version
 
 - name: "setup licensing mode will write to /opt/hfs{{ houdini_version_item.houdini_major_version }}/houdini/Licensing.opt"
   shell: |
@@ -110,7 +122,7 @@
     sudo cat /opt/hfs{{ houdini_version_item.houdini_major_version }}/houdini/Licensing.opt
   register: houdini_hserver_out
   become: true
-  when: not skip_install
+  when: houdini_install_type != "server"
 
 - name: setup licensing server ip as deadline user will write to $HOME/.sesi_licenses.pref
   shell: |
@@ -122,45 +134,75 @@
     echo $HOME
   register: houdini_hserver_deadlineuser_out
   become_user: deadlineuser
-  when: not skip_install
+  when: houdini_install_type != "server"
 
-# ### server install
-# - name: check if hserver file exists
-#   stat: 
-#     path: /opt/hfs17.5/bin/hserver
-#   register: hserver_check
-#   become: true
+### SERVER INSTALL
+- name: SERVER INSTALL - check if hserver file exists
+  stat: 
+    path: /opt/hfs17.5/bin/hserver
+  register: hserver_check
+  become: true
+  when: houdini_install_type == "server"
 
-# - name: Stop licensing server if already running / installed.  Please ignore any error if hserver not running.
-#   shell: |
-#     /opt/hfs17.5/bin/hserver -q
-#   ignore_errors: yes
-#   become: true
-#   when: hserver_check.stat.exists == true
+- name: SERVER INSTALL - Stop licensing server if already running / installed.  Please ignore any error if hserver not running.
+  shell: |
+    /opt/hfs17.5/bin/hserver -q
+  ignore_errors: yes
+  become: true
+  when: houdini_install_type == "server" and hserver_check.stat.exists
+
+- name: SERVER INSTALL - permissions
+  file:
+    path: "{{ download_to_dir }}/{{ houdini_linux_filename }}"
+    mode: u+rw,g+rw,o+rw
+  become: true
+  when: houdini_install_type == "server"
+
+- name: SERVER INSTALL - install houdini with correct dir.
+  shell: |
+    set -x
+    cd /var/tmp
+    dir={{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}
+    #dir=houdini_installer
+    echo "$dir"
+    sudo mkdir -p "$dir"
+    sudo tar -xvf {{ houdini_linux_filename }} -C "$dir" --strip-components 1
+    cd "$dir"
+    #sudo mkdir -p {{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}
+    #sudo tar -xvf {{ houdini_linux_filename }} -C {{ houdini_linux_filename | regex_replace('.tar.gz$', '') }} --strip-components 1
+    #cd {{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}
+    # cd {{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}
+    sudo ./houdini.install --accept-EULA --install-houdini --install-license --install-hfs-symlink
+  register: houdini_install_out
+  become_user: "{{ variable_user }}"
+  become: true
+  when: houdini_install_type == "server"
 
 # - name: install houdini
 #   shell: |
 #     set -x
-#     sudo chmod 600 /var/tmp/houdini-17.5.173-linux_x86_64_gcc6.3.tar
 #     cd /var/tmp
-#     sudo mkdir houdini_installer
-#     sudo tar -xvf houdini-17.5.173-linux_x86_64_gcc6.3.tar -C houdini_installer --strip-components 1
+#     sudo mkdir -p houdini_installer
+#     sudo tar -xvf {{ houdini_linux_filename }} -C houdini_installer --strip-components 1
 #     cd houdini_installer
 #     sudo ./houdini.install --auto-install --accept-EULA --install-houdini --install-license --no-local-licensing --install-hfs-symlink
 #   register: houdini_install_out
 #   become: true
+#   when: houdini_install_type == "server"
 
-# - debug:
-#     msg:  "{{ houdini_install_out.stdout }}"
+- debug:
+    msg:  "{{ houdini_install_out.stdout }}"
+  when: houdini_install_type == "server"
 
-# - name: setup licensing mode
-#   shell: |
-#     cd /opt/hfs17.5
-#     sudo sed -i '/licensingMode = sesinetd/s/^# //g' /opt/hfs17.5/houdini/Licensing.opt
-#     sudo cat /opt/hfs17.5/houdini/Licensing.opt
-#     /opt/hfs17.5/bin/hserver
-#   become: true
-# ### end server install
+- name: SERVER INSTALL - setup licensing mode
+  shell: |
+    cd /opt/hfs17.5
+    sudo sed -i '/licensingMode = sesinetd/s/^# //g' /opt/hfs17.5/houdini/Licensing.opt
+    sudo cat /opt/hfs17.5/houdini/Licensing.opt
+    /opt/hfs17.5/bin/hserver
+  become: true
+  when: houdini_install_type == "server"
+### END SERVER INSTALL
 
 # After install sync houdini download with bucket
 
