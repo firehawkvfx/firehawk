@@ -25,6 +25,7 @@
     backup: true
     insertbefore: BOF
     block: |
+      PDGMQ_USE_IP=1
       FIREHAWK_HOUDINI_TOOLS = "{{ firehawk_houdini_tools }}"
       PROD_ROOT = "{{ localnas1_mount_path }}"
       PROD_ONSITE_ROOT = "{{ localnas1_path_abs }}"
