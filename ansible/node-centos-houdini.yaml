@@ -106,25 +106,13 @@
     # the become sudo pass is only relevent for local installation if required on the host specified.
     ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
     houdini_major_version: 18.0
-    # houdini_linux_filename (to install from): 
-    # when not set to a specific string eg "houdini-17.5.326-linux_x86_64_gcc6.3.tar.gz", instead use the string "auto"
-    # specific versions must exist in your s3 bucket for retrieval which you can place there manually, or if you use
-    # a version you have installed previously, it should already exist in the bucket.
-    #houdini_linux_filename: "auto"
-    #houdini_auto_version: True
-    # sesi_username: "{{ sesi_username }}"
-    # eg: myemaillogin@sidefxwebsite
-    # sesi_password: "{{ sesi_password }}"
-    # eg: mypassword@sidefxwebiste
-    # houdini_build: "{{ houdini_build }}"
-    # eg: daily
-    download_to_dir: /var/tmp/openfirehawk
+    download_to_dir: /var/tmp/firehawk
     
     variable_user: centos
     bastionip: "{{ groups['bastionip'][0] }}"
-    #hostname: "node1.{{ public_domain }}"
+
     skip_packages: false
-    skip_install: false
+    houdini_install_type: 'node'
     bucket: "installers.{{ public_domain }}"
     # the firehawk houdini tools can be linked to a live path on your file system with an variable instead of the default. 
     firehawk_sync_source: '/vagrant/modules/node_centos/modules/openfirehawk-houdini-tools'
@@ -183,6 +171,10 @@
   #   - { port: '1024', dest: "{{ public_subnet1 }}" }
   #   - { port: '1024', dest: "{{ public_subnet2 }}" }
 
+  - name: ansible distro
+    debug:
+      var: ansible_distribution
+
   - package:
       name: "{{ item }}"
       state: present
@@ -195,6 +187,7 @@
       - libXScrnSaver
     tags:
       - packages
+    when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
     
 
   - name: install pip
@@ -221,8 +214,9 @@
     file:
       path: "{{ download_to_dir }}"
       state: directory
-      mode: 0700
+      mode: u+rwX,g+rwX,o+rwX
       owner: "{{ variable_user }}"
+    become: true
 
   - name: Install beautifulsoup4 for web page crawling
     pip:
@@ -246,6 +240,15 @@
     loop: "{{ houdini_version_list }}"
     loop_control:
       loop_var: houdini_version_item
+    when: houdini_install_type != "server"
+
+  - name: install houdini server for items in list
+    include_role:
+      name: houdini-install
+    loop: "{{ houdini_license_server_version_list }}"
+    loop_control:
+      loop_var: houdini_version_item
+    when: houdini_install_type == "server"
 
   - name: configure houdini.env and deadline for items in list
     include_role:
@@ -253,10 +256,12 @@
     loop: "{{ houdini_version_list }}"
     loop_control:
       loop_var: houdini_version_item
+    when: houdini_install_type != "server"
 
   - name: configure houdini and deadline config
     include_role:
       name: houdini-deadline-config
+    when: houdini_install_type != "server"
 
 - hosts: ansible_control
   become: true
@@ -266,6 +271,7 @@
     no_extension: "{{ deadline_linux_installers_tar | splitext | first }}"
     basename: "{{ no_extension.split('/')[-1] }}"
     houdini_major_version: 18.0
+    houdini_install_type: 'node'
     
   tasks:
   - name: setup houdini plugin in deadline repository for each major version.  This identical role use occurs in 2 locations - after deadline install and with install of Houdini
@@ -274,3 +280,4 @@
     loop: "{{ houdini_major_version_list }}"
     loop_control:
       loop_var: houdini_major_version
+    when: houdini_install_type != "server"

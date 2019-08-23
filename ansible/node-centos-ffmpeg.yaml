@@ -23,7 +23,7 @@
     bastionip: "{{ groups['bastionip'][0] }}"
     hostname: "node1.{{ public_domain }}"
     skip_packages: false
-    skip_install: false
+    houdini_install_type: node
     bucket: "installers.{{ public_domain }}"
 
 

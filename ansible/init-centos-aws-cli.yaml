@@ -30,7 +30,7 @@
     hostname: "node1.{{ public_domain }}"
     houdini_build: "{{ lookup('env','TF_VAR_houdini_build') }}"
     skip_packages: false
-    skip_install: false
+    houdini_install_type: node
   
   pre_tasks:
     - name: ensure source ./update_vars.sh initialised
