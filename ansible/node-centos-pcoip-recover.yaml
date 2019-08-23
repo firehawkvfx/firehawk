@@ -5,36 +5,43 @@
   vars:
     # if true, teradici pcoip service will be restarted
     pcoip: true
-    nvidia_driver: 410.92
+    # run this command to select a version and grid folder
+    # aws s3 ls --recursive s3://ec2-linux-nvidia-drivers/
+    nvidia_driver: 430.30
+    grid_folder: grid-9.0
     driver_file: NVIDIA-Linux-x86_64-{{ nvidia_driver }}-grid.run
     driver_url: http://us.download.nvidia.com/XFree86/Linux-x86_64/{{ driver_file }}
   
   tasks:
   - name: ensure dir exists
     file:
-      path: /vagrant/Downloads/nvidia/latest/
+      path: /vagrant/Downloads/nvidia/{{ grid_folder }}/
       state: directory
 
   - name: check if driver version exists
     stat: 
-      path: "/vagrant/downloads/nvidia/{{ driver_file }}"
+      path: "/vagrant/downloads/nvidia/{{ grid_folder }}/{{ driver_file }}"
     register: driver_stat
 
   - name: get nvidia driver
     shell: |
       set -x
-      cd /vagrant/downloads/nvidia/latest
-      aws s3 sync s3://ec2-linux-nvidia-drivers/latest/ . --delete
-      cp *.run /vagrant/downloads/nvidia/.
+      cd /vagrant/downloads/nvidia/{{ grid_folder }}
+      aws s3 sync s3://ec2-linux-nvidia-drivers/{{ grid_folder }}/ . --delete
+      #cp *.run /vagrant/downloads/nvidia/.
     become_user: vagrant
     when: driver_stat.stat.exists == false
 
-  - name: "Ansible find files in subdirectory downloads"
+  - name: "Ansible find files in subdirectory downloads /vagrant/downloads/nvidia/{{ grid_folder }}/"
     find:
-      paths: "/vagrant/downloads/nvidia/"
-      patterns: "*{{ nvidia_driver }}-grid.run"
+      paths: "/vagrant/downloads/nvidia/{{ grid_folder }}/"
+      #patterns: ".*{{ nvidia_driver }}.*.run"
+      patterns: "*{{ nvidia_driver }}*.run"
     register: files_matched
     become: true
+  
+  - debug:
+      msg: "files_matched: {{ files_matched }}"
 
   - debug:
       msg: "installer path: {{ files_matched.files[0].path }}"
@@ -51,7 +58,7 @@
   - name: ensure the nvidia installer is syncronised with the bucket
     s3_sync:
       bucket: "installers.{{ public_domain }}"
-      file_root: /vagrant/downloads/nvidia
+      file_root: /vagrant/downloads/nvidia/{{ grid_folder }}
       include: "{{ files_matched.files[0].path | basename }}"
       aws_access_key: "{{ aws_access_key }}"
       aws_secret_key: "{{ aws_secret_key }}"
