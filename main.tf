@@ -76,6 +76,12 @@ module "vpc" {
   bastion_ip                     = module.bastion.public_ip
 }
 
+module "deadline" {
+  source = "./modules/deadline"
+  pgp_key =  file(var.pgp_key_path)
+  remote_ip_cidr = var.remote_ip_cidr
+}
+
 module "bastion" {
   source = "./modules/bastion"
 

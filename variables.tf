@@ -57,6 +57,9 @@ variable "key_name" {
 variable "local_key_path" {
 }
 
+variable "pgp_key_path" {
+}
+
 #the remote_ip_cidr is the public remote static ip address of the site that will access the vpc
 #see this page for more undewrstanding on ip ranges reserved for this purpose
 #https://openvpn.net/community-resources/how-to/
