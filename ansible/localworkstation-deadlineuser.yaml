@@ -463,7 +463,7 @@
 # multislave functionality
   - copy:
       src: /vagrant/scripts/deadline-multi-slave.sh
-      dest: /usr/bin/dlmultislave.sh
+      dest: /usr/bin/deadline-multi-slave.sh
       owner: deadlineuser
       group: syscontrol
       mode: u=rx,g=rx,o-rwx
