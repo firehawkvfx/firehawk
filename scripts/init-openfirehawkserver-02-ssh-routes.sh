@@ -58,4 +58,4 @@ echo "3. ensure you have enabled the commandline plugin in tools configure plugi
 echo "4. ensure slaveautoconf is enabled up configure event plugins"
 
 # kill the current session to ensure any new groups can be used in next script
-sleep 1; pkill -u vagrant sshd
+# sleep 1; pkill -u vagrant sshd
