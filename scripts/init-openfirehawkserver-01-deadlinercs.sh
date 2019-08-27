@@ -32,6 +32,14 @@ fi
 echo 'Use vagrant reload and vagrant ssh after executing each .sh script'
 echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 
+# install keybase, used for aquiring keys for deadline spot plugin.
+curl --remote-name https://prerelease.keybase.io/keybase_amd64.deb
+sudo apt install -y ./keybase_amd64.deb
+run_keybase
+echo $(keybase --version)
+
+# you should login with 'keybase login'.  if you haven't created a user account you can do so at keybase.io
+
 ansible-playbook -i ansible/inventory/hosts ansible/init.yaml --extra-vars "variable_user=vagrant"
 
 #install aws cli for deadline user with s3 credentials
