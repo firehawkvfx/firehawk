@@ -161,17 +161,12 @@
 - name: SERVER INSTALL - install houdini with correct dir.
   shell: |
     set -x
-    cd /var/tmp
+    cd {{ download_to_dir }}
     dir={{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}
-    #dir=houdini_installer
     echo "$dir"
     sudo mkdir -p "$dir"
     sudo tar -xvf {{ houdini_linux_filename }} -C "$dir" --strip-components 1
     cd "$dir"
-    #sudo mkdir -p {{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}
-    #sudo tar -xvf {{ houdini_linux_filename }} -C {{ houdini_linux_filename | regex_replace('.tar.gz$', '') }} --strip-components 1
-    #cd {{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}
-    # cd {{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}
     sudo ./houdini.install --accept-EULA --install-houdini --install-license --install-hfs-symlink
   register: houdini_install_out
   become_user: "{{ variable_user }}"
@@ -206,7 +201,7 @@
 
 # After install sync houdini download with bucket
 
-- name: ensure the houdini installer exist in the s3 bucket.  Push if it doesn't.
+- name: ensure the houdini installer exists in the s3 bucket.  Push if it doesn't.
   s3_sync:
     bucket: "installers.{{ public_domain }}"
     file_root: "{{ download_to_dir }}"
