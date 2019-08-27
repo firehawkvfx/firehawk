@@ -101,7 +101,7 @@
     cd /opt/Thinkbox/DeadlineDatabase10/mongo/application/bin/
     ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval '
       var StaggerInstances = "5";
-      var IdleShutdown = "10";
+      var IdleShutdown = "2";
       var spot_json = cat("/secrets/dev/spot-fleet-templates/config_generated.json");
       db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"PluginEnabled": "1"}});
       db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.State": "Global Enabled"}});
@@ -110,6 +110,7 @@
       db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.Logging": "Verbose"}});
       db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.Region": "{{ aws_region }}"}});
       db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.Config": spot_json}});
+      db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.IdleShutdown": IdleShutdown}});
       db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.DeleteTerminatedSlaves": "True"}});
       db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.StrictHardCap": "True"}});
       db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.StaggerInstances": StaggerInstances}});'
