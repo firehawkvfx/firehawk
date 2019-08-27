@@ -178,7 +178,6 @@
   - package:
       name: "{{ item }}"
       state: present
-    when: not skip_packages
     with_items:
       - mesa-libGLw
       - libXp
@@ -187,7 +186,7 @@
       - libXScrnSaver
     tags:
       - packages
-    when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+    when: not skip_packages and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
     
 
   - name: install pip
