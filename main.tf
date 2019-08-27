@@ -82,6 +82,58 @@ module "deadline" {
   remote_ip_cidr = var.remote_ip_cidr
 }
 
+output "spot_access_key_id" {
+  value = module.deadline.spot_access_key_id
+}
+output "spot_secret" {
+  value = module.deadline.spot_secret
+}
+
+resource "null_resource" "dependency_deadline_spot" {
+  triggers = {
+    spot_access_key_id       = module.deadline.spot_access_key_id
+    spot_secret              = module.deadline.spot_secret
+  }
+}
+
+resource "null_resource" "dependency_node_centos" {
+  count      = var.site_mounts ? 1 : 0
+  triggers = {
+    ami_id = module.node.ami_id
+  }
+}
+
+# if a new image is detected, update the spot template and spot plugin json settings
+# consider using md5 of spot template to trigger an update.
+resource "null_resource" "provision_deadline_spot" {
+  count      = var.site_mounts ? 1 : 0
+  depends_on = [null_resource.dependency_deadline_spot, null_resource.dependency_node_centos]
+
+  triggers = {
+    ami_id = module.node.ami_id
+    config_template_sha1 = "${sha1(file("/secrets/dev/spot-fleet-templates/config_template.json"))}"
+    deadline_spot_sha1 = "${sha1(file("/vagrant/ansible/deadline-spot.yaml"))}"
+    deadline_spot_role_sha1 = "${sha1(file("/vagrant/ansible/roles/deadline-spot/tasks/main.yml"))}"
+    spot_access_key_id = module.deadline.spot_access_key_id
+    spot_secret        = module.deadline.spot_secret
+  }
+  
+  # needs subnets id eg subnet-019d702254060c2f9, and ami_id, arn id eg arn:aws:iam::972620357255:instance-profile/DeadlineSlaveRole, snapshot id snap-06c90e54aaf77dbe5, security group id, sg-0b1e4b21eb893f712
+  provisioner "local-exec" {
+    command = <<EOT
+      set -x
+      cd /vagrant
+      echo ${ module.deadline.spot_access_key_id }
+      echo ${ module.deadline.spot_secret }
+      ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-spot.yaml -v --extra-vars 'ami_id=${module.node.ami_id} snapshot_id=${module.node.snapshot_id} subnet_id=${module.vpc.private_subnets[0]} spot_instance_profile_arn=${module.deadline.spot_instance_profile_arn} security_group_id=${module.node.security_group_id} spot_access_key_id=${module.deadline.spot_access_key_id} spot_secret=${module.deadline.spot_secret}'
+EOT
+  }
+}
+
+resource "aws_spot_fleet_request" "cheap_compute" {
+
+}
+
 module "bastion" {
   source = "./modules/bastion"
 
@@ -220,11 +272,13 @@ variable "pcoip_skip_update" {
 #   houdini_license_server_address = "${var.houdini_license_server_address}"
 # }
 
+
+
 module "workstation" {
   source = "./modules/workstation_pcoip"
   name   = "workstation"
 
-  workstation_enabled = true
+  workstation_enabled = false
 
   #options for gateway type are centos7 and pcoip
   gateway_type   = var.gateway_type
