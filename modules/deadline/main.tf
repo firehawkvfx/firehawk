@@ -1,24 +1,120 @@
-resource "aws_iam_user" "deadline_spot_user" {
-  name = "deadline_spot_user"
+### deadline spot instance IAM policy.  This allows instances launched by a spot fleet template to be recognised by deadline, and must be assigned when creating a spot fleet template.
+
+resource "aws_iam_policy" "spot_instance_policy" {
+  name        = "spot_instance_policy"
+  path        = "/"
+  description = "spot_instance_policy for Deadline"
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "SlaveStatement",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeTags",
+                "ec2:TerminateInstances"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "SQSReporting",
+            "Effect": "Allow",
+            "Action": [
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl",
+                "sqs:ReceiveMessage",
+                "sqs:SendMessage"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+EOF
 }
 
-resource "aws_iam_access_key" "deadline_spot_access_key" {
+resource "aws_iam_role" "spot_instance_role" {
+  name = "spot_instance_role"
+  path = "/"
+
+  assume_role_policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Action": "sts:AssumeRole",
+            "Principal": {
+               "Service": "ec2.amazonaws.com"
+            },
+            "Effect": "Allow",
+            "Sid": ""
+        }
+    ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy" "spot_instance_role_policy" {
+  name = "SlaveStatement"
+  role = "${aws_iam_role.spot_instance_role.id}"
+
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "SlaveStatement",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeTags",
+                "ec2:TerminateInstances"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "SQSReporting",
+            "Effect": "Allow",
+            "Action": [
+                "sqs:GetQueueAttributes",
+                "sqs:GetQueueUrl",
+                "sqs:ReceiveMessage",
+                "sqs:SendMessage"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+EOF
+}
+
+resource "aws_iam_instance_profile" "spot_instance_profile" {
+  name = "SlaveStatement"
+  role = "${aws_iam_role.spot_instance_role.name}"
+}
+
+output "spot_instance_profile_arn" {
+  value = "${aws_iam_instance_profile.spot_instance_profile.arn}"
+}
+
+### deadline spot fleet user IAM
+
+
+resource "aws_iam_user_group_membership" "deadline_spot_group_membership" {
   user = "${aws_iam_user.deadline_spot_user.name}"
-  pgp_key = var.pgp_key
-  # see https://www.hiroom2.com/2016/08/14/ubuntu-16-04-create-gpg-key/ to create pgp key in ubuntu
+
+  groups = [
+    "${aws_iam_group.deadline_spot_group.name}"
+  ]
 }
 
-output "spot_access_key_id" {
-  value = "${aws_iam_access_key.deadline_spot_access_key.id}"
+resource "aws_iam_group" "deadline_spot_group" {
+  name = "deadline_spot_group"
+  path = "/users/"
 }
 
-output "spot_secret" {
-  value = "${aws_iam_access_key.deadline_spot_access_key.encrypted_secret}"
-}
-
-resource "aws_iam_user_policy" "deadline_spot_user_policy" {
-  name = "deadline_spot_user_policy"
-  user = "${aws_iam_user.deadline_spot_user.name}"
+resource "aws_iam_group_policy" "deadline_spot_group_policy" {
+  name  = "deadline_spot_group_policy"
+  group = "${aws_iam_group.deadline_spot_group.id}"
 
   policy = <<EOF
 {
@@ -199,4 +295,23 @@ resource "aws_iam_user_policy" "deadline_spot_user_policy" {
     ]
 }
 EOF
+}
+
+resource "aws_iam_user" "deadline_spot_user" {
+  name = "deadline_spot_user"
+}
+
+resource "aws_iam_access_key" "deadline_spot_access_key" {
+  user = "${aws_iam_user.deadline_spot_user.name}"
+  pgp_key = "keybase:andrew_graham"
+  #var.pgp_key
+  # see https://www.hiroom2.com/2016/08/14/ubuntu-16-04-create-gpg-key/ to create pgp key in ubuntu
+}
+
+output "spot_access_key_id" {
+  value = "${aws_iam_access_key.deadline_spot_access_key.id}"
+}
+
+output "spot_secret" {
+  value = "${aws_iam_access_key.deadline_spot_access_key.encrypted_secret}"
 }
