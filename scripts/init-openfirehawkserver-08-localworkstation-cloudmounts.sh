@@ -43,4 +43,6 @@ export TF_VAR_softnas_storage=true
 export TF_VAR_site_mounts=true
 export TF_VAR_remote_mounts_on_local=true
 terraform apply --auto-approve
+
+echo "for the deadline spot plugin to be updated, pulse must be restarted.  Use exit and vagrant reload"
 #should add a test script at this point to validate vpn connection is established, or licence servers may not work.

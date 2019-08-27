@@ -158,20 +158,74 @@
   become: true
   when: houdini_install_type == "server"
 
-- name: SERVER INSTALL - install houdini with correct dir.
+# - name: create dir
+#   file:
+#     path: "{{ download_to_dir }}/{{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}"
+#     state: directory
+#     mode: u=rwX,g=rwx
+#     owner: "{{ variable_user }}"
+#   become_user: "{{ variable_user }}"
+#   become: true
+#   when: houdini_install_type == "server"
+
+- name: SERVER INSTALL - make dir.
   shell: |
     set -x
     cd {{ download_to_dir }}
     dir={{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}
     echo "$dir"
     sudo mkdir -p "$dir"
-    sudo tar -xvf {{ houdini_linux_filename }} -C "$dir" --strip-components 1
     cd "$dir"
-    sudo ./houdini.install --accept-EULA --install-houdini --install-license --install-hfs-symlink
   register: houdini_install_out
   become_user: "{{ variable_user }}"
   become: true
   when: houdini_install_type == "server"
+
+- name: SERVER INSTALL - unarchive houdini with correct dir.
+  shell: |
+    set -x
+    dir={{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}
+    cd {{ download_to_dir }}
+    sudo tar -xvf {{ houdini_linux_filename }} -C "{{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}" --strip-components 1
+  register: houdini_install_out
+  become_user: "{{ variable_user }}"
+  become: true
+  when: houdini_install_type == "server"
+
+# - name: Unarchive a file with extra options
+#   unarchive:
+#     src: "{{ download_to_dir }}/{{ houdini_linux_filename }}"
+#     dest: "{{ download_to_dir }}/{{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}"
+#     # extra_opts:
+#     # - --strip-components 1
+#   become_user: "{{ variable_user }}"
+#   become: true
+#   when: houdini_install_type == "server"
+
+- name: SERVER INSTALL - install houdini with correct dir.
+  shell: |
+    set -x
+    cd {{ download_to_dir }}/{{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}
+    sudo ./houdini.install --accept-EULA --install-houdini --install-license --install-hfs-symlink --auto-install
+  register: houdini_install_out
+  become_user: "{{ variable_user }}"
+  become: true
+  when: houdini_install_type == "server"
+
+# - name: SERVER INSTALL - install houdini with correct dir.
+#   shell: |
+#     set -x
+#     cd {{ download_to_dir }}
+#     dir={{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}
+#     echo "$dir"
+#     sudo mkdir -p "$dir"
+#     sudo tar -xvf {{ houdini_linux_filename }} -C "$dir" --strip-components 1
+#     cd "$dir"
+#     sudo ./houdini.install --accept-EULA --install-houdini --install-license --install-hfs-symlink
+#   register: houdini_install_out
+#   become_user: "{{ variable_user }}"
+#   become: true
+#   when: houdini_install_type == "server"
 
 # - name: install houdini
 #   shell: |

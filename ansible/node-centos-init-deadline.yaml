@@ -132,7 +132,7 @@
   - name: "Ansible find files in subdirectory downloads"
     find:
       paths: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
-      patterns: "*DeadlineClient-{{ deadlineversion }}-linux-x64-installer.run"
+      patterns: "*DeadlineClient-{{ deadline_version }}-linux-x64-installer.run"
     register: files_matched
     become: true
 

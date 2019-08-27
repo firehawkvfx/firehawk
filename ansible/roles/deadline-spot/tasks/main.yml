@@ -68,81 +68,51 @@
 # To list the contents of EventPluginSettingsCollection (for example):
 # db.EventPluginSettingsCollection.find().pretty()
 
-
-
-    # ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval 'db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.State": "Global Enabled"}})'
-    # ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval 'db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.Logging": "Verbose"}})'
-    # ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval 'db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.IdleShutdown": "10"}})'
-    # ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval 'db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.DeleteTerminatedSlaves": "True"}})'
-    # ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval 'db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.StrictHardCap": "True"}})'
-    # ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval 'db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.StaggerInstances": "5"}})'
-    # ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval 'db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.Region": "{{ aws_region }}"}})'
-
-# template 
-# [
-# 			"State",
-# 			"Global Enabled"
-# 		],
-# 		[
-# 			"ResourceTracker",
-# 			"True"
-# 		],
-# 		[
-# 			"AccessID",
-# 			""
-# 		],
-# 		[
-# 			"SecretKey",
-# 			""
-# 		],
-# 		[
-# 			"Logging",
-# 			"Standard"
-# 		],
-# 		[
-# 			"Region",
-# 			"ap-northeast-1"
-# 		],
-# 		[
-# 			"Config",
-# 			"{}"
-# 		],
-# 		[
-# 			"IdleShutdown",
-# 			"10"
-# 		],
-# 		[
-# 			"DeleteTerminatedSlaves",
-# 			"False"
-# 		],
-# 		[
-# 			"StrictHardCap",
-# 			"True"
-# 		],
-# 		[
-# 			"StaggerInstances",
-# 			"50"
-# 		]
-
 # debug with {{ aws_access_key }}
 # debug with {{ aws_secret_key }}
 # normal use with {{ spot_access_key_id }}
 # normal use with {{ spot_secret_key }}
 
-- name: init spot template
+# if using deadline > v10.0.28.2, use conf_list_blob in place of conf_json_blob
+# - name: init spot template - list blob
+#   shell: | 
+#     set -x
+#     cd /opt/Thinkbox/DeadlineDatabase10/mongo/application/bin/
+#     ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval 'db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"PluginEnabled": "1"}})'
+
+#     ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval '
+#       var StaggerInstances = "5";
+#       var IdleShutdown = "10";
+#       var spot_json = cat("/secrets/dev/spot-fleet-templates/config_generated.json");
+#       var conf_json_blob = { "State" : "Global Enabled", "AccessID" : "{{ aws_access_key }}", "SecretKey" : "{{ aws_secret_key }}", "Logging" : "Verbose", "Region" : "{{ aws_region }}", "Config" : spot_json, "IdleShutdown" : IdleShutdown, "DeleteTerminatedSlaves" : "True", "StrictHardCap" : "True", "StaggerInstances" : StaggerInstances };
+#       var conf_list_blob = [ [ "State", "Global Enabled" ], [ "ResourceTracker", "True" ], [ "AccessID", "{{ aws_access_key }}" ], [ "SecretKey", "{{ aws_secret_key }}" ], [ "Logging", "Verbose" ], [ "Region", "{{ aws_region }}" ], [ "Config", spot_json ], [ "IdleShutdown", IdleShutdown ], [ "DeleteTerminatedSlaves", "True" ], [ "StrictHardCap", "True" ], [ "StaggerInstances", StaggerInstances ] ];
+#       db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit": conf_list_blob}});
+#     '
+#     var done = "true"
+#   become: true
+#   register: deadline_db
+#   with_items:
+#   - insert
+#   - update
+
+- name: init spot template - json
   shell: | 
     set -x
     cd /opt/Thinkbox/DeadlineDatabase10/mongo/application/bin/
-    ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval 'db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"PluginEnabled": "1"}})'
-
     ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval '
-      var StaggerInstances = "5"
-      var IdleShutdown = "10"
+      var StaggerInstances = "5";
+      var IdleShutdown = "10";
       var spot_json = cat("/secrets/dev/spot-fleet-templates/config_generated.json");
-      var conf_list = [ [ "State", "Global Enabled" ], [ "ResourceTracker", "True" ], [ "AccessID", "{{ aws_access_key }}" ], [ "SecretKey", "{{ aws_secret_key }}" ], [ "Logging", "Verbose" ], [ "Region", "{{ aws_region }}" ], [ "Config", spot_json ], [ "IdleShutdown", IdleShutdown ], [ "DeleteTerminatedSlaves", "True" ], [ "StrictHardCap", "True" ], [ "StaggerInstances", StaggerInstances ] ]
-      db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit": conf_list}});
-    '
-
+      db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"PluginEnabled": "1"}});
+      db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.State": "Global Enabled"}});
+      db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.AccessID": "{{ aws_access_key }}"}});
+      db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.SecretKey": "{{ aws_secret_key }}"}});
+      db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.Logging": "Verbose"}});
+      db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.Region": "{{ aws_region }}"}});
+      db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.Config": spot_json}});
+      db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.DeleteTerminatedSlaves": "True"}});
+      db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.StrictHardCap": "True"}});
+      db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.StaggerInstances": StaggerInstances}});'
   become: true
   register: deadline_db
   with_items:

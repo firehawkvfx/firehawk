@@ -130,10 +130,6 @@ EOT
   }
 }
 
-resource "aws_spot_fleet_request" "cheap_compute" {
-
-}
-
 module "bastion" {
   source = "./modules/bastion"
 
