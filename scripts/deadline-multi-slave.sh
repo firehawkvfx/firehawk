@@ -11,27 +11,71 @@ remove=false
 delaytime=2
 configfiledelay=2
 
-if [[ -z $argument ]] ; then
-  echo "Starting one slave per core."
-else
-  case $argument in
-    -s|--shutdown)
-      ARGS='-shutdown'
-      ;;
-    *)
-      raise_error "Unknown argument: ${argument}"
-      return
-      ;;
-  esac
-fi
-
 unset CPUCORES
 unset SLAVECOUNT
 
 declare $( cat /proc/cpuinfo | grep "cpu cores" | awk -F: '{ num+=1 } END{ 
-    print "CPUCORES="num
-    print "SLAVECOUNT="(num/4)
-    }' )
+  print "CPUCORES="num
+  print "SLAVECOUNT="(num/4)
+  }' )
+
+while [ "$1" != "" ]; do
+    case $1 in
+        -c | --cores-per-slave )    shift
+                                    filename=$1
+                                    echo "Using $1 cores per slave."
+                                    declare $( cat /proc/cpuinfo | grep "cpu cores" | awk -F: '{ num+=1 } END{ 
+                                      print "CPUCORES="num
+                                      print "SLAVECOUNT="(num/$1)
+                                      }' )
+                                    ;;
+        -t | --total-slaves )       shift
+                                    filename=$1
+                                    echo "Starting $1 slaves."
+                                    declare $( cat /proc/cpuinfo | grep "cpu cores" | awk -F: '{ num+=1 } END{ 
+                                      print "CPUCORES="num
+                                      print "SLAVECOUNT="($1)
+                                      }' )
+                                    ;;
+        -s | --shutdown )           ARGS='-shutdown'
+                                    ;;
+        -h | --help )               usage
+                                    exit
+                                    ;;
+        * )                         usage
+                                    exit 1
+    esac
+    shift
+done
+
+# if [[ -z $argument ]] ; then
+#   echo "Starting one slave per core."
+#   declare $( cat /proc/cpuinfo | grep "cpu cores" | awk -F: '{ num+=1 } END{ 
+#     print "CPUCORES="num
+#     print "SLAVECOUNT="(num/4)
+#     }' )
+# else
+#   case $argument in
+#     -n|--number)
+#       # ARGS='-number'
+#       declare $( cat /proc/cpuinfo | grep "cpu cores" | awk -F: '{ num+=1 } END{ 
+#         print "CPUCORES="num
+#         print "SLAVECOUNT="(num/4)
+#         }' )
+#       ;;
+#     -s|--shutdown)
+#       ARGS='-shutdown'
+#       ;;
+#     *)
+#       raise_error "Unknown argument: ${argument}"
+#       return
+#       ;;
+#   esac
+# fi
+
+
+
+
 
 echo "CPUCORES=$CPUCORES"
 echo "SLAVECOUNT=$SLAVECOUNT"
@@ -98,7 +142,7 @@ do
   fi
 done
 
-# normal behaviour is to relaunch.  unless -s is specified then nothing will be done.
+# normal behaviour is to relaunch.  unless -s is specified then nothing will be done, since slaves are being removed prior for shutdown.
 for i in $(seq $SLAVECOUNT $END); do 
     digit=$(printf "%02d" $i);
     name="i-$digit";

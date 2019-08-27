@@ -22,7 +22,7 @@ if [[ -z $argument ]] ; then
   deadlinestatus=$(sudo service deadline10launcher status)
   echo "deadline status: $deadlinestatus"
 
-  /usr/bin/dlmultislave.sh
+  /usr/bin/deadline-multi-slave.sh --total-slaves 1
 
   echo "Running...";
   while :
@@ -35,7 +35,7 @@ else
     -s|--shutdown)
       ARGS='-shutdown'
 
-      /usr/bin/dlmultislave.sh -s
+      /usr/bin/deadline-multi-slave.sh -s --total-slaves 1
       
       ;;
     *)
