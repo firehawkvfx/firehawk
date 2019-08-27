@@ -29,6 +29,11 @@ EOF
 
 }
 
+resource "aws_iam_instance_profile" "softnas_profile" {
+  name = "SoftNAS_HA_IAM"
+  role = aws_iam_role.softnas_role.name
+}
+
 resource "aws_iam_role_policy_attachment" "softnas_ssm_attach" {
   role       = aws_iam_role.softnas_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
@@ -85,23 +90,6 @@ resource "aws_iam_role_policy" "softnas_policy" {
 EOF
 
 }
-
-resource "aws_iam_instance_profile" "softnas_profile" {
-  name = "SoftNAS_HA_IAM"
-  role = aws_iam_role.softnas_role.name
-}
-
-# output "softnas_role_id" {
-#   value = "${aws_cloudformation_stack.SoftNASRole.outputs["SoftnasRoleID"]}"
-# }
-
-# output "softnas_role_arn" {
-#   value = "${aws_cloudformation_stack.SoftNASRole.outputs["SoftnasARN"]}"
-# }
-
-# output "softnas_role_name" {
-#   value = "${aws_cloudformation_stack.SoftNASRole.outputs["SoftNasRoleName"]}"
-# }
 
 locals {
   softnas_mode_ami = "${var.softnas_mode}_${var.aws_region}"
