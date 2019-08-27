@@ -122,6 +122,9 @@ houdini_major_version_list:
     - '17.5'
     - '18.0'
 
+# The maximum number of instances to launch in a spot fleet for houdini engine
+max_spot_capacity_engine: 3
+
 # this list of dictionaries is use to install multiple versions of houdini.
 # versions should be listed from oldest to newest.
 houdini_version_list:
@@ -176,6 +179,8 @@ houdini_license_server_version_list:
   # only set this for a maximum of 1 version in the list.  It will enforce the houdini environment for all shells opened.
 
 firehawk_sync_source: "{{ lookup('env','TF_VAR_firehawk_sync_source') }}"
+
+keybase_secret: "{{ lookup('env','TF_VAR_keybase_secret') }}"
 
 aws_region: "{{ lookup('env','TF_VAR_aws_region') }}"
 AWS_REGION: "{{ lookup('env','TF_VAR_aws_region') }}"
