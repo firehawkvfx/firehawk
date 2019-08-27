@@ -1,0 +1,16 @@
+- name: add groups
+  shell: |
+    /opt/Thinkbox/Deadline10/bin/deadlinecommand -AddGroup {{ item }}
+  with_items:
+  - local
+  - cloud
+  - cloud_engine
+  - cloud_c8_engine
+  - cloud_c64_engine
+  - cloud_c8_mantra
+  - cloud_c64_mantra
+  - cloud_mantra
+  - local_workstation
+  - cloud_workstation
+  - local_all
+  - cloud_all
