@@ -513,3 +513,7 @@
 
   - debug:
       msg: "to disable multilsave service for deadline use 'systemctl disable multislaveservice.service'"
+    tags:
+    - cloud-install
+    - onsite-install
+    - multi-slave

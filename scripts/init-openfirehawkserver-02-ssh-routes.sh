@@ -32,7 +32,7 @@ fi
 echo 'Use vagrant reload and vagrant ssh after executing each .sh script'
 echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 
-# custom events auto assign groups to slaves on startup
+# custom events auto assign groups to slaves on startup, eg slaveautoconf
 ansible-playbook -i ansible/inventory/hosts ansible/deadline-repository-custom-events.yaml
 
 # configure onsite NAS mounts to ansible control
