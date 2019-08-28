@@ -270,7 +270,7 @@ resource "aws_ami_from_instance" "node_centos" {
 
 #wakeup a node after sleep
 resource "null_resource" "start-node" {
-  count = !var.sleep && var.site_mounts ? 1 : 0
+  count = !var.sleep && var.site_mounts && var.wakeable ? 1 : 0
 
   provisioner "local-exec" {
     command = "aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id}"
