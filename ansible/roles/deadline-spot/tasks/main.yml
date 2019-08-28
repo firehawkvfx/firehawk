@@ -7,9 +7,12 @@
     chdir: /vagrant
     command: '/bin/bash -c "echo {{ spot_secret }} | base64 --decode | keybase pgp decrypt"'
     responses:
+      (?i)Decryption: "{{ keybase_secret }}"
       #.*Please enter your Keybase passphrase to unlock the secret key for \[.*\]: "{{ keybase_secret }}"
       #.*Please enter your Keybase passphrase to unlock the secret key for.*: "{{ keybase_secret }}"
-      .*Reason\[:.*\] PGP Decryption\[:.*\]: "{{ keybase_secret }}"
+      #.*Reason\[:.*\] PGP Decryption\[:.*\]: "{{ keybase_secret }}"
+      #.*easo.*: "{{ keybase_secret }}"
+      
       
   become_user: vagrant
   connection: local
