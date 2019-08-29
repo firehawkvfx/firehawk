@@ -47,6 +47,8 @@
   become_user: "{{ variable_user }}"
   become: true
   no_log: true
+  tags:
+  - user_access
 
 # example usage:
 # ansible-playbook -i ansible/inventory ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_node_centos"
