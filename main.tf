@@ -114,6 +114,7 @@ resource "null_resource" "provision_deadline_spot" {
     config_template_sha1 = "${sha1(file("/secrets/dev/spot-fleet-templates/config_template.json"))}"
     deadline_spot_sha1 = "${sha1(file("/vagrant/ansible/deadline-spot.yaml"))}"
     deadline_spot_role_sha1 = "${sha1(file("/vagrant/ansible/roles/deadline-spot/tasks/main.yml"))}"
+    deadline_roles_tf_sha1 = "${sha1(file("/vagrant/modules/deadline/main.tf"))}"
     spot_access_key_id = module.deadline.spot_access_key_id
     spot_secret        = module.deadline.spot_secret
   }
@@ -125,7 +126,7 @@ resource "null_resource" "provision_deadline_spot" {
       cd /vagrant
       echo ${ module.deadline.spot_access_key_id }
       echo ${ module.deadline.spot_secret }
-      ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-spot.yaml -v --extra-vars 'ami_id=${module.node.ami_id} snapshot_id=${module.node.snapshot_id} subnet_id=${module.vpc.private_subnets[0]} spot_instance_profile_arn=${module.deadline.spot_instance_profile_arn} security_group_id=${module.node.security_group_id} spot_access_key_id=${module.deadline.spot_access_key_id} spot_secret=${module.deadline.spot_secret}'
+      ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-spot.yaml -v --extra-vars 'ami_id=${module.node.ami_id} snapshot_id=${module.node.snapshot_id} subnet_id=${module.vpc.private_subnets[0]} spot_instance_profile_arn="${module.deadline.spot_instance_profile_arn}" security_group_id=${module.node.security_group_id} spot_access_key_id=${module.deadline.spot_access_key_id} spot_secret=${module.deadline.spot_secret}'
 EOT
   }
 }
@@ -328,6 +329,9 @@ module "node" {
 
   # region will determine the ami
   region = var.aws_region
+
+  # the iam instance profile provide credentials for s3 read and write access, the ability to list instance states, and read tags to join deadline groups when launched in a spot fleet
+  instance_profile_name = module.deadline.spot_instance_profile_name
 
   # options for gateway type are centos7 and pcoip
   vpc_id                      = module.vpc.vpc_id
