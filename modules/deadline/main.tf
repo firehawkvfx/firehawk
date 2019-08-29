@@ -1,38 +1,5 @@
 ### deadline spot instance IAM policy.  This allows instances launched by a spot fleet template to be recognised by deadline, and must be assigned when creating a spot fleet template.
 
-resource "aws_iam_policy" "spot_instance_policy" {
-  name        = "spot_instance_policy"
-  path        = "/"
-  description = "spot_instance_policy for Deadline"
-  policy = <<EOF
-{
-    "Version": "2012-10-17",
-    "Statement": [
-        {
-            "Sid": "SlaveStatement",
-            "Effect": "Allow",
-            "Action": [
-                "ec2:DescribeTags",
-                "ec2:TerminateInstances"
-            ],
-            "Resource": "*"
-        },
-        {
-            "Sid": "SQSReporting",
-            "Effect": "Allow",
-            "Action": [
-                "sqs:GetQueueAttributes",
-                "sqs:GetQueueUrl",
-                "sqs:ReceiveMessage",
-                "sqs:SendMessage"
-            ],
-            "Resource": "*"
-        }
-    ]
-}
-EOF
-}
-
 resource "aws_iam_role" "spot_instance_role" {
   name = "spot_instance_role"
   path = "/"
@@ -54,7 +21,7 @@ resource "aws_iam_role" "spot_instance_role" {
 EOF
 }
 
-resource "aws_iam_role_policy" "spot_instance_role_policy" {
+resource "aws_iam_role_policy" "spot_instance_role_worker_policy" {
   name = "SlaveStatement"
   role = "${aws_iam_role.spot_instance_role.id}"
 
@@ -87,13 +54,73 @@ resource "aws_iam_role_policy" "spot_instance_role_policy" {
 EOF
 }
 
+# to limit access to a specific bucket, see here - https://aws.amazon.com/blogs/security/writing-iam-policies-how-to-grant-access-to-an-amazon-s3-bucket/
+resource "aws_iam_role_policy" "spot_instance_role_s3_policy" {
+  name = "S3ReadWrite"
+  role = "${aws_iam_role.spot_instance_role.id}"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetBucketLocation",
+        "s3:ListAllMyBuckets"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["s3:ListBucket"],
+      "Resource": ["arn:aws:s3:::*"]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:DeleteObject"
+      ],
+      "Resource": ["arn:aws:s3:::*"]
+    }
+  ]
+}
+EOF
+}
+resource "aws_iam_role_policy" "spot_instance_role_describe_policy" {
+  name = "DescribeInstances"
+  role = "${aws_iam_role.spot_instance_role.id}"
+
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeInstances",
+                "ec2:DescribeInstanceStatus"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+EOF
+}
+
 resource "aws_iam_instance_profile" "spot_instance_profile" {
-  name = "SlaveStatement"
+  name = "${aws_iam_role.spot_instance_role.name}"
   role = "${aws_iam_role.spot_instance_role.name}"
 }
 
 output "spot_instance_profile_arn" {
   value = "${aws_iam_instance_profile.spot_instance_profile.arn}"
+}
+output "spot_instance_profile_name" {
+  value = "${aws_iam_instance_profile.spot_instance_profile.name}"
 }
 
 ### deadline spot fleet user IAM
@@ -130,12 +157,7 @@ resource "aws_iam_group_policy" "deadline_spot_group_policy" {
                 "ec2:DescribeSpotFleetRequests",
                 "ec2:DescribeSpotFleetInstances"
             ],
-            "Resource": "*",
-            "Condition": {
-                "IpAddress" : {
-                    "aws:SourceIp" : ["${var.remote_ip_cidr}"]
-                }
-            }
+            "Resource": "*"
         },
         {
             "Effect": "Allow",
@@ -153,12 +175,7 @@ resource "aws_iam_group_policy" "deadline_spot_group_policy" {
                 "iam:GetRolePolicy",
                 "iam:GetUser"
             ],
-            "Resource": "*",
-            "Condition": {
-                "IpAddress" : {
-                    "aws:SourceIp" : ["${var.remote_ip_cidr}"]
-                }
-            }
+            "Resource": "*"
         },
         {
             "Effect": "Allow",
@@ -177,12 +194,7 @@ resource "aws_iam_group_policy" "deadline_spot_group_policy" {
             ],
             "Resource": [
                 "*"
-            ],
-            "Condition": {
-                "IpAddress" : {
-                    "aws:SourceIp" : ["${var.remote_ip_cidr}"]
-                }
-            }
+            ]
         },
         {
             "Sid": "DynamoDBPermissions",
@@ -197,12 +209,7 @@ resource "aws_iam_group_policy" "deadline_spot_group_policy" {
                 "dynamodb:ListTagsOfResource",
                 "dynamodb:Scan"
             ],
-            "Resource": "*",
-            "Condition": {
-                "IpAddress" : {
-                    "aws:SourceIp" : ["${var.remote_ip_cidr}"]
-                }
-            }
+            "Resource": "*"
         },
         {
             "Sid": "SQSPermissions",
@@ -215,12 +222,7 @@ resource "aws_iam_group_policy" "deadline_spot_group_policy" {
                 "sqs:UntagQueue",
                 "sqs:TagQueue"
             ],
-            "Resource": "*",
-            "Condition": {
-                "IpAddress" : {
-                    "aws:SourceIp" : ["${var.remote_ip_cidr}"]
-                }
-            }
+            "Resource": "*"
         },
         {
             "Sid": "LambdaPermissions",
@@ -235,12 +237,7 @@ resource "aws_iam_group_policy" "deadline_spot_group_policy" {
                 "lambda:DeleteEventSourceMapping",
                 "lambda:AddPermission"
             ],
-            "Resource": "*",
-            "Condition": {
-                "IpAddress" : {
-                    "aws:SourceIp" : ["${var.remote_ip_cidr}"]
-                }
-            }
+            "Resource": "*"
         },
         {
             "Sid": "EventPermissions",
@@ -252,12 +249,7 @@ resource "aws_iam_group_policy" "deadline_spot_group_policy" {
                 "events:DeleteRule",
                 "events:PutTargets"
             ],
-            "Resource": "*",
-            "Condition": {
-                "IpAddress" : {
-                    "aws:SourceIp" : ["${var.remote_ip_cidr}"]
-                }
-            }
+            "Resource": "*"
         },
         {
             "Sid": "S3Permissions",
@@ -267,12 +259,7 @@ resource "aws_iam_group_policy" "deadline_spot_group_policy" {
             ],
             "Resource": [
                 "*"
-            ],
-            "Condition": {
-                "IpAddress" : {
-                    "aws:SourceIp" : ["${var.remote_ip_cidr}"]
-                }
-            }
+            ]
         },
         {
             "Sid": "AutoScalingPermissions",
@@ -285,12 +272,7 @@ resource "aws_iam_group_policy" "deadline_spot_group_policy" {
                 "application-autoscaling:PutScalingPolicy",
                 "application-autoscaling:DeleteScalingPolicy"
             ],
-            "Resource": "*",
-            "Condition": {
-                "IpAddress" : {
-                    "aws:SourceIp" : ["${var.remote_ip_cidr}"]
-                }
-            }
+            "Resource": "*"
         }
     ]
 }
