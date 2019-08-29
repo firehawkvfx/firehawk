@@ -33,8 +33,8 @@ echo 'Use vagrant reload and vagrant ssh after executing each .sh script'
 echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 
 # install keybase, used for aquiring keys for deadline spot plugin.
-curl --remote-name https://prerelease.keybase.io/keybase_amd64.deb
-sudo apt install -y ./keybase_amd64.deb
+(cd /vagrant/tmp; curl --remote-name https://prerelease.keybase.io/keybase_amd64.deb)
+sudo apt install -y /vagrant/tmp/keybase_amd64.deb
 run_keybase
 echo $(keybase --version)
 
