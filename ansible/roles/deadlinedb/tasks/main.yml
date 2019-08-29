@@ -48,7 +48,7 @@
 - name: set permissions
   file:
     path: "{{ files_matched.files[0].path }}"
-    mode: +r+x-w
+    mode: u+r,u+x,u-w
     owner: deadlineuser
   become: true
   tags:
