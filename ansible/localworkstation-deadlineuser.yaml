@@ -359,9 +359,7 @@
 
   - name: deadline dependencies
     package:
-      name: "{{ item }}"
-      state: present
-    with_items:
+      name:
       - redhat-lsb
       - samba-client
       - samba-common
@@ -372,6 +370,8 @@
       - bzip2
       - nmap
       #- nfs-utils-lib
+      state: present
+
     tags:
     - cloud-install
     - onsite-install
