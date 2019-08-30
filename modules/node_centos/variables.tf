@@ -17,7 +17,7 @@ variable "remote_subnet_cidr" {
 }
 
 variable "wakeable" {
-  default = false
+  default = true
 }
 
 # examples ["subnet-0a7554f56af4d6d0a", "subnet-0257c7f8b1d68b6e4"]
