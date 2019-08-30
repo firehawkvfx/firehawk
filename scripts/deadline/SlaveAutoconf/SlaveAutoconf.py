@@ -19,7 +19,7 @@ import shlex
 
 SLAVE_NAME_PREFIX_CLOUD = "ip-"
 POOLS_CLOUD = [] # Example: ["one", "two", "three"]
-GROUPS_CLOUD = ["cloud_c8_engine"]
+GROUPS_CLOUD = ["cloud_c2_engine"]
 
 SLAVE_NAME_PREFIX_CLOUD_WORKSTATION = "cloud_workstation"
 POOLS_CLOUD_WORKSTATION = [] # Example: ["one", "two", "three"]
