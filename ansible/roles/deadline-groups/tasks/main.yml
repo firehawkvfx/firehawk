@@ -5,8 +5,10 @@
   - local
   - cloud
   - cloud_engine
+  - cloud_c2_engine
   - cloud_c8_engine
   - cloud_c64_engine
+  - cloud_c2_mantra
   - cloud_c8_mantra
   - cloud_c64_mantra
   - cloud_mantra
