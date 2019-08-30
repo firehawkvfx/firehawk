@@ -1,17 +1,13 @@
 - name: provide temporary steps to work around this failure.
   debug:
-    msg: currently the expect module isn't working here.  try to enter this in a shell to validate a password first.  "keybase pgp encrypt -m 'secret' | keybase pgp decrypt"
+    msg: currently the expect module isn't working here on pgp decryption.  try to enter this in a shell to validate a password first.  "keybase pgp encrypt -m 'secret' | keybase pgp decrypt"
 
 - name: Case insensitive password string match
   expect:
     chdir: /vagrant
     command: '/bin/bash -c "echo {{ spot_secret }} | base64 --decode | keybase pgp decrypt"'
     responses:
-      (?i)Decryption: "{{ keybase_secret }}"
-      #.*Please enter your Keybase passphrase to unlock the secret key for \[.*\]: "{{ keybase_secret }}"
-      #.*Please enter your Keybase passphrase to unlock the secret key for.*: "{{ keybase_secret }}"
-      #.*Reason\[:.*\] PGP Decryption\[:.*\]: "{{ keybase_secret }}"
-      #.*easo.*: "{{ keybase_secret }}"
+      PGP Decryption: "{{ keybase_secret }}"
       
       
   become_user: vagrant
@@ -104,7 +100,7 @@
     cd /opt/Thinkbox/DeadlineDatabase10/mongo/application/bin/
     ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval '
       var StaggerInstances = "5";
-      var IdleShutdown = "2";
+      var IdleShutdown = "10";
       var spot_json = cat("/secrets/dev/spot-fleet-templates/config_generated.json");
       db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"PluginEnabled": "1"}});
       db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.State": "Global Enabled"}});
