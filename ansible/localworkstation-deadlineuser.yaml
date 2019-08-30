@@ -517,3 +517,14 @@
     - cloud-install
     - onsite-install
     - multi-slave
+
+  - name: allow permission for deadline to shutdown the machine.
+    lineinfile:
+      state: present
+      path: /etc/sudoers
+      line: "deadlineuser ALL=(ALL) NOPASSWD: /sbin/poweroff, /sbin/reboot, /sbin/shutdown"
+      insertafter: '^.*localhost=/sbin/shutdown.*$'
+    become: true
+    tags:
+    - cloud-install
+    - onsite-install
