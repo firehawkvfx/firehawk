@@ -18,15 +18,15 @@ import traceback
 import shlex
 
 SLAVE_NAME_PREFIX_CLOUD = "ip-"
-POOLS_CLOUD = ["one", "two", "three"] # Example: ["one", "two", "three"]
-GROUPS_CLOUD = ["cloud"]
+POOLS_CLOUD = [] # Example: ["one", "two", "three"]
+GROUPS_CLOUD = ["cloud_c8_engine"]
 
 SLAVE_NAME_PREFIX_CLOUD_WORKSTATION = "cloud_workstation"
-POOLS_CLOUD_WORKSTATION = ["one", "two", "three"] # Example: ["one", "two", "three"]
+POOLS_CLOUD_WORKSTATION = [] # Example: ["one", "two", "three"]
 GROUPS_CLOUD_WORKSTATION = ["cloud_workstation"]
 
 SLAVE_NAME_PREFIX_LOCAL = "workstation"
-POOLS_LOCAL = ["one", "two", "three"] # Example: ["one", "two", "three"]
+POOLS_LOCAL = [] # Example: ["one", "two", "three"]
 GROUPS_LOCAL = ["local"]
 
 LISTENING_PORT=None # or 27100
@@ -51,7 +51,8 @@ class ConfigSlaveEventListener (DeadlineEventListener):
     def OnSlaveStarted(self, slavename):
         # Load slave settings for when we needed
         slave = RepositoryUtils.GetSlaveSettings(slavename, True)
-
+        newPools = []
+        newGroups = []
         # Skip over Slaves that don't match the prefix
         if slavename.lower().startswith(SLAVE_NAME_PREFIX_CLOUD.lower()):
             print("Slave automatic configuration CLOUD for {0}".format(slavename))
@@ -68,19 +69,21 @@ class ConfigSlaveEventListener (DeadlineEventListener):
         else:
             return
         # if didn't exit, then continue to setup pools and groups
-        for x in slave.Pools:
-            if x not in newPools:
-                newPools.append(x)
+        if len(newPools)>0:
+            for x in slave.Pools:
+                if x not in newPools:
+                    newPools.append(x)
         
-        slave.Pools = newPools 
-        print("Updated slave pools to be '%s'" % ",".join(newPools))
+            slave.Pools = newPools 
+            print("Updated slave pools to be '%s'" % ",".join(newPools))
         
-        for x in slave.Groups:
-            if x not in newGroups:
-                newGroups.append(x)
+        if len(newGroups)>0:
+            for x in slave.Groups:
+                if x not in newGroups:
+                    newGroups.append(x)
         
-        slave.Groups = newGroups 
-        print("Updated slave groups to be '%s'" % ",".join(newGroups))
+            slave.Groups = newGroups
+            print("Updated slave groups to be '%s'" % ",".join(newGroups))
         
         # Set up the listening port
         if LISTENING_PORT:
@@ -93,3 +96,4 @@ class ConfigSlaveEventListener (DeadlineEventListener):
 
         # Save any changes we've made back to the database
         RepositoryUtils.SaveSlaveSettings(slave)
+        print("Save slave settings to db")
