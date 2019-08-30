@@ -10,18 +10,6 @@
   tags:
     - sync_scripts
 
-- name: dir permissions on /prod/assets/openfirehawk-houdini-tools.  note permissions aren't being set correctly for group for some reason.
-  file:
-    path: /prod/assets/openfirehawk-houdini-tools/
-    state: directory
-    owner: deadlineuser
-    group: syscontrol
-    mode: u=wrX,g=wrX,o-rwx
-    recurse: true
-  become: true
-  tags:
-    - sync_scripts
-
 - name: ensure all mounts are present
   command: sudo mount -a
   become_user: vagrant
