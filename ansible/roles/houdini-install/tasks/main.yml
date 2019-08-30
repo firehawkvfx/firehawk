@@ -80,6 +80,8 @@
     set -x
     cd {{ download_to_dir }}/
     aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ houdini_linux_filename }}"
+  args:
+    creates: "{{ download_to_dir }}/{{ houdini_linux_filename }}"
   become_user: "{{ variable_user }}"
   when: houdini_install_type == "server"
 
@@ -88,6 +90,8 @@
     set -x
     cd {{ download_to_dir }}/
     ~/.local/bin/aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ houdini_linux_filename }}"
+  args:
+    creates: "{{ download_to_dir }}/{{ houdini_linux_filename }}"
   become_user: "{{ variable_user }}"
   when: houdini_install_type != "server"
 
