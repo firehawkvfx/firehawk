@@ -83,7 +83,6 @@
   become: true
 
   vars:
-    #hostname: workstation.firehawkvfx.com
     pcoip: False
     ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
 
