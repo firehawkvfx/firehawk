@@ -186,6 +186,8 @@ data "aws_subnet" "private_subnet" {
   id    = "${var.private_subnet_ids[count.index]}"
 }
 
+variable "volume_size" {}
+
 resource "aws_instance" "node_centos" {
   count      = var.site_mounts ? 1 : 0
   depends_on = [null_resource.dependency_softnas_and_bastion]
@@ -198,7 +200,7 @@ resource "aws_instance" "node_centos" {
   ebs_optimized = true
 
   root_block_device {
-    volume_size = "16"
+    volume_size = var.volume_size
     volume_type = "gp2"
   }
 
@@ -253,7 +255,7 @@ resource "null_resource" "provision_node_centos" {
       cd /vagrant
       ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.node_centos[0].private_ip} bastion_ip=${var.bastion_ip}"
       ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=node0.$TF_VAR_public_domain host_ip=${aws_instance.node_centos[0].private_ip} group_name=role_node_centos"
-      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init-users.yaml -v
+      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init-users.yaml -v --extra-vars "set_hostname=false"
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_node_centos variable_user=deadlineuser" --skip-tags "user_access"
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_node_centos variable_user=centos" --skip-tags "user_access"
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"
