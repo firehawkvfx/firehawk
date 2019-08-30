@@ -17,6 +17,10 @@ variable "azs" {
   default = ["ap-southeast-2a", "ap-southeast-2b"]
 }
 
+variable "node_centos_volume_size" {
+  default = 20
+}
+
 # once you setup an ssl certificate with your domain, it will have a route zone id.
 variable "route_zone_id" {
 }
