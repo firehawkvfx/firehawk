@@ -150,16 +150,16 @@ houdini_version_list:
   # optionally - only set this for a maximum of 1 version in the list.  It will enforce the houdini environment for all shells opened. it is not required, but can help with debugging deadline issues.
 
 # - houdini_major_version: "18.0"
-#   houdini_auto_version: True
-#   houdini_minor_version: "auto"
-#   houdini_linux_filename: "auto"
+#   houdini_auto_version: False
+#   houdini_minor_version: "18.0.208"
+#   houdini_linux_filename: "houdini-18.0.208-linux_x86_64_gcc6.3.tar.gz"
 #   houdini_build: "daily"
 #   # enforce_env: False
 
 - houdini_major_version: "18.0"
-  houdini_auto_version: False
-  houdini_minor_version: "18.0.208"
-  houdini_linux_filename: "houdini-18.0.208-linux_x86_64_gcc6.3.tar.gz"
+  houdini_auto_version: True
+  houdini_minor_version: "auto"
+  houdini_linux_filename: "auto"
   houdini_build: "daily"
   # enforce_env: False
 
