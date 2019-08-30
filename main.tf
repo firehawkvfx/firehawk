@@ -118,6 +118,7 @@ resource "null_resource" "provision_deadline_spot" {
     deadline_roles_tf_sha1 = "${sha1(file("/vagrant/modules/deadline/main.tf"))}"
     spot_access_key_id = module.deadline.spot_access_key_id
     spot_secret        = module.deadline.spot_secret
+    volume_size = var.node_centos_volume_size
   }
   
   # needs subnets id eg subnet-019d702254060c2f9, and ami_id, arn id eg arn:aws:iam::972620357255:instance-profile/DeadlineSlaveRole, snapshot id snap-06c90e54aaf77dbe5, security group id, sg-0b1e4b21eb893f712
@@ -127,7 +128,7 @@ resource "null_resource" "provision_deadline_spot" {
       cd /vagrant
       echo ${ module.deadline.spot_access_key_id }
       echo ${ module.deadline.spot_secret }
-      ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-spot.yaml -v --extra-vars 'ami_id=${module.node.ami_id} snapshot_id=${module.node.snapshot_id} subnet_id=${module.vpc.private_subnets[0]} spot_instance_profile_arn="${module.deadline.spot_instance_profile_arn}" security_group_id=${module.node.security_group_id} spot_access_key_id=${module.deadline.spot_access_key_id} spot_secret=${module.deadline.spot_secret}'
+      ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-spot.yaml -v --extra-vars 'ami_id=${module.node.ami_id} snapshot_id=${module.node.snapshot_id} subnet_id=${module.vpc.private_subnets[0]} spot_instance_profile_arn="${module.deadline.spot_instance_profile_arn}" security_group_id=${module.node.security_group_id} spot_access_key_id=${module.deadline.spot_access_key_id} spot_secret=${module.deadline.spot_secret} volume_size=${var.node_centos_volume_size}'
 EOT
   }
 }
@@ -349,6 +350,8 @@ module "node" {
   bastion_ip                = module.bastion.public_ip
 
   openfirehawkserver = var.openfirehawkserver
+
+  volume_size = var.node_centos_volume_size
 
   key_name       = var.key_name
   local_key_path = var.local_key_path
