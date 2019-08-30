@@ -114,7 +114,6 @@
   vars:
     ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
     softnas_exports: "{{ hostvars[groups['role_softnas'][0]]['presence']['results'] }}"
-    #hostname: "node1.{{ public_domain }}"
     pcoip: false
     destroy: false
     # these defaults can be overidden by storing a config in /secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
@@ -439,7 +438,6 @@
   vars:
     ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
     softnas_exports: "{{ hostvars[groups['role_softnas'][0]]['presence']['results'] }}"
-    #hostname: "node1.{{ public_domain }}"
     pcoip: False
     site_mounts:
     # remote mounts not on cloud site- example.  Update with your own details and set state to present.
