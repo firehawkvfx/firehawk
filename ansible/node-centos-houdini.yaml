@@ -106,7 +106,7 @@
     # the become sudo pass is only relevent for local installation if required on the host specified.
     ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
     houdini_major_version: 18.0
-    download_to_dir: /var/tmp/firehawk
+    download_to_dir: /prod/tmp/firehawk
     
     variable_user: centos
     bastionip: "{{ groups['bastionip'][0] }}"
@@ -208,14 +208,30 @@
       state: directory
       mode: 0700
       owner: "{{ variable_user }}"
+      group: syscontrol
+    become: true
 
   - name: dir permissions on "{{ download_to_dir }}"
     file:
       path: "{{ download_to_dir }}"
       state: directory
-      mode: u+rwX,g+rwX,o+rwX
+      mode: u=rwX,g=rwX,o-wx
       owner: "{{ variable_user }}"
+      group: syscontrol
     become: true
+
+  - name: check permissions
+    shell: |
+      cd "{{ download_to_dir }}"
+      ls -ltriah
+      cd ..
+      ls -ltriah
+    become: true
+    register: check_permisions
+  
+  - name: show permissions
+    debug:
+      var: check_permisions.stdout
 
   - name: Install beautifulsoup4 for web page crawling
     pip:
@@ -226,12 +242,19 @@
     copy:
       src: /vagrant/modules/node_centos/modules/houdini_install_script/
       dest: /opt/houdini_install_script/
+      mode: u=rwX,g=rwX,o-wx
+      owner: "{{ variable_user }}"
+      group: syscontrol
       directory_mode: yes
+    become: true
 
   - name: set permissions on houdini_install.py
     file:
       path: /opt/houdini_install_script/houdini_install.py
-      mode: 0700
+      mode: u=rwX,g=rwX,o-wx
+      owner: "{{ variable_user }}"
+      group: syscontrol
+    become: true
 
   - name: install houdini for items in list
     include_role:
