@@ -177,6 +177,15 @@ resource "null_resource" "dependency_softnas_and_bastion" {
   }
 }
 
+data "aws_subnet_ids" "private_subnet" {
+  vpc_id = "${var.vpc_id}"
+}
+
+data "aws_subnet" "private_subnet" {
+  count = "${length(var.private_subnet_ids)}"
+  id    = "${var.private_subnet_ids[count.index]}"
+}
+
 resource "aws_instance" "node_centos" {
   count      = var.site_mounts ? 1 : 0
   depends_on = [null_resource.dependency_softnas_and_bastion]
@@ -186,14 +195,16 @@ resource "aws_instance" "node_centos" {
   ami           = var.use_custom_ami ? var.custom_ami : var.ami_map[var.region]
   instance_type = var.instance_type
 
-  #ebs_optimized = true
+  ebs_optimized = true
 
   root_block_device {
     volume_size = "16"
-    volume_type = "standard"
+    volume_type = "gp2"
   }
+
   key_name               = var.key_name
   subnet_id              = element(var.private_subnet_ids, count.index)
+  private_ip             = cidrhost( "${data.aws_subnet.private_subnet[count.index].cidr_block}" , 20)
   vpc_security_group_ids = [aws_security_group.node_centos.id]
   tags = {
     Name  = "node_centos"
@@ -204,6 +215,7 @@ resource "aws_instance" "node_centos" {
 
 resource "null_resource" "provision_node_centos" {
   count      = var.site_mounts ? 1 : 0
+  #count      = 0
   depends_on = [aws_instance.node_centos]
 
   triggers = {
@@ -229,6 +241,7 @@ resource "null_resource" "provision_node_centos" {
     inline = [
       "sleep 10",
       "set -x",
+      "cloud-init status --wait",
       "sudo yum install -y python",
       "ssh-keyscan ${aws_instance.node_centos[0].private_ip}",
     ]
@@ -247,7 +260,9 @@ resource "null_resource" "provision_node_centos" {
       ansible-playbook -i "$TF_VAR_inventory" ansible/localworkstation-deadlineuser.yaml --tags "onsite-install" --skip-tags "multi-slave" --extra-vars "variable_host=role_node_centos variable_user=centos"
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-houdini.yaml -v --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source"
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v
-  
+      # stop the instance to ensure ami is created from a stable state
+      aws ec2 stop-instances --instance-ids ${aws_instance.node_centos[0].id}
+      aws ec2 wait instance-stopped --instance-ids ${aws_instance.node_centos[0].id}
 EOT
 
   }
@@ -267,6 +282,20 @@ resource "aws_ami_from_instance" "node_centos" {
   depends_on         = [null_resource.provision_node_centos]
   name               = "node_centos_houdini_${aws_instance.node_centos[0].id}_${random_id.ami_unique_name[0].hex}"
   source_instance_id = aws_instance.node_centos[0].id
+}
+
+#wakeup after ami
+resource "null_resource" "start-node-after-ami" {
+  count              = var.site_mounts ? 1 : 0
+  triggers = {
+    ami_id = aws_ami_from_instance.node_centos[0].id
+  }
+  
+  depends_on         = [aws_ami_from_instance.node_centos]
+
+  provisioner "local-exec" {
+    command = "aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id}"
+  }
 }
 
 #wakeup a node after sleep
