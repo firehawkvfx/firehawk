@@ -6,7 +6,7 @@
     hostname: "node1.{{ public_domain }}"
     pcoip: False
     # this will initialise ssh and the hostname.  this is bypassed on the softnas instance which has different initialisation steps.
-    init_ssh: true
+    set_hostname: true
 
   tasks:
   - name: init authorized_keys
@@ -15,12 +15,12 @@
       dest: /root/.ssh/authorized_keys
       force: no
     become: true
-    when: init_ssh
+    #when: set_hostname
 
   - name: change hostname
     hostname:
       name: "{{ hostname }}"
-    when: init_ssh
+    when: set_hostname
       
   - name: add myself to /etc/hosts
     lineinfile:
@@ -28,13 +28,13 @@
       regexp: '^127\.0\.0\.1[ \t]+localhost'
       line: "127.0.0.1 localhost {{ hostname }}"
       state: present
-    when: init_ssh
+    when: set_hostname
 
   - name: Set hostname var in bash profile
     lineinfile:
       path: /root/.bash_profile
       line: 'export HOSTNAME={{ hostname }}'
-    when: init_ssh
+    when: set_hostname
     
 # these packages are required to pass an encrypted string via commandline into a user pass and are suited to centos.
   - name: install mkpasswd
