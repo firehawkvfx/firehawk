@@ -54,8 +54,7 @@ variable "instance_profile_name" {
 }
 
 variable "instance_type" {
-  #default = "t2.micro"
-  default = "m5.4xlarge"
+  default = "m4.large"
 }
 
 variable "user" {
