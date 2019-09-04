@@ -326,6 +326,7 @@ variable "node_sleep_on_create" {
 }
 
 module "node" {
+  # need to ensure mounts exist on start 
   source = "./modules/node_centos"
   name   = "centos"
 
