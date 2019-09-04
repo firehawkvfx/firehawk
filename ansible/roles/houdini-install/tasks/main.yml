@@ -216,33 +216,6 @@
   become: true
   when: houdini_install_type == "server"
 
-# - name: SERVER INSTALL - install houdini with correct dir.
-#   shell: |
-#     set -x
-#     cd {{ download_to_dir }}
-#     dir={{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}
-#     echo "$dir"
-#     sudo mkdir -p "$dir"
-#     sudo tar -xvf {{ houdini_linux_filename }} -C "$dir" --strip-components 1
-#     cd "$dir"
-#     sudo ./houdini.install --accept-EULA --install-houdini --install-license --install-hfs-symlink
-#   register: houdini_install_out
-#   become_user: "{{ variable_user }}"
-#   become: true
-#   when: houdini_install_type == "server"
-
-# - name: install houdini
-#   shell: |
-#     set -x
-#     cd /var/tmp
-#     sudo mkdir -p houdini_installer
-#     sudo tar -xvf {{ houdini_linux_filename }} -C houdini_installer --strip-components 1
-#     cd houdini_installer
-#     sudo ./houdini.install --auto-install --accept-EULA --install-houdini --install-license --no-local-licensing --install-hfs-symlink
-#   register: houdini_install_out
-#   become: true
-#   when: houdini_install_type == "server"
-
 - debug:
     msg:  "{{ houdini_install_out.stdout }}"
   when: houdini_install_type == "server"
@@ -275,10 +248,12 @@
   copy:
     dest: /etc/profile.d/houdini_init.sh
     content: |
-      # cwd="$(pwd)" && cd /opt/hfs{{ houdini_version_item.houdini_major_version }}/ && source ./houdini_setup && cd $cwd
+      cwd="$(pwd)" && cd /opt/hfs{{ houdini_version_item.houdini_major_version }}/ && source ./houdini_setup && cd $cwd
     mode: u=rw,g=r,o=r
     owner: root
     group: root 
   become: true
+  when: enforce_henv
   tags:
     - enforce_houdini_env_vars
+  
