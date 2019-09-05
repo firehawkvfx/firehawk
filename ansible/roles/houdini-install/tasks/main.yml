@@ -243,17 +243,3 @@
     mode: push
   tags:
     - sync_installers
-
-- name: comment out file to enforce env
-  copy:
-    dest: /etc/profile.d/houdini_init.sh
-    content: |
-      cwd="$(pwd)" && cd /opt/hfs{{ houdini_version_item.houdini_major_version }}/ && source ./houdini_setup && cd $cwd
-    mode: u=rw,g=r,o=r
-    owner: root
-    group: root 
-  become: true
-  when: enforce_henv
-  tags:
-    - enforce_houdini_env_vars
-  
