@@ -83,13 +83,6 @@ module "deadline" {
   cidr_list = concat([var.remote_subnet_cidr, var.remote_ip_cidr], module.vpc.private_subnets_cidr_blocks)
 }
 
-output "spot_access_key_id" {
-  value = module.deadline.spot_access_key_id
-}
-output "spot_secret" {
-  value = module.deadline.spot_secret
-}
-
 resource "null_resource" "dependency_deadline_spot" {
   triggers = {
     spot_access_key_id       = module.deadline.spot_access_key_id
@@ -128,7 +121,7 @@ resource "null_resource" "provision_deadline_spot" {
       cd /vagrant
       echo ${ module.deadline.spot_access_key_id }
       echo ${ module.deadline.spot_secret }
-      ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-spot.yaml -v --extra-vars 'ami_id=${module.node.ami_id} snapshot_id=${module.node.snapshot_id} subnet_id=${module.vpc.private_subnets[0]} spot_instance_profile_arn="${module.deadline.spot_instance_profile_arn}" security_group_id=${module.node.security_group_id} spot_access_key_id=${module.deadline.spot_access_key_id} spot_secret=${module.deadline.spot_secret} volume_size=${var.node_centos_volume_size}'
+      ANSIBLE_STDOUT_CALLBACK=debug ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-spot.yaml -vvv --extra-vars 'volume_size=${var.node_centos_volume_size} ami_id=${module.node.ami_id} snapshot_id=${module.node.snapshot_id} subnet_id=${module.vpc.private_subnets[0]} spot_instance_profile_arn="${module.deadline.spot_instance_profile_arn}" security_group_id=${module.node.security_group_id} spot_access_key_id=${module.deadline.spot_access_key_id} spot_secret=${module.deadline.spot_secret}'
 EOT
   }
 }

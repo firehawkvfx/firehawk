@@ -1,62 +1,36 @@
-- name: provide temporary steps to work around this failure.
-  debug:
-    msg: currently the expect module isn't working here on pgp decryption.  try to enter this in a shell to validate a password first.  "keybase pgp encrypt -m 'secret' | keybase pgp decrypt"
+- name: install expect module
+  package:
+    name: expect
+  become: true
 
-- name: Case insensitive password string match
-  expect:
-    chdir: /vagrant
-    command: '/bin/bash -c "echo {{ spot_secret }} | base64 --decode | keybase pgp decrypt"'
-    responses:
-      PGP Decryption: "{{ keybase_secret }}"
-      
-      
+- name: Run expect to wait for a keybase pass and decrypt - first time is dirty output.
+  shell: |
+    /vagrant/scripts/pgp-expect.sh {{ keybase_secret | regex_escape() }} {{ spot_secret | regex_escape() }}
+  become_user: vagrant
+  connection: local
+  no_log: true
+
+- name: Run expect to wait for a keybase pass and decrypt - collect output.
+  shell: |
+    /vagrant/scripts/pgp-expect.sh {{ keybase_secret | regex_escape() }} {{ spot_secret | regex_escape() }}
   become_user: vagrant
   connection: local
   register: spot_secret_output
-  #no_log: true
+  no_log: true
 
 - set_fact:
     spot_secret_key: "{{ spot_secret_output.stdout }}"
-  #no_log: true
+  no_log: true
+
+- fail:
+    msg: "invalid output from keybase expect"
+  when: '" " in spot_secret_key or spot_secret_key ==""'
+  no_log: true
 
 - debug:
     msg: "warning, multiple subnets in the json spot fleet template may cause errors"
 
-# - name: init spot secret keys
-#   shell: | 
-#     set -x
-#     cd /opt/Thinkbox/DeadlineDatabase10/mongo/application/bin/
-#     ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval 'db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"PluginEnabled": "1"}})'
-#     ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval 'db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.State": "Global Enabled"}})'
-#     ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval 'db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"PluginEnabled": "1"}})'
-
-#     ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval 'db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.AccessID": "{{ spot_access_key_id }}"}})'
-#     ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval 'db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.SecretKey": "{{ spot_secret_key }}"}})'
-#   become: true
-#   #register: deadline_db
-#   with_items:
-#   - insert
-#   - update
-#   no_log: true
-
-# - name: init spot root keys debug only
-#   shell: | 
-#     set -x
-#     cd /opt/Thinkbox/DeadlineDatabase10/mongo/application/bin/
-#     ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval 'db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.AccessID": "{{ aws_access_key }}"}})'
-#     ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval 'db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.SecretKey": "{{ aws_secret_key }}"}})'
-#   become: true
-#   register: deadline_db
-#   with_items:
-#   - insert
-#   - update
-#   #no_log: true
-
-
-### 
-
-
-- name: generate config from template
+- name: generate spot fleet config from template
   template:
     src: /secrets/dev/spot-fleet-templates/config_template.json
     dest: /secrets/dev/spot-fleet-templates/config_generated.json
@@ -67,8 +41,8 @@
 # To list the contents of EventPluginSettingsCollection (for example):
 # db.EventPluginSettingsCollection.find().pretty()
 
-# debug with {{ aws_access_key }}
-# debug with {{ aws_secret_key }}
+# debug permissions with root {{ aws_access_key }}
+# debug permissions with root {{ aws_secret_key }}
 # normal use with {{ spot_access_key_id }}
 # normal use with {{ spot_secret_key }}
 
@@ -104,8 +78,8 @@
       var spot_json = cat("/secrets/dev/spot-fleet-templates/config_generated.json");
       db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"PluginEnabled": "1"}});
       db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.State": "Global Enabled"}});
-      db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.AccessID": "{{ aws_access_key }}"}});
-      db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.SecretKey": "{{ aws_secret_key }}"}});
+      db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.AccessID": "{{ spot_access_key_id }}"}});
+      db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.SecretKey": "{{ spot_secret_key }}"}});
       db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.Logging": "Verbose"}});
       db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.Region": "{{ aws_region }}"}});
       db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.Config": spot_json}});
@@ -114,10 +88,11 @@
       db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.StrictHardCap": "True"}});
       db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.StaggerInstances": StaggerInstances}});'
   become: true
-  register: deadline_db
+  # register: deadline_db
+  no_log: true
   with_items:
   - insert
   - update
 
-- debug:
-    var: deadline_db
+# - debug:
+#     var: deadline_db
