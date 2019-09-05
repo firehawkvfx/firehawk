@@ -175,19 +175,31 @@
     debug:
       var: ansible_distribution
 
-  - package:
-      name: "{{ item }}"
-      state: present
-    with_items:
+  - name: package dependencies CentOS
+    package:
+      name:
       - mesa-libGLw
       - libXp
       - libXp-devel
       - mesa-libGLU
       - libXScrnSaver
+      state: present
     tags:
       - packages
     when: not skip_packages and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
-    
+
+  - name: package dependencies Ubuntu
+    package:
+      name:
+      #- libglu1-mesa:i386
+      - libglu1
+      - libsm6
+      #- libxmu6:i386
+      - libxmu6
+      state: present
+    tags:
+      - packages
+    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
   - name: install pip
     package:
@@ -197,10 +209,9 @@
 
   - name: install nmap to open port range for tops
     package:
-      name: "{{ item }}"
+      name: nmap
       state: present
-    with_items:
-      - nmap
+    become: true
 
   - name: dir permissions on /opt/houdini_install_script
     file:
