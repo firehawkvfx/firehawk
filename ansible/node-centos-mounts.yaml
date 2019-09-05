@@ -245,7 +245,7 @@
     mount:
       fstype: none
       path: "{{ item.item.bind2 }}"
-      opts: "x-systemd.requires=/{{ item.item.pool_name }}/{{ item.item.volume_name }},x-systemd.automount,bind"
+      opts: "x-systemd.requires=/{{ item.item.pool_name }}/{{ item.item.volume_name }},x-systemd.automount,bind,_netdev"
       src: "/{{ item.item.pool_name }}/{{ item.item.volume_name }}"
       # if the path exists, and it was found in the exports, then set to mounted, else remove.
       state: "{{ ( destroy == false and item.item.path and item.item.bind2 and item.rc == 0 and item.item.state == 'present' ) | ternary( 'mounted' , 'absent' ) }}"
@@ -407,7 +407,7 @@
     mount:
       fstype: none
       path: "{{ item.item.bind1 }}"
-      opts: "x-systemd.requires=/{{ item.item.pool_name }}/{{ item.item.volume_name }},x-systemd.automount,bind"
+      opts: "x-systemd.requires=/{{ item.item.pool_name }}/{{ item.item.volume_name }},x-systemd.automount,bind,_netdev"
       src: "/{{ item.item.pool_name }}/{{ item.item.volume_name }}"
       # if the path exists, and it was found in the exports, then set to mounted, else remove.
       state: "{{ ( item.item.path and item.item.bind1 and item.rc == 0 and item.item.state == 'present' ) | ternary( 'mounted' , 'absent' ) }}"
@@ -421,7 +421,7 @@
     mount:
       fstype: none
       path: "{{ item.item.bind2 }}"
-      opts: "x-systemd.requires=/{{ item.item.pool_name }}/{{ item.item.volume_name }},x-systemd.automount,bind"
+      opts: "x-systemd.requires=/{{ item.item.pool_name }}/{{ item.item.volume_name }},x-systemd.automount,bind,_netdev"
       src: "/{{ item.item.pool_name }}/{{ item.item.volume_name }}"
       # if the path exists, and it was found in the exports, then set to mounted, else remove.
       state: "{{ ( item.item.path and item.item.bind2 and item.rc == 0 and item.item.state == 'present' ) | ternary( 'mounted' , 'absent' ) }}"
@@ -596,7 +596,7 @@
     mount:
       fstype: none
       path: "{{ item.item.site_bind1 }}"
-      opts: "x-systemd.requires={{ item.item.mount_path }},x-systemd.automount,bind"
+      opts: "x-systemd.requires={{ item.item.mount_path }},x-systemd.automount,bind,_netdev"
       src: "{{ item.item.mount_path }}"
       # if the path exists, and it was found in the exports, then set to mounted, else remove.
       state: "{{ ( item.item.mount_path and item.item.site_bind1 and item.rc == 0 and item.item.state == 'present' ) | ternary( 'mounted' , 'absent' ) }}"
@@ -610,7 +610,7 @@
     mount:
       fstype: none
       path: "{{ item.item.bind1 }}"
-      opts: "x-systemd.requires={{ item.item.mount_path }},x-systemd.automount,bind"
+      opts: "x-systemd.requires={{ item.item.mount_path }},x-systemd.automount,bind,_netdev"
       src: "{{ item.item.mount_path }}"
       # if the path exists, and it was found in the exports, then set to mounted, else remove.
       state: "{{ ( item.item.mount_path and item.item.bind1 and item.rc == 0 and item.item.state == 'present' ) | ternary( 'mounted' , 'absent' ) }}"
@@ -624,7 +624,7 @@
     mount:
       fstype: none
       path: "{{ item.item.bind2 }}"
-      opts: "x-systemd.requires={{ item.item.mount_path }},x-systemd.automount,bind"
+      opts: "x-systemd.requires={{ item.item.mount_path }},x-systemd.automount,bind,_netdev"
       src: "{{ item.item.mount_path }}"
       # if the path exists, and it was found in the exports, then set to mounted, else remove.
       state: "{{ ( item.item.mount_path and item.item.bind2 and item.rc == 0 and item.item.state == 'present' ) | ternary( 'mounted' , 'absent' ) }}"
