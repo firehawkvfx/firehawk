@@ -8,10 +8,15 @@
 mkdir -p ./tmp/
 mkdir -p ../secrets/
 # The template will be updated by this script
-touch ./secrets.template
-rm ./secrets.template
-touch ./tmp/secrets.temp
-rm ./tmp/secrets.temp
+secrets_template=./secrets.template
+
+touch $secrets_template
+rm $secrets_template
+
+temp_output=./tmp/secrets.temp
+
+touch $temp_output
+rm $temp_output
 
 # IFS will allow for lop to iterate over lines instead of words seperated by ' '
 IFS='
@@ -83,8 +88,10 @@ else
     -u|--decrypt)
       line=$(head -n 1 ../secrets/secrets-$TF_VAR_envtier)
       if [[ "$line" == "\$ANSIBLE_VAULT"* ]]; then 
-          echo "found encrypted vault"
-          echo "Decrypting secrets. WARNING: Do not commit unencrypted secrets to version control. run this command again without --decrypt before commiting any secrets to version control"
+          echo "Found encrypted vault"
+          echo "Decrypting secrets."
+          echo "WARNING: Never commit unencrypted secrets to a repo. run this command again without --decrypt before commiting any secrets to version control"
+          echo "If you accidentally do commit unencrypted secrets, ensure there is no trace of the data in the repo, or invalidate the secrets / replace them."
           ansible-vault decrypt --vault-id ../secrets/keys/.vault-key-$TF_VAR_envtier ../secrets/secrets-$TF_VAR_envtier
       else
           echo "vault not encrypted.  no need to decrypt. vars will be set from unencrypted vault."
@@ -108,22 +115,23 @@ printf "\nTF_VAR_envtier=$TF_VAR_envtier\n"
 printf "vault_command=$vault_command\n"
 
 export vault_examples_command="cat ./secrets.example"
-# we need to handle this in python instead.  if environment vars aren't in the example, they should be blank, rather than using real values.
-for i in `eval $vault_command`
+
+for i in `(eval $vault_command | sed 's/^$/###/')`
 do
     if [[ "$i" =~ ^#.*$ ]]
     then
-        echo $i >> ./tmp/secrets.temp
+        # replace ### blank line placeholder for user readable temp_output and respect newlines
+        echo "${i#"###"}" >> $temp_output
     else
-        #echo ${i%%=*}'=$'${i%%=*} >> ./tmp/secrets.temp
-        echo ${i%%=*}'=insertvalue' >> ./tmp/secrets.temp
+        # temp_output original line to file without value
+        echo "${i%%=*}=insertvalue" >> $temp_output
     fi
 done
 
 # substitute example var values into the template.
 
-envsubst < "./tmp/secrets.temp" > "./secrets.template"
-rm ./tmp/secrets.temp
+envsubst < "$temp_output" > "$secrets_template"
+rm $temp_output
 
 # # Now set environment variables to the actual values defined in the user's secrets-prod file
 for i in `eval $vault_command`
@@ -148,7 +156,7 @@ do
     export $i
 done
 
-rm ./tmp/envtier_exports.txt
+#rm ./tmp/envtier_exports.txt
 
 # in the ubuntu vagrant image, for some reason the ssh bash agent needs to be initialised or keys cannot be added with ssh-add
 #ssh-agent bash
