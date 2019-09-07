@@ -137,9 +137,6 @@ variable "deadline_proxy_certificate" {
 variable "deadline_proxy_root_dir" {
 }
 
-variable "deadline_samba_server_address" {
-}
-
 variable "houdini_license_server_address" {
 }
 
