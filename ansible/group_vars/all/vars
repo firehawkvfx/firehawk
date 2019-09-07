@@ -124,6 +124,7 @@ houdini_major_version_list:
 
 # The maximum number of instances to launch in a spot fleet for houdini engine
 max_spot_capacity_engine: 3
+max_spot_capacity_mantra: 8
 
 # this list of dictionaries is use to install multiple versions of houdini.
 # versions should be listed from oldest to newest.

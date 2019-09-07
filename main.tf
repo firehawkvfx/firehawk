@@ -126,6 +126,10 @@ EOT
   }
 }
 
+output "node_ami_id" {
+  value = "${module.node.ami_id}"
+}
+
 module "bastion" {
   source = "./modules/bastion"
 
@@ -169,9 +173,11 @@ variable "softnas_skip_update" {
 }
 
 variable "softnas_use_custom_ami" {
+  default = false
 }
 
 variable "softnas_custom_ami" {
+  default = 123456789
 }
 
 module "softnas" {
