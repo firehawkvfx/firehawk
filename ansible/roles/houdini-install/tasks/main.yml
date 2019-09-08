@@ -102,6 +102,8 @@
   register: houdini_install_out
   become: true
   when: houdini_install_type != "server" and houdini_version_item.houdini_auto_version
+  failed_when:
+  - "'Nothing was installed.' in houdini_install_out.stderr"
 
 - debug:
     msg:  "{{ houdini_install_out.stdout }}"
@@ -114,6 +116,8 @@
   register: houdini_install_out
   become: true
   when: houdini_install_type != "server" and not houdini_version_item.houdini_auto_version
+  failed_when:
+  - "'Nothing was installed.' in houdini_install_out.stderr"
 
 - debug:
     msg:  "{{ houdini_install_out.stdout }}"
@@ -205,6 +209,8 @@
 #   become_user: "{{ variable_user }}"
 #   become: true
 #   when: houdini_install_type == "server"
+
+# sudo ./houdini.install --auto-install --accept-EULA --install-houdini --no-license --install-hfs-symlink --make-dir /opt/houdini/18.0.221
 
 - name: SERVER INSTALL - install houdini with correct dir.
   shell: |
