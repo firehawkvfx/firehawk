@@ -632,3 +632,14 @@
     - "{{ site_presence.results }}"
     tags:
     - cloud_install
+
+  - name: insert/update block in /etc/sysconfig/network
+    blockinfile:
+      path: /etc/sysconfig/network
+      marker: "# {mark} ANSIBLE MANAGED BLOCK delay"
+      backup: yes
+      content: |
+        NETWORKDELAY=20
+    become: true
+    tags:
+    - cloud_install
