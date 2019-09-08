@@ -270,6 +270,10 @@ EOT
   }
 }
 
+# to replace the ami, use:
+# terraform taint module.node.random_id.ami_unique_name[0]
+# and then terraform apply
+
 resource "random_id" "ami_unique_name" {
   count = var.site_mounts ? 1 : 0
   keepers = {
