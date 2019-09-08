@@ -22,19 +22,21 @@ declare $( cat /proc/cpuinfo | grep "cpu cores" | awk -F: '{ num+=1 } END{
 while [ "$1" != "" ]; do
     case $1 in
         -c | --cores-per-slave )    shift
-                                    filename=$1
+                                    arg_num=$1
                                     echo "Using $1 cores per slave."
-                                    declare $( cat /proc/cpuinfo | grep "cpu cores" | awk -F: '{ num+=1 } END{ 
+                                    declare $( cat /proc/cpuinfo | grep "cpu cores" | awk -v arg_num="$arg_num" -F: '{ num+=1 } END{ 
                                       print "CPUCORES="num
-                                      print "SLAVECOUNT="(num/$1)
+                                      print "SLAVECOUNT="(num/arg_num)
                                       }' )
                                     ;;
         -t | --total-slaves )       shift
-                                    filename=$1
-                                    echo "Starting $1 slaves."
-                                    declare $( cat /proc/cpuinfo | grep "cpu cores" | awk -F: '{ num+=1 } END{ 
+                                    arg_num=$1
+                                    echo "Starting $1 slaves total."
+                                    declare $( cat /proc/cpuinfo | grep "cpu cores" | awk -v arg_num="$arg_num" -F: '{ 
+                                      num+=1
+                                      } END{ 
                                       print "CPUCORES="num
-                                      print "SLAVECOUNT="($1)
+                                      print "SLAVECOUNT="arg_num
                                       }' )
                                     ;;
         -s | --shutdown )           ARGS='-shutdown'
