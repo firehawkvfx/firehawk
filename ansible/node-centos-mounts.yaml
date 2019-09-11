@@ -639,7 +639,7 @@
       marker: "# {mark} ANSIBLE MANAGED BLOCK delay"
       backup: yes
       content: |
-        NETWORKDELAY=20
+        NETWORKDELAY=40
     become: true
     tags:
     - cloud_install
