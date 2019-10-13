@@ -73,7 +73,7 @@ module "vpc" {
   openvpn_admin_user = var.openvpn_admin_user
   openvpn_admin_pw   = var.openvpn_admin_pw
 
-  bastion_ip                     = module.bastion.public_ip
+  bastion_ip         = module.bastion.public_ip
 }
 
 module "deadline" {
@@ -97,8 +97,12 @@ resource "null_resource" "dependency_node_centos" {
   }
 }
 
-# if a new image is detected, update the spot template and spot plugin json settings
+# if a new image is detected, TF will update the spot template and spot plugin json settings
 # consider using md5 of spot template to trigger an update.
+# alternative do it manually with
+# terraform taint null_resource.provision_deadline_spot[0]
+# terraform apply
+
 resource "null_resource" "provision_deadline_spot" {
   count      = var.site_mounts ? 1 : 0
   depends_on = [null_resource.dependency_deadline_spot, null_resource.dependency_node_centos]
@@ -128,6 +132,15 @@ EOT
 
 output "node_ami_id" {
   value = "${module.node.ami_id}"
+}
+
+# to debug only
+output "vpc_cidr" {
+  value = module.vpc.vpc_cidr_block
+}
+
+variable "node_skip_update" {
+  default = false
 }
 
 module "bastion" {
@@ -167,7 +180,7 @@ variable "gateway_type" {
   default = "pcoip"
 }
 
-#A single softnas instance that resides in a private subnet for high performance nfs storage
+# A single softnas instance that resides in a private subnet for high performance nfs storage
 variable "softnas_skip_update" {
   default = false
 }
@@ -314,10 +327,6 @@ module "workstation" {
   openfirehawkserver = var.openfirehawkserver
 
   houdini_license_server_address = var.houdini_license_server_address
-}
-
-variable "node_skip_update" {
-  default = false
 }
 
 variable "node_sleep_on_create" {
