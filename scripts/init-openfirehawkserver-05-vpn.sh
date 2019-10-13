@@ -39,7 +39,7 @@ printf "\n\nHave you installed keybase and initialised pgp?\n\nIf not it is high
 echo "Press enter if you have initialised a keybase pgp passphrase for this shell. Otherwise exit (ctrl+c) and run:"
 echo "keybase login"
 echo "keybase pgp gen"
-echo -n 'keybase pgp encrypt -m "test_secret" | keybase pgp decrypt'
+printf 'keybase pgp encrypt -m "test_secret" | keybase pgp decrypt\n'
 read userInput
 
 # This stage configures the vpc and vpn.  after this stage, vagrant reload and test ping the private ip of the bastion host to ensure the vpn is working.
