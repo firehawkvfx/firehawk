@@ -101,7 +101,7 @@
     state: present
     path: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env"
     backup: true
-    regexp: '.*HOUDINI_TEMP_DIR =.*'
+    regexp: '^HOUDINI_TEMP_DIR =.*'
     line: 'HOUDINI_TEMP_DIR = "/prod/tmp"'
   become: yes
   tags:
