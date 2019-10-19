@@ -163,7 +163,23 @@
     - cloud-install
     - onsite-install
 
-# moved houdini config to a serperate role
+  - name: uninstall urllib3 because of conflict with rhel 8 packages
+    pip:
+      name: urllib3
+      state: absent
+    become: yes
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: install python-urllib3 with yum 
+    yum:
+      name: 'python-urllib3'
+      state: present
+    become: yes
+    tags:
+    - cloud-install
+    - onsite-install
 
   - name: upgrade all packages - yum update
     yum:
