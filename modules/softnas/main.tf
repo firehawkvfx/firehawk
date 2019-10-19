@@ -391,9 +391,13 @@ resource "null_resource" "provision_softnas" {
       cd /vagrant
       ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.softnas1[0].private_ip} bastion_ip=${var.bastion_ip}"
       ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=softnas0 host_ip=${aws_instance.softnas1[0].private_ip} group_name=role_softnas"
+      # remove any mounts on local workstation first since they will have been broken if another softnas instance was just destroyed to create this one.
+      if [ $TF_VAR_remote_mounts_on_local ] ; then
+        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'
+      fi
       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init.yaml -v
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init-users.yaml -v --extra-vars "variable_host=role_softnas set_hostname=false"
-      # ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-update.yaml -v
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-update.yaml -v
       # hotfix script to speed up instance start and shutdown
       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-install-acpid.yaml -v
 
