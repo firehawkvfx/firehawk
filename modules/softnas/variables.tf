@@ -96,7 +96,7 @@ variable "instance_type" {
 
   default = {
     low  = "m4.xlarge"
-    high = "r5.xlarge"
+    high = "r5.12xlarge"
   }
 }
 
@@ -115,10 +115,10 @@ variable "selected_ami" {
 
   default = {
     low_ap-southeast-2 = "ami-a24a98c0"
-    #high_ap-southeast-2 = "ami-5e7ea03c"
-    #high_ap-southeast-2 = "ami-058203bb6a3250775"
-    #test update
+    # 4.2.4 enterprise consumption
     high_ap-southeast-2 = "ami-05de939bacdc06d34"
+    # 4.3.0 enterprise consumption
+    # high_ap-southeast-2 = "ami-051ec062f31c60ee4"
   }
 }
 
