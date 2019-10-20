@@ -38,7 +38,7 @@ variable "ami" {
 }
 
 variable "instance_type" {
-  default = "m4.large"
+  default = "m5.xlarge"
 }
 
 variable "cert_arn" {
