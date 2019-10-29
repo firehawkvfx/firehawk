@@ -39,31 +39,12 @@
     state: present
   when: result.stat.exists == false
 
-- name: insert marker start
-  lineinfile:
-    path: "{{ item }}"
-    #insertafter: "^#?UUID.*$"
-    line: "# BEGIN ANSIBLE MANAGED BLOCK"
-    backup: yes
-  with_items:
-    - /home/deadlineuser/.bashrc
-    - /home/vagrant/.bashrc
-
-- name: insert marker end
-  lineinfile:
-    path: "{{ item }}"
-    insertafter: "# BEGIN ANSIBLE MANAGED BLOCK"
-    line: "# END ANSIBLE MANAGED BLOCK"
-    create: true
-  with_items:
-    - /home/deadlineuser/.bashrc
-    - /home/vagrant/.bashrc
-
 - name: insert/update block in /home/deadlineuser/.bashrc and home/vagrant/.bashrc
   blockinfile:
     path: "{{ item }}"
     backup: yes
-    content: |
+    marker: "# {mark} ANSIBLE MANAGED BLOCK ALIASES"
+    block: |
       ### These lines are created by the new user playbook. ansible-playbook -i ansible/inventory ansible/newuser_deadline.yaml --tags "newuser"
       
       showenv='. /vagrant/showenv.sh'
