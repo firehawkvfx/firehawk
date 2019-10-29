@@ -45,7 +45,6 @@ variable "ami_map" {
   type = map(string)
 
   default = {
-    # ap-southeast-2 = "ami-d8c21dba"
     ap-southeast-2 = "ami-08bd00d7713a39e7d"
   }
 }
