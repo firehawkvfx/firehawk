@@ -15,19 +15,19 @@
   tags:
     - sync_scripts
 
-- name: execute unit test
-  shell: |
-    set -x
-    cd /opt/hfs17.5/
-    source ./houdini_setup
-    ls /var/tmp/
-    ls /var/tmp/qc/*.hip
-    cd /var/tmp/qc
-    hython /var/tmp/qc/hip_unit_test.py /var/tmp/qc/test_ebs_read_hip_no_deadline_rop.hip /obj/ropnet1/fetch1
-    ls -ltriah /var/tmp/geo
-  become_user: deadlineuser
-  tags:
-    - sync_scripts
+# - name: execute unit test
+#   shell: |
+#     set -x
+#     cd /opt/hfs17.5/
+#     source ./houdini_setup
+#     ls /var/tmp/
+#     ls /var/tmp/qc/*.hip
+#     cd /var/tmp/qc
+#     hython /var/tmp/qc/hip_unit_test.py /var/tmp/qc/test_ebs_read_hip_no_deadline_rop.hip /obj/ropnet1/fetch1
+#     ls -ltriah /var/tmp/geo
+#   become_user: deadlineuser
+#   tags:
+#     - sync_scripts
 
 # - name: Ensure unit test runs on boot.  Undesirable, but currently needed - See sidefx RFE100149
 #   copy:
