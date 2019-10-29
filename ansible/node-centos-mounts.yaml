@@ -155,7 +155,7 @@
     - local_install
     - cloud_install
 
-  - name: exports to mount to this instance
+  - name: softnas exports to mount to this instance
     debug:
       var: item
     with_items: 
@@ -505,7 +505,7 @@
 
 ### update fstab with found mounts
 
-  - name: exports to mount to this instance
+  - name: local nas exports to mount to this instance
     debug:
       var: item
     with_items: 
