@@ -213,6 +213,15 @@ resource "aws_instance" "node_centos" {
     Route = "private"
     Role  = "node_centos"
   }
+# cloud init resets network delay settings if configured outside of cloud-init
+  user_data = <<USERDATA
+#cloud-config
+network:
+ - config: disabled
+bootcmd:
+ - echo "NETWORKDELAY=20" | sudo tee -a /etc/sysconfig/network
+ - mount -a
+USERDATA
 }
 
 resource "null_resource" "provision_node_centos" {
@@ -262,6 +271,8 @@ resource "null_resource" "provision_node_centos" {
       ansible-playbook -i "$TF_VAR_inventory" ansible/localworkstation-deadlineuser.yaml --tags "onsite-install" --skip-tags "multi-slave" --extra-vars "variable_host=role_node_centos variable_user=centos"
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-houdini.yaml -v --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source"
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v
+      # last step before building ami we run a unit test to get houdini over a 4 minute hiccup on first use see sidefx RFE100149
+      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-houdini-unit-test.yaml -v --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source"
       # stop the instance to ensure ami is created from a stable state
       aws ec2 stop-instances --instance-ids ${aws_instance.node_centos[0].id}
       aws ec2 wait instance-stopped --instance-ids ${aws_instance.node_centos[0].id}
