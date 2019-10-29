@@ -72,6 +72,11 @@
       name: boto3
     become: true
 
+  - name: install strace
+    package: 
+      name: strace
+    become: true
+
   ### steps to creat a new user rwith password and ssh key
 
 
