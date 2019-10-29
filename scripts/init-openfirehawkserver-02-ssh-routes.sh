@@ -50,6 +50,8 @@ ansible-playbook -i ansible/inventory/hosts ansible/aws-new-key.yaml
 ansible-playbook -i ansible/inventory ansible/ansible-control-update-routes.yaml
 
 echo -e "\nIf above was succesful, exit the vm and use 'vagrant reload' before continuing with the next script.  New user group added wont have user added until reload."
+echo -e "\nFor houdini to work, ensure you have configured your licences on the production server."
+echo -e "\nDo not install houdini licensing in a dev vm since it should be as stable as possible, and re provisioning the vm will use licence key install tokens (limited yearly)"
 echo -e "\nFor deadline to work, ensure you have follow these steps:"
 echo "1. in deadline monitor create groups under super user mode: tools/create groups and ensure the groups exist for all groups slave appear under"
 echo "eg cloud, local, local_workstation, cloud_workstation"
