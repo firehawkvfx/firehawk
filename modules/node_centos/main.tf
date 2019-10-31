@@ -218,11 +218,11 @@ resource "aws_instance" "node_centos" {
 #cloud-config
 network:
  - config: disabled
-bootcmd:
- - echo "NETWORKDELAY=20" | sudo tee -a /etc/sysconfig/network
- - mount -a
 USERDATA
 }
+#bootcmd:
+# - mount -a
+# - echo "NETWORKDELAY=20" | sudo tee -a /etc/sysconfig/network
 
 resource "null_resource" "provision_node_centos" {
   count      = var.site_mounts ? 1 : 0
