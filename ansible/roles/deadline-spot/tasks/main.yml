@@ -74,7 +74,7 @@
     cd /opt/Thinkbox/DeadlineDatabase10/mongo/application/bin/
     ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval '
       var StaggerInstances = "5";
-      var IdleShutdown = "10";
+      var IdleShutdown = "4";
       var spot_json = cat("/secrets/dev/spot-fleet-templates/config_generated.json");
       db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"PluginEnabled": "1"}});
       db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.State": "Global Enabled"}});
