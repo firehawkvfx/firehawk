@@ -159,12 +159,6 @@ houdini_version_list:
 
 # - houdini_major_version: "18.0"
 #   houdini_auto_version: False
-#   houdini_minor_version: "18.0.262"
-#   houdini_linux_filename: "houdini-18.0.262-linux_x86_64_gcc6.3.tar.gz"
-#   houdini_build: "daily"
-
-# - houdini_major_version: "18.0"
-#   houdini_auto_version: False
 #   houdini_minor_version: "18.0.274"
 #   houdini_linux_filename: "houdini-18.0.274-linux_x86_64_gcc6.3.tar.gz"
 #   houdini_build: "daily"
