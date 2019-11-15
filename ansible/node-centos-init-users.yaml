@@ -35,7 +35,12 @@
       path: /root/.bash_profile
       line: 'export HOSTNAME={{ hostname }}'
     when: set_hostname
-    
+
+# disable SELINUX - it can often cause issues with various systems like PDGMQ, licensing, and PCOIP
+  - name: Disable SELinux
+    selinux:
+      state: disabled
+
 # these packages are required to pass an encrypted string via commandline into a user pass and are suited to centos.
   - name: install mkpasswd
     package:
