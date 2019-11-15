@@ -2,6 +2,19 @@
 # This module creates all resources necessary for a PCOIP instance in AWS
 #----------------------------------------------------------------
 
+variable "houdini_license_server_address" {
+}
+
+variable "private_subnets_cidr_blocks" {
+  default = []
+}
+
+variable "openfirehawkserver" {
+}
+
+variable "remote_subnet_cidr" {
+}
+
 resource "aws_security_group" "workstation_pcoip" {
   name        = var.name
   vpc_id      = var.vpc_id
@@ -80,6 +93,8 @@ resource "aws_security_group" "workstation_pcoip" {
     cidr_blocks = [var.remote_ip_cidr, var.remote_subnet_cidr]
     description = "icmp"
   }
+
+
   egress {
     protocol    = "-1"
     from_port   = 0
@@ -87,19 +102,6 @@ resource "aws_security_group" "workstation_pcoip" {
     cidr_blocks = ["0.0.0.0/0"]
     description = "all outgoing traffic"
   }
-}
-
-variable "houdini_license_server_address" {
-}
-
-variable "private_subnets_cidr_blocks" {
-  default = []
-}
-
-variable "openfirehawkserver" {
-}
-
-variable "remote_subnet_cidr" {
 }
 
 resource "aws_security_group" "workstation_centos" {
@@ -257,6 +259,14 @@ resource "aws_security_group" "workstation_centos" {
   }
 }
 
+variable "provision_softnas_volumes" {
+  default = []
+}
+
+variable "attach_local_mounts_after_start" {
+  default = []
+}
+
 # You may wish to use a custom ami of your own creation.  insert the ami details below
 variable "use_custom_ami" {
   default = false
@@ -274,16 +284,13 @@ variable "softnas_private_ip1" {
   default = []
 }
 
-variable "provision_softnas_volumes" {
-  default = []
-}
-
 # This null resource creates a dependency on the completed volume provisioning from the softnas instance, and the existance of the bastion host.
 resource "null_resource" "dependency_softnas_and_bastion" {
   triggers = {
     softnas_private_ip1       = join(",", var.softnas_private_ip1)
     bastion_ip                = var.bastion_ip
     provision_softnas_volumes = join(",", var.provision_softnas_volumes)
+    attach_local_mounts_after_start = join(",", var.attach_local_mounts_after_start)
   }
 }
 
@@ -353,6 +360,7 @@ resource "null_resource" "workstation_pcoip" {
     inline = [
       "sleep 10",
       "set -x",
+      "cloud-init status --wait",
       "sudo yum install -y python",
       "while [ ! -f /etc/ssh/ssh_host_ecdsa_key.pub ]",
       "do",
