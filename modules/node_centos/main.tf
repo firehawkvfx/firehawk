@@ -169,11 +169,18 @@ variable "provision_softnas_volumes" {
   default = []
 }
 
+variable "attach_local_mounts_after_start" {
+  default = []
+}
+
+
+
 resource "null_resource" "dependency_softnas_and_bastion" {
   triggers = {
     softnas_private_ip1       = join(",", var.softnas_private_ip1)
     bastion_ip                = var.bastion_ip
     provision_softnas_volumes = join(",", var.provision_softnas_volumes)
+    attach_local_mounts_after_start = join(",", var.attach_local_mounts_after_start)
   }
 }
 
@@ -283,7 +290,12 @@ EOT
 
 # to replace the ami after further provisioning, use:
 # terraform taint module.node.random_id.ami_unique_name[0]
+# terraform taint aws_ami_from_instance.node_centos[0]
+# or you can destroy the instance with
+# terraform taint module.node.aws_instance.node_centos[0]
 # and then terraform apply
+# you will also need to delete existing spot fleets from the AWS console, and get deadline to restart pulse and perform housecleaning to roll out the new ami into future spot fleets.
+
 
 resource "random_id" "ami_unique_name" {
   count = var.site_mounts ? 1 : 0
@@ -296,7 +308,7 @@ resource "random_id" "ami_unique_name" {
 
 resource "aws_ami_from_instance" "node_centos" {
   count              = var.site_mounts ? 1 : 0
-  depends_on         = [null_resource.provision_node_centos]
+  depends_on         = [null_resource.provision_node_centos, random_id.ami_unique_name]
   name               = "node_centos_houdini_${aws_instance.node_centos[0].id}_${random_id.ami_unique_name[0].hex}"
   source_instance_id = aws_instance.node_centos[0].id
 }
@@ -315,9 +327,10 @@ resource "null_resource" "start-node-after-ami" {
   }
 }
 
-#wakeup a node after sleep
+# wakeup a node after sleep.  ensure the softnas instaqnce has finished creating its volumes otherwise mounts will not work - dependency_softnas_and_bastion
 resource "null_resource" "start-node" {
   count = !var.sleep && var.site_mounts && var.wakeable ? 1 : 0
+  depends_on = [null_resource.dependency_softnas_and_bastion]
 
   provisioner "local-exec" {
     command = "aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id}"
