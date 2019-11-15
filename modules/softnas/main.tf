@@ -650,7 +650,7 @@ EOT
   }
 }
 
-resource "null_resource" "attach-local-mounts-after-start" {
+resource "null_resource" "attach_local_mounts_after_start" {
   count      =  !var.sleep && var.softnas_storage ? 1 : 0
   depends_on = [null_resource.start-softnas]
 
@@ -698,7 +698,11 @@ EOT
   }
 }
 
-resource "null_resource" "detach-local-mounts-after-stop" {
+output "attach_local_mounts_after_start" {
+  value = null_resource.attach_local_mounts_after_start.*.id
+}
+
+resource "null_resource" "detach_local_mounts_after_stop" {
   count      = var.sleep && var.softnas_storage ? 1 : 0
   depends_on = [null_resource.shutdown-softnas]
 
