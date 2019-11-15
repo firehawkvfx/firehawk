@@ -21,6 +21,10 @@ variable "node_centos_volume_size" {
   default = 20
 }
 
+variable "node_centos_volume_type" {
+  default = "gp2"
+}
+
 # once you setup an ssl certificate with your domain, it will have a route zone id.
 variable "route_zone_id" {
 }
@@ -77,6 +81,10 @@ variable "vpn_cidr" {
 #the remote subnet cidr block is the subnet range that your remote site is in.  use this if you intend to use the openvpn client
 #as a router / gateway for other nodes on your remote network to access the EC2 private subnet.
 variable "remote_subnet_cidr" {
+}
+
+variable "node_wakeable" {
+  default = false
 }
 
 variable "softnas1_cloudformation_role_name" {
