@@ -116,6 +116,7 @@ resource "null_resource" "provision_deadline_spot" {
     spot_access_key_id = module.deadline.spot_access_key_id
     spot_secret        = module.deadline.spot_secret
     volume_size = var.node_centos_volume_size
+    volume_type = var.node_centos_volume_type
   }
   
   # needs subnets id eg subnet-019d702254060c2f9, and ami_id, arn id eg arn:aws:iam::972620357255:instance-profile/DeadlineSlaveRole, snapshot id snap-06c90e54aaf77dbe5, security group id, sg-0b1e4b21eb893f712
@@ -125,7 +126,7 @@ resource "null_resource" "provision_deadline_spot" {
       cd /vagrant
       echo ${ module.deadline.spot_access_key_id }
       echo ${ module.deadline.spot_secret }
-      ANSIBLE_STDOUT_CALLBACK=debug ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-spot.yaml -vvv --extra-vars 'volume_size=${var.node_centos_volume_size} ami_id=${module.node.ami_id} snapshot_id=${module.node.snapshot_id} subnet_id=${module.vpc.private_subnets[0]} spot_instance_profile_arn="${module.deadline.spot_instance_profile_arn}" security_group_id=${module.node.security_group_id} spot_access_key_id=${module.deadline.spot_access_key_id} spot_secret=${module.deadline.spot_secret}'
+      ANSIBLE_STDOUT_CALLBACK=debug ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-spot.yaml -vvv --extra-vars 'volume_type=${var.node_centos_volume_type} volume_size=${var.node_centos_volume_size} ami_id=${module.node.ami_id} snapshot_id=${module.node.snapshot_id} subnet_id=${module.vpc.private_subnets[0]} spot_instance_profile_arn="${module.deadline.spot_instance_profile_arn}" security_group_id=${module.node.security_group_id} spot_access_key_id=${module.deadline.spot_access_key_id} spot_secret=${module.deadline.spot_secret}'
 EOT
   }
 }
@@ -289,7 +290,7 @@ module "workstation" {
   source = "./modules/workstation_pcoip"
   name   = "workstation"
 
-  workstation_enabled = false
+  workstation_enabled = true
 
   #options for gateway type are centos7 and pcoip
   gateway_type   = var.gateway_type
@@ -314,6 +315,7 @@ module "workstation" {
   # dependencies
   softnas_private_ip1       = module.softnas.softnas1_private_ip
   provision_softnas_volumes = module.softnas.provision_softnas_volumes
+  attach_local_mounts_after_start = module.softnas.attach_local_mounts_after_start
   bastion_ip                = module.bastion.public_ip
 
   #sleep will stop instances to save cost during idle time.
@@ -356,6 +358,7 @@ module "node" {
   # dependencies
   softnas_private_ip1       = module.softnas.softnas1_private_ip
   provision_softnas_volumes = module.softnas.provision_softnas_volumes
+  attach_local_mounts_after_start = module.softnas.attach_local_mounts_after_start
   bastion_ip                = module.bastion.public_ip
 
   openfirehawkserver = var.openfirehawkserver
@@ -374,6 +377,8 @@ module "node" {
 
   #sleep will stop instances to save cost during idle time.
   sleep = var.sleep
+
+  wakeable = var.node_wakeable
 
   houdini_license_server_address = var.houdini_license_server_address
 }
