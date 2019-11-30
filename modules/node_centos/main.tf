@@ -165,16 +165,6 @@ resource "aws_security_group" "node_centos" {
   }
 }
 
-variable "provision_softnas_volumes" {
-  default = []
-}
-
-variable "attach_local_mounts_after_start" {
-  default = []
-}
-
-
-
 resource "null_resource" "dependency_softnas_and_bastion" {
   triggers = {
     softnas_private_ip1       = join(",", var.softnas_private_ip1)
@@ -227,9 +217,6 @@ network:
  - config: disabled
 USERDATA
 }
-#bootcmd:
-# - mount -a
-# - echo "NETWORKDELAY=20" | sudo tee -a /etc/sysconfig/network
 
 resource "null_resource" "provision_node_centos" {
   count      = var.site_mounts ? 1 : 0
