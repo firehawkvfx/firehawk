@@ -105,30 +105,27 @@ varfile=
 
 f () {
     local OPTIND
-    while getopts "e:f" option
-    do
-    case "${option}"
-    in
-    e)
-        # echo "env was $OPTARG"
-        # if [[ "$OPTARG" == "dev" ]]; then
-        # export TF_VAR_envtier='dev' >&2
-        # echo "using dev"
-        # fi
-        # if [[ "$OPTARG" == "prod" ]]; then
-        # export TF_VAR_envtier='prod' >&2
-        # fi
-        echo "-e was triggered, Parameter: $OPTARG"
-        ;;
-    # d) decrypt=true;;
-    f)
-        echo "-f was triggered, Parameter: $OPTARG"
-        # echo "$option varfile was $OPTARG $opt $option"
-        # export varfile="$OPTARG"
-        ;;
-    esac
+    while getopts "e:f:d" option; do
+        case "${option}" in
+        e)
+            echo "env was $OPTARG"
+            if [[ "$OPTARG" == "dev" ]]; then
+            export TF_VAR_envtier='dev' >&2
+            echo "using dev"
+            fi
+            if [[ "$OPTARG" == "prod" ]]; then
+            export TF_VAR_envtier='prod' >&2
+            fi
+            ;;
+        f)
+            # echo "-f was triggered, Parameter: $OPTARG"
+            # echo "$option varfile was $OPTARG $opt $option"
+            export varfile="$OPTARG"
+            ;;
+        d) decrypt=true;;
+        esac
     done
-    shift $((OPTIND -1))
+    # shift $((OPTIND -1))
 }
 
 f "$@"
