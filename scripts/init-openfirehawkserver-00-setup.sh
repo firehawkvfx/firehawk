@@ -7,8 +7,6 @@
 
 clear
 
-
-
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 printf "\n...checking scripts directory at $SCRIPTDIR\n\n"
 
@@ -50,11 +48,6 @@ output=$SCRIPTDIR/../../secrets/output.txt
 #clear output
 touch $output
 rm $output
-
-#consider erase output?
-#rm $output
-
-
 
 if [[ ! $TF_VAR_envtier ]]; then
     echo "No Environment has been initialised.  Assuming first time installation.  if this is incorrect, initialise variables first with:"
