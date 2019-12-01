@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # the purpose of this script is to:
 # 1) set envrionment variables as defined in the encrypted secrets/secrets-prod file
@@ -7,118 +7,268 @@
 #    The purpose of this script is to ensure that the template for all users remains consistent.
 # 3) Example values for the secrets.template file are defined in secrets.example. Ensure you have placed an example key=value for any new vars in secrets.example. 
 # If any changes have resulted in a new variable name, then example values helps other understand what they should be using for their own infrastructure.
+
+clear
+
 mkdir -p ./tmp/
 mkdir -p ../secrets/
 # The template will be updated by this script
 secrets_template=./secrets.template
-
 touch $secrets_template
 rm $secrets_template
-
 temp_output=./tmp/secrets.temp
-
 touch $temp_output
 rm $temp_output
+
+failed=false
+verbose=false
+optspec=":hv-:t:"
+export var_file="../secrets/secrets-$TF_VAR_envtier"
+encrypt_mode="encrypt"
 
 # IFS will allow for loop to iterate over lines instead of words seperated by ' '
 IFS='
 '
 
-for i in `cat ./secrets.example`
-do
-    [[ "$i" =~ ^#.*$ ]] && continue
-    export $i
-done
+verbose () {
+    local OPTIND
+    OPTIND=0
+    while getopts "$optspec" optchar; do
+        case "${optchar}" in
+            -)
+                case "${OPTARG}" in
+                    tier)
+                        val="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+                        opt="${OPTARG}"
+                        ;;
+                    tier=*)
+                        ;;
+                    var-file)
+                        val="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+                        opt="${OPTARG}"
+                        ;;
+                    var-file=*)
+                        ;;
+                    vault)
+                        val="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+                        opt="${OPTARG}"
+                        ;;
+                    vault=*)
+                        ;;
+                    *)
+                        if [ "$OPTERR" = 1 ] && [ "${optspec:0:1}" != ":" ]; then
+                            echo "Unknown option --${OPTARG}" >&2
+                        fi
+                        ;;
+                esac;;
+            t)
+                ;;
+            v)
+                echo "Parsing option: '-${optchar}'" >&2
+                echo "verbose mode"
+                verbose=true
+                ;;
+        esac
+    done
+}
+verbose "$@"
 
-argument="$1"
+tier () {
+    if [[ "$verbose" == true ]]; then
+        echo "Parsing tier option: '--${opt}', value: '${val}'" >&2;
+    fi
+    export TF_VAR_envtier=$val
+}
 
-# if --init is supplied, no decryption occurs.  otherwise, we assume a key is required.
-echo ""
-if [[ -z $argument ]] ; then
-  echo "No argument supplied. assuming secrets are encrypted, dev environment.  Use --prod for production."
-  export TF_VAR_envtier='dev'
-  export vault_command="ansible-vault view --vault-id ../secrets/keys/.vault-key-$TF_VAR_envtier ../secrets/secrets-$TF_VAR_envtier"
-  # Update template
-else
-  case $argument in
-    -d|--dev)
-      export TF_VAR_envtier='dev'
-      export vault_command="ansible-vault view --vault-id ../secrets/keys/.vault-key-$TF_VAR_envtier ../secrets/secrets-$TF_VAR_envtier"
-      ;;
-    -p|--prod)
-      export TF_VAR_envtier='prod'
-      export vault_command="ansible-vault view --vault-id ../secrets/keys/.vault-key-$TF_VAR_envtier ../secrets/secrets-$TF_VAR_envtier"
-      ;;
-    *)
-      raise_error "Unknown argument: ${argument}"
-      return
-      ;;
-  esac
+var_file=
+
+var_file () {
+    if [[ "$verbose" == true ]]; then
+        echo "Parsing var_file option: '--${opt}', value: '${val}'" >&2;
+    fi
+    export var_file="${val}"
+}
+
+vault () {
+    echo "verbose=$verbose"
+    if [[ "$verbose" == true ]]; then
+        echo "Parsing tier option: '--${opt}', value: '${val}'" >&2;
+    fi
+    if [[ $val = 'encrypt' || $val = 'decrypt' || $val = 'none' ]]; then
+        export encrypt_mode=$val
+    else
+        printf "\nERROR: valid modes for encrypt are:\nencrypt, decrypt or none\n"
+        failed=true
+    fi
+}
+
+function to_abs_path {
+    local target="$1"
+    if [ "$target" == "." ]; then
+        echo "$(pwd)"
+    elif [ "$target" == ".." ]; then
+        echo "$(dirname "$(pwd)")"
+    else
+        echo "$(cd "$(dirname "$1")"; pwd)/$(basename "$1")"
+    fi
+}
+
+# We allow equivalent args such as:
+# -t dev
+# --tier dev
+# --tier=dev
+# which each results in the same function tier() running.
+
+#OPTIND=0
+parse_opts () {
+    local OPTIND
+    OPTIND=0
+    while getopts "$optspec" optchar; do
+        case "${optchar}" in
+            -)
+                case "${OPTARG}" in
+                    tier)
+                        val="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+                        opt="${OPTARG}"
+                        tier
+                        ;;
+                    tier=*)
+                        val=${OPTARG#*=}
+                        opt=${OPTARG%=$val}
+                        tier
+                        ;;
+                    var-file)
+                        val="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+                        opt="${OPTARG}"
+                        var_file
+                        ;;
+                    var-file=*)
+                        val=${OPTARG#*=}
+                        opt=${OPTARG%=$val}
+                        var_file
+                        ;;
+                    vault)
+                        val="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+                        opt="${OPTARG}"
+                        vault
+                        ;;
+                    vault=*)
+                        val=${OPTARG#*=}
+                        opt=${OPTARG%=$val}
+                        vault
+                        ;;
+                    *)
+                        if [ "$OPTERR" = 1 ] && [ "${optspec:0:1}" != ":" ]; then
+                            echo "Unknown option --${OPTARG}" >&2
+                        fi
+                        ;;
+                esac;;
+            t)
+                val="${OPTARG}"
+                opt="${optchar}"
+                tier
+                ;;
+            v) # verbosity is handled prior since its a dependency for this block
+                ;;
+            h)
+                echo "usage: $0 [-v] [--tier[=]<value>]" >&2
+                exit 2
+                ;;
+            *)
+                if [ "$OPTERR" != 1 ] || [ "${optspec:0:1}" = ":" ]; then
+                    echo "Non-option argument: '-${OPTARG}'" >&2
+                fi
+                ;;
+        esac
+    done
+}
+parse_opts "$@"
+
+# if any parsing failed this is the correct method to parse an exit code of 1 whether executed or sourced
+
+[ "$BASH_SOURCE" == "$0" ] &&
+    echo "This file is meant to be sourced, not executed" && 
+        exit 30
+
+if [[ $failed = true ]]; then    
+    return 88
 fi
 
+# If initialising vagrant vars, no encryption is required
+if [[ -z "$var_file" ]]; then
+    var_file="secrets-$TF_VAR_envtier"
+    printf "\nUsing vault file $var_file\n"
+elif [[ "$var_file" = "vagrant" ]]; then
+    printf '\nUsing variable file vagrant. No encryption/decryption will be used\n'
+    encrypt_mode="none"
+else
+    printf "\nUnrecognised vault/variable file.  Exiting...\n"
+    failed=true
+fi
+
+if [[ $failed = true ]]; then
+    return 88
+fi
+
+var_file="$(to_abs_path ../secrets/$var_file)"
+vault_key="$(to_abs_path ../secrets/keys/.vault-key-$TF_VAR_envtier)"
+vault_command="ansible-vault view --vault-id $vault_key $var_file"
+
 #check if a vault key exists.  if it does, then install can continue automatically.
-if [ -e ../secrets/keys/.vault-key-$TF_VAR_envtier ];
-then
-    echo ".vault-key-$TF_VAR_envtier exists. vagrant up will automatically provision."
+if [ -e ../secrets/keys/.vault-key-$TF_VAR_envtier ]; then
+    if [[ $verbose ]]; then
+        path=$(to_abs_path $vault_key)
+        printf "\n$vault_key exists. vagrant up will automatically provision.\n\n"
+    fi
     export TF_VAR_vaultkeypresent='true'
 else
-    echo ".vault-key-$TF_VAR_envtier doesn't exist. vagrant up will not automatically provision."
+    printf "\n$vault_key doesn't exist. vagrant up will not automatically provision.\n\n"
     export TF_VAR_vaultkeypresent='false'
 fi
 
-
-argument2="$2"
-
-# if --init is supplied, no decryption occurs.  otherwise, we assume a key is required.
-echo ""
-if [[ -z $argument2 ]] ; then
-  echo "No 2nd argument supplied. Secrets will be encrypted by default if not already encrypted"
-  line=$(head -n 1 ../secrets/secrets-$TF_VAR_envtier)
-  if [[ "$line" == "\$ANSIBLE_VAULT"* ]]; then 
-      echo "found encrypted vault"
-  else
-      echo "Vault not encrypted"
-      echo "Encrypting secrets. Vars will be set from encrypted vault."
-      ansible-vault encrypt --vault-id ../secrets/keys/.vault-key-$TF_VAR_envtier ../secrets/secrets-$TF_VAR_envtier
-  fi
-  # Update template
-else
-  case $argument2 in
-    -i|--init)
-      echo "Assuming secrets are not encrypted to set environment vars"
-      export vault_command="cat ../secrets/secrets-$TF_VAR_envtier"
-      ;;
-    -u|--decrypt)
-      line=$(head -n 1 ../secrets/secrets-$TF_VAR_envtier)
-      if [[ "$line" == "\$ANSIBLE_VAULT"* ]]; then 
-          echo "Found encrypted vault"
-          echo "Decrypting secrets."
-          echo "WARNING: Never commit unencrypted secrets to a repo. run this command again without --decrypt before commiting any secrets to version control"
-          echo "If you accidentally do commit unencrypted secrets, ensure there is no trace of the data in the repo, or invalidate the secrets / replace them."
-          ansible-vault decrypt --vault-id ../secrets/keys/.vault-key-$TF_VAR_envtier ../secrets/secrets-$TF_VAR_envtier
-      else
-          echo "vault not encrypted.  no need to decrypt. vars will be set from unencrypted vault."
-      fi
-      export vault_command="cat ../secrets/secrets-$TF_VAR_envtier"
-      ;;
-    -v|--view)
-      echo "Ensuring secrets are encrypted."
-      ansible-vault encrypt --vault-id ../secrets/keys/.vault-key-$TF_VAR_envtier ../secrets/secrets-$TF_VAR_envtier
-      echo "Viewing encrypted secrets."
-      ansible-vault view --vault-id ../secrets/keys/.vault-key-$TF_VAR_envtier ../secrets/secrets-$TF_VAR_envtier
-      ;;
-    *)
-      raise_error "Unknown argument2: ${argument2}"
-      return
-      ;;
-  esac
+# vault arg will set encryption mode
+if [[ $encrypt_mode = "encrypt" ]]; then
+    echo "Encrypting Vault..."
+    line=$(head -n 1 $var_file)
+    if [[ "$line" == "\$ANSIBLE_VAULT"* ]]; then 
+        echo "Vault is already encrypted"
+    else
+        echo "Encrypting secrets. Vars will be set from encrypted vault."
+        ansible-vault encrypt --vault-id $vault_key $var_file
+    fi
+elif [[ $encrypt_mode = "decrypt" ]]; then
+    echo "Decrypting Vault..."
+    line=$(head -n 1 $var_file)
+    if [[ "$line" == "\$ANSIBLE_VAULT"* ]]; then 
+        echo "Found encrypted vault"
+        echo "Decrypting secrets."
+        ansible-vault decrypt --vault-id $vault_key $var_file
+    else
+        echo "Vault already unencrypted.  No need to decrypt. Vars will be set from unencrypted vault."
+    fi
+    printf "\nWARNING: Never commit unencrypted secrets to a repo. run this command again without --decrypt before commiting any secrets to version control"
+    printf "\nIf you accidentally do commit unencrypted secrets, ensure there is no trace of the data in the repo, and invalidate the secrets / replace them.\n"
+        
+    export vault_command="cat $var_file"
+elif [[ $encrypt_mode = "none" ]]; then
+    echo "Assuming secrets are not encrypted to set environment vars"
+    export vault_command="cat $var_file"
 fi
 
-printf "\nTF_VAR_envtier=$TF_VAR_envtier\n"
-printf "vault_command=$vault_command\n"
+if [[ $verbose = true ]]; then
+    printf "\n"
+    echo "TF_VAR_envtier=$TF_VAR_envtier"
+    echo "var_file=$var_file"
+    echo "vault_key=$vault_key"
+    echo "encrypt_mode=$encrypt_mode"
+    echo "vault_command=$vault_command"
+fi
 
 export vault_examples_command="cat ./secrets.example"
 
+### Use the vault command to iterate over variables and export them
+
+printf "\n...Parsing variable file\n"
 for i in `(eval $vault_command | sed 's/^$/###/')`
 do
     if [[ "$i" =~ ^#.*$ ]]
@@ -136,6 +286,7 @@ done
 envsubst < "$temp_output" > "$secrets_template"
 rm $temp_output
 
+printf "...Exporting variables to environment\n"
 # # Now set environment variables to the actual values defined in the user's secrets-prod file
 for i in `eval $vault_command`
 do
@@ -159,7 +310,6 @@ do
     export $i
 done
 
-#rm ./tmp/envtier_exports.txt
+rm ./tmp/envtier_exports.txt
 
-# in the ubuntu vagrant image, for some reason the ssh bash agent needs to be initialised or keys cannot be added with ssh-add
-#ssh-agent bash
+printf "Done.\n\n"
