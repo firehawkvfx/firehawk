@@ -13,7 +13,7 @@ clear
 mkdir -p ./tmp/
 mkdir -p ../secrets/
 # The template will be updated by this script
-secrets_template=./secrets.template
+secrets_template=./tmp/secrets.template
 touch $secrets_template
 rm $secrets_template
 temp_output=./tmp/secrets.temp
@@ -194,6 +194,8 @@ if [[ $failed = true ]]; then
     return 88
 fi
 
+
+template_path="./secrets.template"
 # If initialising vagrant vars, no encryption is required
 if [[ -z "$var_file" ]]; then
     var_file="secrets-$TF_VAR_envtier"
@@ -201,6 +203,7 @@ if [[ -z "$var_file" ]]; then
 elif [[ "$var_file" = "vagrant" ]]; then
     printf '\nUsing variable file vagrant. No encryption/decryption will be used\n'
     encrypt_mode="none"
+    template_path="./vagrant.template"
 else
     printf "\nUnrecognised vault/variable file.  Exiting...\n"
     failed=true
@@ -266,9 +269,9 @@ fi
 
 export vault_examples_command="cat ./secrets.example"
 
-### Use the vault command to iterate over variables and export them
+### Use the vault command to iterate over variables and export them without values to the template
 
-printf "\n...Parsing variable file\n"
+printf "\n...Parsing vault file to template\n"
 for i in `(eval $vault_command | sed 's/^$/###/')`
 do
     if [[ "$i" =~ ^#.*$ ]]
@@ -282,7 +285,6 @@ do
 done
 
 # substitute example var values into the template.
-
 envsubst < "$temp_output" > "$secrets_template"
 rm $temp_output
 
@@ -312,4 +314,8 @@ done
 
 rm ./tmp/envtier_exports.txt
 
-printf "Done.\n\n"
+# The template will now be written to the public repository without any private values
+printf "\n...Saving template to $template_path\n"
+mv -fv $secrets_template $template_path
+
+printf "\nDone.\n\n"

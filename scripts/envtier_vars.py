@@ -1,12 +1,10 @@
 import os
-# print "test"
-#os.environ["TF_VAR_envtier"] = "1"
 envtier=os.environ["TF_VAR_envtier"]
 
 outdict = {}
 
 # set values to current envtier
-with open("secrets.template") as f:
+with open("./tmp/secrets.template") as f:
     for line in f:
         if not line.startswith('#'):
             if ('_dev' in line) or ('_prod' in line): 
