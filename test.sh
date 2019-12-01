@@ -1,7 +1,8 @@
 #!/usr/bin/env bash 
 verbose=false
 optspec=":hv-:t:"
-varfile=secrets-$TF_VAR_envtier
+varfile=secrets
+encryptmode="encrypt"
 
 verbose () {
     local OPTIND
@@ -23,38 +24,18 @@ tier () {
     export TF_VAR_envtier=$val
 }
 
-parse_tier () {
-    local OPTIND
-    while getopts "$optspec" optchar; do
-        case "${optchar}" in
-            -)
-                case "${OPTARG}" in
-                    tier)
-                        val="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
-                        opt="${OPTARG}"
-                        tier
-                        ;;
-                    tier=*)
-                        val=${OPTARG#*=}
-                        opt=${OPTARG%=$val}
-                        tier
-                        ;;
-                esac;;
-            t)
-                val="${OPTARG}"
-                opt="${optchar}"
-                tier
-                ;;
-        esac
-    done
-}
-parse_tier "$@"
-
 varfile () {
     if [[ "$verbose" == true ]]; then
         echo "Parsing tier option: '--${opt}', value: '${val}'" >&2;
     fi
     export varfile="../secrets/${val}"
+}
+
+tier () {
+    if [[ "$verbose" == true ]]; then
+        echo "Parsing tier option: '--${opt}', value: '${val}'" >&2;
+    fi
+    export encryptmode=$val
 }
 
 
@@ -71,6 +52,16 @@ parse_opts () {
         case "${optchar}" in
             -)
                 case "${OPTARG}" in
+                    tier)
+                        val="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+                        opt="${OPTARG}"
+                        tier
+                        ;;
+                    tier=*)
+                        val=${OPTARG#*=}
+                        opt=${OPTARG%=$val}
+                        tier
+                        ;;
                     varfile)
                         val="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
                         opt="${OPTARG}"
@@ -81,12 +72,29 @@ parse_opts () {
                         opt=${OPTARG%=$val}
                         varfile
                         ;;
+                    vault)
+                        val="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+                        opt="${OPTARG}"
+                        vault
+                        ;;
+                    vault=*)
+                        val=${OPTARG#*=}
+                        opt=${OPTARG%=$val}
+                        vault
+                        ;;
                     *)
                         if [ "$OPTERR" = 1 ] && [ "${optspec:0:1}" != ":" ]; then
                             echo "Unknown option --${OPTARG}" >&2
                         fi
                         ;;
                 esac;;
+            t)
+                val="${OPTARG}"
+                opt="${optchar}"
+                tier
+                ;;
+            v) # verbosity is handled prior since its a dependency for this block
+                ;;
             h)
                 echo "usage: $0 [-v] [--tier[=]<value>]" >&2
                 exit 2
@@ -99,10 +107,13 @@ parse_opts () {
         esac
     done
 }
-
 parse_opts "$@"
 
+varfile="$varfile-$TF_VAR_envtier"
 vault_command="ansible-vault view --vault-id ../secrets/keys/.vault-key-$TF_VAR_envtier $varfile"
 
-echo "TF_VAR_envtier=$TF_VAR_envtier"
-echo "varfile=$varfile"
+if [[ "$verbose" == true ]]; then
+    echo "TF_VAR_envtier=$TF_VAR_envtier"
+    echo "varfile=$varfile"
+    echo "vault_command=$vault_command"
+fi

@@ -7,6 +7,8 @@
 
 clear
 
+
+
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 printf "\n...checking scripts directory at $SCRIPTDIR\n\n"
 
@@ -39,6 +41,9 @@ read -p 'Press enter to continue'
 IFS='
 '
 
+columns=$(tput cols)
+display=false
+
 input=$SCRIPTDIR/../secrets.template
 output=$SCRIPTDIR/../../secrets/output.txt
 
@@ -57,6 +62,18 @@ if [[ ! $TF_VAR_envtier ]]; then
     printf "\n...propogating the configuration in to secrets file\n\n"
 fi
 
+# Get total entries for progress tracking
+progress=0
+entries=0
+
+for i in `(cat $input | sed 's/^$/###/')`
+do
+    if [[ "$i" =~ ^.*=insertvalue$ ]]
+    then
+        entries=$((entries + 1))
+    fi
+done
+
 for i in `(cat $input | sed 's/^$/###/')`
 do
     if [[ "$i" =~ ^.*=insertvalue$ ]]
@@ -65,9 +82,16 @@ do
         # compare with current env var. if initialised, use env var and dont ask user.
         command="echo \$${i%%=*}"
         current_value=`eval $command`
+        
+        printf "%*s\n" $columns "Progess $progress / $entries "
+
         if [[ "$replace_all" = true ]]; then
-            printf "\nPress return to use current value= $current_value\n"
+            printf "Press return to use current value: $current_value\n"
             read -p "Set ${i%%=*}: "  result
+            if [[ -z $result ]]; then 
+                # User pressed ENTER to use current env var / default value
+                result=$current_value
+            fi
         else
             if [[ ! $current_value ]]; then
                 # if no value is set, then prompt the user.
@@ -79,10 +103,21 @@ do
         fi
         echo "${i%%=*}=$result"
         echo "${i%%=*}=$result" >> $output
+        progress=$((progress + 1))
     else
-        # strip comment char # and replace_all ### blank line placeholder for user readable output.
-        printf "${i#"# "}\n" | sed 's/^###$/ /'
-        # output original line to file
+        if [[ "$i" =~ ^\#\ BEGIN\ CONFIGURATION\ \#$ ]]
+        then
+            display=true
+            clear
+        fi
+
+        # when begin config line is found, begin deisplay of contents
+        if [[ "$display" = true ]]; then
+            # strip comment char # and replace_all ### blank line placeholder for user readable output.
+            printf "${i#"# "}\n" | sed 's/^###$/ /'
+        fi
+
+        # always output original line to file
         printf "${i#"###"}\n" >> $output
     fi
 done

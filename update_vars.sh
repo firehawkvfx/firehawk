@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # the purpose of this script is to:
 # 1) set envrionment variables as defined in the encrypted secrets/secrets-prod file
 # 2) consistently rebuild the secrets.template file based on the variable names found in the secrets-prod file.
@@ -18,9 +20,10 @@ temp_output=./tmp/secrets.temp
 touch $temp_output
 rm $temp_output
 
-# IFS will allow for lop to iterate over lines instead of words seperated by ' '
+# IFS will allow for loop to iterate over lines instead of words seperated by ' '
 IFS='
 '
+
 for i in `cat ./secrets.example`
 do
     [[ "$i" =~ ^#.*$ ]] && continue

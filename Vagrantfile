@@ -11,10 +11,8 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder "../secrets", "/secrets", create: true
 
   mac_string = ENV['TF_VAR_vagrant_mac']
-  vaultkeypresent = ENV['TF_VAR_vaultkeypresent']
   bridgenic = ENV['TF_VAR_bridgenic']
-  envtier = ENV['TF_VAR_envtier']
-  name = ENV['TF_VAR_openfirehawkserver_name']
+  envtier = ENV['TF_VAR_envtier']=
   openfirehawkserver = ENV['TF_VAR_openfirehawkserver']
   network = ENV['TF_VAR_network']
 
