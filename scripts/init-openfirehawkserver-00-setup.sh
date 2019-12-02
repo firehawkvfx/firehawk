@@ -7,10 +7,52 @@
 
 clear
 
+function to_abs_path {
+    local target="$1"
+    if [ "$target" == "." ]; then
+        echo "$(pwd)"
+    elif [ "$target" == ".." ]; then
+        echo "$(dirname "$(pwd)")"
+    else
+        echo "$(cd "$(dirname "$1")"; pwd)/$(basename "$1")"
+    fi
+}
+
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 printf "\n...checking scripts directory at $SCRIPTDIR\n\n"
 
-PS3='Please enter your choice: '
+configure=
+
+PS3='Do you wish to configure the Openfirehawk server (Vagrant VM) or Configure Secrets (To be done from within the Openfirehawk Server Vagrant VM only)? '
+options=("Configure Vagrant" "Configure Secrets" "Quit")
+select opt in "${options[@]}"
+do
+    case $opt in
+        "Configure Vagrant")
+            printf "\nThe OpenFirehawk Server is launched with Vagrant.  Some environment variables must be configured uniquely to your environment.\n\n"
+            configure='vagrant'
+            input=$(to_abs_path $SCRIPTDIR/../vagrant.template)
+            output_tmp=$(to_abs_path $SCRIPTDIR/../../secrets/vagrant-tmp)
+            output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/vagrant)
+            break
+            ;;
+        "Configure Secrets")
+            printf "\nThis should only be done within the OpenFirehawk Serrver Vagrant VM. Provisioning infrastructure requires configuration using secrets based on the secrets.template file.  These will be queried for your own unique values and should always be encrypted before you commit them in your private repository.\n\n"
+            configure='secrets'
+            input=$(to_abs_path $SCRIPTDIR/../secrets.template)
+            output_tmp=$(to_abs_path $SCRIPTDIR/../../secrets/secrets-tmp)
+            output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/secrets-dev)
+            break
+            ;;
+        "Quit")
+            echo "You selected $REPLY to $opt"
+            exit
+            ;;
+        *) echo "invalid option $REPLY";;
+    esac
+done
+
+PS3='Do you wish configure all settings or only new settings? '
 options=("Initialise" "Update" "Quit")
 select opt in "${options[@]}"
 do
@@ -33,7 +75,7 @@ do
     esac
 done
 
-read -p 'Press enter to continue'
+read -p 'Press ENTER to continue'
 
 # IFS will allow for lop to iterate over lines instead of words seperated by new line char
 IFS='
@@ -42,12 +84,11 @@ IFS='
 columns=$(tput cols)
 display=false
 
-input=$SCRIPTDIR/../secrets.template
-output=$SCRIPTDIR/../../secrets/output.txt
 
-#clear output
-touch $output
-rm $output
+
+#clear output_tmp
+touch $output_tmp
+rm $output_tmp
 
 if [[ ! $TF_VAR_envtier ]]; then
     echo "No Environment has been initialised.  Assuming first time installation.  if this is incorrect, initialise variables first with:"
@@ -95,7 +136,7 @@ do
             fi
         fi
         echo "${i%%=*}=$result"
-        echo "${i%%=*}=$result" >> $output
+        echo "${i%%=*}=$result" >> $output_tmp
         progress=$((progress + 1))
     else
         if [[ "$i" =~ ^\#\ BEGIN\ CONFIGURATION\ \#$ ]]
@@ -111,6 +152,24 @@ do
         fi
 
         # always output original line to file
-        printf "${i#"###"}\n" >> $output
+        printf "${i#"###"}\n" >> $output_tmp
     fi
+done
+
+PS3="Your configuration has been stored at temp path $output_tmp.  To use this configuration do you wish to overwrite any existing configuration at $output_complete? "
+options=("Yes, overwrite my old configuration" "No / Quit")
+select opt in "${options[@]}"
+do
+    case $opt in
+        "Yes, overwrite my old configuration")
+            printf "\nMoving temp config to overwrite previous config..\n\n"
+            mv -fv $output_tmp $output_complete
+            break
+            ;;
+        "No / Quit")
+            printf "\nIf you wish to later you can manually move $output_tmp to $output_complete to apply the configuration\n\nExiting...\n\n"
+            exit
+            ;;
+        *) echo "invalid option $REPLY";;
+    esac
 done
