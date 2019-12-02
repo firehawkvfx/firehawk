@@ -54,7 +54,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "echo DEBIAN_FRONTEND=$DEBIAN_FRONTEND"
 
   config.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive"
-  config.vm.provision "shell", inline: "sudo rm /etc/localtime && sudo ln -s /usr/share/zoneinfo/Australia/Brisbane /etc/localtime", run: "always"
+  config.vm.provision "shell", inline: "sudo rm /etc/localtime && sudo ln -s #{ENV['TF_VAR_timezone_localpath']} /etc/localtime", run: "always"
   config.vm.provision "shell", inline: "sudo apt-get update"
   # temp disable as we are getting freezing with ssh issues
   config.vm.provision "shell", inline: "sudo apt-get install -y sshpass"

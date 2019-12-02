@@ -13,7 +13,7 @@ clear
 mkdir -p ./tmp/
 mkdir -p ../secrets/
 # The template will be updated by this script
-secrets_template=./secrets.template
+secrets_template=./tmp/secrets.template
 touch $secrets_template
 rm $secrets_template
 temp_output=./tmp/secrets.temp
