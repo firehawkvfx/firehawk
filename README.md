@@ -235,7 +235,7 @@ Instances that reside in the private subnet are currently configured through ope
 ## Secrets
 In the secrets file, you will set your own values for these configuration variables.  Many will be different for your environment, and you **absolutely must use unique passwords and set your static ip address for onsite**.
 
-If you ever make commits to a git repo, ensure you never commit unencrypted secrets or anything in the secrets/ path.  vault keys and pem keys for ssh access are stoed in keys/ and these should not be committed to version control.
+If you ever make commits to a git repo, ensure you never commit unencrypted secrets in the secrets/ path.  vault keys and pem keys for ssh access are stored in keys/ and these should not be committed to version control.
 
 if you happen to accidentally publish private information you can remove it with this example to remove the secrets-prod file form the repository.  ensure you have a local backup - this operation will strip all branches.
 https://help.github.com/en/articles/removing-sensitive-data-from-a-repository

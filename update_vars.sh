@@ -224,7 +224,9 @@ fi
 
 var_file="$(to_abs_path $TF_VAR_firehawk_path/../secrets/$var_file)"
 vault_key="$(to_abs_path $TF_VAR_firehawk_path/../secrets/keys/.vault-key-$TF_VAR_envtier)"
-vault_command="ansible-vault view --vault-id $vault_key $var_file"
+
+# We use a local key and a password to encrypt and decrypt data.  no operation can occur without both.  in this case we decrypt first without password and then with the password.
+vault_command="ansible-vault view --vault-id $vault_key --vault-id $vault_key@prompt $var_file"
 
 #check if a vault key exists.  if it does, then install can continue automatically.
 if [ -e $vault_key ]; then
@@ -232,10 +234,37 @@ if [ -e $vault_key ]; then
         path=$(to_abs_path $vault_key)
         printf "\n$vault_key exists. vagrant up will automatically provision.\n\n"
     fi
-    export TF_VAR_vaultkeypresent='true'
 else
-    printf "\n$vault_key doesn't exist. vagrant up will not automatically provision.\n\n"
-    export TF_VAR_vaultkeypresent='false'
+    printf "\n$vault_key doesn't exist.\n\n"
+    printf "\nNo vault key has been initialised at this location.\n\n"
+    PS3='Do you wish to initialise a new vault key?'
+    options=("Initialise A New Key" "Quit")
+    select opt in "${options[@]}"
+    do
+        case $opt in
+            "Initialise A New Key")
+                printf "\nWARNING: DO NOT COMMIT THESE KEYS TO VERSION CONTROL.\n"
+                openssl rand -base64 64 > $vault_key || failed=true
+                break
+                ;;
+            "Quit")
+                echo "You selected $REPLY to $opt"
+                quit=true
+                break
+                ;;
+            *) echo "invalid option $REPLY";;
+        esac
+    done
+    
+fi
+
+if [[ $failed = true ]]; then    
+    echo "WARNING: Failed to create key"
+    return 88
+fi
+
+if [[ $quit = true ]]; then    
+    return 88
 fi
 
 # vault arg will set encryption mode
@@ -245,8 +274,8 @@ if [[ $encrypt_mode = "encrypt" ]]; then
     if [[ "$line" == "\$ANSIBLE_VAULT"* ]]; then 
         echo "Vault is already encrypted"
     else
-        echo "Encrypting secrets. Vars will be set from encrypted vault."
-        ansible-vault encrypt --vault-id $vault_key $var_file
+        echo "Encrypting secrets with a key on disk and with a password. Vars will be set from an encrypted vault."
+        ansible-vault encrypt --vault-id $vault_key@prompt $var_file
     fi
 elif [[ $encrypt_mode = "decrypt" ]]; then
     echo "Decrypting Vault..."
@@ -254,7 +283,7 @@ elif [[ $encrypt_mode = "decrypt" ]]; then
     if [[ "$line" == "\$ANSIBLE_VAULT"* ]]; then 
         echo "Found encrypted vault"
         echo "Decrypting secrets."
-        ansible-vault decrypt --vault-id $vault_key $var_file
+        ansible-vault decrypt --vault-id $vault_key --vault-id $vault_key@prompt $var_file
     else
         echo "Vault already unencrypted.  No need to decrypt. Vars will be set from unencrypted vault."
     fi
@@ -281,29 +310,39 @@ export vault_examples_command="cat $TF_VAR_firehawk_path/secrets.example"
 ### Use the vault command to iterate over variables and export them without values to the template
 
 printf "\n...Parsing vault file to template\n"
-for i in `(eval $vault_command | sed 's/^$/###/')`
-do
-    if [[ "$i" =~ ^#.*$ ]]
-    then
-        # replace ### blank line placeholder for user readable temp_output and respect newlines
-        echo "${i#"###"}" >> $temp_output
-    else
-        # temp_output original line to file without value
-        echo "${i%%=*}=insertvalue" >> $temp_output
-    fi
-done
+source_vars () {
+    local MULTILINE=$(eval $vault_command)
+    for i in $(echo "$MULTILINE" | sed 's/^$/###/')
+    do
+        if [[ "$i" =~ ^#.*$ ]]
+        then
+            # replace ### blank line placeholder for user readable temp_output and respect newlines
+            if [[ $verbose = true ]]; then
+                echo "line= $i"
+            fi
+            echo "${i#"###"}" >> $temp_output
+        else
+            # temp_output original line to file without value
+            if [[ $verbose = true ]]; then
+                echo "var= ${i%%=*}"
+            fi
+            echo "${i%%=*}=insertvalue" >> $temp_output
+        fi
+    done
 
-# substitute example var values into the template.
-envsubst < "$temp_output" > "$secrets_template"
-rm $temp_output
+    # substitute example var values into the template.
+    envsubst < "$temp_output" > "$secrets_template"
+    rm $temp_output
 
-printf "...Exporting variables to environment\n"
-# # Now set environment variables to the actual values defined in the user's secrets-prod file
-for i in `eval $vault_command`
-do
-    [[ "$i" =~ ^#.*$ ]] && continue
-    export $i
-done
+    printf "\n...Exporting variables to environment\n"
+    # # Now set environment variables to the actual values defined in the user's secrets-prod file
+    for i in $(echo "$MULTILINE")
+    do
+        [[ "$i" =~ ^#.*$ ]] && continue
+        export $i
+    done
+}
+source_vars
 
 # # Determine your current public ip for security groups.
 

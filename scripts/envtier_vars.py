@@ -4,9 +4,7 @@ TF_VAR_firehawk_path=os.environ["TF_VAR_firehawk_path"]
 outdict = {}
 
 template_path = TF_VAR_firehawk_path + "/tmp/secrets.template"
-print "template_path", template_path
 envtier_mapping_path = TF_VAR_firehawk_path + "/tmp/envtier_mapping.txt"
-print "envtier_mapping_path", envtier_mapping_path
 
 # set values to current envtier
 with open(template_path) as f:
