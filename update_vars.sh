@@ -8,23 +8,28 @@
 # 3) Example values for the secrets.template file are defined in secrets.example. Ensure you have placed an example key=value for any new vars in secrets.example. 
 # If any changes have resulted in a new variable name, then example values helps other understand what they should be using for their own infrastructure.
 
-clear
+# the directory of the current script
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+export TF_VAR_firehawk_path=$SCRIPTDIR
+echo "SCRIPTDIR $SCRIPTDIR"
 
-mkdir -p ./tmp/
-mkdir -p ../secrets/
+mkdir -p $TF_VAR_firehawk_path/tmp/
+mkdir -p $TF_VAR_firehawk_path/../secrets/
 # The template will be updated by this script
-secrets_template=./tmp/secrets.template
+secrets_template=$TF_VAR_firehawk_path/tmp/secrets.template
 touch $secrets_template
 rm $secrets_template
-temp_output=./tmp/secrets.temp
+temp_output=$TF_VAR_firehawk_path/tmp/secrets.temp
 touch $temp_output
 rm $temp_output
 
 failed=false
 verbose=false
 optspec=":hv-:t:"
-export var_file="../secrets/secrets-$TF_VAR_envtier"
+
 encrypt_mode="encrypt"
+
+
 
 # IFS will allow for loop to iterate over lines instead of words seperated by ' '
 IFS='
@@ -171,8 +176,9 @@ parse_opts () {
             v) # verbosity is handled prior since its a dependency for this block
                 ;;
             h)
-                echo "usage: $0 [-v] [--tier[=]<value>]" >&2
-                exit 2
+                echo "usage: source ./update_vars.sh [-v] [--tier[=]dev/prod] [--var-file[=]vagrant/secrets] [--vault[=]encrypt/decrypt]" >&2
+                printf "\nUse this to source either the vagrant or encrypted secrets config in your dev or prod tier.\n" &&
+                    failed=true
                 ;;
             *)
                 if [ "$OPTERR" != 1 ] || [ "${optspec:0:1}" = ":" ]; then
@@ -195,7 +201,7 @@ if [[ $failed = true ]]; then
 fi
 
 
-template_path="./secrets.template"
+template_path="$TF_VAR_firehawk_path/secrets.template"
 # If initialising vagrant vars, no encryption is required
 if [[ -z "$var_file" ]]; then
     var_file="secrets-$TF_VAR_envtier"
@@ -203,9 +209,12 @@ if [[ -z "$var_file" ]]; then
 elif [[ "$var_file" = "vagrant" ]]; then
     printf '\nUsing variable file vagrant. No encryption/decryption will be used\n'
     encrypt_mode="none"
-    template_path="./vagrant.template"
+    template_path="$TF_VAR_firehawk_path/vagrant.template"
+elif [[ "$var_file" = "secrets" ]]; then
+    var_file="secrets-$TF_VAR_envtier"
+    printf "\nUsing vault file $var_file\n"
 else
-    printf "\nUnrecognised vault/variable file.  Exiting...\n"
+    printf "\nUnrecognised vault/variable file. \n$var_file\nExiting...\n"
     failed=true
 fi
 
@@ -213,12 +222,12 @@ if [[ $failed = true ]]; then
     return 88
 fi
 
-var_file="$(to_abs_path ../secrets/$var_file)"
-vault_key="$(to_abs_path ../secrets/keys/.vault-key-$TF_VAR_envtier)"
+var_file="$(to_abs_path $TF_VAR_firehawk_path/../secrets/$var_file)"
+vault_key="$(to_abs_path $TF_VAR_firehawk_path/../secrets/keys/.vault-key-$TF_VAR_envtier)"
 vault_command="ansible-vault view --vault-id $vault_key $var_file"
 
 #check if a vault key exists.  if it does, then install can continue automatically.
-if [ -e ../secrets/keys/.vault-key-$TF_VAR_envtier ]; then
+if [ -e $vault_key ]; then
     if [[ $verbose ]]; then
         path=$(to_abs_path $vault_key)
         printf "\n$vault_key exists. vagrant up will automatically provision.\n\n"
@@ -267,7 +276,7 @@ if [[ $verbose = true ]]; then
     echo "vault_command=$vault_command"
 fi
 
-export vault_examples_command="cat ./secrets.example"
+export vault_examples_command="cat $TF_VAR_firehawk_path/secrets.example"
 
 ### Use the vault command to iterate over variables and export them without values to the template
 
@@ -302,17 +311,17 @@ export TF_VAR_remote_ip_cidr="$(dig +short myip.opendns.com @resolver1.opendns.c
 
 # # this python script generates mappings based on the current environment.
 # # any var ending in _prod or _dev will be stripped and mapped based on the envtier
-python ./scripts/envtier_vars.py
-envsubst < "./tmp/envtier_mapping.txt" > "./tmp/envtier_exports.txt"
+python $TF_VAR_firehawk_path/scripts/envtier_vars.py
+envsubst < "$TF_VAR_firehawk_path/tmp/envtier_mapping.txt" > "$TF_VAR_firehawk_path/tmp/envtier_exports.txt"
 
 # using the current envtier environment, evaluate the variables
-for i in `cat ./tmp/envtier_exports.txt`
+for i in `cat $TF_VAR_firehawk_path/tmp/envtier_exports.txt`
 do
     [[ "$i" =~ ^#.*$ ]] && continue
     export $i
 done
 
-rm ./tmp/envtier_exports.txt
+rm $TF_VAR_firehawk_path/tmp/envtier_exports.txt
 
 # The template will now be written to the public repository without any private values
 printf "\n...Saving template to $template_path\n"
