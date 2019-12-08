@@ -34,7 +34,7 @@
 # - Specify a new key name here (usually with todays date), and encrypt your secrets again with this new key file and password.
 # - This process should be applied to both dev and production environments as soon as possible.
 # Automation of key/pass rotation without destroying/rebuilding infrastructure will be possible in the future.
-# eg 1: TF_VAR_vault_key_name_dev='.vault-key-20191208-dev'
+# eg 1: TF_VAR_vault_key_name_dev=.vault-key-20191208-dev
 TF_VAR_vault_key_name_dev=insertvalue
 
 # TF_VAR_vault_key_name_prod:
@@ -49,7 +49,7 @@ TF_VAR_vault_key_name_dev=insertvalue
 # - Specify a new key name here (usually with todays date), and encrypt your secrets again with this new key file and password.
 # - This process should be applied to both dev and production environments as soon as possible.
 # Automation of key/pass rotation without destroying/rebuilding infrastructure will be possible in the future.
-# eg 1: TF_VAR_vault_key_name_prod='.vault-key-20191208-prod'
+# eg 1: TF_VAR_vault_key_name_prod=.vault-key-20191208-prod
 TF_VAR_vault_key_name_prod=insertvalue
 
 # TF_VAR_bridgenic: 
