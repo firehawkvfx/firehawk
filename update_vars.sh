@@ -211,9 +211,13 @@ source_vars () {
         printf "\nUsing vault file $var_file\n"
         template_path="$TF_VAR_firehawk_path/secrets.template"
     elif [[ "$var_file" = "vagrant" ]]; then
-        printf '\nUsing variable file vagrant. No encryption/decryption will be used\n'
+        printf '\nUsing variable file vagrant. No encryption/decryption will be used.\n'
         encrypt_mode="none"
         template_path="$TF_VAR_firehawk_path/vagrant.template"
+    elif [[ "$var_file" = "config" ]]; then
+        printf '\nUsing variable file config. No encryption/decryption will be used.\n'
+        encrypt_mode="none"
+        template_path="$TF_VAR_firehawk_path/config.template"
     else
         printf "\nUnrecognised vault/variable file. \n$var_file\nExiting...\n"
         failed=true
@@ -383,9 +387,10 @@ source_vars () {
     fi
 }
 
-# if sourcing secrets, we also source the vagrant file
+# if sourcing secrets, we also source the vagrant file and unencrypted config file
 if [[ "$var_file" = "secrets" ]]; then
     source_vars 'vagrant' $encrypt_mode
+    source_vars 'config' $encrypt_mode
     source_vars $var_file $encrypt_mode
 else
     source_vars $var_file $encrypt_mode
