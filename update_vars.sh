@@ -11,14 +11,13 @@
 # the directory of the current script
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 export TF_VAR_firehawk_path=$SCRIPTDIR
-echo "SCRIPTDIR $SCRIPTDIR"
 
 mkdir -p $TF_VAR_firehawk_path/tmp/
 mkdir -p $TF_VAR_firehawk_path/../secrets/
 # The template will be updated by this script
-secrets_template=$TF_VAR_firehawk_path/tmp/secrets.template
-touch $secrets_template
-rm $secrets_template
+tmp_template_path=$TF_VAR_firehawk_path/tmp/secrets.template
+touch $tmp_template_path
+rm $tmp_template_path
 temp_output=$TF_VAR_firehawk_path/tmp/secrets.temp
 touch $temp_output
 rm $temp_output
@@ -29,9 +28,7 @@ optspec=":hv-:t:"
 
 encrypt_mode="encrypt"
 
-
-
-# IFS will allow for loop to iterate over lines instead of words seperated by ' '
+# IFS must allow us to iterate over lines instead of words seperated by ' '
 IFS='
 '
 
@@ -202,115 +199,127 @@ fi
 
 
 template_path="$TF_VAR_firehawk_path/secrets.template"
-# If initialising vagrant vars, no encryption is required
-if [[ -z "$var_file" ]]; then
-    var_file="secrets-$TF_VAR_envtier"
-    printf "\nUsing vault file $var_file\n"
-elif [[ "$var_file" = "vagrant" ]]; then
-    printf '\nUsing variable file vagrant. No encryption/decryption will be used\n'
-    encrypt_mode="none"
-    template_path="$TF_VAR_firehawk_path/vagrant.template"
-elif [[ "$var_file" = "secrets" ]]; then
-    var_file="secrets-$TF_VAR_envtier"
-    printf "\nUsing vault file $var_file\n"
-else
-    printf "\nUnrecognised vault/variable file. \n$var_file\nExiting...\n"
-    failed=true
-fi
 
-if [[ $failed = true ]]; then
-    return 88
-fi
-
-var_file="$(to_abs_path $TF_VAR_firehawk_path/../secrets/$var_file)"
-vault_key="$(to_abs_path $TF_VAR_firehawk_path/../secrets/keys/.vault-key-$TF_VAR_envtier)"
-
-# We use a local key and a password to encrypt and decrypt data.  no operation can occur without both.  in this case we decrypt first without password and then with the password.
-vault_command="ansible-vault view --vault-id $vault_key --vault-id $vault_key@prompt $var_file"
-
-#check if a vault key exists.  if it does, then install can continue automatically.
-if [ -e $vault_key ]; then
-    if [[ $verbose ]]; then
-        path=$(to_abs_path $vault_key)
-        printf "\n$vault_key exists. vagrant up will automatically provision.\n\n"
-    fi
-else
-    printf "\n$vault_key doesn't exist.\n\n"
-    printf "\nNo vault key has been initialised at this location.\n\n"
-    PS3='Do you wish to initialise a new vault key?'
-    options=("Initialise A New Key" "Quit")
-    select opt in "${options[@]}"
-    do
-        case $opt in
-            "Initialise A New Key")
-                printf "\nWARNING: DO NOT COMMIT THESE KEYS TO VERSION CONTROL.\n"
-                openssl rand -base64 64 > $vault_key || failed=true
-                break
-                ;;
-            "Quit")
-                echo "You selected $REPLY to $opt"
-                quit=true
-                break
-                ;;
-            *) echo "invalid option $REPLY";;
-        esac
-    done
-    
-fi
-
-if [[ $failed = true ]]; then    
-    echo "WARNING: Failed to create key"
-    return 88
-fi
-
-if [[ $quit = true ]]; then    
-    return 88
-fi
-
-# vault arg will set encryption mode
-if [[ $encrypt_mode = "encrypt" ]]; then
-    echo "Encrypting Vault..."
-    line=$(head -n 1 $var_file)
-    if [[ "$line" == "\$ANSIBLE_VAULT"* ]]; then 
-        echo "Vault is already encrypted"
-    else
-        echo "Encrypting secrets with a key on disk and with a password. Vars will be set from an encrypted vault."
-        ansible-vault encrypt --vault-id $vault_key@prompt $var_file
-    fi
-elif [[ $encrypt_mode = "decrypt" ]]; then
-    echo "Decrypting Vault..."
-    line=$(head -n 1 $var_file)
-    if [[ "$line" == "\$ANSIBLE_VAULT"* ]]; then 
-        echo "Found encrypted vault"
-        echo "Decrypting secrets."
-        ansible-vault decrypt --vault-id $vault_key --vault-id $vault_key@prompt $var_file
-    else
-        echo "Vault already unencrypted.  No need to decrypt. Vars will be set from unencrypted vault."
-    fi
-    printf "\nWARNING: Never commit unencrypted secrets to a repo. run this command again without --decrypt before commiting any secrets to version control"
-    printf "\nIf you accidentally do commit unencrypted secrets, ensure there is no trace of the data in the repo, and invalidate the secrets / replace them.\n"
-        
-    export vault_command="cat $var_file"
-elif [[ $encrypt_mode = "none" ]]; then
-    echo "Assuming secrets are not encrypted to set environment vars"
-    export vault_command="cat $var_file"
-fi
-
-if [[ $verbose = true ]]; then
-    printf "\n"
-    echo "TF_VAR_envtier=$TF_VAR_envtier"
-    echo "var_file=$var_file"
-    echo "vault_key=$vault_key"
-    echo "encrypt_mode=$encrypt_mode"
-    echo "vault_command=$vault_command"
-fi
-
-export vault_examples_command="cat $TF_VAR_firehawk_path/secrets.example"
-
-### Use the vault command to iterate over variables and export them without values to the template
-
-printf "\n...Parsing vault file to template\n"
 source_vars () {
+    local var_file=$1
+    local encrypt_mode=$2
+
+    printf "\n...Sourcing $var_file\n"
+    # If initialising vagrant vars, no encryption is required
+    if [[ -z "$var_file" ]] || [[ "$var_file" = "secrets" ]]; then
+        var_file="secrets-$TF_VAR_envtier"
+        printf "\nUsing vault file $var_file\n"
+        template_path="$TF_VAR_firehawk_path/secrets.template"
+    elif [[ "$var_file" = "vagrant" ]]; then
+        printf '\nUsing variable file vagrant. No encryption/decryption will be used\n'
+        encrypt_mode="none"
+        template_path="$TF_VAR_firehawk_path/vagrant.template"
+    else
+        printf "\nUnrecognised vault/variable file. \n$var_file\nExiting...\n"
+        failed=true
+    fi
+
+    if [[ $failed = true ]]; then
+        return 88
+    fi
+
+    var_file="$(to_abs_path $TF_VAR_firehawk_path/../secrets/$var_file)"
+
+    # set vault key location based on envtier dev/prod
+    if [[ "$TF_VAR_envtier" = 'dev' ]]; then
+        vault_key="$(to_abs_path $TF_VAR_firehawk_path/../secrets/keys/$TF_VAR_vault_key_name_dev)"
+    elif [[ "$TF_VAR_envtier" = 'prod' ]]; then
+        vault_key="$(to_abs_path $TF_VAR_firehawk_path/../secrets/keys/$TF_VAR_vault_key_name_prod)"
+    else 
+        printf "\n...WARNING: envtier evaluated to no match for dev or prod.  Inspect update_vars.sh to handle this case correctly.\n"
+    fi
+
+    # We use a local key and a password to encrypt and decrypt data.  no operation can occur without both.  in this case we decrypt first without password and then with the password.
+    vault_command="ansible-vault view --vault-id $vault_key --vault-id $vault_key@prompt $var_file"
+
+    #check if a vault key exists.  if it does, then install can continue automatically.
+    if [ -e $vault_key ]; then
+        if [[ $verbose ]]; then
+            path=$(to_abs_path $vault_key)
+            printf "\n$vault_key exists. vagrant up will automatically provision.\n\n"
+        fi
+    else
+        printf "\n$vault_key doesn't exist.\n\n"
+        printf "\nNo vault key has been initialised at this location.\n\n"
+        PS3='Do you wish to initialise a new vault key?'
+        options=("Initialise A New Key" "Quit")
+        select opt in "${options[@]}"
+        do
+            case $opt in
+                "Initialise A New Key")
+                    printf "\nWARNING: DO NOT COMMIT THESE KEYS TO VERSION CONTROL.\n"
+                    openssl rand -base64 64 > $vault_key || failed=true
+                    break
+                    ;;
+                "Quit")
+                    echo "You selected $REPLY to $opt"
+                    quit=true
+                    break
+                    ;;
+                *) echo "invalid option $REPLY";;
+            esac
+        done
+        
+    fi
+
+    if [[ $failed = true ]]; then    
+        echo "WARNING: Failed to create key"
+        return 88
+    fi
+
+    if [[ $quit = true ]]; then    
+        return 88
+    fi
+
+    # vault arg will set encryption mode
+    if [[ $encrypt_mode = "encrypt" ]]; then
+        echo "Encrypting Vault..."
+        line=$(head -n 1 $var_file)
+        if [[ "$line" == "\$ANSIBLE_VAULT"* ]]; then 
+            echo "Vault is already encrypted"
+        else
+            echo "Encrypting secrets with a key on disk and with a password. Vars will be set from an encrypted vault."
+            ansible-vault encrypt --vault-id $vault_key@prompt $var_file
+        fi
+    elif [[ $encrypt_mode = "decrypt" ]]; then
+        echo "Decrypting Vault... $var_file"
+        line=$(head -n 1 $var_file)
+        if [[ "$line" == "\$ANSIBLE_VAULT"* ]]; then 
+            echo "Found encrypted vault"
+            echo "Decrypting secrets."
+            ansible-vault decrypt --vault-id $vault_key --vault-id $vault_key@prompt $var_file
+        else
+            echo "Vault already unencrypted.  No need to decrypt. Vars will be set from unencrypted vault."
+        fi
+        printf "\nWARNING: Never commit unencrypted secrets to a repo. run this command again without --decrypt before commiting any secrets to version control"
+        printf "\nIf you accidentally do commit unencrypted secrets, ensure there is no trace of the data in the repo, and invalidate the secrets / replace them.\n"
+            
+        export vault_command="cat $var_file"
+    elif [[ $encrypt_mode = "none" ]]; then
+        echo "Assuming secrets are not encrypted to set environment vars"
+        export vault_command="cat $var_file"
+    fi
+
+    if [[ $verbose = true ]]; then
+        printf "\n"
+        echo "TF_VAR_envtier=$TF_VAR_envtier"
+        echo "var_file=$var_file"
+        echo "vault_key=$vault_key"
+        echo "encrypt_mode=$encrypt_mode"
+        echo "vault_command=$vault_command"
+    fi
+
+    export vault_examples_command="cat $TF_VAR_firehawk_path/secrets.example"
+
+    ### Use the vault command to iterate over variables and export them without values to the template
+
+    printf "\n...Parsing vault file to template.  Decrypting if necesary.\n"
+
     local MULTILINE=$(eval $vault_command)
     for i in $(echo "$MULTILINE" | sed 's/^$/###/')
     do
@@ -331,7 +340,7 @@ source_vars () {
     done
 
     # substitute example var values into the template.
-    envsubst < "$temp_output" > "$secrets_template"
+    envsubst < "$temp_output" > "$tmp_template_path"
     rm $temp_output
 
     printf "\n...Exporting variables to environment\n"
@@ -341,29 +350,45 @@ source_vars () {
         [[ "$i" =~ ^#.*$ ]] && continue
         export $i
     done
+
+
+    # # Determine your current public ip for security groups.
+
+    export TF_VAR_remote_ip_cidr="$(dig +short myip.opendns.com @resolver1.opendns.com)/32"
+
+    # # this python script generates mappings based on the current environment.
+    # # any var ending in _prod or _dev will be stripped and mapped based on the envtier
+    python $TF_VAR_firehawk_path/scripts/envtier_vars.py
+    envsubst < "$TF_VAR_firehawk_path/tmp/envtier_mapping.txt" > "$TF_VAR_firehawk_path/tmp/envtier_exports.txt"
+
+    # Next- using the current envtier environment, evaluate the variables for the that envrionment.  
+    # variables ending in _dev or _prod will take precedence based on the envtier, and be set to keys stripped of the appended _dev or _prod namespace
+    for i in `cat $TF_VAR_firehawk_path/tmp/envtier_exports.txt`
+    do
+        [[ "$i" =~ ^#.*$ ]] && continue
+        export $i
+    done
+
+    rm $TF_VAR_firehawk_path/tmp/envtier_exports.txt
+
+    if [[ "$TF_VAR_envtier" = 'dev' ]]; then
+        # The template will now be written to the public repository without any private values
+        printf "\n...Saving template to $template_path\n"
+        mv -fv $tmp_template_path $template_path
+    elif [[ "$TF_VAR_envtier" = 'prod' ]]; then
+        printf "\n...Bypassing saving of template to public repository since we are in a prod environment.  Writes to the Firehawk repository path are only done in the dev environment.\n"
+        rm -fv $tmp_template_path
+    else 
+        printf "\n...WARNING: envtier evaluated to no match for dev or prod.  Inspect update_vars.sh to handle this case correctly.\n"
+    fi
 }
-source_vars
 
-# # Determine your current public ip for security groups.
-
-export TF_VAR_remote_ip_cidr="$(dig +short myip.opendns.com @resolver1.opendns.com)/32"
-
-# # this python script generates mappings based on the current environment.
-# # any var ending in _prod or _dev will be stripped and mapped based on the envtier
-python $TF_VAR_firehawk_path/scripts/envtier_vars.py
-envsubst < "$TF_VAR_firehawk_path/tmp/envtier_mapping.txt" > "$TF_VAR_firehawk_path/tmp/envtier_exports.txt"
-
-# using the current envtier environment, evaluate the variables
-for i in `cat $TF_VAR_firehawk_path/tmp/envtier_exports.txt`
-do
-    [[ "$i" =~ ^#.*$ ]] && continue
-    export $i
-done
-
-rm $TF_VAR_firehawk_path/tmp/envtier_exports.txt
-
-# The template will now be written to the public repository without any private values
-printf "\n...Saving template to $template_path\n"
-mv -fv $secrets_template $template_path
+# if sourcing secrets, we also source the vagrant file
+if [[ "$var_file" = "secrets" ]]; then
+    source_vars 'vagrant' $encrypt_mode
+    source_vars $var_file $encrypt_mode
+else
+    source_vars $var_file $encrypt_mode
+fi
 
 printf "\nDone.\n\n"
