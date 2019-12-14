@@ -118,6 +118,12 @@ function to_abs_path {
     fi
 }
 
+function help {
+    echo "usage: source ./update_vars.sh [-v] [--tier[=]dev/prod] [--var-file[=]vagrant/secrets] [--vault[=]encrypt/decrypt]" >&2
+    printf "\nUse this to source either the vagrant or encrypted secrets config in your dev or prod tier.\n" &&
+    failed=true
+}
+
 # We allow equivalent args such as:
 # -t dev
 # --tier dev
@@ -162,6 +168,9 @@ parse_opts () {
                         opt=${OPTARG%=$val}
                         vault
                         ;;
+                    help)
+                        help
+                        ;;
                     *)
                         if [ "$OPTERR" = 1 ] && [ "${optspec:0:1}" != ":" ]; then
                             echo "Unknown option --${OPTARG}" >&2
@@ -176,9 +185,7 @@ parse_opts () {
             v) # verbosity is handled prior since its a dependency for this block
                 ;;
             h)
-                echo "usage: source ./update_vars.sh [-v] [--tier[=]dev/prod] [--var-file[=]vagrant/secrets] [--vault[=]encrypt/decrypt]" >&2
-                printf "\nUse this to source either the vagrant or encrypted secrets config in your dev or prod tier.\n" &&
-                    failed=true
+                help
                 ;;
             *)
                 if [ "$OPTERR" != 1 ] || [ "${optspec:0:1}" = ":" ]; then
