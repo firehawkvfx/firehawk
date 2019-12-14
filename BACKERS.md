@@ -6,16 +6,20 @@ OpenFirehawk is an open source project (MPL2.0).  It's developement is made poss
 
 ### Backers
 
-Janghyung Kim   
+Harvey Fong
 Anton Ognyev  
-Mikas Sadauskas  
 Stan Shapetskiy  
 Sergio Caires  
-Steven Quinones Colon  
 Edward Twiss  
 Seona Hwang  
-Nuno Rivotti  
-Zach Judson  
+Chris Hönninger
+
+### Previous Backers
+Janghyung Kim
+Mikas Sadauskas  
+Zach Judson
+Steven Quinones Colon  
+Nuno Rivotti
 
 <!--stackedit_data:
 eyJoaXN0b3J5IjpbNDk2NjgwMjc5LDQ3NzU4NzY0NiwtMTIwOT
