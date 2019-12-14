@@ -12,14 +12,14 @@ Stan Shapetskiy
 Sergio Caires  
 Edward Twiss  
 Seona Hwang  
-Chris Hönninger
+Chris Hönninger  
 
 ### Previous Backers
-Janghyung Kim
+Janghyung Kim  
 Mikas Sadauskas  
-Zach Judson
+Zach Judson  
 Steven Quinones Colon  
-Nuno Rivotti
+Nuno Rivotti  
 
 <!--stackedit_data:
 eyJoaXN0b3J5IjpbNDk2NjgwMjc5LDQ3NzU4NzY0NiwtMTIwOT
