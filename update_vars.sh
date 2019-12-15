@@ -9,6 +9,8 @@
 # If any changes have resulted in a new variable name, then example values helps other understand what they should be using for their own infrastructure.
 
 RED='\033[0;31m' # Red Text
+GREEN='\033[0;32m' # Green Text
+BLUE='\033[0;34m' # Blue Text
 NC='\033[0m' # No Color        
 # the directory of the current script
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
@@ -17,6 +19,7 @@ export TF_VAR_firehawk_path=$SCRIPTDIR
 mkdir -p $TF_VAR_firehawk_path/tmp/
 mkdir -p $TF_VAR_firehawk_path/../secrets/
 # The template will be updated by this script
+save_template=true
 tmp_template_path=$TF_VAR_firehawk_path/tmp/secrets.template
 touch $tmp_template_path
 rm $tmp_template_path
@@ -91,6 +94,17 @@ var_file () {
         echo "Parsing var_file option: '--${opt}', value: '${val}'" >&2;
     fi
     export var_file="${val}"
+}
+
+save_template_fn () {
+    if [[ "$verbose" == true ]]; then
+        echo "Parsing var_file option: '--${opt}', value: '${val}'" >&2;
+    fi 
+    save_template=${val}
+    
+    if [[ $save_template = false ]]; then
+        echo "...Will skip saving of template"
+    fi
 }
 
 vault () {
@@ -170,6 +184,41 @@ parse_opts () {
                         ;;
                     help)
                         help
+                        ;;
+                    save-template)
+                        val="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+                        opt="${OPTARG}"
+                        save_template_fn
+                        ;;
+                    save-template=*)
+                        val=${OPTARG#*=}
+                        opt=${OPTARG%=$val}
+                        save_template_fn
+                        ;;
+                    dev)
+                        val="dev";
+                        opt="${OPTARG}"
+                        tier
+                        ;;
+                    prod)
+                        val="prod";
+                        opt="${OPTARG}"
+                        tier
+                        ;;
+                    vagrant)
+                        val="vagrant"; OPTIND=$(( $OPTIND + 1 ))
+                        opt="${OPTARG}"
+                        var_file
+                        ;;
+                    secrets)
+                        val="secrets"; OPTIND=$(( $OPTIND + 1 ))
+                        opt="${OPTARG}"
+                        var_file
+                        ;;
+                    decrypt)
+                        val="decrypt"; OPTIND=$(( $OPTIND + 1 ))
+                        opt="vault"
+                        vault
                         ;;
                     *)
                         if [ "$OPTERR" = 1 ] && [ "${optspec:0:1}" != ":" ]; then
@@ -336,7 +385,7 @@ source_vars () {
     ### Use the vault command to iterate over variables and export them without values to the template
 
     if [[ $encrypt_mode = "none" ]]; then
-        printf "\n...Parsing unencrypted file to template.  No Decryption necesary.\n"
+        printf "\n...Parsing unencrypted file to template.  No decryption necesary.\n"
     else
         printf "\n...Parsing vault file to template.  Decrypting.\n"
     fi
@@ -392,13 +441,17 @@ source_vars () {
 
     rm $TF_VAR_firehawk_path/tmp/envtier_exports.txt
 
-    if [[ "$TF_VAR_envtier" = 'dev' ]]; then
+    # update the template if in dev environment and save template is enabled.  save template may be disabled during setup script
+    if [[ "$TF_VAR_envtier" = 'dev' && $save_template = true ]]; then
+        echo "$save_template"
         # The template will now be written to the public repository without any private values
         printf "\n...Saving template to $template_path\n"
         mv -fv $tmp_template_path $template_path
     elif [[ "$TF_VAR_envtier" = 'prod' ]]; then
         printf "\n...Bypassing saving of template to public repository since we are in a prod environment.  Writes to the Firehawk repository path are only done in the dev environment.\n"
         rm -fv $tmp_template_path
+    elif [[ $save_template = false ]]; then
+        printf "\n...Skipping saving of template\n"
     else 
         printf "\n...${RED}WARNING: envtier evaluated to no match for dev or prod.  Inspect update_vars.sh to handle this case correctly.${NC}\n"
         return 88
