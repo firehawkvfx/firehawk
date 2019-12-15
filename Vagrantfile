@@ -91,15 +91,12 @@ Vagrant.configure("2") do |config|
 
   # #disable the update notifier.  We do not want to update to ubuntu 18, currently deadline installer gui doesn't work in 18.
   config.vm.provision "shell", inline: "sudo sed -i 's/Prompt=.*$/Prompt=never/' /etc/update-manager/release-upgrades"
-  
-  # host key checking.
-  config.ssh.verify_host_key: "always"
 
   # for dpkg or virtualbox issues, see https://superuser.com/questions/298367/how-to-fix-virtualbox-startup-error-vboxadd-service-failed
 
   # disable password authentication - ssh key only.
   config.vm.provision "shell", inline: <<-EOC
-    sudo sed -i -e "\\#PasswordAuthentication yes# s#PasswordAuthentication yes#PasswordAuthentication no#g" /etc/ssh/sshd_config
+    sudo sed -i 's/.*PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
     sudo service ssh restart
   EOC
 
