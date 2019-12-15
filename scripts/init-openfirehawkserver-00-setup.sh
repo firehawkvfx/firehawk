@@ -7,6 +7,10 @@
 
 clear
 
+RED='\033[0;31m' # Red Text
+GREEN='\033[0;32m' # Green Text
+BLUE='\033[0;34m' # Blue Text
+NC='\033[0m' # No Color
 
 
 if [ ! -z $HISTFILE ]; then
@@ -68,7 +72,7 @@ function ctrl_c() {
         printf "\n** CTRL-C ** EXITING...\n"
         if [[ "$configure" != 'vagrant' ]]; then
             printf "\nWARNING: PARTIALLY COMPLETED INSTALLATIONS MAY LEAVE UNENCRYPTED SECRETS.\n"
-            PS3='Do you want to Encrypt, Remove, or Leave the resulting temp file on disk?? '
+            PS3='Do you want to Encrypt, Remove, or Leave the resulting temp file on disk? '
             options=("Encrypt And Quit" "Remove And Quit" "Leave And Quit (NOT RECOMMENDED)")
             select opt in "${options[@]}"
             do
@@ -135,7 +139,7 @@ display=false
 if [[ -f "$output_complete" ]]; then
     printf "\n\n...Attempting to source environment variables from existing config file $configure\n"
     printf "\nThis configuration script always sources from and writes to the dev configuration file.  Once evaluated and tested the configuration can be replicated across to your production file. \n"
-    source $SCRIPTDIR/../update_vars.sh --var-file $configure --tier dev
+    source $SCRIPTDIR/../update_vars.sh --var-file $configure --tier dev --save-template false
 fi
 
 #clear output_tmp
@@ -160,10 +164,14 @@ do
     fi
 done
 
+# iterate over lines in template and filter results
 for i in `(cat $input | sed 's/^$/###/')`
 do
-    if [[ "$i" =~ ^.*=insertvalue$ ]]
-    then
+    if [[ "$i" =~ ^.*default:.* ]]; then
+        default_value=$(echo ${i#*=} | awk '{$1=$1};1')
+    fi
+
+    if [[ "$i" =~ ^.*=insertvalue$ ]]; then
         # if insertvalue is in line from template, then prompt user for value. 
         # compare with current env var. if initialised, use env var and dont ask user.
         command="echo \$${i%%=*}"
@@ -174,21 +182,32 @@ do
         if [[ "$replace_all" = true ]]; then
             repeat_question=true
             while [ $repeat_question = true ]; do
-                allow_default=false
+                use_preset_value=false
                 if [[ ! -z $current_value ]]; then
                     # if a value already exists, it to be used as a default
-                    allow_default=true
-                    printf "Press return to use current value: $current_value\n"
+                    use_preset_value='current'
+                    printf "Press return to use ${GREEN}current${NC} value: "
+                    echo "$current_value"
+                elif [[ ! -z $default_value ]]; then
+                    # else if no current value exists, try to use default value if it exists
+                    use_preset_value='default'
+                    printf "Press return to use ${BLUE}default${NC} value: "
+                    echo "$default_value"
                 else
                     printf "Press return to enter a value: \n"
                 fi
                 read -p "Set ${i%%=*}: "  result
                 if [[ -z $result ]]; then
                     # if blank value was entered
-                    if [[ $allow_default = true ]]; then
-                        # User pressed ENTER to use current env var / default value
-                        printf "\nUsing current value \n"
+                    if [[ "$use_preset_value" = 'current' ]]; then
+                        # User pressed ENTER to use current env var
+                        printf "\n${GREEN}Using current value \n"
                         result=$current_value
+                        repeat_question=false
+                    elif [[ "$use_preset_value" = 'default' ]]; then
+                        # User pressed ENTER to use default env var
+                        printf "\n${BLUE}Using default value \n"
+                        result=$default_value
                         repeat_question=false
                     else
                         # if no env var, then repeate the question
@@ -210,7 +229,11 @@ do
         fi
         echo "${i%%=*}=$result"
         echo "${i%%=*}=$result" >> $output_tmp
+        printf "${NC}"
+        #march progress forward
         progress=$((progress + 1))
+        #reset default value
+        default_value=
     else
         if [[ "$i" =~ ^\#\ BEGIN\ CONFIGURATION\ \#$ ]]
         then
