@@ -48,3 +48,4 @@ terraform apply --auto-approve
 
 # kill the current session to ensure any new groups can be used in next script
 # sleep 1; pkill -u vagrant sshd
+printf "\n...Finished $SCRIPTNAME\n\n"

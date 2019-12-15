@@ -1,6 +1,7 @@
 #!/bin/bash
 argument="$1"
 
+SCRIPTNAME=`basename "$0"`
 echo "Argument $1"
 echo ""
 ARGS=''
@@ -36,7 +37,7 @@ keybase pgp encrypt -m "testing pgp decryption" | keybase pgp decrypt
 
 printf "\n\nHave you installed keybase and initialised pgp?\n\nIf not it is highly recommended that you create a profile on your phone for 2fa."
 
-echo "Press enter if you have initialised a keybase pgp passphrase for this shell. Otherwise exit (ctrl+c) and run:"
+echo "Press ENTER if you have initialised a keybase pgp passphrase for this shell. Otherwise exit (ctrl+c) and run:"
 echo "keybase login"
 echo "keybase pgp gen"
 printf 'keybase pgp encrypt -m "test_secret" | keybase pgp decrypt\n'
@@ -64,3 +65,4 @@ terraform apply --auto-approve
 
 echo "IMPORTANT: After this first terraform apply is succesful, you must exit this vm and use 'vagrant reload' to apply the promisc settings to the NIC for routing to work."
 #  THIS NEEDS TO BE FIXED OR MOUNTS from other systems onsite WONT WORK without reboot. you will get an error on the render node/remote workstation.  it would be good to have a single execute install.
+printf "\n...Finished $SCRIPTNAME\n\n"

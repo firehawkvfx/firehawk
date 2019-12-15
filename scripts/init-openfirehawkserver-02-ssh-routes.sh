@@ -1,6 +1,7 @@
 #!/bin/bash
 argument="$1"
 
+SCRIPTNAME=`basename "$0"`
 echo "Argument $1"
 echo ""
 ARGS=''
@@ -53,11 +54,8 @@ echo -e "\nIf above was succesful, exit the vm and use 'vagrant reload' before c
 echo -e "\nFor houdini to work, ensure you have configured your licences on the production server."
 echo -e "\nDo not install houdini licensing in a dev vm since it should be as stable as possible, and re provisioning the vm will use licence key install tokens (limited yearly)"
 echo -e "\nFor deadline to work, ensure you have follow these steps:"
-echo "1. in deadline monitor create groups under super user mode: tools/create groups and ensure the groups exist for all groups slave appear under"
+echo "1. in deadline monitor create groups in super user mode: tools/create groups and ensure the groups exist for all groups appear under"
 echo "eg cloud, local, local_workstation, cloud_workstation"
 echo "2. ensure you have entered your ubl information for the repository"
 echo "3. ensure you have enabled the commandline plugin in tools configure plugins"
-echo "4. ensure slaveautoconf is enabled up configure event plugins"
-
-# kill the current session to ensure any new groups can be used in next script
-# sleep 1; pkill -u vagrant sshd
+printf "\n...Finished $SCRIPTNAME\n\n"

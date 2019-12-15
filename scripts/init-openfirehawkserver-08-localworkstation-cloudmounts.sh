@@ -1,6 +1,7 @@
 #!/bin/bash
 argument="$1"
 
+SCRIPTNAME=`basename "$0"`
 echo "Argument $1"
 echo ""
 ARGS=''
@@ -46,3 +47,5 @@ terraform apply --auto-approve
 
 echo "for the deadline spot plugin to be updated, pulse must be restarted.  Use exit and vagrant reload"
 #should add a test script at this point to validate vpn connection is established, or licence servers may not work.
+
+printf "\n...Finished $SCRIPTNAME\n\n"

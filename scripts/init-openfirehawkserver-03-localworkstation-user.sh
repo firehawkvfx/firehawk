@@ -1,6 +1,7 @@
 #!/bin/bash
 argument="$1"
 
+SCRIPTNAME=`basename "$0"`
 echo "Argument $1"
 echo ""
 ARGS=''
@@ -53,4 +54,5 @@ ansible-playbook -i "$TF_VAR_inventory" ansible/localworkstation-deadlineuser.ya
 
 echo 'exit and use vagrant reload, then vagrant ssh back in after executing each .sh script'
 # kill the current session to ensure any new groups can be used in next script
+printf "\n...Finished $SCRIPTNAME\n\n"
 sleep 1; pkill -u vagrant sshd
