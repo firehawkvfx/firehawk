@@ -277,6 +277,11 @@ source_vars () {
         printf '\nUsing variable file config. No encryption/decryption will be used.\n'
         encrypt_mode="none"
         template_path="$TF_VAR_firehawk_path/config.template"
+    elif [[ "$var_file" = "config-override" ]]; then
+        var_file="config-override-$TF_VAR_envtier"
+        printf "\nUsing variable file $var_file. No encryption/decryption will be used.\n"
+        encrypt_mode="none"
+        template_path="$TF_VAR_firehawk_path/config-override.template"
     else
         printf "\nUnrecognised vault/variable file. \n$var_file\nExiting...\n"
         failed=true
@@ -466,13 +471,15 @@ else
     return 88
 fi
 
-# if sourcing secrets, we also source the vagrant file and unencrypted config file
+# if sourcing secrets, we also source the vagrant file, unencrypted config file and config ovverrides
 if [[ "$var_file" = "secrets" ]] || [[ -z "$var_file" ]]; then
     # assume secrets is the var file for default behaviour
     source_vars 'vagrant' 'none'
     source_vars 'config' 'none'
-    var_file = "secrets"
-    source_vars "secrets" "$encrypt_mode"
+    var_file = 'secrets'
+    source_vars 'secrets' "$encrypt_mode"
+    var_file = 'config-override'
+    source_vars 'config-override' 'none'
 else
     source_vars "$var_file" "$encrypt_mode"
 fi
