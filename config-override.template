@@ -1,0 +1,38 @@
+# ~/.bashrc
+
+# config override is altered by install scripts but can also be used to override configuration variables.
+
+# WARNING: When editing your config file do not store any secrets / sensitive information here.
+# Secrets should only ever be stored in the encrypted secrets file..
+# This unencrypted config file is still stored in your private repository and should not be publicly available.
+
+# CONFIG INITIALIZATION #
+
+# Private values must be used as values only (and not in #commented lines), since it is only the values that are kept private.
+# Only Commented lines and the variable names / keys are read from this private secrets/config file in your private repo to auto generate the public firehawk/config.template file when running 'source ./update_vars.sh'.
+
+# If these steps are followed then no private values will be or should be propogated into the public repo firehawk/config.template file.
+# Before making any commits of config.template to the public firehawk repo ensure there are no secrets / sensitive information contained in a commit.
+# Be sure to provide any new variable keys you may end up adding with a commented out description with example dummy values above your actual private value used to assist others.
+
+# Do not put real world sensitive information in the example comments / #commented out lines.
+
+# New comments should be only added in secrets/config as these lines will be propogated into the config.template schema used to initialise any new  secrets/config file for other users of the Firehawk repo.
+
+# BEGIN CONFIGURATION #
+
+# TF_VAR_softnas_storage:
+# Enable softnas storage.  Softnas is used for a centralised cloud based NFS share.
+# It's licenceing cost scales with usage, and can provide RAID redundancy.
+# default: TF_VAR_softnas_storage=true
+TF_VAR_softnas_storage=insertvalue
+
+# TF_VAR_site_mounts:
+# Enable site NFS mounts to be mounted on remote nodes.  If you have an existing local NFS share from your own NAS, it can be provided as a remote mount over vpn for cloud based nodes.  Operating with a local NFS share is requried for PDG/TOPS to function.
+# default: TF_VAR_site_mounts=true
+TF_VAR_site_mounts=insertvalue
+
+# TF_VAR_remote_mounts_on_local:
+# Enable cloud NFS mounts to be mounted on local nodes.  After the VPN is connected, the remote SoftNAS NFS shares can be mounted on the local workstation.  This is necesary for PDG/TOPS to track completed work items, and allow remote deletion of data.
+# default: TF_VAR_remote_mounts_on_local=true
+TF_VAR_remote_mounts_on_local=insertvalue

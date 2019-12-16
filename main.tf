@@ -78,7 +78,7 @@ module "vpc" {
 
 module "deadline" {
   source = "./modules/deadline"
-  pgp_key =  file(var.pgp_key_path)
+  keybase_pgp_key = var.keybase_pgp_key
   remote_ip_cidr = var.remote_ip_cidr
   cidr_list = concat([var.remote_subnet_cidr, var.remote_ip_cidr], module.vpc.private_subnets_cidr_blocks)
 }
@@ -104,7 +104,7 @@ resource "null_resource" "dependency_node_centos" {
 # terraform apply
 
 resource "null_resource" "provision_deadline_spot" {
-  count      = var.site_mounts ? 1 : 0
+  count      = (var.site_mounts && var.provision_deadline_spot_plugin) ? 1 : 0
   depends_on = [null_resource.dependency_deadline_spot, null_resource.dependency_node_centos]
 
   triggers = {
@@ -290,7 +290,7 @@ module "workstation" {
   source = "./modules/workstation_pcoip"
   name   = "workstation"
 
-  workstation_enabled = true
+  workstation_enabled = var.workstation_enabled
 
   #options for gateway type are centos7 and pcoip
   gateway_type   = var.gateway_type
@@ -362,6 +362,8 @@ module "node" {
   bastion_ip                = module.bastion.public_ip
 
   openfirehawkserver = var.openfirehawkserver
+
+  instance_type = var.node_centos_instance_type
 
   volume_size = var.node_centos_volume_size
 

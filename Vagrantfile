@@ -11,10 +11,8 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder "../secrets", "/secrets", create: true
 
   mac_string = ENV['TF_VAR_vagrant_mac']
-  vaultkeypresent = ENV['TF_VAR_vaultkeypresent']
   bridgenic = ENV['TF_VAR_bridgenic']
-  envtier = ENV['TF_VAR_envtier']
-  name = ENV['TF_VAR_openfirehawkserver_name']
+  envtier = ENV['TF_VAR_envtier']=
   openfirehawkserver = ENV['TF_VAR_openfirehawkserver']
   network = ENV['TF_VAR_network']
 
@@ -56,7 +54,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "echo DEBIAN_FRONTEND=$DEBIAN_FRONTEND"
 
   config.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive"
-  config.vm.provision "shell", inline: "sudo rm /etc/localtime && sudo ln -s /usr/share/zoneinfo/Australia/Brisbane /etc/localtime", run: "always"
+  config.vm.provision "shell", inline: "sudo rm /etc/localtime && sudo ln -s #{ENV['TF_VAR_timezone_localpath']} /etc/localtime", run: "always"
   config.vm.provision "shell", inline: "sudo apt-get update"
   # temp disable as we are getting freezing with ssh issues
   config.vm.provision "shell", inline: "sudo apt-get install -y sshpass"
@@ -93,9 +91,14 @@ Vagrant.configure("2") do |config|
 
   # #disable the update notifier.  We do not want to update to ubuntu 18, currently deadline installer gui doesn't work in 18.
   config.vm.provision "shell", inline: "sudo sed -i 's/Prompt=.*$/Prompt=never/' /etc/update-manager/release-upgrades"
-  
 
   # for dpkg or virtualbox issues, see https://superuser.com/questions/298367/how-to-fix-virtualbox-startup-error-vboxadd-service-failed
+
+  # disable password authentication - ssh key only.
+  config.vm.provision "shell", inline: <<-EOC
+    sudo sed -i 's/.*PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
+    sudo service ssh restart
+  EOC
 
   config.vm.provision "shell", inline: "sudo reboot"
   # trigger reload

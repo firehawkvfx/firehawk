@@ -62,8 +62,6 @@ variable "instance_profile_name" {
 }
 
 variable "instance_type" {
-  default = "m5.2xlarge"
-  #default = "r5.2xlarge"
 }
 
 variable "user" {

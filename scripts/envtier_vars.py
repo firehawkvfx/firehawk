@@ -1,12 +1,13 @@
 import os
-# print "test"
-#os.environ["TF_VAR_envtier"] = "1"
 envtier=os.environ["TF_VAR_envtier"]
-
+TF_VAR_firehawk_path=os.environ["TF_VAR_firehawk_path"]
 outdict = {}
 
-# set values to current envtier
-with open("secrets.template") as f:
+template_path = TF_VAR_firehawk_path + "/tmp/secrets.template"
+envtier_mapping_path = TF_VAR_firehawk_path + "/tmp/envtier_mapping.txt"
+
+# set values to those relevant to the current envtier in a dictionary based on the _dev or _prod appended names space on any keys.
+with open(template_path) as f:
     for line in f:
         if not line.startswith('#'):
             if ('_dev' in line) or ('_prod' in line): 
@@ -14,6 +15,6 @@ with open("secrets.template") as f:
                 outdict[varname] = varname+'_'+envtier
 
 # write environment mappings to tmp file
-with open("./tmp/envtier_mapping.txt", "w") as f:
+with open(envtier_mapping_path, "w") as f:
     for key in outdict:
         print >>f, key+'=$'+outdict[key]

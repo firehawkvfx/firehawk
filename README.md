@@ -31,7 +31,9 @@ These are some good paid video courses to try-
 ## Getting Started
 
 You will want to experiment with spinning up an AWS account.  You will need to start an instance in your nearest region with this ami - (softnas platinum consumption based for lower compute requirements).  take note of the AMI.  you wont need to leave this instance running.  You can terminate it, and delete the EBS volume.
-Next startup up an open vpn access server instance from the openvpn AMI, and when started, take note of this AMI.  these will need to be added into terraform variables later, because they are unique to your region.
+Next startup up an open vpn access server instance from the openvpn AMI, and when started, take note of this AMI.  these will need to be added into terraform variables later, because they are unique to your region.   
+
+Next head to keybase.io to create an account.  Later, we will use keybase to create a an encryption key (PGP encryption).  Terraform requires a form of PGP encryption when dynamically creating AWS Secrets keys to ensure that the shell output is not readable by any0ne except someone authorised with the PGP key.
 
 ## Security
 openFirehawk is not ready for production.  There are outstanding changes that need to be done to improve security for general use.
@@ -235,7 +237,7 @@ Instances that reside in the private subnet are currently configured through ope
 ## Secrets
 In the secrets file, you will set your own values for these configuration variables.  Many will be different for your environment, and you **absolutely must use unique passwords and set your static ip address for onsite**.
 
-If you ever make commits to a git repo, ensure you never commit unencrypted secrets or anything in the secrets/ path.  vault keys and pem keys for ssh access are stoed in keys/ and these should not be committed to version control.
+If you ever make commits to a git repo, ensure you never commit unencrypted secrets in the secrets/ path.  vault keys and pem keys for ssh access are stored in keys/ and these should not be committed to version control.
 
 if you happen to accidentally publish private information you can remove it with this example to remove the secrets-prod file form the repository.  ensure you have a local backup - this operation will strip all branches.
 https://help.github.com/en/articles/removing-sensitive-data-from-a-repository

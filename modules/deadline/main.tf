@@ -23,7 +23,7 @@ EOF
 
 resource "aws_iam_role_policy" "spot_instance_role_worker_policy" {
   name = "SlaveStatement"
-  role = "${aws_iam_role.spot_instance_role.id}"
+  role = aws_iam_role.spot_instance_role.id
 
   policy = <<EOF
 {
@@ -57,7 +57,7 @@ EOF
 # to limit access to a specific bucket, see here - https://aws.amazon.com/blogs/security/writing-iam-policies-how-to-grant-access-to-an-amazon-s3-bucket/
 resource "aws_iam_role_policy" "spot_instance_role_s3_policy" {
   name = "S3ReadWrite"
-  role = "${aws_iam_role.spot_instance_role.id}"
+  role = aws_iam_role.spot_instance_role.id
 
   policy = <<EOF
 {
@@ -91,7 +91,7 @@ EOF
 }
 resource "aws_iam_role_policy" "spot_instance_role_describe_policy" {
   name = "DescribeInstances"
-  role = "${aws_iam_role.spot_instance_role.id}"
+  role = aws_iam_role.spot_instance_role.id
 
   policy = <<EOF
 {
@@ -112,8 +112,8 @@ EOF
 }
 
 resource "aws_iam_instance_profile" "spot_instance_profile" {
-  name = "${aws_iam_role.spot_instance_role.name}"
-  role = "${aws_iam_role.spot_instance_role.name}"
+  name = aws_iam_role.spot_instance_role.name
+  role = aws_iam_role.spot_instance_role.name
 }
 
 output "spot_instance_profile_arn" {
@@ -285,8 +285,8 @@ resource "aws_iam_user" "deadline_spot_user" {
 
 resource "aws_iam_access_key" "deadline_spot_access_key" {
   user = "${aws_iam_user.deadline_spot_user.name}"
-  pgp_key = "keybase:andrew_graham"
-  #var.pgp_key
+  pgp_key = var.keybase_pgp_key
+  # pgp key: normally in format 'keybase:my_username'
   # see https://www.hiroom2.com/2016/08/14/ubuntu-16-04-create-gpg-key/ to create pgp key in ubuntu
 }
 
