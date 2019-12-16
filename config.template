@@ -279,3 +279,7 @@ TF_VAR_workstation_enabled=insertvalue
 # Usually it makes sense to provision this instance with a low cost instance type, but when testing workloads you may wish to increase it.
 # https://aws.amazon.com/ec2/pricing/on-demand/
 TF_VAR_node_centos_instance_type=insertvalue
+
+# TF_VAR_provision_deadline_spot_plugin:
+# If enabled, the deadline spot fleet plugin will be automatically configured.  note that because we alter the mongo db, this may not be supported with future versions of deadline.  You may need to disable it and configure the plugin manually in these circumstances.
+TF_VAR_provision_deadline_spot_plugin=insertvalue
