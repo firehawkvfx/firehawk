@@ -151,3 +151,5 @@ variable "houdini_license_server_address" {
 variable "s3_disk_size" {
 }
 
+variable "workstation_enabled" {
+}
