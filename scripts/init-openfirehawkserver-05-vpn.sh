@@ -6,6 +6,22 @@ echo "Argument $1"
 echo ""
 ARGS=''
 
+# This is the directory of the current script
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+function to_abs_path {
+    local target="$1"
+    if [ "$target" == "." ]; then
+        echo "$(pwd)"
+    elif [ "$target" == ".." ]; then
+        echo "$(dirname "$(pwd)")"
+    else
+        echo "$(cd "$(dirname "$1")"; pwd)/$(basename "$1")"
+    fi
+}
+SCRIPTDIR=$(to_abs_path $SCRIPTDIR)
+printf "\n...checking scripts directory at $SCRIPTDIR\n\n"
+
 cd /vagrant
 
 if [[ -z $argument ]] ; then
@@ -53,12 +69,18 @@ read userInput
 # vagrant snapshot push
 # vagrant ssh
 
-echo 'site mounts will not be mounted in cloud.  currently this will disable provisioning any render node or remote workstation until vpn is confirmed to function after this step'
-export TF_VAR_site_mounts=false
-echo 'softnas nfs exports will not be mounted on local site'
-export TF_VAR_remote_mounts_on_local=false
+# In this stage, we hold off creation of resources that require the vpn as a dependency.
+# Config overide allows temporary configuration to set a state for your infrastructure.  This is to prevent you from editting the base configuration file in day to day operation once it is configured correctly.
+config_override=$(to_abs_path $TF_VAR_firehawk_path/../secrets/config-override-$TF_VAR_envtier)
+echo "...Config Override path $config_override"
+echo '...Site mounts will not be mounted in cloud.  currently this will disable provisioning any render node or remote workstation until vpn is confirmed to function after this step'
+sudo sed -i 's/^TF_VAR_site_mounts=.*$/TF_VAR_site_mounts=false/' $config_override
+echo '...Softnas nfs exports will not be mounted on local site'
+sudo sed -i 's/^TF_VAR_remote_mounts_on_local=.*$/TF_VAR_remote_mounts_on_local=false/' $config_override
 echo 'on first apply, dont create softnas instance until vpn is working'
-export TF_VAR_softnas_storage=false
+sudo sed -i 's/^TF_VAR_softnas_storage=.*$/TF_VAR_softnas_storage=false/' $config_override
+echo "...Sourcing config override"
+source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override
 
 terraform init
 terraform apply --auto-approve
