@@ -263,3 +263,12 @@ TF_VAR_softnas2_private_ip1_prod=insertvalue
 # When using softnas with high availability and failover, this 2nd interface is used for replication to a 2nd softnas instance.
 # default: TF_VAR_softnas2_private_ip2_prod=10.0.1.12
 TF_VAR_softnas2_private_ip2_prod=insertvalue
+
+# ANSIBLE_FORCE_COLOR:
+# When ansible is run via terraform local exec, colour is not normally visible.  This setting enforces color.
+# default: ANSIBLE_FORCE_COLOR=1
+ANSIBLE_FORCE_COLOR=insertvalue
+
+# TF_VAR_workstation_enabled:
+# terraform and ansible will provision a cloud based workstation if true.
+TF_VAR_workstation_enabled=insertvalue
