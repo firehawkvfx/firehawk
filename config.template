@@ -272,3 +272,10 @@ ANSIBLE_FORCE_COLOR=insertvalue
 # TF_VAR_workstation_enabled:
 # terraform and ansible will provision a cloud based workstation if true.
 TF_VAR_workstation_enabled=insertvalue
+
+# TF_VAR_node_centos_instance_type:
+# The AWS instance type for the node used to provision the spot fleet image from.
+# Note this is only used for provisioning the AMI.  The actual instance types used for rendering are controlled by the spot fleet template, and can vary.
+# Usually it makes sense to provision this instance with a low cost instance type, but when testing workloads you may wish to increase it.
+# https://aws.amazon.com/ec2/pricing/on-demand/
+TF_VAR_node_centos_instance_type=insertvalue
