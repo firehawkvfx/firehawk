@@ -153,5 +153,9 @@ variable "s3_disk_size" {
 
 variable "workstation_enabled" {
 }
+
+variable "node_centos_instance_type" {
+}
+
 variable "keybase_pgp_key" {
 }
