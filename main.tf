@@ -104,7 +104,7 @@ resource "null_resource" "dependency_node_centos" {
 # terraform apply
 
 resource "null_resource" "provision_deadline_spot" {
-  count      = var.site_mounts ? 1 : 0
+  count      = (var.site_mounts && var.provision_deadline_spot_plugin) ? 1 : 0
   depends_on = [null_resource.dependency_deadline_spot, null_resource.dependency_node_centos]
 
   triggers = {
