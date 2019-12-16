@@ -78,7 +78,7 @@ module "vpc" {
 
 module "deadline" {
   source = "./modules/deadline"
-  pgp_key =  file(var.pgp_key_path)
+  keybase_pgp_key = var.keybase_pgp_key
   remote_ip_cidr = var.remote_ip_cidr
   cidr_list = concat([var.remote_subnet_cidr, var.remote_ip_cidr], module.vpc.private_subnets_cidr_blocks)
 }
@@ -362,6 +362,8 @@ module "node" {
   bastion_ip                = module.bastion.public_ip
 
   openfirehawkserver = var.openfirehawkserver
+
+  instance_type = var.node_centos_instance_type
 
   volume_size = var.node_centos_volume_size
 

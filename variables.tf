@@ -153,3 +153,5 @@ variable "s3_disk_size" {
 
 variable "workstation_enabled" {
 }
+variable "keybase_pgp_key" {
+}
