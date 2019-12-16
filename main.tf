@@ -290,7 +290,7 @@ module "workstation" {
   source = "./modules/workstation_pcoip"
   name   = "workstation"
 
-  workstation_enabled = true
+  workstation_enabled = var.workstation_enabled
 
   #options for gateway type are centos7 and pcoip
   gateway_type   = var.gateway_type
