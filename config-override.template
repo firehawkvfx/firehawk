@@ -36,3 +36,8 @@ TF_VAR_site_mounts=insertvalue
 # Enable cloud NFS mounts to be mounted on local nodes.  After the VPN is connected, the remote SoftNAS NFS shares can be mounted on the local workstation.  This is necesary for PDG/TOPS to track completed work items, and allow remote deletion of data.
 # default: TF_VAR_remote_mounts_on_local=true
 TF_VAR_remote_mounts_on_local=insertvalue
+
+# TF_VAR_provision_deadline_spot_plugin:
+# If enabled, the deadline spot fleet plugin will be automatically configured.  
+# Note that because we alter the mongo db, this may not be supported with future versions of deadline.  You may need to disable it and configure the plugin manually in these circumstances.
+TF_VAR_provision_deadline_spot_plugin=insertvalue

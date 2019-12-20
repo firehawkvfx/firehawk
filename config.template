@@ -106,7 +106,8 @@ TF_VAR_public_subnet2_dev=insertvalue
 TF_VAR_firehawk_sync_source=insertvalue
 
 # TF_VAR_softnas_mode_dev:
-# the ability to switch the performance of the softnas between [low/high] to save costs in dev environment.
+# The ability to switch the performance of the softnas between [low/high] to save costs in dev environment.  
+# Since this uses different AMI's for low and high, each allowing different instance ranges to be used, the settings should be identical for dev and prod environments.
 # default: TF_VAR_softnas_mode_dev=high 
 TF_VAR_softnas_mode_dev=insertvalue
 
@@ -182,8 +183,8 @@ TF_VAR_openfirehawkserver_name_dev=insertvalue
 TF_VAR_openfirehawkserver_name_prod=insertvalue
 
 # TF_VAR_deadline_version:
-# The version of the deadline installer.  Upgrading from 10.0.25.2 will require changes to the way the spot event plugin is updated in the DB.  currently, it is a dictionary with key/value pairs, but in more recent versions of deadline this is now a list of lists with key value pairs. Version 10.0.28.2 is not supported.
-# default: TF_VAR_deadline_version=10.0.25.2
+# The version of the deadline installer.  Upgrading from 10.0.25.2 has changes to the way the spot event plugin is updated in the DB.  currently, it is a dictionary with key/value pairs, but in more recent versions of deadline this is now a list of lists with key value pairs.
+# default: TF_VAR_deadline_version=10.1.1.3
 TF_VAR_deadline_version=insertvalue
 
 # TF_VAR_deadline_proxy_root_dir_dev:
@@ -281,5 +282,6 @@ TF_VAR_workstation_enabled=insertvalue
 TF_VAR_node_centos_instance_type=insertvalue
 
 # TF_VAR_provision_deadline_spot_plugin:
-# If enabled, the deadline spot fleet plugin will be automatically configured.  note that because we alter the mongo db, this may not be supported with future versions of deadline.  You may need to disable it and configure the plugin manually in these circumstances.
+# If enabled, the deadline spot fleet plugin will be automatically configured.  
+# Note that because we alter the mongo db, this may not be supported with future versions of deadline.  You may need to disable it and configure the plugin manually in these circumstances.
 TF_VAR_provision_deadline_spot_plugin=insertvalue
