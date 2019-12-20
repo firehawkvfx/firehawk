@@ -68,6 +68,10 @@
 #   - insert
 #   - update
 
+# to query db entries ue something like - > db.EventPluginSettingsCollection.find({"_id": "spot"})
+# > db.EventPluginSettingsCollection.find({"_id": "spot"})
+# { "_id" : "spot", "LastWriteTime" : ISODate("2019-12-16T11:04:30.499Z"), "Name" : "Spot", "PluginEnabled" : 1, "DebugLogging" : false, "Icon" : null, "Limits" : [ ], "DlInit" : [ [ "State", "Disabled" ], [ "ResourceTracker", "True" ], [ "AccessID", "" ], [ "SecretKey", "" ], [ "Logging", "Standard" ], [ "Region", "us-west-2" ], [ "Config", "{}" ], [ "IdleShutdown", "10" ], [ "DeleteTerminatedSlaves", "False" ], [ "DeleteInterruptedSlaves", "False" ], [ "StrictHardCap", "True" ], [ "StaggerInstances", "50" ], [ "PreJobTaskMode", "Conservative" ], [ "AWSInstanceStatus", "Disabled" ] ], "Meta" : {  } }
+
 - name: init spot template - json
   shell: | 
     set -x
@@ -77,16 +81,64 @@
       var IdleShutdown = "2";
       var spot_json = cat("/secrets/dev/spot-fleet-templates/config_generated.json");
       db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"PluginEnabled": "1"}});
-      db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.State": "Global Enabled"}});
-      db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.AccessID": "{{ spot_access_key_id }}"}});
-      db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.SecretKey": "{{ spot_secret_key }}"}});
-      db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.Logging": "Verbose"}});
-      db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.Region": "{{ aws_region }}"}});
-      db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.Config": spot_json}});
-      db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.IdleShutdown": IdleShutdown}});
-      db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.DeleteTerminatedSlaves": "True"}});
-      db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.StrictHardCap": "True"}});
-      db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit.StaggerInstances": StaggerInstances}});'
+      db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit": [
+        [
+          "State",
+          "Global Enabled"
+        ],
+        [
+          "ResourceTracker",
+          "True"
+        ],
+        [
+          "AccessID",
+          "{{ spot_access_key_id }}"
+        ],
+        [
+          "SecretKey",
+          "{{ spot_secret_key }}"
+        ],
+        [
+          "Logging",
+          "Verbose"
+        ],
+        [
+          "Region",
+          "{{ aws_region }}"
+        ],
+        [
+          "Config",
+          spot_json
+        ],
+        [
+          "IdleShutdown",
+          IdleShutdown
+        ],
+        [
+          "DeleteTerminatedSlaves",
+          "True"
+        ],
+        [
+          "DeleteInterruptedSlaves",
+          "False"
+        ],
+        [
+          "StrictHardCap",
+          "True"
+        ],
+        [
+          "StaggerInstances",
+          StaggerInstances
+        ],
+        [
+          "PreJobTaskMode",
+          "Conservative"
+        ],
+        [
+          "AWSInstanceStatus",
+          "Disabled"
+        ]
+      ]}});'
   become: true
   # register: deadline_db
   no_log: true
