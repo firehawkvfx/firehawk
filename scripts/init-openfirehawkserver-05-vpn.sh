@@ -24,6 +24,8 @@ printf "\n...checking scripts directory at $SCRIPTDIR\n\n"
 
 cd /vagrant
 
+tf_action="apply"
+
 if [[ -z $argument ]] ; then
   echo "Error! you must specify an environment --dev or --prod" 1>&2
   exit 64
@@ -39,6 +41,11 @@ else
       echo "using prod environment"
       source ./update_vars.sh --prod
       ;;
+    -p|--plan)
+      tf_action="plan"
+      echo "using prod environment"
+      source ./update_vars.sh --prod
+      ;;
     *)
       raise_error "Unknown argument: ${argument}"
       return
@@ -49,8 +56,6 @@ fi
 echo 'Use vagrant reload and vagrant ssh after executing each .sh script'
 echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 
-keybase pgp encrypt -m "testing pgp decryption" | keybase pgp decrypt
-
 printf "\n\nHave you installed keybase and initialised pgp?\n\nIf not it is highly recommended that you create a profile on your phone for 2fa."
 
 echo "Press ENTER if you have initialised a keybase pgp passphrase for this shell. Otherwise exit (ctrl+c) and run:"
@@ -58,6 +63,8 @@ echo "keybase login"
 echo "keybase pgp gen"
 printf 'keybase pgp encrypt -m "test_secret" | keybase pgp decrypt\n'
 read userInput
+
+keybase pgp encrypt -m "testing pgp decryption" | keybase pgp decrypt
 
 # This stage configures the vpc and vpn.  after this stage, vagrant reload and test ping the private ip of the bastion host to ensure the vpn is working.
 
@@ -83,7 +90,13 @@ echo "...Sourcing config override"
 source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override
 
 terraform init
-terraform apply --auto-approve
+if [[ "$tf_action" == "plan" ]]; then
+  echo "running terraform plan"
+  terraform plan
+elif [[ "$tf_action" == "apply" ]]; then
+  echo "running terraform apply"
+  terraform apply --auto-approve
+fi
 
 echo "IMPORTANT: After this first terraform apply is succesful, you must exit this vm and use 'vagrant reload' to apply the promisc settings to the NIC for routing to work."
 #  THIS NEEDS TO BE FIXED OR MOUNTS from other systems onsite WONT WORK without reboot. you will get an error on the render node/remote workstation.  it would be good to have a single execute install.
