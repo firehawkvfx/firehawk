@@ -63,9 +63,9 @@ resource "aws_security_group" "node_centos" {
   # For OpenVPN Client Web Server & Admin Web UI
 
   ingress {
-    protocol    = "tcp"
-    from_port   = 22
-    to_port     = 22
+    protocol  = "tcp"
+    from_port = 22
+    to_port   = 22
     # TF-UPGRADE-TODO: In Terraform v0.10 and earlier, it was sometimes necessary to
     # force an interpolation expression to be interpreted as a list by wrapping it
     # in an extra set of list brackets. That form was supported for compatibilty in
@@ -167,27 +167,27 @@ resource "aws_security_group" "node_centos" {
 
 resource "null_resource" "dependency_softnas_and_bastion" {
   triggers = {
-    softnas_private_ip1       = join(",", var.softnas_private_ip1)
-    bastion_ip                = var.bastion_ip
-    provision_softnas_volumes = join(",", var.provision_softnas_volumes)
+    softnas_private_ip1             = join(",", var.softnas_private_ip1)
+    bastion_ip                      = var.bastion_ip
+    provision_softnas_volumes       = join(",", var.provision_softnas_volumes)
     attach_local_mounts_after_start = join(",", var.attach_local_mounts_after_start)
   }
 }
 
 data "aws_subnet_ids" "private_subnet" {
-  vpc_id = "${var.vpc_id}"
+  vpc_id = var.vpc_id
 }
 
 data "aws_subnet" "private_subnet" {
-  count = "${length(var.private_subnet_ids)}"
-  id    = "${var.private_subnet_ids[count.index]}"
+  count = length(var.private_subnet_ids)
+  id    = var.private_subnet_ids[count.index]
 }
 
 variable "volume_size" {}
 
 resource "aws_instance" "node_centos" {
-  count      = var.site_mounts ? 1 : 0
-  depends_on = [null_resource.dependency_softnas_and_bastion]
+  count                = var.site_mounts ? 1 : 0
+  depends_on           = [null_resource.dependency_softnas_and_bastion]
   iam_instance_profile = var.instance_profile_name
 
   #instance type and ami are determined by the gateway type variable for if you want a graphical or non graphical instance.
@@ -203,14 +203,14 @@ resource "aws_instance" "node_centos" {
 
   key_name               = var.key_name
   subnet_id              = element(var.private_subnet_ids, count.index)
-  private_ip             = cidrhost( "${data.aws_subnet.private_subnet[count.index].cidr_block}" , 20)
+  private_ip             = cidrhost("${data.aws_subnet.private_subnet[count.index].cidr_block}", 20)
   vpc_security_group_ids = [aws_security_group.node_centos.id]
   tags = {
     Name  = "node_centos"
     Route = "private"
     Role  = "node_centos"
   }
-# cloud init resets network delay settings if configured outside of cloud-init
+  # cloud init resets network delay settings if configured outside of cloud-init
   user_data = <<USERDATA
 #cloud-config
 network:
@@ -219,7 +219,7 @@ USERDATA
 }
 
 resource "null_resource" "provision_node_centos" {
-  count      = var.site_mounts ? 1 : 0
+  count = var.site_mounts ? 1 : 0
   #count      = 0
   depends_on = [aws_instance.node_centos]
 
@@ -302,12 +302,12 @@ resource "aws_ami_from_instance" "node_centos" {
 
 #wakeup after ami
 resource "null_resource" "start-node-after-ami" {
-  count              = var.site_mounts ? 1 : 0
+  count = var.site_mounts ? 1 : 0
   triggers = {
     ami_id = aws_ami_from_instance.node_centos[0].id
   }
-  
-  depends_on         = [aws_ami_from_instance.node_centos]
+
+  depends_on = [aws_ami_from_instance.node_centos]
 
   provisioner "local-exec" {
     command = "aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id}"
@@ -316,7 +316,7 @@ resource "null_resource" "start-node-after-ami" {
 
 # wakeup a node after sleep.  ensure the softnas instaqnce has finished creating its volumes otherwise mounts will not work - dependency_softnas_and_bastion
 resource "null_resource" "start-node" {
-  count = !var.sleep && var.site_mounts && var.wakeable ? 1 : 0
+  count      = ! var.sleep && var.site_mounts && var.wakeable ? 1 : 0
   depends_on = [null_resource.dependency_softnas_and_bastion]
 
   provisioner "local-exec" {

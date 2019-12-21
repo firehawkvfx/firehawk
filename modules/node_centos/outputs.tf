@@ -19,7 +19,7 @@ output "ami_id" {
 
 locals {
   ebs_block_device = {
-    for bd in aws_ami_from_instance.node_centos[0].ebs_block_device:
+    for bd in aws_ami_from_instance.node_centos[0].ebs_block_device :
     bd.device_name => bd
   }
 }

@@ -157,9 +157,9 @@ resource "aws_security_group" "workstation_centos" {
   # For OpenVPN Client Web Server & Admin Web UI
 
   ingress {
-    protocol    = "tcp"
-    from_port   = 22
-    to_port     = 22
+    protocol  = "tcp"
+    from_port = 22
+    to_port   = 22
     # TF-UPGRADE-TODO: In Terraform v0.10 and earlier, it was sometimes necessary to
     # force an interpolation expression to be interpreted as a list by wrapping it
     # in an extra set of list brackets. That form was supported for compatibilty in
@@ -287,9 +287,9 @@ variable "softnas_private_ip1" {
 # This null resource creates a dependency on the completed volume provisioning from the softnas instance, and the existance of the bastion host.
 resource "null_resource" "dependency_softnas_and_bastion" {
   triggers = {
-    softnas_private_ip1       = join(",", var.softnas_private_ip1)
-    bastion_ip                = var.bastion_ip
-    provision_softnas_volumes = join(",", var.provision_softnas_volumes)
+    softnas_private_ip1             = join(",", var.softnas_private_ip1)
+    bastion_ip                      = var.bastion_ip
+    provision_softnas_volumes       = join(",", var.provision_softnas_volumes)
     attach_local_mounts_after_start = join(",", var.attach_local_mounts_after_start)
   }
 }
@@ -339,7 +339,7 @@ variable "public_domain_name" {
 
 resource "null_resource" "workstation_pcoip" {
   depends_on = [aws_instance.workstation_pcoip]
-  count      = !local.skip_update && var.site_mounts && var.workstation_enabled ? 1 : 0
+  count      = ! local.skip_update && var.site_mounts && var.workstation_enabled ? 1 : 0
 
   triggers = {
     instanceid = aws_instance.workstation_pcoip[0].id

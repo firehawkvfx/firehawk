@@ -73,25 +73,25 @@ module "vpc" {
   openvpn_admin_user = var.openvpn_admin_user
   openvpn_admin_pw   = var.openvpn_admin_pw
 
-  bastion_ip         = module.bastion.public_ip
+  bastion_ip = module.bastion.public_ip
 }
 
 module "deadline" {
-  source = "./modules/deadline"
+  source          = "./modules/deadline"
   keybase_pgp_key = var.keybase_pgp_key
-  remote_ip_cidr = var.remote_ip_cidr
-  cidr_list = concat([var.remote_subnet_cidr, var.remote_ip_cidr], module.vpc.private_subnets_cidr_blocks)
+  remote_ip_cidr  = var.remote_ip_cidr
+  cidr_list       = concat([var.remote_subnet_cidr, var.remote_ip_cidr], module.vpc.private_subnets_cidr_blocks)
 }
 
 resource "null_resource" "dependency_deadline_spot" {
   triggers = {
-    spot_access_key_id       = module.deadline.spot_access_key_id
-    spot_secret              = module.deadline.spot_secret
+    spot_access_key_id = module.deadline.spot_access_key_id
+    spot_secret        = module.deadline.spot_secret
   }
 }
 
 resource "null_resource" "dependency_node_centos" {
-  count      = var.site_mounts ? 1 : 0
+  count = var.site_mounts ? 1 : 0
   triggers = {
     ami_id = module.node.ami_id
   }
@@ -108,31 +108,31 @@ resource "null_resource" "provision_deadline_spot" {
   depends_on = [null_resource.dependency_deadline_spot, null_resource.dependency_node_centos]
 
   triggers = {
-    ami_id = module.node.ami_id
-    config_template_sha1 = "${sha1(file("/secrets/dev/spot-fleet-templates/config_template.json"))}"
-    deadline_spot_sha1 = "${sha1(file("/vagrant/ansible/deadline-spot.yaml"))}"
+    ami_id                  = module.node.ami_id
+    config_template_sha1    = "${sha1(file("/secrets/dev/spot-fleet-templates/config_template.json"))}"
+    deadline_spot_sha1      = "${sha1(file("/vagrant/ansible/deadline-spot.yaml"))}"
     deadline_spot_role_sha1 = "${sha1(file("/vagrant/ansible/roles/deadline-spot/tasks/main.yml"))}"
-    deadline_roles_tf_sha1 = "${sha1(file("/vagrant/modules/deadline/main.tf"))}"
-    spot_access_key_id = module.deadline.spot_access_key_id
-    spot_secret        = module.deadline.spot_secret
-    volume_size = var.node_centos_volume_size
-    volume_type = var.node_centos_volume_type
+    deadline_roles_tf_sha1  = "${sha1(file("/vagrant/modules/deadline/main.tf"))}"
+    spot_access_key_id      = module.deadline.spot_access_key_id
+    spot_secret             = module.deadline.spot_secret
+    volume_size             = var.node_centos_volume_size
+    volume_type             = var.node_centos_volume_type
   }
-  
+
   # needs subnets id eg subnet-019d702254060c2f9, and ami_id, arn id eg arn:aws:iam::972620357255:instance-profile/DeadlineSlaveRole, snapshot id snap-06c90e54aaf77dbe5, security group id, sg-0b1e4b21eb893f712
   provisioner "local-exec" {
     command = <<EOT
       set -x
       cd /vagrant
-      echo ${ module.deadline.spot_access_key_id }
-      echo ${ module.deadline.spot_secret }
+      echo ${module.deadline.spot_access_key_id}
+      echo ${module.deadline.spot_secret}
       ANSIBLE_STDOUT_CALLBACK=debug ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-spot.yaml -vvv --extra-vars 'volume_type=${var.node_centos_volume_type} volume_size=${var.node_centos_volume_size} ami_id=${module.node.ami_id} snapshot_id=${module.node.snapshot_id} subnet_id=${module.vpc.private_subnets[0]} spot_instance_profile_arn="${module.deadline.spot_instance_profile_arn}" security_group_id=${module.node.security_group_id} spot_access_key_id=${module.deadline.spot_access_key_id} spot_secret=${module.deadline.spot_secret}'
 EOT
   }
 }
 
 output "node_ami_id" {
-  value = "${module.node.ami_id}"
+  value = module.node.ami_id
 }
 
 # to debug only
@@ -313,10 +313,10 @@ module "workstation" {
   public_domain_name = var.public_domain
 
   # dependencies
-  softnas_private_ip1       = module.softnas.softnas1_private_ip
-  provision_softnas_volumes = module.softnas.provision_softnas_volumes
+  softnas_private_ip1             = module.softnas.softnas1_private_ip
+  provision_softnas_volumes       = module.softnas.provision_softnas_volumes
   attach_local_mounts_after_start = module.softnas.attach_local_mounts_after_start
-  bastion_ip                = module.bastion.public_ip
+  bastion_ip                      = module.bastion.public_ip
 
   #sleep will stop instances to save cost during idle time.
   sleep                      = var.sleep
@@ -356,10 +356,10 @@ module "node" {
   remote_subnet_cidr          = var.remote_subnet_cidr
 
   # dependencies
-  softnas_private_ip1       = module.softnas.softnas1_private_ip
-  provision_softnas_volumes = module.softnas.provision_softnas_volumes
+  softnas_private_ip1             = module.softnas.softnas1_private_ip
+  provision_softnas_volumes       = module.softnas.provision_softnas_volumes
   attach_local_mounts_after_start = module.softnas.attach_local_mounts_after_start
-  bastion_ip                = module.bastion.public_ip
+  bastion_ip                      = module.bastion.public_ip
 
   openfirehawkserver = var.openfirehawkserver
 

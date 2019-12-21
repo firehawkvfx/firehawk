@@ -610,7 +610,7 @@ output "provision_softnas_volumes" {
 
 # wakeup a node after sleep
 resource "null_resource" "start-softnas" {
-  count      =  !var.sleep && var.softnas_storage ? 1 : 0
+  count      = ! var.sleep && var.softnas_storage ? 1 : 0
   depends_on = [null_resource.provision_softnas_volumes]
 
   #,"null_resource.mount_volumes_onsite"]
@@ -651,7 +651,7 @@ EOT
 }
 
 resource "null_resource" "attach_local_mounts_after_start" {
-  count      =  !var.sleep && var.softnas_storage ? 1 : 0
+  count      = ! var.sleep && var.softnas_storage ? 1 : 0
   depends_on = [null_resource.start-softnas]
 
   #,"null_resource.mount_volumes_onsite"]
