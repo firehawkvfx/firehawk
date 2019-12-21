@@ -281,6 +281,7 @@ EOF
 
 resource "aws_iam_user" "deadline_spot_user" {
   name = "deadline_spot_user"
+  force_destroy = true
 }
 
 resource "aws_iam_access_key" "deadline_spot_access_key" {

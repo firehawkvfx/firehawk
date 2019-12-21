@@ -31,10 +31,9 @@ variable "private_key" {
 }
 
 variable "ami" {
-  #v2.5
-  #default = "ami-7777b515"
-  #v2.6.1
-  default = "ami-05fdd828e5a7530b0"
+  # open vpn ami id / version
+  #v2.7.5
+  default = "ami-0d8ba0e9e6b6d18b7"
 }
 
 variable "instance_type" {

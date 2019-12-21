@@ -42,11 +42,6 @@ variable "private_subnets" {
 variable "public_subnets" {
   default = []
 }
-
-# due to aws security group limits, we need a single range to encompass all private subnets for softnas security groups to not exceed the limit.
-variable "all_private_subnets_cidr_range" {
-}
-
 #vpn variables
 
 variable "remote_ip_cidr" {

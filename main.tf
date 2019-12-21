@@ -47,7 +47,7 @@ module "vpc" {
   private_subnets = [var.private_subnet1, var.private_subnet2]
   public_subnets  = [var.public_subnet1, var.public_subnet2]
 
-  all_private_subnets_cidr_range = "10.0.0.0/16"
+  vpc_cidr = var.vpc_cidr
 
   #vpn variables
 
@@ -154,7 +154,7 @@ module "bastion" {
 
   #options for gateway type are centos7 and pcoip
   vpc_id                      = module.vpc.vpc_id
-  vpc_cidr                    = module.vpc.vpc_cidr_block
+  vpc_cidr                    = var.vpc_cidr
   vpn_cidr                    = var.vpn_cidr
   remote_ip_cidr              = var.remote_ip_cidr
   public_subnet_ids           = module.vpc.public_subnets
@@ -217,7 +217,7 @@ module "softnas" {
   public_domain                  = var.public_domain
   private_subnets                = module.vpc.private_subnets
   private_subnets_cidr_blocks    = module.vpc.private_subnets_cidr_blocks
-  all_private_subnets_cidr_range = module.vpc.all_private_subnets_cidr_range
+  vpc_cidr = var.vpc_cidr
   public_subnets_cidr_blocks     = module.vpc.public_subnets_cidr_blocks
   remote_subnet_cidr             = var.remote_subnet_cidr
   remote_ip_cidr                 = var.remote_ip_cidr
@@ -256,7 +256,7 @@ variable "pcoip_skip_update" {
 #   #options for gateway type are centos7 and pcoip
 #   gateway_type      = "${var.gateway_type}"
 #   vpc_id            = "${module.vpc.vpc_id}"
-#   vpc_cidr          = "${module.vpc.vpc_cidr_block}"
+#   vpc_cidr          = "${var.vpc_cidr}"
 #   vpn_cidr          = "${var.vpn_cidr}"
 #   remote_ip_cidr    = "${var.remote_ip_cidr}"
 #   public_subnet_ids = "${module.vpc.public_subnets}"
@@ -295,7 +295,7 @@ module "workstation" {
   #options for gateway type are centos7 and pcoip
   gateway_type   = var.gateway_type
   vpc_id         = module.vpc.vpc_id
-  vpc_cidr       = module.vpc.vpc_cidr_block
+  vpc_cidr = var.vpc_cidr
   vpn_cidr       = var.vpn_cidr
   remote_ip_cidr = var.remote_ip_cidr
 
@@ -348,7 +348,7 @@ module "node" {
 
   # options for gateway type are centos7 and pcoip
   vpc_id                      = module.vpc.vpc_id
-  vpc_cidr                    = module.vpc.vpc_cidr_block
+  vpc_cidr                    = var.vpc_cidr
   vpn_cidr                    = var.vpn_cidr
   remote_ip_cidr              = var.remote_ip_cidr
   private_subnet_ids          = module.vpc.private_subnets

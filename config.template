@@ -116,6 +116,11 @@ TF_VAR_softnas_mode_dev=insertvalue
 # default: TF_VAR_softnas_mode_prod=high 
 TF_VAR_softnas_mode_prod=insertvalue
 
+# TF_VAR_vpc_cidr:
+# This is the IP range (CIDR notation) of your cloud subnet that all AWS private addresses will reside in.
+# default: TF_VAR_softnas_mode_prod=10.0.0.0/16
+TF_VAR_vpc_cidr=insertvalue
+
 # TF_VAR_remote_subnet_cidr:
 # This is the IP range (CIDR notation) of your subnet onsite that the firehawkserver vm will reside in, and that other onsite nodes reside in.
 # eg: TF_VAR_remote_subnet_cidr=192.168.29.0/24

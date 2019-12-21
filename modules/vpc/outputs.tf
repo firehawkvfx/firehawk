@@ -14,8 +14,8 @@ output "private_subnets_cidr_blocks" {
   value = module.vpc.private_subnets_cidr_blocks
 }
 
-output "all_private_subnets_cidr_range" {
-  value = var.all_private_subnets_cidr_range
+output "vpc_cidr" {
+  value = var.vpc_cidr
 }
 
 output "public_subnets" {

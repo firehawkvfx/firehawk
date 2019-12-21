@@ -336,11 +336,11 @@ Here you should see the connection was initialised.  if not, try running this pl
 
 If you make changes to your infrastructure that you want to recover from, a good way to replace resources is something like this...  lets say I just moved to a different network that has a different subnet, or my local IP changes for openfirehawkserver.  its easy to to destroy my openvpn instance and start over
 
-    terraform taint -module vpc.vpn.openvpn aws_instance.openvpn
+    terraform taint module.vpc.module.vpn.module.openvpn.aws_instance.openvpn
 
 - Now I should also taint what is downstream if there are dependencies that aren't being picked up too, like the eip.
 
-    terraform taint -module vpc.vpn.openvpn aws_eip.openvpnip
+    terraform taint module.vpc.module.vpn.module.openvpn.aws_eip.openvpnip
     The resource aws_eip.openvpnip in the module root.vpc.vpn.openvpn has been marked as tainted!
 
 After I'm happy with this I can run terraform apply to recrete the vpn.

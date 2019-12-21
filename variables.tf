@@ -2,6 +2,9 @@ variable "sleep" {
   default = false
 }
 
+variable "vpc_cidr" {
+}
+
 #you can get an ssl certificate arn by verifying your domain with aws certificate manager.
 variable "cert_arn" {
 }

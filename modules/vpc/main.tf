@@ -45,7 +45,7 @@ module "vpn" {
   igw_id = module.vpc.igw_id
 
   vpc_id   = module.vpc.vpc_id
-  vpc_cidr = module.vpc.vpc_cidr_block
+  vpc_cidr = var.vpc_cidr
 
   #the cidr range that the vpn will assign to remote addresses within the vpc if routing.
   vpn_cidr           = var.vpn_cidr
