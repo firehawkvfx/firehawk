@@ -267,19 +267,19 @@ source_vars () {
     # If initialising vagrant vars, no encryption is required
     if [[ -z "$var_file" ]] || [[ "$var_file" = "secrets" ]]; then
         var_file="secrets-$TF_VAR_envtier"
-        printf "\nUsing vault file $var_file\n"
+        printf "...Using vault file $var_file\n"
         template_path="$TF_VAR_firehawk_path/secrets.template"
     elif [[ "$var_file" = "vagrant" ]]; then
-        printf '\nUsing variable file vagrant. No encryption/decryption will be used.\n'
+        printf '...Using variable file vagrant. No encryption/decryption will be used.\n'
         encrypt_mode="none"
         template_path="$TF_VAR_firehawk_path/vagrant.template"
     elif [[ "$var_file" = "config" ]]; then
-        printf '\nUsing variable file config. No encryption/decryption will be used.\n'
+        printf '...Using variable file config. No encryption/decryption will be used.\n'
         encrypt_mode="none"
         template_path="$TF_VAR_firehawk_path/config.template"
     elif [[ "$var_file" = "config-override" ]]; then
         var_file="config-override-$TF_VAR_envtier"
-        printf "\nUsing variable file $var_file. No encryption/decryption will be used.\n"
+        printf "...Using variable file $var_file. No encryption/decryption will be used.\n"
         encrypt_mode="none"
         template_path="$TF_VAR_firehawk_path/config-override.template"
     else
@@ -293,7 +293,6 @@ source_vars () {
 
     # After a var file is source we also store the modified date of that file as a dynamic variable name.  if the modified date of the file on the next run is identical to the environment variable, then it doesn't need to be sourced again.  This allows detection of the contents being changed and sourcing the file if true.
 
-    echo "...Get basename for var file to test modified date var from last source"
     var_file_basename="$(echo $var_file | tr '-' '_')"
     var_file="$(to_abs_path $TF_VAR_firehawk_path/../secrets/$var_file)"
 
