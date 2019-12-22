@@ -27,6 +27,24 @@
   remote_user: openvpnas
   become: true
 
+  # install pexpect and its dependencies to use passwd
+  roles:
+    - role: init-packages
+
+  # set user password.  this is a temporary measure as it should be handled by user data, but for some reason open vpn isn't accepting that approach as of 2.71““““““““““““
+  post_tasks:
+    - name: set user pass
+      expect:
+        command: passwd {{ openvpn_user }}
+        responses:
+          (?i)password: "{{ openvpn_user_pw }}"
+          (?i)Retype new password: "{{ openvpn_user_pw }}"
+      no_log: true
+
+- hosts: "{{ variable_host | default('openvpnip') }}"
+  remote_user: openvpnas
+  become: true
+
   vars:
     client_network: None
     client_netmask_bits: None
