@@ -76,6 +76,24 @@ module "vpc" {
   bastion_ip = module.bastion.public_ip
 }
 
+output "vpn_private_ip" {
+  value = module.vpc.vpn_private_ip
+}
+
+output "snapshot_id" {
+  value = module.node.snapshot_id
+}
+
+output "node_ami_id" {
+  value = module.node.ami_id
+}
+
+# if a new image is detected, TF will update the spot template and spot plugin json settings
+# consider using md5 of spot template to trigger an update.
+# alternative do it manually with
+# terraform taint null_resource.provision_deadline_spot[0]
+# terraform apply
+
 module "deadline" {
   source          = "./modules/deadline"
   keybase_pgp_key = var.keybase_pgp_key
@@ -96,12 +114,6 @@ resource "null_resource" "dependency_node_centos" {
     ami_id = module.node.ami_id
   }
 }
-
-# if a new image is detected, TF will update the spot template and spot plugin json settings
-# consider using md5 of spot template to trigger an update.
-# alternative do it manually with
-# terraform taint null_resource.provision_deadline_spot[0]
-# terraform apply
 
 resource "null_resource" "provision_deadline_spot" {
   count      = (var.site_mounts && var.provision_deadline_spot_plugin) ? 1 : 0
@@ -131,9 +143,10 @@ EOT
   }
 }
 
-output "node_ami_id" {
-  value = module.node.ami_id
+output "spot_access_key_id" {
+  value = module.deadline.spot_access_key_id
 }
+
 
 # to debug only
 output "vpc_cidr" {
