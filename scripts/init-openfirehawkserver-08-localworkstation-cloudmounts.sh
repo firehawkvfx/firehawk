@@ -33,16 +33,9 @@ fi
 echo 'Use vagrant reload and vagrant ssh after executing each .sh script'
 echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 
-# this stage will configure mounts from onsite onto the cloud site, and vice versa.
-
-# vagrant reload
-# vagrant ssh
-
-# test the vpn buy logging into softnas and ping another system on your local network.
-
-# export TF_VAR_softnas_storage=true
-# export TF_VAR_site_mounts=true
-# export TF_VAR_remote_mounts_on_local=true
+# This stage will configure mounts from onsite onto the cloud site, and vice versa.
+# Test the vpn by logging into softnas and ping another system on your local network.
+# Modify the config overiide file to achieve desired state.
 
 config_override=$(to_abs_path $TF_VAR_firehawk_path/../secrets/config-override-$TF_VAR_envtier)
 echo "...Config Override path $config_override"
