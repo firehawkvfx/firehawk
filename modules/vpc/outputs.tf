@@ -41,4 +41,3 @@ output "private_route_table_ids" {
 output "vpn_private_ip" {
   value = module.vpn.private_ip
 }
-
