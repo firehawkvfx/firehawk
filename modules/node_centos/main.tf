@@ -174,10 +174,6 @@ resource "null_resource" "dependency_softnas_and_bastion" {
   }
 }
 
-data "aws_subnet_ids" "private_subnet" {
-  vpc_id = var.vpc_id
-}
-
 data "aws_subnet" "private_subnet" {
   count = length(var.private_subnet_ids)
   id    = var.private_subnet_ids[count.index]
