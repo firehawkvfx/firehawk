@@ -29,8 +29,6 @@
     become: true
     when: init
   
-  - debug: msg="{{ slurpfile['content'] | b64decode }}"
-  
   - name: "Wait until Softnas Boot Init completes before Stopping the instance."
     wait_for:
       path: /tmp/softnas.boot
@@ -44,7 +42,4 @@
       src: /tmp/softnas.boot
     register: slurpfilepost
     become: true
-    when: init
-  
-  - debug: msg="{{ slurpfilepost['content'] | b64decode }}"
     when: init
