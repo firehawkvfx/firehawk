@@ -23,6 +23,8 @@ variable "remote_ip_cidr" {
 variable "public_subnets_cidr_blocks" {
 }
 
+variable "route_public_domain_name" {}
+
 variable "private_subnets_cidr_blocks" {
 }
 

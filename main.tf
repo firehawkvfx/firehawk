@@ -164,6 +164,8 @@ module "bastion" {
 
   name = "bastion"
 
+  route_public_domain_name = var.route_public_domain_name
+
   # region will determine the ami
   region = var.aws_region
 

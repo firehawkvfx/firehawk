@@ -34,8 +34,12 @@
     mode: 0600
     owner: vagrant
     content: |
-      host bastion
-        Hostname bastion.{{ public_domain }}
+      Host bastion
+        Hostname {{ bastion_address }}
+        User centos 
+        IdentityFile  {{ ansible_ssh_private_key_file }}
+
+      Host "{{ bastion_address }}"
         User centos 
         IdentityFile  {{ ansible_ssh_private_key_file }}
 

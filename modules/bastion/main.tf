@@ -99,6 +99,11 @@ USERDATA
 
 }
 
+locals {
+  bastion_address = var.route_public_domain_name ? "bastion.${var.public_domain_name}":"${aws_eip.bastionip.public_ip}"
+}
+
+
 resource "null_resource" "provision_bastion" {
   depends_on = [
     aws_instance.bastion,
@@ -108,6 +113,7 @@ resource "null_resource" "provision_bastion" {
 
   triggers = {
     instanceid = aws_instance.bastion.id
+    bastion_address = local.bastion_address
   }
 
   provisioner "remote-exec" {
@@ -126,7 +132,7 @@ resource "null_resource" "provision_bastion" {
     command = <<EOT
       set -x
       cd /vagrant
-      ansible-playbook -i ansible/inventory/hosts ansible/ssh-add-public-host.yaml -v --extra-vars "public_ip=${aws_eip.bastionip.public_ip} public_address=bastion.${var.public_domain_name} set_bastion=true"
+      ansible-playbook -i ansible/inventory/hosts ansible/ssh-add-public-host.yaml -v --extra-vars "public_ip=${aws_eip.bastionip.public_ip} public_address=${local.bastion_address} bastion_address=${local.bastion_address} set_bastion=true"
   
 EOT
 
@@ -140,11 +146,12 @@ variable "public_domain_name" {
 }
 
 resource "aws_route53_record" "bastion_record" {
-  zone_id = var.route_zone_id
-  name    = "bastion.${var.public_domain_name}"
+  count   = var.route_public_domain_name ? 1 : 0
+  zone_id = element(concat(list(var.route_zone_id), list("")), 0)
+  name    = element(concat(list("bastion.${var.public_domain_name}"), list("")), 0)
   type    = "A"
   ttl     = 300
-  records = [aws_eip.bastionip.public_ip]
+  records = [element(concat(list(aws_eip.bastionip.public_ip), list("")), 0)]
 }
 
 resource "null_resource" "start-bastion" {
