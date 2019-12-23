@@ -238,9 +238,9 @@
 
 # After install sync houdini download with bucket
 
-- name: "ensure the houdini installer exists in the s3 bucket installers.{{ public_domain }} Push if it doesn't."
+- name: "ensure the houdini installer exists in the s3 bucket {{ installers_bucket }} Push if it doesn't."
   s3_sync:
-    bucket: "installers.{{ public_domain }}"
+    bucket: "{{ installers_bucket }}"
     file_root: "{{ download_to_dir }}"
     include: "{{ houdini_linux_filename }}"
     aws_access_key: "{{ aws_access_key_s3user }}"

@@ -23,6 +23,9 @@ public_domain: "{{ lookup('env','TF_VAR_public_domain') }}"
 # eg I may need to reference houdinilicenceserver.prod.example.com in both the prod and dev environments for render nodes to be tested.
 public_domain_prod: "{{ lookup('env','TF_VAR_public_domain_prod') }}"
 
+bucket_extension: "{{ lookup('env','TF_VAR_bucket_extension') }}"
+installers_bucket: "installers.{{ bucket_extension }}"
+
 private_subnet1: "{{ lookup('env', 'TF_VAR_private_subnet1') }}"
 private_subnet1_dev: "{{ lookup('env', 'TF_VAR_private_subnet1_dev') }}"
 private_subnet1_prod: "{{ lookup('env', 'TF_VAR_private_subnet1_prod') }}"

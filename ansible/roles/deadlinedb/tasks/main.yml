@@ -54,6 +54,16 @@
   tags:
   - install
 
+- name: ensure an s3 bucket exists
+  s3_bucket:
+    name: "{{ installers_bucket }}"
+    aws_access_key: "{{ aws_access_key_s3user }}"
+    aws_secret_key: "{{ aws_secret_key_s3user }}"
+    region: "{{ aws_region }}"
+  tags:
+  - install
+  - sync_installers
+
 - name: install deadline db
   shell: |
     set -x
@@ -66,7 +76,7 @@
 
 - name: ensure the deadline linux installer tar exists in the s3 bucket.  Push if it doesn't.
   s3_sync:
-    bucket: "installers.{{ public_domain }}"
+    bucket: "{{ installers_bucket }}"
     file_root: "{{ deadline_linux_installers_tar | dirname }}"
     include: "{{ deadline_linux_installers_tar | basename }}"
     aws_access_key: "{{ aws_access_key_s3user }}"

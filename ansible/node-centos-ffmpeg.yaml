@@ -21,10 +21,9 @@
   vars:
     variable_user: centos
     bastionip: "{{ groups['bastionip'][0] }}"
-    hostname: "node1.{{ public_domain }}"
     skip_packages: false
     houdini_install_type: node
-    bucket: "installers.{{ public_domain }}"
+    bucket: "{{ installers_bucket }}"
 
 
   tasks:

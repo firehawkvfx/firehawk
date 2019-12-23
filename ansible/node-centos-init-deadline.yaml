@@ -4,36 +4,36 @@
   
   vars:
     sync_downloads: false
-    bucket: "installers.{{ public_domain }}"
+    bucket: "{{ installers_bucket }}"
 
   tasks:
   - name: ensure an s3 bucket exists to store large files / installers for faster redeployment.
     s3_bucket:
-      name: "installers.{{ public_domain }}"
-      aws_access_key: "{{ aws_access_key }}"
-      aws_secret_key: "{{ aws_secret_key }}"
+      name: "{{ bucket }}"
+      aws_access_key: "{{ aws_access_key_s3user }}"
+      aws_secret_key: "{{ aws_secret_key_s3user }}"
       region: "{{ aws_region }}"
     tags:
       - sync_installers
 
   - name: ensure the deadline installer is syncronised with the bucket
     s3_sync:
-      bucket: "installers.{{ public_domain }}"
+      bucket: "{{ bucket }}"
       file_root: /vagrant/downloads/
       include: "{{ deadline_linux_filename }}"
-      aws_access_key: "{{ aws_access_key }}"
-      aws_secret_key: "{{ aws_secret_key }}"
+      aws_access_key: "{{ aws_access_key_s3user }}"
+      aws_secret_key: "{{ aws_secret_key_s3user }}"
       region: "{{ aws_region }}"
     tags:
       - sync_installers
 
   - name: ensure the downloads folder is syncronised with the bucket
     s3_sync:
-      bucket: "installers.{{ public_domain }}"
+      bucket: "{{ bucket }}"
       file_root: /vagrant/downloads/
       include: "*"
-      aws_access_key: "{{ aws_access_key }}"
-      aws_secret_key: "{{ aws_secret_key }}"
+      aws_access_key: "{{ aws_access_key_s3user }}"
+      aws_secret_key: "{{ aws_secret_key_s3user }}"
       region: "{{ aws_region }}"
     when: sync_downloads
     tags:
@@ -96,7 +96,7 @@
 
   - name: S3 GET deadline
     aws_s3:
-      bucket: "installers.{{ public_domain }}"
+      bucket: "{{ bucket }}"
       object: "{{ deadline_linux_filename }}"
       dest: "/home/deadlineuser/Downloads/{{ deadline_linux_filename }}"
       mode: get

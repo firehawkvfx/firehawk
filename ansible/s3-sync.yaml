@@ -5,7 +5,7 @@
   become: true
   
   vars:
-    bucket: "{{ show }}.{{ public_domain }}"
+    bucket: "{{ show }}.{{ bucket_extension }}"
     volume_path: "{{ localnas1_mount_path }}"
     default_s3_push_args: --include "*"
     debug: false
@@ -50,8 +50,8 @@
   - name: ensure an s3 bucket exists
     s3_bucket:
       name: "{{ bucket }}"
-      aws_access_key: "{{ aws_access_key }}"
-      aws_secret_key: "{{ aws_secret_key }}"
+      aws_access_key: "{{ aws_access_key_s3user }}"
+      aws_secret_key: "{{ aws_secret_key_s3user }}"
       region: "{{ aws_region }}"
     tags:
       - sync-local-push
@@ -155,7 +155,7 @@
     pool_name: pool0
     volume_name: volume0
 
-    bucket: "{{ show }}.{{ public_domain }}"
+    bucket: "{{ show }}.{{ bucket_extension }}"
 
     volume_path: "/{{ pool_name }}/{{ volume_name }}"
     
