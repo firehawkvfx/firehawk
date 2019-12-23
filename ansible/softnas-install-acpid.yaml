@@ -1,6 +1,6 @@
 # softnas hotfix to improove boot / shutdown times
 - hosts: role_softnas
-  remote_user: centos
+  remote_user: "{{ softnas_ssh_user | default('ec2-user') }}"
   become: true
 
   vars:

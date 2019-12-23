@@ -91,7 +91,7 @@
 
 # create a new bucket
 - hosts: role_softnas
-  remote_user: centos
+  remote_user: "{{ softnas_ssh_user | default('ec2-user') }}"
   become_user: root
   become: true
 
@@ -125,7 +125,7 @@
 
 # mount / import an existing bucket if pool and volume name match
 - hosts: role_softnas
-  remote_user: centos
+  remote_user: "{{ softnas_ssh_user | default('ec2-user') }}"
   become_user: root
   become: true
 

@@ -68,6 +68,9 @@ variable "softnas_storage" {
 variable "remote_mounts_on_local" {
 }
 
+variable "softnas_ssh_user" {
+}
+
 variable "softnas_role_name" {
   default = "SoftNAS_HA_IAM"
 }
@@ -116,9 +119,9 @@ variable "selected_ami" {
   default = {
     low_ap-southeast-2 = "ami-a24a98c0"
     # 4.2.4 enterprise consumption
-    high_ap-southeast-2 = "ami-05de939bacdc06d34"
-    # 4.3.0 enterprise consumption
-    # high_ap-southeast-2 = "ami-051ec062f31c60ee4"
+    # high_ap-southeast-2 = "ami-05de939bacdc06d34"
+    # 4.3.0 platinum consumption
+    high_ap-southeast-2 = "ami-051ec062f31c60ee4"
   }
 }
 

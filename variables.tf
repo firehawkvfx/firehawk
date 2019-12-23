@@ -90,6 +90,9 @@ variable "node_wakeable" {
   default = false
 }
 
+variable "softnas_ssh_user" {
+}
+
 variable "softnas1_cloudformation_role_name" {
   default = "FCB-Softnas1Role"
 }
