@@ -364,7 +364,7 @@ resource "null_resource" "pcoipgw" {
     command = <<EOT
       set -x
       cd /vagrant
-      ansible-playbook -i ansible/inventory/hosts ansible/ssh-add-public-host.yaml -v --extra-vars "public_ip=${aws_eip.pcoipgw_eip.public_ip} public_hostname=gateway.${var.public_domain_name} set_bastion=false"
+      ansible-playbook -i ansible/inventory/hosts ansible/ssh-add-public-host.yaml -v --extra-vars "public_ip=${aws_eip.pcoipgw_eip.public_ip} public_address=gateway.${var.public_domain_name} set_bastion=false"
       # ansible-playbook -i ansible/inventory ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.pcoipgw.private_ip} bastion_ip=${var.bastion_ip}"
       ansible-playbook -i ansible/inventory ansible/node-centos-init.yaml -v --extra-vars "variable_host=pcoipgw_eip.0 hostname=gateway.${var.public_domain_name} pcoip=true"
       ansible-playbook -i ansible/inventory ansible/node-centos-houdini.yaml -v --extra-vars "variable_host=pcoipgw_eip.0 hostname=gateway.${var.public_domain_name} firehawk_sync_source=$TF_VAR_firehawk_sync_source"

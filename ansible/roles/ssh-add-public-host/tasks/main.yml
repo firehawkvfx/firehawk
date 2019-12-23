@@ -14,7 +14,7 @@
   become_user: vagrant
 
 - name: clean known hosts
-  shell: "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R {{ public_hostname }}"
+  shell: "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R {{ public_address }}"
   become: true
   become_user: vagrant
 
@@ -24,7 +24,7 @@
   become_user: vagrant
     
 - name: Write the new ec2 instance host key to known hosts
-  shell: "ssh-keyscan {{ public_hostname }} >> /home/vagrant/.ssh/known_hosts"
+  shell: "ssh-keyscan {{ public_address }} >> /home/vagrant/.ssh/known_hosts"
   become: true
   become_user: vagrant
 

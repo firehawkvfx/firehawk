@@ -126,7 +126,7 @@ resource "null_resource" "provision_bastion" {
     command = <<EOT
       set -x
       cd /vagrant
-      ansible-playbook -i ansible/inventory/hosts ansible/ssh-add-public-host.yaml -v --extra-vars "public_ip=${aws_eip.bastionip.public_ip} public_hostname=bastion.${var.public_domain_name} set_bastion=true"
+      ansible-playbook -i ansible/inventory/hosts ansible/ssh-add-public-host.yaml -v --extra-vars "public_ip=${aws_eip.bastionip.public_ip} public_address=bastion.${var.public_domain_name} set_bastion=true"
   
 EOT
 

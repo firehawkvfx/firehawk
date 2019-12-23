@@ -38,8 +38,13 @@ module "vpc" {
 variable "remote_subnet_cidr" {
 }
 
+variable "route_public_domain_name" {
+}
+
 module "vpn" {
   source = "../vpn"
+
+  route_public_domain_name = var.route_public_domain_name
 
   # dummy attribute to force dependency on IGW.
   igw_id = module.vpc.igw_id

@@ -52,6 +52,7 @@ TF_VAR_vault_key_name_dev=insertvalue
 # default: TF_VAR_vault_key_name_prod=.vault-key-20191208-prod
 TF_VAR_vault_key_name_prod=insertvalue
 
+
 # TF_VAR_bridgenic: 
 # The network interface virtual box will use to bridge its connection 
 # If you don't know the exact string for the bridgenic (found on 'vagrant up' eg: '1) en0: Wi-Fi (AirPort)') then leave it as 'none'

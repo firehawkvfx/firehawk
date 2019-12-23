@@ -80,10 +80,14 @@ variable "public_subnets" {
   default = []
 }
 
+variable "route_public_domain_name" {}
+
 module "openvpn" {
   #source = "github.com/firehawkvfx/tf_aws_openvpn"
 
   source = "../tf_aws_openvpn"
+
+  route_public_domain_name = var.route_public_domain_name
 
   #start vpn will initialise service locally to connect
   #start_vpn = false

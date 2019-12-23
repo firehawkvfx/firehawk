@@ -38,6 +38,8 @@ variable "public_subnet2" {
 module "vpc" {
   source = "./modules/vpc"
 
+  route_public_domain_name = var.route_public_domain_name
+
   #sleep will disable the nat gateway to save cost during idle time.
   sleep              = var.sleep
   enable_nat_gateway = var.enable_nat_gateway

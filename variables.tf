@@ -44,6 +44,9 @@ variable "public_domain_prod" {
 variable "openfirehawkserver" {
 }
 
+variable "route_public_domain_name" {
+}
+
 variable "openvpn_user" {
 }
 
