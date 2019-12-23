@@ -350,6 +350,7 @@ resource "null_resource" "workstation_pcoip" {
       user                = "centos"
       host                = aws_instance.workstation_pcoip[0].private_ip
       bastion_host        = var.bastion_ip
+      bastion_user        = "centos"
       private_key         = var.private_key
       bastion_private_key = var.private_key
       type                = "ssh"
@@ -390,6 +391,7 @@ EOT
       user                = "centos"
       host                = aws_instance.workstation_pcoip[0].private_ip
       bastion_host        = var.bastion_ip
+      bastion_user        = "centos"
       private_key         = var.private_key
       bastion_private_key = var.private_key
       type                = "ssh"

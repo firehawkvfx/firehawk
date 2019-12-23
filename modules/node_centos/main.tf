@@ -232,6 +232,7 @@ resource "null_resource" "provision_node_centos" {
       user                = "centos"
       host                = aws_instance.node_centos[0].private_ip
       bastion_host        = var.bastion_ip
+      bastion_user        = "centos"
       private_key         = var.private_key
       bastion_private_key = var.private_key
       type                = "ssh"

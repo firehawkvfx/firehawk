@@ -7,17 +7,8 @@
       debug:
         msg: "test local connection"
 
-- hosts: softnas0
-  remote_user: centos
-  become: true
-
-  tasks:
-    - name: test softnas0 connection.
-      debug:
-        msg: "test softnas0 connection"
-
 - hosts: role_softnas
-  remote_user: centos
+  remote_user: "{{ softnas_ssh_user | default('ec2-user') }}"
   become: true
 
   tasks:
@@ -26,7 +17,7 @@
         msg: "test role_softnas connection"
 
 - hosts: role_softnas
-  remote_user: centos
+  remote_user: "{{ softnas_ssh_user | default('ec2-user') }}"
   become: true
 
   vars:

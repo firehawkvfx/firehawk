@@ -1,5 +1,5 @@
 - hosts: role_softnas
-  remote_user: centos
+  remote_user: "{{ softnas_ssh_user | default('ec2-user') }}"
   become: true
 
   tasks:

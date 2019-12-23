@@ -93,6 +93,7 @@ vpn_nic: eth1
 openvpn_user: openvpnas
 openvpn_user_pw: "{{ lookup('env','TF_VAR_openvpn_user_pw') }}"
 
+softnas_ssh_user: "{{ lookup('env','TF_VAR_softnas_ssh_user') }}"
 user_softnas_pw: "{{ lookup('env','TF_VAR_user_softnas_pw') }}"
 
 user_deadlineuser_name: "{{ lookup('env','TF_VAR_user_deadlineuser_name') }}"

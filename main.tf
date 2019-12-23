@@ -223,6 +223,7 @@ module "softnas" {
   aws_region                     = var.aws_region
   softnas_mode                   = var.softnas_mode
   vpn_private_ip                 = module.vpc.vpn_private_ip
+  softnas_ssh_user               = var.softnas_ssh_user
   key_name                       = var.key_name
   private_key                    = file(var.local_key_path)
   vpc_id                         = module.vpc.vpc_id

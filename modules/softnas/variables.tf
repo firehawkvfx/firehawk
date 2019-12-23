@@ -68,6 +68,9 @@ variable "softnas_storage" {
 variable "remote_mounts_on_local" {
 }
 
+variable "softnas_ssh_user" {
+}
+
 variable "softnas_role_name" {
   default = "SoftNAS_HA_IAM"
 }
