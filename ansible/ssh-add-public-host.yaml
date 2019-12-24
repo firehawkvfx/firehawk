@@ -4,8 +4,6 @@
   gather_facts: no
 
 # we need different steps for adding a new host in the public subnet, vs private.  we should detect the difference and handle appropriately.
-  vars:
-    bastion_address: bastion.{{ public_domain }}
 
   roles:
   - ssh-add-public-host

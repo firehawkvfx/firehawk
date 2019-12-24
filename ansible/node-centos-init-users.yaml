@@ -3,7 +3,6 @@
   become: true
 
   vars:
-    hostname: "node1.{{ public_domain }}"
     pcoip: False
     # this will initialise ssh and the hostname.  this is bypassed on the softnas instance which has different initialisation steps.
     set_hostname: true

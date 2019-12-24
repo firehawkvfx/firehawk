@@ -53,19 +53,19 @@
   # tasks file for roles/init-host
   - name: change hostname
     hostname:
-      name: "nas1.{{ public_domain }}"
+      name: "nas1"
       
   - name: add myself to /etc/hosts
     lineinfile:
       dest: /etc/hosts
       regexp: '^127\.0\.0\.1[ \t]+localhost'
-      line: "127.0.0.1 localhost nas1.{{ public_domain }}"
+      line: "127.0.0.1 localhost nas1"
       state: present
 
   - name: Set hostname var in bash profile
     lineinfile:
       path: /root/.bash_profile
-      line: 'export HOSTNAME=nas1.{{ public_domain }}'
+      line: 'export HOSTNAME=nas1'
       
   # some problems exist in here.  we get # replaced with ; for some reason
   # - name: insert marker start

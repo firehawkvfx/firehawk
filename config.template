@@ -178,13 +178,15 @@ TF_VAR_softnas1_path_abs=insertvalue
 TF_VAR_firehawk_houdini_tools=insertvalue
 
 # TF_VAR_openfirehawkserver_name_dev:
-# The hostname for the firehawkserver in the dev environment.  consider using the Fully Qualified Domain Name for the host as below.  This domain extension may be different for the dev environment to isolate the domain from production and allow AWS to control it via Route 53.
-# eg: TF_VAR_openfirehawkserver_name_dev=openfirehawkserverdev.devexample.com
+# The hostname for the firehawkserver in the dev environment.  You may also use the Fully Qualified Domain Name for the host as well.
+# eg: TF_VAR_openfirehawkserver_name_dev=openfirehawkserverdev.example_dev.com
+# default: TF_VAR_openfirehawkserver_name_dev=openfirehawkserverdev
 TF_VAR_openfirehawkserver_name_dev=insertvalue
 
 # TF_VAR_openfirehawkserver_name_prod:
-# The hostname for the firehawkserver in the prod environment.  consider using the Fully Qualified Domain Name for the host as below.  This domain extension may be different for the dev environment to isolate the domain from production and allow AWS to control it via Route 53.
-# eg: TF_VAR_openfirehawkserver_name_prod=openfirehawkserver.prodexample.com
+# The hostname for the firehawkserver in the prod environment.  You may also use the Fully Qualified Domain Name for the host as well.
+# eg: TF_VAR_openfirehawkserver_name_prod=openfirehawkserver.example_prod.com
+# default: TF_VAR_openfirehawkserver_name_prod=openfirehawkserver
 TF_VAR_openfirehawkserver_name_prod=insertvalue
 
 # TF_VAR_deadline_version:

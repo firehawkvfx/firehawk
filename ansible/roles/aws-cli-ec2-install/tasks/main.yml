@@ -20,20 +20,21 @@
   pip: 
     name: awscli
     extra_args: --upgrade --user
-  become_user: "{{ variable_user }}"
+  become_user: "{{ variable_become_user }}"
   become: true
 
 - name: install pexpect
   pip: 
     name: pexpect
     extra_args: --upgrade --user
-  become_user: "{{ variable_user }}"
+  become_user: "{{ variable_become_user }}"
   become: true
 
 - name: install the boto package, force upgrade
   pip: 
     name: boto3
-  become_user: "{{ variable_user }}"
+    extra_args: --user
+  become_user: "{{ variable_become_user }}"
   become: true
 
 - name: Case insensitive password string match
@@ -44,7 +45,7 @@
       .*Secret Access Key \[.*\]: "{{ aws_secret_key_s3user }}"
       .*region name \[.*\]: "{{ aws_region }}"
       .*output format \[.*\]: json
-  become_user: "{{ variable_user }}"
+  become_user: "{{ variable_become_user }}"
   become: true
   no_log: true
   tags:

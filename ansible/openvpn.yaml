@@ -48,7 +48,6 @@
   vars:
     client_network: None
     client_netmask_bits: None
-    vpn_address: vpn.{{ public_domain }}
     
   pre_tasks:
     - name: create dir.
