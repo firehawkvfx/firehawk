@@ -44,6 +44,9 @@ ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-va
 ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-copy-id-private-host.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser"
 # ansible-playbook -i secrets/dev/inventory/hosts ansible/ssh-copy-id-private-host.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser"
 
+# install the aws cli for the user to enable s3 access.
+ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser"
+
 # This stage configures deadline on the local workstation
 # REBOOT required for network interface modes to update.  Then launch terraform
 
