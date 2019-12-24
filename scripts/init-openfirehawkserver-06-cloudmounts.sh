@@ -1,6 +1,7 @@
 #!/bin/bash
 argument="$1"
 
+SCRIPTNAME=`basename "$0"`
 echo "Argument $1"
 echo ""
 ARGS=''
@@ -46,7 +47,7 @@ echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 # export TF_VAR_site_mounts=false
 # export TF_VAR_remote_mounts_on_local=false
 
-# spinup vpn and test
+# ensure vpn is up and test
 terraform apply --auto-approve
 
 # test if vpn private ip can be reached/
