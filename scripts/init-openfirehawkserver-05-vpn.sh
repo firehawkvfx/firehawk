@@ -56,15 +56,18 @@ fi
 echo 'Use vagrant reload and vagrant ssh after executing each .sh script'
 echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 
-printf "\n\nHave you installed keybase and initialised pgp?\n\nIf not it is highly recommended that you create a profile on your phone for 2fa."
+printf "\n\nHave you installed keybase and initialised pgp?\n\nIf not it is highly recommended that you create a profile on your phone and desktop for 2fa.\nIf this process fails for any reason use 'keybase login' manually and test pgp decryption in the shell.\n\n"
 
-echo "Press ENTER if you have initialised a keybase pgp passphrase for this shell. Otherwise exit (ctrl+c) and run:"
-echo "keybase login"
-echo "keybase pgp gen"
-printf 'keybase pgp encrypt -m "test_secret" | keybase pgp decrypt\n'
-read userInput
+# install keybase and test decryption
+$TF_VAR_firehawk_path/scripts/keybase-test.sh
 
-keybase pgp encrypt -m "testing pgp decryption" | keybase pgp decrypt
+# legacy manual keybase activation steps
+# echo "Press ENTER if you have initialised a keybase pgp passphrase for this shell. Otherwise exit (ctrl+c) and run:"
+# echo "keybase login"
+# echo "keybase pgp gen"
+# printf 'keybase pgp encrypt -m "test_secret" | keybase pgp decrypt\n'
+# read userInput
+
 
 # This stage configures the vpc and vpn.  after this stage, vagrant reload and test ping the private ip of the bastion host to ensure the vpn is working.
 
