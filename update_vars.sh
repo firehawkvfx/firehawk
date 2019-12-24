@@ -277,6 +277,10 @@ source_vars () {
         printf '...Using variable file config. No encryption/decryption will be used.\n'
         encrypt_mode="none"
         template_path="$TF_VAR_firehawk_path/config.template"
+    elif [[ "$var_file" = "defaults" ]]; then
+        printf '...Using variable file defaults. No encryption/decryption will be used.\n'
+        encrypt_mode="none"
+        template_path="$TF_VAR_firehawk_path/defaults.template"
     elif [[ "$var_file" = "config-override" ]]; then
         var_file="config-override-$TF_VAR_envtier"
         printf "...Using variable file $var_file. No encryption/decryption will be used.\n"
