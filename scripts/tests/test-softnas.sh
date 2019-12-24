@@ -12,9 +12,9 @@ ping -c1 $softnas_private_ip &> /dev/null && pass=true || pass=false
 
 if [ $pass == true ]
 then
-  printf "${GREEN}The softnas private IP was reachable.${NC}\n\n"
+  printf "\n${GREEN}The softnas private IP was reachable.${NC}\n\n"
   exit 0
 else
-  printf "${RED}The softnas private IP could not be reached.  Ensure the softnas instance exists and is running. Also ensure you can login to the VPN manually, and restart the VM with 'vagrant reload' before continuing.${NC}\n\n" >&2
+  printf "\n${RED}The softnas private IP could not be reached.  Ensure the softnas instance exists and is running. Also ensure you can login to the VPN manually, and restart the VM with 'vagrant reload' before continuing.${NC}\n\n" >&2
   exit 1
 fi

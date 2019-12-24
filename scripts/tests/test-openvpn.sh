@@ -12,9 +12,9 @@ ping -c1 $vpn_private_ip &> /dev/null && pass=true || pass=false
 
 if [ $pass == true ]
 then
-  printf "${GREEN}The VPN private IP was reachable.${NC}\n\n"
+  printf "\n${GREEN}The VPN private IP was reachable.${NC}\n\n"
   exit 0
 else
-  printf "${RED}The VPN private IP could not be reached.  Ensure you can login to the vpn manually, and restart the VM with 'vagrant reload' before continuing.${NC}\n" >&2
+  printf "\n${RED}The VPN private IP could not be reached.  Ensure you can login to the vpn manually, and restart the VM with 'vagrant reload' before continuing.${NC}\n" >&2
   exit 1
 fi
