@@ -507,7 +507,9 @@ fi
 if [[ "$var_file" = "secrets" ]] || [[ -z "$var_file" ]]; then
     # assume secrets is the var file for default behaviour
     source_vars 'vagrant' 'none'
+    source_vars 'defaults' 'none'
     source_vars 'config' 'none'
+    # override the var_file at this point.
     var_file = 'secrets'
     source_vars 'secrets' "$encrypt_mode"
     var_file = 'config-override'
