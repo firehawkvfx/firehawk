@@ -15,6 +15,8 @@ Vagrant.configure("2") do |config|
   envtier = ENV['TF_VAR_envtier']=
   openfirehawkserver = ENV['TF_VAR_openfirehawkserver']
   network = ENV['TF_VAR_network']
+  gui = false
+  ansible_version = 'latest'
 
   config.vm.define "ansible_control_"+envtier
   config.vagrant.plugins = ['vagrant-disksize', 'vagrant-reload']
@@ -61,13 +63,19 @@ Vagrant.configure("2") do |config|
 
   ### Install Ansible Block ###
   config.vm.provision "shell", inline: "sudo apt-get install -y software-properties-common"
-  #config.vm.provision "shell", inline: "pip install --upgrade pip"
-  #config.vm.provision "shell", inline: "sudo apt-get install -y python-pip python-dev"
-  #pip install --upgrade pip
-  #config.vm.provision "shell", inline: "sudo -H pip install ansible==2.7.11"
-  # to list available versions - pip install ansible==
-  config.vm.provision "shell", inline: "sudo apt-add-repository --yes --update ppa:ansible/ansible"
-  config.vm.provision "shell", inline: "sudo apt-get install -y ansible"
+
+  if ansible_version == 'latest'
+    config.vm.provision "shell", inline: "sudo apt-add-repository --yes --update ppa:ansible/ansible"
+    config.vm.provision "shell", inline: "sudo apt-get install -y ansible"
+  else
+    config.vm.provision "shell", inline: "pip install --upgrade pip"
+    config.vm.provision "shell", inline: "sudo apt-get install -y python-pip python-dev"
+    pip install --upgrade pip
+    # to list available versions - pip install ansible==
+    config.vm.provision "shell", inline: "sudo -H pip install ansible==#{ansible_version}"
+  
+  # configure a connection timeout to prevent ansible from getting stuck when there is an ssh issue.
+  config.vm.provision "shell", inline: "echo 'ConnectTimeout 60' >> /etc/ssh/ssh_config"
 
   # we define the location of the ansible hosts file in an environment variable.
   config.vm.provision "shell", inline: "grep -qxF 'ANSIBLE_INVENTORY=/vagrant/ansible/hosts' /etc/environment || echo 'ANSIBLE_INVENTORY=/vagrant/ansible/hosts' | sudo tee -a /etc/environment"
@@ -77,17 +85,17 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "sudo apt-get install -y virtualbox-guest-utils"
 
   #reboot required for desktop to function.
-
-  # ### Install ubuntu desktop and virtualbox additions.  Because a reboot is required, provisioning is handled here. ###
-  # # # Install the gui with vagrant or install the gui with ansible installed on the host.  
-  # # # This creates potentiall issues because ideally, Ansible should be used within the vm only to limit ansible version issues if the user updates vagrant on their host.
-  # config.vm.provision "shell", inline: "sudo apt-get install -y ubuntu-desktop"
-  # # ...or xfce.  pick one.
-  # #config.vm.provision "shell", inline: "sudo apt-get install -y curl xfce4"
-  # config.vm.provision "shell", inline: "sudo apt-get install -y virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11 xserver-xorg-legacy"
-  # # Permit anyone to start the GUI
-  # config.vm.provision "shell", inline: "sudo sed -i 's/allowed_users=.*$/allowed_users=anybody/' /etc/X11/Xwrapper.config"
-  # ## End Ubuntu Desktop block ###
+  if gui == true
+    ### Install ubuntu desktop and virtualbox additions.  Because a reboot is required, provisioning is handled here. ###
+    # # Install the gui with vagrant or install the gui with ansible installed on the host.  
+    # # This creates potentiall issues because ideally, Ansible should be used within the vm only to limit ansible version issues if the user updates vagrant on their host.
+    config.vm.provision "shell", inline: "sudo apt-get install -y ubuntu-desktop"
+    # ...or xfce.  pick one.
+    #config.vm.provision "shell", inline: "sudo apt-get install -y curl xfce4"
+    config.vm.provision "shell", inline: "sudo apt-get install -y virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11 xserver-xorg-legacy"
+    # Permit anyone to start the GUI
+    config.vm.provision "shell", inline: "sudo sed -i 's/allowed_users=.*$/allowed_users=anybody/' /etc/X11/Xwrapper.config"
+    ## End Ubuntu Desktop block ###
 
   # #disable the update notifier.  We do not want to update to ubuntu 18, currently deadline installer gui doesn't work in 18.
   config.vm.provision "shell", inline: "sudo sed -i 's/Prompt=.*$/Prompt=never/' /etc/update-manager/release-upgrades"
