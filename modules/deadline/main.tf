@@ -127,7 +127,7 @@ output "spot_instance_profile_name" {
 
 
 resource "aws_iam_user_group_membership" "deadline_spot_group_membership" {
-  user = aws_iam_user.deadline_spot_user.name
+  user = aws_iam_user.deadline_spot_deployment_user.name
 
   groups = [
     "${aws_iam_group.deadline_spot_group.name}"
@@ -279,13 +279,13 @@ resource "aws_iam_group_policy" "deadline_spot_group_policy" {
 EOF
 }
 
-resource "aws_iam_user" "deadline_spot_user" {
-  name = "deadline_spot_user"
+resource "aws_iam_user" "deadline_spot_deployment_user" {
+  name = "deadline_spot_deployment_user"
   force_destroy = true
 }
 
 resource "aws_iam_access_key" "deadline_spot_access_key" {
-  user    = aws_iam_user.deadline_spot_user.name
+  user    = aws_iam_user.deadline_spot_deployment_user.name
   pgp_key = var.keybase_pgp_key
   # pgp key: normally in format 'keybase:my_username'
   # see https://www.hiroom2.com/2016/08/14/ubuntu-16-04-create-gpg-key/ to create pgp key in ubuntu
