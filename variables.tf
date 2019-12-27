@@ -111,11 +111,9 @@ variable "envtier" {
 }
 
 variable "remote_mounts_on_local" {
-  default = true
 }
 
 variable "softnas_storage" {
-  default = true
 }
 
 variable "softnas1_private_ip1" {
