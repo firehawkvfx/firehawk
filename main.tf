@@ -220,7 +220,7 @@ variable "softnas_custom_ami" {
   default = 123456789
 }
 
-module "softnas" {
+module "softnas" {  
   softnas_storage                = var.softnas_storage
   source                         = "./modules/softnas"
   cloudformation_role_stack_name = var.softnas1_cloudformation_role_name

@@ -197,6 +197,7 @@ resource "aws_instance" "node_centos" {
   root_block_device {
     volume_size = var.volume_size
     volume_type = "gp2"
+    delete_on_termination = true
   }
 
   key_name               = var.key_name
