@@ -302,8 +302,6 @@
   - name: ensure an s3 bucket exists
     s3_bucket:
       name: "{{ installers_bucket }}"
-      aws_access_key: "{{ aws_access_key_s3user }}"
-      aws_secret_key: "{{ aws_secret_key_s3user }}"
       region: "{{ aws_region }}"
     tags:
     - cloud-install
@@ -315,8 +313,6 @@
       object: "{{ deadline_linux_filename }}"
       dest: "/home/deadlineuser/Downloads/{{ deadline_linux_filename }}"
       mode: get
-      aws_access_key: "{{ aws_access_key_s3user }}"
-      aws_secret_key: "{{ aws_secret_key_s3user }}"
       region: "{{ aws_region }}"
     tags:
     - cloud-install
