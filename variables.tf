@@ -114,6 +114,7 @@ variable "remote_mounts_on_local" {
 }
 
 variable "softnas_storage" {
+  default = true
 }
 
 variable "softnas1_private_ip1" {
