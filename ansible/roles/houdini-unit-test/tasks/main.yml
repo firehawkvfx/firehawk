@@ -5,7 +5,7 @@
   tags:
     - sync_scripts
 
-- name: copy hip file unit test to local ebs volume. if this fails there may be an issue with the onsite nfs mount.  check routes.
+- name: copy hip file unit test to local ebs volume. if this fails there may be an issue with the onsite nfs mount.  check routes. Check that you did vagrant reload after provisioning vpn.  This is necesary for routes to work.
   shell: |
     set -x
     ls {{ firehawk_sync_source }}
