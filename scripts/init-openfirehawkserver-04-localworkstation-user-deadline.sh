@@ -34,7 +34,7 @@ echo 'Use vagrant reload and vagrant ssh after executing each .sh script'
 echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 
 # This stage configures deadline on the local workstation
-# REBOOT required for network interface modes to update.  Then launch terraform
+# REBOOT required for network interface modes to update.
 
 # configure deadline on the local workstation with the keys from this install to run deadline slave and monitor
 ansible-playbook -i "$TF_VAR_inventory" ansible/localworkstation-deadlineuser.yaml --tags "onsite-install" --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key"
