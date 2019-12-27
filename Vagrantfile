@@ -68,11 +68,11 @@ Vagrant.configure("2") do |config|
     config.vm.provision "shell", inline: "sudo apt-add-repository --yes --update ppa:ansible/ansible"
     config.vm.provision "shell", inline: "sudo apt-get install -y ansible"
   else
-    config.vm.provision "shell", inline: "pip install --upgrade pip"
     config.vm.provision "shell", inline: "sudo apt-get install -y python-pip python-dev"
-    pip install --upgrade pip
+    config.vm.provision "shell", inline: "pip install --upgrade pip"
     # to list available versions - pip install ansible==
     config.vm.provision "shell", inline: "sudo -H pip install ansible==#{ansible_version}"
+  end
   
   # configure a connection timeout to prevent ansible from getting stuck when there is an ssh issue.
   config.vm.provision "shell", inline: "echo 'ConnectTimeout 60' >> /etc/ssh/ssh_config"
@@ -96,6 +96,7 @@ Vagrant.configure("2") do |config|
     # Permit anyone to start the GUI
     config.vm.provision "shell", inline: "sudo sed -i 's/allowed_users=.*$/allowed_users=anybody/' /etc/X11/Xwrapper.config"
     ## End Ubuntu Desktop block ###
+  end
 
   # #disable the update notifier.  We do not want to update to ubuntu 18, currently deadline installer gui doesn't work in 18.
   config.vm.provision "shell", inline: "sudo sed -i 's/Prompt=.*$/Prompt=never/' /etc/update-manager/release-upgrades"
