@@ -37,12 +37,50 @@
   become_user: "{{ variable_become_user }}"
   become: true
 
+# on an ec2 instance, the cli credentials are inherited automatically by the role or permissions assigned to the instance.  Below is the optional tag to intall a specific access key for a user account.  the inputs are provided as environment variables with pgp encryption.
+
+# decrypt the secret
+
+- name: Run expect to wait for a keybase pass and decrypt - first time is dirty output.
+  shell: |
+    /vagrant/scripts/pgp-expect.sh {{ keybase_secret | regex_escape() }} {{ storage_user_secret | regex_escape() }}
+  become_user: vagrant
+  connection: local
+  no_log: true
+  tags:
+  - user_access
+
+- name: Run expect to wait for a keybase pass and decrypt - collect output.
+  shell: |
+    /vagrant/scripts/pgp-expect.sh {{ keybase_secret | regex_escape() }} {{ storage_user_secret | regex_escape() }}
+  become_user: vagrant
+  connection: local
+  register: storage_user_secret_output
+  no_log: true
+  tags:
+  - user_access
+
+# now use the outputs to install the aws cli
+
+- set_fact:
+    storage_user_secret_key: "{{ storage_user_secret_output.stdout }}"
+  no_log: true
+  tags:
+  - user_access
+
+- fail:
+    msg: "invalid output from keybase expect"
+  when: '" " in storage_user_secret_key or storage_user_secret_key ==""'
+  no_log: true
+  tags:
+  - user_access
+
 - name: Case insensitive password string match
   expect:
     command: "/home/{{ variable_user }}/.local/bin/aws configure"
     responses:
-      .*Access Key ID \[.*\]: "{{ aws_access_key_s3user }}"
-      .*Secret Access Key \[.*\]: "{{ aws_secret_key_s3user }}"
+      .*Access Key ID \[.*\]: "{{ storage_user_access_key_id }}"
+      .*Secret Access Key \[.*\]: "{{ storage_user_secret_key }}"
       .*region name \[.*\]: "{{ aws_region }}"
       .*output format \[.*\]: json
   become_user: "{{ variable_become_user }}"
