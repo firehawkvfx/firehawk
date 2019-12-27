@@ -43,7 +43,7 @@ echo $(keybase --version)
 
 ansible-playbook -i ansible/inventory/hosts ansible/init.yaml --extra-vars "variable_user=vagrant"
 
-#install aws cli for deadline user with s3 credentials
+#install aws cli for user with s3 credentials
 ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=ansible_control variable_user=vagrant"
 ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=ansible_control variable_user=root"
 
