@@ -8,7 +8,13 @@
     
     variable_user: centos
     bastionip: "{{ groups['bastionip'][0] }}"
+    
+    # whether to execute the unit test.  False will just copy the file.
+    execute: false
 
+    # run on boot to test startup latency.
+    run_on_boot: false
+    
     skip_packages: false
     houdini_install_type: 'node'
     bucket: "{{ installers_bucket }}"
