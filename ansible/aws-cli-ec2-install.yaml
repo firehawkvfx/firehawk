@@ -6,6 +6,8 @@
   vars:
     variable_user: centos
     variable_become_user: "{{ variable_user }}"
+    # sudo password may be required when installing cli on a local workstation
+    ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
 
   pre_tasks:
   - name: test
