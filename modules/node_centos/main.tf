@@ -3,6 +3,8 @@
 #----------------------------------------------------------------
 
 resource "aws_security_group" "node_centos" {
+  count                = var.site_mounts ? 1 : 0
+
   name        = var.name
   vpc_id      = var.vpc_id
   description = "Teradici PCOIP security group"
@@ -200,7 +202,7 @@ resource "aws_instance" "node_centos" {
   key_name               = var.key_name
   subnet_id              = element(var.private_subnet_ids, count.index)
   private_ip             = cidrhost("${data.aws_subnet.private_subnet[count.index].cidr_block}", 20)
-  vpc_security_group_ids = [aws_security_group.node_centos.id]
+  vpc_security_group_ids = aws_security_group.node_centos.*.id
   tags = {
     Name  = "node_centos"
     Route = "private"

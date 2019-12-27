@@ -16,6 +16,8 @@ variable "remote_subnet_cidr" {
 }
 
 resource "aws_security_group" "workstation_pcoip" {
+  count         = var.site_mounts && var.workstation_enabled ? 1 : 0
+
   name        = var.name
   vpc_id      = var.vpc_id
   description = "Workstation - Teradici PCOIP security group"
@@ -105,6 +107,8 @@ resource "aws_security_group" "workstation_pcoip" {
 }
 
 resource "aws_security_group" "workstation_centos" {
+  count         = var.site_mounts && var.workstation_enabled ? 1 : 0
+
   name        = "gateway_centos"
   vpc_id      = var.vpc_id
   description = "Workstation - Security group"
@@ -304,7 +308,7 @@ resource "aws_instance" "workstation_pcoip" {
   key_name  = var.key_name
   subnet_id = element(var.private_subnet_ids, count.index)
 
-  vpc_security_group_ids = [aws_security_group.workstation_pcoip.id, aws_security_group.workstation_centos.id]
+  vpc_security_group_ids = concat(aws_security_group.workstation_pcoip.*.id, aws_security_group.workstation_centos.*.id)
 
   ebs_optimized = true
   root_block_device {

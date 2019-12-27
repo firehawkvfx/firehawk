@@ -99,6 +99,8 @@ resource "random_uuid" "test" {
 }
 
 resource "aws_security_group" "softnas" {
+  count = var.softnas_storage ? 1 : 0
+
   name        = "softnas"
   vpc_id      = var.vpc_id
   description = "SoftNAS security group"
@@ -269,9 +271,10 @@ resource "aws_security_group" "softnas" {
 }
 
 resource "aws_network_interface" "nas1eth0" {
+  count = var.softnas_storage ? 1 : 0
   subnet_id       = var.private_subnets[0]
   private_ips     = [var.softnas1_private_ip1]
-  security_groups = [aws_security_group.softnas.id]
+  security_groups = aws_security_group.softnas.*.id
 
   tags = {
     Name = "primary_network_interface"
@@ -279,9 +282,10 @@ resource "aws_network_interface" "nas1eth0" {
 }
 
 resource "aws_network_interface" "nas1eth1" {
+  count = var.softnas_storage ? 1 : 0
   subnet_id       = var.private_subnets[0]
   private_ips     = [var.softnas1_private_ip2]
-  security_groups = [aws_security_group.softnas.id]
+  security_groups = aws_security_group.softnas.*.id
 
   tags = {
     Name = "secondary_network_interface"
@@ -306,13 +310,13 @@ resource "aws_instance" "softnas1" {
 
   network_interface {
     device_index         = 0
-    network_interface_id = aws_network_interface.nas1eth0.id
+    network_interface_id = element(concat(aws_network_interface.nas1eth0.*.id, list("")), 0)
     #delete_on_termination = true
   }
 
   network_interface {
     device_index         = 1
-    network_interface_id = aws_network_interface.nas1eth1.id
+    network_interface_id = element(concat(aws_network_interface.nas1eth1.*.id, list("")), 0)
     #delete_on_termination = true
   }
 

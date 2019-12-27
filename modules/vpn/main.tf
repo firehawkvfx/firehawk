@@ -82,8 +82,12 @@ variable "public_subnets" {
 
 variable "route_public_domain_name" {}
 
+variable "create_vpn" {}
+
 module "openvpn" {
   #source = "github.com/firehawkvfx/tf_aws_openvpn"
+
+  create_vpn = var.create_vpn
 
   source = "../tf_aws_openvpn"
 

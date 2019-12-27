@@ -2,6 +2,8 @@ variable "name" {
   default = "bastion"
 }
 
+variable "create_vpc" {}
+
 variable "region" {
 }
 

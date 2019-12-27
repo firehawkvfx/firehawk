@@ -2,6 +2,9 @@ variable "sleep" {
   default = false
 }
 
+variable "enable_vpc" {
+}
+
 variable "vpc_cidr" {
 }
 
