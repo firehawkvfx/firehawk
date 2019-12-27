@@ -5,7 +5,7 @@ resource "aws_iam_user_group_membership" "s3_group_membership" {
   user = aws_iam_user.storage_user.name
 
   groups = [
-    "AmazonS3FullAccess",
+    "${aws_iam_group.s3_admin_group.name}",
     "${aws_iam_group.query_instances_group.name}"
   ]
 }
@@ -33,6 +33,29 @@ resource "aws_iam_group_policy" "query_instances_group_policy" {
             "Resource": "*"
         }
     ]
+}
+EOF
+}
+
+resource "aws_iam_group" "s3_admin_group" {
+  name = "s3_admin_group"
+  path = "/users/"
+}
+
+resource "aws_iam_group_policy" "s3_admin_group_policy" {
+  name  = "s3_admin_group_policy"
+  group = aws_iam_group.s3_admin_group.id
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "s3:*",
+      "Resource": "*"
+    }
+  ]
 }
 EOF
 }
