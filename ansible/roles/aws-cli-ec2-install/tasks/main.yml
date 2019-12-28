@@ -115,7 +115,7 @@
 
 # install aws cli for root.  sometimes paths will be written to that only the root should be able to write to.  if that happens, the root user needs aws credentials to do that.
 
-- name: Use expect to install AWS CLI- Centos
+- name: Use expect to install AWS CLI- Centos - root
   expect:
     # this version of the command may be required for centos
     command: "/home/{{ variable_user }}/.local/bin/aws configure"
@@ -130,7 +130,7 @@
   tags:
   - user_access
 
-- name: Use expect to install AWS CLI- Ubuntu
+- name: Use expect to install AWS CLI- Ubuntu - root
   expect:
     # this version of the command may be required for ubuntu
     command: "/usr/local/bin/aws configure"
