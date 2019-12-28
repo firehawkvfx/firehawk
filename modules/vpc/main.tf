@@ -46,6 +46,8 @@ module "vpn" {
 
   create_vpn = var.create_vpc
 
+  aws_region = var.region
+
   route_public_domain_name = var.route_public_domain_name
 
   # dummy attribute to force dependency on IGW.

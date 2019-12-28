@@ -29,7 +29,7 @@ printf '{\n'
 printf "    \"$map_name\": {\n"
 first=true
 for region in "${regions[@]}" ; do
-    ami=$(aws ec2 describe-images --filters "${filters}" --region ${region} --owners "${owners}" --query 'Images[*].[ImageId]' --output json | jq '.[0][0]')
+    ami=$(aws ec2 describe-images --filters "${filters}" --region ${region} --query 'Images[*].[ImageId]' --output json | jq '.[0][0]')
     if [ $first == true ]; then
         printf "        \"${region}\": ${ami}"
     else

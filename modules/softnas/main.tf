@@ -298,9 +298,53 @@ variable "softnas_use_custom_ami" {
 variable "softnas_custom_ami" {
 }
 
+variable "softnas_platinum_consumption_v4_3_0" {
+  type=map(string)
+  default={
+        "eu-north-1":"ami-86c64cf8",
+        "ap-south-1":"ami-0e4539f02a02f1ab4",
+        "eu-west-3":"ami-009b7f9c7dfeb92f3",
+        "eu-west-2":"ami-0ef252a1d4374265c",
+        "eu-west-1":"ami-04bd346142120053e",
+        "ap-northeast-2":"ami-018944e4872077a59",
+        "ap-northeast-1":"ami-00247989b503ef530",
+        "sa-east-1":"ami-04ba46ed92145a857",
+        "ca-central-1":"ami-041ead7c675208173",
+        "ap-southeast-1":"ami-0a7812f2df1da2ead",
+        "ap-southeast-2":"ami-051ec062f31c60ee4",
+        "eu-central-1":"ami-0364719d47383b7e3",
+        "us-east-1":"ami-09ab8f3babc9990de",
+        "us-east-2":"ami-08b218079ece9cea7",
+        "us-west-1":"ami-014f7e83a442f2f6d",
+        "us-west-2":"ami-0aec3fd870f36b7b4"
+    }
+}
+
+variable "softnas_platinum_consumption_lower_v4_3_0" {
+  type=map(string)
+  default={
+        "eu-north-1": "ami-89c64cf7",
+        "ap-south-1": "ami-0bc2e596cebbf1a54",
+        "eu-west-3": "ami-08173ae3a53edfb35",
+        "eu-west-2": "ami-059330a53138116d9",
+        "eu-west-1": "ami-0b88d1ce09cdc47c7",
+        "ap-northeast-2": "ami-0843a4f279aec8e9f",
+        "ap-northeast-1": "ami-08cbcdfe14bf34ae2",
+        "sa-east-1": "ami-0f6e9baa7910efc60",
+        "ca-central-1": "ami-06f1791b8326fabfd",
+        "ap-southeast-1": "ami-0418cdeeb85ad6644",
+        "ap-southeast-2": "ami-048287b6b9f28c85c",
+        "eu-central-1": "ami-0d32d715591ae2bbb",
+        "us-east-1": "ami-0513dcb022fc5e3a7",
+        "us-east-2": "ami-0aa19b48e665bce28",
+        "us-west-1": "ami-09edaba2d8cc884ac",
+        "us-west-2": "ami-0280326becc413cb5"
+    }
+}
+
 resource "aws_instance" "softnas1" {
   count = var.softnas_storage ? 1 : 0
-  ami   = var.softnas_use_custom_ami ? var.softnas_custom_ami : var.selected_ami[local.softnas_mode_ami]
+  ami   = var.softnas_use_custom_ami ? var.softnas_custom_ami : lookup(var.softnas_platinum_consumption_v4_3_0, var.aws_region)
 
   instance_type = var.instance_type[var.softnas_mode]
 
