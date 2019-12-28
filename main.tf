@@ -38,6 +38,8 @@ variable "public_subnet2" {
 module "vpc" {
   source = "./modules/vpc"
 
+  create_vpc = var.enable_vpc
+
   route_public_domain_name = var.route_public_domain_name
 
   #sleep will disable the nat gateway to save cost during idle time.
@@ -78,16 +80,48 @@ module "vpc" {
   bastion_ip = module.bastion.public_ip
 }
 
+variable "node_skip_update" {
+  default = false
+}
+
+module "bastion" {
+  source = "./modules/bastion"
+
+  create_vpc = var.enable_vpc
+
+  name = "bastion"
+
+  route_public_domain_name = var.route_public_domain_name
+
+  # region will determine the ami
+  region = var.aws_region
+
+  #options for gateway type are centos7 and pcoip
+  vpc_id                      = module.vpc.vpc_id
+  vpc_cidr                    = var.vpc_cidr
+  vpn_cidr                    = var.vpn_cidr
+  remote_ip_cidr              = var.remote_ip_cidr
+  public_subnet_ids           = module.vpc.public_subnets
+  public_subnets_cidr_blocks  = module.vpc.public_subnets_cidr_blocks
+  private_subnets_cidr_blocks = module.vpc.private_subnets_cidr_blocks
+  remote_subnet_cidr          = var.remote_subnet_cidr
+
+  key_name       = var.key_name
+  local_key_path = var.local_key_path
+  private_key    = file(var.local_key_path)
+
+  route_zone_id      = var.route_zone_id
+  public_domain_name = var.public_domain
+
+  #skipping os updates will allow faster rollout for testing.
+  skip_update = var.node_skip_update
+
+  #sleep will stop instances to save cost during idle time.
+  sleep = var.sleep
+}
+
 output "vpn_private_ip" {
   value = module.vpc.vpn_private_ip
-}
-
-output "snapshot_id" {
-  value = module.node.snapshot_id
-}
-
-output "node_ami_id" {
-  value = module.node.ami_id
 }
 
 # if a new image is detected, TF will update the spot template and spot plugin json settings
@@ -96,11 +130,28 @@ output "node_ami_id" {
 # terraform taint null_resource.provision_deadline_spot[0]
 # terraform apply
 
+module "storage_user" {
+  source          = "./modules/storage_user"
+  keybase_pgp_key = var.keybase_pgp_key
+}
+
+output "storage_user_access_key_id" {
+  value = module.storage_user.storage_user_access_key_id
+}
+
+output "storage_user_secret" {
+  value = module.storage_user.storage_user_secret
+}
+
 module "deadline" {
   source          = "./modules/deadline"
   keybase_pgp_key = var.keybase_pgp_key
   remote_ip_cidr  = var.remote_ip_cidr
   cidr_list       = concat([var.remote_subnet_cidr, var.remote_ip_cidr], module.vpc.private_subnets_cidr_blocks)
+}
+
+output "spot_access_key_id" {
+  value = module.deadline.spot_access_key_id
 }
 
 resource "null_resource" "dependency_deadline_spot" {
@@ -145,52 +196,10 @@ EOT
   }
 }
 
-output "spot_access_key_id" {
-  value = module.deadline.spot_access_key_id
-}
-
 
 # to debug only
 output "vpc_cidr" {
   value = module.vpc.vpc_cidr_block
-}
-
-variable "node_skip_update" {
-  default = false
-}
-
-module "bastion" {
-  source = "./modules/bastion"
-
-  name = "bastion"
-
-  route_public_domain_name = var.route_public_domain_name
-
-  # region will determine the ami
-  region = var.aws_region
-
-  #options for gateway type are centos7 and pcoip
-  vpc_id                      = module.vpc.vpc_id
-  vpc_cidr                    = var.vpc_cidr
-  vpn_cidr                    = var.vpn_cidr
-  remote_ip_cidr              = var.remote_ip_cidr
-  public_subnet_ids           = module.vpc.public_subnets
-  public_subnets_cidr_blocks  = module.vpc.public_subnets_cidr_blocks
-  private_subnets_cidr_blocks = module.vpc.private_subnets_cidr_blocks
-  remote_subnet_cidr          = var.remote_subnet_cidr
-
-  key_name       = var.key_name
-  local_key_path = var.local_key_path
-  private_key    = file(var.local_key_path)
-
-  route_zone_id      = var.route_zone_id
-  public_domain_name = var.public_domain
-
-  #skipping os updates will allow faster rollout for testing.
-  skip_update = var.node_skip_update
-
-  #sleep will stop instances to save cost during idle time.
-  sleep = var.sleep
 }
 
 # todo : this option is deprecated.  must be pcoip.  previous options for gateway type are centos7 and pcoip
@@ -211,7 +220,7 @@ variable "softnas_custom_ami" {
   default = 123456789
 }
 
-module "softnas" {
+module "softnas" {  
   softnas_storage                = var.softnas_storage
   source                         = "./modules/softnas"
   cloudformation_role_stack_name = var.softnas1_cloudformation_role_name
@@ -403,3 +412,10 @@ module "node" {
   houdini_license_server_address = var.houdini_license_server_address
 }
 
+output "snapshot_id" {
+  value = module.node.snapshot_id
+}
+
+output "node_ami_id" {
+  value = module.node.ami_id
+}

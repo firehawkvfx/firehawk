@@ -57,8 +57,6 @@
 - name: ensure an s3 bucket exists
   s3_bucket:
     name: "{{ installers_bucket }}"
-    aws_access_key: "{{ aws_access_key_s3user }}"
-    aws_secret_key: "{{ aws_secret_key_s3user }}"
     region: "{{ aws_region }}"
   tags:
   - install
@@ -79,8 +77,6 @@
     bucket: "{{ installers_bucket }}"
     file_root: "{{ deadline_linux_installers_tar | dirname }}"
     include: "{{ deadline_linux_installers_tar | basename }}"
-    aws_access_key: "{{ aws_access_key_s3user }}"
-    aws_secret_key: "{{ aws_secret_key_s3user }}"
     region: "{{ aws_region }}"
     mode: push
   become: true

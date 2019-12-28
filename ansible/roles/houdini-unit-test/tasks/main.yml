@@ -5,7 +5,7 @@
   tags:
     - sync_scripts
 
-- name: copy hip file unit test to local ebs volume
+- name: copy hip file unit test to local ebs volume. if this fails there may be an issue with the onsite nfs mount.  check routes. Check that you did vagrant reload after provisioning vpn.  This is necesary for routes to work.
   shell: |
     set -x
     ls {{ firehawk_sync_source }}
@@ -15,34 +15,36 @@
   tags:
     - sync_scripts
 
-# - name: execute unit test
-#   shell: |
-#     set -x
-#     cd /opt/hfs17.5/
-#     source ./houdini_setup
-#     ls /var/tmp/
-#     ls /var/tmp/qc/*.hip
-#     cd /var/tmp/qc
-#     hython /var/tmp/qc/hip_unit_test.py /var/tmp/qc/test_ebs_read_hip_no_deadline_rop.hip /obj/ropnet1/fetch1
-#     ls -ltriah /var/tmp/geo
-#   become_user: deadlineuser
-#   tags:
-#     - sync_scripts
+- name: execute unit test
+  shell: |
+    set -x
+    cd /opt/hfs17.5/
+    source ./houdini_setup
+    ls /var/tmp/
+    ls /var/tmp/qc/*.hip
+    cd /var/tmp/qc
+    hython /var/tmp/qc/hip_unit_test.py /var/tmp/qc/test_ebs_read_hip_no_deadline_rop.hip /obj/ropnet1/fetch1
+    ls -ltriah /var/tmp/geo
+  become_user: deadlineuser
+  when: execute
+  tags:
+    - sync_scripts
 
-# - name: Ensure unit test runs on boot.  Undesirable, but currently needed - See sidefx RFE100149
-#   copy:
-#     content: |
-#       #!/bin/bash
-#       set -x
-#       echo 'init log' >> /var/tmp/qc/logfile.txt
-#       exec > /var/tmp/qc/logfile.txt
-#       sleep 45
-#       mount -a
-#       cd /opt/hfs17.5/
-#       source ./houdini_setup
-#       cd /var/tmp/qc
-#       hython /var/tmp/qc/hip_unit_test.py /var/tmp/qc/test_ebs_read_hip.hip /obj/ropnet1/fetch1
-#     dest: /etc/rc.d/init.d/houdini_test.sh
-#     mode: 0700
-#     owner: root
-#   become: true
+- name: Ensure unit test runs on boot.  Undesirable, but needed - See sidefx RFE100149
+  copy:
+    content: |
+      #!/bin/bash
+      set -x
+      echo 'init log' >> /var/tmp/qc/logfile.txt
+      exec > /var/tmp/qc/logfile.txt
+      sleep 45
+      mount -a
+      cd /opt/hfs17.5/
+      source ./houdini_setup
+      cd /var/tmp/qc
+      hython /var/tmp/qc/hip_unit_test.py /var/tmp/qc/test_ebs_read_hip.hip /obj/ropnet1/fetch1
+    dest: /etc/rc.d/init.d/houdini_test.sh
+    mode: 0700
+    owner: root
+  when: run_on_boot
+  become: true

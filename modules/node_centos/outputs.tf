@@ -26,11 +26,10 @@ variable "ebs_empty_map" {
 # We create a list with a dummy map as the 2nd / last element.
 locals {
   ebs_block_device_extended = concat(aws_ami_from_instance.node_centos.*.ebs_block_device, list(list(var.ebs_empty_map)))
-}
-
-# We select the first element in the list.  if the actual node exists, we will eventually get a valid value after the for loop below, otherwise it will return blank from the empty map, which is fine, since the ami id should never be referenced in this state.
-locals {
+  # We select the first element in the list.  if the actual node exists, we will eventually get a valid value after the for loop below, otherwise it will return blank from the empty map, which is fine, since the ami id should never be referenced in this state.
   ebs_block_device_selected = element(local.ebs_block_device_extended, 0)
+  # since security groups use count we need to output a valid value.
+  security_group_id = element( concat(aws_security_group.node_centos.*.id, list("") ), 0)
 }
 
 # This loop creates key's based on the device name, so the snapshot_id can be retrieved by the device name.
@@ -46,5 +45,5 @@ output "snapshot_id" {
 }
 
 output "security_group_id" {
-  value = aws_security_group.node_centos.id
+  value = local.security_group_id
 }

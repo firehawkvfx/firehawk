@@ -99,6 +99,8 @@ resource "random_uuid" "test" {
 }
 
 resource "aws_security_group" "softnas" {
+  count = var.softnas_storage ? 1 : 0
+
   name        = "softnas"
   vpc_id      = var.vpc_id
   description = "SoftNAS security group"
@@ -269,9 +271,10 @@ resource "aws_security_group" "softnas" {
 }
 
 resource "aws_network_interface" "nas1eth0" {
+  count = var.softnas_storage ? 1 : 0
   subnet_id       = var.private_subnets[0]
   private_ips     = [var.softnas1_private_ip1]
-  security_groups = [aws_security_group.softnas.id]
+  security_groups = aws_security_group.softnas.*.id
 
   tags = {
     Name = "primary_network_interface"
@@ -279,9 +282,10 @@ resource "aws_network_interface" "nas1eth0" {
 }
 
 resource "aws_network_interface" "nas1eth1" {
+  count = var.softnas_storage ? 1 : 0
   subnet_id       = var.private_subnets[0]
   private_ips     = [var.softnas1_private_ip2]
-  security_groups = [aws_security_group.softnas.id]
+  security_groups = aws_security_group.softnas.*.id
 
   tags = {
     Name = "secondary_network_interface"
@@ -306,36 +310,29 @@ resource "aws_instance" "softnas1" {
 
   network_interface {
     device_index         = 0
-    network_interface_id = aws_network_interface.nas1eth0.id
+    network_interface_id = element(concat(aws_network_interface.nas1eth0.*.id, list("")), 0)
     #delete_on_termination = true
   }
 
   network_interface {
     device_index         = 1
-    network_interface_id = aws_network_interface.nas1eth1.id
+    network_interface_id = element(concat(aws_network_interface.nas1eth1.*.id, list("")), 0)
     #delete_on_termination = true
   }
 
   root_block_device {
     volume_size = "100"
     volume_type = "gp2"
-
-    #device_name = "/dev/sda1"
     delete_on_termination = true
     # if specifying a snapshot, do not specify encryption.
     #encryption = false
   }
 
   key_name = var.key_name
-
-  #subnet_id              = "${var.private_subnets[0]}"
-  #vpc_security_group_ids = ["${aws_security_group.node_centos.id}"]
-
-  #user_data = "${file("${path.module}/user_data.yml")}"
   user_data = <<USERDATA
 #cloud-config
-hostname: nas1.${var.public_domain}
-fqdn: nas1.${var.public_domain}
+hostname: nas1
+fqdn: nas1
 manage_etc_hosts: false
 USERDATA
 
@@ -388,23 +385,25 @@ resource "null_resource" "provision_softnas" {
   }
   provisioner "local-exec" {
     command = <<EOT
+      . /vagrant/scripts/exit_test.sh
       set -x
       cd /vagrant
-      ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.softnas1[0].private_ip} bastion_ip=${var.bastion_ip}"
-      ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=softnas0 host_ip=${aws_instance.softnas1[0].private_ip} group_name=role_softnas"
+      ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.softnas1[0].private_ip} bastion_ip=${var.bastion_ip}"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=softnas0 host_ip=${aws_instance.softnas1[0].private_ip} group_name=role_softnas"; exit_test
       # remove any mounts on local workstation first since they will have been broken if another softnas instance was just destroyed to create this one.
-      if [ $TF_VAR_remote_mounts_on_local ] ; then
-        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'
+      if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
+        echo "CONFIGURE REMOTE MOUNTS ON LOCAL NODES"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
       fi
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init.yaml -v
-      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init-users.yaml -v --extra-vars "variable_host=role_softnas variable_user=$TF_VAR_softnas_ssh_user set_hostname=false"
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-update.yaml -v
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init.yaml -v; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init-users.yaml -v --extra-vars "variable_host=role_softnas variable_user=$TF_VAR_softnas_ssh_user set_hostname=false"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-update.yaml -v; exit_test
       # hotfix script to speed up instance start and shutdown
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-install-acpid.yaml -v
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-install-acpid.yaml -v; exit_test
 
       # cli is only needed if sync operations with s3 will be run on this instance.
-      # #ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli.yaml -v --extra-vars "variable_user=ec2-user variable_host=role_softnas"
-      # #ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2.yaml -v --extra-vars "variable_user=ec2-user variable_host=role_softnas"
+      # #ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli.yaml -v --extra-vars "variable_user=ec2-user variable_host=role_softnas"; exit_test
+      # #ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2.yaml -v --extra-vars "variable_user=ec2-user variable_host=role_softnas"; exit_test
   
 EOT
 
@@ -553,17 +552,19 @@ resource "null_resource" "provision_softnas_volumes" {
 
   provisioner "local-exec" {
     command = <<EOT
+      . /vagrant/scripts/exit_test.sh
       set -x
       cd /vagrant
       # ensure all old mounts onsite are removed if they exist.
-      if [[ $TF_VAR_remote_mounts_on_local ]] ; then
-        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'
+      if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
+        echo "CONFIGURE REMOTE MOUNTS ON LOCAL NODES"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
       fi
       # mount all ebs disks before s3
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-check-able-to-stop.yaml -v --extra-vars "instance_id=${aws_instance.softnas1[0].id}"
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk.yaml -v --extra-vars "instance_id=${aws_instance.softnas1[0].id} stop_softnas_instance=true mode=attach"
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-check-able-to-stop.yaml -v --extra-vars "instance_id=${aws_instance.softnas1[0].id}"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk.yaml -v --extra-vars "instance_id=${aws_instance.softnas1[0].id} stop_softnas_instance=true mode=attach"; exit_test
       # Although we start the instance in ansible, the aws cli can be more reliable to ensure this.
-      aws ec2 start-instances --instance-ids ${aws_instance.softnas1[0].id}
+      aws ec2 start-instances --instance-ids ${aws_instance.softnas1[0].id}; exit_test
   
 EOT
 
@@ -587,19 +588,20 @@ EOT
   }
   provisioner "local-exec" {
     command = <<EOT
+      . /vagrant/scripts/exit_test.sh
       set -x
       cd /vagrant
       # ensure volumes and pools exist after disks are ensured to exist.
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-pool.yaml -v
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-pool.yaml -v; exit_test
       # ensure s3 disks exist and are mounted
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-s3-disk.yaml -v --extra-vars "pool_name=pool0 volume_name=volume0 disk_device=0 s3_disk_size_max_value=${var.s3_disk_size} encrypt_s3=true import_pool=${local.import_pool}"
-      # ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-s3-disk.yaml -v --extra-vars "pool_name=pool1 volume_name=volume1 disk_device=1 s3_disk_size_max_value=${var.s3_disk_size} encrypt_s3=true import_pool=${local.import_pool}"
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-s3-disk.yaml -v --extra-vars "pool_name=pool0 volume_name=volume0 disk_device=0 s3_disk_size_max_value=${var.s3_disk_size} encrypt_s3=true import_pool=${local.import_pool}"; exit_test
+      # ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-s3-disk.yaml -v --extra-vars "pool_name=pool1 volume_name=volume1 disk_device=1 s3_disk_size_max_value=${var.s3_disk_size} encrypt_s3=true import_pool=${local.import_pool}"; exit_test
 
       # exports should be updated here.
       # if btier.json exists in /secrets/${var.envtier}/ebs-volumes/ then the tiers will be imported.
       
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-backup-btier.yaml -v --extra-vars "restore=true"
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk-update-exports.yaml -v --extra-vars "instance_id=${aws_instance.softnas1[0].id}"
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-backup-btier.yaml -v --extra-vars "restore=true"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk-update-exports.yaml -v --extra-vars "instance_id=${aws_instance.softnas1[0].id}"; exit_test
   
 EOT
 
@@ -614,7 +616,7 @@ output "provision_softnas_volumes" {
 
 # wakeup a node after sleep
 resource "null_resource" "start-softnas" {
-  count      = ! var.sleep && var.softnas_storage ? 1 : 0
+  count      = ( !var.sleep && var.softnas_storage ) ? 1 : 0
   depends_on = [null_resource.provision_softnas_volumes]
 
   #,"null_resource.mount_volumes_onsite"]
@@ -625,9 +627,10 @@ resource "null_resource" "start-softnas" {
 
   provisioner "local-exec" {
     command = <<EOT
+      . /vagrant/scripts/exit_test.sh
       # create volatile storage
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk.yaml --extra-vars "instance_id=${aws_instance.softnas1[0].id} stop_softnas_instance=true mode=attach"
-      aws ec2 start-instances --instance-ids ${aws_instance.softnas1[0].id}
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk.yaml --extra-vars "instance_id=${aws_instance.softnas1[0].id} stop_softnas_instance=true mode=attach"; exit_test
+      aws ec2 start-instances --instance-ids ${aws_instance.softnas1[0].id}; exit_test
   
 EOT
 
@@ -635,7 +638,7 @@ EOT
 }
 
 resource "null_resource" "shutdown-softnas" {
-  count = var.sleep && var.softnas_storage ? 1 : 0
+  count = ( var.sleep && var.softnas_storage ) ? 1 : 0
 
   triggers = {
     instanceid = aws_instance.softnas1[0].id
@@ -645,9 +648,10 @@ resource "null_resource" "shutdown-softnas" {
     #command = "aws ec2 stop-instances --instance-ids ${aws_instance.softnas1.id}"
 
     command = <<EOT
-      aws ec2 stop-instances --instance-ids ${aws_instance.softnas1[0].id}
+      . /vagrant/scripts/exit_test.sh
+      aws ec2 stop-instances --instance-ids ${aws_instance.softnas1[0].id}; exit_test
       # delete volatile storage
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk.yaml --extra-vars "instance_id=${aws_instance.softnas1[0].id} stop_softnas_instance=true mode=destroy"
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk.yaml --extra-vars "instance_id=${aws_instance.softnas1[0].id} stop_softnas_instance=true mode=destroy"; exit_test
   
 EOT
 
@@ -655,7 +659,7 @@ EOT
 }
 
 resource "null_resource" "attach_local_mounts_after_start" {
-  count      = ! var.sleep && var.softnas_storage ? 1 : 0
+  count      = ( !var.sleep && var.softnas_storage ) ? 1 : 0
   depends_on = [null_resource.start-softnas]
 
   #,"null_resource.mount_volumes_onsite"]
@@ -683,24 +687,24 @@ resource "null_resource" "attach_local_mounts_after_start" {
   }
   provisioner "local-exec" {
     command = <<EOT
+      . /vagrant/scripts/exit_test.sh
       set -x
       echo "TF_VAR_remote_mounts_on_local= $TF_VAR_remote_mounts_on_local"
       # ensure routes on workstation exist
-      if [ $TF_VAR_remote_mounts_on_local ] ; then
-        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-routes.yaml -v -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key"
+      if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
+        printf "\n$BLUE CONFIGURE REMOTE ROUTES ON LOCAL NODES $NC\n"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-routes.yaml -v -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key"; exit_test
       fi
       # ensure volumes and pools exist after the disks were ensured to exist - this was done before starting instance.
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-pool.yaml -v
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-pool.yaml -v; exit_test
       #ensure exports are correct
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk-update-exports.yaml -v --extra-vars "instance_id=${aws_instance.softnas1[0].id}"
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk-update-exports.yaml -v --extra-vars "instance_id=${aws_instance.softnas1[0].id}"; exit_test
       # mount volumes to local site when softnas is started
-      if [ $TF_VAR_remote_mounts_on_local ] ; then
-        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'
+      if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
+        printf "\n$BLUE CONFIGURE REMOTE MOUNTS ON LOCAL NODES $NC\n"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
       fi
-      # ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v -v --extra-vars "variable_host=localhost variable_user=vagrant" --skip-tags 'cloud_install local_install_onsite_mounts'
-  
 EOT
-
   }
 }
 
@@ -709,7 +713,7 @@ output "attach_local_mounts_after_start" {
 }
 
 resource "null_resource" "detach_local_mounts_after_stop" {
-  count      = var.sleep && var.softnas_storage ? 1 : 0
+  count      = ( var.sleep && var.softnas_storage ) ? 1 : 0
   depends_on = [null_resource.shutdown-softnas]
 
   #,"null_resource.mount_volumes_onsite"]
@@ -720,12 +724,12 @@ resource "null_resource" "detach_local_mounts_after_stop" {
   }
   provisioner "local-exec" {
     command = <<EOT
+      . /vagrant/scripts/exit_test.sh
       set -x
       # unmount volumes from local site when softnas is shutdown.
-      if [ $TF_VAR_remote_mounts_on_local ] ; then
-        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'
+      if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
+        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
       fi
-      # ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=localhost variable_user=vagrant destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'
   
 EOT
 

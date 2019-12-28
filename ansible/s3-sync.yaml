@@ -50,8 +50,6 @@
   - name: ensure an s3 bucket exists
     s3_bucket:
       name: "{{ bucket }}"
-      aws_access_key: "{{ aws_access_key_s3user }}"
-      aws_secret_key: "{{ aws_secret_key_s3user }}"
       region: "{{ aws_region }}"
     tags:
       - sync-local-push

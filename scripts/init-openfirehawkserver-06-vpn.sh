@@ -84,6 +84,8 @@ $TF_VAR_firehawk_path/scripts/keybase-test.sh
 config_override=$(to_abs_path $TF_VAR_firehawk_path/../secrets/config-override-$TF_VAR_envtier)
 echo "...Config Override path $config_override"
 
+echo 'enable the vpc.'
+sudo sed -i 's/^TF_VAR_enable_vpc=.*$/TF_VAR_enable_vpc=true/' $config_override
 echo 'on first apply, dont create softnas instance until vpn is working'
 sudo sed -i 's/^TF_VAR_softnas_storage=.*$/TF_VAR_softnas_storage=false/' $config_override
 echo '...Site mounts will not be mounted in cloud.  currently this will disable provisioning any render node or remote workstation until vpn is confirmed to function after this step'

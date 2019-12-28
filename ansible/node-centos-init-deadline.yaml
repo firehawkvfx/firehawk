@@ -10,8 +10,6 @@
   - name: ensure an s3 bucket exists to store large files / installers for faster redeployment.
     s3_bucket:
       name: "{{ bucket }}"
-      aws_access_key: "{{ aws_access_key_s3user }}"
-      aws_secret_key: "{{ aws_secret_key_s3user }}"
       region: "{{ aws_region }}"
     tags:
       - sync_installers
@@ -21,8 +19,6 @@
       bucket: "{{ bucket }}"
       file_root: /vagrant/downloads/
       include: "{{ deadline_linux_filename }}"
-      aws_access_key: "{{ aws_access_key_s3user }}"
-      aws_secret_key: "{{ aws_secret_key_s3user }}"
       region: "{{ aws_region }}"
     tags:
       - sync_installers
@@ -32,8 +28,6 @@
       bucket: "{{ bucket }}"
       file_root: /vagrant/downloads/
       include: "*"
-      aws_access_key: "{{ aws_access_key_s3user }}"
-      aws_secret_key: "{{ aws_secret_key_s3user }}"
       region: "{{ aws_region }}"
     when: sync_downloads
     tags:

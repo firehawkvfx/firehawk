@@ -3,6 +3,8 @@
 #----------------------------------------------------------------
 
 resource "aws_security_group" "node_centos" {
+  count                = var.site_mounts ? 1 : 0
+
   name        = var.name
   vpc_id      = var.vpc_id
   description = "Teradici PCOIP security group"
@@ -195,12 +197,13 @@ resource "aws_instance" "node_centos" {
   root_block_device {
     volume_size = var.volume_size
     volume_type = "gp2"
+    delete_on_termination = true
   }
 
   key_name               = var.key_name
   subnet_id              = element(var.private_subnet_ids, count.index)
   private_ip             = cidrhost("${data.aws_subnet.private_subnet[count.index].cidr_block}", 20)
-  vpc_security_group_ids = [aws_security_group.node_centos.id]
+  vpc_security_group_ids = aws_security_group.node_centos.*.id
   tags = {
     Name  = "node_centos"
     Route = "private"
@@ -251,24 +254,25 @@ resource "null_resource" "provision_node_centos" {
 
   provisioner "local-exec" {
     command = <<EOT
+      . /vagrant/scripts/exit_test.sh
       set -x
       cd /vagrant
-      ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.node_centos[0].private_ip} bastion_ip=${var.bastion_ip}"
-      ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=node0 host_ip=${aws_instance.node_centos[0].private_ip} group_name=role_node_centos"
-      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init-users.yaml -v --extra-vars "set_hostname=false"
+      ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.node_centos[0].private_ip} bastion_ip=${var.bastion_ip}"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=node0 host_ip=${aws_instance.node_centos[0].private_ip} group_name=role_node_centos"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init-users.yaml -v --extra-vars "set_hostname=false"; exit_test
       # install cli for centos user
-      ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_node_centos variable_user=centos" --skip-tags "user_access"
+      ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_node_centos variable_user=centos" --skip-tags "user_access"; exit_test
       # install cli for deadlineuser
-      ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_node_centos variable_user=centos variable_become_user=deadlineuser" --skip-tags "user_access"
-      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"
-      ansible-playbook -i "$TF_VAR_inventory" ansible/localworkstation-deadlineuser.yaml --tags "onsite-install" --skip-tags "multi-slave" --extra-vars "variable_host=role_node_centos variable_user=centos"
-      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-houdini.yaml -v --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source"
-      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v
+      ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_node_centos variable_user=centos variable_become_user=deadlineuser" --skip-tags "user_access"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/localworkstation-deadlineuser.yaml --tags "onsite-install" --skip-tags "multi-slave" --extra-vars "variable_host=role_node_centos variable_user=centos"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-houdini.yaml -v --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v; exit_test
       # last step before building ami we run a unit test to get houdini over a 4 minute hiccup on first use see sidefx RFE100149
-      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-houdini-unit-test.yaml -v --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source"
+      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-houdini-unit-test.yaml -v --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source"; exit_test
       # stop the instance to ensure ami is created from a stable state
-      aws ec2 stop-instances --instance-ids ${aws_instance.node_centos[0].id}
-      aws ec2 wait instance-stopped --instance-ids ${aws_instance.node_centos[0].id}
+      aws ec2 stop-instances --instance-ids ${aws_instance.node_centos[0].id}; exit_test
+      aws ec2 wait instance-stopped --instance-ids ${aws_instance.node_centos[0].id}; exit_test
 EOT
 
   }

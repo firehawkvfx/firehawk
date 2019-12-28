@@ -2,6 +2,9 @@ variable "sleep" {
   default = false
 }
 
+variable "enable_vpc" {
+}
+
 variable "vpc_cidr" {
 }
 
@@ -108,7 +111,6 @@ variable "envtier" {
 }
 
 variable "remote_mounts_on_local" {
-  default = true
 }
 
 variable "softnas_storage" {
