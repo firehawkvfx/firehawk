@@ -117,3 +117,8 @@ TF_VAR_openfirehawkserver_vcpus_dev=insertvalue
 # The number of VCPU's dedicated to the vagrant VM used in the prod environment.  Primarily you should consider the requirements of running mongo DB for Deadline on this host.
 # default: TF_VAR_openfirehawkserver_vcpus_prod=2
 TF_VAR_openfirehawkserver_vcpus_prod=insertvalue
+
+# TF_VAR_ansible_version:
+# the version to use for ansible.  Can be 'latest', or a specific version
+# default: TF_VAR_ansible_version=2.9.2
+TF_VAR_ansible_version=insertvalue

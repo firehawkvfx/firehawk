@@ -15,8 +15,9 @@ Vagrant.configure("2") do |config|
   envtier = ENV['TF_VAR_envtier']=
   openfirehawkserver = ENV['TF_VAR_openfirehawkserver']
   network = ENV['TF_VAR_network']
+  # The gui options are left for legacy reasons in the even that it may be required, but we are moving away from this to save resources.
   gui = false
-  ansible_version = 'latest'
+  ansible_version = ENV['TF_VAR_ansible_version']
 
   config.vm.define "ansible_control_"+envtier
   config.vagrant.plugins = ['vagrant-disksize', 'vagrant-reload']
