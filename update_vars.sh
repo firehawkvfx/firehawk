@@ -16,6 +16,9 @@ NC='\033[0m' # No Color
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 export TF_VAR_firehawk_path=$SCRIPTDIR
 
+# source an exit test to bail if non zero exit code is produced.
+. $TF_VAR_firehawk_path/scripts/exit_test.sh
+
 mkdir -p $TF_VAR_firehawk_path/tmp/
 mkdir -p $TF_VAR_firehawk_path/../secrets/
 # The template will be updated by this script
