@@ -144,7 +144,12 @@
 
     - name: configure routes to opposite dev/prod environment so that nodes in both envs can access licence server
       shell: |
-        ip route del {{ item.subnet }}
+        ip route list | grep {{ item.subnet }}
+        if [ $? -eq 0 ]; then
+          ip route del {{ item.subnet }}
+        else
+          echo "Route does not exit.  No need to delete {{ item.subnet }}"
+        fi
         ip route add {{ item.subnet }} via {{ item.next_hop }} dev {{ vpn_nic }}
       with_items:
         - { subnet: "{{ private_subnet1_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
@@ -172,7 +177,12 @@
 
     - name: configure routes to opposite dev/prod environment so that nodes in both envs can access licence server.  Remove route if it exists and re apply it.
       shell: |
-        ip route del {{ item.subnet }}
+        ip route list | grep {{ item.subnet }}
+        if [ $? -eq 0 ]; then
+          ip route del {{ item.subnet }}
+        else
+          echo "Route does not exit.  No need to delete {{ item.subnet }}"
+        fi
         ip route add {{ item.subnet }} via {{ item.next_hop }} dev {{ vpn_nic }}
       with_items:
         - { subnet: "{{ private_subnet1_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
