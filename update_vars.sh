@@ -301,7 +301,7 @@ source_vars () {
     # After a var file is source we also store the modified date of that file as a dynamic variable name.  if the modified date of the file on the next run is identical to the environment variable, then it doesn't need to be sourced again.  This allows detection of the contents being changed and sourcing the file if true.
 
     var_file_basename="$(echo $var_file | tr '-' '_')"
-    var_file="$(to_abs_path $TF_VAR_firehawk_path/../secrets/$var_file)"
+    var_file="$(to_abs_path $TF_VAR_firehawk_path/../secrets/$var_file)"; exit_test
 
     echo "...Test modified date"
     file_modified_date=$(date -r $var_file)
@@ -389,7 +389,7 @@ source_vars () {
                 echo "Vault is already encrypted"
             else
                 echo "Encrypting secrets with a key on disk and with a password. Vars will be set from an encrypted vault."
-                ansible-vault encrypt --vault-id $vault_key@prompt $var_file
+                ansible-vault encrypt --vault-id $vault_key@prompt $var_file; exit_test
             fi
         elif [[ $encrypt_mode = "decrypt" ]]; then
             echo "Decrypting Vault... $var_file"
@@ -397,7 +397,7 @@ source_vars () {
             if [[ "$line" == "\$ANSIBLE_VAULT"* ]]; then 
                 echo "Found encrypted vault"
                 echo "Decrypting secrets."
-                ansible-vault decrypt --vault-id $vault_key --vault-id $vault_key@prompt $var_file
+                ansible-vault decrypt --vault-id $vault_key --vault-id $vault_key@prompt $var_file; exit_test
             else
                 echo "Vault already unencrypted.  No need to decrypt. Vars will be set from unencrypted vault."
             fi
@@ -429,8 +429,8 @@ source_vars () {
             printf "\n...Parsing vault file to template.  Decrypting.\n"
         fi
 
-        local MULTILINE=$(eval $vault_command)
-        for i in $(echo "$MULTILINE" | sed 's/^$/###/')
+        local multiline; multiline=$(eval $vault_command); exit_test
+        for i in $(echo "$multiline" | sed 's/^$/###/')
         do
             if [[ "$i" =~ ^#.*$ ]]
             then
@@ -454,7 +454,7 @@ source_vars () {
 
         printf "\n...Exporting variables to environment\n"
         # # Now set environment variables to the actual values defined in the user's secrets-prod file
-        for i in $(echo "$MULTILINE")
+        for i in $(echo "$multiline")
         do
             [[ "$i" =~ ^#.*$ ]] && continue
             export $i
@@ -467,7 +467,7 @@ source_vars () {
 
         # # this python script generates mappings based on the current environment.
         # # any var ending in _prod or _dev will be stripped and mapped based on the envtier
-        python $TF_VAR_firehawk_path/scripts/envtier_vars.py
+        python $TF_VAR_firehawk_path/scripts/envtier_vars.py; exit_test
         envsubst < "$TF_VAR_firehawk_path/tmp/envtier_mapping.txt" > "$TF_VAR_firehawk_path/tmp/envtier_exports.txt"
 
         # Next- using the current envtier environment, evaluate the variables for the that envrionment.  
@@ -513,16 +513,16 @@ fi
 # if sourcing secrets, we also source the vagrant file, unencrypted config file and config ovverrides
 if [[ "$var_file" = "secrets" ]] || [[ -z "$var_file" ]]; then
     # assume secrets is the var file for default behaviour
-    source_vars 'vagrant' 'none'
-    source_vars 'defaults' 'none'
-    source_vars 'config' 'none'
+    source_vars 'vagrant' 'none'; exit_test
+    source_vars 'defaults' 'none'; exit_test
+    source_vars 'config' 'none'; exit_test
     # override the var_file at this point.
-    var_file = 'secrets'
-    source_vars 'secrets' "$encrypt_mode"
-    var_file = 'config-override'
-    source_vars 'config-override' 'none'
+    var_file = 'secrets'; exit_test
+    source_vars 'secrets' "$encrypt_mode"; exit_test
+    var_file = 'config-override'; exit_test
+    source_vars 'config-override' 'none'; exit_test
 else
-    source_vars "$var_file" "$encrypt_mode"
+    source_vars "$var_file" "$encrypt_mode"; exit_test
 fi
 
 printf "\nDone.\n\n"

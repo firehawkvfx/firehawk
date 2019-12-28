@@ -6,9 +6,12 @@ echo "Argument $1"
 echo ""
 ARGS=''
 
-# This is the directory of the current script
-SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-
+# trap ctrl-c and call ctrl_c()
+trap ctrl_c INT
+function ctrl_c() {
+        printf "\n** CTRL-C ** EXITING...\n"
+        exit
+}
 function to_abs_path {
     local target="$1"
     if [ "$target" == "." ]; then
@@ -19,8 +22,12 @@ function to_abs_path {
         echo "$(cd "$(dirname "$1")"; pwd)/$(basename "$1")"
     fi
 }
+# This is the directory of the current script
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 SCRIPTDIR=$(to_abs_path $SCRIPTDIR)
 printf "\n...checking scripts directory at $SCRIPTDIR\n\n"
+# source an exit test to bail if non zero exit code is produced.
+. $SCRIPTDIR/exit_test.sh
 
 cd /vagrant
 
@@ -36,17 +43,17 @@ else
     -d|--dev)
       ARGS='--dev'
       echo "using dev environment"
-      source ./update_vars.sh --dev
+      source ./update_vars.sh --dev; exit_test
       ;;
     -p|--prod)
       ARGS='--prod'
       echo "using prod environment"
-      source ./update_vars.sh --prod
+      source ./update_vars.sh --prod; exit_test
       ;;
     -p|--plan)
       tf_action="plan"
       echo "using prod environment"
-      source ./update_vars.sh --prod
+      source ./update_vars.sh --prod; exit_test
       ;;
     *)
       raise_error "Unknown argument: ${argument}"
@@ -61,7 +68,7 @@ echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 printf "\n\nHave you installed keybase and initialised pgp?\n\nIf not it is highly recommended that you create a profile on your phone and desktop for 2fa first.\nIf this process fails for any reason use 'keybase login' manually and test pgp decryption in the shell.\n\n"
 
 # install keybase and test decryption
-$TF_VAR_firehawk_path/scripts/keybase-test.sh
+$TF_VAR_firehawk_path/scripts/keybase-test.sh; exit_test
 
 # legacy manual keybase activation steps
 # echo "Press ENTER if you have initialised a keybase pgp passphrase for this shell. Otherwise exit (ctrl+c) and run:"
@@ -72,10 +79,10 @@ $TF_VAR_firehawk_path/scripts/keybase-test.sh
 
 if [[ "$tf_action" == "plan" ]]; then
   echo "running terraform plan"
-  terraform plan
+  terraform plan; exit_test
 elif [[ "$tf_action" == "apply" ]]; then
   echo "running terraform apply without any VPC to create a user with s3 cloud storage read write priveledges."
-  terraform apply --auto-approve
+  terraform apply --auto-approve; exit_test
   # get keys for s3 install
   export storage_user_access_key_id=$(terraform output storage_user_access_key_id)
   echo "storage_user_access_key_id= $storage_user_access_key_id"
@@ -87,16 +94,16 @@ fi
 
 # these are optional if you have an onsite RHEL / CENTOS workstation
 # add local host ssh keys to list of accepted keys on ansible control, example for another onsite workstation-
-ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=192.168.92.12 local=True"
+ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=192.168.92.12 local=True"; exit_test
 
-ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=workstation.firehawkvfx.com host_ip=192.168.92.12 group_name=role_local_workstation"
+ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=workstation.firehawkvfx.com host_ip=192.168.92.12 group_name=role_local_workstation"; exit_test
 
 # create and copy an ssh rsa key from ansible control to the workstation for provisioning.  1st time will error, run it twice
-ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-copy-id-private-host.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser"
+ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-copy-id-private-host.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser"; exit_test
 # ansible-playbook -i secrets/dev/inventory/hosts ansible/ssh-copy-id-private-host.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser"
 
 # if executing this playbook outside the script, you may need to run 'ssh-agent bash' in ubuntu.
-ssh-add /home/vagrant/.ssh/id_rsa
-ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser aws_cli_root=true"
+ssh-add /home/vagrant/.ssh/id_rsa; exit_test
+ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser aws_cli_root=true"; exit_test
 
 printf "\n...Finished $SCRIPTNAME\n\n"

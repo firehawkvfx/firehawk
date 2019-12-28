@@ -1,14 +1,29 @@
 #!/bin/bash
 
+### GENERAL FUNCTIONS FOR ALL INSTALLS
+
 # trap ctrl-c and call ctrl_c()
 trap ctrl_c INT
 function ctrl_c() {
         printf "\n** CTRL-C ** EXITING...\n"
         exit
 }
-
+function to_abs_path {
+    local target="$1"
+    if [ "$target" == "." ]; then
+        echo "$(pwd)"
+    elif [ "$target" == ".." ]; then
+        echo "$(dirname "$(pwd)")"
+    else
+        echo "$(cd "$(dirname "$1")"; pwd)/$(basename "$1")"
+    fi
+}
+# This is the directory of the current script
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+SCRIPTDIR=$(to_abs_path $SCRIPTDIR)
+printf "\n...checking scripts directory at $SCRIPTDIR\n\n"
 # source an exit test to bail if non zero exit code is produced.
-. /vagrant/scripts/exit_test.sh
+. $SCRIPTDIR/exit_test.sh
 
 argument="$1"
 

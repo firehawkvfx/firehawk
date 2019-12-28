@@ -6,9 +6,12 @@ echo "Argument $1"
 echo ""
 ARGS=''
 
-# This is the directory of the current script
-SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-
+# trap ctrl-c and call ctrl_c()
+trap ctrl_c INT
+function ctrl_c() {
+        printf "\n** CTRL-C ** EXITING...\n"
+        exit
+}
 function to_abs_path {
     local target="$1"
     if [ "$target" == "." ]; then
@@ -19,8 +22,12 @@ function to_abs_path {
         echo "$(cd "$(dirname "$1")"; pwd)/$(basename "$1")"
     fi
 }
+# This is the directory of the current script
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 SCRIPTDIR=$(to_abs_path $SCRIPTDIR)
 printf "\n...checking scripts directory at $SCRIPTDIR\n\n"
+# source an exit test to bail if non zero exit code is produced.
+. $SCRIPTDIR/exit_test.sh
 
 cd /vagrant
 
@@ -34,17 +41,17 @@ else
     -d|--dev)
       ARGS='--dev'
       echo "using dev environment"
-      source ./update_vars.sh --dev
+      source ./update_vars.sh --dev; exit_test
       ;;
     -p|--prod)
       ARGS='--prod'
       echo "using prod environment"
-      source ./update_vars.sh --prod
+      source ./update_vars.sh --prod; exit_test
       ;;
     -p|--plan)
       tf_action="plan"
       echo "using prod environment"
-      source ./update_vars.sh --prod
+      source ./update_vars.sh --prod; exit_test
       ;;
     *)
       raise_error "Unknown argument: ${argument}"
@@ -59,7 +66,7 @@ echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 printf "\n\nHave you installed keybase and initialised pgp?\n\nIf not it is highly recommended that you create a profile on your phone and desktop for 2fa.\nIf this process fails for any reason use 'keybase login' manually and test pgp decryption in the shell.\n\n"
 
 # install keybase and test decryption
-$TF_VAR_firehawk_path/scripts/keybase-test.sh
+$TF_VAR_firehawk_path/scripts/keybase-test.sh; exit_test
 
 # legacy manual keybase activation steps
 # echo "Press ENTER if you have initialised a keybase pgp passphrase for this shell. Otherwise exit (ctrl+c) and run:"
@@ -94,15 +101,15 @@ echo '...Softnas nfs exports will not be mounted on local site'
 sudo sed -i 's/^TF_VAR_remote_mounts_on_local=.*$/TF_VAR_remote_mounts_on_local=false/' $config_override
 
 echo "...Sourcing config override"
-source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override
+source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override; exit_test
 
 terraform init
 if [[ "$tf_action" == "plan" ]]; then
   echo "running terraform plan"
-  terraform plan
+  terraform plan; exit_test
 elif [[ "$tf_action" == "apply" ]]; then
   echo "running terraform apply"
-  terraform apply --auto-approve
+  terraform apply --auto-approve; exit_test
 fi
 
 echo "IMPORTANT: After this first terraform apply is succesful, you must exit this vm and use 'vagrant reload' to apply the promisc settings to the NIC for routing to work."

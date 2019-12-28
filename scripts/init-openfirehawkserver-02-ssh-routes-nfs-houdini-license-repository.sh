@@ -6,6 +6,29 @@ echo "Argument $1"
 echo ""
 ARGS=''
 
+# trap ctrl-c and call ctrl_c()
+trap ctrl_c INT
+function ctrl_c() {
+        printf "\n** CTRL-C ** EXITING...\n"
+        exit
+}
+function to_abs_path {
+    local target="$1"
+    if [ "$target" == "." ]; then
+        echo "$(pwd)"
+    elif [ "$target" == ".." ]; then
+        echo "$(dirname "$(pwd)")"
+    else
+        echo "$(cd "$(dirname "$1")"; pwd)/$(basename "$1")"
+    fi
+}
+# This is the directory of the current script
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+SCRIPTDIR=$(to_abs_path $SCRIPTDIR)
+printf "\n...checking scripts directory at $SCRIPTDIR\n\n"
+# source an exit test to bail if non zero exit code is produced.
+. $SCRIPTDIR/exit_test.sh
+
 cd /vagrant
 
 if [[ -z $argument ]] ; then
@@ -16,12 +39,12 @@ else
     -d|--dev)
       ARGS='--dev'
       echo "using dev environment"
-      source ./update_vars.sh --dev
+      source ./update_vars.sh --dev; exit_test
       ;;
     -p|--prod)
       ARGS='--prod'
       echo "using prod environment"
-      source ./update_vars.sh --prod
+      source ./update_vars.sh --prod; exit_test
       ;;
     *)
       raise_error "Unknown argument: ${argument}"
@@ -34,21 +57,21 @@ echo 'Use vagrant reload and vagrant ssh after executing each .sh script'
 echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 
 # custom events auto assign groups to slaves on startup, eg slaveautoconf
-ansible-playbook -i ansible/inventory/hosts ansible/deadline-repository-custom-events.yaml
+ansible-playbook -i ansible/inventory/hosts ansible/deadline-repository-custom-events.yaml; exit_test
 
 # configure onsite NAS mounts to ansible control
-ansible-playbook -i ansible/inventory/hosts ansible/node-centos-mounts.yaml --extra-vars "variable_host=localhost variable_user=vagrant softnas_hosts=none" --tags 'local_install_onsite_mounts'
+ansible-playbook -i ansible/inventory/hosts ansible/node-centos-mounts.yaml --extra-vars "variable_host=localhost variable_user=vagrant softnas_hosts=none" --tags 'local_install_onsite_mounts'; exit_test
 
 # ssh will be killed from the previous script because users were added to a new group and this will not update unless your ssh session is restarted.
 # login again and continue...
 
 # ansible-playbook -i ansible/inventory/hosts ansible/openfirehawkserver_houdini.yaml
 # install houdini with the same procedure as on render nodes and workstations, and initialise the licence server on this system.
-ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-houdini.yaml -vvv --extra-vars "variable_host=localhost variable_user=deadlineuser houdini_install_type=server" --skip-tags "sync_scripts"
+ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-houdini.yaml -vvv --extra-vars "variable_host=localhost variable_user=deadlineuser houdini_install_type=server" --skip-tags "sync_scripts"; exit_test
 
-ansible-playbook -i ansible/inventory/hosts ansible/aws-new-key.yaml
+ansible-playbook -i ansible/inventory/hosts ansible/aws-new-key.yaml; exit_test
 # configure routes to opposite environment for licence server to communicate if in dev environment
-ansible-playbook -i ansible/inventory ansible/ansible-control-update-routes.yaml
+ansible-playbook -i ansible/inventory ansible/ansible-control-update-routes.yaml; exit_test
 
 echo -e "\nIf above was succesful, exit the vm and use 'vagrant reload' before continuing with the next script.  New user group added wont have user added until reload."
 echo -e "\nFor houdini to work, ensure you have configured your licences on the production server."
