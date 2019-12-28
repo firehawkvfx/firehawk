@@ -15,20 +15,21 @@
   tasks:
     - name: Remove route if it exists and re apply it later
       shell: |
-        ip route del {{ item.subnet }}
+        ip route list | grep {{ item.subnet }}
+        if [ $? -eq 0 ]; then
+          ip route del {{ item.subnet }}
+        fi
       with_items:
         - { subnet: "{{ private_subnet1_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
         - { subnet: "{{ public_subnet1_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
         - { subnet: "{{ vpn_cidr_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
       when: envtier == 'dev'
-      ignore_errors: true
       become: yes
       tags:
         - add-routes
 
     - name: configure routes to opposite dev/prod environment so that nodes in both envs can access licence server
       shell: |
-        #ip route del {{ item.subnet }}
         ip route add {{ item.subnet }} via {{ item.next_hop }} dev {{ gatewaynic }}
       with_items:
         - { subnet: "{{ private_subnet1_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
@@ -56,21 +57,21 @@
 
     - name: Remove route if it exists and re apply it later
       shell: |
-        ip route del {{ item.subnet }}
-        #ip route add {{ item.subnet }} via {{ item.next_hop }} dev {{ gatewaynic }}
+        ip route list | grep {{ item.subnet }}
+        if [ $? -eq 0 ]; then
+          ip route del {{ item.subnet }}
+        fi
       with_items:
         - { subnet: "{{ private_subnet1_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
         - { subnet: "{{ public_subnet1_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
         - { subnet: "{{ vpn_cidr_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
       when: envtier == 'prod'
-      ignore_errors: true
       become: yes
       tags:
         - add-routes
 
     - name: configure routes to opposite dev/prod environment so that nodes in both envs can access licence server.  Remove route if it exists and re apply it.
       shell: |
-        #ip route del {{ item.subnet }}
         ip route add {{ item.subnet }} via {{ item.next_hop }} dev {{ gatewaynic }}
       with_items:
         - { subnet: "{{ private_subnet1_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
