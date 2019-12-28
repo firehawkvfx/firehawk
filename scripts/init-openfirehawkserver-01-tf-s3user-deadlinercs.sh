@@ -7,6 +7,9 @@ function ctrl_c() {
         exit
 }
 
+# source an exit test to bail if non zero exit code is produced.
+. /vagrant/scripts/exit_test.sh
+
 argument="$1"
 
 echo "Argument $1"
@@ -27,17 +30,17 @@ else
     -d|--dev)
       ARGS='--dev'
       echo "using dev environment"
-      source ./update_vars.sh --dev
+      source ./update_vars.sh --dev; exit_test
       ;;
     -p|--prod)
       ARGS='--prod'
       echo "using prod environment"
-      source ./update_vars.sh --prod
+      source ./update_vars.sh --prod; exit_test
       ;;
     -p|--plan)
       tf_action="plan"
       echo "using prod environment"
-      source ./update_vars.sh --prod
+      source ./update_vars.sh --prod; exit_test
       ;;
     *)
       raise_error "Unknown argument: ${argument}"
@@ -65,12 +68,12 @@ echo $(keybase --version)
 
 # you should login with 'keybase login'.  if you haven't created a user account you can do so at keybase.io
 
-ansible-playbook -i ansible/inventory/hosts ansible/init.yaml --extra-vars "variable_user=vagrant"
+ansible-playbook -i ansible/inventory/hosts ansible/init.yaml --extra-vars "variable_user=vagrant"; exit_test
 
 printf "\n\nHave you installed keybase and initialised pgp?\n\nIf not it is highly recommended that you create a profile on your phone and desktop for 2fa.\nIf this process fails for any reason use 'keybase login' manually and test pgp decryption in the shell.\n\n"
 
 # install keybase and test decryption
-$TF_VAR_firehawk_path/scripts/keybase-test.sh
+$TF_VAR_firehawk_path/scripts/keybase-test.sh; exit_test
 
 # legacy manual keybase activation steps
 # echo "Press ENTER if you have initialised a keybase pgp passphrase for this shell. Otherwise exit (ctrl+c) and run:"
@@ -91,15 +94,15 @@ sudo sed -i 's/^TF_VAR_site_mounts=.*$/TF_VAR_site_mounts=false/' $config_overri
 echo '...Softnas nfs exports will not be mounted on local site'
 sudo sed -i 's/^TF_VAR_remote_mounts_on_local=.*$/TF_VAR_remote_mounts_on_local=false/' $config_override
 echo "...Sourcing config override"
-source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override
+source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override; exit_test
 
 terraform init
 if [[ "$tf_action" == "plan" ]]; then
   echo "running terraform plan"
-  terraform plan
+  terraform plan; exit_test
 elif [[ "$tf_action" == "apply" ]]; then
   echo "running terraform apply without any VPC to create a user with s3 cloud storage read write access."
-  terraform apply --auto-approve
+  terraform apply --auto-approve; exit_test
   # get keys for s3 install
   export storage_user_access_key_id=$(terraform output storage_user_access_key_id)
   echo "storage_user_access_key_id= $storage_user_access_key_id"
@@ -112,9 +115,8 @@ elif [[ "$tf_action" == "apply" ]]; then
   echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 
   # install aws cli for user with s3 credentials.  root user only needs s3 access.  in future consider provisining a replacement access key for vagrant with less permissions, and remove the root account keys?
-  ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=ansible_control variable_user=root"
+  ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=ansible_control variable_user=root"; exit_test
 
-  ansible-playbook -i ansible/inventory/hosts ansible/newuser_deadline.yaml -v
+  ansible-playbook -i ansible/inventory/hosts ansible/newuser_deadline.yaml -v; exit_test
   # shell will exit at this point, no commands possible here on.
 fi
-
