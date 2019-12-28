@@ -139,7 +139,7 @@ module "openvpn" {
   key_name       = var.key_name
   private_key    = var.private_key
   local_key_path = var.local_key_path
-  ami            = "${lookup(var.openvpn_v2_7_5, var.aws_region)}"
+  ami            = lookup(var.openvpn_v2_7_5, var.aws_region)
   instance_type  = var.instance_type
 
   # Network Routing Inputs.  source destination checks are disable for nat gateways or routing on an instance.
