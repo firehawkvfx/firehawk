@@ -385,18 +385,7 @@ resource "null_resource" "provision_softnas" {
   }
   provisioner "local-exec" {
     command = <<EOT
-      exit_test () {
-        RED='\033[0;31m' # Red Text
-        GREEN='\033[0;32m' # Green Text
-        BLUE='\033[0;34m' # Blue Text
-        NC='\033[0m' # No Color
-        if [ $? -eq 0 ]; then
-          printf "\n $GREEN Playbook Succeeded $NC \n"
-        else
-          printf "\n $RED Failed Playbook $NC \n" >&2
-          exit 1
-        fi
-      }
+      . /vagrant/scripts/exit_test.sh
       set -x
       cd /vagrant
       ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.softnas1[0].private_ip} bastion_ip=${var.bastion_ip}"; exit_test
@@ -563,18 +552,7 @@ resource "null_resource" "provision_softnas_volumes" {
 
   provisioner "local-exec" {
     command = <<EOT
-      exit_test () {
-        RED='\033[0;31m' # Red Text
-        GREEN='\033[0;32m' # Green Text
-        BLUE='\033[0;34m' # Blue Text
-        NC='\033[0m' # No Color
-        if [ $? -eq 0 ]; then
-          printf "\n $GREEN Playbook Succeeded $NC \n"
-        else
-          printf "\n $RED Failed Playbook $NC \n" >&2
-          exit 1
-        fi
-      }
+      . /vagrant/scripts/exit_test.sh
       set -x
       cd /vagrant
       # ensure all old mounts onsite are removed if they exist.
@@ -610,18 +588,7 @@ EOT
   }
   provisioner "local-exec" {
     command = <<EOT
-      exit_test () {
-        RED='\033[0;31m' # Red Text
-        GREEN='\033[0;32m' # Green Text
-        BLUE='\033[0;34m' # Blue Text
-        NC='\033[0m' # No Color
-        if [ $? -eq 0 ]; then
-          printf "\n $GREEN Playbook Succeeded $NC \n"
-        else
-          printf "\n $RED Failed Playbook $NC \n" >&2
-          exit 1
-        fi
-      }
+      . /vagrant/scripts/exit_test.sh
       set -x
       cd /vagrant
       # ensure volumes and pools exist after disks are ensured to exist.
@@ -660,18 +627,7 @@ resource "null_resource" "start-softnas" {
 
   provisioner "local-exec" {
     command = <<EOT
-      exit_test () {
-        RED='\033[0;31m' # Red Text
-        GREEN='\033[0;32m' # Green Text
-        BLUE='\033[0;34m' # Blue Text
-        NC='\033[0m' # No Color
-        if [ $? -eq 0 ]; then
-          printf "\n $GREEN Playbook Succeeded $NC \n"
-        else
-          printf "\n $RED Failed Playbook $NC \n" >&2
-          exit 1
-        fi
-      }
+      . /vagrant/scripts/exit_test.sh
       # create volatile storage
       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk.yaml --extra-vars "instance_id=${aws_instance.softnas1[0].id} stop_softnas_instance=true mode=attach"; exit_test
       aws ec2 start-instances --instance-ids ${aws_instance.softnas1[0].id}; exit_test
@@ -692,18 +648,7 @@ resource "null_resource" "shutdown-softnas" {
     #command = "aws ec2 stop-instances --instance-ids ${aws_instance.softnas1.id}"
 
     command = <<EOT
-      exit_test () {
-        RED='\033[0;31m' # Red Text
-        GREEN='\033[0;32m' # Green Text
-        BLUE='\033[0;34m' # Blue Text
-        NC='\033[0m' # No Color
-        if [ $? -eq 0 ]; then
-          printf "\n $GREEN Playbook Succeeded $NC \n"
-        else
-          printf "\n $RED Failed Playbook $NC \n" >&2
-          exit 1
-        fi
-      }
+      . /vagrant/scripts/exit_test.sh
       aws ec2 stop-instances --instance-ids ${aws_instance.softnas1[0].id}; exit_test
       # delete volatile storage
       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk.yaml --extra-vars "instance_id=${aws_instance.softnas1[0].id} stop_softnas_instance=true mode=destroy"; exit_test
@@ -742,18 +687,7 @@ resource "null_resource" "attach_local_mounts_after_start" {
   }
   provisioner "local-exec" {
     command = <<EOT
-      exit_test () {
-        RED='\033[0;31m' # Red Text
-        GREEN='\033[0;32m' # Green Text
-        BLUE='\033[0;34m' # Blue Text
-        NC='\033[0m' # No Color
-        if [ $? -eq 0 ]; then
-          printf "\n $GREEN Playbook Succeeded $NC \n"
-        else
-          printf "\n $RED Failed Playbook $NC \n" >&2
-          exit 1
-        fi
-      }
+      . /vagrant/scripts/exit_test.sh
       set -x
       echo "TF_VAR_remote_mounts_on_local= $TF_VAR_remote_mounts_on_local"
       # ensure routes on workstation exist
@@ -790,18 +724,7 @@ resource "null_resource" "detach_local_mounts_after_stop" {
   }
   provisioner "local-exec" {
     command = <<EOT
-      exit_test () {
-        RED='\033[0;31m' # Red Text
-        GREEN='\033[0;32m' # Green Text
-        BLUE='\033[0;34m' # Blue Text
-        NC='\033[0m' # No Color
-        if [ $? -eq 0 ]; then
-          printf "\n $GREEN Playbook Succeeded $NC \n"
-        else
-          printf "\n $RED Failed Playbook $NC \n" >&2
-          exit 1
-        fi
-      }
+      . /vagrant/scripts/exit_test.sh
       set -x
       # unmount volumes from local site when softnas is shutdown.
       if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then

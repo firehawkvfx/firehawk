@@ -254,18 +254,7 @@ resource "null_resource" "provision_node_centos" {
 
   provisioner "local-exec" {
     command = <<EOT
-      exit_test () {
-        RED='\033[0;31m' # Red Text
-        GREEN='\033[0;32m' # Green Text
-        BLUE='\033[0;34m' # Blue Text
-        NC='\033[0m' # No Color
-        if [ $? -eq 0 ]; then
-          printf "\n $GREEN Playbook Succeeded $NC \n"
-        else
-          printf "\n $RED Failed Playbook $NC \n" >&2
-          exit 1
-        fi
-      }
+      . /vagrant/scripts/exit_test.sh
       set -x
       cd /vagrant
       ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.node_centos[0].private_ip} bastion_ip=${var.bastion_ip}"; exit_test
