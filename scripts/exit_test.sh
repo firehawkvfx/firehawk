@@ -9,9 +9,9 @@ NC='\033[0m' # No Color
 
 exit_test () {
     if [ $? -eq 0 ]; then
-        printf "\n${GREEN}Playbook Succeeded${NC}\n"
+        printf "\n${GREEN}Command Succeeded${NC}\n"
     else
-        printf "\n${RED}Failed Playbook${NC}\n" >&2
+        printf "\n${RED}Failed Command${NC}\n" >&2
         exit 1
     fi
 }
