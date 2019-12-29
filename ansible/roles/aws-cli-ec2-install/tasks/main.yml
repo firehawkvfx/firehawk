@@ -34,7 +34,7 @@
   become_user: "{{ variable_become_user }}"
   become: true
 
-  # for some reason this can still have permissions issues when command line is fine
+  # for some reason this can still have permissions issues on the vagrant vm when command line is fine
 # - name: install awscli, force upgrade
 #   pip: 
 #     name: awscli
