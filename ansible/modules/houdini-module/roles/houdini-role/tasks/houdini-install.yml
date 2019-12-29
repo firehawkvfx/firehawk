@@ -89,7 +89,7 @@
   args:
     creates: "{{ download_to_dir }}/{{ houdini_linux_filename }}"
   become_user: "{{ variable_user }}"
-  when: houdini_install_type == "server"
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
 - name: (CENTOS) Sync houdini from s3 if exist - pull
   shell: |
@@ -99,9 +99,9 @@
   args:
     creates: "{{ download_to_dir }}/{{ houdini_linux_filename }}"
   become_user: "{{ variable_user }}"
-  when: houdini_install_type != "server"
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
 
-- name: Auto download and install Houdini with python script - auto version
+- name: Auto download and install Houdini with python script - auto version only
   shell: |
     cd /opt/houdini_install_script/
     . /vagrant/scripts/exit_test.sh
@@ -109,7 +109,7 @@
   register: houdini_install_out
   no_log: true
   become: true
-  when: houdini_install_type != "server" and houdini_version_item.houdini_auto_version
+  when: houdini_version_item.houdini_auto_version
   failed_when:
   - "'Nothing was installed.' in houdini_install_out.stderr"
 
@@ -123,6 +123,7 @@
     . /vagrant/scripts/exit_test.sh
     sudo python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password | b64decode }} -i /opt/houdini -b {{ houdini_version_item.houdini_build }} -t {{ download_to_dir }} -q false -f {{ houdini_linux_filename }}; exit_test
   register: houdini_install_out
+  no_log: true
   become: true
   when: houdini_install_type != "server" and not houdini_version_item.houdini_auto_version
   failed_when:
