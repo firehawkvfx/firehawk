@@ -131,6 +131,7 @@ elif [[ "$tf_action" == "apply" ]]; then
 
   # install aws cli for user with s3 credentials.  root user only needs s3 access.  in future consider provisining a replacement access key for vagrant with less permissions, and remove the root account keys?
   ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=ansible_control variable_user=root"; exit_test
+  ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=ansible_control variable_user=deadlineuser"; exit_test
 
   ansible-playbook -i ansible/inventory/hosts ansible/newuser_deadline.yaml -v; exit_test
   # shell will exit at this point, no commands possible here on.
