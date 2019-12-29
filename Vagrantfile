@@ -69,6 +69,7 @@ Vagrant.configure("2") do |config|
     config.vm.provision "shell", inline: "sudo apt-add-repository --yes --update ppa:ansible/ansible"
     config.vm.provision "shell", inline: "sudo apt-get install -y ansible"
   else
+    # Installing a specific version of ansible with pip creates dependency issues pip which we resolve here.
     config.vm.provision "shell", inline: "sudo apt-get install -y python-pip python-dev"
     config.vm.provision "shell", inline: "pip install --upgrade pip"
     config.vm.provision "shell", inline: "sudo rm -rf /usr/lib/python2.7/dist-packages/OpenSSL"
@@ -76,6 +77,8 @@ Vagrant.configure("2") do |config|
     config.vm.provision "shell", inline: "sudo pip install -U pyopenssl"
     # to list available versions - pip install ansible==
     config.vm.provision "shell", inline: "sudo -H pip install ansible==#{ansible_version}"
+    config.vm.provision "shell", inline: "sudo pip uninstall requests"
+    config.vm.provision "shell", inline: "sudo pip install requests"
   end
   
   # configure a connection timeout to prevent ansible from getting stuck when there is an ssh issue.

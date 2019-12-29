@@ -1,0 +1,101 @@
+# This playbook is self contained with its own default variables, but the default variables (vars.yml) can be overidden at your own /secrets/overrides/ansible/modules/houdini-module/vars.yml
+
+# This script will query the latest daily or production build with side fx and install it.
+# if the file exists in s3, it will be downloaded and installed.  aws cli must be configured with a key that has permission to access s3.
+# Do not install the cli on cloud nodes with aws account root permissions!  A seperate user / key with the minimum s3 permissions required is recommended.
+
+# If the file doesn't exist in the s3 bucket, it will be downloaded from side fx, and then pushed to the bucket after install.
+
+# Example install on an aws instance
+# ansible-playbook -i ansible/inventory ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.${var.public_domain_name}"
+# Example local install on a RHEL 7.6 / CENTOS workstation / render node.
+# ansible-playbook -i ansible/inventory ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_become_pass=sompass"
+
+- hosts: "{{ variable_host | default('role_node_centos') }}"
+  remote_user: "{{ variable_user | default('centos') }}"
+  become: true
+  vars_files:
+    - /vagrant/ansible/group_vars/all/vars
+    - vars.yml
+    - /secrets/overrides/ansible/modules/houdini-module/vars.yml
+
+  vars:
+    ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
+
+  tasks:
+  - name: test connection
+    debug:
+      msg: "connection established"
+
+# sync installers from/to s3 bucket.  any new houdini versions will be pushed from ansible control to the bucket.
+
+- hosts: ansible_control
+  remote_user: vagrant
+  become: true
+  vars_files:
+    - /vagrant/ansible/group_vars/all/vars
+    - vars.yml
+    - /secrets/overrides/ansible/modules/houdini-module/vars.yml
+
+  vars:
+    sync_downloads: false
+    bucket: "{{ installers_bucket }}"
+
+  tasks:
+
+  # - name: Open tops ports for vpn. May not be necesary in H18.
+  #   include_role:
+  #     name: houdini-tops-ports-vpn
+
+  - name: ensure an s3 bucket exists to store large files / installers for faster redeployment.
+    s3_bucket:
+      name: "{{ bucket }}"
+      region: "{{ aws_region }}"
+    tags:
+      - sync_installers
+
+  - name: ensure the downloads folder is syncronised with the bucket
+    s3_sync:
+      bucket: "{{ bucket }}"
+      file_root: /vagrant/downloads/
+      include: "*"
+      region: "{{ aws_region }}"
+    when: sync_downloads
+    tags:
+      - sync_installers
+
+- hosts: "{{ variable_host | default('role_node_centos') }}"
+  remote_user: "{{ variable_user | default('centos') }}"
+  become: true
+  vars_files:
+    - /vagrant/ansible/group_vars/all/vars
+    - vars.yml
+    - /secrets/overrides/ansible/modules/houdini-module/vars.yml
+
+  tasks:
+  - name: install houdini module
+    include_role:
+      name: houdini-role
+
+- hosts: ansible_control
+  become: true
+  vars_files:
+    - /vagrant/ansible/group_vars/all/vars
+    - vars.yml
+    - /secrets/overrides/ansible/modules/houdini-module/vars.yml
+
+  vars:
+    my_password: "{{ user_deadlineuser_pw }}"
+    no_extension: "{{ deadline_linux_installers_tar | splitext | first }}"
+    basename: "{{ no_extension.split('/')[-1] }}"
+    #houdini_major_version: 18.0
+    houdini_install_type: 'node'
+    
+  tasks:
+  - name: setup houdini plugin in deadline repository for each major version.  This identical role use occurs in 2 locations - after deadline install and with install of Houdini
+    include_role:
+      name: 'deadlinedb-houdini-plugins'
+    loop: "{{ houdini_major_version_list }}"
+    loop_control:
+      loop_var: houdini_major_version
+    when: houdini_install_type != "server"

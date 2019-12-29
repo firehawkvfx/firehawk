@@ -50,8 +50,10 @@
 - name: Query houdini filename - Houdini python script
   shell: |
     cd /opt/houdini_install_script/
-    python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini -b {{ houdini_version_item.houdini_build }} -t {{ download_to_dir }} -q true -f {{ houdini_linux_filename }}
+    . /vagrant/scripts/exit_test.sh
+    python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password | b64decode }} -i /opt/houdini -b {{ houdini_version_item.houdini_build }} -t {{ download_to_dir }} -q true -f {{ houdini_linux_filename }}; exit_test
   register: houdini_query_out
+  no_log: true
   become: true
   when: houdini_version_item.houdini_auto_version
 
@@ -69,11 +71,15 @@
     regexp: '(houdini.*.tar.*)'
   with_items:
   - "{{ houdini_query_out.stdout_lines }}"
-  when: houdini_version_item.houdini_auto_version
+  when: houdini_version_item.houdini_auto_version and 'File:' in item
 
 - name: Houdini filename to install from sidefx website result
   debug:
     var: houdini_linux_filename
+
+- fail:
+    msg: 'no valid houdini_linux_filename was defined / found'
+  when: '".tar" not in houdini_linux_filename'
 
 - name: (UBUNTU) Sync houdini from s3 if exist - pull
   shell: |
@@ -98,8 +104,10 @@
 - name: Auto download and install Houdini with python script - auto version
   shell: |
     cd /opt/houdini_install_script/
-    sudo python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini -b {{ houdini_version_item.houdini_build }} -t {{ download_to_dir }} -q false
+    . /vagrant/scripts/exit_test.sh
+    sudo python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password | b64decode }} -i /opt/houdini -b {{ houdini_version_item.houdini_build }} -t {{ download_to_dir }} -q false; exit_test
   register: houdini_install_out
+  no_log: true
   become: true
   when: houdini_install_type != "server" and houdini_version_item.houdini_auto_version
   failed_when:
@@ -112,7 +120,8 @@
 - name: Install Houdini with python script - specific existing version from s3 bucket
   shell: |
     cd /opt/houdini_install_script/
-    sudo python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini -b {{ houdini_version_item.houdini_build }} -t {{ download_to_dir }} -q false -f {{ houdini_linux_filename }}
+    . /vagrant/scripts/exit_test.sh
+    sudo python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password | b64decode }} -i /opt/houdini -b {{ houdini_version_item.houdini_build }} -t {{ download_to_dir }} -q false -f {{ houdini_linux_filename }}; exit_test
   register: houdini_install_out
   become: true
   when: houdini_install_type != "server" and not houdini_version_item.houdini_auto_version
@@ -154,8 +163,12 @@
 
 - name: SERVER INSTALL - Stop licensing server if already running / installed.  Please ignore any error if hserver not running.
   shell: |
-    /opt/hfs17.5/bin/hserver -q
-  ignore_errors: yes
+    pgrep hserver
+    if [ $? -eq 0 ]; then
+      /opt/hfs17.5/bin/hserver -q
+    else
+      echo "hserver is not running.  No need to kill process"
+    fi
   become: true
   when: houdini_install_type == "server" and hserver_check.stat.exists
 

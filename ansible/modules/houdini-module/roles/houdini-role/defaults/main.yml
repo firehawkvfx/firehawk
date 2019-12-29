@@ -1,0 +1,5 @@
+---
+# defaults file for roles/houdini-module
+
+sesi_username: "{{ lookup('env','TF_VAR_sesi_username') }}"
+sesi_password: "{{ lookup('env','TF_VAR_sesi_password') | b64encode }}"
