@@ -79,9 +79,11 @@ $TF_VAR_firehawk_path/scripts/keybase-test.sh; exit_test
 
 if [[ "$tf_action" == "plan" ]]; then
   echo "running terraform plan"
+  cd /vagrant
   terraform plan; exit_test
 elif [[ "$tf_action" == "apply" ]]; then
-  echo "running terraform apply without any VPC to create a user with s3 cloud storage read write priveledges."
+  echo "running terraform apply."
+  cd /vagrant
   terraform apply --auto-approve; exit_test
   # get keys for s3 install
   export storage_user_access_key_id=$(terraform output storage_user_access_key_id)
@@ -91,7 +93,7 @@ elif [[ "$tf_action" == "apply" ]]; then
 fi
 
 ### end get access keys from terraform
-
+set -x
 # these are optional if you have an onsite RHEL / CENTOS workstation
 # add local host ssh keys to list of accepted keys on ansible control, example for another onsite workstation-
 ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=192.168.92.12 local=True"; exit_test
@@ -103,7 +105,8 @@ ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-copy-id-private-host.yaml -v
 # ansible-playbook -i secrets/dev/inventory/hosts ansible/ssh-copy-id-private-host.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser"
 
 # if executing this playbook outside the script, you may need to run 'ssh-agent bash' in ubuntu.
-ssh-add /home/vagrant/.ssh/id_rsa; exit_test
+eval `ssh-agent -s`
+ssh-add /home/vagrant/.ssh/id_rsa
 ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser aws_cli_root=true"; exit_test
 
 printf "\n...Finished $SCRIPTNAME\n\n"
