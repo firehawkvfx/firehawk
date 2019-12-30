@@ -7,8 +7,9 @@
 - name: install mkpasswd, pip, pexpect, passlib
   package:
     name:
-    - whois
     - python-pip
+    - python-apt
+    - whois
     - python-passlib
     - zip
     - openvpn
@@ -16,7 +17,10 @@
     - gpgv2
     state: present
 
-#nfs-common is used for showmount
+- name: install requests to query web pages in houdini python install script.
+  pip:
+    name: requests
+  become: true
 
 - name: install pexpect for rhel / centos,
   pip:
