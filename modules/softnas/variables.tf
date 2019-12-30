@@ -99,7 +99,7 @@ variable "instance_type" {
 
   default = {
     low  = "m4.xlarge"
-    high = "r5.2xlarge"
+    high = "m4.2xlarge"
   }
 }
 
