@@ -98,13 +98,13 @@
   tags:
   - install
 
-- name: show version list
-  debug:
-    var: houdini_major_version_list
+# - name: show version list
+#   debug:
+#     var: houdini_major_version_list
 
-- name: setup houdini plugin for each major version.  this occurs after deadline install and with install of houdini
-  include_role:
-    name: 'deadlinedb-houdini-plugins'
-  loop: "{{ houdini_major_version_list }}"
-  loop_control:
-    loop_var: houdini_major_version
+# - name: setup houdini plugin for each major version.  this occurs after deadline install and with install of houdini
+#   include_role:
+#     name: 'deadlinedb-houdini-plugins'
+#   loop: "{{ houdini_major_version_list }}"
+#   loop_control:
+#     loop_var: houdini_major_version
