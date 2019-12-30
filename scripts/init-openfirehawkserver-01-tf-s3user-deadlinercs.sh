@@ -111,12 +111,13 @@ sudo sed -i 's/^TF_VAR_remote_mounts_on_local=.*$/TF_VAR_remote_mounts_on_local=
 echo "...Sourcing config override"
 source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override; exit_test
 
+cd /vagrant
 terraform init
 if [[ "$tf_action" == "plan" ]]; then
-  echo "running terraform plan"
+  printf "\nrunning terraform plan.\n"
   terraform plan; exit_test
 elif [[ "$tf_action" == "apply" ]]; then
-  echo "running terraform apply without any VPC to create a user with s3 cloud storage read write access."
+  printf "\nrunning terraform apply without any VPC to create a user with s3 cloud storage read write access.\n"
   terraform apply --auto-approve; exit_test
   # get keys for s3 install
   export storage_user_access_key_id=$(terraform output storage_user_access_key_id)
@@ -131,8 +132,11 @@ elif [[ "$tf_action" == "apply" ]]; then
 
   # install aws cli for user with s3 credentials.  root user only needs s3 access.  in future consider provisining a replacement access key for vagrant with less permissions, and remove the root account keys?
   ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=ansible_control variable_user=root"; exit_test
+  
+  ansible-playbook -i ansible/inventory/hosts ansible/newuser_deadline.yaml -v; exit_test
+
+  # couldn't do this before previous playbook since the user doesn't exist yet.  split out the creation of the user into a seperate role to run first, then we can download deadline via s3.
   ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=ansible_control variable_user=deadlineuser"; exit_test
 
-  ansible-playbook -i ansible/inventory/hosts ansible/newuser_deadline.yaml -v; exit_test
   # shell will exit at this point, no commands possible here on.
 fi
