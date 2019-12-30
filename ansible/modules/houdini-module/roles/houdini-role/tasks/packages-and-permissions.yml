@@ -90,12 +90,20 @@
 - name: Install requests for web page crawling
   pip:
     name: requests
-  when: not skip_packages
+  become: true
+
+- name: Install requests for web page crawling as user
+  pip:
+    name: requests
+    extra_args: --user
+  become_user: "{{ variable_user }}"
+  become: true
+
 
 - name: Install beautifulsoup4 for web page crawling
   pip:
     name: beautifulsoup4
-  when: not skip_packages
+  become: true
 
 - name: Copy Houdini auto install script to remote host from ansible control.
   copy:
