@@ -59,6 +59,7 @@ TF_VAR_vault_key_name_prod=insertvalue
 # eg 1: TF_VAR_bridgenic=none
 # eg 2: TF_VAR_bridgenic=en0: Wi-Fi (AirPort)
 # eg 3: TF_VAR_bridgenic=en1: Thunderbolt Ethernet Slot 1
+# default: TF_VAR_bridgenic=en0: Wi-Fi (AirPort)
 TF_VAR_bridgenic=insertvalue
 
 # TF_VAR_timezone_localpath: 

@@ -63,6 +63,6 @@ echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 # ssh-agent bash
 eval `ssh-agent -s`
 ssh-add /home/vagrant/.ssh/id_rsa
-ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -vvv --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser" --skip-tags "sync_scripts"; exit_test
+ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -vvv --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password variable_host=workstation.firehawkvfx.com variable_user=deadlineuser" --skip-tags "sync_scripts"; exit_test
 
 printf "\n...Finished $SCRIPTNAME\n\n"

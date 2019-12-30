@@ -51,7 +51,7 @@
   shell: |
     cd /opt/houdini_install_script/
     . /prod/assets/openfirehawk-houdini-tools/scripts/bash/exit_test.sh
-    python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password | b64decode }} -i /opt/houdini -b {{ houdini_version_item.houdini_build }} -t {{ download_to_dir }} -q true -f {{ houdini_linux_filename }}; exit_test
+    python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini -b {{ houdini_version_item.houdini_build }} -t {{ download_to_dir }} -q true -f {{ houdini_linux_filename }}; exit_test
   register: houdini_query_out
   #no_log: true
   become: true
@@ -95,7 +95,7 @@
   shell: |
     set -x
     cd {{ download_to_dir }}/
-    ~/.local/bin/aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ houdini_linux_filename }}"
+    aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ houdini_linux_filename }}"
   args:
     creates: "{{ download_to_dir }}/{{ houdini_linux_filename }}"
   become_user: "{{ variable_user }}"
@@ -105,7 +105,7 @@
   shell: |
     cd /opt/houdini_install_script/
     . /prod/assets/openfirehawk-houdini-tools/scripts/bash/exit_test.sh
-    sudo python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password | b64decode }} -i /opt/houdini -b {{ houdini_version_item.houdini_build }} -t {{ download_to_dir }} -q false; exit_test
+    sudo python /opt/houdini_install_script/houdini_install.py -u '{{ sesi_username }}' -p '{{ sesi_password }}' -i /opt/houdini -b {{ houdini_version_item.houdini_build }} -t {{ download_to_dir }} -q false; exit_test
   register: houdini_install_out
   no_log: true
   become: true
@@ -121,7 +121,7 @@
   shell: |
     cd /opt/houdini_install_script/
     . /prod/assets/openfirehawk-houdini-tools/scripts/bash/exit_test.sh
-    sudo python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password | b64decode }} -i /opt/houdini -b {{ houdini_version_item.houdini_build }} -t {{ download_to_dir }} -q false -f {{ houdini_linux_filename }}; exit_test
+    sudo python /opt/houdini_install_script/houdini_install.py -u '{{ sesi_username }}' -p '{{ sesi_password }}' -i /opt/houdini -b {{ houdini_version_item.houdini_build }} -t {{ download_to_dir }} -q false -f {{ houdini_linux_filename }}; exit_test
   register: houdini_install_out
   no_log: true
   become: true
