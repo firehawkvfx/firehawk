@@ -16,11 +16,17 @@
     pip install --upgrade pip
   become: true
 
-- name: upgrade pip
-  shell: |
-    pip install --upgrade pip
-  become_user: "{{ variable_become_user }}"
-  become: true
+- name: ansible versions other than 'latest' are not supported until virtuelenv is integrated into the repo.
+  fail:
+    msg: "ansible version {{ ansible_version}} is other than 'latest' are not supported until virtuelenv is integrated into the repo."
+  when: selected_ansible_version != 'latest'
+
+# - name: upgrade pip
+#   shell: |
+#     pip install --upgrade pip
+#   become_user: "{{ variable_become_user }}"
+#   become: true
+#   when: selected_ansible_version != 'latest'
 
 - name: install awscli, force upgrade - root
   pip: 
@@ -28,45 +34,51 @@
     extra_args: --upgrade
   become: true
 
-- name: upgrade awscli in pip via commandline - pip module has a permissions issue.
-  shell: |
-    sudo -H pip install --upgrade --user awscli
-  become_user: "{{ variable_become_user }}"
-  become: true
-
-  # for some reason this can still have permissions issues on the vagrant vm when command line is fine
-# - name: install awscli, force upgrade
-#   pip: 
-#     name: awscli
-#     extra_args: --upgrade --user
+# - name: upgrade awscli in pip via commandline - pip module has a permissions issue.
+#   shell: |
+#     sudo -H pip install --upgrade --user awscli
 #   become_user: "{{ variable_become_user }}"
 #   become: true
+#   when: selected_ansible_version != 'latest'
 
-- name: install pexpect in pip via commandline - pip module has a permissions issue.
-  shell: |
-    sudo -H pip install --upgrade --user pexpect
+# for some reason this can still have permissions issues on the vagrant vm when command line is fine.  this only occurs with the ansible modules
+- name: install awscli, force upgrade
+  pip: 
+    name: awscli
+    extra_args: --upgrade --user
   become_user: "{{ variable_become_user }}"
   become: true
+  when: selected_ansible_version == 'latest'
 
-# - name: install pexpect
-#   pip: 
-#     name: pexpect
-#     extra_args: --upgrade --user
+# - name: install pexpect in pip via commandline - pip module has a permissions issue.
+#   shell: |
+#     sudo -H pip install --upgrade --user pexpect
 #   become_user: "{{ variable_become_user }}"
 #   become: true
+#   when: selected_ansible_version != 'latest'
 
-- name: install boto in pip via commandline - pip module has a permissions issue.
-  shell: |
-    sudo -H pip install --upgrade --user boto3
+- name: install pexpect
+  pip: 
+    name: pexpect
+    extra_args: --upgrade --user
   become_user: "{{ variable_become_user }}"
   become: true
+  when: selected_ansible_version == 'latest'
 
-# - name: install the boto package, force upgrade
-#   pip: 
-#     name: boto3
-#     extra_args: --user
+# - name: install boto in pip via commandline - pip module has a permissions issue.
+#   shell: |
+#     sudo -H pip install --upgrade --user boto3
 #   become_user: "{{ variable_become_user }}"
 #   become: true
+#   when: selected_ansible_version != 'latest'
+
+- name: install the boto package, force upgrade
+  pip: 
+    name: boto3
+    extra_args: --user
+  become_user: "{{ variable_become_user }}"
+  become: true
+  when: selected_ansible_version == 'latest'
 
 # on an ec2 instance, the cli credentials are inherited automatically by the role or permissions assigned to the instance.  Below is the optional tag to intall a specific access key for a user account.  the inputs are provided as environment variables with pgp encryption.
 
