@@ -83,7 +83,6 @@
 
   ### steps to creat a new user rwith password and ssh key
 
-
   - name: Ensure group "deadlineuser" exists
     group:
       name: deadlineuser

@@ -2,6 +2,8 @@
 ansible_ssh_private_key_file: "{{ lookup('env','TF_VAR_local_key_path') }}"
 ANSIBLE_FORCE_COLOR: 'true'
 
+selected_ansible_version: "{{ lookup('env','TF_VAR_selected_ansible_version') }}"
+
 debug: 0
 
 envtier: "{{ lookup('env','TF_VAR_envtier') }}"

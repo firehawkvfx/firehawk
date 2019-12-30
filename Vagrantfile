@@ -17,7 +17,7 @@ Vagrant.configure("2") do |config|
   network = ENV['TF_VAR_network']
   # The gui options are left for legacy reasons in the even that it may be required, but we are moving away from this to save resources.
   gui = false
-  ansible_version = ENV['TF_VAR_ansible_version']
+  selected_ansible_version = ENV['TF_VAR_selected_ansible_version']
 
   config.vm.define "ansible_control_"+envtier
   config.vagrant.plugins = ['vagrant-disksize', 'vagrant-reload']
@@ -65,9 +65,12 @@ Vagrant.configure("2") do |config|
   ### Install Ansible Block ###
   config.vm.provision "shell", inline: "sudo apt-get install -y software-properties-common"
 
-  if ansible_version == 'latest'
+  if selected_ansible_version == 'latest'
+    config.vm.provision "shell", inline: "echo 'installing latest version of ansible with apt-get'"
     config.vm.provision "shell", inline: "sudo apt-add-repository --yes --update ppa:ansible/ansible"
     config.vm.provision "shell", inline: "sudo apt-get install -y ansible"
+    # config.vm.provision "shell", inline: "sudo pip uninstall requests"
+    # config.vm.provision "shell", inline: "sudo pip install requests"
   else
     # Installing a specific version of ansible with pip creates dependency issues pip which we resolve here.
     config.vm.provision "shell", inline: "sudo apt-get install -y python-pip python-dev"

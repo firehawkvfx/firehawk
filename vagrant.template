@@ -118,7 +118,9 @@ TF_VAR_openfirehawkserver_vcpus_dev=insertvalue
 # default: TF_VAR_openfirehawkserver_vcpus_prod=2
 TF_VAR_openfirehawkserver_vcpus_prod=insertvalue
 
-# TF_VAR_ansible_version:
-# the version to use for ansible.  Can be 'latest', or a specific version
-# default: TF_VAR_ansible_version=2.9.2
-TF_VAR_ansible_version=insertvalue
+# TF_VAR_selected_ansible_version:
+# the version to use for ansible.  Can be 'latest', or a specific version.  due to a bug with pip and ansible we can have pip permissions and authentication issues when not using latest.
+# this is because pip installs the version instead of apt-get when using a specific version instead of latest.  Resolution by using virtualenv will be required to resolve.
+# eg: TF_VAR_selected_ansible_version=2.9.2
+# default: TF_VAR_selected_ansible_version=latest
+TF_VAR_selected_ansible_version=insertvalue
