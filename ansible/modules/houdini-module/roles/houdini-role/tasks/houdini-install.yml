@@ -50,10 +50,10 @@
 - name: Query houdini filename - Houdini python script
   shell: |
     cd /opt/houdini_install_script/
-    . /vagrant/scripts/exit_test.sh
+    . /prod/assets/openfirehawk-houdini-tools/scripts/bash/exit_test.sh
     python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password | b64decode }} -i /opt/houdini -b {{ houdini_version_item.houdini_build }} -t {{ download_to_dir }} -q true -f {{ houdini_linux_filename }}; exit_test
   register: houdini_query_out
-  no_log: true
+  #no_log: true
   become: true
   when: houdini_version_item.houdini_auto_version
 
@@ -101,10 +101,10 @@
   become_user: "{{ variable_user }}"
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
 
-- name: Auto download and install Houdini with python script - auto version only
+- name: Auto download / install Houdini with python script - auto version only
   shell: |
     cd /opt/houdini_install_script/
-    . /vagrant/scripts/exit_test.sh
+    . /prod/assets/openfirehawk-houdini-tools/scripts/bash/exit_test.sh
     sudo python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password | b64decode }} -i /opt/houdini -b {{ houdini_version_item.houdini_build }} -t {{ download_to_dir }} -q false; exit_test
   register: houdini_install_out
   no_log: true
@@ -120,7 +120,7 @@
 - name: Install Houdini with python script - specific existing version from s3 bucket
   shell: |
     cd /opt/houdini_install_script/
-    . /vagrant/scripts/exit_test.sh
+    . /prod/assets/openfirehawk-houdini-tools/scripts/bash/exit_test.sh
     sudo python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password | b64decode }} -i /opt/houdini -b {{ houdini_version_item.houdini_build }} -t {{ download_to_dir }} -q false -f {{ houdini_linux_filename }}; exit_test
   register: houdini_install_out
   no_log: true
@@ -157,7 +157,7 @@
 ### SERVER INSTALL
 - name: SERVER INSTALL - check if hserver file exists
   stat: 
-    path: /opt/hfs17.5/bin/hserver
+    path: /opt/hfs{{ houdini_version_item.houdini_major_version }}/bin/hserver
   register: hserver_check
   become: true
   when: houdini_install_type == "server"
@@ -166,7 +166,7 @@
   shell: |
     pgrep hserver
     if [ $? -eq 0 ]; then
-      /opt/hfs17.5/bin/hserver -q
+      /opt/hfs{{ houdini_version_item.houdini_major_version }}/bin/hserver -q
     else
       echo "hserver is not running.  No need to kill process"
     fi
@@ -242,10 +242,10 @@
 
 - name: SERVER INSTALL - setup licensing mode
   shell: |
-    cd /opt/hfs17.5
-    sudo sed -i '/licensingMode = sesinetd/s/^# //g' /opt/hfs17.5/houdini/Licensing.opt
-    sudo cat /opt/hfs17.5/houdini/Licensing.opt
-    /opt/hfs17.5/bin/hserver
+    cd /opt/hfs{{ houdini_version_item.houdini_major_version }}
+    sudo sed -i '/licensingMode = sesinetd/s/^# //g' /opt/hfs{{ houdini_version_item.houdini_major_version }}/houdini/Licensing.opt
+    sudo cat /opt/hfs{{ houdini_version_item.houdini_major_version }}/houdini/Licensing.opt
+    /opt/hfs{{ houdini_version_item.houdini_major_version }}/bin/hserver
   become: true
   when: houdini_install_type == "server"
 ### END SERVER INSTALL
