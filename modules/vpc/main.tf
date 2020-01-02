@@ -80,6 +80,7 @@ module "vpn" {
   openvpn_admin_pw   = var.openvpn_admin_pw
 
   bastion_ip = var.bastion_ip
+  bastion_dependency = var.bastion_dependency
 
   #sleep will stop instances to save cost during idle time.
   sleep = var.sleep

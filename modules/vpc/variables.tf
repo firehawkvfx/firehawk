@@ -82,3 +82,5 @@ variable "vpn_cidr" {
 
 variable "bastion_ip" {
 }
+
+variable "bastion_dependency" {}

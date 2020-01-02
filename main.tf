@@ -77,7 +77,8 @@ module "vpc" {
   openvpn_admin_user = var.openvpn_admin_user
   openvpn_admin_pw   = var.openvpn_admin_pw
 
-  bastion_ip = module.bastion.public_ip
+  bastion_ip         = module.bastion.public_ip
+  bastion_dependency = module.bastion.bastion_dependency
 }
 
 variable "node_skip_update" {

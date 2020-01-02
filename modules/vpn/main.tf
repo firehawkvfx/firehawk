@@ -108,6 +108,8 @@ variable "openvpn_v2_7_5" {
 
 variable "aws_region" {}
 
+variable "bastion_dependency" {}
+
 module "openvpn" {
   #source = "github.com/firehawkvfx/tf_aws_openvpn"
 
@@ -159,6 +161,7 @@ module "openvpn" {
   openvpn_admin_pw   = var.openvpn_admin_pw
 
   bastion_ip = var.bastion_ip
+  bastion_dependency = var.bastion_dependency
 
   #sleep will stop instances to save cost during idle time.
   sleep = var.sleep

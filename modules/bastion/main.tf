@@ -133,6 +133,7 @@ locals {
   id = element(concat(aws_instance.bastion.*.id, list("")), 0)
   security_group_id = element(concat(aws_security_group.bastion.*.id, list("")), 0)
   bastion_address = var.route_public_domain_name ? "bastion.${var.public_domain_name}":"${local.public_ip}"
+  bastion_dependency = element(concat(null_resource.provision_bastion.*.id, list("")), 0)
 }
 
 
