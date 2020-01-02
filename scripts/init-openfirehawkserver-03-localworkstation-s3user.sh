@@ -93,7 +93,7 @@ elif [[ "$tf_action" == "apply" ]]; then
 fi
 
 ### end get access keys from terraform
-set -x
+
 # these are optional if you have an onsite RHEL / CENTOS workstation
 # add local host ssh keys to list of accepted keys on ansible control, example for another onsite workstation-
 ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=192.168.92.12 local=True"; exit_test
