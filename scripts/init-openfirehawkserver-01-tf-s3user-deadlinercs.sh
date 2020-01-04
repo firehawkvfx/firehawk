@@ -135,8 +135,16 @@ elif [[ "$tf_action" == "apply" ]]; then
   
   ansible-playbook -i ansible/inventory/hosts ansible/newuser_deadline.yaml -v; exit_test
 
+  # first db check
+  ansible-playbook -i ansible/inventory/hosts ansible/deadline-db-check.yaml -v; exit_test
   # couldn't do this before previous playbook since the user doesn't exist yet.  split out the creation of the user into a seperate role to run first, then we can download deadline via s3.
+  
   ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=ansible_control variable_user=deadlineuser"; exit_test
+  
+  # 2nd db check
+  ansible-playbook -i ansible/inventory/hosts ansible/deadline-db-check.yaml -v; exit_test
 
+  echo "Soft shutdown scheduled (To protect DB).  After shutdown, 'vagrant up', and use 'vagrant ssh' to return to the VM."
+  sudo shutdown
   # shell will exit at this point, no commands possible here on.
 fi

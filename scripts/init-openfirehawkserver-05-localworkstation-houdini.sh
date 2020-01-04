@@ -57,6 +57,8 @@ fi
 
 echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 
+ansible-playbook -i ansible/inventory/hosts ansible/deadline-db-check.yaml -v; exit_test
+
 # install houdini on a local workstation with deadline submitters and environment vars.
 
 # if running the playbook below out of a shell script, the ssh-agent may need to be set to bash to work.
@@ -64,5 +66,7 @@ echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 eval `ssh-agent -s`
 ssh-add /home/vagrant/.ssh/id_rsa
 ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -vvv --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password variable_host=workstation.firehawkvfx.com variable_user=deadlineuser" --skip-tags "sync_scripts"; exit_test
+
+ansible-playbook -i ansible/inventory/hosts ansible/deadline-db-check.yaml -v; exit_test
 
 printf "\n...Finished $SCRIPTNAME\n\n"

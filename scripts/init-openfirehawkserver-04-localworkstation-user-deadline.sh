@@ -56,11 +56,15 @@ fi
 echo 'Use vagrant reload and vagrant ssh after executing each .sh script'
 echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 
+ansible-playbook -i ansible/inventory/hosts ansible/deadline-db-check.yaml -v; exit_test
+
 # This stage configures deadline on the local workstation
 # REBOOT required for network interface modes to update.
 
 # configure deadline on the local workstation with the keys from this install to run deadline slave and monitor
 ansible-playbook -i "$TF_VAR_inventory" ansible/localworkstation-deadlineuser.yaml --tags "onsite-install" --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key"; exit_test
+
+ansible-playbook -i ansible/inventory/hosts ansible/deadline-db-check.yaml -v; exit_test
 
 #need to fix houdini executable for deadline install and houdini install stages - both.
 

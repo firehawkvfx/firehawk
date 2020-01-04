@@ -76,7 +76,7 @@
         location: /opt/Thinkbox/DeadlineDatabase10/certs/mongo_client.pem
         target: "{{ secrets_archive }}/opt/Thinkbox/DeadlineDatabase10/certs/mongo_client.pem"
   
-  tasks:
+  pre_tasks:
   - name: store-secret
     with_items:
       - "{{ lookup('dict', secrets) }}"
@@ -86,17 +86,12 @@
   roles:
   - deadline-groups
   - deadline-ubl
+  - deadline-db-check
 
 - hosts: ansible_control
   become: true
   
   tasks:
-  - name: Kill SSH because otherwise the user will not be added to the group.
-    shell: sleep 1; pkill -u {{ ansible_user }} sshd
-    async: 3
-    poll: 2
-    tags:
-    - onsite-install
 
   - name: reset ssh connection to allow user changes to affect 'current login user'
     meta: reset_connection

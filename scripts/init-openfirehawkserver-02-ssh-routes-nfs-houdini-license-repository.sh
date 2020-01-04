@@ -56,6 +56,9 @@ fi
 echo 'Use vagrant reload and vagrant ssh after executing each .sh script'
 echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 
+#check db
+ansible-playbook -i ansible/inventory/hosts ansible/deadline-db-check.yaml -v; exit_test
+
 # custom events auto assign groups to slaves on startup, eg slaveautoconf
 ansible-playbook -i ansible/inventory/hosts ansible/deadline-repository-custom-events.yaml; exit_test
 
@@ -72,6 +75,9 @@ ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-m
 ansible-playbook -i ansible/inventory/hosts ansible/aws-new-key.yaml; exit_test
 # configure routes to opposite environment for licence server to communicate if in dev environment
 ansible-playbook -i ansible/inventory ansible/ansible-control-update-routes.yaml; exit_test
+
+#check db
+ansible-playbook -i ansible/inventory/hosts ansible/deadline-db-check.yaml -v; exit_test
 
 echo -e "\nIf above was succesful, exit the vm and use 'vagrant reload' before continuing with the next script.  New user group added wont have user added until reload."
 echo -e "\nFor houdini to work, ensure you have configured your licences on the production server."

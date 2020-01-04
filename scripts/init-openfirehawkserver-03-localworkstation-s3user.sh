@@ -67,6 +67,10 @@ echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 
 printf "\n\nHave you installed keybase and initialised pgp?\n\nIf not it is highly recommended that you create a profile on your phone and desktop for 2fa first.\nIf this process fails for any reason use 'keybase login' manually and test pgp decryption in the shell.\n\n"
 
+#check db
+ansible-playbook -i ansible/inventory/hosts ansible/deadline-db-check.yaml -v; exit_test
+
+
 # install keybase and test decryption
 $TF_VAR_firehawk_path/scripts/keybase-test.sh; exit_test
 
@@ -108,5 +112,9 @@ ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-copy-id-private-host.yaml -v
 eval `ssh-agent -s`
 ssh-add /home/vagrant/.ssh/id_rsa
 ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser aws_cli_root=true"; exit_test
+
+#check db
+ansible-playbook -i ansible/inventory/hosts ansible/deadline-db-check.yaml -v; exit_test
+
 
 printf "\n...Finished $SCRIPTNAME\n\n"

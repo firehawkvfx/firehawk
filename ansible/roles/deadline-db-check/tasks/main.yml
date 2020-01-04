@@ -1,0 +1,7 @@
+- name: Ensure db is still valid
+  shell: |
+    set -x
+    cd /opt/Thinkbox/DeadlineDatabase10/mongo/application/bin/
+    ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval ''
+  no_log: true
+  become: true
