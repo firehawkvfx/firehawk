@@ -69,8 +69,13 @@ Vagrant.configure("2") do |config|
     config.vm.provision "shell", inline: "echo 'installing latest version of ansible with apt-get'"
     config.vm.provision "shell", inline: "sudo apt-add-repository --yes --update ppa:ansible/ansible"
     config.vm.provision "shell", inline: "sudo apt-get install -y ansible"
-    # config.vm.provision "shell", inline: "sudo pip uninstall requests"
-    # config.vm.provision "shell", inline: "sudo pip install requests"
+    # errors will be encountered with pip and cryptography down the line with ubuntu.  resolve here.
+    config.vm.provision "shell", inline: "sudo apt-get install -y python-pip python-dev"
+    config.vm.provision "shell", inline: "pip install --upgrade pip"
+    config.vm.provision "shell", inline: "sudo rm -rf /usr/lib/python2.7/dist-packages/OpenSSL"
+    config.vm.provision "shell", inline: "sudo rm -rf /usr/lib/python2.7/dist-packages/pyOpenSSL-0.15.1.egg-info"
+    config.vm.provision "shell", inline: "sudo pip install pyopenssl --upgrade"
+    config.vm.provision "shell", inline: "sudo pip install cryptography --upgrade"
   else
     # Installing a specific version of ansible with pip creates dependency issues pip which we resolve here.
     config.vm.provision "shell", inline: "sudo apt-get install -y python-pip python-dev"
