@@ -21,6 +21,11 @@ resource "aws_iam_role" "spot_instance_role" {
 EOF
 }
 
+resource "aws_iam_role_policy_attachment" "AmazonS3FullAccess" {
+  role       = aws_iam_role.spot_instance_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+}
+
 resource "aws_iam_role_policy" "spot_instance_role_worker_policy" {
   name = "SlaveStatement"
   role = aws_iam_role.spot_instance_role.id
