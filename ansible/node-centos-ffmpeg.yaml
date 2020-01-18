@@ -3,7 +3,7 @@
 # Example install on an aws instance
 # ansible-playbook -i ansible/inventory ansible/node-centos-ffmpeg.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.${var.public_domain_name}"
 # Example local install on a RHEL 7.6 / CENTOS workstation / render node.
-# ansible-playbook -i ansible/inventory ansible/node-centos-ffmpeg.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_become_pass=sompass"
+# ansible-playbook -i ansible/inventory ansible/node-centos-ffmpeg.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser hostname=workstation1 ansible_become_pass=sompass"
 
 - hosts: "{{ variable_host | default('role_node_centos') }}"
   remote_user: "{{ variable_user | default('centos') }}"
@@ -25,6 +25,8 @@
     houdini_install_type: node
     bucket: "{{ installers_bucket }}"
 
+  roles:
+  - name: pip
 
   tasks:
   - name: Remote RPM install with yum
