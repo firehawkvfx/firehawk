@@ -126,8 +126,10 @@
 
 - name: Use expect to install AWS CLI- Centos
   expect:
-    # this version of the command may be required for centos
-    command: "/home/{{ variable_user }}/.local/bin/aws configure"
+    # different version of the command may be required for centos.  depending on install method this can change.  eg:
+    # /usr/bin/aws
+    # /home/{{ variable_user }}/.local/bin/aws
+    command: "aws configure"
     responses:
       .*Access Key ID \[.*\]: "{{ storage_user_access_key_id }}"
       .*Secret Access Key \[.*\]: "{{ storage_user_secret_key }}"
@@ -135,7 +137,7 @@
       .*output format \[.*\]: json
   become_user: "{{ variable_become_user }}"
   become: true
-  no_log: true
+  # no_log: true
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
   tags:
   - user_access
@@ -161,7 +163,7 @@
 - name: Use expect to install AWS CLI- Centos - root
   expect:
     # this version of the command may be required for centos
-    command: "/home/{{ variable_user }}/.local/bin/aws configure"
+    command: "aws configure"
     responses:
       .*Access Key ID \[.*\]: "{{ storage_user_access_key_id }}"
       .*Secret Access Key \[.*\]: "{{ storage_user_secret_key }}"
