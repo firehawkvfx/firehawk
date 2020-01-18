@@ -125,7 +125,7 @@ we can initialise the secrets keys and encrypt.
 - Now we can execute the first playbook to initialise the vm.
     ansible-playbook -i ansible/inventory/hosts ansible/init.yaml -v
 - Download the deadline linux installer version 10.0.23.4 (or latest version) into downloads/Deadline-10.0.23.4-linux-installers.tar, then setup the deadline user and deadline db + deadline rcs with this playbook. set the version in your secrets file.
-    ansible-playbook -i ansible/inventory/hosts ansible/newuser_deadline.yaml -v
+    ansible-playbook -i ansible/inventory/hosts ansible/newuser_deadlineuser.yaml -v
 - Remember to always run source ./update_vars.sh before running any ansible playbooks, or using terraform.  Without your environment variables, nothing will work.
 - Download the latest houdini installer tar to the downloads folder.
     ansible-playbook -i ansible/inventory/hosts ansible/openfirehawkserver_houdini.yaml -v
