@@ -99,19 +99,26 @@ fi
 ### end get access keys from terraform
 
 # these are optional if you have an onsite RHEL / CENTOS workstation
-# add local host ssh keys to list of accepted keys on ansible control, example for another onsite workstation-
-ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=192.168.92.12 local=True"; exit_test
 
-ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=workstation.firehawkvfx.com host_ip=192.168.92.12 group_name=role_local_workstation"; exit_test
+# add local host ssh keys to list of accepted keys on ansible control. Example for another onsite workstation-
+ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=$TF_VAR_workstation_address local=True"; exit_test
+
+# now add this host and address to ansible inventory
+ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=workstation1 host_ip=$TF_VAR_workstation_address group_name=role_local_workstation"; exit_test
+
+# Now this will init the deployuser on the workstation.  the deployuser wil become the primary user with ssh access.  once this process completes the first time.
+ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_sshuser.yaml -v --extra-vars "variable_host=workstation1 user_inituser_name=$TF_VAR_user_inituser_name ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_private_key"
+
+# we can use the deploy user to create more users as well, like the deadlineuser for artist use.
+ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars "variable_connect_as_user=deployuser variable_user=deadlineuser variable_host=workstation1 ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_private_key" --tags 'newuser,onsite-install'
 
 # create and copy an ssh rsa key from ansible control to the workstation for provisioning.  1st time will error, run it twice
-ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-copy-id-private-host.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser"; exit_test
-# ansible-playbook -i secrets/dev/inventory/hosts ansible/ssh-copy-id-private-host.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser"
+ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-copy-id-private-host.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_private_key"; exit_test
 
-# if executing this playbook outside the script, you may need to run 'ssh-agent bash' in ubuntu.
-eval `ssh-agent -s`
-ssh-add /home/vagrant/.ssh/id_rsa
-ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser aws_cli_root=true"; exit_test
+# configure aws for all users
+ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=workstation1 variable_user=$TF_VAR_user_inituser_name aws_cli_root=true ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_private_key"; exit_test
+ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=workstation1 variable_user=deployuser aws_cli_root=true ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_private_key"; exit_test
+ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser aws_cli_root=true ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_private_key"; exit_test
 
 #check db
 ansible-playbook -i ansible/inventory/hosts ansible/deadline-db-check.yaml -v; exit_test
