@@ -2,7 +2,7 @@
 # tasks file for ./ansible/roles/pip
 # these packages are required to pass an encrypted string via commandline into a user pass and are suited to centos, and also for aws cli.
 
-- name: Add repository
+- name: Add epel repository
   yum_repository:
     name: epel
     description: EPEL YUM repo
@@ -10,18 +10,28 @@
     gpgkey: "{{ epel_repo_gpg_key_url }}"
     enabled: yes
   become: true
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
 
-- name: upgrade all packages
+- name: upgrade all yum packages
   yum:
     name: '*'
     state: latest
   become: true
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+
+- name: Upgrade all apt packages
+  apt:
+    name: "*"
+    state: latest
+  become: true
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
 - name: install epel-release
   package:
     name: epel-release
     state: latest
   become: true
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
 
 - name: install pip
   package:
@@ -40,12 +50,38 @@
     name: urllib3
     state: absent
   become: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
 
-- name: install python-urllib3 with yum 
-  yum:
+- name: install python-urllib3 package
+  package:
     name: 'python-urllib3'
     state: present
   become: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+
+- name: upgrade pyopenssl
+  pip: 
+    name: pyopenssl
+    extra_args: --upgrade
+  become: true
+
+- name: remove cryptography and reinstall to fix a bug with boto and pip
+  pip: 
+    name: cryptography
+    state: absent
+  become: true
+
+- name: upgrade cryptography
+  pip: 
+    name: cryptography
+    extra_args: --upgrade
+  become: true
+
+- name: upgrade paramiko to fix a bug with boto and pip
+  pip: 
+    name: paramiko
+    extra_args: --upgrade
+  become: true
 
 - name: install pexpect
   pip:
@@ -55,6 +91,11 @@
 - name: install passlib
   pip:
     name: passlib
+  become: yes
+
+- name: install requests
+  pip:
+    name: requests
   become: yes
 
 - name: install boto
