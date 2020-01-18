@@ -1,6 +1,6 @@
 ---
 # example local install
-# ansible-playbook -i "$TF_VAR_inventory" ansible/init-centos-aws-cli.yaml -v --extra-vars "ansible_ssh_user=deadlineuser variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_become_pass=somepass"
+# ansible-playbook -i "$TF_VAR_inventory" ansible/init-centos-aws-cli.yaml -v --extra-vars "ansible_ssh_user=deadlineuser variable_host=workstation1 variable_user=deadlineuser hostname=workstation1 ansible_become_pass=somepass"
 
 # make sure with local hosts in ubuntu that you are ussing ssh correctly - https://docs.ansible.com/ansible/latest/user_guide/intro_getting_started.html
 # $ ssh-agent bash
@@ -11,7 +11,7 @@
   become: true
   
   vars:
-    ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
+    ansible_become_pass: "{{ user_deadlineuser_pw }}"
 
   tasks:
   - name: test connection
@@ -25,7 +25,7 @@
   vars:
     variable_user: centos
     # the become pass is required for root priveledge escalation on onsite workstations only.  no passwords are used on cloud based workstations for provisioning - only access by ssh is defined.
-    ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
+    ansible_become_pass: "{{ user_deadlineuser_pw }}"
     bastionip: "{{ groups['bastionip'][0] }}"
     houdini_build: "{{ lookup('env','TF_VAR_houdini_build') }}"
     skip_packages: false
