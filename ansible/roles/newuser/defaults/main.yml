@@ -1,2 +1,3 @@
 ---
 # defaults file for roles/newuser
+add_to_group_syscontrol: False
