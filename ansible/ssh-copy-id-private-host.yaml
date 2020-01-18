@@ -22,7 +22,7 @@
       echo "SSH_AUTH_SOCK= $SSH_AUTH_SOCK"
       eval "$(ssh-agent)"
       echo "SSH_AUTH_SOCK= $SSH_AUTH_SOCK"
-      ssh-agent bash && ssh-keygen -q -t rsa -f {{ ansible_ssh_private_key_file }} -C '' -N ''
+      # ssh-agent bash && ssh-keygen -q -t rsa -f {{ ansible_ssh_private_key_file }} -C '' -N ''
       ssh-agent bash && ssh-add {{ ansible_ssh_private_key_file }}
     args:
       creates: "{{ ansible_ssh_private_key_file }}"
