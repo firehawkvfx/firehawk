@@ -199,10 +199,25 @@ TF_VAR_softnas_ssh_user=insertvalue
 # default: TF_VAR_user_deadlineuser_name=deadlineuser
 TF_VAR_user_deadlineuser_name=insertvalue
 
-# TF_VAR_onsite_workstation_ssh_key:
+# TF_VAR_general_use_ssh_key_dev:
+# This key will be generated if it doesn't already exist.  it will be used as an authorized key to access onsite systems and others where specified
+# default: TF_VAR_general_use_ssh_key_dev=/secrets/keys/id_ssh_rsa_dev
+TF_VAR_general_use_ssh_key_dev=insertvalue
+
+# TF_VAR_general_use_ssh_key_prod:
+# This key will be generated if it doesn't already exist.  it will be used as an authorized key to access onsite systems and others where specified
+# default: TF_VAR_general_use_ssh_key_prod=/secrets/keys/id_ssh_rsa_prod
+TF_VAR_general_use_ssh_key_prod=insertvalue
+
+# TF_VAR_onsite_workstation_ssh_private_key_dev:
 # the path to the rsa key to copy its id to other local workstations for provisioning.  This is best left at its default value.
-# default: TF_VAR_onsite_workstation_ssh_key=/home/vagrant/.ssh/id_rsa
-TF_VAR_onsite_workstation_ssh_key=insertvalue
+# default: TF_VAR_onsite_workstation_ssh_private_key_dev=/secrets/keys/id_ssh_rsa_dev
+TF_VAR_onsite_workstation_ssh_private_key_dev=insertvalue
+
+# TF_VAR_onsite_workstation_ssh_private_key_prod:
+# the path to the rsa key to copy its id to other local workstations for provisioning.  This is best left at its default value.
+# default: TF_VAR_onsite_workstation_ssh_private_key_prod=/secrets/keys/id_ssh_rsa_prod
+TF_VAR_onsite_workstation_ssh_private_key_prod=insertvalue
 
 # TF_VAR_pgp_key_path_dev:
 # the path to the pgp key for the dev environment.  the default should be fine.  ensure that unencrypted keys are never commited to version control.  this path should be in git ignore, or build a CI workflow to ensure that keys are encrypted before any commits occur.
@@ -311,3 +326,8 @@ TF_VAR_softnas_smtp_from=insertvalue
 # mailserver details for softnas notifications
 # default: TF_VAR_smtp_encryption="none"
 TF_VAR_smtp_encryption=insertvalue
+
+# TF_VAR_houdini_test_connection:
+# After a cloud node has finished provisioning, test that it can run a simple hython tast and connect to the license server 
+# default: TF_VAR_houdini_test_connection=false
+TF_VAR_houdini_test_connection=insertvalue

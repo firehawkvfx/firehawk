@@ -64,6 +64,11 @@ TF_VAR_softnas_mode_prod=insertvalue
 # This would be the ip range 192.168.29.0 - 192.168.29.255
 TF_VAR_remote_subnet_cidr=insertvalue
 
+# TF_VAR_workstation_address:
+# The address of the workstation the artist will operate from onsite
+# eg: TF_VAR_remote_subnet_cidr=192.168.92.31
+TF_VAR_workstation_address=insertvalue
+
 # TF_VAR_houdini_license_server_address:
 # The ip of the houdini licence server used when in a dev or prod environment.  This will normally be the same ip server used in dev and production to not waste licences. So in a dev environment, you will probably need to reference the same houdini licence server in production.  Ideally, the houdini license server should be a seperate vm to the vagrant host for stability reasons but this is currently untested.  It is recomended that the licence server ip is the vagrant production VM until otherwise tested.  A licence server should rarely need to be touched, but updates to infrastructure could disrupt it if located on the firehawkserver vm.
 # eg: TF_VAR_houdini_license_server_address=192.168.29.80
