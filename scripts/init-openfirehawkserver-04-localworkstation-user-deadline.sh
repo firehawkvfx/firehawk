@@ -62,7 +62,7 @@ ansible-playbook -i ansible/inventory/hosts ansible/deadline-db-check.yaml -v; e
 # REBOOT required for network interface modes to update.
 
 # configure deadline on the local workstation with the keys from this install to run deadline slave and monitor
-ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-localworkstation-install.yaml --tags "onsite-install" --extra-vars "variable_host=workstation1 variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_private_key"; exit_test
+ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml --tags "onsite-install" --extra-vars "variable_host=workstation1 variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_private_key"; exit_test
 
 ansible-playbook -i ansible/inventory/hosts ansible/deadline-db-check.yaml -v; exit_test
 
