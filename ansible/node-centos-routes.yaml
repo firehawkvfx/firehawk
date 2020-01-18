@@ -2,14 +2,14 @@
 
 # example local install
 
-# ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-routes.yaml -v -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_become_pass=somepass ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key"
+# ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-routes.yaml -v -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser hostname=workstation1 ansible_become_pass=somepass ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_private_key"
 
 - hosts: "{{ variable_host | default('role_node_centos') }}"
   remote_user: "{{ variable_user | default('centos') }}"
   become: true
 
   vars:
-    ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
+    ansible_become_pass: "{{ user_deadlineuser_pw }}"
 
   tasks:
   - name: test connection and permissions
@@ -21,7 +21,7 @@
   become: true
 
   vars:
-    ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
+    ansible_become_pass: "{{ user_deadlineuser_pw }}"
     variable_user: centos
     bastionip: "{{ groups['bastionip'][0] }}"
     houdini_build: "{{ lookup('env','TF_VAR_houdini_build') }}"
