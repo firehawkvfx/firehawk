@@ -4,7 +4,7 @@
 
   vars:
     # the become sudo pass is only relevent for local installation if required on the host specified.
-    ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
+    ansible_become_pass: "{{ user_deadlineuser_pw }}"
     
     variable_user: centos
     bastionip: "{{ groups['bastionip'][0] }}"
