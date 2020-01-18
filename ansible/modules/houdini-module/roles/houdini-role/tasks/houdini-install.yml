@@ -86,8 +86,6 @@
     set -x
     cd {{ download_to_dir }}/
     aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ houdini_linux_filename }}"
-  args:
-    creates: "{{ download_to_dir }}/{{ houdini_linux_filename }}"
   become_user: "{{ variable_user }}"
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
@@ -96,8 +94,6 @@
     set -x
     cd {{ download_to_dir }}/
     aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ houdini_linux_filename }}"
-  args:
-    creates: "{{ download_to_dir }}/{{ houdini_linux_filename }}"
   become_user: "{{ variable_user }}"
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
 
