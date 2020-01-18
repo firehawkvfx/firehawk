@@ -6,6 +6,9 @@
     pcoip: False
     # this will initialise ssh and the hostname.  this is bypassed on the softnas instance which has different initialisation steps.
     set_hostname: true
+    init_users:
+      deadlineuser
+      centos
 
   tasks:
   - name: init authorized_keys
@@ -41,7 +44,25 @@
       state: disabled
 
 # these packages are required to pass an encrypted string via commandline into a user pass and are suited to centos.
-  - name: install mkpasswd
+
+  - name: install pip
+    package:
+      name: python-pip
+      state: latest
+
+  - name: uninstall urllib3 because of conflict with rhel 8 packages
+    pip:
+      name: urllib3
+      state: absent
+    become: yes
+
+  - name: install python-urllib3 with yum 
+    yum:
+      name: 'python-urllib3'
+      state: present
+    become: yes
+
+  - name: install expect
     package:
       name: expect
       state: present
@@ -50,11 +71,6 @@
     package:
       name: epel-release
       state: present
-
-  - name: install pip
-    package:
-      name: python-pip
-      state: latest
 
   - name: install pexpect
     pip:
@@ -76,10 +92,10 @@
       name: boto3
     become: true
 
-  - name: install strace
-    package: 
-      name: strace
-    become: true
+  # - name: install strace
+  #   package: 
+  #     name: strace
+  #   become: true
 
   ### steps to creat a new user rwith password and ssh key
 
