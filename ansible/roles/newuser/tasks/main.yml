@@ -1,36 +1,47 @@
 ---
 # tasks file for roles/newuser
 - stat:
-    path: "/home/deadlineuser"
+    path: "/home/{{ variable_user }}"
   register: result
 
 - debug:
-    msg: "deadlineuser home directory exists already.  Will not create user or make any changes.  The password was not changed/set."
+    msg: "{{ variable_user }} home directory exists already.  Will not create user or make any changes.  The password was not changed/set."
   when: result.stat.exists == true and result.stat.isdir == true
 
 - debug:
-    msg: "deadlineuser home directory doesn't exist.  Will create user and set password."
+    msg: "{{ variable_user }} home directory doesn't exist.  Will create user and set password."
   when: result.stat.exists == false
 
 - name: Create a login user
   user:
-    name: deadlineuser
-    uid: 9001
-    #password: "{{ my_password }}"
-    groups: # Empty by default, here we give it some groups
-      - sudo
+    name: "{{ variable_user }}"
+    uid: "{{ variable_uid }}"
+    password: "{{ my_password }}"
     state: present
     shell: /bin/bash # Defaults to /bin/bash
     system: no # Defaults to no
     createhome: yes # Defaults to yes
-  when: result.stat.exists == false
 
 - name: set user pass
   expect:
-    command: passwd deadlineuser
+    command: "passwd {{ variable_user }}"
     responses:
       (?i)password: "{{ my_password }}"
       (?i)Retype new password: "{{ my_password }}"
+
+- name: adding existing user "{{ item }}" to group wheel
+  user:
+    name: "{{ variable_user }}"
+    groups: wheel
+    append: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+
+- name: adding existing user "{{ item }}" to group sudo
+  user:
+    name: "{{ variable_user }}"
+    groups: sudo
+    append: yes
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
 - name: change the default ubuntu user passwd
   user:
@@ -39,17 +50,15 @@
     state: present
   when: result.stat.exists == false
 
-- name: insert/update block in /home/deadlineuser/.bashrc and home/vagrant/.bashrc
+- name: "insert/update block in /home/{{ variable_user }}/.bashrc and home/vagrant/.bashrc"
   blockinfile:
     path: "{{ item }}"
     backup: yes
     marker: "# {mark} ANSIBLE MANAGED BLOCK ALIASES"
     block: |
-      ### These lines are created by the new user playbook. ansible-playbook -i ansible/inventory ansible/newuser_deadline.yaml --tags "newuser"
+      ### These lines are created by the new user playbook. ansible-playbook -i ansible/inventory ansible/newuser_deadlineuser.yaml --tags "newuser"
       
       showenv='. /vagrant/showenv.sh'
-      refresh_alias='cd /vagrant && ansible-playbook -i ansible/inventory ansible/newuser_deadline.yaml --tags newuser && source ~/.bashrc'
       ec2_list_running='aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId]' --filters Name=instance-state-name,Values=running --output text'
   with_items:
-    - /home/deadlineuser/.bashrc
-    - /home/vagrant/.bashrc
+    - /home/{{ variable_user }}/.bashrc
