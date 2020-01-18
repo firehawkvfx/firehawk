@@ -1,12 +1,6 @@
 ---
 # tasks file for ./ansible/roles/pip
-- name: upgrade all packages
-  yum:
-    name: '*'
-    state: latest
-  become: true
-  
-# these packages are required to pass an encrypted string via commandline into a user pass and are suited to centos.
+# these packages are required to pass an encrypted string via commandline into a user pass and are suited to centos, and also for aws cli.
 
 - name: Add repository
   yum_repository:
@@ -15,6 +9,12 @@
     baseurl: "{{ epel_repo_url }}"
     gpgkey: "{{ epel_repo_gpg_key_url }}"
     enabled: yes
+  become: true
+
+- name: upgrade all packages
+  yum:
+    name: '*'
+    state: latest
   become: true
 
 - name: install epel-release
@@ -33,11 +33,6 @@
   pip: 
     name: pip
     extra_args: --upgrade
-  become: true
-
-- name: pip passlib
-  pip: 
-    name: passlib
   become: true
 
 - name: uninstall urllib3 because of conflict with rhel 8 packages
