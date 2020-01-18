@@ -1,45 +1,24 @@
 ---
 #tasks file for roles/aws-cli
 
-- name: install mkpasswd, pip, passlib
+- name: install whois, passlib
   package:
     name: "{{ item }}"
     state: present
   with_items:
     - whois
-    - python-pip
-    - python-passlib
     - zip
-
-- name: upgrade pip
-  shell: |
-    pip install --upgrade pip
-  become: true
 
 - name: ansible versions other than 'latest' are not supported until virtuelenv is integrated into the repo.
   fail:
     msg: "ansible version {{ ansible_version}} is other than 'latest' are not supported until virtuelenv is integrated into the repo."
   when: selected_ansible_version != 'latest'
 
-# - name: upgrade pip
-#   shell: |
-#     pip install --upgrade pip
-#   become_user: "{{ variable_become_user }}"
-#   become: true
-#   when: selected_ansible_version != 'latest'
-
 - name: install awscli, force upgrade - root
   pip: 
     name: awscli
     extra_args: --upgrade
   become: true
-
-# - name: upgrade awscli in pip via commandline - pip module has a permissions issue.
-#   shell: |
-#     sudo -H pip install --upgrade --user awscli
-#   become_user: "{{ variable_become_user }}"
-#   become: true
-#   when: selected_ansible_version != 'latest'
 
 # for some reason this can still have permissions issues on the vagrant vm when command line is fine.  this only occurs with the ansible modules
 - name: install awscli, force upgrade
@@ -50,13 +29,6 @@
   become: true
   when: selected_ansible_version == 'latest'
 
-# - name: install pexpect in pip via commandline - pip module has a permissions issue.
-#   shell: |
-#     sudo -H pip install --upgrade --user pexpect
-#   become_user: "{{ variable_become_user }}"
-#   become: true
-#   when: selected_ansible_version != 'latest'
-
 - name: install pexpect
   pip: 
     name: pexpect
@@ -64,13 +36,6 @@
   become_user: "{{ variable_become_user }}"
   become: true
   when: selected_ansible_version == 'latest'
-
-# - name: install boto in pip via commandline - pip module has a permissions issue.
-#   shell: |
-#     sudo -H pip install --upgrade --user boto3
-#   become_user: "{{ variable_become_user }}"
-#   become: true
-#   when: selected_ansible_version != 'latest'
 
 - name: install the boto package, force upgrade
   pip: 
