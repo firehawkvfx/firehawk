@@ -9,7 +9,7 @@
 # Example install on an aws instance
 # ansible-playbook -i ansible/inventory ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.${var.public_domain_name}"
 # Example local install on a RHEL 7.6 / CENTOS workstation / render node.
-# ansible-playbook -i ansible/inventory ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_become_pass=sompass"
+# ansible-playbook -i ansible/inventory ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser hostname=workstation1 ansible_become_pass=sompass"
 
 - hosts: "{{ variable_host | default('role_node_centos') }}"
   remote_user: "{{ variable_user | default('centos') }}"
@@ -20,7 +20,7 @@
     - /secrets/overrides/ansible/modules/houdini-module/vars.yml
 
   vars:
-    ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
+    ansible_become_pass: "{{ user_deadlineuser_pw }}"
 
   tasks:
   - name: test connection
