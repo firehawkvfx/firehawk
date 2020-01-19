@@ -49,7 +49,7 @@ TF_VAR_vault_key_name_dev=insertvalue
 # 3) Specify a new key name here (usually with todays date), and encrypt your secrets again with this new key file and password.
 # 4) This process should be applied to both dev and production environments as soon as possible.
 # Automation of key/pass rotation without destroying/rebuilding infrastructure will be possible in the future.
-# default: TF_VAR_vault_key_name_prod=.vault-key-20191208-prod
+# default: TF_VAR_vault_key_name_prod=.vault-key-20200119-prod
 TF_VAR_vault_key_name_prod=insertvalue
 
 
