@@ -428,6 +428,7 @@ resource "null_resource" "provision_softnas" {
     ]
   }
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /vagrant/scripts/exit_test.sh
       set -x
@@ -514,15 +515,6 @@ EOT
   }
 }
 
-# While instance is stopped, we attach ebs volumes.
-# resource "aws_volume_attachment" "softnas1_ebs_att" {
-#   depends_on         = ["aws_instance.softnas1", "null_resource.create_ami"]
-#   count       = "${length(local.softnas1_volumes)}"
-#   device_name = "${element(local.softnas1_mounts, count.index)}"
-#   volume_id   = "${element(local.softnas1_volumes, count.index)}"
-#   instance_id = "${aws_instance.softnas1.id}"
-# }
-
 # Start instance so that s3 disks can be attached
 resource "null_resource" "start-softnas-after-create_ami" {
   count = local.create_ami && var.softnas_storage ? 1 : 0
@@ -595,6 +587,7 @@ resource "null_resource" "provision_softnas_volumes" {
   }
 
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /vagrant/scripts/exit_test.sh
       set -x
@@ -730,6 +723,7 @@ resource "null_resource" "attach_local_mounts_after_start" {
     ]
   }
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /vagrant/scripts/exit_test.sh
       set -x
@@ -767,6 +761,7 @@ resource "null_resource" "detach_local_mounts_after_stop" {
     startsoftnas = null_resource.shutdown-softnas[0].id
   }
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /vagrant/scripts/exit_test.sh
       set -x

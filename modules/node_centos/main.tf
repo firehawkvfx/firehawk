@@ -3,7 +3,7 @@
 #----------------------------------------------------------------
 
 resource "aws_security_group" "node_centos" {
-  count                = var.site_mounts ? 1 : 0
+  count       = var.site_mounts ? 1 : 0
 
   name        = var.name
   vpc_id      = var.vpc_id
@@ -46,21 +46,23 @@ resource "aws_security_group" "node_centos" {
     description = "all incoming traffic from remote subnet range"
   }
 
-  ingress {
-    protocol    = "-1"
-    from_port   = 0
-    to_port     = 0
-    cidr_blocks = ["${var.houdini_license_server_address}/32"]
-    description = "Houdini License Server"
-  }
+  # if all incoming from the onsite subnet is allowed, the rules below aren't required.
 
-  ingress {
-    protocol    = "-1"
-    from_port   = 0
-    to_port     = 0
-    cidr_blocks = ["${var.openfirehawkserver}/32"]
-    description = "Deadline DB"
-  }
+  # ingress {
+  #   protocol    = "-1"
+  #   from_port   = 0
+  #   to_port     = 0
+  #   cidr_blocks = ["${var.houdini_license_server_address}/32"]
+  #   description = "Houdini License Server"
+  # }
+
+  # ingress {
+  #   protocol    = "-1"
+  #   from_port   = 0
+  #   to_port     = 0
+  #   cidr_blocks = ["${var.openfirehawkserver}/32"]
+  #   description = "Deadline DB"
+  # }
 
   # For OpenVPN Client Web Server & Admin Web UI
 
@@ -275,6 +277,7 @@ resource "null_resource" "provision_node_centos" {
   }
 
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /vagrant/scripts/exit_test.sh
       set -x
