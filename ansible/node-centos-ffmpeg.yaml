@@ -26,9 +26,9 @@
     bucket: "{{ installers_bucket }}"
 
   roles:
-  - name: pip
+  - role: pip
 
-  tasks:
+  post_tasks:
   - name: Remote RPM install with yum
     yum:
       name: https://download1.rpmfusion.org/free/el/rpmfusion-free-release-7.noarch.rpm

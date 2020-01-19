@@ -2,7 +2,7 @@
 # tasks file for ./ansible/roles/pip
 # these packages are required to pass an encrypted string via commandline into a user pass and are suited to centos, and also for aws cli.
 
-- name: Add epel repository
+- name: Add epel repository for centos7
   yum_repository:
     name: epel
     description: EPEL YUM repo
@@ -10,7 +10,21 @@
     gpgkey: "{{ epel_repo_gpg_key_url }}"
     enabled: yes
   become: true
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+  when: ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' ) and ansible_distribution_major_version > '6'
+  tags:
+  - add-epel
+
+- name: Add epel repository for centos6 and lower
+  yum_repository:
+    name: epel
+    description: EPEL YUM repo
+    baseurl: "{{ epel_repo_url }}"
+    gpgkey: "{{ epel_repo_gpg_key_url }}"
+    enabled: yes
+  become: true
+  when: ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' ) and ansible_distribution_major_version <= '6'
+  tags:
+  - add-epel
 
 - name: upgrade all yum packages
   yum:
