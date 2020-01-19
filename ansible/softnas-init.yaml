@@ -2,20 +2,33 @@
   remote_user: "{{ softnas_ssh_user | default('ec2-user') }}"
   become: true
 
-  roles:
-  - role: pip
-
-  post_tasks:
+  tasks:
   - name: ensure file exists
     copy:
       content: ""
       dest: /tmp/updatetype
       force: no
 
-  - name: install expect
+# these packages are required to pass an encrypted string via commandline into a user pass.
+  - name: install mkpasswd
     package:
       name: expect
       state: present
+
+  - name: install pip
+    package:
+      name: python-pip
+      state: present
+
+  - name: install pexpect
+    pip:
+      name: pexpect
+    become: yes
+    
+  - name: install passlib
+    pip:
+      name: passlib
+    become: yes
 
   - name: set user pass
     expect:

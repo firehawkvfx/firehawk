@@ -12,7 +12,7 @@
 
   
   roles:
-    - role: pip
+    - {role: 'pip', tags: 'pip'}
 
   post_tasks:
   - name: init authorized_keys
