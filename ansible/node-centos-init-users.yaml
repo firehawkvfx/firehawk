@@ -10,10 +10,6 @@
       deadlineuser
       centos
 
-  
-  roles:
-    - {role: 'pip', tags: 'pip'}
-
   post_tasks:
   - name: init authorized_keys
     copy:
@@ -47,14 +43,30 @@
     selinux:
       state: disabled
 
-
-
-
   - name: install expect
     package:
       name: expect
       state: present
 
+  - name: check major version
+    debug:
+      var: ansible_distribution_major_version
+      
+  - name: pip configure for ubuntu and cent7
+    include_role:
+      name: pip
+    when: ansible_distribution_major_version > '6'
+    tags:
+      - pip
+
+  - name: pip configure for cent6 (softnas)
+    include_role:
+      name: pip-centos6
+    when: ansible_distribution_major_version <= '6'
+    tags:
+      - pip-centos6
+    
+      
 
   ### steps to creat a new user rwith password and ssh key
 
