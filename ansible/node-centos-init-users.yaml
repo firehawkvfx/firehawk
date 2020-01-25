@@ -3,12 +3,14 @@
   become: true
 
   vars:
-    hostname: "node1.{{ public_domain }}"
     pcoip: False
     # this will initialise ssh and the hostname.  this is bypassed on the softnas instance which has different initialisation steps.
     set_hostname: true
+    init_users:
+      deadlineuser
+      centos
 
-  tasks:
+  post_tasks:
   - name: init authorized_keys
     copy:
       content: ""
@@ -41,49 +43,32 @@
     selinux:
       state: disabled
 
-# these packages are required to pass an encrypted string via commandline into a user pass and are suited to centos.
-  - name: install mkpasswd
+  - name: install expect
     package:
       name: expect
       state: present
 
-  - name: install epel-release
-    package:
-      name: epel-release
-      state: present
+  - name: check major version
+    debug:
+      var: ansible_distribution_major_version
+      
+  - name: pip configure for ubuntu and cent7
+    include_role:
+      name: pip
+    when: ansible_distribution_major_version > '6'
+    tags:
+      - pip
 
-  - name: install pip
-    package:
-      name: python-pip
-      state: latest
-
-  - name: install pexpect
-    pip:
-      name: pexpect
-    become: yes
+  - name: pip configure for cent6 (softnas)
+    include_role:
+      name: pip-centos6
+    when: ansible_distribution_major_version <= '6'
+    tags:
+      - pip-centos6
     
-  - name: install passlib
-    pip:
-      name: passlib
-    become: yes
-
-  - name: install the package, force upgrade
-    package: 
-      name: python-boto
-    become: true
-
-  - name: install the package, force upgrade
-    pip: 
-      name: boto3
-    become: true
-
-  - name: install strace
-    package: 
-      name: strace
-    become: true
+      
 
   ### steps to creat a new user rwith password and ssh key
-
 
   - name: Ensure group "deadlineuser" exists
     group:
@@ -176,14 +161,3 @@
     - deadlineuser
     - centos
     become: true
-
-  # this may not be working well with aws.
-  # - name: Kill SSH because otherwise the user will not be added to the group.
-  #   shell: sleep 1; pkill -u {{ ansible_user }} sshd
-  #   async: 3
-  #   poll: 2
-
-  # - name: reset ssh connection to allow user changes to affect 'current login user'
-  #   meta: reset_connection
-
-  # ensure no other tasks occur without another ssh session after this point.

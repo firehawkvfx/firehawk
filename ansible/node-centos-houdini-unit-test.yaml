@@ -4,14 +4,20 @@
 
   vars:
     # the become sudo pass is only relevent for local installation if required on the host specified.
-    ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
+    ansible_become_pass: "{{ user_deadlineuser_pw }}"
     
     variable_user: centos
     bastionip: "{{ groups['bastionip'][0] }}"
+    
+    # whether to execute the unit test.  False will just copy the file.
+    execute: false
 
+    # run on boot to test startup latency.
+    run_on_boot: false
+    
     skip_packages: false
     houdini_install_type: 'node'
-    bucket: "installers.{{ public_domain }}"
+    bucket: "{{ installers_bucket }}"
     # the firehawk houdini tools can be linked to a live path on your file system with an variable instead of the default. 
     firehawk_sync_source: '/vagrant/modules/node_centos/modules/openfirehawk-houdini-tools'
 

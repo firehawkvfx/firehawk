@@ -11,12 +11,13 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder "../secrets", "/secrets", create: true
 
   mac_string = ENV['TF_VAR_vagrant_mac']
-  vaultkeypresent = ENV['TF_VAR_vaultkeypresent']
   bridgenic = ENV['TF_VAR_bridgenic']
-  envtier = ENV['TF_VAR_envtier']
-  name = ENV['TF_VAR_openfirehawkserver_name']
+  envtier = ENV['TF_VAR_envtier']=
   openfirehawkserver = ENV['TF_VAR_openfirehawkserver']
   network = ENV['TF_VAR_network']
+  # The gui options are left for legacy reasons in the even that it may be required, but we are moving away from this to save resources.
+  gui = false
+  selected_ansible_version = ENV['TF_VAR_selected_ansible_version']
 
   config.vm.define "ansible_control_"+envtier
   config.vagrant.plugins = ['vagrant-disksize', 'vagrant-reload']
@@ -56,20 +57,28 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "echo DEBIAN_FRONTEND=$DEBIAN_FRONTEND"
 
   config.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive"
-  config.vm.provision "shell", inline: "sudo rm /etc/localtime && sudo ln -s /usr/share/zoneinfo/Australia/Brisbane /etc/localtime", run: "always"
+  config.vm.provision "shell", inline: "sudo rm /etc/localtime && sudo ln -s #{ENV['TF_VAR_timezone_localpath']} /etc/localtime", run: "always"
   config.vm.provision "shell", inline: "sudo apt-get update"
   # temp disable as we are getting freezing with ssh issues
   config.vm.provision "shell", inline: "sudo apt-get install -y sshpass"
 
   ### Install Ansible Block ###
   config.vm.provision "shell", inline: "sudo apt-get install -y software-properties-common"
-  #config.vm.provision "shell", inline: "pip install --upgrade pip"
-  #config.vm.provision "shell", inline: "sudo apt-get install -y python-pip python-dev"
-  #pip install --upgrade pip
-  #config.vm.provision "shell", inline: "sudo -H pip install ansible==2.7.11"
-  # to list available versions - pip install ansible==
-  config.vm.provision "shell", inline: "sudo apt-add-repository --yes --update ppa:ansible/ansible"
-  config.vm.provision "shell", inline: "sudo apt-get install -y ansible"
+
+  if selected_ansible_version == 'latest'
+    config.vm.provision "shell", inline: "echo 'installing latest version of ansible with apt-get'"
+    config.vm.provision "shell", inline: "sudo apt-add-repository --yes --update ppa:ansible/ansible"
+    config.vm.provision "shell", inline: "sudo apt-get install -y ansible"
+  else
+    # Installing a specific version of ansible with pip creates dependency issues pip potentially.
+    config.vm.provision "shell", inline: "sudo apt-get install -y python-pip"
+    config.vm.provision "shell", inline: "pip install --upgrade pip"    
+    # to list available versions - pip install ansible==
+    config.vm.provision "shell", inline: "sudo -H pip install ansible==#{ansible_version}"
+  end
+  
+  # configure a connection timeout to prevent ansible from getting stuck when there is an ssh issue.
+  config.vm.provision "shell", inline: "echo 'ConnectTimeout 60' >> /etc/ssh/ssh_config"
 
   # we define the location of the ansible hosts file in an environment variable.
   config.vm.provision "shell", inline: "grep -qxF 'ANSIBLE_INVENTORY=/vagrant/ansible/hosts' /etc/environment || echo 'ANSIBLE_INVENTORY=/vagrant/ansible/hosts' | sudo tee -a /etc/environment"
@@ -79,23 +88,29 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "sudo apt-get install -y virtualbox-guest-utils"
 
   #reboot required for desktop to function.
-
-  # ### Install ubuntu desktop and virtualbox additions.  Because a reboot is required, provisioning is handled here. ###
-  # # # Install the gui with vagrant or install the gui with ansible installed on the host.  
-  # # # This creates potentiall issues because ideally, Ansible should be used within the vm only to limit ansible version issues if the user updates vagrant on their host.
-  # config.vm.provision "shell", inline: "sudo apt-get install -y ubuntu-desktop"
-  # # ...or xfce.  pick one.
-  # #config.vm.provision "shell", inline: "sudo apt-get install -y curl xfce4"
-  # config.vm.provision "shell", inline: "sudo apt-get install -y virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11 xserver-xorg-legacy"
-  # # Permit anyone to start the GUI
-  # config.vm.provision "shell", inline: "sudo sed -i 's/allowed_users=.*$/allowed_users=anybody/' /etc/X11/Xwrapper.config"
-  # ## End Ubuntu Desktop block ###
+  if gui == true
+    ### Install ubuntu desktop and virtualbox additions.  Because a reboot is required, provisioning is handled here. ###
+    # # Install the gui with vagrant or install the gui with ansible installed on the host.  
+    # # This creates potentiall issues because ideally, Ansible should be used within the vm only to limit ansible version issues if the user updates vagrant on their host.
+    config.vm.provision "shell", inline: "sudo apt-get install -y ubuntu-desktop"
+    # ...or xfce.  pick one.
+    #config.vm.provision "shell", inline: "sudo apt-get install -y curl xfce4"
+    config.vm.provision "shell", inline: "sudo apt-get install -y virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11 xserver-xorg-legacy"
+    # Permit anyone to start the GUI
+    config.vm.provision "shell", inline: "sudo sed -i 's/allowed_users=.*$/allowed_users=anybody/' /etc/X11/Xwrapper.config"
+    ## End Ubuntu Desktop block ###
+  end
 
   # #disable the update notifier.  We do not want to update to ubuntu 18, currently deadline installer gui doesn't work in 18.
   config.vm.provision "shell", inline: "sudo sed -i 's/Prompt=.*$/Prompt=never/' /etc/update-manager/release-upgrades"
-  
 
   # for dpkg or virtualbox issues, see https://superuser.com/questions/298367/how-to-fix-virtualbox-startup-error-vboxadd-service-failed
+
+  # disable password authentication - ssh key only.
+  config.vm.provision "shell", inline: <<-EOC
+    sudo sed -i 's/.*PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
+    sudo service ssh restart
+  EOC
 
   config.vm.provision "shell", inline: "sudo reboot"
   # trigger reload

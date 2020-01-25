@@ -48,20 +48,16 @@
 
   - name: ensure an s3 bucket exists to store large files / installers for faster redeployment.
     s3_bucket:
-      name: "installers.{{ public_domain }}"
-      aws_access_key: "{{ aws_access_key }}"
-      aws_secret_key: "{{ aws_secret_key }}"
+      name: "{{ installers_bucket }}"
       region: "{{ aws_region }}"
     tags:
       - sync_installers
 
   - name: ensure the nvidia installer is syncronised with the bucket
     s3_sync:
-      bucket: "installers.{{ public_domain }}"
+      bucket: "{{ installers_bucket }}"
       file_root: /vagrant/downloads/nvidia/{{ grid_folder }}
       include: "{{ files_matched.files[0].path | basename }}"
-      aws_access_key: "{{ aws_access_key }}"
-      aws_secret_key: "{{ aws_secret_key }}"
       region: "{{ aws_region }}"
     tags:
       - sync_installers
@@ -127,7 +123,7 @@
 
   - name: S3 GET nvidia driver
     aws_s3:
-      bucket: "installers.{{ public_domain }}"
+      bucket: "{{ installers_bucket }}"
       object: "{{ driver_file }}"
       dest: "/home/centos/Downloads/{{ driver_file }}"
       mode: get

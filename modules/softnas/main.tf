@@ -99,6 +99,8 @@ resource "random_uuid" "test" {
 }
 
 resource "aws_security_group" "softnas" {
+  count = var.softnas_storage ? 1 : 0
+
   name        = "softnas"
   vpc_id      = var.vpc_id
   description = "SoftNAS security group"
@@ -111,7 +113,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "-1"
     from_port   = 0
     to_port     = 0
-    cidr_blocks = [var.remote_subnet_cidr, "10.0.0.0/16", var.public_subnets_cidr_blocks[0], var.vpn_cidr]
+    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.public_subnets_cidr_blocks[0], var.vpn_cidr]
     description = "all incoming traffic"
   }
 
@@ -119,7 +121,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "tcp"
     from_port   = 53
     to_port     = 53
-    cidr_blocks = [var.remote_subnet_cidr, var.all_private_subnets_cidr_range, var.public_subnets_cidr_blocks[0], var.vpn_cidr]
+    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.public_subnets_cidr_blocks[0], var.vpn_cidr]
     description = "DNS"
   }
 
@@ -127,7 +129,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "udp"
     from_port   = 53
     to_port     = 53
-    cidr_blocks = [var.remote_subnet_cidr, var.all_private_subnets_cidr_range, var.public_subnets_cidr_blocks[0], var.vpn_cidr]
+    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.public_subnets_cidr_blocks[0], var.vpn_cidr]
     description = "DNS"
   }
 
@@ -135,7 +137,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "icmp"
     from_port   = 8
     to_port     = 0
-    cidr_blocks = [var.remote_subnet_cidr, var.all_private_subnets_cidr_range, var.public_subnets_cidr_blocks[0], var.vpn_cidr]
+    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.public_subnets_cidr_blocks[0], var.vpn_cidr]
     description = "icmp"
   }
 
@@ -143,7 +145,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "tcp"
     from_port   = 22
     to_port     = 22
-    cidr_blocks = [var.remote_subnet_cidr, var.all_private_subnets_cidr_range, var.public_subnets_cidr_blocks[0], var.vpn_cidr]
+    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.public_subnets_cidr_blocks[0], var.vpn_cidr]
     description = "ssh"
   }
 
@@ -151,7 +153,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "tcp"
     from_port   = 443
     to_port     = 443
-    cidr_blocks = [var.remote_subnet_cidr, var.all_private_subnets_cidr_range, var.public_subnets_cidr_blocks[0], var.vpn_cidr]
+    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.public_subnets_cidr_blocks[0], var.vpn_cidr]
     description = "https"
   }
 
@@ -159,7 +161,7 @@ resource "aws_security_group" "softnas" {
   #   protocol    = "udp"
   #   from_port   = 1194
   #   to_port     = 1194
-  #   cidr_blocks = ["${var.remote_subnet_cidr}", "${var.all_private_subnets_cidr_range}", "${var.public_subnets_cidr_blocks[0]}", "${var.vpn_cidr}"]
+  #   cidr_blocks = ["${var.remote_subnet_cidr}", "${var.vpc_cidr}", "${var.public_subnets_cidr_blocks[0]}", "${var.vpn_cidr}"]
   #   description = "from softnas default template"
   # }
 
@@ -167,7 +169,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "tcp"
     from_port   = 0
     to_port     = 65535
-    cidr_blocks = [var.remote_subnet_cidr, var.all_private_subnets_cidr_range, var.vpn_cidr]
+    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.vpn_cidr]
     description = "all incoming traffic from remote vpn"
   }
 
@@ -175,7 +177,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "udp"
     from_port   = 49152
     to_port     = 65535
-    cidr_blocks = [var.remote_subnet_cidr, var.all_private_subnets_cidr_range, var.vpn_cidr]
+    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.vpn_cidr]
     description = ""
   }
 
@@ -183,7 +185,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "tcp"
     from_port   = 111
     to_port     = 111
-    cidr_blocks = [var.remote_subnet_cidr, var.all_private_subnets_cidr_range, var.vpn_cidr]
+    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.vpn_cidr]
     description = "NFS"
   }
 
@@ -191,7 +193,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "udp"
     from_port   = 111
     to_port     = 111
-    cidr_blocks = [var.remote_subnet_cidr, var.all_private_subnets_cidr_range, var.vpn_cidr]
+    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.vpn_cidr]
     description = "NFS"
   }
 
@@ -199,7 +201,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "tcp"
     from_port   = 892
     to_port     = 892
-    cidr_blocks = [var.remote_subnet_cidr, var.all_private_subnets_cidr_range, var.vpn_cidr]
+    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.vpn_cidr]
     description = "rquotad, nlockmgr, mountd, status"
   }
 
@@ -207,7 +209,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "udp"
     from_port   = 892
     to_port     = 892
-    cidr_blocks = [var.remote_subnet_cidr, var.all_private_subnets_cidr_range, var.vpn_cidr]
+    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.vpn_cidr]
     description = "rquotad, nlockmgr, mountd, status"
   }
 
@@ -215,7 +217,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "tcp"
     from_port   = 2010
     to_port     = 2010
-    cidr_blocks = [var.remote_subnet_cidr, var.all_private_subnets_cidr_range, var.vpn_cidr]
+    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.vpn_cidr]
     description = "rquotad, nlockmgr, mountd, status"
   }
 
@@ -223,7 +225,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "udp"
     from_port   = 2010
     to_port     = 2010
-    cidr_blocks = [var.remote_subnet_cidr, var.all_private_subnets_cidr_range, var.vpn_cidr]
+    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.vpn_cidr]
     description = "rquotad, nlockmgr, mountd, status"
   }
 
@@ -231,7 +233,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "tcp"
     from_port   = 2014
     to_port     = 2014
-    cidr_blocks = [var.remote_subnet_cidr, var.all_private_subnets_cidr_range, var.vpn_cidr]
+    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.vpn_cidr]
     description = "rquotad, nlockmgr, mountd, status"
   }
 
@@ -239,7 +241,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "udp"
     from_port   = 2014
     to_port     = 2014
-    cidr_blocks = [var.remote_subnet_cidr, var.all_private_subnets_cidr_range, var.vpn_cidr]
+    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.vpn_cidr]
     description = "rquotad, nlockmgr, mountd, status"
   }
 
@@ -247,7 +249,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "tcp"
     from_port   = 2049
     to_port     = 2049
-    cidr_blocks = [var.remote_subnet_cidr, var.all_private_subnets_cidr_range, var.vpn_cidr]
+    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.vpn_cidr]
     description = "rquotad, nlockmgr, mountd, status"
   }
 
@@ -255,7 +257,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "udp"
     from_port   = 2049
     to_port     = 2049
-    cidr_blocks = [var.remote_subnet_cidr, var.all_private_subnets_cidr_range, var.vpn_cidr]
+    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.vpn_cidr]
     description = "rquotad, nlockmgr, mountd, status"
   }
 
@@ -269,9 +271,10 @@ resource "aws_security_group" "softnas" {
 }
 
 resource "aws_network_interface" "nas1eth0" {
+  count = var.softnas_storage ? 1 : 0
   subnet_id       = var.private_subnets[0]
   private_ips     = [var.softnas1_private_ip1]
-  security_groups = [aws_security_group.softnas.id]
+  security_groups = aws_security_group.softnas.*.id
 
   tags = {
     Name = "primary_network_interface"
@@ -279,9 +282,10 @@ resource "aws_network_interface" "nas1eth0" {
 }
 
 resource "aws_network_interface" "nas1eth1" {
+  count = var.softnas_storage ? 1 : 0
   subnet_id       = var.private_subnets[0]
   private_ips     = [var.softnas1_private_ip2]
-  security_groups = [aws_security_group.softnas.id]
+  security_groups = aws_security_group.softnas.*.id
 
   tags = {
     Name = "secondary_network_interface"
@@ -294,9 +298,53 @@ variable "softnas_use_custom_ami" {
 variable "softnas_custom_ami" {
 }
 
+variable "softnas_platinum_consumption_v4_3_0" {
+  type=map(string)
+  default={
+        "eu-north-1":"ami-86c64cf8",
+        "ap-south-1":"ami-0e4539f02a02f1ab4",
+        "eu-west-3":"ami-009b7f9c7dfeb92f3",
+        "eu-west-2":"ami-0ef252a1d4374265c",
+        "eu-west-1":"ami-04bd346142120053e",
+        "ap-northeast-2":"ami-018944e4872077a59",
+        "ap-northeast-1":"ami-00247989b503ef530",
+        "sa-east-1":"ami-04ba46ed92145a857",
+        "ca-central-1":"ami-041ead7c675208173",
+        "ap-southeast-1":"ami-0a7812f2df1da2ead",
+        "ap-southeast-2":"ami-051ec062f31c60ee4",
+        "eu-central-1":"ami-0364719d47383b7e3",
+        "us-east-1":"ami-09ab8f3babc9990de",
+        "us-east-2":"ami-08b218079ece9cea7",
+        "us-west-1":"ami-014f7e83a442f2f6d",
+        "us-west-2":"ami-0aec3fd870f36b7b4"
+    }
+}
+
+variable "softnas_platinum_consumption_lower_v4_3_0" {
+  type=map(string)
+  default={
+        "eu-north-1": "ami-89c64cf7",
+        "ap-south-1": "ami-0bc2e596cebbf1a54",
+        "eu-west-3": "ami-08173ae3a53edfb35",
+        "eu-west-2": "ami-059330a53138116d9",
+        "eu-west-1": "ami-0b88d1ce09cdc47c7",
+        "ap-northeast-2": "ami-0843a4f279aec8e9f",
+        "ap-northeast-1": "ami-08cbcdfe14bf34ae2",
+        "sa-east-1": "ami-0f6e9baa7910efc60",
+        "ca-central-1": "ami-06f1791b8326fabfd",
+        "ap-southeast-1": "ami-0418cdeeb85ad6644",
+        "ap-southeast-2": "ami-048287b6b9f28c85c",
+        "eu-central-1": "ami-0d32d715591ae2bbb",
+        "us-east-1": "ami-0513dcb022fc5e3a7",
+        "us-east-2": "ami-0aa19b48e665bce28",
+        "us-west-1": "ami-09edaba2d8cc884ac",
+        "us-west-2": "ami-0280326becc413cb5"
+    }
+}
+
 resource "aws_instance" "softnas1" {
   count = var.softnas_storage ? 1 : 0
-  ami   = var.softnas_use_custom_ami ? var.softnas_custom_ami : var.selected_ami[local.softnas_mode_ami]
+  ami   = var.softnas_use_custom_ami ? var.softnas_custom_ami : lookup(var.softnas_platinum_consumption_v4_3_0, var.aws_region)
 
   instance_type = var.instance_type[var.softnas_mode]
 
@@ -306,36 +354,29 @@ resource "aws_instance" "softnas1" {
 
   network_interface {
     device_index         = 0
-    network_interface_id = aws_network_interface.nas1eth0.id
+    network_interface_id = element(concat(aws_network_interface.nas1eth0.*.id, list("")), 0)
     #delete_on_termination = true
   }
 
   network_interface {
     device_index         = 1
-    network_interface_id = aws_network_interface.nas1eth1.id
+    network_interface_id = element(concat(aws_network_interface.nas1eth1.*.id, list("")), 0)
     #delete_on_termination = true
   }
 
   root_block_device {
     volume_size = "100"
     volume_type = "gp2"
-
-    #device_name = "/dev/sda1"
     delete_on_termination = true
     # if specifying a snapshot, do not specify encryption.
     #encryption = false
   }
 
   key_name = var.key_name
-
-  #subnet_id              = "${var.private_subnets[0]}"
-  #vpc_security_group_ids = ["${aws_security_group.node_centos.id}"]
-
-  #user_data = "${file("${path.module}/user_data.yml")}"
   user_data = <<USERDATA
 #cloud-config
-hostname: nas1.${var.public_domain}
-fqdn: nas1.${var.public_domain}
+hostname: nas1
+fqdn: nas1
 manage_etc_hosts: false
 USERDATA
 
@@ -361,9 +402,10 @@ resource "null_resource" "provision_softnas" {
   # some time is required before the ecdsa key file exists.
   provisioner "remote-exec" {
     connection {
-      user                = "centos"
+      user                = var.softnas_ssh_user
       host                = aws_instance.softnas1[0].private_ip
       bastion_host        = var.bastion_ip
+      bastion_user        = "centos"
       private_key         = var.private_key
       bastion_private_key = var.private_key
       type                = "ssh"
@@ -386,24 +428,27 @@ resource "null_resource" "provision_softnas" {
     ]
   }
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     command = <<EOT
+      . /vagrant/scripts/exit_test.sh
       set -x
       cd /vagrant
-      ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.softnas1[0].private_ip} bastion_ip=${var.bastion_ip}"
-      ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=softnas0 host_ip=${aws_instance.softnas1[0].private_ip} group_name=role_softnas"
+      ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.softnas1[0].private_ip} bastion_ip=${var.bastion_ip}"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=softnas0 host_ip=${aws_instance.softnas1[0].private_ip} group_name=role_softnas"; exit_test
       # remove any mounts on local workstation first since they will have been broken if another softnas instance was just destroyed to create this one.
-      if [ $TF_VAR_remote_mounts_on_local ] ; then
-        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'
+      if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
+        echo "CONFIGURE REMOTE MOUNTS ON LOCAL NODES"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=workstation1 variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_private_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
       fi
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init.yaml -v
-      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init-users.yaml -v --extra-vars "variable_host=role_softnas set_hostname=false"
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-update.yaml -v
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init.yaml -v; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init-users.yaml -v --extra-vars "variable_host=role_softnas variable_user=$TF_VAR_softnas_ssh_user set_hostname=false"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-update.yaml -v; exit_test
       # hotfix script to speed up instance start and shutdown
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-install-acpid.yaml -v
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-install-acpid.yaml -v; exit_test
 
       # cli is only needed if sync operations with s3 will be run on this instance.
-      # #ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli.yaml -v --extra-vars "variable_user=centos variable_host=role_softnas"
-      # #ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2.yaml -v --extra-vars "variable_user=centos variable_host=role_softnas"
+      # #ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli.yaml -v --extra-vars "variable_user=ec2-user variable_host=role_softnas"; exit_test
+      # #ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2.yaml -v --extra-vars "variable_user=ec2-user variable_host=role_softnas"; exit_test
   
 EOT
 
@@ -445,9 +490,10 @@ resource "null_resource" "create_ami" {
 
   provisioner "remote-exec" {
     connection {
-      user                = "centos"
+      user                = var.softnas_ssh_user
       host                = aws_instance.softnas1[0].private_ip
       bastion_host        = var.bastion_ip
+      bastion_user        = "centos"
       private_key         = var.private_key
       bastion_private_key = var.private_key
       type                = "ssh"
@@ -468,15 +514,6 @@ EOT
 
   }
 }
-
-# While instance is stopped, we attach ebs volumes.
-# resource "aws_volume_attachment" "softnas1_ebs_att" {
-#   depends_on         = ["aws_instance.softnas1", "null_resource.create_ami"]
-#   count       = "${length(local.softnas1_volumes)}"
-#   device_name = "${element(local.softnas1_mounts, count.index)}"
-#   volume_id   = "${element(local.softnas1_volumes, count.index)}"
-#   instance_id = "${aws_instance.softnas1.id}"
-# }
 
 # Start instance so that s3 disks can be attached
 resource "null_resource" "start-softnas-after-create_ami" {
@@ -536,9 +573,10 @@ resource "null_resource" "provision_softnas_volumes" {
 
   provisioner "remote-exec" {
     connection {
-      user                = "centos"
+      user                = var.softnas_ssh_user
       host                = aws_instance.softnas1[0].private_ip
       bastion_host        = var.bastion_ip
+      bastion_user        = "centos"
       private_key         = var.private_key
       bastion_private_key = var.private_key
       type                = "ssh"
@@ -549,18 +587,21 @@ resource "null_resource" "provision_softnas_volumes" {
   }
 
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     command = <<EOT
+      . /vagrant/scripts/exit_test.sh
       set -x
       cd /vagrant
       # ensure all old mounts onsite are removed if they exist.
-      if [[ $TF_VAR_remote_mounts_on_local ]] ; then
-        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'
+      if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
+        echo "CONFIGURE REMOTE MOUNTS ON LOCAL NODES"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser hostname=workstation1 ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_private_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
       fi
       # mount all ebs disks before s3
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-check-able-to-stop.yaml -v --extra-vars "instance_id=${aws_instance.softnas1[0].id}"
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk.yaml -v --extra-vars "instance_id=${aws_instance.softnas1[0].id} stop_softnas_instance=true mode=attach"
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-check-able-to-stop.yaml -v --extra-vars "instance_id=${aws_instance.softnas1[0].id}"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk.yaml -v --extra-vars "instance_id=${aws_instance.softnas1[0].id} stop_softnas_instance=true mode=attach"; exit_test
       # Although we start the instance in ansible, the aws cli can be more reliable to ensure this.
-      aws ec2 start-instances --instance-ids ${aws_instance.softnas1[0].id}
+      aws ec2 start-instances --instance-ids ${aws_instance.softnas1[0].id}; exit_test
   
 EOT
 
@@ -570,9 +611,10 @@ EOT
   # connect to the instance again to ensure it has booted.
   provisioner "remote-exec" {
     connection {
-      user                = "centos"
+      user                = var.softnas_ssh_user
       host                = aws_instance.softnas1[0].private_ip
       bastion_host        = var.bastion_ip
+      bastion_user        = "centos"
       private_key         = var.private_key
       bastion_private_key = var.private_key
       type                = "ssh"
@@ -583,19 +625,17 @@ EOT
   }
   provisioner "local-exec" {
     command = <<EOT
+      . /vagrant/scripts/exit_test.sh
       set -x
       cd /vagrant
       # ensure volumes and pools exist after disks are ensured to exist.
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-pool.yaml -v
-      # ensure s3 disks exist and are mounted
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-s3-disk.yaml -v --extra-vars "pool_name=pool0 volume_name=volume0 disk_device=0 s3_disk_size_max_value=${var.s3_disk_size} encrypt_s3=true import_pool=${local.import_pool}"
-      # ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-s3-disk.yaml -v --extra-vars "pool_name=pool1 volume_name=volume1 disk_device=1 s3_disk_size_max_value=${var.s3_disk_size} encrypt_s3=true import_pool=${local.import_pool}"
-
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-pool.yaml -v; exit_test
+      # ensure s3 disks exist and are mounted.  the s3 features are disabled currently in favour of migrating to using the aws cli and pdg to sync data
+      # ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-s3-disk.yaml -v --extra-vars "pool_name=pool0 volume_name=volume0 disk_device=0 s3_disk_size_max_value=${var.s3_disk_size} encrypt_s3=true import_pool=${local.import_pool}"; exit_test
       # exports should be updated here.
       # if btier.json exists in /secrets/${var.envtier}/ebs-volumes/ then the tiers will be imported.
-      
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-backup-btier.yaml -v --extra-vars "restore=true"
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk-update-exports.yaml -v --extra-vars "instance_id=${aws_instance.softnas1[0].id}"
+      # ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-backup-btier.yaml -v --extra-vars "restore=true"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk-update-exports.yaml -v --extra-vars "instance_id=${aws_instance.softnas1[0].id}"; exit_test
   
 EOT
 
@@ -610,7 +650,7 @@ output "provision_softnas_volumes" {
 
 # wakeup a node after sleep
 resource "null_resource" "start-softnas" {
-  count      =  !var.sleep && var.softnas_storage ? 1 : 0
+  count      = ( !var.sleep && var.softnas_storage ) ? 1 : 0
   depends_on = [null_resource.provision_softnas_volumes]
 
   #,"null_resource.mount_volumes_onsite"]
@@ -621,9 +661,10 @@ resource "null_resource" "start-softnas" {
 
   provisioner "local-exec" {
     command = <<EOT
+      . /vagrant/scripts/exit_test.sh
       # create volatile storage
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk.yaml --extra-vars "instance_id=${aws_instance.softnas1[0].id} stop_softnas_instance=true mode=attach"
-      aws ec2 start-instances --instance-ids ${aws_instance.softnas1[0].id}
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk.yaml --extra-vars "instance_id=${aws_instance.softnas1[0].id} stop_softnas_instance=true mode=attach"; exit_test
+      aws ec2 start-instances --instance-ids ${aws_instance.softnas1[0].id}; exit_test
   
 EOT
 
@@ -631,7 +672,7 @@ EOT
 }
 
 resource "null_resource" "shutdown-softnas" {
-  count = var.sleep && var.softnas_storage ? 1 : 0
+  count = ( var.sleep && var.softnas_storage ) ? 1 : 0
 
   triggers = {
     instanceid = aws_instance.softnas1[0].id
@@ -641,9 +682,10 @@ resource "null_resource" "shutdown-softnas" {
     #command = "aws ec2 stop-instances --instance-ids ${aws_instance.softnas1.id}"
 
     command = <<EOT
-      aws ec2 stop-instances --instance-ids ${aws_instance.softnas1[0].id}
+      . /vagrant/scripts/exit_test.sh
+      aws ec2 stop-instances --instance-ids ${aws_instance.softnas1[0].id}; exit_test
       # delete volatile storage
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk.yaml --extra-vars "instance_id=${aws_instance.softnas1[0].id} stop_softnas_instance=true mode=destroy"
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk.yaml --extra-vars "instance_id=${aws_instance.softnas1[0].id} stop_softnas_instance=true mode=destroy"; exit_test
   
 EOT
 
@@ -651,7 +693,7 @@ EOT
 }
 
 resource "null_resource" "attach_local_mounts_after_start" {
-  count      =  !var.sleep && var.softnas_storage ? 1 : 0
+  count      = ( !var.sleep && var.softnas_storage ) ? 1 : 0
   depends_on = [null_resource.start-softnas]
 
   #,"null_resource.mount_volumes_onsite"]
@@ -659,12 +701,14 @@ resource "null_resource" "attach_local_mounts_after_start" {
   triggers = {
     instanceid   = aws_instance.softnas1[0].id
     startsoftnas = null_resource.start-softnas[0].id
+    remote_mounts_on_local = var.remote_mounts_on_local
   }
   provisioner "remote-exec" {
     connection {
-      user                = "centos"
+      user                = var.softnas_ssh_user
       host                = aws_instance.softnas1[0].private_ip
       bastion_host        = var.bastion_ip
+      bastion_user        = "centos"
       private_key         = var.private_key
       bastion_private_key = var.private_key
       type                = "ssh"
@@ -676,25 +720,26 @@ resource "null_resource" "attach_local_mounts_after_start" {
     ]
   }
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     command = <<EOT
+      . /vagrant/scripts/exit_test.sh
       set -x
       echo "TF_VAR_remote_mounts_on_local= $TF_VAR_remote_mounts_on_local"
       # ensure routes on workstation exist
-      if [ $TF_VAR_remote_mounts_on_local ] ; then
-        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-routes.yaml -v -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key"
+      if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
+        printf "\n$BLUE CONFIGURE REMOTE ROUTES ON LOCAL NODES $NC\n"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-routes.yaml -v -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser hostname=workstation1 ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_private_key"; exit_test
       fi
       # ensure volumes and pools exist after the disks were ensured to exist - this was done before starting instance.
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-pool.yaml -v
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-pool.yaml -v; exit_test
       #ensure exports are correct
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk-update-exports.yaml -v --extra-vars "instance_id=${aws_instance.softnas1[0].id}"
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk-update-exports.yaml -v --extra-vars "instance_id=${aws_instance.softnas1[0].id}"; exit_test
       # mount volumes to local site when softnas is started
-      if [ $TF_VAR_remote_mounts_on_local ] ; then
-        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'
+      if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
+        printf "\n$BLUE CONFIGURE REMOTE MOUNTS ON LOCAL NODES $NC\n"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_private_key" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
       fi
-      # ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v -v --extra-vars "variable_host=localhost variable_user=vagrant" --skip-tags 'cloud_install local_install_onsite_mounts'
-  
 EOT
-
   }
 }
 
@@ -703,7 +748,7 @@ output "attach_local_mounts_after_start" {
 }
 
 resource "null_resource" "detach_local_mounts_after_stop" {
-  count      = var.sleep && var.softnas_storage ? 1 : 0
+  count      = ( var.sleep && var.softnas_storage ) ? 1 : 0
   depends_on = [null_resource.shutdown-softnas]
 
   #,"null_resource.mount_volumes_onsite"]
@@ -713,13 +758,14 @@ resource "null_resource" "detach_local_mounts_after_stop" {
     startsoftnas = null_resource.shutdown-softnas[0].id
   }
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     command = <<EOT
+      . /vagrant/scripts/exit_test.sh
       set -x
       # unmount volumes from local site when softnas is shutdown.
-      if [ $TF_VAR_remote_mounts_on_local ] ; then
-        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'
+      if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
+        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=workstation1 variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_private_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
       fi
-      # ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=localhost variable_user=vagrant destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'
   
 EOT
 

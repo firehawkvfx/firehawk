@@ -2,14 +2,14 @@
 
 # example local install
 
-# ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-routes.yaml -v -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_become_pass=somepass ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key"
+# ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-routes.yaml -v -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser hostname=workstation1 ansible_become_pass=somepass ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_private_key"
 
 - hosts: "{{ variable_host | default('role_node_centos') }}"
   remote_user: "{{ variable_user | default('centos') }}"
   become: true
 
   vars:
-    ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
+    ansible_become_pass: "{{ user_deadlineuser_pw }}"
 
   tasks:
   - name: test connection and permissions
@@ -21,7 +21,7 @@
   become: true
 
   vars:
-    ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
+    ansible_become_pass: "{{ user_deadlineuser_pw }}"
     variable_user: centos
     bastionip: "{{ groups['bastionip'][0] }}"
     houdini_build: "{{ lookup('env','TF_VAR_houdini_build') }}"
@@ -39,14 +39,18 @@
 
   - name: remove previous routes if they exist.  ignore errors if commmand fails - routes probably don't exist.
     shell: |
-      ip route del {{ item.subnet }}
+      ip route list | grep {{ item.subnet }}
+      if [ $? -eq 0 ]; then
+        ip route del {{ item.subnet }}
+      else
+        echo "Route does not exit.  No need to delete {{ item.subnet }}"
+      fi
     with_items:
       - { subnet: "{{ private_subnet1_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
       - { subnet: "{{ public_subnet1_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
       - { subnet: "{{ vpn_cidr_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
     when: envtier == 'prod'
     become: yes
-    ignore_errors: true
     tags:
       - add-routes
 
@@ -82,14 +86,18 @@
 ### configure dev routes
   - name: remove previous routes if they exist.  ignore errors if commmand fails - routes probably don't exist.
     shell: |
-      ip route del {{ item.subnet }}
+      ip route list | grep {{ item.subnet }}
+      if [ $? -eq 0 ]; then
+        ip route del {{ item.subnet }}
+      else
+        echo "Route does not exit.  No need to delete {{ item.subnet }}"
+      fi
     with_items:
       - { subnet: "{{ private_subnet1_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
       - { subnet: "{{ public_subnet1_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
       - { subnet: "{{ vpn_cidr_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
     when: envtier == 'dev'
     become: yes
-    ignore_errors: true
     tags:
       - add-routes
 

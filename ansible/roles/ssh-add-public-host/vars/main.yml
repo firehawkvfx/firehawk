@@ -3,4 +3,4 @@
 set_bastion: false
 
 public_ip: None
-public_hostname: None
+public_address: None

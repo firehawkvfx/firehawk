@@ -9,7 +9,7 @@ module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
   #source = "../terraform-aws-vpc"
-  create_vpc = true
+  create_vpc = var.create_vpc
 
   name = "firehawk-compute"
   cidr = var.vpc_cidr
@@ -28,7 +28,7 @@ module "vpc" {
 
   enable_dns_support   = true
   enable_dns_hostnames = true
-  
+
   tags = {
     Terraform   = "true"
     Environment = "dev"
@@ -38,14 +38,23 @@ module "vpc" {
 variable "remote_subnet_cidr" {
 }
 
+variable "route_public_domain_name" {
+}
+
 module "vpn" {
   source = "../vpn"
+
+  create_vpn = var.create_vpc
+
+  aws_region = var.region
+
+  route_public_domain_name = var.route_public_domain_name
 
   # dummy attribute to force dependency on IGW.
   igw_id = module.vpc.igw_id
 
   vpc_id   = module.vpc.vpc_id
-  vpc_cidr = module.vpc.vpc_cidr_block
+  vpc_cidr = var.vpc_cidr
 
   #the cidr range that the vpn will assign to remote addresses within the vpc if routing.
   vpn_cidr           = var.vpn_cidr
@@ -71,6 +80,7 @@ module "vpn" {
   openvpn_admin_pw   = var.openvpn_admin_pw
 
   bastion_ip = var.bastion_ip
+  bastion_dependency = var.bastion_dependency
 
   #sleep will stop instances to save cost during idle time.
   sleep = var.sleep
@@ -94,11 +104,11 @@ resource "null_resource" "dependency_vpn" {
 }
 
 resource "aws_route" "private_openvpn_remote_subnet_gateway" {
+  count = var.create_vpc ? length(var.private_subnets) : 0
   depends_on = [
     null_resource.dependency_vpc,
     null_resource.dependency_vpn,
   ]
-  count = length(var.private_subnets)
 
   route_table_id         = element(module.vpc.private_route_table_ids, count.index)
   destination_cidr_block = var.remote_subnet_cidr
@@ -110,11 +120,11 @@ resource "aws_route" "private_openvpn_remote_subnet_gateway" {
 }
 
 resource "aws_route" "public_openvpn_remote_subnet_gateway" {
+  count = var.create_vpc ? length(var.private_subnets) : 0
   depends_on = [
     null_resource.dependency_vpc,
     null_resource.dependency_vpn,
   ]
-  count = length(var.private_subnets)
 
   route_table_id         = element(module.vpc.public_route_table_ids, count.index)
   destination_cidr_block = var.remote_subnet_cidr
@@ -127,11 +137,11 @@ resource "aws_route" "public_openvpn_remote_subnet_gateway" {
 
 ### routes may be needed for traffic going back to open vpn dhcp adresses
 resource "aws_route" "private_openvpn_remote_subnet_vpndhcp_gateway" {
+  count = var.create_vpc ? length(var.private_subnets) : 0
   depends_on = [
     null_resource.dependency_vpc,
     null_resource.dependency_vpn,
   ]
-  count = length(var.private_subnets)
 
   route_table_id         = element(module.vpc.private_route_table_ids, count.index)
   destination_cidr_block = var.vpn_cidr
@@ -143,11 +153,11 @@ resource "aws_route" "private_openvpn_remote_subnet_vpndhcp_gateway" {
 }
 
 resource "aws_route" "public_openvpn_remote_subnet_vpndhcp_gateway" {
+  count = var.create_vpc ? length(var.private_subnets) : 0
   depends_on = [
     null_resource.dependency_vpc,
     null_resource.dependency_vpn,
   ]
-  count = length(var.private_subnets)
 
   route_table_id         = element(module.vpc.public_route_table_ids, count.index)
   destination_cidr_block = var.vpn_cidr

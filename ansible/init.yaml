@@ -19,6 +19,7 @@
 
   roles:
     - {role: 'init-host', tags: 'init-host'}
+    - role: pip
     - role: init-packages
     - role: terraform
     - role: aws-cli

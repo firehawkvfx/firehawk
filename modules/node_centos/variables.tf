@@ -16,6 +16,15 @@ variable "remote_ip_cidr" {
 variable "remote_subnet_cidr" {
 }
 
+variable "provision_softnas_volumes" {
+  default = []
+}
+
+variable "attach_local_mounts_after_start" {
+  default = []
+}
+
+
 variable "wakeable" {
   default = true
 }
@@ -53,8 +62,6 @@ variable "instance_profile_name" {
 }
 
 variable "instance_type" {
-  default = "m5.2xlarge"
-  #default = "r5.2xlarge"
 }
 
 variable "user" {

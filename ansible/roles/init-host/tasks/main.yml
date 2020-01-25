@@ -4,11 +4,8 @@
   hostname:
     name: "{{ openfirehawkserver_name }}"
 
-# - name: add myself to /etc/hosts
-#   lineinfile:
-#     dest: /etc/hosts
-#     line: "{{ openfirehawkserver }} {{ openfirehawkserver_name }}"
-#     state: present
+- openssh_keypair:
+    path: "{{ general_use_ssh_key }}"
 
 - name: insert/update block in /etc/hosts
   blockinfile:

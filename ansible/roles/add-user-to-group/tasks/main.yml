@@ -1,0 +1,23 @@
+---
+# tasks file for add-user-to-group
+
+  # set permissions on dealine repository so that scripts can be copied by the vagrant user.
+- name: Ensure group "syscontrol" exists
+  group:
+    name: "{{ variable_group }}"
+    state: present
+    gid: "{{ variable_gid }}"
+  become: true
+  tags:
+  - cloud-install
+  - onsite-install
+
+- name: adding existing user "{{ item }}" to group syscontrol
+  user:
+    name: "{{ variable_user }}"
+    groups: "{{ variable_group }}"
+    append: yes
+  become: true
+  tags:
+  - cloud-install
+  - onsite-install

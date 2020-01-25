@@ -27,6 +27,24 @@
   remote_user: openvpnas
   become: true
 
+  # install pexpect and its dependencies to use passwd
+  roles:
+    - role: init-packages
+
+  # set user password.  this is a temporary measure as it should be handled by user data, but for some reason open vpn isn't accepting that approach as of 2.71““““““““““““
+  post_tasks:
+    - name: set user pass
+      expect:
+        command: passwd {{ openvpn_user }}
+        responses:
+          (?i)password: "{{ openvpn_user_pw }}"
+          (?i)Retype new password: "{{ openvpn_user_pw }}"
+      no_log: true
+
+- hosts: "{{ variable_host | default('openvpnip') }}"
+  remote_user: openvpnas
+  become: true
+
   vars:
     client_network: None
     client_netmask_bits: None
@@ -126,7 +144,12 @@
 
     - name: configure routes to opposite dev/prod environment so that nodes in both envs can access licence server
       shell: |
-        ip route del {{ item.subnet }}
+        ip route list | grep {{ item.subnet }}
+        if [ $? -eq 0 ]; then
+          ip route del {{ item.subnet }}
+        else
+          echo "Route does not exit.  No need to delete {{ item.subnet }}"
+        fi
         ip route add {{ item.subnet }} via {{ item.next_hop }} dev {{ vpn_nic }}
       with_items:
         - { subnet: "{{ private_subnet1_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
@@ -154,7 +177,12 @@
 
     - name: configure routes to opposite dev/prod environment so that nodes in both envs can access licence server.  Remove route if it exists and re apply it.
       shell: |
-        ip route del {{ item.subnet }}
+        ip route list | grep {{ item.subnet }}
+        if [ $? -eq 0 ]; then
+          ip route del {{ item.subnet }}
+        else
+          echo "Route does not exit.  No need to delete {{ item.subnet }}"
+        fi
         ip route add {{ item.subnet }} via {{ item.next_hop }} dev {{ vpn_nic }}
       with_items:
         - { subnet: "{{ private_subnet1_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }

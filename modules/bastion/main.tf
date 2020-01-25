@@ -3,6 +3,7 @@
 #----------------------------------------------------------------
 
 resource "aws_security_group" "bastion" {
+  count       = var.create_vpc ? 1 : 0
   name        = var.name
   vpc_id      = var.vpc_id
   description = "Bastion Security Group"
@@ -67,23 +68,50 @@ resource "aws_security_group" "bastion" {
 }
 
 resource "aws_eip" "bastionip" {
+  count    = var.create_vpc ? 1 : 0
   vpc      = true
-  instance = aws_instance.bastion.id
+  instance = aws_instance.bastion[count.index].id
 
   tags = {
     role  = "bastion"
     route = "public"
   }
 }
+variable "centos_v7" {
+  type = map(string)
+  default = {
+        "eu-north-1": "ami-5ee66f20",
+        "ap-south-1": "ami-02e60be79e78fef21",
+        "eu-west-3": "ami-0e1ab783dc9489f34",
+        "eu-west-2": "ami-0eab3a90fc693af19",
+        "eu-west-1": "ami-0ff760d16d9497662",
+        "ap-northeast-2": "ami-06cf2a72dadf92410",
+        "ap-northeast-1": "ami-045f38c93733dd48d",
+        "sa-east-1": "ami-0b8d86d4bf91850af",
+        "ca-central-1": "ami-033e6106180a626d0",
+        "ap-southeast-1": "ami-0b4dd9d65556cac22",
+        "ap-southeast-2": "ami-08bd00d7713a39e7d",
+        "eu-central-1": "ami-04cf43aca3e6f3de3",
+        "us-east-1": "ami-02eac2c0129f6376b",
+        "us-east-2": "ami-0f2b4fc905b0bd1f1",
+        "us-west-1": "ami-074e2d6769f445be5",
+        "us-west-2": "ami-01ed306a12b7d1c96"
+    }
+}
 
 resource "aws_instance" "bastion" {
-  ami           = var.ami_map[var.region]
+  count         = var.create_vpc ? 1 : 0
+  ami           = lookup(var.centos_v7, var.region)
   instance_type = var.instance_type
   key_name      = var.key_name
   subnet_id     = element(var.public_subnet_ids, 0)
 
-  vpc_security_group_ids = [aws_security_group.bastion.id]
+  vpc_security_group_ids = [local.security_group_id]
 
+  root_block_device {
+    delete_on_termination = true
+  }
+  
   tags = {
     Name = var.name
   }
@@ -99,7 +127,18 @@ USERDATA
 
 }
 
+locals {
+  public_ip = element(concat(aws_eip.bastionip.*.public_ip, list("")), 0)
+  private_ip = element(concat(aws_instance.bastion.*.private_ip, list("")), 0)
+  id = element(concat(aws_instance.bastion.*.id, list("")), 0)
+  security_group_id = element(concat(aws_security_group.bastion.*.id, list("")), 0)
+  bastion_address = var.route_public_domain_name ? "bastion.${var.public_domain_name}":"${local.public_ip}"
+  bastion_dependency = element(concat(null_resource.provision_bastion.*.id, list("")), 0)
+}
+
+
 resource "null_resource" "provision_bastion" {
+  count    = var.create_vpc ? 1 : 0
   depends_on = [
     aws_instance.bastion,
     aws_eip.bastionip,
@@ -107,13 +146,14 @@ resource "null_resource" "provision_bastion" {
   ]
 
   triggers = {
-    instanceid = aws_instance.bastion.id
+    instanceid = local.id
+    bastion_address = local.bastion_address
   }
 
   provisioner "remote-exec" {
     connection {
       user        = "centos"
-      host        = aws_eip.bastionip.public_ip
+      host        = local.public_ip
       private_key = var.private_key
       type        = "ssh"
       timeout     = "10m"
@@ -126,7 +166,7 @@ resource "null_resource" "provision_bastion" {
     command = <<EOT
       set -x
       cd /vagrant
-      ansible-playbook -i ansible/inventory/hosts ansible/ssh-add-public-host.yaml -v --extra-vars "public_ip=${aws_eip.bastionip.public_ip} public_hostname=bastion.${var.public_domain_name} set_bastion=true"
+      ansible-playbook -i ansible/inventory/hosts ansible/ssh-add-public-host.yaml -v --extra-vars "public_ip=${local.public_ip} public_address=${local.bastion_address} bastion_address=${local.bastion_address} set_bastion=true"
   
 EOT
 
@@ -140,27 +180,28 @@ variable "public_domain_name" {
 }
 
 resource "aws_route53_record" "bastion_record" {
-  zone_id = var.route_zone_id
-  name    = "bastion.${var.public_domain_name}"
+  count   = var.route_public_domain_name && var.create_vpc ? 1 : 0
+  zone_id = element(concat(list(var.route_zone_id), list("")), 0)
+  name    = element(concat(list("bastion.${var.public_domain_name}"), list("")), 0)
   type    = "A"
   ttl     = 300
-  records = [aws_eip.bastionip.public_ip]
+  records = [local.public_ip]
 }
 
 resource "null_resource" "start-bastion" {
-  count = var.sleep ? 0 : 1
+  count = ( !var.sleep && var.create_vpc) ? 1 : 0
 
   provisioner "local-exec" {
-    command = "aws ec2 start-instances --instance-ids ${aws_instance.bastion.id}"
+    command = "aws ec2 start-instances --instance-ids ${local.id}"
   }
 }
 
 resource "null_resource" "shutdown-bastion" {
-  count = var.sleep ? 1 : 0
+  count = var.sleep && var.create_vpc ? 1 : 0
 
   provisioner "local-exec" {
     command = <<EOT
-      aws ec2 stop-instances --instance-ids ${aws_instance.bastion.id}
+      aws ec2 stop-instances --instance-ids ${local.id}
   
 EOT
 

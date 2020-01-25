@@ -31,7 +31,9 @@ These are some good paid video courses to try-
 ## Getting Started
 
 You will want to experiment with spinning up an AWS account.  You will need to start an instance in your nearest region with this ami - (softnas platinum consumption based for lower compute requirements).  take note of the AMI.  you wont need to leave this instance running.  You can terminate it, and delete the EBS volume.
-Next startup up an open vpn access server instance from the openvpn AMI, and when started, take note of this AMI.  these will need to be added into terraform variables later, because they are unique to your region.
+Next startup up an open vpn access server instance from the openvpn AMI, and when started, take note of this AMI.  these will need to be added into terraform variables later, because they are unique to your region.   
+
+Next head to keybase.io to create an account.  Later, we will use keybase to create a an encryption key (PGP encryption).  Terraform requires a form of PGP encryption when dynamically creating AWS Secrets keys to ensure that the shell output is not readable by any0ne except someone authorised with the PGP key.
 
 ## Security
 openFirehawk is not ready for production.  There are outstanding changes that need to be done to improve security for general use.
@@ -123,7 +125,7 @@ we can initialise the secrets keys and encrypt.
 - Now we can execute the first playbook to initialise the vm.
     ansible-playbook -i ansible/inventory/hosts ansible/init.yaml -v
 - Download the deadline linux installer version 10.0.23.4 (or latest version) into downloads/Deadline-10.0.23.4-linux-installers.tar, then setup the deadline user and deadline db + deadline rcs with this playbook. set the version in your secrets file.
-    ansible-playbook -i ansible/inventory/hosts ansible/newuser_deadline.yaml -v
+    ansible-playbook -i ansible/inventory/hosts ansible/newuser_deadlineuser.yaml -v
 - Remember to always run source ./update_vars.sh before running any ansible playbooks, or using terraform.  Without your environment variables, nothing will work.
 - Download the latest houdini installer tar to the downloads folder.
     ansible-playbook -i ansible/inventory/hosts ansible/openfirehawkserver_houdini.yaml -v
@@ -235,7 +237,7 @@ Instances that reside in the private subnet are currently configured through ope
 ## Secrets
 In the secrets file, you will set your own values for these configuration variables.  Many will be different for your environment, and you **absolutely must use unique passwords and set your static ip address for onsite**.
 
-If you ever make commits to a git repo, ensure you never commit unencrypted secrets or anything in the secrets/ path.  vault keys and pem keys for ssh access are stoed in keys/ and these should not be committed to version control.
+If you ever make commits to a git repo, ensure you never commit unencrypted secrets in the secrets/ path.  vault keys and pem keys for ssh access are stored in keys/ and these should not be committed to version control.
 
 if you happen to accidentally publish private information you can remove it with this example to remove the secrets-prod file form the repository.  ensure you have a local backup - this operation will strip all branches.
 https://help.github.com/en/articles/removing-sensitive-data-from-a-repository
@@ -334,11 +336,11 @@ Here you should see the connection was initialised.  if not, try running this pl
 
 If you make changes to your infrastructure that you want to recover from, a good way to replace resources is something like this...  lets say I just moved to a different network that has a different subnet, or my local IP changes for openfirehawkserver.  its easy to to destroy my openvpn instance and start over
 
-    terraform taint -module vpc.vpn.openvpn aws_instance.openvpn
+    terraform taint module.vpc.module.vpn.module.openvpn.aws_instance.openvpn
 
 - Now I should also taint what is downstream if there are dependencies that aren't being picked up too, like the eip.
 
-    terraform taint -module vpc.vpn.openvpn aws_eip.openvpnip
+    terraform taint module.vpc.module.vpn.module.openvpn.aws_eip.openvpnip
     The resource aws_eip.openvpnip in the module root.vpc.vpn.openvpn has been marked as tainted!
 
 After I'm happy with this I can run terraform apply to recrete the vpn.

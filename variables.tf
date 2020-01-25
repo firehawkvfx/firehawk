@@ -2,6 +2,12 @@ variable "sleep" {
   default = false
 }
 
+variable "enable_vpc" {
+}
+
+variable "vpc_cidr" {
+}
+
 #you can get an ssl certificate arn by verifying your domain with aws certificate manager.
 variable "cert_arn" {
 }
@@ -39,6 +45,9 @@ variable "public_domain_prod" {
 }
 
 variable "openfirehawkserver" {
+}
+
+variable "route_public_domain_name" {
 }
 
 variable "openvpn_user" {
@@ -87,6 +96,9 @@ variable "node_wakeable" {
   default = false
 }
 
+variable "softnas_ssh_user" {
+}
+
 variable "softnas1_cloudformation_role_name" {
   default = "FCB-Softnas1Role"
 }
@@ -99,7 +111,6 @@ variable "envtier" {
 }
 
 variable "remote_mounts_on_local" {
-  default = true
 }
 
 variable "softnas_storage" {
@@ -151,3 +162,14 @@ variable "houdini_license_server_address" {
 variable "s3_disk_size" {
 }
 
+variable "workstation_enabled" {
+}
+
+variable "node_centos_instance_type" {
+}
+
+variable "keybase_pgp_key" {
+}
+
+variable "provision_deadline_spot_plugin" {
+}

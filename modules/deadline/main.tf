@@ -21,9 +21,14 @@ resource "aws_iam_role" "spot_instance_role" {
 EOF
 }
 
+resource "aws_iam_role_policy_attachment" "AmazonS3FullAccess" {
+  role       = aws_iam_role.spot_instance_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+}
+
 resource "aws_iam_role_policy" "spot_instance_role_worker_policy" {
   name = "SlaveStatement"
-  role = "${aws_iam_role.spot_instance_role.id}"
+  role = aws_iam_role.spot_instance_role.id
 
   policy = <<EOF
 {
@@ -57,7 +62,7 @@ EOF
 # to limit access to a specific bucket, see here - https://aws.amazon.com/blogs/security/writing-iam-policies-how-to-grant-access-to-an-amazon-s3-bucket/
 resource "aws_iam_role_policy" "spot_instance_role_s3_policy" {
   name = "S3ReadWrite"
-  role = "${aws_iam_role.spot_instance_role.id}"
+  role = aws_iam_role.spot_instance_role.id
 
   policy = <<EOF
 {
@@ -91,7 +96,7 @@ EOF
 }
 resource "aws_iam_role_policy" "spot_instance_role_describe_policy" {
   name = "DescribeInstances"
-  role = "${aws_iam_role.spot_instance_role.id}"
+  role = aws_iam_role.spot_instance_role.id
 
   policy = <<EOF
 {
@@ -112,22 +117,22 @@ EOF
 }
 
 resource "aws_iam_instance_profile" "spot_instance_profile" {
-  name = "${aws_iam_role.spot_instance_role.name}"
-  role = "${aws_iam_role.spot_instance_role.name}"
+  name = aws_iam_role.spot_instance_role.name
+  role = aws_iam_role.spot_instance_role.name
 }
 
 output "spot_instance_profile_arn" {
-  value = "${aws_iam_instance_profile.spot_instance_profile.arn}"
+  value = aws_iam_instance_profile.spot_instance_profile.arn
 }
 output "spot_instance_profile_name" {
-  value = "${aws_iam_instance_profile.spot_instance_profile.name}"
+  value = aws_iam_instance_profile.spot_instance_profile.name
 }
 
 ### deadline spot fleet user IAM
 
 
 resource "aws_iam_user_group_membership" "deadline_spot_group_membership" {
-  user = "${aws_iam_user.deadline_spot_user.name}"
+  user = aws_iam_user.deadline_spot_deployment_user.name
 
   groups = [
     "${aws_iam_group.deadline_spot_group.name}"
@@ -141,7 +146,7 @@ resource "aws_iam_group" "deadline_spot_group" {
 
 resource "aws_iam_group_policy" "deadline_spot_group_policy" {
   name  = "deadline_spot_group_policy"
-  group = "${aws_iam_group.deadline_spot_group.id}"
+  group = aws_iam_group.deadline_spot_group.id
 
   policy = <<EOF
 {
@@ -279,21 +284,22 @@ resource "aws_iam_group_policy" "deadline_spot_group_policy" {
 EOF
 }
 
-resource "aws_iam_user" "deadline_spot_user" {
-  name = "deadline_spot_user"
+resource "aws_iam_user" "deadline_spot_deployment_user" {
+  name = "deadline_spot_deployment_user"
+  force_destroy = true
 }
 
 resource "aws_iam_access_key" "deadline_spot_access_key" {
-  user = "${aws_iam_user.deadline_spot_user.name}"
-  pgp_key = "keybase:andrew_graham"
-  #var.pgp_key
+  user    = aws_iam_user.deadline_spot_deployment_user.name
+  pgp_key = var.keybase_pgp_key
+  # pgp key: normally in format 'keybase:my_username'
   # see https://www.hiroom2.com/2016/08/14/ubuntu-16-04-create-gpg-key/ to create pgp key in ubuntu
 }
 
 output "spot_access_key_id" {
-  value = "${aws_iam_access_key.deadline_spot_access_key.id}"
+  value = aws_iam_access_key.deadline_spot_access_key.id
 }
 
 output "spot_secret" {
-  value = "${aws_iam_access_key.deadline_spot_access_key.encrypted_secret}"
+  value = aws_iam_access_key.deadline_spot_access_key.encrypted_secret
 }

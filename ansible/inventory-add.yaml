@@ -15,7 +15,7 @@
       debug:
         var: hosts_file
         
-    - name: ensure a 2 new lines exist at end of file always
+    - name: ensure 2 new lines exist at end of file always
       shell: |
         /vagrant/scripts/append_blank_line.sh {{ hosts_file }}
       become: true
@@ -32,7 +32,7 @@
         create: true
       become: yes
 
-    - name: ensure a 2 new lines exist at end of file always
+    - name: ensure 2 new lines exist at end of file always
       shell: |
         /vagrant/scripts/append_blank_line.sh {{ hosts_file }}
       become: true
@@ -48,7 +48,7 @@
       when: group_name != ''
       become: yes
 
-    - name: ensure a 2 new lines exist at end of file always
+    - name: ensure 2 new lines exist at end of file always
       shell: |
         /vagrant/scripts/append_blank_line.sh {{ hosts_file }}
       become: true
@@ -78,7 +78,7 @@
       when: group_name == ''
       become: yes
 
-    - name: ensure a 2 new lines exist at end of file always
+    - name: ensure 2 new lines exist at end of file always
       shell: |
         /vagrant/scripts/append_blank_line.sh {{ hosts_file }}
       become: true

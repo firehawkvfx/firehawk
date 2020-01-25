@@ -1,0 +1,9 @@
+- hosts: ansible_control
+  become: true
+  remote_user: vagrant
+
+  vars:
+    pgp_secret: "{{lookup('env', 'test')}}"
+
+  roles:
+  - {role: 'pgp-decrypt-test'}

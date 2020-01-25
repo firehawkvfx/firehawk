@@ -1,5 +1,25 @@
 ---
 # tasks file for roles/deadlinedb
+
+- name: ensure an s3 bucket exists
+  s3_bucket:
+    name: "{{ installers_bucket }}"
+    region: "{{ aws_region }}"
+  tags:
+  - install
+  - sync_installers
+
+- name: Sync deadline from s3 if exist - pull
+  shell: |
+    set -x
+    cd {{ deadline_linux_installers_tar | dirname }}/
+    aws s3 sync s3://{{ installers_bucket }}/ . --exclude "*" --include "{{ deadline_linux_installers_tar | basename }}"
+  args:
+    creates: "{{ deadline_linux_installers_tar | dirname }}/{{ deadline_linux_installers_tar | basename }}"
+  tags:
+  - install
+  - sync_installers
+
 - name: "Ensures tar exists {{ deadline_linux_installers_tar }}"
   stat:
     path: "{{ deadline_linux_installers_tar }}"
@@ -66,11 +86,9 @@
 
 - name: ensure the deadline linux installer tar exists in the s3 bucket.  Push if it doesn't.
   s3_sync:
-    bucket: "installers.{{ public_domain }}"
+    bucket: "{{ installers_bucket }}"
     file_root: "{{ deadline_linux_installers_tar | dirname }}"
     include: "{{ deadline_linux_installers_tar | basename }}"
-    aws_access_key: "{{ aws_access_key_s3user }}"
-    aws_secret_key: "{{ aws_secret_key_s3user }}"
     region: "{{ aws_region }}"
     mode: push
   become: true
@@ -91,14 +109,3 @@
   become: true
   tags:
   - install
-
-- name: show version list
-  debug:
-    var: houdini_major_version_list
-
-- name: setup houdini plugin for each major version.  this occurs after deadline install and with install of houdini
-  include_role:
-    name: 'deadlinedb-houdini-plugins'
-  loop: "{{ houdini_major_version_list }}"
-  loop_control:
-    loop_var: houdini_major_version

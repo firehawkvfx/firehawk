@@ -17,11 +17,6 @@
     path: /opt/houdini_install_script/houdini_install.py
     mode: 0700
     owner: vagrant
-  
-# - shell: |
-#     python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini
-#   register: houdini_install_out
-#   become: true
 
 # temp alternate install for ubuntu
 - name: copy installer from downloads

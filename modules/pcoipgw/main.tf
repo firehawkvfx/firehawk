@@ -349,6 +349,7 @@ resource "null_resource" "pcoipgw" {
       user                = "centos"
       host                = aws_instance.pcoipgw.private_ip
       bastion_host        = var.bastion_ip
+      bastion_user        = "centos"
       private_key         = var.private_key
       bastion_private_key = var.private_key
       type                = "ssh"
@@ -363,10 +364,10 @@ resource "null_resource" "pcoipgw" {
     command = <<EOT
       set -x
       cd /vagrant
-      ansible-playbook -i ansible/inventory/hosts ansible/ssh-add-public-host.yaml -v --extra-vars "public_ip=${aws_eip.pcoipgw_eip.public_ip} public_hostname=gateway.${var.public_domain_name} set_bastion=false"
+      ansible-playbook -i ansible/inventory/hosts ansible/ssh-add-public-host.yaml -v --extra-vars "public_ip=${aws_eip.pcoipgw_eip.public_ip} public_address=gateway.${var.public_domain_name} set_bastion=false"
       # ansible-playbook -i ansible/inventory ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.pcoipgw.private_ip} bastion_ip=${var.bastion_ip}"
       ansible-playbook -i ansible/inventory ansible/node-centos-init.yaml -v --extra-vars "variable_host=pcoipgw_eip.0 hostname=gateway.${var.public_domain_name} pcoip=true"
-      ansible-playbook -i ansible/inventory ansible/node-centos-houdini.yaml -v --extra-vars "variable_host=pcoipgw_eip.0 hostname=gateway.${var.public_domain_name} firehawk_sync_source=$TF_VAR_firehawk_sync_source"
+      ansible-playbook -i ansible/inventory ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password variable_host=pcoipgw_eip.0 hostname=gateway.${var.public_domain_name} firehawk_sync_source=$TF_VAR_firehawk_sync_source"
       # to recover from yum update breaking pcoip we reinstall the nvidia driver and dracut to fix pcoip.
       ansible-playbook -i ansible/inventory ansible/node-centos-pcoip-recover.yaml -v --extra-vars "variable_host=pcoipgw_eip.0 hostname=gateway.${var.public_domain_name}"
   

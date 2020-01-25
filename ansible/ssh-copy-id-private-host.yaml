@@ -5,9 +5,8 @@
   vars:
     #bastion_ip: false
     local: false
-    ansible_ssh_private_key_file: "{{ onsite_workstation_ssh_key }}"
-    
-    #"{{ variable_user | default('user') }}"
+    ansible_ssh_private_key_file: "{{ onsite_workstation_ssh_private_key }}"
+    public_key_location: "{{ general_use_ssh_key }}.pub"
 
   tasks:
   - name : load bash ssh-agent
@@ -23,7 +22,7 @@
       echo "SSH_AUTH_SOCK= $SSH_AUTH_SOCK"
       eval "$(ssh-agent)"
       echo "SSH_AUTH_SOCK= $SSH_AUTH_SOCK"
-      ssh-agent bash && ssh-keygen -q -t rsa -f {{ ansible_ssh_private_key_file }} -C '' -N ''
+      # ssh-agent bash && ssh-keygen -q -t rsa -f {{ ansible_ssh_private_key_file }} -C '' -N ''
       ssh-agent bash && ssh-add {{ ansible_ssh_private_key_file }}
     args:
       creates: "{{ ansible_ssh_private_key_file }}"
@@ -31,14 +30,14 @@
 # vagrant is having issues
 
 - hosts: "{{ variable_host | default('workstation.example.com') }}"
-  remote_user: "{{ variable_user | default('deadlineuser') }}"
+  remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
   become: true
   gather_facts: false
 
   vars:
-    ansible_ssh_public_key_file: "{{ onsite_workstation_ssh_key }}.pub"
-    ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
-    ansible_password: "{{ user_deadlineuser_pw_local }}"
+    ansible_ssh_public_key_file: "{{ onsite_workstation_ssh_private_key }}.pub"
+    ansible_become_pass: "{{ user_deadlineuser_pw }}"
+    ansible_password: "{{ user_deadlineuser_pw }}"
 
   tasks:
   - command: echo 'connection established'

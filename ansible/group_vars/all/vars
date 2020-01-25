@@ -2,6 +2,8 @@
 ansible_ssh_private_key_file: "{{ lookup('env','TF_VAR_local_key_path') }}"
 ANSIBLE_FORCE_COLOR: 'true'
 
+selected_ansible_version: "{{ lookup('env','TF_VAR_selected_ansible_version') }}"
+
 debug: 0
 
 envtier: "{{ lookup('env','TF_VAR_envtier') }}"
@@ -12,7 +14,7 @@ shot: "{{ lookup('env','TF_VAR_SHOT') }}"
 
 gatewaynic: "{{ lookup('env','TF_VAR_gatewaynic') }}"
 
-terraform_version: "0.12.6"
+terraform_version: "0.12.18"
 terraform_inventory_version: "0.8"
 inventory: "{{ lookup('env','TF_VAR_inventory') }}"
 
@@ -22,6 +24,9 @@ public_domain: "{{ lookup('env','TF_VAR_public_domain') }}"
 # the below public_domain_prod is used in some rare cases where multiple instances of infrastructure may not be not possible, like with a licence server.
 # eg I may need to reference houdinilicenceserver.prod.example.com in both the prod and dev environments for render nodes to be tested.
 public_domain_prod: "{{ lookup('env','TF_VAR_public_domain_prod') }}"
+
+bucket_extension: "{{ lookup('env','TF_VAR_bucket_extension') }}"
+installers_bucket: "installers.{{ bucket_extension }}"
 
 private_subnet1: "{{ lookup('env', 'TF_VAR_private_subnet1') }}"
 private_subnet1_dev: "{{ lookup('env', 'TF_VAR_private_subnet1_dev') }}"
@@ -80,9 +85,6 @@ deadline_linux_filename: "{{ deadline_linux_installers_tar.split('/')[-1] }}"
 
 db_pass: "{{ lookup('env','TF_VAR_db_pass') }}"
 
-sesi_username: "{{ lookup('env','TF_VAR_sesi_username') }}"
-sesi_password: "{{ lookup('env','TF_VAR_sesi_password') }}"
-
 vpn_cidr: "{{ lookup('env','TF_VAR_vpn_cidr') }}"
 vpn_cidr_dev: "{{ lookup('env','TF_VAR_vpn_cidr_prod') }}"
 vpn_cidr_prod: "{{ lookup('env','TF_VAR_vpn_cidr_prod') }}"
@@ -93,13 +95,21 @@ vpn_nic: eth1
 openvpn_user: openvpnas
 openvpn_user_pw: "{{ lookup('env','TF_VAR_openvpn_user_pw') }}"
 
+softnas_ssh_user: "{{ lookup('env','TF_VAR_softnas_ssh_user') }}"
 user_softnas_pw: "{{ lookup('env','TF_VAR_user_softnas_pw') }}"
 
 user_deadlineuser_name: "{{ lookup('env','TF_VAR_user_deadlineuser_name') }}"
 user_deadlineuser_pw: "{{ lookup('env','TF_VAR_user_deadlineuser_pw') }}"
 
-user_deadlineuser_pw_local: "{{ lookup('env','TF_VAR_user_deadlineuser_pw_local') }}"
-onsite_workstation_ssh_key: "{{ lookup('env','TF_VAR_onsite_workstation_ssh_key') }}"
+general_use_ssh_key: "{{ lookup('env','TF_VAR_general_use_ssh_key') }}"
+
+onsite_workstation_ssh_private_key: "{{ lookup('env','TF_VAR_onsite_workstation_ssh_private_key') }}"
+
+user_inituser_name: "{{ lookup('env', 'TF_VAR_user_inituser_name') }}"
+user_inituser_pw: "{{ lookup('env', 'TF_VAR_user_inituser_pw') }}"
+user_deployuser_pw:  "{{ lookup('env','TF_VAR_user_deployuser_pw') }}"
+
+workstation_address: "{{ lookup('env', 'TF_VAR_workstation_address') }}"
 
 openfirehawkserver: "{{ lookup('env','TF_VAR_openfirehawkserver') }}"
 openfirehawkserver_dev: "{{ lookup('env','TF_VAR_openfirehawkserver_dev') }}"
@@ -114,83 +124,10 @@ deadline_proxy_certificate: "{{ lookup('env','TF_VAR_deadline_proxy_certificate'
 deadline_proxy_certificate_password: "{{ lookup('env','TF_VAR_deadline_proxy_certificate_password') }}"
 
 houdini_license_server_address: "{{ lookup('env','TF_VAR_houdini_license_server_address') }}"
-# houdini_build: "{{ lookup('env','TF_VAR_houdini_build') }}"
-# houdini_major_version: "18.0"
-# houdini_minor_version: "auto"
-# this list is used for deadline plugin compatibility
-houdini_major_version_list:
-    - '17.5'
-    - '18.0'
 
 # The maximum number of instances to launch in a spot fleet for houdini engine
 max_spot_capacity_engine: 7
 max_spot_capacity_mantra: 61
-
-# this list of dictionaries is use to install multiple versions of houdini.
-# versions should be listed from oldest to newest.
-houdini_version_list:
-- houdini_major_version: "17.5"
-  houdini_auto_version: False
-  
-  # houdini_auto_version: auto latest version can only be used for the latest daily/produciton build visible to your account.
-  # eg, if houdini 18 is released and visible in your downloads from your account, then auto cannot be used for 17.5.
-  # to install any older version that is not the latest (auto), that version .tar.gz must exist in your s3 bucket.
-  # when using auto, the installer will be uploaded to your s3 bucket.
-  
-  houdini_minor_version: "17.5.364"
-  # houdini_minor_version: "17.5.173"
-  # houdini_minor_version: eg "17.5.364" or "auto"
-  
-  houdini_linux_filename: "houdini-17.5.364-linux_x86_64_gcc6.3.tar.gz"
-  # houdini_linux_filename: "houdini-17.5.173-linux_x86_64_gcc6.3.tar.gz"
-  # houdini_linux_filename: file to install from s3 bucket eg: "houdini-17.5.364-linux_x86_64_gcc6.3.tar.gz" or "auto"
-  
-  houdini_build: "daily"
-  # houdini_build: used to download latest "daily" or "production" build when other options set to auto.  eg: "daily" or "production"
-  # enforce_env: False
-  # optionally - only set this for a maximum of 1 version in the list.  It will enforce the houdini environment for all shells opened. it is not required, but can help with debugging deadline issues.
-
-# - houdini_major_version: "18.0"
-#   houdini_auto_version: False
-#   houdini_minor_version: "18.0.208"
-#   houdini_linux_filename: "houdini-18.0.208-linux_x86_64_gcc6.3.tar.gz"
-#   houdini_build: "daily"
-#   # enforce_env: False
-
-# - houdini_major_version: "18.0"
-#   houdini_auto_version: False
-#   houdini_minor_version: "18.0.274"
-#   houdini_linux_filename: "houdini-18.0.274-linux_x86_64_gcc6.3.tar.gz"
-#   houdini_build: "daily"
-
-- houdini_major_version: "18.0"
-  houdini_auto_version: True
-  houdini_minor_version: "auto"
-  houdini_linux_filename: "auto"
-  houdini_build: "daily"
-  # enforce_env: False
-
-houdini_license_server_version_list:
-- houdini_major_version: "17.5"
-  houdini_auto_version: False
-  
-  # houdini_auto_version: auto latest version can only be used for the latest daily/produciton build visible to your account.
-  # eg, if houdini 18 is released and visible in your downloads from your account, then auto cannot be used for 17.5.
-  # to install any older version that is not the latest (auto), that version .tar.gz must exist in your s3 bucket.
-  # when using auto, the installer will be uploaded to your s3 bucket.
-  
-  houdini_minor_version: "17.5.364"
-  # houdini_minor_version: "17.5.173"
-  # houdini_minor_version: eg "17.5.364" or "auto"
-  
-  houdini_linux_filename: "houdini-17.5.364-linux_x86_64_gcc6.3.tar.gz"
-  # houdini_linux_filename: "houdini-17.5.173-linux_x86_64_gcc6.3.tar.gz"
-  # houdini_linux_filename: file to install from s3 bucket eg: "houdini-17.5.364-linux_x86_64_gcc6.3.tar.gz" or "auto"
-  
-  houdini_build: "daily"
-  # houdini_build: used to download latest "daily" or "production" build when other options set to auto.  eg: "daily" or "production"
-  # enforce_env: False
-  # only set this for a maximum of 1 version in the list.  It will enforce the houdini environment for all shells opened.
 
 firehawk_sync_source: "{{ lookup('env','TF_VAR_firehawk_sync_source') }}"
 
@@ -205,9 +142,8 @@ AWS_ACCESS_KEY: "{{ lookup('env','TF_VAR_aws_access_key') }}"
 aws_secret_key: "{{ lookup('env','TF_VAR_aws_secret_key') }}"
 AWS_SECRET_KEY: "{{ lookup('env','TF_VAR_aws_secret_key') }}"
 
-aws_access_key_s3user: "{{ lookup('env','TF_VAR_aws_access_key_s3user') }}"
-aws_secret_key_s3user: "{{ lookup('env','TF_VAR_aws_secret_key_s3user') }}"
-
+storage_user_access_key_id: "{{ lookup('env','storage_user_access_key_id') }}"
+storage_user_secret: "{{ lookup('env','storage_user_secret') }}"
 
 s3_disk_password: "{{ lookup('env','TF_VAR_s3_disk_password') }}"
 s3_disk_size: "{{ lookup('env','TF_VAR_s3_disk_size') }}"
@@ -227,7 +163,7 @@ time_zone_info_path_linux: "{{ time_zone_info_dict_linux['Australia_Sydney'] }}"
 
 repo_dir: "{{ playbook_dir.split('/')[0:-1]|join('/') }}"
 
-vault_key_name: ".vault-key-{{ envtier }}"
+vault_key_name: "{{ lookup('env','TF_VAR_vault_key_name') }}"
 vault_key_path: "{{ repo_dir }}/../secrets/keys/{{ vault_key_name }}"
 
 key_folder: "{{ repo_dir }}/../secrets/keys/"

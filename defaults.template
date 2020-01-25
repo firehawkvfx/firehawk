@@ -1,0 +1,333 @@
+# ~/.bashrc
+
+# The contents of defaults.template are modified by update_vars.sh.
+# Editing these contents should only be done in secrets/defaults, and then propogated with 'source ./update_vars.sh'
+
+# WARNING: When editing this config file do not store any secrets / sensitive information here.
+# Secrets should only ever be stored in the encrypted secrets file.
+# This unencrypted config file is still stored in your private repository and should not be publicly available.
+
+# CONFIG INITIALIZATION #
+
+# these defaults can be overidien by placing your own custom values in config-overrides, or in your secrets file if the information is of a sensitive nature.
+
+# Private values must be used as values only (and not in #commented lines), since it is only the values that are kept private.
+# Only Commented lines and the variable names / keys are read from this private secrets/defaults file in your private repo to auto generate the public firehawk/config.template file when running 'source ./update_vars.sh'.
+
+# If these steps are followed then no private values will be or should be propogated into the public repo firehawk/config.template file.
+# Before making any commits of config.template to the public firehawk repo ensure there are no secrets / sensitive information contained in a commit.
+# Be sure to provide any new variable keys you may end up adding with a commented out description with example dummy values above your actual private value used to assist others.
+
+# Do not put real world sensitive information in the example comments / #commented out lines.
+
+# New comments should be only added in secrets/defaults as these lines will be propogated into the config.template schema used to initialise any new  secrets/defaults file for other users of the Firehawk repo.
+
+# BEGIN CONFIGURATION #
+
+# TF_VAR_inventory_dev: 
+# The relative path to the inventory maintained for ansible from the /vagrant path.
+# This should exist outside the public repository and the default should be used.
+# default: TF_VAR_inventory_dev=../secrets/dev/inventory
+TF_VAR_inventory_dev=insertvalue
+
+# TF_VAR_inventory_prod:
+# The relative path to the inventory maintained for ansible from the /vagrant path.
+# This should exist outside the public repository and the default should be used.
+# default: TF_VAR_inventory_prod=../secrets/prod/inventory
+TF_VAR_inventory_prod=insertvalue
+
+# TF_VAR_softnas_storage:
+# Enable softnas storage.  Softnas is used for a centralised cloud based NFS share.
+# It's licenceing cost scales with usage, and can provide RAID redundancy.
+# default: TF_VAR_softnas_storage=true
+TF_VAR_softnas_storage=insertvalue
+
+# TF_VAR_private_subnet1_prod:
+# The production IP range for private subnet 1 for workers.  This subnet is accessed via VPN or bastion hosts.
+# default: TF_VAR_private_subnet1_prod=10.0.1.0/24
+TF_VAR_private_subnet1_prod=insertvalue
+
+# TF_VAR_private_subnet2_prod:
+# The production IP range for private subnet 2 for workers.  This subnet is accessed via VPN or bastion hosts.
+# default: TF_VAR_private_subnet2_prod=10.0.2.0/24
+TF_VAR_private_subnet2_prod=insertvalue
+
+# TF_VAR_public_subnet1_prod:
+# The production IP range for public subnet 1 for public facing  systems.  examples are your VPN access server instance, or bastion host for provisioning other instances in the private network.
+# default: TF_VAR_public_subnet1_prod=10.0.101.0/24
+TF_VAR_public_subnet1_prod=insertvalue
+
+# TF_VAR_public_subnet2_prod:
+# The production IP range for public subnet 2 for public facing systems.  examples are your VPN access server instance, or bastion host for provisioning other instances in the private network.
+# default: TF_VAR_public_subnet2_prod=10.0.102.0/24
+TF_VAR_public_subnet2_prod=insertvalue
+
+# TF_VAR_private_subnet1_dev:
+# The dev IP range for private subnet 1 for workers.  This subnet is accessed via VPN or bastion hosts.
+# default: TF_VAR_private_subnet1_dev=10.0.11.0/24
+TF_VAR_private_subnet1_dev=insertvalue
+
+# TF_VAR_private_subnet2_dev:
+# The dev IP range for private subnet 2 for workers.  This subnet is accessed via VPN or bastion hosts.
+# default: TF_VAR_private_subnet2_dev=10.0.12.0/24
+TF_VAR_private_subnet2_dev=insertvalue
+
+# TF_VAR_public_subnet1_dev:
+# The dev IP range for public subnet 1 for public facing  systems.  examples are your VPN access server instance, or bastion host for provisioning other instances in the private network.
+# default: TF_VAR_public_subnet1_dev=10.0.201.0/24
+TF_VAR_public_subnet1_dev=insertvalue
+
+# TF_VAR_public_subnet2_dev:
+# The dev IP range for public subnet 2 for public facing systems.  examples are your VPN access server instance, or bastion host for provisioning other instances in the private network.
+# default: TF_VAR_public_subnet2_dev=10.0.202.0/24
+TF_VAR_public_subnet2_dev=insertvalue
+
+# TF_VAR_vpc_cidr:
+# This is the IP range (CIDR notation) of your cloud subnet that all AWS private addresses will reside in.
+# default: TF_VAR_softnas_mode_prod=10.0.0.0/16
+TF_VAR_vpc_cidr=insertvalue
+
+# TF_VAR_vpn_cidr_prod:
+#  Open VPN sets up DHCP in this range for every connection in the dev env to provide a unique ip on each side of the VPN for every system. Dont change this from the default for now. In the future it should be unique. Reference for potential ranges https://www.arin.net/reference/research/statistics/address_filters/
+# default: TF_VAR_vpn_cidr_prod=172.27.232.0/24
+TF_VAR_vpn_cidr_prod=insertvalue
+
+# TF_VAR_vpn_cidr_dev:
+#  Open VPN sets up DHCP in this range for every connection in the dev env to provide a unique ip on each side of the VPN for every system. Dont change this from the default for now. In the future it should be unique. Reference for potential ranges https://www.arin.net/reference/research/statistics/address_filters/
+# default: TF_VAR_vpn_cidr_dev=172.17.232.0/24
+TF_VAR_vpn_cidr_dev=insertvalue
+
+# TF_VAR_openfirehawkserver_name_dev:
+# The hostname for the firehawkserver in the dev environment.  You may also use the Fully Qualified Domain Name for the host as well.
+# eg: TF_VAR_openfirehawkserver_name_dev=openfirehawkserverdev.example_dev.com
+# default: TF_VAR_openfirehawkserver_name_dev=openfirehawkserverdev
+TF_VAR_openfirehawkserver_name_dev=insertvalue
+
+# TF_VAR_openfirehawkserver_name_prod:
+# The hostname for the firehawkserver in the prod environment.  You may also use the Fully Qualified Domain Name for the host as well.
+# eg: TF_VAR_openfirehawkserver_name_prod=openfirehawkserver.example_prod.com
+# default: TF_VAR_openfirehawkserver_name_prod=openfirehawkserver
+TF_VAR_openfirehawkserver_name_prod=insertvalue
+
+# TF_VAR_s3_disk_size_prod:
+# Default s3 disk size in GB for the prod environment. This is thin provisioned and will not result in charges unless used so you should set it to the largest size you think you might need for output data.
+# default: TF_VAR_s3_disk_size_prod=10000
+TF_VAR_s3_disk_size_prod=insertvalue
+
+# TF_VAR_s3_disk_size_dev:
+# Default s3 disk size in GB for the dev environment. This is thin provisioned and will not result in charges unless used so you should set it to the largest size you think you might need for output data.
+# default: TF_VAR_s3_disk_size_dev=10000
+TF_VAR_s3_disk_size_dev=insertvalue
+
+# TF_VAR_softnas1_private_ip1_dev:
+# The private ip to install softnas dev with for its first interface.
+# When using softnas with high availability and failover, a 2nd interface is used for replication to a 2nd softnas instance.
+# default: TF_VAR_softnas1_private_ip1_dev=10.0.11.11
+TF_VAR_softnas1_private_ip1_dev=insertvalue
+
+# TF_VAR_softnas1_private_ip2_dev:
+# The private ip to install softnas dev with for its 2nd interface.
+# When using softnas with high availability and failover, this 2nd interface is used for replication to a 2nd softnas instance.
+# default: TF_VAR_softnas1_private_ip2_dev=10.0.11.12
+TF_VAR_softnas1_private_ip2_dev=insertvalue
+
+# TF_VAR_softnas2_private_ip1_dev:
+# The private ip to install softnas dev with for its first interface.
+# When using softnas with high availability and failover, a 2nd interface is used for replication to a 2nd softnas instance.
+# default: TF_VAR_softnas2_private_ip1_dev=10.0.11.11
+TF_VAR_softnas2_private_ip1_dev=insertvalue
+
+# TF_VAR_softnas2_private_ip2_dev:
+# The private ip to install softnas dev with for its 2nd interface.
+# When using softnas with high availability and failover, this 2nd interface is used for replication to a 2nd softnas instance.
+# default: TF_VAR_softnas2_private_ip2_dev=10.0.11.12
+TF_VAR_softnas2_private_ip2_dev=insertvalue
+
+# TF_VAR_softnas1_private_ip1_prod:
+# The private ip to install softnas prod with for its first interface.
+# When using softnas with high availability and failover, a 2nd interface is used for replication to a 2nd softnas instance.
+# default: TF_VAR_softnas1_private_ip1_prod=10.0.1.11
+TF_VAR_softnas1_private_ip1_prod=insertvalue
+
+# TF_VAR_softnas1_private_ip2_prod:
+# The private ip to install softnas prod with for its 2nd interface.
+# When using softnas with high availability and failover, this 2nd interface is used for replication to a 2nd softnas instance.
+# default: TF_VAR_softnas1_private_ip2_prod=10.0.1.12
+TF_VAR_softnas1_private_ip2_prod=insertvalue
+
+# TF_VAR_softnas2_private_ip1_prod:
+# The private ip to install softnas prod with for its first interface.
+# When using softnas with high availability and failover, a 2nd interface is used for replication to a 2nd softnas instance.
+# default: TF_VAR_softnas2_private_ip1_prod=10.0.1.11
+TF_VAR_softnas2_private_ip1_prod=insertvalue
+
+# TF_VAR_softnas2_private_ip2_prod:
+# The private ip to install softnas prod with for its 2nd interface.
+# When using softnas with high availability and failover, this 2nd interface is used for replication to a 2nd softnas instance.
+# default: TF_VAR_softnas2_private_ip2_prod=10.0.1.12
+TF_VAR_softnas2_private_ip2_prod=insertvalue
+
+# TF_VAR_node_centos_instance_type:
+# The AWS instance type for the node used to provision the spot fleet image from.
+# Note this is only used for provisioning the AMI.  The actual instance types used for rendering are controlled by the spot fleet template, and can vary.
+# Usually it makes sense to provision this instance with a low cost instance type, but when testing workloads you may wish to increase it.
+# https://aws.amazon.com/ec2/pricing/on-demand/
+TF_VAR_node_centos_instance_type=insertvalue
+
+# ANSIBLE_FORCE_COLOR:
+# When ansible is run via terraform local exec, colour is not normally visible.  This setting enforces color.
+# default: ANSIBLE_FORCE_COLOR=1
+ANSIBLE_FORCE_COLOR=insertvalue
+
+# TF_VAR_openvpn_user:
+# The OpenVPN Access Server username.  Changing this is not currently supported but planned as it may require changes to accomodate it with the Open VPN provisioning stage.
+# default: TF_VAR_openvpn_user=openvpnas
+TF_VAR_openvpn_user=insertvalue
+
+# TF_VAR_openvpn_admin_user:
+# The OpenVPN Access Server admin username.  Changing this is not currently supported pbut planned as it may require changes to accomodate it with the Open VPN provisioning stage.
+# default: TF_VAR_openvpn_admin_user=openvpnas
+TF_VAR_openvpn_admin_user=insertvalue
+
+# TF_VAR_softnas_ssh_user:
+# The softnas username to provision with ssh.  Changing this is not currently supported. It is not used by general users, it is only for provisioning volumes and deployment.
+# default: TF_VAR_softnas_ssh_user=ec2-user
+TF_VAR_softnas_ssh_user=insertvalue
+
+# TF_VAR_user_deadlineuser_name:
+# A deadline user account is created to simplify handling of permissions for render nodes and services. Changing this value is not currently supported.
+# default: TF_VAR_user_deadlineuser_name=deadlineuser
+TF_VAR_user_deadlineuser_name=insertvalue
+
+# TF_VAR_general_use_ssh_key_dev:
+# This key will be generated if it doesn't already exist.  it will be used as an authorized key to access onsite systems and others where specified
+# default: TF_VAR_general_use_ssh_key_dev=/secrets/keys/id_ssh_rsa_dev
+TF_VAR_general_use_ssh_key_dev=insertvalue
+
+# TF_VAR_general_use_ssh_key_prod:
+# This key will be generated if it doesn't already exist.  it will be used as an authorized key to access onsite systems and others where specified
+# default: TF_VAR_general_use_ssh_key_prod=/secrets/keys/id_ssh_rsa_prod
+TF_VAR_general_use_ssh_key_prod=insertvalue
+
+# TF_VAR_onsite_workstation_ssh_private_key_dev:
+# the path to the rsa key to copy its id to other local workstations for provisioning.  This is best left at its default value.
+# default: TF_VAR_onsite_workstation_ssh_private_key_dev=/secrets/keys/id_ssh_rsa_dev
+TF_VAR_onsite_workstation_ssh_private_key_dev=insertvalue
+
+# TF_VAR_onsite_workstation_ssh_private_key_prod:
+# the path to the rsa key to copy its id to other local workstations for provisioning.  This is best left at its default value.
+# default: TF_VAR_onsite_workstation_ssh_private_key_prod=/secrets/keys/id_ssh_rsa_prod
+TF_VAR_onsite_workstation_ssh_private_key_prod=insertvalue
+
+# TF_VAR_pgp_key_path_dev:
+# the path to the pgp key for the dev environment.  the default should be fine.  ensure that unencrypted keys are never commited to version control.  this path should be in git ignore, or build a CI workflow to ensure that keys are encrypted before any commits occur.
+# default: TF_VAR_pgp_key_path_dev=/secrets/keys/.pgp-key-dev
+TF_VAR_pgp_key_path_dev=insertvalue
+
+# TF_VAR_pgp_key_path_prod:
+# the path to the pgp key for the prod environment.  the default should be fine.  ensure that unencrypted keys are never commited to version control.  This path (/secrets/keys/) should be in git ignore, or build a CI workflow to ensure that keys are encrypted before any commits occur.
+# default: TF_VAR_pgp_key_path_prod=/secrets/keys/.pgp-key-prod
+TF_VAR_pgp_key_path_prod=insertvalue
+
+# TF_VAR_route_public_domain_name:
+# Defines if you want hostnames accessible with a public domain name.
+# If you enable it, your aws account must manage the public domain name in route 53, then you can use public domain names to route traffic.  For example, the vpn can be publicly accessible at vpn.example.com and the bastion host is publicly accessible at bastion.example.com.  Note that we normally use security groups to limit access to these nodes from a specific offsite ip address as well.
+# This setting is not required to use your own domain name for internal hostnames, or for labelling s3 bucket cloud storage (eg a bucket name like myinstallers.example.com is still valid provided it is not already in use)
+# default: TF_VAR_route_public_domain_name=false
+TF_VAR_route_public_domain_name=insertvalue
+
+# TF_VAR_use_public_domain_name_in_s3_buckets:
+# Cloud storage buckets in AWS need to have unique global names.  You can use a public domain name you own to create unique cloud storage bucket names without worrying about this setting.
+# default: TF_VAR_use_public_domain_name_in_s3_buckets=false
+TF_VAR_use_public_domain_name_in_s3_buckets=insertvalue
+
+# TF_VAR_route_zone_id_dev:
+# The route zone id for the dev domain name in your dev AWS account.  Your aws account will need a public domain name in the account (route 53) in order to assign public routes for DNS.  Once this is established in your account, insert the route zone id here for Terraform to create addresses for systems that are publicly accessible, like vpn and bastion hosts.
+# eg: TF_VAR_route_zone_id_dev=432LJN23TLJN3V
+# default: TF_VAR_route_zone_id_dev=none
+TF_VAR_route_zone_id_dev=insertvalue
+
+# TF_VAR_route_zone_id_dev:
+# The route zone id for the prod domain name in your prod AWS account.  This should be unique to the dev account, but it maybe possible to avoid with further developement.  Your aws account will need a public domain name in the account (route 53) in order to assign public routes for DNS.  Once this is established in your account, insert the route zone id here for Terraform to create addresses for systems that are publicly accessible, like vpn and bastion hosts.
+# eg: TF_VAR_route_zone_id_dev=KJ2352KJ235LJ
+# default: TF_VAR_route_zone_id_prod=none
+TF_VAR_route_zone_id_prod=insertvalue
+
+# TF_VAR_cert_arn_dev:
+# The ARN for the SSL certificate of your public dev domain in the AWS dev account.  You will have an SSL certificate for any public domain in aws, and this has an ARN associated with it.
+# eg: TF_VAR_cert_arn_dev="arn:aws:acm:ap-southeast-2:322531242314:certificate/adsfljnf3-234g-5634-3245-42kjh243kj"
+# default: TF_VAR_cert_arn_dev=none
+TF_VAR_cert_arn_dev=insertvalue
+
+# TF_VAR_cert_arn_prod:
+# The ARN for the SSL certificate of your public prod domain in the AWS prod account.  You will have an SSL certificate for any public domain in aws, and this has an ARN associated with it.
+# eg: TF_VAR_cert_arn_prod="arn:aws:acm:ap-southeast-2:3225865862314:certificate/adsfljnf3-234g-5634-3245-42kjh243kj"
+# default: TF_VAR_cert_arn_prod=none
+TF_VAR_cert_arn_prod=insertvalue
+
+# TF_VAR_public_domain_prod:
+# The public prod domain name in the AWS prod account.  You can purchase a cheap domain in aws with lesser known extensions for testing and use this here. Launched Infrastructure will switch between different domains depending on the staging environment for isolation. Some resources, like licences servers, may exist in a single domain (usually prod), since they often are not dynamic.
+# eg: TF_VAR_public_domain_prod=devexample.com
+# default: TF_VAR_public_domain_prod=none
+TF_VAR_public_domain_prod=insertvalue
+
+# TF_VAR_public_domain_dev:
+# The public dev domain name in the AWS dev account.  You can purchase a cheap domain in AWS with lesser known extensions for testing and use this here. Launched Infrastructure will switch between different domains depending on the staging environment for isolation. Some resources, like licence servers, may exist in a single domain (usually prod), since they often are not dynamic and cant be moved easily.
+# eg: TF_VAR_public_domain_dev=devexample.com
+# eg: TF_VAR_public_domain_dev=none
+TF_VAR_public_domain_dev=insertvalue
+
+# TF_VAR_key_name_dev:
+# The name of the key pair used in the dev environment. You will create a key pair to access your aws instances, listed here.
+# default: TF_VAR_key_name_dev=my_key_pair_dev
+TF_VAR_key_name_dev=insertvalue
+
+# TF_VAR_local_key_path_dev:
+# the path to the keypair from within the vagrant VM.
+# default: TF_VAR_local_key_path_dev=/secrets/keys/my_key_pair_dev.pem
+TF_VAR_local_key_path_dev=insertvalue
+
+# TF_VAR_key_name_prod:
+# The name of the key pair used in the prod environment. You will create a key pair to access your AWS instances, listed here.
+# default: TF_VAR_key_name_prod=my_key_pair_prod
+TF_VAR_key_name_prod=insertvalue
+
+# TF_VAR_local_key_path_prod:
+# the path to the keypair from within the vagrant VM.
+# default: TF_VAR_local_key_path_prod=/secrets/keys/my_key_pair_prod.pem
+TF_VAR_local_key_path_prod=insertvalue
+
+# TF_VAR_softnas_mailserver:
+# mailserver details for softnas notifications
+# eg: TF_VAR_softnas_mailserver="mymailserver.mydomain.com"
+TF_VAR_softnas_mailserver=insertvalue
+
+# TF_VAR_softnas_smtp_port:
+# mailserver details for softnas notifications
+# default: TF_VAR_softnas_smtp_port="26"
+TF_VAR_softnas_smtp_port=insertvalue
+
+# TF_VAR_softnas_smtp_username:
+# mailserver details for softnas notifications
+# eg: TF_VAR_softnas_smtp_username="user@mydomain.com"
+TF_VAR_softnas_smtp_username=insertvalue
+
+# TF_VAR_softnas_smtp_password:
+# mailserver details for softnas notifications
+# eg: TF_VAR_softnas_smtp_password="MyMailPassword"
+TF_VAR_softnas_smtp_password=insertvalue
+
+# TF_VAR_softnas_smtp_from:
+# mailserver details for softnas notifications
+# eg: TF_VAR_softnas_smtp_from="user@mydomain.com"
+TF_VAR_softnas_smtp_from=insertvalue
+
+# TF_VAR_smtp_encryption:
+# mailserver details for softnas notifications
+# default: TF_VAR_smtp_encryption="none"
+TF_VAR_smtp_encryption=insertvalue
+
+# TF_VAR_houdini_test_connection:
+# After a cloud node has finished provisioning, test that it can run a simple hython tast and connect to the license server 
+# default: TF_VAR_houdini_test_connection=false
+TF_VAR_houdini_test_connection=insertvalue

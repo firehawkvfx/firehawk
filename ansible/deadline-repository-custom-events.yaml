@@ -3,7 +3,10 @@
   become: true
 
   # set permissions on dealine repository so that scripts can be copied by the vagrant user.
-  tasks:
+  pre_tasks:
+  - include_role:
+      name: deadline-db-check
+
   - name: copy deadline event to repository
     copy:
       src: /vagrant/scripts/deadline/SlaveAutoconf
@@ -19,3 +22,6 @@
       path: /opt/Thinkbox/DeadlineRepository10/events/SlaveAutoconf
       mode: u+rX-w,g=rX-w,o-rwx
       recurse: true
+
+  - include_role:
+      name: deadline-db-check

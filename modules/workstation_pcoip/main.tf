@@ -16,6 +16,8 @@ variable "remote_subnet_cidr" {
 }
 
 resource "aws_security_group" "workstation_pcoip" {
+  count         = var.site_mounts && var.workstation_enabled ? 1 : 0
+
   name        = var.name
   vpc_id      = var.vpc_id
   description = "Workstation - Teradici PCOIP security group"
@@ -105,6 +107,8 @@ resource "aws_security_group" "workstation_pcoip" {
 }
 
 resource "aws_security_group" "workstation_centos" {
+  count         = var.site_mounts && var.workstation_enabled ? 1 : 0
+
   name        = "gateway_centos"
   vpc_id      = var.vpc_id
   description = "Workstation - Security group"
@@ -157,9 +161,9 @@ resource "aws_security_group" "workstation_centos" {
   # For OpenVPN Client Web Server & Admin Web UI
 
   ingress {
-    protocol    = "tcp"
-    from_port   = 22
-    to_port     = 22
+    protocol  = "tcp"
+    from_port = 22
+    to_port   = 22
     # TF-UPGRADE-TODO: In Terraform v0.10 and earlier, it was sometimes necessary to
     # force an interpolation expression to be interpreted as a list by wrapping it
     # in an extra set of list brackets. That form was supported for compatibilty in
@@ -287,9 +291,9 @@ variable "softnas_private_ip1" {
 # This null resource creates a dependency on the completed volume provisioning from the softnas instance, and the existance of the bastion host.
 resource "null_resource" "dependency_softnas_and_bastion" {
   triggers = {
-    softnas_private_ip1       = join(",", var.softnas_private_ip1)
-    bastion_ip                = var.bastion_ip
-    provision_softnas_volumes = join(",", var.provision_softnas_volumes)
+    softnas_private_ip1             = join(",", var.softnas_private_ip1)
+    bastion_ip                      = var.bastion_ip
+    provision_softnas_volumes       = join(",", var.provision_softnas_volumes)
     attach_local_mounts_after_start = join(",", var.attach_local_mounts_after_start)
   }
 }
@@ -304,7 +308,7 @@ resource "aws_instance" "workstation_pcoip" {
   key_name  = var.key_name
   subnet_id = element(var.private_subnet_ids, count.index)
 
-  vpc_security_group_ids = [aws_security_group.workstation_pcoip.id, aws_security_group.workstation_centos.id]
+  vpc_security_group_ids = concat(aws_security_group.workstation_pcoip.*.id, aws_security_group.workstation_centos.*.id)
 
   ebs_optimized = true
   root_block_device {
@@ -339,7 +343,7 @@ variable "public_domain_name" {
 
 resource "null_resource" "workstation_pcoip" {
   depends_on = [aws_instance.workstation_pcoip]
-  count      = !local.skip_update && var.site_mounts && var.workstation_enabled ? 1 : 0
+  count      = ! local.skip_update && var.site_mounts && var.workstation_enabled ? 1 : 0
 
   triggers = {
     instanceid = aws_instance.workstation_pcoip[0].id
@@ -350,6 +354,7 @@ resource "null_resource" "workstation_pcoip" {
       user                = "centos"
       host                = aws_instance.workstation_pcoip[0].private_ip
       bastion_host        = var.bastion_ip
+      bastion_user        = "centos"
       private_key         = var.private_key
       bastion_private_key = var.private_key
       type                = "ssh"
@@ -390,6 +395,7 @@ EOT
       user                = "centos"
       host                = aws_instance.workstation_pcoip[0].private_ip
       bastion_host        = var.bastion_ip
+      bastion_user        = "centos"
       private_key         = var.private_key
       bastion_private_key = var.private_key
       type                = "ssh"
@@ -414,9 +420,9 @@ EOT
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_workstation_centos variable_user=centos"
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.$TF_VAR_public_domain pcoip=true" --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"
       # to configure deadline scripts-
-      ansible-playbook -i "$TF_VAR_inventory" ansible/localworkstation-deadlineuser.yaml --tags "onsite-install" --extra-vars "variable_host=role_workstation_centos variable_user=centos"
+      ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml --tags "onsite-install" --extra-vars "variable_host=role_workstation_centos variable_user=centos"
       # configure houdini and submission scripts
-      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-houdini.yaml -v --extra-vars "variable_host=role_workstation_centos sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source"
+      ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_host=role_workstation_centos sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source"
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v --extra-vars "variable_host=role_workstation_centos"
       # to recover from yum update breaking pcoip we reinstall the nvidia driver and dracut to fix pcoip.
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-pcoip-recover.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.$TF_VAR_public_domain pcoip=true"

@@ -38,6 +38,10 @@ variable "public_subnet2" {
 module "vpc" {
   source = "./modules/vpc"
 
+  create_vpc = var.enable_vpc
+
+  route_public_domain_name = var.route_public_domain_name
+
   #sleep will disable the nat gateway to save cost during idle time.
   sleep              = var.sleep
   enable_nat_gateway = var.enable_nat_gateway
@@ -47,7 +51,7 @@ module "vpc" {
   private_subnets = [var.private_subnet1, var.private_subnet2]
   public_subnets  = [var.public_subnet1, var.public_subnet2]
 
-  all_private_subnets_cidr_range = "10.0.0.0/16"
+  vpc_cidr = var.vpc_cidr
 
   #vpn variables
 
@@ -74,70 +78,7 @@ module "vpc" {
   openvpn_admin_pw   = var.openvpn_admin_pw
 
   bastion_ip         = module.bastion.public_ip
-}
-
-module "deadline" {
-  source = "./modules/deadline"
-  pgp_key =  file(var.pgp_key_path)
-  remote_ip_cidr = var.remote_ip_cidr
-  cidr_list = concat([var.remote_subnet_cidr, var.remote_ip_cidr], module.vpc.private_subnets_cidr_blocks)
-}
-
-resource "null_resource" "dependency_deadline_spot" {
-  triggers = {
-    spot_access_key_id       = module.deadline.spot_access_key_id
-    spot_secret              = module.deadline.spot_secret
-  }
-}
-
-resource "null_resource" "dependency_node_centos" {
-  count      = var.site_mounts ? 1 : 0
-  triggers = {
-    ami_id = module.node.ami_id
-  }
-}
-
-# if a new image is detected, TF will update the spot template and spot plugin json settings
-# consider using md5 of spot template to trigger an update.
-# alternative do it manually with
-# terraform taint null_resource.provision_deadline_spot[0]
-# terraform apply
-
-resource "null_resource" "provision_deadline_spot" {
-  count      = var.site_mounts ? 1 : 0
-  depends_on = [null_resource.dependency_deadline_spot, null_resource.dependency_node_centos]
-
-  triggers = {
-    ami_id = module.node.ami_id
-    config_template_sha1 = "${sha1(file("/secrets/dev/spot-fleet-templates/config_template.json"))}"
-    deadline_spot_sha1 = "${sha1(file("/vagrant/ansible/deadline-spot.yaml"))}"
-    deadline_spot_role_sha1 = "${sha1(file("/vagrant/ansible/roles/deadline-spot/tasks/main.yml"))}"
-    deadline_roles_tf_sha1 = "${sha1(file("/vagrant/modules/deadline/main.tf"))}"
-    spot_access_key_id = module.deadline.spot_access_key_id
-    spot_secret        = module.deadline.spot_secret
-    volume_size = var.node_centos_volume_size
-    volume_type = var.node_centos_volume_type
-  }
-  
-  # needs subnets id eg subnet-019d702254060c2f9, and ami_id, arn id eg arn:aws:iam::972620357255:instance-profile/DeadlineSlaveRole, snapshot id snap-06c90e54aaf77dbe5, security group id, sg-0b1e4b21eb893f712
-  provisioner "local-exec" {
-    command = <<EOT
-      set -x
-      cd /vagrant
-      echo ${ module.deadline.spot_access_key_id }
-      echo ${ module.deadline.spot_secret }
-      ANSIBLE_STDOUT_CALLBACK=debug ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-spot.yaml -vvv --extra-vars 'volume_type=${var.node_centos_volume_type} volume_size=${var.node_centos_volume_size} ami_id=${module.node.ami_id} snapshot_id=${module.node.snapshot_id} subnet_id=${module.vpc.private_subnets[0]} spot_instance_profile_arn="${module.deadline.spot_instance_profile_arn}" security_group_id=${module.node.security_group_id} spot_access_key_id=${module.deadline.spot_access_key_id} spot_secret=${module.deadline.spot_secret}'
-EOT
-  }
-}
-
-output "node_ami_id" {
-  value = "${module.node.ami_id}"
-}
-
-# to debug only
-output "vpc_cidr" {
-  value = module.vpc.vpc_cidr_block
+  bastion_dependency = module.bastion.bastion_dependency
 }
 
 variable "node_skip_update" {
@@ -147,14 +88,18 @@ variable "node_skip_update" {
 module "bastion" {
   source = "./modules/bastion"
 
+  create_vpc = var.enable_vpc
+
   name = "bastion"
+
+  route_public_domain_name = var.route_public_domain_name
 
   # region will determine the ami
   region = var.aws_region
 
   #options for gateway type are centos7 and pcoip
   vpc_id                      = module.vpc.vpc_id
-  vpc_cidr                    = module.vpc.vpc_cidr_block
+  vpc_cidr                    = var.vpc_cidr
   vpn_cidr                    = var.vpn_cidr
   remote_ip_cidr              = var.remote_ip_cidr
   public_subnet_ids           = module.vpc.public_subnets
@@ -176,6 +121,88 @@ module "bastion" {
   sleep = var.sleep
 }
 
+output "vpn_private_ip" {
+  value = module.vpc.vpn_private_ip
+}
+
+# if a new image is detected, TF will update the spot template and spot plugin json settings
+# consider using md5 of spot template to trigger an update.
+# alternative do it manually with
+# terraform taint null_resource.provision_deadline_spot[0]
+# terraform apply
+
+module "storage_user" {
+  source          = "./modules/storage_user"
+  keybase_pgp_key = var.keybase_pgp_key
+}
+
+output "storage_user_access_key_id" {
+  value = module.storage_user.storage_user_access_key_id
+}
+
+output "storage_user_secret" {
+  value = module.storage_user.storage_user_secret
+}
+
+module "deadline" {
+  source          = "./modules/deadline"
+  keybase_pgp_key = var.keybase_pgp_key
+  remote_ip_cidr  = var.remote_ip_cidr
+  cidr_list       = concat([var.remote_subnet_cidr, var.remote_ip_cidr], module.vpc.private_subnets_cidr_blocks)
+}
+
+output "spot_access_key_id" {
+  value = module.deadline.spot_access_key_id
+}
+
+resource "null_resource" "dependency_deadline_spot" {
+  triggers = {
+    spot_access_key_id = module.deadline.spot_access_key_id
+    spot_secret        = module.deadline.spot_secret
+  }
+}
+
+resource "null_resource" "dependency_node_centos" {
+  count = var.site_mounts ? 1 : 0
+  triggers = {
+    ami_id = module.node.ami_id
+  }
+}
+
+resource "null_resource" "provision_deadline_spot" {
+  count      = (var.site_mounts && var.provision_deadline_spot_plugin) ? 1 : 0
+  depends_on = [null_resource.dependency_deadline_spot, null_resource.dependency_node_centos]
+
+  triggers = {
+    ami_id                  = module.node.ami_id
+    config_template_sha1    = "${sha1(file("/secrets/dev/spot-fleet-templates/config_template.json"))}"
+    deadline_spot_sha1      = "${sha1(file("/vagrant/ansible/deadline-spot.yaml"))}"
+    deadline_spot_role_sha1 = "${sha1(file("/vagrant/ansible/roles/deadline-spot/tasks/main.yml"))}"
+    deadline_roles_tf_sha1  = "${sha1(file("/vagrant/modules/deadline/main.tf"))}"
+    spot_access_key_id      = module.deadline.spot_access_key_id
+    spot_secret             = module.deadline.spot_secret
+    volume_size             = var.node_centos_volume_size
+    volume_type             = var.node_centos_volume_type
+  }
+
+  # needs subnets id eg subnet-019d702254060c2f9, and ami_id, arn id eg arn:aws:iam::972620357255:instance-profile/DeadlineSlaveRole, snapshot id snap-06c90e54aaf77dbe5, security group id, sg-0b1e4b21eb893f712
+  provisioner "local-exec" {
+    command = <<EOT
+      set -x
+      cd /vagrant
+      echo ${module.deadline.spot_access_key_id}
+      echo ${module.deadline.spot_secret}
+      ANSIBLE_STDOUT_CALLBACK=debug ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-spot.yaml -vvv --extra-vars 'volume_type=${var.node_centos_volume_type} volume_size=${var.node_centos_volume_size} ami_id=${module.node.ami_id} snapshot_id=${module.node.snapshot_id} subnet_id=${module.vpc.private_subnets[0]} spot_instance_profile_arn="${module.deadline.spot_instance_profile_arn}" security_group_id=${module.node.security_group_id} spot_access_key_id=${module.deadline.spot_access_key_id} spot_secret=${module.deadline.spot_secret}'
+EOT
+  }
+}
+
+
+# to debug only
+output "vpc_cidr" {
+  value = module.vpc.vpc_cidr_block
+}
+
 # todo : this option is deprecated.  must be pcoip.  previous options for gateway type are centos7 and pcoip
 variable "gateway_type" {
   default = "pcoip"
@@ -194,7 +221,7 @@ variable "softnas_custom_ami" {
   default = 123456789
 }
 
-module "softnas" {
+module "softnas" {  
   softnas_storage                = var.softnas_storage
   source                         = "./modules/softnas"
   cloudformation_role_stack_name = var.softnas1_cloudformation_role_name
@@ -210,6 +237,7 @@ module "softnas" {
   aws_region                     = var.aws_region
   softnas_mode                   = var.softnas_mode
   vpn_private_ip                 = module.vpc.vpn_private_ip
+  softnas_ssh_user               = var.softnas_ssh_user
   key_name                       = var.key_name
   private_key                    = file(var.local_key_path)
   vpc_id                         = module.vpc.vpc_id
@@ -217,7 +245,7 @@ module "softnas" {
   public_domain                  = var.public_domain
   private_subnets                = module.vpc.private_subnets
   private_subnets_cidr_blocks    = module.vpc.private_subnets_cidr_blocks
-  all_private_subnets_cidr_range = module.vpc.all_private_subnets_cidr_range
+  vpc_cidr = var.vpc_cidr
   public_subnets_cidr_blocks     = module.vpc.public_subnets_cidr_blocks
   remote_subnet_cidr             = var.remote_subnet_cidr
   remote_ip_cidr                 = var.remote_ip_cidr
@@ -256,7 +284,7 @@ variable "pcoip_skip_update" {
 #   #options for gateway type are centos7 and pcoip
 #   gateway_type      = "${var.gateway_type}"
 #   vpc_id            = "${module.vpc.vpc_id}"
-#   vpc_cidr          = "${module.vpc.vpc_cidr_block}"
+#   vpc_cidr          = "${var.vpc_cidr}"
 #   vpn_cidr          = "${var.vpn_cidr}"
 #   remote_ip_cidr    = "${var.remote_ip_cidr}"
 #   public_subnet_ids = "${module.vpc.public_subnets}"
@@ -290,12 +318,12 @@ module "workstation" {
   source = "./modules/workstation_pcoip"
   name   = "workstation"
 
-  workstation_enabled = true
+  workstation_enabled = var.workstation_enabled
 
   #options for gateway type are centos7 and pcoip
   gateway_type   = var.gateway_type
   vpc_id         = module.vpc.vpc_id
-  vpc_cidr       = module.vpc.vpc_cidr_block
+  vpc_cidr = var.vpc_cidr
   vpn_cidr       = var.vpn_cidr
   remote_ip_cidr = var.remote_ip_cidr
 
@@ -313,10 +341,10 @@ module "workstation" {
   public_domain_name = var.public_domain
 
   # dependencies
-  softnas_private_ip1       = module.softnas.softnas1_private_ip
-  provision_softnas_volumes = module.softnas.provision_softnas_volumes
+  softnas_private_ip1             = module.softnas.softnas1_private_ip
+  provision_softnas_volumes       = module.softnas.provision_softnas_volumes
   attach_local_mounts_after_start = module.softnas.attach_local_mounts_after_start
-  bastion_ip                = module.bastion.public_ip
+  bastion_ip                      = module.bastion.public_ip
 
   #sleep will stop instances to save cost during idle time.
   sleep                      = var.sleep
@@ -348,7 +376,7 @@ module "node" {
 
   # options for gateway type are centos7 and pcoip
   vpc_id                      = module.vpc.vpc_id
-  vpc_cidr                    = module.vpc.vpc_cidr_block
+  vpc_cidr                    = var.vpc_cidr
   vpn_cidr                    = var.vpn_cidr
   remote_ip_cidr              = var.remote_ip_cidr
   private_subnet_ids          = module.vpc.private_subnets
@@ -356,12 +384,14 @@ module "node" {
   remote_subnet_cidr          = var.remote_subnet_cidr
 
   # dependencies
-  softnas_private_ip1       = module.softnas.softnas1_private_ip
-  provision_softnas_volumes = module.softnas.provision_softnas_volumes
+  softnas_private_ip1             = module.softnas.softnas1_private_ip
+  provision_softnas_volumes       = module.softnas.provision_softnas_volumes
   attach_local_mounts_after_start = module.softnas.attach_local_mounts_after_start
-  bastion_ip                = module.bastion.public_ip
+  bastion_ip                      = module.bastion.public_ip
 
   openfirehawkserver = var.openfirehawkserver
+
+  instance_type = var.node_centos_instance_type
 
   volume_size = var.node_centos_volume_size
 
@@ -383,3 +413,10 @@ module "node" {
   houdini_license_server_address = var.houdini_license_server_address
 }
 
+output "snapshot_id" {
+  value = module.node.snapshot_id
+}
+
+output "node_ami_id" {
+  value = module.node.ami_id
+}

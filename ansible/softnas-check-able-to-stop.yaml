@@ -15,7 +15,7 @@
     when: init
 
 - hosts: role_softnas
-  remote_user: centos
+  remote_user: "{{ softnas_ssh_user | default('ec2-user') }}"
   become: true
   
   vars:
@@ -28,8 +28,6 @@
     register: slurpfile
     become: true
     when: init
-  
-  - debug: msg="{{ slurpfile['content'] | b64decode }}"
   
   - name: "Wait until Softnas Boot Init completes before Stopping the instance."
     wait_for:
@@ -44,7 +42,4 @@
       src: /tmp/softnas.boot
     register: slurpfilepost
     become: true
-    when: init
-  
-  - debug: msg="{{ slurpfilepost['content'] | b64decode }}"
     when: init

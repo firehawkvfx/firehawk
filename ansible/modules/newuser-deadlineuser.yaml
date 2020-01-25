@@ -41,14 +41,10 @@
         system: no # Defaults to no
         createhome: yes # Defaults to yes
       when: result.stat.exists == false
+      
     - name: change the default ubuntu user passwd
       user:
         name: ubuntu
         password: "{{ my_password }}"
-        #groups: # Empty by default, here we give it some groups
-        #  - sudo
         state: present
-        #shell: /bin/bash # Defaults to /bin/bash
-        #system: no # Defaults to no
-        #createhome: yes # Defaults to yes
       when: result.stat.exists == false

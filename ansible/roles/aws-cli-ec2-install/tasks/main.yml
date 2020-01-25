@@ -1,54 +1,161 @@
 ---
 #tasks file for roles/aws-cli
 
-- name: install mkpasswd, pip, pexpect, passlib
+- name: install whois, passlib
   package:
     name: "{{ item }}"
     state: present
   with_items:
     - whois
-    - python-pip
-    - python-passlib
     - zip
 
-- name: upgrade pip
-  shell: |
-    pip install --upgrade pip
+- name: ansible versions other than 'latest' are not supported until virtuelenv is integrated into the repo.
+  fail:
+    msg: "ansible version {{ ansible_version}} is other than 'latest' are not supported until virtuelenv is integrated into the repo."
+  when: selected_ansible_version != 'latest'
+
+- name: install awscli, force upgrade - root
+  pip: 
+    name: awscli
+    extra_args: --upgrade
   become: true
 
+# for some reason this can still have permissions issues on the vagrant vm when command line is fine.  this only occurs with the ansible modules
 - name: install awscli, force upgrade
   pip: 
     name: awscli
     extra_args: --upgrade --user
-  become_user: "{{ variable_user }}"
+  become_user: "{{ variable_become_user }}"
   become: true
+  when: selected_ansible_version == 'latest'
 
 - name: install pexpect
   pip: 
     name: pexpect
     extra_args: --upgrade --user
-  become_user: "{{ variable_user }}"
+  become_user: "{{ variable_become_user }}"
   become: true
+  when: selected_ansible_version == 'latest'
 
 - name: install the boto package, force upgrade
   pip: 
     name: boto3
-  become_user: "{{ variable_user }}"
+    extra_args: --user
+  become_user: "{{ variable_become_user }}"
   become: true
+  when: selected_ansible_version == 'latest'
 
-- name: Case insensitive password string match
-  expect:
-    command: "/home/{{ variable_user }}/.local/bin/aws configure"
-    responses:
-      .*Access Key ID \[.*\]: "{{ aws_access_key_s3user }}"
-      .*Secret Access Key \[.*\]: "{{ aws_secret_key_s3user }}"
-      .*region name \[.*\]: "{{ aws_region }}"
-      .*output format \[.*\]: json
-  become_user: "{{ variable_user }}"
-  become: true
+# on an ec2 instance, the cli credentials are inherited automatically by the role or permissions assigned to the instance.  Below is the optional tag to intall a specific access key for a user account.  the inputs are provided as environment variables with pgp encryption.
+
+# decrypt the secret
+
+- name: Run expect to wait for a keybase pass and decrypt - first time is dirty output.
+  shell: |
+    /vagrant/scripts/pgp-expect.sh {{ keybase_secret | regex_escape() }} {{ storage_user_secret | regex_escape() }}
+  become_user: vagrant
+  connection: local
   no_log: true
   tags:
   - user_access
+
+- name: Run expect to wait for a keybase pass and decrypt - collect output.
+  shell: |
+    /vagrant/scripts/pgp-expect.sh {{ keybase_secret | regex_escape() }} {{ storage_user_secret | regex_escape() }}
+  become_user: vagrant
+  connection: local
+  register: storage_user_secret_output
+  no_log: true
+  tags:
+  - user_access
+
+# now use the outputs to install the aws cli
+
+- set_fact:
+    storage_user_secret_key: "{{ storage_user_secret_output.stdout }}"
+  no_log: true
+  tags:
+  - user_access
+
+- fail:
+    msg: "invalid output from keybase expect"
+  when: '" " in storage_user_secret_key or storage_user_secret_key ==""'
+  no_log: true
+  tags:
+  - user_access
+
+- name: ansible distro
+  debug:
+    var: ansible_distribution
+
+# install aws cli for the user.
+
+- name: Use expect to install AWS CLI- Centos
+  expect:
+    # different version of the command may be required for centos.  depending on install method this can change.  eg:
+    # /usr/bin/aws
+    # /home/{{ variable_user }}/.local/bin/aws
+    command: "aws configure"
+    responses:
+      .*Access Key ID \[.*\]: "{{ storage_user_access_key_id }}"
+      .*Secret Access Key \[.*\]: "{{ storage_user_secret_key }}"
+      .*region name \[.*\]: "{{ aws_region }}"
+      .*output format \[.*\]: json
+  become_user: "{{ variable_become_user }}"
+  become: true
+  # no_log: true
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+  tags:
+  - user_access
+
+- name: Use expect to install AWS CLI- Ubuntu
+  expect:
+    # this version of the command may be required for ubuntu
+    command: "/usr/local/bin/aws configure"
+    responses:
+      .*Access Key ID \[.*\]: "{{ storage_user_access_key_id }}"
+      .*Secret Access Key \[.*\]: "{{ storage_user_secret_key }}"
+      .*region name \[.*\]: "{{ aws_region }}"
+      .*output format \[.*\]: json
+  become_user: "{{ variable_become_user }}"
+  become: true
+  no_log: true
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  tags:
+  - user_access
+
+# install aws cli for root.  sometimes paths will be written to that only the root should be able to write to.  if that happens, the root user needs aws credentials to do that.
+
+- name: Use expect to install AWS CLI- Centos - root
+  expect:
+    # this version of the command may be required for centos
+    command: "aws configure"
+    responses:
+      .*Access Key ID \[.*\]: "{{ storage_user_access_key_id }}"
+      .*Secret Access Key \[.*\]: "{{ storage_user_secret_key }}"
+      .*region name \[.*\]: "{{ aws_region }}"
+      .*output format \[.*\]: json
+  become: true
+  no_log: true
+  when: ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' ) and aws_cli_root
+  tags:
+  - user_access
+
+- name: Use expect to install AWS CLI- Ubuntu - root
+  expect:
+    # this version of the command may be required for ubuntu
+    command: "/usr/local/bin/aws configure"
+    responses:
+      .*Access Key ID \[.*\]: "{{ storage_user_access_key_id }}"
+      .*Secret Access Key \[.*\]: "{{ storage_user_secret_key }}"
+      .*region name \[.*\]: "{{ aws_region }}"
+      .*output format \[.*\]: json
+  become: true
+  no_log: true
+  when: ( ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' ) and aws_cli_root
+  tags:
+  - user_access
+
+
 
 # example usage:
 # ansible-playbook -i ansible/inventory ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_node_centos"

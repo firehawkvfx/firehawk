@@ -7,7 +7,7 @@
 # ansible-playbook -i ansible/inventory ansible/node-centos-mounts.yaml
 
 # to update an onsite centos workstation use-
-# ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v -v --extra-vars "variable_host=workstation.firehawkvfx.com variable_user=deadlineuser hostname=workstation.firehawkvfx.com ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_key" --skip-tags 'cloud_install'
+# ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser hostname=workstation1 ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_private_key" --skip-tags 'cloud_install'
 
 # to configure onsite mounts only on the ansible control, skipping softnas export check
 # ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v -v --extra-vars "variable_host=localhost variable_user=vagrant softnas_hosts=none" --tags 'local_install_onsite_mounts'
@@ -17,7 +17,7 @@
   become: true
 
   vars:
-    ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
+    ansible_become_pass: "{{ user_deadlineuser_pw }}"
     destroy: false
 
   tasks:
@@ -112,7 +112,7 @@
   become: true
 
   vars:
-    ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
+    ansible_become_pass: "{{ user_deadlineuser_pw }}"
     softnas_exports: "{{ hostvars[groups['role_softnas'][0]]['presence']['results'] }}"
     pcoip: false
     destroy: false
@@ -436,7 +436,7 @@
   become: true
 
   vars:
-    ansible_become_pass: "{{ user_deadlineuser_pw_local }}"
+    ansible_become_pass: "{{ user_deadlineuser_pw }}"
     softnas_exports: "{{ hostvars[groups['role_softnas'][0]]['presence']['results'] }}"
     pcoip: False
     site_mounts:
