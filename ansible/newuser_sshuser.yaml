@@ -11,7 +11,6 @@
   vars:
     ansible_become_password: "{{ user_inituser_pw }}"
     ansible_password: "{{ user_inituser_pw }}"
-    deployuser_password: "{{ user_deployuser_pw }}"
     public_key_location: "{{ general_use_ssh_key }}.pub"
 
   tasks:
@@ -35,7 +34,7 @@
 
   - debug: var=output.stdout_lines
 
-  - name: add vagrant user as an authorized key on the remote host as deployuser
+  - name: add deployuser as an authorized key on the remote host as deployuser
     authorized_key:
       user: deployuser
       key: "{{ lookup('file', public_key_location) }}"
@@ -70,12 +69,3 @@
     service:
       name: sshd
       state: restarted
-
-- hosts: "{{ variable_host | default('workstation1') }}"
-  remote_user: deployuser
-  become: true
-
-  tasks:
-  - name: test connection as deployuser
-    debug:
-      msg: "connection established"

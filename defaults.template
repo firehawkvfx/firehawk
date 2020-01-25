@@ -36,6 +36,10 @@ TF_VAR_inventory_dev=insertvalue
 # default: TF_VAR_inventory_prod=../secrets/prod/inventory
 TF_VAR_inventory_prod=insertvalue
 
+# TF_VAR_terraform_version:
+# The version of terraform that will be used
+TF_VAR_terraform_version=insertvalue
+
 # TF_VAR_softnas_storage:
 # Enable softnas storage.  Softnas is used for a centralised cloud based NFS share.
 # It's licenceing cost scales with usage, and can provide RAID redundancy.

@@ -57,7 +57,7 @@
       lineinfile:
         state: present
         path: "{{ hosts_file }}"
-        line: "{{ host_name }} ansible_host={{ host_ip }}"
+        line: "{{ host_name }} ansible_host={{ host_ip }} {{ insert_ssh_key_string | default('') }}"
         backup: "{{ backup }}"
         owner: vagrant
         regexp: "^{{ host_name }} ansible_host=.*"
@@ -70,7 +70,7 @@
       lineinfile:
         state: present
         path: "{{ hosts_file }}"
-        line: "{{ host_name }} ansible_host={{ host_ip }}"
+        line: "{{ host_name }} ansible_host={{ host_ip }} {{ insert_ssh_key_string | default('') }}"
         backup: "{{ backup }}"
         owner: vagrant
         regexp: "^{{ host_name }} ansible_host=.*"

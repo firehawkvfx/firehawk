@@ -4,7 +4,7 @@ provider "aws" {
   #  secret_key = "${var.aws_secret_key}"
   region = var.aws_region
   # in a dev environment these version locks below can be disabled.  in production, they should be locked based on the suggested versions from terraform init.
-  version = "~> ${var.aws_provider_version}"
+  version = "~> 2.24"
 }
 
 provider "null" {

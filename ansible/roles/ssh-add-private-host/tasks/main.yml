@@ -15,7 +15,7 @@
 - name: msg delegate to bastion ip
   debug:
     var: bastion_ip
-  when: '"." in bastion_ip'
+  when: '"." in bastion_ip and not local'
 
 - name: msg delegate to get key for private_ip
   debug:
@@ -28,7 +28,7 @@
   remote_user: centos
   become_user: centos
   become: true
-  when: '"." in bastion_ip'
+  when: '"." in bastion_ip and not local'
 
 - name: retrieved new_host_fingerprint via bastion
   debug:
@@ -43,9 +43,9 @@
   with_items: "{{ new_host_fingerprint.stdout_lines }}"
   become: true
   become_user: vagrant
-  when: '"." in bastion_ip'
+  when: '"." in bastion_ip and not local'
 
-- name: keyscan to add keys from remote subnet on this host.
+- name: keyscan to add keys of an ip on this host without bastion.
   command: "ssh-keyscan {{ private_ip }}"
   register: new_host_fingerprint
   become: true
