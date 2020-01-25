@@ -2,6 +2,9 @@ variable "sleep" {
   default = false
 }
 
+variable "aws_provider_version" {
+}
+
 variable "enable_vpc" {
 }
 

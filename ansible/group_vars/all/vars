@@ -14,8 +14,7 @@ shot: "{{ lookup('env','TF_VAR_SHOT') }}"
 
 gatewaynic: "{{ lookup('env','TF_VAR_gatewaynic') }}"
 
-terraform_version: "0.12.18"
-terraform_inventory_version: "0.8"
+terraform_version: "{{ lookup('env','TF_VAR_terraform_version') }}"
 inventory: "{{ lookup('env','TF_VAR_inventory') }}"
 
 # domains
