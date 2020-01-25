@@ -9,6 +9,9 @@
   remote_user: "{{ variable_user | default('centos') }}"
   become: true
 
+  vars:
+    ansible_become_pass: "{{ user_deadlineuser_pw }}"
+
   tasks:
   - name: test connection
     debug:
@@ -19,6 +22,7 @@
   become: true
 
   vars:
+    ansible_become_pass: "{{ user_deadlineuser_pw }}"
     variable_user: centos
     bastionip: "{{ groups['bastionip'][0] }}"
     skip_packages: false
