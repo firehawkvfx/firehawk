@@ -9,8 +9,8 @@
   ec2_key:
     name: "{{ key_name }}"
     #these must be defined if the module is used.
-    aws_access_key: "{{ aws_access_key }}"
-    aws_secret_key: "{{ aws_secret_key }}"
+    AWS_ACCESS_KEY: "{{ AWS_ACCESS_KEY }}"
+    AWS_SECRET_KEY: "{{ AWS_SECRET_KEY }}"
     ec2_region: "{{ aws_region }}"
   register: ec2_key_result
   when: (key_result.stat.exists == False)
