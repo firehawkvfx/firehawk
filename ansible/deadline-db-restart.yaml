@@ -4,4 +4,4 @@
   become: true
 
   roles:
-  - deadline-db-check
+  - deadline-db-restart

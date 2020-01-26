@@ -1,5 +1,6 @@
 ---
-- hosts: ansible_control
+- hosts: "{{ variable_host | default('firehawkgateway') }}"
+  remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
   become: true
 
   vars:
@@ -15,9 +16,9 @@
 # This process archives secrets, and configures some settins.  they are copied to the repository, and encrypted by the vault id - keys/.vault-key
 # Nothing stored in the secrets path should be unencrypted.
 
-- hosts: ansible_control
+- hosts: "{{ variable_host | default('firehawkgateway') }}"
+  remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
   become: true
-  remote_user: deadlineuser
   become_user: root
   
   # secret 2 seems to occaisionally have issues and corrupts the shell output somehow.
@@ -31,8 +32,8 @@
         location: /opt/Thinkbox/certs/Deadline10RemoteClient.pfx
         target: "{{ secrets_archive }}/opt/Thinkbox/certs/Deadline10RemoteClient.pfx"
       secret3:
-        location: /opt/Thinkbox/certs/{{ openfirehawkserver_name }}.pfx
-        target: "{{ secrets_archive }}/opt/Thinkbox/certs/{{ openfirehawkserver_name }}.pfx"
+        location: /opt/Thinkbox/certs/localhost.pfx
+        target: "{{ secrets_archive }}/opt/Thinkbox/certs/localhost.pfx"
       secret4:
         location: /opt/Thinkbox/DeadlineDatabase10/certs/ca.crt
         target: "{{ secrets_archive }}/opt/Thinkbox/DeadlineDatabase10/certs/ca.crt"
@@ -40,8 +41,8 @@
         location: /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx
         target: "{{ secrets_archive }}/opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx"
       secret6:
-        location: /opt/Thinkbox/DeadlineDatabase10/certs/{{ openfirehawkserver_name }}.pem
-        target: "{{ secrets_archive }}/opt/Thinkbox/DeadlineDatabase10/certs/{{ openfirehawkserver_name }}.pem"
+        location: /opt/Thinkbox/DeadlineDatabase10/certs/localhost.pem
+        target: "{{ secrets_archive }}/opt/Thinkbox/DeadlineDatabase10/certs/localhost.pem"
       secret7:
         location: /opt/Thinkbox/DeadlineDatabase10/certs/mongo_client.pem
         target: "{{ secrets_archive }}/opt/Thinkbox/DeadlineDatabase10/certs/mongo_client.pem"
@@ -58,10 +59,10 @@
   - deadline-ubl
   - deadline-db-check
 
-- hosts: ansible_control
+- hosts: "{{ variable_host | default('firehawkgateway') }}"
+  remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
   become: true
   
   tasks:
-
   - name: reset ssh connection to allow user changes to affect 'current login user'
     meta: reset_connection

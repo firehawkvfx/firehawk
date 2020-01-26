@@ -5,8 +5,8 @@
 # ansible-playbook -i ansible/inventory ansible/ansible-control-update-routes.yaml --extra-vars "gatewaynic=eth1"
 
 
-- hosts: ansible_control
-  remote_user: vagrant
+- hosts: firehawkgateway
+  remote_user: deployuser
   gather_facts: "{{ variable_gather_facts | default('true') }}"
   become: true
   vars:

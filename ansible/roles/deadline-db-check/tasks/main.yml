@@ -1,4 +1,4 @@
-- name: Ensure db is still valid
+- name: Ensure db is still valid.  if this fails, db is corrupted or there is a permissions issue
   shell: |
     set -x
     cd /opt/Thinkbox/DeadlineDatabase10/mongo/application/bin/

@@ -27,10 +27,10 @@
     debug:
       msg: "connection established"
 
-# sync installers from/to s3 bucket.  any new houdini versions will be pushed from ansible control to the bucket.
+# sync installers from/to s3 bucket.  any new houdini versions will be pushed from firehawkgateway to the bucket.
 
-- hosts: ansible_control
-  remote_user: vagrant
+- hosts: firehawkgateway
+  remote_user: deployuser
   become: true
   vars_files:
     - /vagrant/ansible/group_vars/all/vars
@@ -42,7 +42,6 @@
     bucket: "{{ installers_bucket }}"
 
   tasks:
-
   # - name: Open tops ports for vpn. May not be necesary in H18.
   #   include_role:
   #     name: houdini-tops-ports-vpn
@@ -51,6 +50,7 @@
     s3_bucket:
       name: "{{ bucket }}"
       region: "{{ aws_region }}"
+    become: false
     tags:
       - sync_installers
 
@@ -61,6 +61,7 @@
       include: "*"
       region: "{{ aws_region }}"
     when: sync_downloads
+    become: false
     tags:
       - sync_installers
 
@@ -77,8 +78,8 @@
     include_role:
       name: houdini-role
 
-- hosts: ansible_control
-  become: true
+- hosts: firehawkgateway
+  remote_user: deployuser
   vars_files:
     - /vagrant/ansible/group_vars/all/vars
     - vars.yml

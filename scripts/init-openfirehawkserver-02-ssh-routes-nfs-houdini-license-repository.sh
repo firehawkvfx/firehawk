@@ -57,27 +57,28 @@ echo 'Use vagrant reload and vagrant ssh after executing each .sh script'
 echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 
 #check db
-ansible-playbook -i ansible/inventory/hosts ansible/deadline-db-check.yaml -v; exit_test
+ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
 
 # custom events auto assign groups to slaves on startup, eg slaveautoconf
-ansible-playbook -i ansible/inventory/hosts ansible/deadline-repository-custom-events.yaml; exit_test
+ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-repository-custom-events.yaml; exit_test
 
-# configure onsite NAS mounts to ansible control
-ansible-playbook -i ansible/inventory/hosts ansible/node-centos-mounts.yaml --extra-vars "variable_host=localhost variable_user=vagrant softnas_hosts=none" --tags 'local_install_onsite_mounts'; exit_test
+# configure onsite NAS mounts to firehawkgateway
+ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=firehawkgateway variable_user=deployuser softnas_hosts=none" --tags 'local_install_onsite_mounts'; exit_test
 
 # ssh will be killed from the previous script because users were added to a new group and this will not update unless your ssh session is restarted.
 # login again and continue...
 
-# ansible-playbook -i ansible/inventory/hosts ansible/openfirehawkserver_houdini.yaml
 # install houdini with the same procedure as on render nodes and workstations, and initialise the licence server on this system.
 ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -vvv --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password variable_host=localhost variable_user=vagrant houdini_install_type=server" --skip-tags "sync_scripts"; exit_test
-
-ansible-playbook -i ansible/inventory/hosts ansible/aws-new-key.yaml; exit_test
+# ensure an aws pem key exists for ssh into cloud nodes
+ansible-playbook -i "$TF_VAR_inventory" ansible/aws-new-key.yaml; exit_test
 # configure routes to opposite environment for licence server to communicate if in dev environment
-ansible-playbook -i ansible/inventory ansible/ansible-control-update-routes.yaml; exit_test
+ansible-playbook -i "$TF_VAR_inventory" ansible/firehawkgateway-update-routes.yaml; exit_test
 
 #check db
-ansible-playbook -i ansible/inventory/hosts ansible/deadline-db-check.yaml -v; exit_test
+ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-restart.yaml -v; exit_test
+ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
 
 echo -e "\nIf above was succesful, exit the vm and use 'vagrant reload' before continuing with the next script.  New user group added wont have user added until reload."
 echo -e "\nFor houdini to work, ensure you have configured your licences on the production server."

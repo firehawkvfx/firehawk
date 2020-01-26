@@ -255,5 +255,6 @@
     include: "{{ houdini_linux_filename }}"
     region: "{{ aws_region }}"
     mode: push
+  become: false
   tags:
     - sync_installers
