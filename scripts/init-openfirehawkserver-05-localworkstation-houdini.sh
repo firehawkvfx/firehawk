@@ -57,14 +57,14 @@ fi
 
 echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 
-ansible-playbook -i ansible/inventory/hosts ansible/deadline-db-check.yaml -v; exit_test
+ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
 
 # install houdini on a local workstation with deadline submitters and environment vars.
 
-ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password variable_host=workstation1 variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_private_key" --skip-tags "sync_scripts"; exit_test
+ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser" --skip-tags "sync_scripts"; exit_test
 
-ansible-playbook -i ansible/inventory/hosts ansible/deadline-db-check.yaml -v; exit_test
+ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
 
-ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_private_key"; exit_test
+ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser"; exit_test
 
 printf "\n...Finished $SCRIPTNAME\n\n"

@@ -68,7 +68,7 @@ echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 printf "\n\nHave you installed keybase and initialised pgp?\n\nIf not it is highly recommended that you create a profile on your phone and desktop for 2fa first.\nIf this process fails for any reason use 'keybase login' manually and test pgp decryption in the shell.\n\n"
 
 #check db
-ansible-playbook -i ansible/inventory/hosts ansible/deadline-db-check.yaml -v; exit_test
+ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
 
 
 # install keybase and test decryption
@@ -102,9 +102,11 @@ fi
 
 # add local host ssh keys to list of accepted keys on ansible control. Example for another onsite workstation-
 ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=$TF_VAR_workstation_address local=True"; exit_test
+ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "variable_host=$TF_VAR_workstation_address variable_user=deployuser local=True"; exit_test
+
 
 # now add this host and address to ansible inventory
-ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=workstation1 host_ip=$TF_VAR_workstation_address group_name=role_local_workstation"; exit_test
+ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=workstation1 host_ip=$TF_VAR_workstation_address group_name=role_local_workstation insert_ssh_key_string=ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_private_key"; exit_test
 
 # Now this will init the deployuser on the workstation.  the deployuser wil become the primary user with ssh access.  once this process completes the first time.
 ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_sshuser.yaml -v --extra-vars "variable_host=workstation1 user_inituser_name=$TF_VAR_user_inituser_name ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_private_key"; exit_test
@@ -123,7 +125,7 @@ ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --ex
 ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser aws_cli_root=true ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_private_key"; exit_test
 
 #check db
-ansible-playbook -i ansible/inventory/hosts ansible/deadline-db-check.yaml -v; exit_test
+ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
 
 
 printf "\n...Finished $SCRIPTNAME\n\n"
