@@ -1,6 +1,6 @@
 ---
-- hosts: ansible_control
-  remote_user: vagrant
+- hosts: "{{ variable_host | default('ansible_control') }}"
+  remote_user: "{{ variable_user | default('vagrant') }}"
   become: true
 
   tasks:
@@ -8,9 +8,14 @@
       debug:
         msg: "test local connection"
 
-- hosts: ansible_control
+- hosts: "{{ variable_host | default('ansible_control') }}"
+  remote_user: "{{ variable_user | default('vagrant') }}"
   become: true
-  
+
+  vars:
+    configure_gateway: false
+    set_hostname: "{{ openfirehawkserver_name if not configure_gateway else 'gateway' }}"
+    
   pre_tasks:
     - name: ensure source ./update_vars.sh initialised
       fail:
@@ -24,11 +29,11 @@
     - role: terraform
     - role: aws-cli
 
-- hosts: ansible_control
-  remote_user: vagrant
+- hosts: "{{ variable_host | default('ansible_control') }}"
+  remote_user: "{{ variable_user | default('vagrant') }}"
   become: true
 
   tasks:
-    - name: Test local connection.  Bad mounts may break local connection
+    - name: Test connection.  Bad mounts may break local connection
       debug:
-        msg: "test local connection"
+        msg: "test connection"

@@ -2,7 +2,7 @@
 # tasks file for roles/init-host
 - name: change hostname
   hostname:
-    name: "{{ openfirehawkserver_name }}"
+    name: "{{ set_hostname }}"
 
 - openssh_keypair:
     path: "{{ general_use_ssh_key }}"
@@ -41,7 +41,6 @@
   lineinfile:
     path: /etc/rc.local
     insertafter: "^#?.By default.*$"
-
     line: "# BEGIN ANSIBLE MANAGED BLOCK"
     backup: yes
 
@@ -60,6 +59,7 @@
       #promiscuous mode required for routing
       /sbin/ifconfig {{ vpn_nic }} up
       /sbin/ifconfig {{ vpn_nic }} promisc
+  when: configure_gateway
 
 - name: execute and check with netstat
   shell: |
