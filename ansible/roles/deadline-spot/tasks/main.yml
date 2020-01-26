@@ -41,8 +41,8 @@
 # To list the contents of EventPluginSettingsCollection (for example):
 # db.EventPluginSettingsCollection.find().pretty()
 
-# debug permissions with root {{ aws_access_key }}
-# debug permissions with root {{ aws_secret_key }}
+# debug permissions with root {{ AWS_ACCESS_KEY }}
+# debug permissions with root {{ AWS_SECRET_KEY }}
 # normal use with {{ spot_access_key_id }}
 # normal use with {{ spot_secret_key }}
 
@@ -57,8 +57,8 @@
 #       var StaggerInstances = "5";
 #       var IdleShutdown = "10";
 #       var spot_json = cat("/secrets/dev/spot-fleet-templates/config_generated.json");
-#       var conf_json_blob = { "State" : "Global Enabled", "AccessID" : "{{ aws_access_key }}", "SecretKey" : "{{ aws_secret_key }}", "Logging" : "Verbose", "Region" : "{{ aws_region }}", "Config" : spot_json, "IdleShutdown" : IdleShutdown, "DeleteTerminatedSlaves" : "True", "StrictHardCap" : "True", "StaggerInstances" : StaggerInstances };
-#       var conf_list_blob = [ [ "State", "Global Enabled" ], [ "ResourceTracker", "True" ], [ "AccessID", "{{ aws_access_key }}" ], [ "SecretKey", "{{ aws_secret_key }}" ], [ "Logging", "Verbose" ], [ "Region", "{{ aws_region }}" ], [ "Config", spot_json ], [ "IdleShutdown", IdleShutdown ], [ "DeleteTerminatedSlaves", "True" ], [ "StrictHardCap", "True" ], [ "StaggerInstances", StaggerInstances ] ];
+#       var conf_json_blob = { "State" : "Global Enabled", "AccessID" : "{{ AWS_ACCESS_KEY }}", "SecretKey" : "{{ AWS_SECRET_KEY }}", "Logging" : "Verbose", "Region" : "{{ aws_region }}", "Config" : spot_json, "IdleShutdown" : IdleShutdown, "DeleteTerminatedSlaves" : "True", "StrictHardCap" : "True", "StaggerInstances" : StaggerInstances };
+#       var conf_list_blob = [ [ "State", "Global Enabled" ], [ "ResourceTracker", "True" ], [ "AccessID", "{{ AWS_ACCESS_KEY }}" ], [ "SecretKey", "{{ AWS_SECRET_KEY }}" ], [ "Logging", "Verbose" ], [ "Region", "{{ aws_region }}" ], [ "Config", spot_json ], [ "IdleShutdown", IdleShutdown ], [ "DeleteTerminatedSlaves", "True" ], [ "StrictHardCap", "True" ], [ "StaggerInstances", StaggerInstances ] ];
 #       db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit": conf_list_blob}});
 #     '
 #     var done = "true"
