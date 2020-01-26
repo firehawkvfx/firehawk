@@ -1,7 +1,7 @@
 ---
 # tasks file for ansible/roles/deadline-db-restart
 
-- name: Ensure db is still valid.  if this fails, db is corrupted or there is a permissions issue
+- name: Stop Deadline10db service
   shell: |
     set -x
     sudo service Deadline10db stop
