@@ -4,49 +4,53 @@
   with_items:
     - "{{ public_ip }}"
 - file:
-    path: /home/vagrant/.ssh/known_hosts
+    path: "/home/{{ variable_user }}/.ssh/known_hosts"
     state: touch
-  become_user: vagrant
+  become_user: "{{ variable_user }}"
   
 - name: clean known hosts
-  shell: "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R {{ public_ip }}"
+  shell: "ssh-keygen -f /home/{{ variable_user }}/.ssh/known_hosts -R {{ public_ip }}"
   become: true
-  become_user: vagrant
+  become_user: "{{ variable_user }}"
 
 - name: clean known hosts
-  shell: "ssh-keygen -f /home/vagrant/.ssh/known_hosts -R {{ public_address }}"
+  shell: "ssh-keygen -f /home/{{ variable_user }}/.ssh/known_hosts -R {{ public_address }}"
   become: true
-  become_user: vagrant
+  become_user: "{{ variable_user }}"
 
 - name: Write the new ec2 instance host key to known hosts
-  shell: "ssh-keyscan {{ public_ip }} >> /home/vagrant/.ssh/known_hosts"
+  shell: "ssh-keyscan {{ public_ip }} >> /home/{{ variable_user }}/.ssh/known_hosts"
   become: true
-  become_user: vagrant
+  become_user: "{{ variable_user }}"
     
 - name: Write the new ec2 instance host key to known hosts
-  shell: "ssh-keyscan {{ public_address }} >> /home/vagrant/.ssh/known_hosts"
+  shell: "ssh-keyscan {{ public_address }} >> /home/{{ variable_user }}/.ssh/known_hosts"
   become: true
-  become_user: vagrant
+  become_user: "{{ variable_user }}"
 
 - name: define ssh config for bastion if set_bastion=true.
   copy:
-    dest: "/home/vagrant/.ssh/config"
+    dest: "/home/{{ variable_user }}/.ssh/config"
     mode: 0600
-    owner: vagrant
+    owner: "{{ variable_user }}"
     content: |
       Host bastion
         Hostname {{ bastion_address }}
         User centos 
-        IdentityFile  {{ ansible_ssh_private_key_file }}
+        IdentityFile  {{ cloud_private_key_file }}
 
       Host "{{ bastion_address }}"
         User centos 
-        IdentityFile  {{ ansible_ssh_private_key_file }}
+        IdentityFile  {{ cloud_private_key_file }}
+
+      Host "192.168.92.*"
+        User deployuser
+        IdentityFile  {{ general_use_ssh_key }}
 
       Host "10.0.1.*", "10.0.2.*", "10.0.11.*", "10.0.12.*", "10.0.101.*", "10.0.102.*", "10.0.201.*", "10.0.202.*"
-        IdentityFile  {{ ansible_ssh_private_key_file }}
+        IdentityFile  {{ cloud_private_key_file }}
         User centos
         ProxyCommand ssh -W %h:%p centos@bastion
   become: true
-  become_user: vagrant
+  become_user: "{{ variable_user }}"
   when: set_bastion

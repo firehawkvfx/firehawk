@@ -1,15 +1,15 @@
-- name: check if /home/vagrant/.ssh/known_hosts file exists
+- name: "check if /home/{{ variable_user }}/.ssh/known_hosts file exists"
   stat: 
-    path: /home/vagrant/.ssh/known_hosts
+    path: "/home/{{ variable_user }}/.ssh/known_hosts"
   register: known_hosts
 
 - debug:
     var: known_hosts
 
 - name: clean known hosts
-  shell: "ssh-agent bash && ssh-keygen -f /home/vagrant/.ssh/known_hosts -R {{ private_ip }}"
+  shell: "ssh-agent bash && ssh-keygen -f /home/{{ variable_user }}/.ssh/known_hosts -R {{ private_ip }}"
   become: true
-  become_user: vagrant
+  become_user: "{{ variable_user }}"
   when: known_hosts.stat.exists == true
 
 - name: msg delegate to bastion ip
@@ -36,13 +36,13 @@
 
 - name: add keyscan to known hosts
   lineinfile:
-    dest: /home/vagrant/.ssh/known_hosts
+    dest: "/home/{{ variable_user }}/.ssh/known_hosts"
     line: "{{ item }}"
     create: true
     mode: '600'
   with_items: "{{ new_host_fingerprint.stdout_lines }}"
   become: true
-  become_user: vagrant
+  become_user: "{{ variable_user }}"
   when: '"." in bastion_ip and not local'
 
 - name: keyscan to add keys of an ip on this host without bastion.
@@ -57,11 +57,11 @@
 
 - name: add keyscan to known hosts
   lineinfile:
-    dest: /home/vagrant/.ssh/known_hosts
+    dest: "/home/{{ variable_user }}/.ssh/known_hosts"
     line: "{{ item }}"
     create: true
     mode: '600'
   with_items: "{{ new_host_fingerprint.stdout_lines }}"
   become: true
-  become_user: vagrant
+  become_user: "{{ variable_user }}"
   when: local
