@@ -127,8 +127,8 @@
       object: "{{ driver_file }}"
       dest: "/home/centos/Downloads/{{ driver_file }}"
       mode: get
-      aws_access_key: "{{ aws_access_key }}"
-      aws_secret_key: "{{ aws_secret_key }}"
+      AWS_ACCESS_KEY: "{{ AWS_ACCESS_KEY }}"
+      AWS_SECRET_KEY: "{{ AWS_SECRET_KEY }}"
       region: "{{ aws_region }}"
 
   - name: check if epel rpm exists

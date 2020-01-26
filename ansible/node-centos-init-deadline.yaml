@@ -94,8 +94,8 @@
       object: "{{ deadline_linux_filename }}"
       dest: "/home/deadlineuser/Downloads/{{ deadline_linux_filename }}"
       mode: get
-      aws_access_key: "{{ aws_access_key }}"
-      aws_secret_key: "{{ aws_secret_key }}"
+      AWS_ACCESS_KEY: "{{ AWS_ACCESS_KEY }}"
+      AWS_SECRET_KEY: "{{ AWS_SECRET_KEY }}"
       region: "{{ aws_region }}"
 
   # - name: Sync deadline from s3 if exist and not present on file system- pull
