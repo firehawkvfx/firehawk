@@ -4,7 +4,8 @@
 # ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml --tags "onsite-install"
 
 # # these permissions are now handled post install of the deadline db.
-- hosts: ansible_control
+- hosts: firehawkgateway
+  remote_user: deployuser
   become: true
 
   tasks:
@@ -149,6 +150,11 @@
     - cloud-install
     - onsite-install
 
+- hosts: firehawkgateway
+  remote_user: deployuser
+  become: true
+
+  tasks:
   - name: ensure local submission scripts dir permissions are readable on the ansible control
     file:
       path: /opt/Thinkbox/DeadlineRepository10/submission
@@ -158,99 +164,6 @@
       group: syscontrol
       recurse: yes
     become: yes
-    connection: local
-    tags:
-    - cloud-install
-    - onsite-install
-
-  # - name: uninstall urllib3 because of conflict with rhel 8 packages
-  #   pip:
-  #     name: urllib3
-  #     state: absent
-  #   become: yes
-  #   tags:
-  #   - cloud-install
-  #   - onsite-install
-
-  # - name: install python-urllib3 with yum 
-  #   yum:
-  #     name: 'python-urllib3'
-  #     state: present
-  #   become: yes
-  #   tags:
-  #   - cloud-install
-  #   - onsite-install
-
-  # - name: upgrade all packages - yum update
-  #   yum:
-  #     name: '*'
-  #     state: latest
-  #   become: yes
-  #   tags:
-  #   - cloud-install
-  #   - onsite-install
-
-# these packages are required to pass an encrypted string via commandline into a user pass and are suited to centos.
-  - name: install expect
-    package:
-      name: expect
-      state: present
-    tags:
-    - cloud-install
-    - onsite-install
-
-  # - name: install epel-release
-  #   package:
-  #     name: epel-release
-  #     state: present
-  #   tags:
-  #   - cloud-install
-  #   - onsite-install
-
-  # - name: install pip
-  #   package:
-  #     name: python-pip
-  #     state: latest
-  #   tags:
-  #   - cloud-install
-  #   - onsite-install
-
-  # - name: install pexpect
-  #   pip:
-  #     name: pexpect
-  #   become: yes
-  #   tags:
-  #   - cloud-install
-  #   - onsite-install
-
-  # - name: install passlib
-  #   pip:
-  #     name: passlib
-  #   become: yes
-  #   tags:
-  #   - cloud-install
-  #   - onsite-install
-
-  # - name: install the package, force upgrade
-  #   package: 
-  #     name: python-boto
-  #   become: true
-  #   tags:
-  #   - cloud-install
-  #   - onsite-install
-
-  # - name: install the package, force upgrade
-  #   pip: 
-  #     name: boto3
-  #   become: true
-  #   tags:
-  #   - cloud-install
-  #   - onsite-install
-
-  - name: restart sshd.service
-    service: 
-      name: sshd
-      state: restarted
     tags:
     - cloud-install
     - onsite-install
@@ -262,31 +175,64 @@
       owner: deadlineuser
       group: syscontrol
     become: yes
-    connection: local
     tags:
     - cloud-install
     - onsite-install
 
-  - name: Copy deadline remote client certificate
-    copy: 
-      src: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
+  # - name: Strange requirement here.  For some reason read permissions needed for everyone to be set above or the ansible copy doesn't work.  So we set it back to normal here.
+  #   file: 
+  #     path: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
+  #     mode: 0640
+  #     owner: deadlineuser
+  #     group: syscontrol
+  #   become: yes
+  #   tags:
+  #   - cloud-install
+  #   - onsite-install
+
+
+- hosts: "{{ variable_host | default('workstation1') }}"
+  remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
+  become: true
+  
+  tasks:
+# these packages are required to pass an encrypted string via commandline into a user pass and are suited to centos.
+  - name: install expect
+    package:
+      name: expect
+      state: present
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: restart sshd.service
+    service: 
+      name: sshd
+      state: restarted
+    tags:
+    - cloud-install
+    - onsite-install
+
+  # - name: Copy deadline remote client certificate
+  #   copy: 
+  #     src: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
+  #     dest: "/opt/Thinkbox/certs/"
+  #     mode: 0600
+  #     owner: deadlineuser
+  #     group: syscontrol
+  #   become: yes
+  #   tags:
+  #   - cloud-install
+  #   - onsite-install
+
+  - name: Copy Remote-To-Remote (from delegate to host)
+    synchronize:
+      src: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx" 
       dest: "/opt/Thinkbox/certs/"
-      mode: 0600
-      owner: deadlineuser
-      group: syscontrol
+      mode: push
+      owner: true
+    delegate_to: firehawkgateway
     become: yes
-    tags:
-    - cloud-install
-    - onsite-install
-
-  - name: Strange requirement here.  For some reason read permissions needed for everyone to be set above or the ansible copy doesn't work.  So we set it back to normal here.
-    file: 
-      path: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
-      mode: 0640
-      owner: deadlineuser
-      group: syscontrol
-    become: yes
-    connection: local
     tags:
     - cloud-install
     - onsite-install
@@ -320,13 +266,6 @@
     tags:
     - cloud-install
     - onsite-install
-
-  # - name: Sync deadline from s3 if exist and not present on file system- pull
-  #   shell: |
-  #     set -x
-  #     cd /home/deadlineuser/Downloads/
-  #     ~/.local/bin/aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ deadline_linux_filename }}"
-  #   become_user: "{{ variable_user }}"
 
   - name: create deadline installer dir
     file: 
