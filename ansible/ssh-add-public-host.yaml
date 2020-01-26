@@ -3,7 +3,19 @@
   become: true
   gather_facts: no
 
-# we need different steps for adding a new host in the public subnet, vs private.  we should detect the difference and handle appropriately.
+  vars:
+    variable_user: vagrant
+
+  roles:
+  - ssh-add-public-host
+
+- hosts: firehawkgateway
+  remote_user: deployuser
+  become: true
+  gather_facts: no
+
+  vars:
+    variable_user: deployuser
 
   roles:
   - ssh-add-public-host
