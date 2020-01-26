@@ -1,5 +1,7 @@
 ---
-ansible_ssh_private_key_file: "{{ lookup('env','TF_VAR_local_key_path') }}"
+cloud_private_key_file: "{{ lookup('env','TF_VAR_local_key_path') }}"
+general_use_ssh_key: "{{ lookup('env','TF_VAR_general_use_ssh_key') }}"
+
 ANSIBLE_FORCE_COLOR: 'true'
 
 selected_ansible_version: "{{ lookup('env','TF_VAR_selected_ansible_version') }}"
@@ -100,8 +102,6 @@ user_softnas_pw: "{{ lookup('env','TF_VAR_user_softnas_pw') }}"
 user_deadlineuser_name: "{{ lookup('env','TF_VAR_user_deadlineuser_name') }}"
 user_deadlineuser_pw: "{{ lookup('env','TF_VAR_user_deadlineuser_pw') }}"
 
-general_use_ssh_key: "{{ lookup('env','TF_VAR_general_use_ssh_key') }}"
-
 onsite_workstation_ssh_private_key: "{{ lookup('env','TF_VAR_onsite_workstation_ssh_private_key') }}"
 
 user_inituser_name: "{{ lookup('env', 'TF_VAR_user_inituser_name') }}"
@@ -135,11 +135,9 @@ keybase_secret: "{{ lookup('env','TF_VAR_keybase_secret') }}"
 aws_region: "{{ lookup('env','TF_VAR_aws_region') }}"
 AWS_REGION: "{{ lookup('env','TF_VAR_aws_region') }}"
 
-aws_access_key: "{{ lookup('env','TF_VAR_aws_access_key') }}"
-AWS_ACCESS_KEY: "{{ lookup('env','TF_VAR_aws_access_key') }}"
+AWS_ACCESS_KEY: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
 
-aws_secret_key: "{{ lookup('env','TF_VAR_aws_secret_key') }}"
-AWS_SECRET_KEY: "{{ lookup('env','TF_VAR_aws_secret_key') }}"
+AWS_SECRET_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
 
 storage_user_access_key_id: "{{ lookup('env','storage_user_access_key_id') }}"
 storage_user_secret: "{{ lookup('env','storage_user_secret') }}"
