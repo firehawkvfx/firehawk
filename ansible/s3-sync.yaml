@@ -109,8 +109,8 @@
   - name: sync paths local pull
     shell: |
       export HISTCONTROL=ignorespace
-        export AWS_ACCESS_KEY_ID={{ aws_access_key }}
-        export AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
+        export AWS_ACCESS_KEY_ID={{ AWS_ACCESS_KEY }}
+        export AWS_SECRET_ACCESS_KEY={{ AWS_SECRET_KEY }}
         export AWS_DEFAULT_REGION={{ aws_region }}
       set -x
       cd {{ volume_path }}/{{ item.path }}
@@ -201,8 +201,8 @@
   - name: set aws environment variables and test connection
     shell: |
       export HISTCONTROL=ignorespace
-        export AWS_ACCESS_KEY_ID={{ aws_access_key }}
-        export AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
+        export AWS_ACCESS_KEY_ID={{ AWS_ACCESS_KEY }}
+        export AWS_SECRET_ACCESS_KEY={{ AWS_SECRET_KEY }}
         export AWS_DEFAULT_REGION={{ aws_region }}
       aws s3 ls
     become: true
@@ -224,8 +224,8 @@
   - name: sync paths remote pull
     shell: |
       export HISTCONTROL=ignorespace
-        export AWS_ACCESS_KEY_ID={{ aws_access_key }}
-        export AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
+        export AWS_ACCESS_KEY_ID={{ AWS_ACCESS_KEY }}
+        export AWS_SECRET_ACCESS_KEY={{ AWS_SECRET_KEY }}
         export AWS_DEFAULT_REGION={{ aws_region }}
       set -x
       cd {{ volume_path }}/{{ item.path }}
@@ -278,8 +278,8 @@
   - name: sync_paths remote push
     shell: |
       export HISTCONTROL=ignorespace
-        export AWS_ACCESS_KEY_ID={{ aws_access_key }}
-        export AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
+        export AWS_ACCESS_KEY_ID={{ AWS_ACCESS_KEY }}
+        export AWS_SECRET_ACCESS_KEY={{ AWS_SECRET_KEY }}
         export AWS_DEFAULT_REGION={{ aws_region }}
       set -x
       cd {{ volume_path }}/{{ item.item.path }}
@@ -306,8 +306,8 @@
 #   - name: sync asset files pull
 #     shell: |
 #       export HISTCONTROL=ignorespace
-#         export AWS_ACCESS_KEY_ID={{ aws_access_key }}
-#         export AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
+#         export AWS_ACCESS_KEY_ID={{ AWS_ACCESS_KEY }}
+#         export AWS_SECRET_ACCESS_KEY={{ AWS_SECRET_KEY }}
 #         export AWS_DEFAULT_REGION={{ aws_region }}
 #       set -x
 #       cd {{ asset_path_nas }}
@@ -319,8 +319,8 @@
 #   - name: sync asset files push
 #     shell: |
 #       export HISTCONTROL=ignorespace
-#         export AWS_ACCESS_KEY_ID={{ aws_access_key }}
-#         export AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
+#         export AWS_ACCESS_KEY_ID={{ AWS_ACCESS_KEY }}
+#         export AWS_SECRET_ACCESS_KEY={{ AWS_SECRET_KEY }}
 #         export AWS_DEFAULT_REGION={{ aws_region }}
 #       set -x
 #       cd {{ asset_path_nas }}
@@ -342,8 +342,8 @@
 #   - name: sync cache files pull
 #     shell: |
 #       export HISTCONTROL=ignorespace
-#         export AWS_ACCESS_KEY_ID={{ aws_access_key }}
-#         export AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
+#         export AWS_ACCESS_KEY_ID={{ AWS_ACCESS_KEY }}
+#         export AWS_SECRET_ACCESS_KEY={{ AWS_SECRET_KEY }}
 #         export AWS_DEFAULT_REGION={{ aws_region }}
 #       set -x
 #       cd {{ shot_path_nas }}/cache
@@ -355,8 +355,8 @@
 #   - name: sync cache files push
 #     shell: |
 #       export HISTCONTROL=ignorespace
-#         export AWS_ACCESS_KEY_ID={{ aws_access_key }}
-#         export AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
+#         export AWS_ACCESS_KEY_ID={{ AWS_ACCESS_KEY }}
+#         export AWS_SECRET_ACCESS_KEY={{ AWS_SECRET_KEY }}
 #         export AWS_DEFAULT_REGION={{ aws_region }}
 #       set -x
 #       cd {{ shot_path_nas }}/cache
@@ -378,8 +378,8 @@
 #   - name: sync houdini files pull
 #     shell: |
 #       export HISTCONTROL=ignorespace
-#         export AWS_ACCESS_KEY_ID={{ aws_access_key }}
-#         export AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
+#         export AWS_ACCESS_KEY_ID={{ AWS_ACCESS_KEY }}
+#         export AWS_SECRET_ACCESS_KEY={{ AWS_SECRET_KEY }}
 #         export AWS_DEFAULT_REGION={{ aws_region }}
 #       set -x
 #       cd {{ shot_path_nas }}/houdini
@@ -391,8 +391,8 @@
 #   - name: sync houdini files push
 #     shell: |
 #       export HISTCONTROL=ignorespace
-#         export AWS_ACCESS_KEY_ID={{ aws_access_key }}
-#         export AWS_SECRET_ACCESS_KEY={{ aws_secret_key }}
+#         export AWS_ACCESS_KEY_ID={{ AWS_ACCESS_KEY }}
+#         export AWS_SECRET_ACCESS_KEY={{ AWS_SECRET_KEY }}
 #         export AWS_DEFAULT_REGION={{ aws_region }}
 #       set -x
 #       cd {{ shot_path_nas }}/houdini
@@ -408,6 +408,6 @@
 #       object: "{{ show }}/{{ seq }}/{{ shot }}/asset"
 #       dest: "/{{ pool_name }}/{{ volume_name }}/"
 #       mode: get
-#       aws_access_key: "{{ aws_access_key }}"
-#       aws_secret_key: "{{ aws_secret_key }}"
+#       AWS_ACCESS_KEY: "{{ AWS_ACCESS_KEY }}"
+#       AWS_SECRET_KEY: "{{ AWS_SECRET_KEY }}"
 #       region: "{{ aws_region }}"
