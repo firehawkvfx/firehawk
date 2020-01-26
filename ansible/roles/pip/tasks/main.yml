@@ -26,6 +26,16 @@
   tags:
   - add-epel
 
+- name: hold linux-image-generic on vagrant as it breaks vagrant mounts currently preventing the image from booting
+  command: echo "linux-image-generic hold" | dpkg --set-selections
+  become: true
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: hold linux-image-generic on vagrant as it breaks vagrant mounts currently preventing the image from booting
+  command: apt-mark hold linux-image-generic
+  become: true
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
 - name: upgrade all yum packages
   yum:
     name: '*'
@@ -35,6 +45,7 @@
   tags:
   - upgrade-packages
 
+# beware if mount issues arise, this may be related - https://askubuntu.com/questions/601/the-following-packages-have-been-kept-back-why-and-how-do-i-solve-it
 - name: Upgrade all apt packages
   apt:
     name: "*"
@@ -85,11 +96,13 @@
     extra_args: --upgrade
   become: true
 
-- name: remove cryptography and reinstall to fix a bug with boto and pip
+# may break ubuntu in vagrant.
+- name: remove cryptography and reinstall to fix a bug with boto and pip.
   pip: 
     name: cryptography
     state: absent
   become: true
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
 
 - name: upgrade cryptography
   pip: 

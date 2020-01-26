@@ -3,6 +3,12 @@
 - name: change hostname
   hostname:
     name: "{{ set_hostname }}"
+  when: set_hostname is defined
+
+- name: Update hosts file with regex if ubuntu to handle correctly.  Otherwise this https://github.com/ansible/ansible-modules-core/issues/2308
+  lineinfile: dest=/etc/hosts line="127.0.0.1       localhost       localhost.localdomain       {{ set_hostname }}"
+              regexp="^127\.0\.0\.1.*localhost.*$"
+  when: set_hostname is defined and ( ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' )
 
 - openssh_keypair:
     path: "{{ general_use_ssh_key }}"
