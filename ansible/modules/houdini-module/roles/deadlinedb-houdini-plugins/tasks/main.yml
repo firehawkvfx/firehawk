@@ -38,6 +38,7 @@
       Default=C:\Program Files\Side Effects Software\Houdini {{ houdini_major_version }}.000\bin\Hython.exe;/Applications/Houdini/Houdini{{ houdini_major_version }}.000/Frameworks/Houdini.framework/Versions/{{ houdini_major_version }}.000/Resources/bin/hython;/opt/hfs{{ houdini_major_version }}/bin/hython
       Description=The path to the hython executable. It can be found in the Houdini bin folder.
     marker: "\n# {mark} ANSIBLE MANAGED BLOCK Houdini{{ houdini_major_version | replace('.', '_') }}_Hython_Executable\n"
+  become: true
   when: (hython_block_exists is changed) or (hython_block_exists is failed)
 
 - name: "Check if settings for {{ houdini_major_version }} simtracker are present in plugin settings"
@@ -62,6 +63,7 @@
       Default=C:\Program Files\Side Effects Software\Houdini {{ houdini_major_version }}.000\houdini\python2.7libs\simtracker.py;/Applications/Houdini/Houdini{{ houdini_major_version }}.000/Frameworks/Houdini.framework/Versions/{{ houdini_major_version }}.000/Resources/houdini/python2.7libs/simtracker.py;/opt/hfs{{ houdini_major_version }}/houdini/python2.7libs/simtracker.py
       Description=The path to the simtracker.py file that is used when distributing HQueue sim jobs. This file can be found in the Houdini install.
     marker: "\n# {mark} ANSIBLE MANAGED BLOCK Houdini{{ houdini_major_version | replace('.', '_') }}_SimTracker\n"
+  become: true
   when: (simtracker_block_exists is changed) or (simtracker_block_exists is failed)
 
 - name: Check content of file /opt/Thinkbox/DeadlineRepository10/plugins/Houdini/Houdini.param for hython block
