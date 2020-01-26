@@ -1,0 +1,170 @@
+---
+# tasks file for ansible/roles/openvpn-gateway
+
+- name: Ansible copy file force
+  copy:
+    src: /home/vagrant/openvpn_config/{{ item }}
+    dest: ~/openvpn_config/
+    force: yes
+    mode: 400
+  with_items:
+    - ca.crt
+    - client.crt
+    - client.key
+    - ta.key
+    - openvpn.conf
+
+- name: Create open vpn autologin 
+  copy:
+    content: |
+              {{ openvpn_user }}
+              {{ openvpn_user_pw }}
+    dest: ~/openvpn_config/yourserver.txt
+    mode: 400
+
+- name: replace
+  lineinfile:
+    path: ~/openvpn_config/openvpn.conf
+    state: present
+    regexp: '^auth-user-pass\s'
+    line: 'auth-user-pass yourserver.txt'
+
+- name: insert after
+  lineinfile:
+    path: ~/openvpn_config/openvpn.conf
+    state: present
+    line: 'push "redirect-gateway def1 bypass-dhcp"'
+    insertafter: auth-user-pass
+
+- name: replace
+  lineinfile:
+    path: ~/openvpn_config/openvpn.conf
+    state: present
+    regexp: '^(.*)# OVPN_ACCESS_SERVER_PROFILE=(.*)$'
+    line: '# OVPN_ACCESS_SERVER_PROFILE={{ openvpn_user }}@{{ vpn_address }}/AUTOLOGIN'
+
+- name: insert after
+  lineinfile:
+    path: ~/openvpn_config/openvpn.conf
+    state: present
+    line: '# OVPN_ACCESS_SERVER_AUTOLOGIN=1'
+    insertafter: '# OVPN_ACCESS_SERVER_PROFILE='
+
+- name: insert after
+  lineinfile:
+    path: ~/openvpn_config/openvpn.conf
+    state: present
+    line: '# OVPN_ACCESS_SERVER_AUTOLOGIN=1'
+    insertafter: '# OVPN_ACCESS_SERVER_PROFILE='
+
+### finish copy
+
+- name: test update -
+  debug:
+    msg: "updating autologin. {{ softnas1_private_ip1 }}"
+
+- name: Ansible copy local openvpn files to /etc/openvpn
+  copy:
+    src: /home/vagrant/openvpn_config/{{ item }}
+    dest: /etc/openvpn/{{ item }}
+    owner: deployuser
+    group: deployuser
+    mode: 0400
+    force: yes
+  with_items:
+    - openvpn.conf
+    - ca.crt
+    - client.crt
+    - client.key
+    - ta.key
+
+- name: Ansible allow autostart, uncomment
+  replace:
+    path: /etc/default/openvpn
+    regexp: '^#(.*AUTOSTART="all".*)'
+    replace: '\1'
+
+- name: allow ip forwarding, uncomment
+  replace:
+    path: /etc/sysctl.conf
+    regexp: '^#(.*net.ipv4.ip_forward=1.*)'
+    replace: '\1'    
+
+- name: force systemd to reread configs (2.4 and above)
+  systemd:
+    daemon_reload: yes
+    name: openvpn
+    state: started
+    enabled: yes
+
+- name: wait for first restart for service.
+  command: sleep 30
+
+- name: force systemd to reread configs (2.4 and above)
+  systemd:
+    daemon_reload: yes
+    name: openvpn
+    state: restarted
+    enabled: yes
+
+- name: configure routes to opposite dev/prod environment so that nodes in both envs can access licence server
+  shell: |
+    ip route list | grep {{ item.subnet }}
+    if [ $? -eq 0 ]; then
+      ip route del {{ item.subnet }}
+    else
+      echo "Route does not exit.  No need to delete {{ item.subnet }}"
+    fi
+    ip route add {{ item.subnet }} via {{ item.next_hop }} dev {{ vpn_nic }}
+  with_items:
+    - { subnet: "{{ private_subnet1_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
+    - { subnet: "{{ public_subnet1_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
+    - { subnet: "{{ vpn_cidr_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
+  when: envtier == 'dev'
+  tags:
+    - add-routes
+
+- name: insert/update block in /etc/network/interfaces for routes. configure routes to opposite dev/prod environment so that nodes in both envs can access licence server.  Remove route if it exists and re apply it.
+  blockinfile:
+    path: /etc/network/interfaces
+    block: |
+      up route add -net {{ item.subnet }} gw {{ item.next_hop }}
+    marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.subnet }}"
+  with_items:
+    - { subnet: "{{ private_subnet1_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
+    - { subnet: "{{ public_subnet1_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
+    - { subnet: "{{ vpn_cidr_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
+  when: envtier == 'dev'
+  tags:
+    - add-routes
+
+- name: configure routes to opposite dev/prod environment so that nodes in both envs can access licence server.  Remove route if it exists and re apply it.
+  shell: |
+    ip route list | grep {{ item.subnet }}
+    if [ $? -eq 0 ]; then
+      ip route del {{ item.subnet }}
+    else
+      echo "Route does not exit.  No need to delete {{ item.subnet }}"
+    fi
+    ip route add {{ item.subnet }} via {{ item.next_hop }} dev {{ vpn_nic }}
+  with_items:
+    - { subnet: "{{ private_subnet1_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
+    - { subnet: "{{ public_subnet1_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
+    - { subnet: "{{ vpn_cidr_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
+  when: envtier == 'prod'
+  tags:
+    - add-routes
+
+- name: insert/update block in /etc/network/interfaces for routes.  configure routes to opposite dev/prod environment so that nodes in both envs can access licence server.  Remove route if it exists and re apply it.
+  blockinfile:
+    path: /etc/network/interfaces
+    block: |
+      up route add -net {{ item.subnet }} gw {{ item.next_hop }}
+    marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.subnet }}"
+  with_items:
+    - { subnet: "{{ private_subnet1_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
+    - { subnet: "{{ public_subnet1_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
+    - { subnet: "{{ vpn_cidr_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
+  when: envtier == 'prod'
+  tags:
+    - add-routes
