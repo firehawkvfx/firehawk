@@ -14,7 +14,7 @@
     group: syscontrol
     recurse: yes
   become: yes
-  connection: local
+  delegate_to: firehawkgateway
   with_items:
   - HServer
   - Houdini
@@ -38,12 +38,28 @@
   - cloud-install
   - onsite-install
 
-- name: Ansible copy directory to the remote server.  if failure - ensure you exit the shell and vagrant ssh in before trying again.  vagerant user and deadlineuser were added to a group and this will not refresh until exiting ssh.
-  copy:
-    src: "/opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/{{ item }}"
-    dest: "/home/deadlineuser/Thinkbox/Deadline10/submitters/HoudiniSubmitter"
+- name: Prepare permissions
+  file:
+    path: "/opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/{{ item }}"
     owner: deadlineuser
     group: syscontrol
+  become: yes
+  with_items:
+  - otls
+  - soho
+  - DeadlineHoudiniClient.py
+  - MainMenuCommon.xml
+  tags:
+  - cloud-install
+  - onsite-install
+
+- name: Ansible copy directory to the remote server.  if failure - ensure you exit the shell and vagrant ssh in before trying again.  vagerant user and deadlineuser were added to a group and this will not refresh until exiting ssh.
+  synchronize:
+    src: "/opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/{{ item }}"
+    dest: "/home/deadlineuser/Thinkbox/Deadline10/submitters/HoudiniSubmitter"
+    mode: push
+    owner: true
+  delegate_to: firehawkgateway
   become: yes
   with_items:
   - otls
@@ -65,21 +81,39 @@
   - onsite-install
 
 - name: Ansible copy CallDeadlineCommand.py to the remote server /opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/CallDeadlineCommand.py
-  copy:
+  synchronize:
     src: "/opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/CallDeadlineCommand.py"
     dest: "/home/deadlineuser/houdini{{ item.houdini_major_version }}/python2.7libs/"
+    mode: push
+    owner: true
+  delegate_to: firehawkgateway
   become: yes
+  with_items: "{{ houdini_version_list }}"
   tags:
   - cloud-install
   - onsite-install
-  with_items: "{{ houdini_version_list }}"
 
-- name: Ansible copy directory to the remote server /opt/Thinkbox/DeadlineRepository10/submission/...
-  copy:
-    src: "/opt/Thinkbox/DeadlineRepository10/submission/{{ item }}"
-    dest: "/opt/Thinkbox/DeadlineRepository10/submission/"
+- name: Prepare permissions
+  file:
+    path: "/opt/Thinkbox/DeadlineRepository10/submission/{{ item }}"
     owner: deadlineuser
     group: syscontrol
+  become: yes
+  with_items:
+  - HServer
+  - Houdini
+  #- Nuke
+  tags:
+  - cloud-install
+  - onsite-install
+
+- name: Ansible copy CallDeadlineCommand.py to the remote server /opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/CallDeadlineCommand.py
+  synchronize:
+    src: "/opt/Thinkbox/DeadlineRepository10/submission/{{ item }}"
+    dest: "/opt/Thinkbox/DeadlineRepository10/submission/"
+    mode: push
+    owner: true
+  delegate_to: firehawkgateway
   become: yes
   with_items:
   - HServer
