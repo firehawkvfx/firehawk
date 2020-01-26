@@ -8,8 +8,8 @@ Vagrant.configure("2") do |config|
   openfirehawkserver = ENV['TF_VAR_openfirehawkserver']
   network = ENV['TF_VAR_network']
   selected_ansible_version = ENV['TF_VAR_selected_ansible_version']
-  # the guest additions below are matched to virtual box 6.0.14
-  config.vbguest.iso_path = "https://download.virtualbox.org/virtualbox/6.0.14/VBoxGuestAdditions_6.0.14.iso"
+  # the guest additions below are matched to virtual box 6.0.16
+  config.vbguest.iso_path = "https://download.virtualbox.org/virtualbox/6.0.16/VBoxGuestAdditions_6.0.16.iso"
   config.vbguest.auto_update = false
   # config.vbguest.auto_update = true
 
