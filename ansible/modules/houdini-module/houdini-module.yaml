@@ -12,7 +12,7 @@
 # ansible-playbook -i ansible/inventory ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser hostname=workstation1 ansible_become_pass=sompass"
 
 - hosts: "{{ variable_host | default('role_node_centos') }}"
-  remote_user: "{{ variable_user | default('centos') }}"
+  remote_user: "{{ variable_connect_as_user | default('centos') }}"
   become: true
   vars_files:
     - /vagrant/ansible/group_vars/all/vars
@@ -66,7 +66,7 @@
       - sync_installers
 
 - hosts: "{{ variable_host | default('role_node_centos') }}"
-  remote_user: "{{ variable_user | default('centos') }}"
+  remote_user: "{{ variable_connect_as_user | default('centos') }}"
   become: true
   vars_files:
     - /vagrant/ansible/group_vars/all/vars
@@ -80,6 +80,7 @@
 
 - hosts: firehawkgateway
   remote_user: deployuser
+  become: true
   vars_files:
     - /vagrant/ansible/group_vars/all/vars
     - vars.yml
