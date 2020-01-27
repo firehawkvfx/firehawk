@@ -4,9 +4,6 @@
 [submodule "modules/node_centos/modules/houdini_install_script"]
 	path = modules/node_centos/modules/houdini_install_script
 	url = https://github.com/firehawkvfx/houdini_install_script.git
-[submodule "secrets"]
-	path = secrets
-	url = https://houdinifxtd@bitbucket.org/houdinifxtd/secrets.git
 [submodule "modules/node_centos/modules/houdini-scripts"]
 	path = modules/node_centos/modules/houdini-scripts
 	url = https://houdinifxtd@bitbucket.org/houdinifxtd/houdini-scripts-openfirehawk.git
