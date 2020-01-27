@@ -12,7 +12,7 @@
   - cloud-install
   - onsite-install
 
-- name: adding existing user "{{ item }}" to group syscontrol
+- name: "adding existing user {{ item }} to group syscontrol"
   user:
     name: "{{ variable_user }}"
     groups: "{{ variable_group }}"
