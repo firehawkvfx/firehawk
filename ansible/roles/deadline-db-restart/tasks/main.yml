@@ -1,10 +1,9 @@
 ---
 # tasks file for ansible/roles/deadline-db-restart
-
 - name: Stop Deadline10db service
-  shell: |
-    set -x
-    sudo service Deadline10db stop
+  service:
+    name: Deadline10db
+    state: stopped
   become: true
 
 - name: Reboot the server and wait for it to come back up.
