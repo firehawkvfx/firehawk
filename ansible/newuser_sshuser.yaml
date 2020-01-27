@@ -4,7 +4,7 @@
 # guide : https://medium.com/@khandelwal12nidhi/setup-ssh-key-and-initial-user-using-ansible-playbook-61eabbb0dba4
 
 - hosts: "{{ variable_host | default('workstation1') }}"
-  remote_user: "{{ user_inituser_name }}"
+  remote_user: "{{ variable_connect_as_user | default(user_inituser_name) }}"
   gather_facts: no
   become: true
 
@@ -12,13 +12,19 @@
     ansible_become_password: "{{ user_inituser_pw }}"
     ansible_password: "{{ user_inituser_pw }}"
     public_key_location: "{{ general_use_ssh_key }}.pub"
+    disable_pass_auth: True
+    disable_root: True
 
   tasks:
+
+  - name: connection test
+    command: "echo connected"
+
   - name: Add a new user named deployuser
     user:
-        name: deployuser
-        shell: /bin/bash
-        password: "{{ user_deployuser_pw }}"
+      name: deployuser
+      shell: /bin/bash
+      password: "{{ user_deployuser_pw }}"
 
   - name: Add deployuser user to the sudoers
     copy:
@@ -40,7 +46,7 @@
       key: "{{ lookup('file', public_key_location) }}"
       state: present
   
-  - name: "add vagrant user as an authorized key on the remote host as {{ user_inituser_name }}"
+  - name: "add connection user {{ user_inituser_name }} as an authorized key on the remote host as {{ user_inituser_name }}"
     authorized_key:
       user: "{{ user_inituser_name }}"
       key: "{{ lookup('file', public_key_location) }}"
@@ -52,7 +58,8 @@
       regexp: '^PasswordAuthentication'
       line: "PasswordAuthentication no"
       state: present
-      backup: yes 
+      backup: yes
+    when: disable_pass_auth
 
   - name: Disable Root Login.
     lineinfile:
@@ -61,6 +68,7 @@
       line: "PermitRootLogin no"
       state: present
       backup: yes
+    when: disable_root
     notify:
       - restart ssh
 
