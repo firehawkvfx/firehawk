@@ -125,3 +125,7 @@ TF_VAR_openfirehawkserver_vcpus_prod=insertvalue
 # eg: TF_VAR_selected_ansible_version=2.9.2
 # default: TF_VAR_selected_ansible_version=latest
 TF_VAR_selected_ansible_version=insertvalue
+
+# TF_VAR_syscontrol_gid:
+# the group gid for the syscontrol group
+TF_VAR_syscontrol_gid=insertvalue

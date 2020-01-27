@@ -8,6 +8,7 @@ Vagrant.configure("2") do |config|
   openfirehawkserver = ENV['TF_VAR_openfirehawkserver']
   network = ENV['TF_VAR_network']
   selected_ansible_version = ENV['TF_VAR_selected_ansible_version']
+  syscontrol_gid=ENV['TF_VAR_syscontrol_gid']
   # the guest additions below are matched to virtual box 6.0.16
   config.vbguest.iso_path = "https://download.virtualbox.org/virtualbox/6.0.16/VBoxGuestAdditions_6.0.16.iso"
   config.vbguest.auto_update = false
@@ -18,7 +19,10 @@ Vagrant.configure("2") do |config|
     # Ubuntu 16.04
     ansiblecontrol.vm.box = "bento/ubuntu-16.04"
     ansiblecontrol.vm.box_version = "201912.03.0"
-    ansiblecontrol.vm.synced_folder "../secrets", "/secrets", create: true
+    # create syscontrol group and add vagrant user
+    ansiblecontrol.vm.provision "shell", inline: "sudo groupadd -g #{syscontrol_gid} syscontrol"
+    ansiblecontrol.vm.provision "shell", inline: "sudo usermod -aG syscontrol vagrant"
+    ansiblecontrol.vm.synced_folder "../secrets", "/secrets", create: true, owner: "vagrant", group: syscontrol_gid
     ansiblecontrol.vm.define "ansible_control_"+envtier
     ansiblecontrol.vagrant.plugins = ['vagrant-disksize', 'vagrant-reload']
     if network == 'public'
@@ -88,7 +92,9 @@ Vagrant.configure("2") do |config|
   config.vm.define "firehawkgateway" do |firehawkgateway|
     firehawkgateway.vm.box = "bento/ubuntu-16.04"
     firehawkgateway.vm.box_version = "201912.03.0"
-    firehawkgateway.vm.synced_folder "../secrets", "/secrets", create: true
+    firehawkgateway.vm.provision "shell", inline: "sudo groupadd -g #{syscontrol_gid} syscontrol"
+    firehawkgateway.vm.provision "shell", inline: "sudo usermod -aG syscontrol vagrant"
+    firehawkgateway.vm.synced_folder "../secrets", "/secrets", create: true, owner: "vagrant", group: syscontrol_gid
     firehawkgateway.vm.define "firehawkgateway_"+envtier
     firehawkgateway.vagrant.plugins = ['vagrant-disksize', 'vagrant-reload']
     firehawkgateway.disksize.size = '65536MB'
