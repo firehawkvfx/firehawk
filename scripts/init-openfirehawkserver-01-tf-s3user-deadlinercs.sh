@@ -93,7 +93,7 @@ ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --e
 ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=firehawkgateway host_ip=$TF_VAR_openfirehawkserver group_name=role_gateway insert_ssh_key_string=ansible_ssh_private_key_file=$TF_VAR_general_use_ssh_key"; exit_test
 
 # Now this will init the deployuser on the workstation.  the deployuser will become the primary user with ssh access.  After this point the vagrant user could be destroyed for further hardening.
-ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_sshuser.yaml -v --extra-vars "variable_host=firehawkgateway user_inituser_name=vagrant ansible_ssh_private_key_file=/vagrant/.vagrant/machines/firehawkgateway/virtualbox/private_key"; exit_test
+ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_sshuser.yaml -v --extra-vars "variable_host=firehawkgateway user_inituser_name=vagrant user_inituser_pw='' ansible_ssh_private_key_file=/vagrant/.vagrant/machines/firehawkgateway/virtualbox/private_key"; exit_test
 echo "Ping the host as deployuser..."
 ansible -m ping firehawkgateway -i "$TF_VAR_inventory" --private-key=$TF_VAR_general_use_ssh_key -u deployuser --become; exit_test
 echo "Init the Gateway VM..."
@@ -149,7 +149,7 @@ elif [[ "$tf_action" == "apply" ]]; then
 
   ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deadlineuser"; exit_test
   # add vagrant user to group syscontrol.   this is local and wont apply until after reboot, so try to avoid since we dont want to reboot the ansible control.
-  # ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars 'variable_user=vagrant' --tags 'onsite-install'; exit_test
+  ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars 'variable_user=vagrant' --tags 'onsite-install'; exit_test
   # add user to syscontrol without the new user tag, it will just add a user to the syscontrol group
   ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars 'variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deployuser' --tags 'onsite-install'; exit_test
   # install deadline
@@ -159,6 +159,8 @@ elif [[ "$tf_action" == "apply" ]]; then
   ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
   # reboot the firehawkgateway to boot the deadline daemon processes predictably.
   ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-restart.yaml -v; exit_test
+  # check corruption disn't occur
+  ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
   # couldn't do this before previous playbook since the user doesn't exist yet.  split out the creation of the user into a seperate role to run first, then we can download deadline via s3.
   
   # ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=ansible_control variable_user=deadlineuser"; exit_test
