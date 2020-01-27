@@ -123,14 +123,14 @@ we can initialise the secrets keys and encrypt.
     source ./update_vars.sh --prod
 - If you already have an aws account, ensure you have secret keys setup in your secrets file so that the aws CLI will be installed correctly.
 - Now we can execute the first playbook to initialise the vm.
-    ansible-playbook -i "$TF_VAR_inventory" ansible/init.yaml -v
+    ansible-playbook -i ansible/inventory/hosts ansible/init.yaml -v
 - Download the deadline linux installer version 10.0.23.4 (or latest version) into downloads/Deadline-10.0.23.4-linux-installers.tar, then setup the deadline user and deadline db + deadline rcs with this playbook. set the version in your secrets file.
-    ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v
+    ansible-playbook -i ansible/inventory/hosts ansible/newuser_deadlineuser.yaml -v
 - Remember to always run source ./update_vars.sh before running any ansible playbooks, or using terraform.  Without your environment variables, nothing will work.
 - Download the latest houdini installer tar to the downloads folder.
-    ansible-playbook -i "$TF_VAR_inventory" ansible/openfirehawkserver_houdini.yaml -v
+    ansible-playbook -i ansible/inventory/hosts ansible/openfirehawkserver_houdini.yaml -v
 - Init your aws access key if you don't already have one setup from a previous installation of open firehawk
-    ansible-playbook -i "$TF_VAR_inventory" ansible/aws-new-key.yaml
+    ansible-playbook -i ansible/inventory/hosts ansible/aws-new-key.yaml
 - Subscribe to these amis (it may take some time before your subscription is processed)-
     openvpn https://aws.amazon.com/marketplace/pp/B00MI40CAE
     centos7 https://aws.amazon.com/marketplace/pp/B00O7WM7QW?qid=1552746240289&sr=0-1&ref_=srh_res_product_title
@@ -183,7 +183,7 @@ Route53FullAccess
 s3AdminAcces
 
 - Under security credentials, create Access Keys for the CLI.  Don't write these down anywhere, you are going to copy them straight into the secrets/secret-prod file.  its easy enough to destroy them and recreate them again in the future, you would just update with the init playbook again-
-    ansible-playbook -i "$TF_VAR_inventory" ansible/init.yaml
+    ansible-playbook -i ansible/inventory/hosts ansible/init.yaml
 
 - Test that its working by running
     aws ec2 describe-regions --output table --debug
