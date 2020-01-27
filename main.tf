@@ -1,7 +1,5 @@
 provider "aws" {
   #  if you haven't installed and configured the aws cli, you will need to provide your aws access key and secret key.
-  #  access_key = "${var.aws_access_key}"
-  #  secret_key = "${var.aws_secret_key}"
   region = var.aws_region
   # in a dev environment these version locks below can be disabled.  in production, they should be locked based on the suggested versions from terraform init.
   version = "~> 2.24"
