@@ -6,6 +6,7 @@ envtier = ENV['TF_VAR_envtier']
 network = ENV['TF_VAR_network']
 selected_ansible_version = ENV['TF_VAR_selected_ansible_version']
 syscontrol_gid=ENV['TF_VAR_syscontrol_gid']
+deployuser_uid=ENV['TF_VAR_deployuser_uid']
 disk = '65536MB'
 
 servers=[
@@ -17,7 +18,8 @@ servers=[
     :promisc => false,
     :box => "bento/ubuntu-16.04",
     :ram => 1024,
-    :cpu => 2
+    :cpu => 2,
+    :primary => true
   },
   {
     :hostname => "firehawkgateway",
@@ -27,7 +29,8 @@ servers=[
     :promisc => true,
     :box => "bento/ubuntu-16.04",
     :ram => 8192,
-    :cpu => 4
+    :cpu => 4,
+    :primary => false
   }
 ]
 
@@ -35,12 +38,14 @@ Vagrant.configure(2) do |config|
     config.vbguest.iso_path = "https://download.virtualbox.org/virtualbox/6.0.14/VBoxGuestAdditions_6.0.14.iso"
     config.vbguest.auto_update = false
     servers.each do |machine|
-        config.vm.define machine[:hostname] do |node|
+        config.vm.define machine[:hostname], primary: machine[:primary] do |node|
             node.vm.box = machine[:box]
             node.vm.hostname = machine[:hostname]+envtier
             node.vm.box_version = "201912.03.0"
             node.vm.provision "shell", inline: "sudo groupadd -g #{syscontrol_gid} syscontrol"
             node.vm.provision "shell", inline: "sudo usermod -aG syscontrol vagrant"
+            node.vm.provision "shell", inline: "sudo useradd -m -s /bin/bash -U deployuser -u #{deployuser_uid}"
+            node.vm.provision "shell", inline: "sudo usermod -aG syscontrol deployuser"
             node.vm.synced_folder "../secrets", "/secrets", create: true, owner: "vagrant", group: syscontrol_gid
             node.vm.define machine[:hostname]+envtier
             node.vagrant.plugins = ['vagrant-disksize', 'vagrant-reload']

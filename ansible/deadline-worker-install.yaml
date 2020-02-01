@@ -95,7 +95,7 @@
     group:
       name: syscontrol
       state: present
-      gid: 9003
+      gid: "{{ syscontrol_gid }}"
     become: true
     tags:
     - cloud-install

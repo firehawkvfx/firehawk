@@ -93,6 +93,9 @@ remote_subnet_cidr: "{{ lookup('env','TF_VAR_remote_subnet_cidr') }}"
 
 vpn_nic: eth1
 
+syscontrol_gid: "{{ lookup('env', 'TF_VAR_syscontrol_gid') }}"
+deployuser_uid: "{{ lookup('env', 'TF_VAR_deployuser_uid') }}"
+
 openvpn_user: openvpnas
 openvpn_user_pw: "{{ lookup('env','TF_VAR_openvpn_user_pw') }}"
 

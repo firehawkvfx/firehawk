@@ -25,6 +25,7 @@
       name: deployuser
       shell: /bin/bash
       password: "{{ user_deployuser_pw }}"
+      uid: "{{ deployuser_uid }}"
 
   - name: Add deployuser user to the sudoers
     copy:
