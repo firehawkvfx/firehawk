@@ -48,8 +48,9 @@ Vagrant.configure(2) do |config|
             node.vm.provision "shell", inline: "sudo usermod -aG syscontrol deployuser"
             # Allow deployuser to have passwordless sudo
             node.vm.provision "shell", inline: "grep -qxF 'deployuser ALL=(ALL) NOPASSWD: ALL' /etc/sudoers || echo 'deployuser ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers"
-            node.vm.synced_folder ".", "/deployuser", mount_options: ["uid=#{deployuser_uid}", "gid=#{syscontrol_gid}"]
-            node.vm.synced_folder "../secrets", "/secrets", create: true, mount_options: ["uid=#{deployuser_uid}", "gid=#{syscontrol_gid}"]
+            # node.vm.synced_folder ".", "/deployuser", mount_options: ["uid=#{deployuser_uid}", "gid=#{syscontrol_gid}"]
+            # node.vm.synced_folder "../secrets", "/secrets", create: true, mount_options: ["uid=#{deployuser_uid}", "gid=#{syscontrol_gid}"]
+            node.vm.synced_folder "../secrets", "/secrets", create: true, owner: "vagrant", group: syscontrol_gid
             node.vm.define machine[:hostname]+envtier
             node.vagrant.plugins = ['vagrant-disksize', 'vagrant-reload']
             node.disksize.size = disk
@@ -93,29 +94,31 @@ Vagrant.configure(2) do |config|
             end
 
             node.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive; sudo apt-get update"
-            node.vm.provision "shell", inline: "echo 'source /deployuser/scripts/env.sh' > /etc/profile.d/sa-environment.sh", :run => 'always'
+            node.vm.provision "shell", inline: "echo 'source /vagrant/scripts/env.sh' > /etc/profile.d/sa-environment.sh", :run => 'always'
             node.vm.provision "shell", inline: "echo DEBIAN_FRONTEND=$DEBIAN_FRONTEND"
             node.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive"
             node.vm.provision "shell", inline: "sudo rm /etc/localtime && sudo ln -s #{ENV['TF_VAR_timezone_localpath']} /etc/localtime", run: "always"
             node.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive; sudo apt-get install -y sshpass"
             ### Install Ansible Block ###
             node.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive; sudo apt-get install -y software-properties-common"
-            if selected_ansible_version == 'latest'
-                node.vm.provision "shell", inline: "echo 'installing latest version of ansible with apt-get'"
-                node.vm.provision "shell", inline: "sudo apt-add-repository --yes --update ppa:ansible/ansible"
-                node.vm.provision "shell", inline: "sudo apt-get install -y ansible"
-            else
-                # Installing a specific version of ansible with pip creates dependency issues pip potentially.
-                node.vm.provision "shell", inline: "sudo apt-get install -y python-pip"
-                node.vm.provision "shell", inline: "pip install --upgrade pip"    
-                # to list available versions - pip install ansible==
-                node.vm.provision "shell", inline: "sudo -H pip install ansible==#{ansible_version}"
+            if machine[:hostname] == "ansiblecontrol"
+                if selected_ansible_version == 'latest'
+                    node.vm.provision "shell", inline: "echo 'installing latest version of ansible with apt-get'"
+                    node.vm.provision "shell", inline: "sudo apt-add-repository --yes --update ppa:ansible/ansible-2.9"
+                    node.vm.provision "shell", inline: "sudo apt-get install -y ansible"
+                else
+                    # Installing a specific version of ansible with pip creates dependency issues pip potentially.
+                    node.vm.provision "shell", inline: "sudo apt-get install -y python-pip"
+                    node.vm.provision "shell", inline: "pip install --upgrade pip"    
+                    # to list available versions - pip install ansible==
+                    node.vm.provision "shell", inline: "sudo -H pip install ansible==#{ansible_version}"
+                end
             end
             # configure a connection timeout to prevent ansible from getting stuck when there is an ssh issue.
             node.vm.provision "shell", inline: "echo 'ConnectTimeout 60' >> /etc/ssh/ssh_config"
           
             # we define the location of the ansible hosts file in an environment variable.
-            node.vm.provision "shell", inline: "grep -qxF 'ANSIBLE_INVENTORY=/deployuser/ansible/hosts' /etc/environment || echo 'ANSIBLE_INVENTORY=/deployuser/ansible/hosts' | sudo tee -a /etc/environment"
+            node.vm.provision "shell", inline: "grep -qxF 'ANSIBLE_INVENTORY=/vagrant/ansible/hosts' /etc/environment || echo 'ANSIBLE_INVENTORY=/vagrant/ansible/hosts' | sudo tee -a /etc/environment"
             # disable the update notifier.  We do not want to update to ubuntu 18, deadline installer doesn't work in 18 when last tested.
             node.vm.provision "shell", inline: "sudo sed -i 's/Prompt=.*$/Prompt=never/' /etc/update-manager/release-upgrades"
             # for dpkg or virtualbox issues, see https://superuser.com/questions/298367/how-to-fix-virtualbox-startup-error-vboxadd-service-failed
