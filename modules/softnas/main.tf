@@ -430,9 +430,9 @@ resource "null_resource" "provision_softnas" {
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
-      . /vagrant/scripts/exit_test.sh
+      . /deployuser/scripts/exit_test.sh
       set -x
-      cd /vagrant
+      cd /deployuser
       ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.softnas1[0].private_ip} bastion_ip=${var.bastion_ip}"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "variable_host=firehawkgateway variable_user=deployuser private_ip=${aws_instance.softnas1[0].private_ip} bastion_ip=${var.bastion_ip}"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=softnas0 host_ip=${aws_instance.softnas1[0].private_ip} group_name=role_softnas insert_ssh_key_string=ansible_ssh_private_key_file=$TF_VAR_local_key_path"; exit_test
@@ -506,7 +506,7 @@ resource "null_resource" "create_ami" {
   provisioner "local-exec" {
     command = <<EOT
       set -x
-      cd /vagrant
+      cd /deployuser
       # ami creation is unnecesary since softnas ami update.  will be needed in future again if softnas updates slow down deployment.
       # ansible-playbook -i "$TF_VAR_inventory" ansible/aws-ami.yaml -v --extra-vars "instance_id=${aws_instance.softnas1[0].id} ami_name=softnas_ami description=softnas1_${aws_instance.softnas1[0].id}_${random_id.ami_unique_name[0].hex}"
       # aws ec2 start-instances --instance-ids ${aws_instance.softnas1[0].id}
@@ -590,9 +590,9 @@ resource "null_resource" "provision_softnas_volumes" {
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
-      . /vagrant/scripts/exit_test.sh
+      . /deployuser/scripts/exit_test.sh
       set -x
-      cd /vagrant
+      cd /deployuser
       # ensure all old mounts onsite are removed if they exist.
       if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
         echo "CONFIGURE REMOTE MOUNTS ON LOCAL NODES"
@@ -626,9 +626,9 @@ EOT
   }
   provisioner "local-exec" {
     command = <<EOT
-      . /vagrant/scripts/exit_test.sh
+      . /deployuser/scripts/exit_test.sh
       set -x
-      cd /vagrant
+      cd /deployuser
       # ensure volumes and pools exist after disks are ensured to exist.
       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-pool.yaml -v; exit_test
       # ensure s3 disks exist and are mounted.  the s3 features are disabled currently in favour of migrating to using the aws cli and pdg to sync data
@@ -662,7 +662,7 @@ resource "null_resource" "start-softnas" {
 
   provisioner "local-exec" {
     command = <<EOT
-      . /vagrant/scripts/exit_test.sh
+      . /deployuser/scripts/exit_test.sh
       # create volatile storage
       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk.yaml --extra-vars "instance_id=${aws_instance.softnas1[0].id} stop_softnas_instance=true mode=attach"; exit_test
       aws ec2 start-instances --instance-ids ${aws_instance.softnas1[0].id}; exit_test
@@ -683,7 +683,7 @@ resource "null_resource" "shutdown-softnas" {
     #command = "aws ec2 stop-instances --instance-ids ${aws_instance.softnas1.id}"
 
     command = <<EOT
-      . /vagrant/scripts/exit_test.sh
+      . /deployuser/scripts/exit_test.sh
       aws ec2 stop-instances --instance-ids ${aws_instance.softnas1[0].id}; exit_test
       # delete volatile storage
       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk.yaml --extra-vars "instance_id=${aws_instance.softnas1[0].id} stop_softnas_instance=true mode=destroy"; exit_test
@@ -723,7 +723,7 @@ resource "null_resource" "attach_local_mounts_after_start" {
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
-      . /vagrant/scripts/exit_test.sh
+      . /deployuser/scripts/exit_test.sh
       set -x
       echo "TF_VAR_remote_mounts_on_local= $TF_VAR_remote_mounts_on_local"
       # ensure routes on workstation exist
@@ -761,7 +761,7 @@ resource "null_resource" "detach_local_mounts_after_stop" {
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
-      . /vagrant/scripts/exit_test.sh
+      . /deployuser/scripts/exit_test.sh
       set -x
       # unmount volumes from local site when softnas is shutdown.
       if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then

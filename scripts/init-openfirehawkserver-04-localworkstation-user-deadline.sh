@@ -29,7 +29,7 @@ printf "\n...checking scripts directory at $SCRIPTDIR\n\n"
 # source an exit test to bail if non zero exit code is produced.
 . $SCRIPTDIR/exit_test.sh
 
-cd /vagrant
+cd /deployuser
 
 if [[ -z $argument ]] ; then
   echo "Error! you must specify an environment --dev or --prod" 1>&2
@@ -71,4 +71,4 @@ ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_
 # echo 'exit and use vagrant reload, then vagrant ssh back in after executing each .sh script'
 # # kill the current session to ensure any new groups can be used in next script
 # printf "\n...Finished $SCRIPTNAME\n\n"
-# sleep 1; pkill -u vagrant sshd
+# sleep 1; pkill -u deployuser sshd

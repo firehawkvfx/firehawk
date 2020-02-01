@@ -363,7 +363,7 @@ resource "null_resource" "pcoipgw" {
   provisioner "local-exec" {
     command = <<EOT
       set -x
-      cd /vagrant
+      cd /deployuser
       ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-public-host.yaml -v --extra-vars "public_ip=${aws_eip.pcoipgw_eip.public_ip} public_address=gateway.${var.public_domain_name} set_bastion=false"
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init.yaml -v --extra-vars "variable_host=pcoipgw_eip.0 hostname=gateway.${var.public_domain_name} pcoip=true"
       ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password variable_host=pcoipgw_eip.0 hostname=gateway.${var.public_domain_name} firehawk_sync_source=$TF_VAR_firehawk_sync_source"

@@ -50,7 +50,7 @@
     state: present
   when: result.stat.exists == false
 
-- name: "insert/update block in /home/{{ variable_user }}/.bashrc and home/vagrant/.bashrc"
+- name: "insert/update block in /home/{{ variable_user }}/.bashrc and home/deployuser/.bashrc"
   blockinfile:
     path: "{{ item }}"
     backup: yes
@@ -58,7 +58,7 @@
     block: |
       ### These lines are created by the new user playbook. ansible-playbook -i ansible/inventory ansible/newuser_deadlineuser.yaml --tags "newuser"
       
-      showenv='. /vagrant/showenv.sh'
+      showenv='. /deployuser/showenv.sh'
       ec2_list_running='aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId]' --filters Name=instance-state-name,Values=running --output text'
   with_items:
     - /home/{{ variable_user }}/.bashrc

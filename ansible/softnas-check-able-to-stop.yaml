@@ -1,5 +1,5 @@
 - hosts: ansible_control
-  remote_user: vagrant
+  remote_user: deployuser
 
   vars:
     init: true
@@ -11,7 +11,7 @@
       region: '{{ aws_region }}'
       state: running
       wait: True
-    become_user: vagrant
+    become_user: deployuser
     when: init
 
 - hosts: role_softnas

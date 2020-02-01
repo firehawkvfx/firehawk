@@ -29,7 +29,7 @@ printf "\n...checking scripts directory at $SCRIPTDIR\n\n"
 # source an exit test to bail if non zero exit code is produced.
 . $SCRIPTDIR/exit_test.sh
 
-cd /vagrant
+cd /deployuser
 
 if [[ -z $argument ]] ; then
   echo "Error! you must specify an environment --dev or --prod" 1>&2
@@ -93,5 +93,5 @@ terraform apply --auto-approve; exit_test
 $TF_VAR_firehawk_path/scripts/tests/test-softnas.sh; exit_test
 
 # kill the current session to ensure any new groups can be used in next script
-# sleep 1; pkill -u vagrant sshd
+# sleep 1; pkill -u deployuser sshd
 printf "\n...Finished $SCRIPTNAME\n\n"

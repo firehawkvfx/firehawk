@@ -31,7 +31,7 @@ printf "\n...checking scripts directory at $SCRIPTDIR\n\n"
 # source an exit test to bail if non zero exit code is produced.
 . $SCRIPTDIR/exit_test.sh
 
-cd /vagrant
+cd /deployuser
 
 if [[ -z $argument ]] ; then
   echo "Error! you must specify an environment --dev or --prod" 1>&2

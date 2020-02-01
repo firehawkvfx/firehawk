@@ -1,12 +1,12 @@
 # adds hosts / updates if present.  optionally add under a group name
 
 - hosts: ansible_control
-  remote_user: vagrant
+  remote_user: deployuser
   gather_facts: "{{ variable_gather_facts | default('true') }}"
   become: true
   
   vars:
-    hosts_file: "/vagrant/{{ inventory }}/hosts"
+    hosts_file: "/deployuser/{{ inventory }}/hosts"
     group_name: ''
     backup: false
   
@@ -17,7 +17,7 @@
         
     - name: ensure 2 new lines exist at end of file always
       shell: |
-        /vagrant/scripts/append_blank_line.sh {{ hosts_file }}
+        /deployuser/scripts/append_blank_line.sh {{ hosts_file }}
       become: true
 
     - name: update ansible_control or add if not exist
@@ -26,7 +26,7 @@
         path: "{{ hosts_file }}"
         line: "ansible_control ansible_connection=local"
         backup: "{{ backup }}"
-        owner: vagrant
+        owner: deployuser
         regexp: "^ansible_control ansible_connection=.*"
         insertbefore: BOF
         create: true
@@ -34,7 +34,7 @@
 
     - name: ensure 2 new lines exist at end of file always
       shell: |
-        /vagrant/scripts/append_blank_line.sh {{ hosts_file }}
+        /deployuser/scripts/append_blank_line.sh {{ hosts_file }}
       become: true
 
     - name: update group or add if not exist
@@ -43,14 +43,14 @@
         path: "{{ hosts_file }}"
         line: "[{{ group_name }}]\n"
         backup: "{{ backup }}"
-        owner: vagrant
+        owner: deployuser
         regexp: ".{{ group_name }}."
       when: group_name != ''
       become: yes
 
     - name: ensure 2 new lines exist at end of file always
       shell: |
-        /vagrant/scripts/append_blank_line.sh {{ hosts_file }}
+        /deployuser/scripts/append_blank_line.sh {{ hosts_file }}
       become: true
       
     - name: Group add host- update host or add if not exist
@@ -59,7 +59,7 @@
         path: "{{ hosts_file }}"
         line: "{{ host_name }} ansible_host={{ host_ip }} {{ insert_ssh_key_string | default('') }}"
         backup: "{{ backup }}"
-        owner: vagrant
+        owner: deployuser
         regexp: "^{{ host_name }} ansible_host=.*"
         insertafter: "^\\[{{ group_name }}\\]"
         create: true
@@ -72,7 +72,7 @@
         path: "{{ hosts_file }}"
         line: "{{ host_name }} ansible_host={{ host_ip }} {{ insert_ssh_key_string | default('') }}"
         backup: "{{ backup }}"
-        owner: vagrant
+        owner: deployuser
         regexp: "^{{ host_name }} ansible_host=.*"
         insertafter: "^ansible_control ansible_connection=.*"
       when: group_name == ''
@@ -80,5 +80,5 @@
 
     - name: ensure 2 new lines exist at end of file always
       shell: |
-        /vagrant/scripts/append_blank_line.sh {{ hosts_file }}
+        /deployuser/scripts/append_blank_line.sh {{ hosts_file }}
       become: true

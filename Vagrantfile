@@ -46,7 +46,10 @@ Vagrant.configure(2) do |config|
             node.vm.provision "shell", inline: "sudo usermod -aG syscontrol vagrant"
             node.vm.provision "shell", inline: "sudo useradd -m -s /bin/bash -U deployuser -u #{deployuser_uid}"
             node.vm.provision "shell", inline: "sudo usermod -aG syscontrol deployuser"
-            node.vm.synced_folder "../secrets", "/secrets", create: true, owner: "vagrant", group: syscontrol_gid
+            # Allow deployuser to have passwordless sudo
+            node.vm.provision "shell", inline: "grep -qxF 'deployuser ALL=(ALL) NOPASSWD: ALL' /etc/sudoers || echo 'deployuser ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers"
+            node.vm.synced_folder ".", "/deployuser", mount_options: ["uid=#{deployuser_uid}", "gid=#{syscontrol_gid}"]
+            node.vm.synced_folder "../secrets", "/secrets", create: true, mount_options: ["uid=#{deployuser_uid}", "gid=#{syscontrol_gid}"]
             node.vm.define machine[:hostname]+envtier
             node.vagrant.plugins = ['vagrant-disksize', 'vagrant-reload']
             node.disksize.size = disk
@@ -90,7 +93,7 @@ Vagrant.configure(2) do |config|
             end
 
             node.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive; sudo apt-get update"
-            node.vm.provision "shell", inline: "echo 'source /vagrant/scripts/env.sh' > /etc/profile.d/sa-environment.sh", :run => 'always'
+            node.vm.provision "shell", inline: "echo 'source /deployuser/scripts/env.sh' > /etc/profile.d/sa-environment.sh", :run => 'always'
             node.vm.provision "shell", inline: "echo DEBIAN_FRONTEND=$DEBIAN_FRONTEND"
             node.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive"
             node.vm.provision "shell", inline: "sudo rm /etc/localtime && sudo ln -s #{ENV['TF_VAR_timezone_localpath']} /etc/localtime", run: "always"
@@ -112,7 +115,7 @@ Vagrant.configure(2) do |config|
             node.vm.provision "shell", inline: "echo 'ConnectTimeout 60' >> /etc/ssh/ssh_config"
           
             # we define the location of the ansible hosts file in an environment variable.
-            node.vm.provision "shell", inline: "grep -qxF 'ANSIBLE_INVENTORY=/vagrant/ansible/hosts' /etc/environment || echo 'ANSIBLE_INVENTORY=/vagrant/ansible/hosts' | sudo tee -a /etc/environment"
+            node.vm.provision "shell", inline: "grep -qxF 'ANSIBLE_INVENTORY=/deployuser/ansible/hosts' /etc/environment || echo 'ANSIBLE_INVENTORY=/deployuser/ansible/hosts' | sudo tee -a /etc/environment"
             # disable the update notifier.  We do not want to update to ubuntu 18, deadline installer doesn't work in 18 when last tested.
             node.vm.provision "shell", inline: "sudo sed -i 's/Prompt=.*$/Prompt=never/' /etc/update-manager/release-upgrades"
             # for dpkg or virtualbox issues, see https://superuser.com/questions/298367/how-to-fix-virtualbox-startup-error-vboxadd-service-failed

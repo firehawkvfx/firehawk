@@ -29,7 +29,7 @@ printf "\n...checking scripts directory at $SCRIPTDIR\n\n"
 # source an exit test to bail if non zero exit code is produced.
 . $SCRIPTDIR/exit_test.sh
 
-cd /vagrant
+cd /deployuser
 
 if [[ -z $argument ]] ; then
   echo "Error! you must specify an environment --dev or --prod" 1>&2
@@ -69,7 +69,7 @@ ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-
 # login again and continue...
 
 # install houdini with the same procedure as on render nodes and workstations, and initialise the licence server on this system.
-ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -vvv --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password variable_host=localhost variable_user=vagrant houdini_install_type=server" --skip-tags "sync_scripts"; exit_test
+ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -vvv --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password variable_host=localhost variable_user=deployuser houdini_install_type=server" --skip-tags "sync_scripts"; exit_test
 # ensure an aws pem key exists for ssh into cloud nodes
 ansible-playbook -i "$TF_VAR_inventory" ansible/aws-new-key.yaml; exit_test
 # configure routes to opposite environment for licence server to communicate if in dev environment

@@ -25,13 +25,13 @@
 # BEGIN CONFIGURATION #
 
 # TF_VAR_inventory_dev: 
-# The relative path to the inventory maintained for ansible from the /vagrant path.
+# The relative path to the inventory maintained for ansible from the /deployuser path.
 # This should exist outside the public repository and the default should be used.
 # default: TF_VAR_inventory_dev=../secrets/dev/inventory
 TF_VAR_inventory_dev=insertvalue
 
 # TF_VAR_inventory_prod:
-# The relative path to the inventory maintained for ansible from the /vagrant path.
+# The relative path to the inventory maintained for ansible from the /deployuser path.
 # This should exist outside the public repository and the default should be used.
 # default: TF_VAR_inventory_prod=../secrets/prod/inventory
 TF_VAR_inventory_prod=insertvalue
@@ -39,6 +39,10 @@ TF_VAR_inventory_prod=insertvalue
 # TF_VAR_terraform_version:
 # The version of terraform that will be used
 TF_VAR_terraform_version=insertvalue
+
+# TF_VAR_aws_provider_version:
+# The version for the aws provider plugin terraform will use
+TF_VAR_aws_provider_version=insertvalue
 
 # TF_VAR_softnas_storage:
 # Enable softnas storage.  Softnas is used for a centralised cloud based NFS share.

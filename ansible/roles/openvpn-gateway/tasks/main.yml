@@ -3,7 +3,7 @@
 
 - name: Ansible copy file force
   copy:
-    src: /home/vagrant/openvpn_config/{{ item }}
+    src: /home/deployuser/openvpn_config/{{ item }}
     dest: ~/openvpn_config/
     force: yes
     mode: 400
@@ -65,7 +65,7 @@
 
 - name: Ansible copy local openvpn files to /etc/openvpn
   copy:
-    src: /home/vagrant/openvpn_config/{{ item }}
+    src: /home/deployuser/openvpn_config/{{ item }}
     dest: /etc/openvpn/{{ item }}
     owner: deployuser
     group: deployuser

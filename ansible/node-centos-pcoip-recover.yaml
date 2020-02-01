@@ -1,5 +1,5 @@
 - hosts: ansible_control
-  remote_user: vagrant
+  remote_user: deployuser
   become: true
 
   vars:
@@ -15,26 +15,26 @@
   tasks:
   - name: ensure dir exists
     file:
-      path: /vagrant/Downloads/nvidia/{{ grid_folder }}/
+      path: /deployuser/Downloads/nvidia/{{ grid_folder }}/
       state: directory
 
   - name: check if driver version exists
     stat: 
-      path: "/vagrant/downloads/nvidia/{{ grid_folder }}/{{ driver_file }}"
+      path: "/deployuser/downloads/nvidia/{{ grid_folder }}/{{ driver_file }}"
     register: driver_stat
 
   - name: get nvidia driver
     shell: |
       set -x
-      cd /vagrant/downloads/nvidia/{{ grid_folder }}
+      cd /deployuser/downloads/nvidia/{{ grid_folder }}
       aws s3 sync s3://ec2-linux-nvidia-drivers/{{ grid_folder }}/ . --delete
-      #cp *.run /vagrant/downloads/nvidia/.
-    become_user: vagrant
+      #cp *.run /deployuser/downloads/nvidia/.
+    become_user: deployuser
     when: driver_stat.stat.exists == false
 
-  - name: "Ansible find files in subdirectory downloads /vagrant/downloads/nvidia/{{ grid_folder }}/"
+  - name: "Ansible find files in subdirectory downloads /deployuser/downloads/nvidia/{{ grid_folder }}/"
     find:
-      paths: "/vagrant/downloads/nvidia/{{ grid_folder }}/"
+      paths: "/deployuser/downloads/nvidia/{{ grid_folder }}/"
       #patterns: ".*{{ nvidia_driver }}.*.run"
       patterns: "*{{ nvidia_driver }}*.run"
     register: files_matched
@@ -56,7 +56,7 @@
   - name: ensure the nvidia installer is syncronised with the bucket
     s3_sync:
       bucket: "{{ installers_bucket }}"
-      file_root: /vagrant/downloads/nvidia/{{ grid_folder }}
+      file_root: /deployuser/downloads/nvidia/{{ grid_folder }}
       include: "{{ files_matched.files[0].path | basename }}"
       region: "{{ aws_region }}"
     tags:

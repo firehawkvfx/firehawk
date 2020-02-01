@@ -1,6 +1,6 @@
 - name: ensure all mounts are present
   command: sudo mount -a
-  become_user: vagrant
+  become_user: deployuser
   connection: local
   tags:
     - sync_scripts

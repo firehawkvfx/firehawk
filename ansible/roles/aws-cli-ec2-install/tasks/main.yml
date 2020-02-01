@@ -20,7 +20,7 @@
     extra_args: --upgrade
   become: true
 
-# for some reason this can still have permissions issues on the vagrant vm when command line is fine.  this only occurs with the ansible modules
+# for some reason this can still have permissions issues on the deployuser vm when command line is fine.  this only occurs with the ansible modules
 - name: install awscli, force upgrade
   pip: 
     name: awscli
@@ -51,8 +51,8 @@
 
 - name: Run expect to wait for a keybase pass and decrypt - first time is dirty output.
   shell: |
-    /vagrant/scripts/pgp-expect.sh {{ keybase_secret | regex_escape() }} {{ storage_user_secret | regex_escape() }}
-  become_user: vagrant
+    /deployuser/scripts/pgp-expect.sh {{ keybase_secret | regex_escape() }} {{ storage_user_secret | regex_escape() }}
+  become_user: deployuser
   connection: local
   no_log: true
   tags:
@@ -60,8 +60,8 @@
 
 - name: Run expect to wait for a keybase pass and decrypt - collect output.
   shell: |
-    /vagrant/scripts/pgp-expect.sh {{ keybase_secret | regex_escape() }} {{ storage_user_secret | regex_escape() }}
-  become_user: vagrant
+    /deployuser/scripts/pgp-expect.sh {{ keybase_secret | regex_escape() }} {{ storage_user_secret | regex_escape() }}
+  become_user: deployuser
   connection: local
   register: storage_user_secret_output
   no_log: true

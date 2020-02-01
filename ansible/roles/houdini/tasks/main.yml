@@ -3,25 +3,25 @@
     path: /opt/houdini_install_script
     state: directory
     mode: 0700
-    owner: vagrant
+    owner: deployuser
 
 - pip:
     name: beautifulsoup4
 
 - copy:
-    src: /vagrant/modules/node_centos/modules/houdini_install_script/
+    src: /deployuser/modules/node_centos/modules/houdini_install_script/
     dest: /opt/houdini_install_script/
     directory_mode: yes
 
 - file:
     path: /opt/houdini_install_script/houdini_install.py
     mode: 0700
-    owner: vagrant
+    owner: deployuser
 
 # temp alternate install for ubuntu
 - name: copy installer from downloads
   copy:
-    src: /vagrant/downloads/houdini-17.5.173-linux_x86_64_gcc6.3.tar
+    src: /deployuser/downloads/houdini-17.5.173-linux_x86_64_gcc6.3.tar
     dest: /var/tmp/
   become: true
 

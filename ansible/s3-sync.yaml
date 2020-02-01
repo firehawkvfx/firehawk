@@ -1,7 +1,7 @@
 # this wil synchronise a shot to and from s3.
 
 - hosts: ansible_control
-  remote_user: vagrant
+  remote_user: deployuser
   become: true
   
   vars:
@@ -74,7 +74,7 @@
   - name: sync_paths existance check
     debug:
       msg: "path does not exist {{ item.item.path }}"
-    become_user: vagrant
+    become_user: deployuser
     when: not item.stat.exists
     with_items:
       - "{{ local_path_presence.results }}"
@@ -86,7 +86,7 @@
       set -x
       cd {{ volume_path }}/{{ item.item.path }}
       aws s3 sync . s3://{{ bucket }}/{{ item.item.path }} {{ item.item.s3_push_args | default( default_s3_push_args ) }}
-    become_user: vagrant
+    become_user: deployuser
     when: item.stat.exists
     with_items:
       - "{{ local_path_presence.results }}"
@@ -115,7 +115,7 @@
       set -x
       cd {{ volume_path }}/{{ item.path }}
       aws s3 sync s3://{{ bucket }}/{{ item.path }} . --include "*"
-    become_user: vagrant
+    become_user: deployuser
     with_items:
       - "{{ remote_push_paths }}"
     tags:

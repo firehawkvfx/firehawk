@@ -13,7 +13,7 @@
 - openssh_keypair:
     path: "{{ general_use_ssh_key }}"
     mode: 0400
-    owner: vagrant
+    owner: deployuser
 
 - name: insert/update block in /etc/hosts
   blockinfile:

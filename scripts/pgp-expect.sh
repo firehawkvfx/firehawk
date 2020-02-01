@@ -18,7 +18,7 @@ if {$force_conservative} {
 
 # pipe encrypted secret in and use keybase pass to retrieve
 set timeout 300
-spawn /vagrant/scripts/pgp-decrypt.sh $secret
+spawn /deployuser/scripts/pgp-decrypt.sh $secret
 match_max 100000
 log_user 1
 stty echo

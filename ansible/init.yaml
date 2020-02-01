@@ -1,6 +1,6 @@
 ---
 - hosts: "{{ variable_host | default('ansible_control') }}"
-  remote_user: "{{ variable_user | default('vagrant') }}"
+  remote_user: "{{ variable_user | default('deployuser') }}"
   become: true
 
   tasks:
@@ -9,7 +9,7 @@
         msg: "test local connection"
 
 - hosts: "{{ variable_host | default('ansible_control') }}"
-  remote_user: "{{ variable_user | default('vagrant') }}"
+  remote_user: "{{ variable_user | default('deployuser') }}"
   become: true
 
   vars:
@@ -19,7 +19,7 @@
   pre_tasks:
     - name: ensure source ./update_vars.sh initialised
       fail:
-        msg: "A tier has not been defined. ensure you run 'source ./update_vars.sh --dev' or 'source ./update_vars.sh --prod' from the path /vagrant"
+        msg: "A tier has not been defined. ensure you run 'source ./update_vars.sh --dev' or 'source ./update_vars.sh --prod' from the path /deployuser"
       when: envtier is not defined
 
   roles:
@@ -30,7 +30,7 @@
     - role: aws-cli
 
 - hosts: "{{ variable_host | default('ansible_control') }}"
-  remote_user: "{{ variable_user | default('vagrant') }}"
+  remote_user: "{{ variable_user | default('deployuser') }}"
   become: true
 
   tasks:

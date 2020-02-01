@@ -5,12 +5,12 @@
       name: "{{ ami_name }}"
     region: "{{ aws_region }}"
   register: ami_find
-  become_user: vagrant
+  become_user: deployuser
 
 - debug:
     msg: ami_find.images[0]
   when: ami_find.images | length
-  become_user: vagrant
+  become_user: deployuser
 
 - name: Deregister AMI if it exists
   ec2_ami:
@@ -18,7 +18,7 @@
     state: absent
     region: "{{ aws_region }}"
   when: ami_find.images | length and ami_find.images[0].state == 'available'
-  become_user: vagrant
+  become_user: deployuser
 
 - name: Stop the softnas instance for ami creation
   ec2:
@@ -26,7 +26,7 @@
     region: '{{ aws_region }}'
     state: stopped
     wait: True
-  become_user: vagrant
+  become_user: deployuser
 
 - name: Creating the AMI from of the instance
   ec2_ami:
@@ -36,4 +36,4 @@
     description: "{{ description }}"
     region: "{{ aws_region }}"
   register: image
-  become_user: vagrant
+  become_user: deployuser

@@ -15,6 +15,6 @@ then
   printf "\n${GREEN}The VPN private IP was reachable.${NC}\n\n"
   exit 0
 else
-  printf "\n${RED}The VPN private IP could not be reached.  Ensure you can login to the vpn manually, and restart the VM with 'vagrant reload' before continuing.${NC}\n" >&2
+  printf "\n${RED}The VPN private IP could not be reached.  Ensure you can login to the vpn manually, and restart the VM with 'deployuser reload' before continuing.${NC}\n" >&2
   exit 1
 fi

@@ -420,7 +420,7 @@
 
 # multislave functionality
   - copy:
-      src: /vagrant/scripts/deadline-multi-slave.sh
+      src: /deployuser/scripts/deadline-multi-slave.sh
       dest: /usr/bin/deadline-multi-slave.sh
       owner: deadlineuser
       group: syscontrol
@@ -433,7 +433,7 @@
 
 # wrapper for multislave script to run as service
   - copy:
-      src: /vagrant/scripts/multislaveservice.sh
+      src: /deployuser/scripts/multislaveservice.sh
       dest: /usr/bin/multislaveservice.sh
       owner: root
       group: root
@@ -446,7 +446,7 @@
 
 # service wraper for multislave
   - copy:
-      src: /vagrant/scripts/multislaveservice.service
+      src: /deployuser/scripts/multislaveservice.service
       dest: /etc/systemd/system/multislaveservice.service
       owner: root
       group: root

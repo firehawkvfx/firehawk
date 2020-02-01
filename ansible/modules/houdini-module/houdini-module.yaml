@@ -15,7 +15,7 @@
   remote_user: "{{ variable_connect_as_user | default('centos') }}"
   become: true
   vars_files:
-    - /vagrant/ansible/group_vars/all/vars
+    - /deployuser/ansible/group_vars/all/vars
     - vars.yml
     - /secrets/overrides/ansible/modules/houdini-module/vars.yml
 
@@ -33,7 +33,7 @@
   remote_user: deployuser
   become: true
   vars_files:
-    - /vagrant/ansible/group_vars/all/vars
+    - /deployuser/ansible/group_vars/all/vars
     - vars.yml
     - /secrets/overrides/ansible/modules/houdini-module/vars.yml
 
@@ -57,7 +57,7 @@
   - name: ensure the downloads folder is syncronised with the bucket
     s3_sync:
       bucket: "{{ bucket }}"
-      file_root: /vagrant/downloads/
+      file_root: /deployuser/downloads/
       include: "*"
       region: "{{ aws_region }}"
     when: sync_downloads
@@ -69,7 +69,7 @@
   remote_user: "{{ variable_connect_as_user | default('centos') }}"
   become: true
   vars_files:
-    - /vagrant/ansible/group_vars/all/vars
+    - /deployuser/ansible/group_vars/all/vars
     - vars.yml
     - /secrets/overrides/ansible/modules/houdini-module/vars.yml
 
@@ -82,7 +82,7 @@
   remote_user: deployuser
   become: true
   vars_files:
-    - /vagrant/ansible/group_vars/all/vars
+    - /deployuser/ansible/group_vars/all/vars
     - vars.yml
     - /secrets/overrides/ansible/modules/houdini-module/vars.yml
 

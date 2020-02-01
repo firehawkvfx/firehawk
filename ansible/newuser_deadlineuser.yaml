@@ -1,7 +1,7 @@
 ---
 
 - hosts: "{{ variable_host | default('ansible_control') }}"
-  remote_user: "{{ variable_connect_as_user | default('vagrant') }}"
+  remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
   gather_facts: yes
   become: true
 
@@ -12,7 +12,7 @@
     tags: ['cloud-install', 'onsite-install', 'newuser']
 
 - hosts: "{{ variable_host | default('ansible_control') }}"
-  remote_user: "{{ variable_connect_as_user | default('vagrant') }}"
+  remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
   become: true
 
   vars:
@@ -31,11 +31,11 @@
       vars:
         variable_group: 'syscontrol'
       tags: ['cloud-install', 'onsite-install']
-# ADD VAGRANT USER TO THE GROUP AS WELL
-# after deadline install we need to ensure vagrant is part of the syscontrol group.
+# ADD deployuser USER TO THE GROUP AS WELL
+# after deadline install we need to ensure deployuser is part of the syscontrol group.
 
 - hosts: "{{ variable_host | default('ansible_control') }}"
-  remote_user: "{{ variable_connect_as_user | default('vagrant') }}"
+  remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
   become: true
   
   tasks:

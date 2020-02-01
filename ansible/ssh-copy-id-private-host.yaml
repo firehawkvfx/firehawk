@@ -1,5 +1,5 @@
 - hosts: localhost
-  remote_user: vagrant
+  remote_user: deployuser
   gather_facts: no
 
   vars:

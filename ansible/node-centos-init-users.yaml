@@ -107,9 +107,9 @@
 
   - name: setup ssh key for deadline user by generating key identifier from pem key
     shell: |
-      ssh-keygen -y -f {{ local_key_path }} > /home/vagrant/{{ key_name }}_public
+      ssh-keygen -y -f {{ local_key_path }} > /home/deployuser/{{ key_name }}_public
     connection: local
-    become_user: vagrant
+    become_user: deployuser
     become: yes
 
   - name: create .ssh dir
@@ -124,7 +124,7 @@
 
   - name: copy key for deadlineuser
     copy:
-      src: "/home/vagrant/{{ key_name }}_public"
+      src: "/home/deployuser/{{ key_name }}_public"
       dest: /home/deadlineuser/.ssh/authorized_keys
       mode: 0600
       owner: deadlineuser

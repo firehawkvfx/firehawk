@@ -1,10 +1,10 @@
 - hosts: ansible_control
-  remote_user: vagrant
+  remote_user: deployuser
   become: true
   gather_facts: no
 
   vars:
-    variable_user: vagrant
+    variable_user: deployuser
 
   roles:
   - ssh-add-public-host

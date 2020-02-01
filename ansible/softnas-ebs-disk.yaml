@@ -1,5 +1,5 @@
 - hosts: ansible_control
-  remote_user: vagrant
+  remote_user: deployuser
 
   vars:
     #  Creates ebs volumes.  example -
@@ -80,7 +80,7 @@
       region: '{{ aws_region }}'
       state: stopped
       wait: True
-    become_user: vagrant
+    become_user: deployuser
     when: stop_softnas_instance
 
   - name: search for existing volume
@@ -132,7 +132,7 @@
       region: '{{ aws_region }}'
       state: running
       wait: True
-    become_user: vagrant
+    become_user: deployuser
     when: stop_softnas_instance and mode == 'attach'
     
     # for each unique pool, in the list, if it doesn't exist, create it.

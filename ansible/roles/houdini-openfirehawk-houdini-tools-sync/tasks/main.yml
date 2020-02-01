@@ -24,7 +24,7 @@
 
 - name: ensure all mounts are present
   command: sudo mount -a
-  become_user: vagrant
+  become_user: deployuser
   connection: local
   tags:
     - sync_scripts
@@ -34,7 +34,7 @@
     set -x
     cd {{ firehawk_sync_source }}
     aws s3 sync . s3://{{ bucket }}/openfirehawk-houdini-tools/ --include "*" --exclude ".git/*"
-  become_user: vagrant
+  become_user: deployuser
   connection: local
   tags:
     - sync_scripts

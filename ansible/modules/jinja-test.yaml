@@ -3,7 +3,7 @@
   vars_prompt:
     - name: "deadline_linux_installers_tar"
       prompt: "What is the path to the deadline linux installers .tar?"
-      default: "/vagrant/downloads/Deadline-{{ deadline_version }}-linux-installers.tar"
+      default: "/deployuser/downloads/Deadline-{{ deadline_version }}-linux-installers.tar"
       private: no
 
   vars:

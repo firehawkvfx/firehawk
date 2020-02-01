@@ -1,5 +1,5 @@
 - hosts: ansible_control
-  remote_user: vagrant
+  remote_user: deployuser
   become: true
   
   vars:
@@ -17,7 +17,7 @@
   - name: ensure the deadline installer is syncronised with the bucket
     s3_sync:
       bucket: "{{ bucket }}"
-      file_root: /vagrant/downloads/
+      file_root: /deployuser/downloads/
       include: "{{ deadline_linux_filename }}"
       region: "{{ aws_region }}"
     tags:
@@ -26,7 +26,7 @@
   - name: ensure the downloads folder is syncronised with the bucket
     s3_sync:
       bucket: "{{ bucket }}"
-      file_root: /vagrant/downloads/
+      file_root: /deployuser/downloads/
       include: "*"
       region: "{{ aws_region }}"
     when: sync_downloads

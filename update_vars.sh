@@ -136,7 +136,7 @@ function to_abs_path {
 }
 
 function help {
-    echo "usage: source ./update_vars.sh [-v] [--tier[=]dev/prod] [--var-file[=]vagrant/secrets] [--vault[=]encrypt/decrypt]" >&2
+    echo "usage: source ./update_vars.sh [-v] [--tier[=]dev/prod] [--var-file[=]deployuser/secrets] [--vault[=]encrypt/decrypt]" >&2
     printf "\nUse this to source either the vagrant or encrypted secrets config in your dev or prod tier.\n" &&
     failed=true
 }

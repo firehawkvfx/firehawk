@@ -29,7 +29,7 @@ printf "\n...checking scripts directory at $SCRIPTDIR\n\n"
 # source an exit test to bail if non zero exit code is produced.
 . $SCRIPTDIR/exit_test.sh
 
-cd /vagrant
+cd /deployuser
 
 ### Get s3 access keys from terraform ###
 
@@ -83,11 +83,11 @@ $TF_VAR_firehawk_path/scripts/keybase-test.sh; exit_test
 
 if [[ "$tf_action" == "plan" ]]; then
   echo "running terraform plan"
-  cd /vagrant
+  cd /deployuser
   terraform plan; exit_test
 elif [[ "$tf_action" == "apply" ]]; then
   echo "running terraform apply."
-  cd /vagrant
+  cd /deployuser
   terraform apply --auto-approve; exit_test
   # get keys for s3 install
   export storage_user_access_key_id=$(terraform output storage_user_access_key_id)

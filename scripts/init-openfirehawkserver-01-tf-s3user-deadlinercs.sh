@@ -31,7 +31,7 @@ echo "Argument $1"
 echo ""
 ARGS=''
 
-cd /vagrant
+cd /deployuser
 
 ### Get s3 access keys from terraform ###
 
@@ -67,8 +67,8 @@ fi
 # install keybase, used for aquiring keys for deadline spot plugin.
 echo "...Downloading/installing keybase for PGP encryption"
 (
-cd /vagrant/tmp
-file='/vagrant/tmp/keybase_amd64.deb'
+cd /deployuser/tmp
+file='/deployuser/tmp/keybase_amd64.deb'
 uri='https://prerelease.keybase.io/keybase_amd64.deb'
 if test -e "$file"
 then zflag=(-z "$file")
@@ -76,24 +76,27 @@ else zflag=()
 fi
 curl -o "$file" "${zflag[@]}" "$uri"
 )
-sudo apt install -y /vagrant/tmp/keybase_amd64.deb
-run_keybase
-echo $(keybase --version)
 
-# install keybase and test decryption
-$TF_VAR_firehawk_path/scripts/keybase-test.sh; exit_test
-# if you encounter issues you should login with 'keybase login'.  if you haven't created a user account you can do so at keybase.io
+if [[ $keybase_disabled != true ]]; then
+  sudo apt install -y /deployuser/tmp/keybase_amd64.deb
+  run_keybase
+  echo $(keybase --version)
 
-ansible-playbook -i ansible/inventory/hosts ansible/init.yaml --extra-vars "variable_user=vagrant set_hostname=ansiblecontrol"; exit_test
+  # install keybase and test decryption
+  $TF_VAR_firehawk_path/scripts/keybase-test.sh; exit_test
+  # if you encounter issues you should login with 'keybase login'.  if you haven't created a user account you can do so at keybase.io
+fi
+
+ansible-playbook -i ansible/inventory/hosts ansible/init.yaml --extra-vars "variable_user=deployuser set_hostname=ansiblecontrol"; exit_test
 printf "\n\nHave you installed keybase and initialised pgp?\n\nIf not it is highly recommended that you create a profile on your phone and desktop for 2fa.\nIf this process fails for any reason use 'keybase login' manually and test pgp decryption in the shell.\n\n"
 
-# add local host ssh keys to list of accepted keys on ansible control. Example for another onsite workstation-
+echo "add local host ssh keys to list of accepted keys on ansible control. Example for another onsite workstation"
 ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=$TF_VAR_openfirehawkserver local=True"; exit_test
-# now add this host and address to ansible inventory
+echo "Add this host and address to ansible inventory"
 ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=firehawkgateway host_ip=$TF_VAR_openfirehawkserver group_name=role_gateway insert_ssh_key_string=ansible_ssh_private_key_file=$TF_VAR_general_use_ssh_key"; exit_test
 
-# Now this will init the deployuser on the workstation.  the deployuser will become the primary user with ssh access.  After this point the vagrant user could be destroyed for further hardening.
-ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_sshuser.yaml -v --extra-vars "variable_host=firehawkgateway user_inituser_name=vagrant user_inituser_pw='' ansible_ssh_private_key_file=/vagrant/.vagrant/machines/firehawkgateway/virtualbox/private_key"; exit_test
+# Now this will init the deployuser on the workstation.  the deployuser will become the primary user with ssh access.  After this point the deployuser user could be destroyed for further hardening.
+ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_sshuser.yaml -v --extra-vars "variable_host=firehawkgateway user_inituser_name=deployuser user_inituser_pw='' ansible_ssh_private_key_file=/deployuser/.vagrant/machines/firehawkgateway/virtualbox/private_key"; exit_test
 echo "Ping the host as deployuser..."
 ansible -m ping firehawkgateway -i "$TF_VAR_inventory" --private-key=$TF_VAR_general_use_ssh_key -u deployuser --become; exit_test
 echo "Init the Gateway VM..."
@@ -121,7 +124,7 @@ sudo sed -i 's/^TF_VAR_remote_mounts_on_local=.*$/TF_VAR_remote_mounts_on_local=
 echo "...Sourcing config override"
 source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override; exit_test
 
-cd /vagrant
+cd /deployuser
 terraform init
 if [[ "$tf_action" == "plan" ]]; then
   printf "\nrunning terraform plan.\n"
@@ -142,14 +145,14 @@ elif [[ "$tf_action" == "apply" ]]; then
 
   # install aws cli for user with s3 credentials.  root user only needs s3 access.  in future consider provisining a replacement access key for vagrant with less permissions, and remove the root account keys?
   ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=ansible_control variable_user=root"; exit_test
-  ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=ansible_control variable_user=vagrant"; exit_test
+  ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=ansible_control variable_user=deployuser"; exit_test
   ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=firehawkgateway variable_user=deployuser"; exit_test
 
   ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars "variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deadlineuser" --tags 'newuser,onsite-install'; exit_test
 
   ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deadlineuser"; exit_test
-  # add vagrant user to group syscontrol.   this is local and wont apply until after reboot, so try to avoid since we dont want to reboot the ansible control.
-  ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars 'variable_user=vagrant' --tags 'onsite-install'; exit_test
+  # add deployuser user to group syscontrol.   this is local and wont apply until after reboot, so try to avoid since we dont want to reboot the ansible control.
+  ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars 'variable_user=deployuser' --tags 'onsite-install'; exit_test
   # add user to syscontrol without the new user tag, it will just add a user to the syscontrol group
   ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars 'variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deployuser' --tags 'onsite-install'; exit_test
   # install deadline

@@ -36,7 +36,7 @@ printf "\n...checking scripts directory at $SCRIPTDIR\n\n"
 
 configure=
 
-PS3='Do you wish to configure the Openfirehawk server (Vagrant VM) or Configure Secrets (To be done from within the Openfirehawk Server Vagrant VM only)? '
+PS3='Do you wish to configure the Openfirehawk server (deployuser VM) or Configure Secrets (To be done from within the Openfirehawk Server Vagrant VM only)? '
 options=("Configure Vagrant" "Configure Secrets" "Quit")
 select opt in "${options[@]}"
 do
@@ -44,9 +44,9 @@ do
         "Configure Vagrant")
             printf "\nThe OpenFirehawk Server is launched with Vagrant.  Some environment variables must be configured uniquely to your environment.\n\n"
             configure='vagrant'
-            input=$(to_abs_path $SCRIPTDIR/../vagrant.template)
-            output_tmp=$(to_abs_path $SCRIPTDIR/../../secrets/vagrant-tmp)
-            output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/vagrant)
+            input=$(to_abs_path $SCRIPTDIR/../deployuser.template)
+            output_tmp=$(to_abs_path $SCRIPTDIR/../../secrets/deployuser-tmp)
+            output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/deployuser)
             break
             ;;
         "Configure Secrets")

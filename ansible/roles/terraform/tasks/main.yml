@@ -1,35 +1,35 @@
 ---
 # tasks file for roles/terraform
 
-- name: Ensures dir exists /vagrant/downloads
+- name: Ensures dir exists /deployuser/downloads
   file:
-    path: /vagrant/downloads
+    path: /deployuser/downloads
     state: directory
   become: yes
 
 - name: Download Terraform
   get_url:
     url: "https://releases.hashicorp.com/terraform/{{ terraform_version }}/terraform_{{ terraform_version }}_linux_amd64.zip"
-    dest: "/vagrant/downloads/terraform_{{ terraform_version }}_linux_amd64.zip"
+    dest: "/deployuser/downloads/terraform_{{ terraform_version }}_linux_amd64.zip"
   become: yes
 
-- name: "Ensures dir exists /vagrant/downloads/terraform_{{ terraform_version }}_linux_amd64/"
+- name: "Ensures dir exists /deployuser/downloads/terraform_{{ terraform_version }}_linux_amd64/"
   file:
-    path: "/vagrant/downloads/terraform_{{ terraform_version }}_linux_amd64/"
+    path: "/deployuser/downloads/terraform_{{ terraform_version }}_linux_amd64/"
     state: directory
   become: yes
 
 - name: Extract
   unarchive:
-    src: "/vagrant/downloads/terraform_{{ terraform_version }}_linux_amd64.zip"
-    dest: "/vagrant/downloads/terraform_{{ terraform_version }}_linux_amd64/"
+    src: "/deployuser/downloads/terraform_{{ terraform_version }}_linux_amd64.zip"
+    dest: "/deployuser/downloads/terraform_{{ terraform_version }}_linux_amd64/"
   become: yes
   
 - name: Copy terraform to binaries
   copy:
-    src: "/vagrant/downloads/terraform_{{ terraform_version }}_linux_amd64/terraform"
+    src: "/deployuser/downloads/terraform_{{ terraform_version }}_linux_amd64/terraform"
     dest: /usr/local/bin/terraform
-    owner: vagrant
-    group: vagrant
+    owner: deployuser
+    group: deployuser
     mode: u=rx,g=rx,o=r
   become: yes

@@ -1,7 +1,7 @@
 ---
 # tasks file for add-user-to-group
 
-  # set permissions on dealine repository so that scripts can be copied by the vagrant user.
+  # set permissions on dealine repository so that scripts can be copied by the deployuser user.
 - name: Ensure group "syscontrol" exists
   group:
     name: "{{ variable_group }}"

@@ -5,7 +5,7 @@
 
   vars:
     copy: true
-    file_copy_local_path: /vagrant/modules/softnas/install_acpid.sh
+    file_copy_local_path: /deployuser/modules/softnas/install_acpid.sh
 
   tasks:
   - name: Check file exists at "{{ file_copy_local_path }}"

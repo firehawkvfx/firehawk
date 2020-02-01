@@ -1,6 +1,6 @@
 # configures autologin for open vpn and routes.
 
-# to update routes only for the vagrant host, execute 
+# to update routes only for the deployuser host, execute 
 # ansible-playbook -i ansible/inventory ansible/openvpn.yaml -v --extra-vars "" --tags add-routes
 
 - hosts: firehawkgateway

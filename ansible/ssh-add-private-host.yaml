@@ -1,12 +1,12 @@
 - hosts: "{{ variable_host | default('localhost') }}"
-  remote_user: "{{ variable_user | default('vagrant') }}"
+  remote_user: "{{ variable_user | default('deployuser') }}"
   become: true
   gather_facts: no
 
   vars:
     bastion_ip: false
     local: false
-    variable_user: vagrant
+    variable_user: deployuser
 
   roles:
   - ssh-add-private-host

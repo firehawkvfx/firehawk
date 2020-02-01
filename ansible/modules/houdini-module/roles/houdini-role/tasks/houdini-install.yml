@@ -19,7 +19,7 @@
 
 - name: "copy houdini-scripts to /home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/scripts/"
   copy:
-    src: /vagrant/modules/node_centos/modules/houdini-scripts/
+    src: /deployuser/modules/node_centos/modules/houdini-scripts/
     dest: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/scripts/"
     directory_mode: yes
     owner: deadlineuser
