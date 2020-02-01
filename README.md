@@ -95,7 +95,7 @@ Currently, this has only been tested from a Linux RHEL 7.5/Centos Host.  You are
 - Now we will setup our environment variables from a template. If you have already done this before, you will probably want to keep your old secrets instead of copying in the template.
     cp secrets.template secrets/secrets-prod
 - First step before launching vagrant is to ensure an environment var is set with a random mac (you can generate it yourself with scripts/random_mac_unicast.sh) and store it as a variable in secrets/secrets-prod.  eg,
-    TF_VAR_vagrant_mac_prod=0023AE327C51
+    TF_VAR_gateway_mac_prod=0023AE327C51
 - Set the environment variables from the secrets file.  --init assumes an unencrypted file is being used.  We always must do this before running vagrant.
     source ./update_vars.sh --prod --init
 - Get your router to assign/reserve a static ip using this same mac address so that the address doesn't change.  if it does, then render nodes won't find the manager.

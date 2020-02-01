@@ -21,7 +21,7 @@ servers=[
   },
   {
     :hostname => "firehawkgateway",
-    :mac_string => ENV['TF_VAR_vagrant_mac'],
+    :mac_string => ENV['TF_VAR_gateway_mac'],
     :ip => ENV['TF_VAR_openfirehawkserver'],
     :bridgenic => bridgenic,
     :promisc => true,
