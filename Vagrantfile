@@ -11,7 +11,7 @@ disk = '65536MB'
 servers=[
   {
     :hostname => "ansiblecontrol",
-    :mac_string => "none",
+    :mac_string => ENV['TF_VAR_ansible_mac'],
     :ip => "auto",
     :bridgenic => bridgenic,
     :promisc => false,

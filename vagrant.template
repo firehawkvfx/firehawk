@@ -67,14 +67,24 @@ TF_VAR_bridgenic=insertvalue
 # eg 1: TF_VAR_timezone_localpath=/usr/share/zoneinfo/Australia/Sydney
 TF_VAR_timezone_localpath=insertvalue
 
+# TF_VAR_ansible_mac_dev: 
+# A randomly generated mac address for the dev VM that vagrant will use for the VM's bridged network adapter. Your onsite router will assign an ip based on this mac, and you should ensure that it is static/reserved within your router for a persistent IP address. Unicast mac addresses must not have an odd second digit, and this is required. You can use the script in scripts/random_mac_unicast.sh to generate a mac adress and use it here.  Using a peristent mac addressnis useful for consistent licencing handling.  Dev and Prod VMs must have unique mac adress values or they will not function on the same network.  For this reason, we recomend authorising all licencing on the production vm only, and route all licence requests to the production vm since the production vm should run always and it will be a more stable host.
+# default: TF_VAR_vagrant_mac_dev=EEDDAAA1987C
+TF_VAR_ansible_mac_dev=insertvalue
+
+# TF_VAR_ansible_mac_prod: 
+# A randomly generated mac address for the dev VM that vagrant will use for the VM's bridged network adapter. Your onsite router will assign an ip based on this mac, and you should ensure that it is static/reserved within your router for a persistent IP address. Unicast mac addresses must not have an odd second digit, and this is required. You can use the script in scripts/random_mac_unicast.sh to generate a mac adress and use it here.  Using a peristent mac addressnis useful for consistent licencing handling.  Dev and Prod VMs must have unique mac adress values or they will not function on the same network.  For this reason, we recomend authorising all licencing on the production vm only, and route all licence requests to the production vm since the production vm should run always and it will be a more stable host.
+# default: TF_VAR_vagrant_mac_prod=7A5EDDBC9FE0
+TF_VAR_ansible_mac_prod=insertvalue
+
 # TF_VAR_vagrant_mac_dev: 
 # A randomly generated mac address for the dev VM that vagrant will use for the VM's bridged network adapter. Your onsite router will assign an ip based on this mac, and you should ensure that it is static/reserved within your router for a persistent IP address. Unicast mac addresses must not have an odd second digit, and this is required. You can use the script in scripts/random_mac_unicast.sh to generate a mac adress and use it here.  Using a peristent mac addressnis useful for consistent licencing handling.  Dev and Prod VMs must have unique mac adress values or they will not function on the same network.  For this reason, we recomend authorising all licencing on the production vm only, and route all licence requests to the production vm since the production vm should run always and it will be a more stable host.
-# eg: TF_VAR_vagrant_mac_dev=4DA1942417BE
+# default: TF_VAR_vagrant_mac_dev=CE4C7CD0284F
 TF_VAR_vagrant_mac_dev=insertvalue
 
 # TF_VAR_vagrant_mac_prod: 
 # A randomly generated mac address for the prod VM that vagrant will use for the VM's bridged network adapter. Your onsite router will assign an ip based on this mac, and you should ensure that it is static/reserved within your router for a persistent IP address. Unicast mac addresses must not have an odd second digit, and this is required. You can use the script in scripts/random_mac_unicast.sh to generate a mac adress and use it here.  Using a peristent mac addressnis useful for consistent licencing handling.  Dev and Prod VMs must have unique mac adress values or they will not function on the same network.  For this reason, we recomend authorising all licencing on the production vm only, and route all licence requests to the production vm since the production vm should run always and it will be a more stable host.
-# eg: TF_VAR_vagrant_mac_prod=4DA1942417BE
+# eg: TF_VAR_vagrant_mac_prod=FA3C6220D650
 TF_VAR_vagrant_mac_prod=insertvalue
 
 # TF_VAR_openfirehawkserver_dev: 
