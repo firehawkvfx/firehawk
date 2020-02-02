@@ -52,4 +52,5 @@
     state: touch
     access_time: preserve
     modification_time: preserve
+  become: true
   when: key_test == true

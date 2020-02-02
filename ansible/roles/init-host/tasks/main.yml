@@ -14,6 +14,8 @@
     path: "{{ general_use_ssh_key }}"
     mode: 0400
     owner: deployuser
+  delegate_to: ansible_control
+  become: true
 
 - name: insert/update block in /etc/hosts
   blockinfile:

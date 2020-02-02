@@ -20,4 +20,5 @@
     content: "{{ ec2_key_result.key.private_key }}"
     dest: "{{ local_key_path }}"
     mode: 0400
+  become: true
   when: (key_result.stat.exists == False) and ec2_key_result.changed
