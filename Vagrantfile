@@ -52,11 +52,12 @@ Vagrant.configure(2) do |config|
             # give deploy user passwordless sudo as with vagrant user.
             node.vm.provision "shell", inline: "touch /etc/sudoers.d/98_deployuser; grep -qxF 'deployuser ALL=(ALL) NOPASSWD:ALL' /etc/sudoers.d/98_deployuser || echo 'deployuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/98_deployuser"
             # allow ssh access as deploy user
-            node.vm.provision "shell", inline: "cp /home/vagrant/.ssh/authorized_keys /home/deployuser/.ssh/authorized_keys; chown deployuser:deployuser authorized_keys"
+            # node.vm.provision "shell", inline: "mkdir -p /home/deployuser/.ssh; chown -R deployuser:deployuser /home/deployuser/.ssh; chmod 700 /home/deployuser/.ssh"
+            node.vm.provision "shell", inline: "cp -fr /home/vagrant/.ssh /home/deployuser/; chown -R deployuser:deployuser /home/deployuser/.ssh; chown deployuser:deployuser /home/deployuser/.ssh/authorized_keys"
             # Allow deployuser to have passwordless sudo
             node.vm.synced_folder ".", "/vagrant", create: true, owner: "vagrant", group: "vagrant"
             node.vm.synced_folder ".", "/deployuser", owner: deployuser_uid, group: deployuser_uid, mount_options: ["uid=#{deployuser_uid}", "gid=#{deployuser_uid}"]
-            node.vm.synced_folder "../secrets", "/secrets", create: true, owner: "vagrant", group: syscontrol_gid
+            node.vm.synced_folder "../secrets", "/secrets", create: true, owner: "deployuser", group: "deployuser", mount_options: ["uid=#{deployuser_uid}", "gid=#{deployuser_uid}"]
             node.vm.define machine[:hostname]+envtier
             node.vagrant.plugins = ['vagrant-disksize', 'vagrant-reload']
             node.disksize.size = disk
@@ -146,7 +147,6 @@ Vagrant.configure(2) do |config|
           
         end
     end
-    # config.ssh.username = 'deployuser'
     VAGRANT_COMMAND = ARGV[0]
     if VAGRANT_COMMAND == "ssh"
         config.ssh.username = 'deployuser'
