@@ -144,6 +144,11 @@ Vagrant.configure(2) do |config|
             node.vm.provision "shell", inline: "sudo reboot"
             node.vm.provision :reload
             node.vm.post_up_message = "You must install this plugin to set the disk size: vagrant plugin install vagrant-disksize\nEnsure you have installed the vbguest plugin with: vagrant plugin update; vagrant plugin install vagrant-vbguest; vagrant vbguest; vagrant vbguest --status"
+
+            node.trigger.before :destroy, :halt, :reload do |trigger|
+                trigger.info = "Stopping node..."
+                trigger.run = {inline: "echo 'stopping node'"}
+              end
           
         end
     end
