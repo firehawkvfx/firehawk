@@ -37,6 +37,7 @@ servers=[
 Vagrant.configure(2) do |config|
     config.vbguest.iso_path = "https://download.virtualbox.org/virtualbox/6.0.14/VBoxGuestAdditions_6.0.14.iso"
     config.vbguest.auto_update = false
+    
     servers.each do |machine|
         config.vm.define machine[:hostname], primary: machine[:primary] do |node|
         # config.vm.define machine[:hostname] do |node|
@@ -50,6 +51,8 @@ Vagrant.configure(2) do |config|
             node.vm.provision "shell", inline: "sudo usermod -aG sudo deployuser"
             # give deploy user passwordless sudo as with vagrant user.
             node.vm.provision "shell", inline: "touch /etc/sudoers.d/98_deployuser; grep -qxF 'deployuser ALL=(ALL) NOPASSWD:ALL' /etc/sudoers.d/98_deployuser || echo 'deployuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/98_deployuser"
+            # allow ssh access as deploy user
+            node.vm.provision "shell", inline: "cp /home/vagrant/.ssh/authorized_keys /home/deployuser/.ssh/authorized_keys; chown deployuser:deployuser authorized_keys"
             # Allow deployuser to have passwordless sudo
             node.vm.synced_folder ".", "/vagrant", create: true, owner: "vagrant", group: "vagrant"
             node.vm.synced_folder ".", "/deployuser", owner: deployuser_uid, group: deployuser_uid, mount_options: ["uid=#{deployuser_uid}", "gid=#{deployuser_uid}"]
@@ -142,5 +145,10 @@ Vagrant.configure(2) do |config|
             node.vm.post_up_message = "You must install this plugin to set the disk size: vagrant plugin install vagrant-disksize\nEnsure you have installed the vbguest plugin with: vagrant plugin update; vagrant plugin install vagrant-vbguest; vagrant vbguest; vagrant vbguest --status"
           
         end
+    end
+    # config.ssh.username = 'deployuser'
+    VAGRANT_COMMAND = ARGV[0]
+    if VAGRANT_COMMAND == "ssh"
+        config.ssh.username = 'deployuser'
     end
 end
