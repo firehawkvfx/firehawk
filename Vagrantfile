@@ -39,6 +39,7 @@ Vagrant.configure(2) do |config|
     config.vbguest.auto_update = false
     servers.each do |machine|
         config.vm.define machine[:hostname], primary: machine[:primary] do |node|
+        # config.vm.define machine[:hostname] do |node|
             node.vm.box = machine[:box]
             node.vm.hostname = machine[:hostname]+envtier
             node.vm.box_version = "201912.03.0"
@@ -46,10 +47,12 @@ Vagrant.configure(2) do |config|
             node.vm.provision "shell", inline: "sudo usermod -aG syscontrol vagrant"
             node.vm.provision "shell", inline: "sudo useradd -m -s /bin/bash -U deployuser -u #{deployuser_uid}"
             node.vm.provision "shell", inline: "sudo usermod -aG syscontrol deployuser"
+            node.vm.provision "shell", inline: "sudo usermod -aG sudo deployuser"
+            # give deploy user passwordless sudo as with vagrant user.
+            node.vm.provision "shell", inline: "touch /etc/sudoers.d/98_deployuser; grep -qxF 'deployuser ALL=(ALL) NOPASSWD:ALL' /etc/sudoers.d/98_deployuser || echo 'deployuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/98_deployuser"
             # Allow deployuser to have passwordless sudo
-            node.vm.provision "shell", inline: "grep -qxF 'deployuser ALL=(ALL) NOPASSWD: ALL' /etc/sudoers || echo 'deployuser ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers"
-            # node.vm.synced_folder ".", "/deployuser", mount_options: ["uid=#{deployuser_uid}", "gid=#{syscontrol_gid}"]
-            # node.vm.synced_folder "../secrets", "/secrets", create: true, mount_options: ["uid=#{deployuser_uid}", "gid=#{syscontrol_gid}"]
+            node.vm.synced_folder ".", "/vagrant", create: true, owner: "vagrant", group: "vagrant"
+            node.vm.synced_folder ".", "/deployuser", owner: deployuser_uid, group: deployuser_uid, mount_options: ["uid=#{deployuser_uid}", "gid=#{deployuser_uid}"]
             node.vm.synced_folder "../secrets", "/secrets", create: true, owner: "vagrant", group: syscontrol_gid
             node.vm.define machine[:hostname]+envtier
             node.vagrant.plugins = ['vagrant-disksize', 'vagrant-reload']
