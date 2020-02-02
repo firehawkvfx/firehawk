@@ -38,7 +38,8 @@
   copy:
     src: "/deployuser/tmp/HoudiniSubmitter/{{ item }}"
     dest: "/home/deadlineuser/Thinkbox/Deadline10/submitters/HoudiniSubmitter"
-  become: deadlineuser
+  become_user: deadlineuser
+  become: true
   with_items:
   - otls
   - soho
