@@ -4,9 +4,13 @@
 - name: Ansible copy file force
   copy:
     src: /home/deployuser/openvpn_config/{{ item }}
-    dest: ~/openvpn_config/
+    dest: /home/deployuser/openvpn_config/
+    owner: deployuser
+    group: deployuser
     force: yes
     mode: 400
+  become_user: deployuser
+  become: true
   with_items:
     - ca.crt
     - client.crt
@@ -19,45 +23,37 @@
     content: |
               {{ openvpn_user }}
               {{ openvpn_user_pw }}
-    dest: ~/openvpn_config/yourserver.txt
+    dest: /home/deployuser/openvpn_config/yourserver.txt
     mode: 400
 
 - name: replace
   lineinfile:
-    path: ~/openvpn_config/openvpn.conf
+    path: /home/deployuser/openvpn_config/openvpn.conf
     state: present
     regexp: '^auth-user-pass\s'
     line: 'auth-user-pass yourserver.txt'
 
 - name: insert after
   lineinfile:
-    path: ~/openvpn_config/openvpn.conf
+    path: /home/deployuser/openvpn_config/openvpn.conf
     state: present
     line: 'push "redirect-gateway def1 bypass-dhcp"'
     insertafter: auth-user-pass
 
 - name: replace
   lineinfile:
-    path: ~/openvpn_config/openvpn.conf
+    path: /home/deployuser/openvpn_config/openvpn.conf
     state: present
     regexp: '^(.*)# OVPN_ACCESS_SERVER_PROFILE=(.*)$'
     line: '# OVPN_ACCESS_SERVER_PROFILE={{ openvpn_user }}@{{ vpn_address }}/AUTOLOGIN'
 
-- name: insert after
+- name: insert OVPN_ACCESS_SERVER_AUTOLOGIN=1 after OVPN_ACCESS_SERVER_PROFILE
   lineinfile:
-    path: ~/openvpn_config/openvpn.conf
+    path: /home/deployuser/openvpn_config/openvpn.conf
     state: present
     line: '# OVPN_ACCESS_SERVER_AUTOLOGIN=1'
     insertafter: '# OVPN_ACCESS_SERVER_PROFILE='
 
-- name: insert after
-  lineinfile:
-    path: ~/openvpn_config/openvpn.conf
-    state: present
-    line: '# OVPN_ACCESS_SERVER_AUTOLOGIN=1'
-    insertafter: '# OVPN_ACCESS_SERVER_PROFILE='
-
-### finish copy
 
 - name: test update -
   debug:
@@ -71,12 +67,15 @@
     group: deployuser
     mode: 0400
     force: yes
+    remote_src: true
+  become: true
   with_items:
     - openvpn.conf
     - ca.crt
     - client.crt
     - client.key
     - ta.key
+    - yourserver.txt
 
 - name: Ansible allow autostart, uncomment
   replace:
