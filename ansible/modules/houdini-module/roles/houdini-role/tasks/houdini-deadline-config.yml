@@ -21,10 +21,11 @@
 
 # - name: Prepare permissions
 #   file:
-#     path: "/opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/{{ item }}"
+#     path: "/deployuser/tmp/HoudiniSubmitter/{{ item }}"
 #     owner: deadlineuser
 #     group: syscontrol
 #   become: yes
+#   delegate_to: ansible_control
 #   with_items:
 #   - otls
 #   - soho
@@ -33,6 +34,14 @@
 #   tags:
 #   - cloud-install
 #   - onsite-install
+
+- name: create HoudiniSubmitter dir
+  file:
+    path: "/home/deadlineuser/Thinkbox/Deadline10/submitters/HoudiniSubmitter/"
+    owner: deadlineuser
+    group: syscontrol
+  become_user: deadlineuser
+  become: true
 
 - name: Ansible copy directory to the remote server.  if failure - ensure you exit the shell and vagrant ssh in before trying again.  vagerant user and deadlineuser were added to a group and this will not refresh until exiting ssh.
   copy:
