@@ -100,7 +100,7 @@
     - cloud-install
     - onsite-install
 
-  - name: Ansible set local permissions for items to be copied - /opt/Thinkbox/DeadlineRepository10/submission/... - should not be necesary since root is covered prior, but may fix issues.
+  - name: Ansible set permissions for items to be copied - /opt/Thinkbox/DeadlineRepository10/submission/... - should not be necesary since root is covered prior, but may fix issues.
     file:
       path: "/opt/Thinkbox/DeadlineRepository10/submission/{{ item }}"
       state: directory
@@ -108,6 +108,37 @@
       owner: deadlineuser
       group: syscontrol
       recurse: yes
+    become: yes
+    with_items:
+    - HServer
+    - Houdini
+    - Nuke
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: Ensure tmp dirs exist - submission
+    file:
+      path: /deployuser/tmp/submission/{{ item }}
+      state: directory
+      mode: u+rwX,g+rwX,o-rwx
+      owner: deployuser
+      group: deployuser
+    become: true
+    delegate_to: ansible_control
+    with_items:
+    - HServer
+    - Houdini
+    - Nuke
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: Fetch submission plugins
+    synchronize:
+      src: "/opt/Thinkbox/DeadlineRepository10/submission/{{ item }}"
+      dest: "/deployuser/tmp/submission/"
+      mode: pull
     become: yes
     with_items:
     - HServer
