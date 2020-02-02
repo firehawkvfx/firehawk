@@ -21,6 +21,12 @@
   debug:
     var: private_ip
 
+- name: ensure correct permissions on key.
+  file:
+    path: "{{ local_key_path }}"
+    mode: 0400
+  become: true
+
 - name: delegate keyscan to add keys from remote subnet via bastion host.
   command: "ssh-keyscan {{ private_ip }}"
   register: new_host_fingerprint
