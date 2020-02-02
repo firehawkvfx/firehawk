@@ -13,7 +13,7 @@
       debug:
         msg: "test local connection"
 
-- hosts: "{{ variable_host | default('openvpnip') }}"
+- hosts: "{{ variable_host | default('openvpnip_private') }}"
   remote_user: openvpnas
   gather_facts: "{{ variable_gather_facts | default('true') }}"
   become: true
@@ -23,7 +23,7 @@
       debug:
         msg: "test vpn connection"
 
-- hosts: "{{ variable_host | default('openvpnip') }}"
+- hosts: "{{ variable_host | default('openvpnip_private') }}"
   remote_user: openvpnas
   become: true
 
@@ -41,7 +41,7 @@
           (?i)Retype new password: "{{ openvpn_user_pw }}"
       no_log: true
 
-- hosts: "{{ variable_host | default('openvpnip') }}"
+- hosts: "{{ variable_host | default('openvpnip_private') }}"
   remote_user: openvpnas
   become: true
 
