@@ -3,5 +3,8 @@
   become_user: root
   become: true
 
+  vars:
+    reboot: true
+
   roles:
   - deadline-db-restart
