@@ -68,7 +68,7 @@
 # store deadline components required for submitter.
 
   - name: Fetch from the remote recursively and save to local
-    synchronize:  src=/opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/{{ item }} dest=/deployuser/tmp/HoudiniSubmitter mode=pull
+    synchronize:  src=/opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/{{ item }} dest=/deployuser/tmp/HoudiniSubmitter/ mode=pull
     become: yes
     with_items:
     - otls
