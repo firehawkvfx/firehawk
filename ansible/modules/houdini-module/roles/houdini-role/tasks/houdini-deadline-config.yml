@@ -19,20 +19,20 @@
   - cloud-install
   - onsite-install
 
-- name: Prepare permissions
-  file:
-    path: "/opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/{{ item }}"
-    owner: deadlineuser
-    group: syscontrol
-  become: yes
-  with_items:
-  - otls
-  - soho
-  - DeadlineHoudiniClient.py
-  - MainMenuCommon.xml
-  tags:
-  - cloud-install
-  - onsite-install
+# - name: Prepare permissions
+#   file:
+#     path: "/opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/{{ item }}"
+#     owner: deadlineuser
+#     group: syscontrol
+#   become: yes
+#   with_items:
+#   - otls
+#   - soho
+#   - DeadlineHoudiniClient.py
+#   - MainMenuCommon.xml
+#   tags:
+#   - cloud-install
+#   - onsite-install
 
 - name: Ansible copy directory to the remote server.  if failure - ensure you exit the shell and vagrant ssh in before trying again.  vagerant user and deadlineuser were added to a group and this will not refresh until exiting ssh.
   copy:
