@@ -54,7 +54,7 @@
     tags:
       - sync_installers
 
-  - name: ensure the downloads folder is syncronised with the bucket
+  - name: Ensure the downloads folder is syncronised with the bucket
     s3_sync:
       bucket: "{{ bucket }}"
       file_root: /deployuser/downloads/
@@ -67,7 +67,7 @@
 
 # store deadline components required for submitter.
 
-  - name: ensure tmp dir exist - HoudiniSubmitter
+  - name: Ensure tmp dir exist - HoudiniSubmitter
     file:
       path: /deployuser/tmp/HoudiniSubmitter/
       state: directory
