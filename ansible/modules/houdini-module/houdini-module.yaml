@@ -71,6 +71,9 @@
     file:
       path: /deployuser/tmp/HoudiniSubmitter/
       state: directory
+      mode: u+rwX,g+rwX,o-rwx
+      owner: deployuser
+      group: deployuser
     become: true
     tags:
     - cloud-install
@@ -78,7 +81,7 @@
 
   - name: Fetch from the remote recursively and save to local
     synchronize:
-      src: /deployuser/tmp/HoudiniSubmitter/
+      src: /deployuser/tmp/HoudiniSubmitter/{{ item }}
       dest: /opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/{{ item }} 
       mode: pull
       recursive: true
