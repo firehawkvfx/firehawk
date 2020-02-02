@@ -102,7 +102,6 @@ ansible -m ping firehawkgateway -i "$TF_VAR_inventory" --private-key=$TF_VAR_gen
 echo "Init the Gateway VM..."
 ansible-playbook -i "$TF_VAR_inventory" ansible/init.yaml --extra-vars "variable_host=firehawkgateway variable_user=deployuser configure_gateway=true set_hostname=firehawkgateway"; exit_test
 
-
 # legacy manual keybase activation steps
 # echo "Press ENTER if you have initialised a keybase pgp passphrase for this shell. Otherwise exit (ctrl+c) and run:"
 # echo "keybase login"

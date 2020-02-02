@@ -65,6 +65,32 @@
     tags:
       - sync_installers
 
+# store deadline components required for submitter.
+  - name: Ansible fetch dir items for Deadline Houdini Client
+    fetch:
+      src: "/opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/{{ item }}"
+      dest: "/deployuser/tmp/HoudiniSubmitter"
+      flat: true
+    become: yes
+    with_items:
+    - otls
+    - soho
+    - DeadlineHoudiniClient.py
+    - MainMenuCommon.xml
+    tags:
+    - cloud-install
+    - onsite-install
+    
+  - name: Ansible fetch CallDeadlineCommand.py
+    fetch:
+      src: "/opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/CallDeadlineCommand.py"
+      dest: "/deployuser/tmp/HoudiniSubmitter/CallDeadlineCommand.py"
+      flat: true
+    become: yes
+    tags:
+    - cloud-install
+    - onsite-install
+
 - hosts: "{{ variable_host | default('role_node_centos') }}"
   remote_user: "{{ variable_connect_as_user | default('centos') }}"
   become: true

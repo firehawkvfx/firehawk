@@ -22,6 +22,7 @@
   shell: |
     ansible-vault encrypt --vault-id {{ vault_key_path }} {{ secret_path }}
   register: encrypt_shell
+  connection: local
 
 - name: encrypt result
   when: '"ANSIBLE_VAULT" not in check.stdout'
@@ -31,6 +32,7 @@
 - name: read the passwd file - validate update
   shell: "cat {{ secret_path }}"
   register: check_post
+  connection: local
 
 - name: check post encryption result
   when: '"ANSIBLE_VAULT" not in check.stdout'

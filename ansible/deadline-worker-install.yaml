@@ -179,17 +179,24 @@
     - cloud-install
     - onsite-install
 
-  # - name: Strange requirement here.  For some reason read permissions needed for everyone to be set above or the ansible copy doesn't work.  So we set it back to normal here.
-  #   file: 
-  #     path: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
-  #     mode: 0640
-  #     owner: deadlineuser
-  #     group: syscontrol
-  #   become: yes
-  #   tags:
-  #   - cloud-install
-  #   - onsite-install
+- hosts: firehawkgateway
+  remote_user: deployuser
+  become: true
 
+  tasks:
+  - name: Fetch deadline remote client certificate and store on ansible_control
+    fetch: 
+      src: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
+      dest: "/secrets/keys/"
+      mode: 0600
+      owner: deadlineuser
+      group: syscontrol
+      flat: true
+    become: yes
+    # delegate_to: firehawkgateway
+    tags:
+    - cloud-install
+    - onsite-install
 
 - hosts: "{{ variable_host | default('workstation1') }}"
   remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
@@ -213,25 +220,13 @@
     - cloud-install
     - onsite-install
 
-  # - name: Copy deadline remote client certificate
-  #   copy: 
-  #     src: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
-  #     dest: "/opt/Thinkbox/certs/"
-  #     mode: 0600
-  #     owner: deadlineuser
-  #     group: syscontrol
-  #   become: yes
-  #   tags:
-  #   - cloud-install
-  #   - onsite-install
-
-  - name: Copy Remote-To-Remote (from delegate to host)
-    synchronize:
-      src: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx" 
+  - name: Copy deadline remote client certificate
+    copy: 
+      src: "/secrets/keys/Deadline10RemoteClient.pfx"
       dest: "/opt/Thinkbox/certs/"
-      mode: push
-      owner: true
-    delegate_to: firehawkgateway
+      mode: 0600
+      owner: deadlineuser
+      group: syscontrol
     become: yes
     tags:
     - cloud-install

@@ -54,12 +54,10 @@
   - onsite-install
 
 - name: Ansible copy directory to the remote server.  if failure - ensure you exit the shell and vagrant ssh in before trying again.  vagerant user and deadlineuser were added to a group and this will not refresh until exiting ssh.
-  synchronize:
-    src: "/opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/{{ item }}"
+  copy:
+    src: "/deployuser/tmp/HoudiniSubmitter/{{ item }}"
     dest: "/home/deadlineuser/Thinkbox/Deadline10/submitters/HoudiniSubmitter"
-    mode: push
     owner: true
-  delegate_to: firehawkgateway
   become: yes
   with_items:
   - otls
@@ -81,12 +79,10 @@
   - onsite-install
 
 - name: Ansible copy CallDeadlineCommand.py to the remote server /opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/CallDeadlineCommand.py
-  synchronize:
-    src: "/opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/CallDeadlineCommand.py"
+  copy:
+    src: "/deployuser/tmp/HoudiniSubmitter/CallDeadlineCommand.py"
     dest: "/home/deadlineuser/houdini{{ item.houdini_major_version }}/python2.7libs/"
-    mode: push
     owner: true
-  delegate_to: firehawkgateway
   become: yes
   with_items: "{{ houdini_version_list }}"
   tags:
