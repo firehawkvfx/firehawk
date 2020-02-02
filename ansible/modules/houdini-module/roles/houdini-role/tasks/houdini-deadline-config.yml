@@ -37,7 +37,7 @@
 - name: Ansible copy directory to the remote server.  if failure - ensure you exit the shell and vagrant ssh in before trying again.  vagerant user and deadlineuser were added to a group and this will not refresh until exiting ssh.
   copy:
     src: "/deployuser/tmp/HoudiniSubmitter/{{ item }}"
-    dest: "/home/deadlineuser/Thinkbox/Deadline10/submitters/HoudiniSubmitter"
+    dest: "/home/deadlineuser/Thinkbox/Deadline10/submitters/HoudiniSubmitter/"
   become_user: deadlineuser
   become: true
   with_items:
