@@ -112,6 +112,14 @@ elif [[ "$tf_action" == "apply" ]]; then
   terraform apply --auto-approve; exit_test
 fi
 
+#check db and restart to enable vpn connection.
+ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-restart.yaml -v; exit_test
+ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+
+# test if vpn private ip can be reached/
+$TF_VAR_firehawk_path/scripts/tests/test-openvpn.sh; exit_test
+
 echo "IMPORTANT: After this first terraform apply is succesful, you must exit this vm and use 'vagrant reload' to apply the promisc settings to the NIC for routing to work."
 #  THIS NEEDS TO BE FIXED OR MOUNTS from other systems onsite WONT WORK without reboot. you will get an error on the render node/remote workstation.  it would be good to have a single execute install.
 printf "\n...Finished $SCRIPTNAME\n\n"
