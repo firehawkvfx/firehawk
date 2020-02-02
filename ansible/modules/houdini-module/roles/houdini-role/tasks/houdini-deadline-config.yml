@@ -4,25 +4,6 @@
     var: item
   with_items: "{{ houdini_version_list }}"
 
-
-- name: Ansible set local permissions for items to be copied - /opt/Thinkbox/DeadlineRepository10/submission/... - should not be necesary since root is covered prior, but may fix issues.
-  file:
-    path: "/opt/Thinkbox/DeadlineRepository10/submission/{{ item }}"
-    state: directory
-    mode: u=rX,g=rX,o=r
-    owner: deadlineuser
-    group: syscontrol
-    recurse: yes
-  become: yes
-  delegate_to: firehawkgateway
-  with_items:
-  - HServer
-  - Houdini
-  - Nuke
-  tags:
-  - cloud-install
-  - onsite-install
-
 - name: Ansible ensure python2.7libs dir exists
   file:
     path: "/home/deadlineuser/houdini{{ item.houdini_major_version }}/python2.7libs/"
@@ -57,8 +38,7 @@
   copy:
     src: "/deployuser/tmp/HoudiniSubmitter/{{ item }}"
     dest: "/home/deadlineuser/Thinkbox/Deadline10/submitters/HoudiniSubmitter"
-    owner: true
-  become: yes
+  become: deadlineuser
   with_items:
   - otls
   - soho
