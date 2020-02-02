@@ -86,7 +86,7 @@
   - name: Fetch from the remote recursively and save to local
     synchronize:
       src: /opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/{{ item }}
-      dest: /deployuser/tmp/HoudiniSubmitter/{{ item }}
+      dest: /deployuser/tmp/HoudiniSubmitter/
       mode: pull
       recursive: true
     become: yes
