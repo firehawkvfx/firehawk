@@ -110,6 +110,9 @@ variable "aws_region" {}
 
 variable "bastion_dependency" {}
 
+variable "private_route_table_ids" {}
+variable "public_route_table_ids" {}
+
 module "openvpn" {
   #source = "github.com/firehawkvfx/tf_aws_openvpn"
 
@@ -136,6 +139,9 @@ module "openvpn" {
   public_subnet_ids  = var.public_subnet_ids
   remote_vpn_ip_cidr = var.remote_vpn_ip_cidr
   remote_subnet_cidr = var.remote_subnet_cidr
+
+  private_route_table_ids = var.private_route_table_ids
+  public_route_table_ids = var.public_route_table_ids
 
   # EC2 Inputs
   key_name       = var.key_name

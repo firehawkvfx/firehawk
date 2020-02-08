@@ -6,7 +6,6 @@ provider "aws" {
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
-  #source = "../terraform-aws-vpc"
   create_vpc = var.create_vpc
 
   name = "firehawk-compute"
@@ -58,6 +57,9 @@ module "vpn" {
   vpn_cidr           = var.vpn_cidr
   remote_subnet_cidr = var.remote_subnet_cidr
 
+  private_route_table_ids = module.vpc.private_route_table_ids
+  public_route_table_ids  = module.vpc.public_route_table_ids
+
   #the remote public address that will connect to the openvpn instance
   remote_vpn_ip_cidr = var.remote_ip_cidr
   public_subnet_ids  = module.vpc.public_subnets
@@ -101,76 +103,67 @@ resource "null_resource" "dependency_vpn" {
   }
 }
 
-resource "aws_route" "private_openvpn_remote_subnet_gateway" {
-  count = var.create_vpc ? length(var.private_subnets) : 0
-  depends_on = [
-    null_resource.dependency_vpc,
-    null_resource.dependency_vpn,
-  ]
+# resource "aws_route" "private_openvpn_remote_subnet_gateway" {
+#   count = var.create_vpc ? length(var.private_subnets) : 0
+#   depends_on = [
+#     null_resource.dependency_vpc,
+#     null_resource.dependency_vpn,
+#   ]
 
-  route_table_id         = element(module.vpc.private_route_table_ids, count.index)
-  destination_cidr_block = var.remote_subnet_cidr
-  instance_id            = module.vpn.id
+#   route_table_id         = element(module.vpc.private_route_table_ids, count.index)
+#   destination_cidr_block = var.remote_subnet_cidr
+#   instance_id            = module.vpn.id
 
-  timeouts {
-    create = "5m"
-  }
-}
+#   timeouts {
+#     create = "5m"
+#   }
+# }
 
-resource "aws_route" "public_openvpn_remote_subnet_gateway" {
-  count = var.create_vpc ? length(var.private_subnets) : 0
-  depends_on = [
-    null_resource.dependency_vpc,
-    null_resource.dependency_vpn,
-  ]
+# resource "aws_route" "public_openvpn_remote_subnet_gateway" {
+#   count = var.create_vpc ? length(var.private_subnets) : 0
+#   depends_on = [
+#     null_resource.dependency_vpc,
+#     null_resource.dependency_vpn,
+#   ]
 
-  route_table_id         = element(module.vpc.public_route_table_ids, count.index)
-  destination_cidr_block = var.remote_subnet_cidr
-  instance_id            = module.vpn.id
+#   route_table_id         = element(module.vpc.public_route_table_ids, count.index)
+#   destination_cidr_block = var.remote_subnet_cidr
+#   instance_id            = module.vpn.id
 
-  timeouts {
-    create = "5m"
-  }
-}
+#   timeouts {
+#     create = "5m"
+#   }
+# }
 
-### routes may be needed for traffic going back to open vpn dhcp adresses
-resource "aws_route" "private_openvpn_remote_subnet_vpndhcp_gateway" {
-  count = var.create_vpc ? length(var.private_subnets) : 0
-  depends_on = [
-    null_resource.dependency_vpc,
-    null_resource.dependency_vpn,
-  ]
+# ### routes may be needed for traffic going back to open vpn dhcp adresses
+# resource "aws_route" "private_openvpn_remote_subnet_vpndhcp_gateway" {
+#   count = var.create_vpc ? length(var.private_subnets) : 0
+#   depends_on = [
+#     null_resource.dependency_vpc,
+#     null_resource.dependency_vpn,
+#   ]
 
-  route_table_id         = element(module.vpc.private_route_table_ids, count.index)
-  destination_cidr_block = var.vpn_cidr
-  instance_id            = module.vpn.id
+#   route_table_id         = element(module.vpc.private_route_table_ids, count.index)
+#   destination_cidr_block = var.vpn_cidr
+#   instance_id            = module.vpn.id
 
-  timeouts {
-    create = "5m"
-  }
-}
+#   timeouts {
+#     create = "5m"
+#   }
+# }
 
-resource "aws_route" "public_openvpn_remote_subnet_vpndhcp_gateway" {
-  count = var.create_vpc ? length(var.private_subnets) : 0
-  depends_on = [
-    null_resource.dependency_vpc,
-    null_resource.dependency_vpn,
-  ]
+# resource "aws_route" "public_openvpn_remote_subnet_vpndhcp_gateway" {
+#   count = var.create_vpc ? length(var.private_subnets) : 0
+#   depends_on = [
+#     null_resource.dependency_vpc,
+#     null_resource.dependency_vpn,
+#   ]
 
-  route_table_id         = element(module.vpc.public_route_table_ids, count.index)
-  destination_cidr_block = var.vpn_cidr
-  instance_id            = module.vpn.id
+#   route_table_id         = element(module.vpc.public_route_table_ids, count.index)
+#   destination_cidr_block = var.vpn_cidr
+#   instance_id            = module.vpn.id
 
-  timeouts {
-    create = "5m"
-  }
-}
-
-# ##########################
-# # Route table association
-# ##########################
-# resource "aws_route_table_association" "openvpn" {
-#   count = "${length(var.private_subnets)}"
-#   subnet_id      = "${element(module.vpc.private_subnets, count.index)}"
-#   route_table_id = "${element(aws_route_table.openvpn.*.id, count.index)}"
+#   timeouts {
+#     create = "5m"
+#   }
 # }
