@@ -19,13 +19,13 @@
   - cloud-install
   - onsite-install
 
-
-
 - name: create HoudiniSubmitter dir
   file:
     path: "/home/deadlineuser/Thinkbox/Deadline10/submitters/HoudiniSubmitter/"
     owner: deadlineuser
     group: syscontrol
+    state: directory
+    mode: u=rwX,g=rwX,o=rX
   become_user: deadlineuser
   become: true
 
@@ -66,6 +66,20 @@
   - cloud-install
   - onsite-install
 
+- name: set dir permisisons python2.7libs
+  file:
+    path: "/home/deadlineuser/houdini{{ item.houdini_major_version }}/python2.7libs/"
+    owner: deadlineuser
+    group: syscontrol
+    state: directory
+    mode: u=rwX,g=rwX,o=rX
+  become_user: deadlineuser
+  become: true
+  with_items: "{{ houdini_version_list }}"
+  tags:
+  - cloud-install
+  - onsite-install
+
 - name: Ansible copy CallDeadlineCommand.py to the remote server /opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/CallDeadlineCommand.py
   copy:
     src: "/deployuser/tmp/HoudiniSubmitter/CallDeadlineCommand.py"
@@ -91,11 +105,41 @@
 #   - cloud-install
 #   - onsite-install
 
-- name: Ansible copy CallDeadlineCommand.py to the remote server /opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/CallDeadlineCommand.py
+- name: set dir permisisons /opt/Thinkbox/DeadlineRepository10/submission
+  file:
+    path: "/opt/Thinkbox/DeadlineRepository10/submission/"
+    owner: deadlineuser
+    group: syscontrol
+    state: directory
+    mode: u=rwX,g=rwX,o=rX
+  # become_user: deadlineuser
+  become: true
+  tags:
+  - cloud-install
+  - onsite-install
+
+- name: set dir permisisons /opt/Thinkbox/DeadlineRepository10/submission
+  file:
+    path: "/opt/Thinkbox/DeadlineRepository10/submission/{{ item }}"
+    owner: deadlineuser
+    group: syscontrol
+    state: directory
+    mode: u=rwX,g=rwX,o=rX
+  # become_user: deadlineuser
+  become: true
+  with_items:
+  - HServer
+  - Houdini
+  #- Nuke
+  tags:
+  - cloud-install
+  - onsite-install
+
+- name: Ansible copy submission to the remote server /opt/Thinkbox/DeadlineRepository10/submission/
   copy:
     src: "/deployuser/tmp/submission/{{ item }}"
     dest: "/opt/Thinkbox/DeadlineRepository10/submission/"
-  become_user: deadlineuser
+  # become_user: deadlineuser
   become: yes
   with_items:
   - HServer

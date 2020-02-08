@@ -1,9 +1,10 @@
 ---
+# this takes the configuration files form the server in preaparation for htem to be used on the client.
 - name: Ensures dir exists
   file:
     path: "~/openvpn_config"
     state: directory
-  delegate_to: firehawkgateway
+  delegate_to: localhost
   # become_user: deployuser
   remote_user: deployuser
   become: yes

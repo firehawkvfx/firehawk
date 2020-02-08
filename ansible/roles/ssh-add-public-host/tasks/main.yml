@@ -43,6 +43,33 @@
         User centos 
         IdentityFile  {{ cloud_private_key_file }}
 
+      Host "192.168.92.*"
+        User deployuser
+        IdentityFile  {{ general_use_ssh_key }}
+
+      Host "10.0.1.*", "10.0.2.*", "10.0.11.*", "10.0.12.*", "10.0.101.*", "10.0.102.*", "10.0.201.*", "10.0.202.*"
+        IdentityFile  {{ cloud_private_key_file }}
+        User centos
+        ProxyCommand ssh -W %h:%p centos@bastion
+  become: true
+  become_user: "{{ variable_user }}"
+  when: set_bastion
+
+- name: define ssh config for bastion if set_bastion=true.
+  copy:
+    dest: "/home/{{ variable_user }}/.ssh/config"
+    mode: 0600
+    owner: "{{ variable_user }}"
+    content: |
+      Host bastion
+        Hostname {{ bastion_address }}
+        User centos 
+        IdentityFile  {{ cloud_private_key_file }}
+
+      Host "{{ bastion_address }}"
+        User centos 
+        IdentityFile  {{ cloud_private_key_file }}
+
       Host vpn
         Hostname {{ vpn_address }}
         User openvpnas 
@@ -62,4 +89,4 @@
         ProxyCommand ssh -W %h:%p centos@bastion
   become: true
   become_user: "{{ variable_user }}"
-  when: set_bastion
+  when: set_vpn

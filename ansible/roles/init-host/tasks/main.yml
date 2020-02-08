@@ -53,6 +53,8 @@
     insertafter: "^#?.By default.*$"
     line: "# BEGIN ANSIBLE MANAGED BLOCK"
     backup: yes
+  tags:
+  - init
 
 - name: insert marker end
   lineinfile:
@@ -60,6 +62,8 @@
     insertafter: "# BEGIN ANSIBLE MANAGED BLOCK"
     line: "# END ANSIBLE MANAGED BLOCK"
     create: true
+  tags:
+  - init
 
 - name: insert/update block in /etc/rc.local
   blockinfile:
@@ -70,6 +74,8 @@
       /sbin/ifconfig {{ vpn_nic }} up
       /sbin/ifconfig {{ vpn_nic }} promisc
   when: configure_gateway
+  tags:
+  - init
 
 - name: execute and check with netstat
   shell: |
@@ -77,6 +83,8 @@
     netstat -i
   register: netstatout
   become: true
+  tags:
+  - init
 
 - debug:
     msg: "{{ netstatout.stdout }}"

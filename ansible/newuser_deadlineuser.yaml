@@ -25,6 +25,8 @@
     houdini_major_version: 18.0
     
   roles:
+    - role: pip
+      tags: 'newuser'
     - role: 'newuser'
       tags: 'newuser'
     - role: 'add-user-to-group'

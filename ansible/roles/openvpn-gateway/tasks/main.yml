@@ -87,7 +87,9 @@
   replace:
     path: /etc/sysctl.conf
     regexp: '^#(.*net.ipv4.ip_forward=1.*)'
-    replace: '\1'    
+    replace: '\1'
+  tags:
+  - init
 
 - name: force systemd to reread configs (2.4 and above)
   systemd:

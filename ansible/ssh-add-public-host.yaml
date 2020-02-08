@@ -5,6 +5,7 @@
 
   vars:
     variable_user: deployuser
+    set_vpn: false
 
   roles:
   - ssh-add-public-host
@@ -16,6 +17,7 @@
 
   vars:
     variable_user: deployuser
+    set_vpn: false
 
   roles:
   - ssh-add-public-host

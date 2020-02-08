@@ -22,20 +22,3 @@
       pip:
         name: passlib
       become: yes
-    # - name: Case insensitive password string match
-    #   expect:
-    #     command: passwd deadlineuser
-    #     responses:
-    #       (?i)password: "MySekretPa$$word"
-    # you don't want to show passwords in your logs
-    #no_log: true
-    # - name: Create a login user
-    #   user:
-    #     name: testuser
-    #     password: "tempPass"
-    #     groups: # Empty by default, here we give it some groups
-    #       - sudo
-    #     state: present
-    #     shell: /bin/bash # Defaults to /bin/bash
-    #     system: no # Defaults to no
-    #     createhome: yes # Defaults to yes
