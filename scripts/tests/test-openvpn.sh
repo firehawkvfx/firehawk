@@ -8,7 +8,7 @@ NC='\033[0m' # No Color
 # return the first ip output for the vpn address.
 vpn_private_ip=$(terraform output vpn_private_ip | head -n 1)
 # blackhole test, ipv4 range 240.0.0.0/4 reserved for future use
-ping -c1 $vpn_private_ip &> /dev/null && pass=true || pass=false
+fping -c1 -t4000 $vpn_private_ip &> /dev/null && pass=true || pass=false
 
 if [ $pass == true ]
 then

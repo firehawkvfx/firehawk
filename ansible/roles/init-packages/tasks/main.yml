@@ -7,6 +7,7 @@
 - name: install mkpasswd, pip, pexpect, passlib
   package:
     name:
+    - fping # used to ping with max reytries up to a certain time to test open vpn.
     - python-pip
     - python-apt
     - whois

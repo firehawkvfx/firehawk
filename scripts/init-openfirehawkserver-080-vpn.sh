@@ -118,6 +118,8 @@ ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_
 # ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
 
 # test if vpn private ip can be reached/
+echo 'wait 5 seconds and pint to test vpn'
+sleep 5
 $TF_VAR_firehawk_path/scripts/tests/test-openvpn.sh; exit_test
 
 echo "IMPORTANT: After this first terraform apply is succesful, you must exit this vm and use 'vagrant reload' to apply the promisc settings to the NIC for routing to work."

@@ -1,7 +1,7 @@
 ---
 # tasks file for ansible/roles/openvpn-gateway
 
-- name: Ansible copy file force
+- name: Ansible copy files from ansible_host (copied earlier from openvpn server instance) to firehawkgateway (openvpn client)
   copy:
     src: /home/deployuser/openvpn_config/{{ item }}
     dest: /home/deployuser/openvpn_config/
@@ -53,7 +53,6 @@
     state: present
     line: '# OVPN_ACCESS_SERVER_AUTOLOGIN=1'
     insertafter: '# OVPN_ACCESS_SERVER_PROFILE='
-
 
 - name: test update -
   debug:
