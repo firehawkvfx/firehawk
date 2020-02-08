@@ -270,7 +270,8 @@ resource "null_resource" "provision_node_centos" {
     inline = [
       "sleep 10",
       "set -x",
-      "cloud-init status --wait",
+      # "cloud-init status --wait  > /dev/null 2>&1",
+      # "[ $? -ne 0 ] && echo 'Cloud-init failed' && exit 1",
       "sudo yum install -y python",
       "ssh-keyscan ${aws_instance.node_centos[0].private_ip}",
     ]
