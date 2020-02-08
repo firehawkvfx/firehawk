@@ -65,20 +65,8 @@ else
 fi
 
 # install keybase, used for aquiring keys for deadline spot plugin.
-echo "...Downloading/installing keybase for PGP encryption"
-(
-cd /deployuser/tmp
-file='/deployuser/tmp/keybase_amd64.deb'
-uri='https://prerelease.keybase.io/keybase_amd64.deb'
-if test -e "$file"
-then zflag=(-z "$file")
-else zflag=()
-fi
-curl -o "$file" "${zflag[@]}" "$uri"
-)
 
 if [[ $keybase_disabled != true ]]; then
-  sudo apt install -y /deployuser/tmp/keybase_amd64.deb
   run_keybase
   echo $(keybase --version)
 
