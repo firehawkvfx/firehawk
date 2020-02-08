@@ -114,8 +114,8 @@ fi
 
 #check db and restart to enable vpn connection.
 ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
-ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-restart.yaml -v; exit_test
-ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+# ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-restart.yaml -v; exit_test
+# ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
 
 # test if vpn private ip can be reached/
 $TF_VAR_firehawk_path/scripts/tests/test-openvpn.sh; exit_test

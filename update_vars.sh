@@ -218,6 +218,11 @@ parse_opts () {
                         opt="${OPTARG}"
                         var_file
                         ;;
+                    init)
+                        val="init"; OPTIND=$(( $OPTIND + 1 ))
+                        opt="${OPTARG}"
+                        var_file
+                        ;;
                     decrypt)
                         val="decrypt"; OPTIND=$(( $OPTIND + 1 ))
                         opt="vault"
@@ -519,6 +524,16 @@ if [[ "$var_file" = "secrets" ]] || [[ -z "$var_file" ]]; then
     # override the var_file at this point.
     var_file = 'secrets'; exit_test
     source_vars 'secrets' "$encrypt_mode"; exit_test
+    var_file = 'config-override'; exit_test
+    source_vars 'config-override' 'none'; exit_test
+elif [[ "$var_file" = "init" ]]; then
+    # assume secrets is the var file for default behaviour
+    source_vars 'vagrant' 'none'; exit_test
+    source_vars 'defaults' 'none'; exit_test
+    source_vars 'config' 'none'; exit_test
+    # override the var_file at this point.
+    # var_file = 'secrets'; exit_test
+    # source_vars 'secrets' "$encrypt_mode"; exit_test
     var_file = 'config-override'; exit_test
     source_vars 'config-override' 'none'; exit_test
 else

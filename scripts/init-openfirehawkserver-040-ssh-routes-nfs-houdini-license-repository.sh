@@ -78,8 +78,6 @@ ansible-playbook -i "$TF_VAR_inventory" ansible/firehawkgateway-update-routes.ya
 
 #check db
 ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
-ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-restart.yaml -v; exit_test
-ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
 
 echo -e "\nIf above was succesful, exit the vm and use 'vagrant reload' before continuing with the next script.  New user group added wont have user added until reload."
 echo -e "\nFor houdini to work, ensure you have configured your licences on the production server."

@@ -1,6 +1,9 @@
 # ensure the version of virutal box installed matches all dependencies - VirtualBox 6.0.14:
 # further notes on plugin versions at the end of this script
 
+# Ensure you have the vagrant duest plugin:
+# vagrant plugin install vagrant-vbguest
+
 bridgenic = ENV['TF_VAR_bridgenic']
 envtier = ENV['TF_VAR_envtier']
 network = ENV['TF_VAR_network']
@@ -59,7 +62,7 @@ Vagrant.configure(2) do |config|
             node.vm.synced_folder ".", "/deployuser", owner: deployuser_uid, group: deployuser_uid, mount_options: ["uid=#{deployuser_uid}", "gid=#{deployuser_uid}"]
             node.vm.synced_folder "../secrets", "/secrets", create: true, owner: "deployuser", group: "deployuser", mount_options: ["uid=#{deployuser_uid}", "gid=#{deployuser_uid}"]
             node.vm.define machine[:hostname]+envtier
-            node.vagrant.plugins = ['vagrant-disksize', 'vagrant-reload']
+            node.vagrant.plugins = ['vagrant-vbguest', 'vagrant-disksize', 'vagrant-reload']
             node.disksize.size = disk
             mac_string = machine[:mac_string]
             if network == 'public'
@@ -108,18 +111,17 @@ Vagrant.configure(2) do |config|
             node.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive; sudo apt-get install -y sshpass"
             ### Install Ansible Block ###
             node.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive; sudo apt-get install -y software-properties-common"
-            if machine[:hostname] == "ansiblecontrol"
-                if selected_ansible_version == 'latest'
-                    node.vm.provision "shell", inline: "echo 'installing latest version of ansible with apt-get'"
-                    node.vm.provision "shell", inline: "sudo apt-add-repository --yes --update ppa:ansible/ansible-2.9"
-                    node.vm.provision "shell", inline: "sudo apt-get install -y ansible"
-                else
-                    # Installing a specific version of ansible with pip creates dependency issues pip potentially.
-                    node.vm.provision "shell", inline: "sudo apt-get install -y python-pip"
-                    node.vm.provision "shell", inline: "pip install --upgrade pip"    
-                    # to list available versions - pip install ansible==
-                    node.vm.provision "shell", inline: "sudo -H pip install ansible==#{ansible_version}"
-                end
+            
+            if selected_ansible_version == 'latest'
+                node.vm.provision "shell", inline: "echo 'installing latest version of ansible with apt-get'"
+                node.vm.provision "shell", inline: "sudo apt-add-repository --yes --update ppa:ansible/ansible-2.9"
+                node.vm.provision "shell", inline: "sudo apt-get install -y ansible"
+            else
+                # Installing a specific version of ansible with pip creates dependency issues pip potentially.
+                node.vm.provision "shell", inline: "sudo apt-get install -y python-pip"
+                node.vm.provision "shell", inline: "pip install --upgrade pip"    
+                # to list available versions - pip install ansible==
+                node.vm.provision "shell", inline: "sudo -H pip install ansible==#{ansible_version}"
             end
             # configure a connection timeout to prevent ansible from getting stuck when there is an ssh issue.
             node.vm.provision "shell", inline: "echo 'ConnectTimeout 60' >> /etc/ssh/ssh_config"
@@ -134,6 +136,9 @@ Vagrant.configure(2) do |config|
                 sudo sed -i 's/.*PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
                 sudo service ssh restart
             EOC
+            if machine[:hostname] == "firehawkgateway"
+                node.vm.provision "shell", inline: "/deployuser/scripts/init-gateway.sh --dev"
+            end
             node.vm.provision "shell", inline: "sudo reboot"
             # trigger reload
             node.vm.provision :reload
