@@ -32,6 +32,7 @@ EOT
 }
 }
 
+# Consider placing a dependency on cloud nodes on the deadline install.  Not likely to occur but would be better practice.
 
 resource "null_resource" "init-routes-houdini-license-server" {
   count = var.firehawk_init ? 1 : 0
@@ -137,3 +138,24 @@ resource "null_resource" "install-houdini-local-workstation" {
 EOT
 }
 }
+
+resource "null_resource" "local-provisioning-complete" {
+  count = var.firehawk_init ? 1 : 0
+  depends_on = [null_resource.install-houdini-local-workstation]
+
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    command = <<EOT
+      echo '...Firehawk Init Complete'
+EOT
+}
+}
+
+locals {
+  local_provisioning_complete = element(concat(null_resource.local-provisioning-complete.*.id, list("")), 0)
+}
+
+output "local-provisioning-complete" {
+  value = local.local_provisioning_complete
+}
+

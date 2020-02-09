@@ -140,11 +140,7 @@
         ]
       ]}});'
   become: true
-  # register: deadline_db
   no_log: true
   with_items:
   - insert
   - update
-
-# - debug:
-#     var: deadline_db

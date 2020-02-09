@@ -29,7 +29,19 @@ variable "public_subnet1" {
 variable "public_subnet2" {
 }
 
+module "firehawk_init" {
+  # Firehawk init uses Ansible to provision local onsite vm's and workstations.
+  source = "./modules/firehawk_init"
+
+  firehawk_init = true
+  
+  storage_user_access_key_id = module.storage_user.storage_user_access_key_id
+  storage_user_secret = module.storage_user.storage_user_secret
+}
+
 module "vpc" {
+
+  firehawk_init_dependency = module.firehawk_init.local-provisioning-complete
   source = "./modules/vpc"
 
   create_vpc = var.enable_vpc

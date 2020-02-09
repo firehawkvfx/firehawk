@@ -3,6 +3,15 @@ provider "aws" {
   region = var.region
 }
 
+variable "firehawk_init_dependency" {
+}
+
+resource "null_resource" "firehawk_init_dependency" {
+  triggers = {
+    firehawk_init_dependency = var.firehawk_init_dependency
+  }
+}
+
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
