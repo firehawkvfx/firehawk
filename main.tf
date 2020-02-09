@@ -370,6 +370,7 @@ variable "node_sleep_on_create" {
 }
 
 module "node" {
+  dependency = module.firehawk_init.deadlinedb-complete
   # need to ensure mounts exist on start 
   source = "./modules/node_centos"
   name   = "centos"

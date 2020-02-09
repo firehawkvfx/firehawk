@@ -178,6 +178,15 @@ resource "null_resource" "dependency_softnas_and_bastion" {
   }
 }
 
+variable "dependency" {
+}
+
+resource "null_resource" "dependency_deadlinedb" {
+  triggers = {
+    dependency = var.dependency
+  }
+}
+
 data "aws_subnet" "private_subnet" {
   count = length(var.private_subnet_ids)
   id    = var.private_subnet_ids[count.index]
@@ -209,7 +218,7 @@ variable "centos_v7" {
 
 resource "aws_instance" "node_centos" {
   count                = var.site_mounts ? 1 : 0
-  depends_on           = [null_resource.dependency_softnas_and_bastion]
+  depends_on           = [null_resource.dependency_softnas_and_bastion, null_resource.dependency_deadlinedb]
   iam_instance_profile = var.instance_profile_name
 
   #instance type and ami are determined by the gateway type variable for if you want a graphical or non graphical instance.

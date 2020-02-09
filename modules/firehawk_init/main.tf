@@ -32,6 +32,14 @@ EOT
 }
 }
 
+locals {
+  deadlinedb_complete = element(concat(null_resource.init-aws-deadlinedb-firehawk.*.id, list("")), 0)
+}
+
+output "deadlinedb-complete" {
+  value = local.deadlinedb_complete
+}
+
 # Consider placing a dependency on cloud nodes on the deadline install.  Not likely to occur but would be better practice.
 
 resource "null_resource" "init-routes-houdini-license-server" {
