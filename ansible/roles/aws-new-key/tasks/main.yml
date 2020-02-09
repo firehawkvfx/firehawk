@@ -1,19 +1,39 @@
 ---
 # tasks file for ansible/roles/aws-new-key
-- name: check if a pem key exists
+- name: "check if a pem key exists {{ local_key_path }}"
   stat:
     path: "{{ local_key_path }}"
   register: key_result
+
+- name: debug
+  debug:
+    var: key_result
+
+- name: debug
+  debug:
+    var: key_result.stat.exists
+
+- name: force removal of key from account if not present on disk.  regenerate next step.
+  ec2_key:
+    name: "{{ key_name }}"
+    #these must be defined if the module is used.
+    aws_access_key: "{{ AWS_ACCESS_KEY }}"
+    aws_secret_key: "{{ AWS_SECRET_KEY }}"
+    ec2_region: "{{ aws_region }}"
+    state: absent
+  register: ec2_key_result
+  when: not key_result.stat.exists
 
 - name: create a new ec2 key pair, returns generated private key
   ec2_key:
     name: "{{ key_name }}"
     #these must be defined if the module is used.
-    AWS_ACCESS_KEY: "{{ AWS_ACCESS_KEY }}"
-    AWS_SECRET_KEY: "{{ AWS_SECRET_KEY }}"
+    aws_access_key: "{{ AWS_ACCESS_KEY }}"
+    aws_secret_key: "{{ AWS_SECRET_KEY }}"
     ec2_region: "{{ aws_region }}"
+    force: yes
   register: ec2_key_result
-  when: (key_result.stat.exists == False)
+  when: not key_result.stat.exists
 
 - name: Save private key
   copy:
@@ -21,4 +41,4 @@
     dest: "{{ local_key_path }}"
     mode: 0400
   become: true
-  when: (key_result.stat.exists == False) and ec2_key_result.changed
+  when: (not key_result.stat.exists) and ec2_key_result.changed

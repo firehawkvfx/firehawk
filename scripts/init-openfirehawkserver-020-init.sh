@@ -67,7 +67,8 @@ fi
 
 ansible-playbook -i ansible/inventory/hosts ansible/init.yaml --extra-vars "variable_user=deployuser set_hostname=ansiblecontrol"; exit_test
 printf "\n\nHave you installed keybase and initialised pgp?\n\nIf not it is highly recommended that you create a profile on your phone and desktop for 2fa.\nIf this process fails for any reason use 'keybase login' manually and test pgp decryption in the shell.\n\n"
-
+echo "Ansible will create a PEM key at this path if it doesn't already exist: $TF_VAR_local_key_path"
+ansible-playbook -i "$TF_VAR_inventory" ansible/aws-new-key.yaml; exit_test
 echo "add local host ssh keys to list of accepted keys on ansible control. Example for another onsite workstation"
 ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=$TF_VAR_openfirehawkserver local=True"; exit_test
 echo "Add this host and address to ansible inventory"
