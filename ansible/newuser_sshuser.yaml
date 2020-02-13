@@ -3,26 +3,21 @@
 # guide : https://www.howtoforge.com/tutorial/setup-new-user-and-ssh-key-authentication-using-ansible/
 # guide : https://medium.com/@khandelwal12nidhi/setup-ssh-key-and-initial-user-using-ansible-playbook-61eabbb0dba4
 
-# - hosts: ansible_control
-#   remote_user: deployuser
-#   gather_facts: no
-#   become: true
+- hosts: "{{ variable_host | default('workstation1') }}"
+  remote_user: "{{ variable_connect_as_user | default(user_inituser_name) }}"
+  gather_facts: no
 
-#   tasks:
-#   - name: Generate ssh key on ansible_control
-#     command : ssh-keygen -q -t rsa -f /home/deployuser/.ssh/id_rsa.pub -C "" -N ""
-#     args:
-#       creates: /home/deployuser/.ssh/id_rsa.pub
-#     become_user: deployuser
-#     register: output
+  vars:
+    ansible_become_password: "{{ user_inituser_pw }}"
+    ansible_password: "{{ user_inituser_pw }}"
+    public_key_location: "{{ general_use_ssh_key }}.pub"
+    disable_pass_auth: True
+    disable_root: True
 
-# - hosts: "{{ variable_host | default('workstation1') }}"
-#   remote_user: "{{ variable_connect_as_user | default(user_inituser_name) }}"
-#   gather_facts: no
+  tasks:
 
-#   tasks:
-#   - name: Connection test
-#     command: "echo connected"
+  - name: Connection test without sudo
+    command: "echo connected"
 
 - hosts: "{{ variable_host | default('workstation1') }}"
   remote_user: "{{ variable_connect_as_user | default(user_inituser_name) }}"
@@ -68,6 +63,7 @@
       key: "{{ lookup('file', public_key_location) }}"
       state: present
   
+  # this step allows repetition of this script after password is disabled.
   - name: "add connection user {{ user_inituser_name }} as an authorized key on the remote host as {{ user_inituser_name }}"
     authorized_key:
       user: "{{ user_inituser_name }}"
