@@ -26,6 +26,7 @@
     path: "{{ local_key_path }}"
     mode: 0400
   become: true
+  connection: local
 
 - name: delegate keyscan to add keys from remote subnet via bastion host.
   command: "ssh-keyscan {{ private_ip }}"
