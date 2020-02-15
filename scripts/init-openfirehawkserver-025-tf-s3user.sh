@@ -67,7 +67,7 @@ fi
 # install keybase, used for aquiring keys for deadline spot plugin.
 
 if [[ $keybase_disabled != true ]]; then
-  if [[ "$TF_VAR_pgp_public_key"=="keybase:*" ]]; then
+  if [[ "$TF_VAR_pgp_public_key" == keybase:* ]]; then
     run_keybase
     echo $(keybase --version)
   fi

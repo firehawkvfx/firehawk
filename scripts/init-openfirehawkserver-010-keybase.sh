@@ -64,26 +64,31 @@ else
   esac
 fi
 
-# install keybase, used for aquiring keys for deadline spot plugin.
-echo "...Downloading/installing keybase for PGP encryption"
-(
-cd /deployuser/tmp
-file='/deployuser/tmp/keybase_amd64.deb'
-uri='https://prerelease.keybase.io/keybase_amd64.deb'
-if test -e "$file"
-then zflag=(-z "$file")
-else zflag=()
-fi
-curl -o "$file" "${zflag[@]}" "$uri"
-)
-
 if [[ $keybase_disabled != true ]]; then
-  sudo apt install -y /deployuser/tmp/keybase_amd64.deb
-  if [[ "$TF_VAR_pgp_public_key"=="keybase:*" ]]; then
+  if [[ "$TF_VAR_pgp_public_key" == keybase:* ]]; then
+    echo "Installing keybase since pgp_public key starts with keybase:"
+    # install keybase, used for aquiring keys for deadline spot plugin.
+    echo "...Downloading/installing keybase for PGP encryption"
+    (
+    cd /deployuser/tmp
+    file='/deployuser/tmp/keybase_amd64.deb'
+    uri='https://prerelease.keybase.io/keybase_amd64.deb'
+    if test -e "$file"
+    then zflag=(-z "$file")
+    else zflag=()
+    fi
+    curl -o "$file" "${zflag[@]}" "$uri"
+    )
+    sudo apt install -y /deployuser/tmp/keybase_amd64.deb
     run_keybase
     echo $(keybase --version)
+  else
+    echo "Installing pgp and expect"
+    # Currently this imports existing keys.  need to handle generation of keys if nothing exists with ansible instead of bash.
+    sudo apt-get install expect -y
+    gpg --import $TF_VAR_pgp_private_key
+    expect -c "spawn gpg --edit-key $TF_VAR_pgp_email trust quit; send \"5\ry\r\"; expect eof"
   fi
-
   # install keybase and test decryption
   $TF_VAR_firehawk_path/scripts/keybase-pgp-test.sh; exit_test
   # if you encounter issues you should login with 'keybase login'.  if you haven't created a user account you can do so at keybase.io
