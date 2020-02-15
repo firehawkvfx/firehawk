@@ -2,6 +2,9 @@
 
 ### GENERAL FUNCTIONS FOR ALL INSTALLS
 
+# Don't store command history.
+unset HISTFILE
+
 # trap ctrl-c and call ctrl_c()
 trap ctrl_c INT
 function ctrl_c() {
@@ -57,10 +60,12 @@ else
       return
       ;;
   esac
+  echo "...Provision PGP / Keybase"
   $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-010-keybase.sh $ARGS; exit_test
+  echo "...Provision Local VM's"
   $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-020-init.sh $ARGS; exit_test
-  
-  terraform init
+  echo "...Start Terraform"
+  terraform init; exit_test
   terraform apply --auto-approve; exit_test
   # After this point provisioning will now execute from TF.
   # $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-030-tf-s3user-deadlinercs.sh $ARGS; exit_test
