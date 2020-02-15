@@ -1,9 +1,11 @@
 #!/bin/bash
 # echo "Enter Secrets Decryption Password..."
+unset HISTFILE
+
 echo -n Password: 
 read -s password
 
-printf "\nRunning in ansiblecontrol with $1..."
+printf "\nRunning ansiblecontrol with $1...\n"
 
 vagrant up
 
