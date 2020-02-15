@@ -291,7 +291,7 @@ resource "aws_iam_user" "deadline_spot_deployment_user" {
 
 resource "aws_iam_access_key" "deadline_spot_access_key" {
   user    = aws_iam_user.deadline_spot_deployment_user.name
-  pgp_key = var.keybase_pgp_key
+  pgp_key = var.pgp_public_key
   # pgp key: normally in format 'keybase:my_username'
   # see https://www.hiroom2.com/2016/08/14/ubuntu-16-04-create-gpg-key/ to create pgp key in ubuntu
 }

@@ -66,7 +66,7 @@ echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 printf "\n\nHave you installed keybase and initialised pgp?\n\nIf not it is highly recommended that you create a profile on your phone and desktop for 2fa.\nIf this process fails for any reason use 'keybase login' manually and test pgp decryption in the shell.\n\n"
 
 # install keybase and test decryption
-$TF_VAR_firehawk_path/scripts/keybase-test.sh; exit_test
+$TF_VAR_firehawk_path/scripts/keybase-pgp-test.sh; exit_test
 
 # legacy manual keybase activation steps
 # echo "Press ENTER if you have initialised a keybase pgp passphrase for this shell. Otherwise exit (ctrl+c) and run:"

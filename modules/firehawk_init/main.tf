@@ -12,8 +12,8 @@ resource "null_resource" "init-aws-deadlinedb-firehawk" {
       echo "storage_user_access_key_id=$storage_user_access_key_id"
       export storage_user_secret=${var.storage_user_secret}
       echo "storage_user_secret= $storage_user_secret"
-      # Test keybase decryption
-      ./scripts/keybase-test.sh; exit_test
+      # Test keybase / pgp decryption options
+      ./scripts/keybase-pgp-test.sh; exit_test
       # Install aws cli for user with s3 credentials.  root user only needs s3 access.  in future consider provisining a replacement access key for vagrant with less permissions, and remove the root account keys?
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=ansible_control variable_user=root"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=ansible_control variable_user=deployuser"; exit_test

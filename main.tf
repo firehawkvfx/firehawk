@@ -5,6 +5,11 @@ provider "aws" {
   version = "~> 2.24"
 }
 
+# if var.pgp_public_key contains keybase, then use that.  else take the contents of the var as a file on disc
+locals {
+  pgp_public_key = length(regexall(".*keybase:.*", var.pgp_public_key)) > 0 ? var.pgp_public_key : filebase64("/secrets/keys/gpg_pub_key.gpg.pub")
+}
+
 provider "null" {
   version = "~> 2.0"
 }
@@ -139,7 +144,7 @@ output "vpn_private_ip" {
 
 module "storage_user" {
   source          = "./modules/storage_user"
-  keybase_pgp_key = var.keybase_pgp_key
+  pgp_public_key = local.pgp_public_key
 }
 
 output "storage_user_access_key_id" {
@@ -152,7 +157,7 @@ output "storage_user_secret" {
 
 module "deadline" {
   source          = "./modules/deadline"
-  keybase_pgp_key = var.keybase_pgp_key
+  pgp_public_key = local.pgp_public_key
   remote_ip_cidr  = var.remote_ip_cidr
   cidr_list       = concat([var.remote_subnet_cidr, var.remote_ip_cidr], module.vpc.private_subnets_cidr_blocks)
 }
@@ -317,6 +322,7 @@ variable "pcoip_skip_update" {
 
 #   houdini_license_server_address = "${var.houdini_license_server_address}"
 # }
+
 
 
 

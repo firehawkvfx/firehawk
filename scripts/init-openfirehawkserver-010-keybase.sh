@@ -79,10 +79,12 @@ curl -o "$file" "${zflag[@]}" "$uri"
 
 if [[ $keybase_disabled != true ]]; then
   sudo apt install -y /deployuser/tmp/keybase_amd64.deb
-  run_keybase
-  echo $(keybase --version)
+  if [[ "$TF_VAR_pgp_public_key"=="keybase:*" ]]; then
+    run_keybase
+    echo $(keybase --version)
+  fi
 
   # install keybase and test decryption
-  $TF_VAR_firehawk_path/scripts/keybase-test.sh; exit_test
+  $TF_VAR_firehawk_path/scripts/keybase-pgp-test.sh; exit_test
   # if you encounter issues you should login with 'keybase login'.  if you haven't created a user account you can do so at keybase.io
 fi

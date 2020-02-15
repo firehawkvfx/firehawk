@@ -67,9 +67,10 @@ resource "aws_iam_user" "storage_user" {
 
 resource "aws_iam_access_key" "storage_user_access_key" {
   user    = aws_iam_user.storage_user.name
-  pgp_key = var.keybase_pgp_key
+  pgp_key = var.pgp_public_key
   # pgp key: normally in format 'keybase:my_username'
-  # see https://www.hiroom2.com/2016/08/14/ubuntu-16-04-create-gpg-key/ to create pgp key in ubuntu
+  # See https://www.hiroom2.com/2016/08/14/ubuntu-16-04-create-gpg-key/ to create pgp key in ubuntu
+  # Also execllent documentation on pgp / gpg as an alternative to keybase http://zanussi.combell.org/bash_gpg_encrypt_decrypt.html
 }
 
 output "storage_user_access_key_id" {

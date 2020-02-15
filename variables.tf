@@ -168,7 +168,7 @@ variable "workstation_enabled" {
 variable "node_centos_instance_type" {
 }
 
-variable "keybase_pgp_key" {
+variable "pgp_public_key" {
 }
 
 variable "provision_deadline_spot_plugin" {

@@ -70,7 +70,7 @@ if [[ $keybase_disabled != true ]]; then
   echo $(keybase --version)
 
   # install keybase and test decryption
-  $TF_VAR_firehawk_path/scripts/keybase-test.sh; exit_test
+  $TF_VAR_firehawk_path/scripts/keybase-pgp-test.sh; exit_test
   # if you encounter issues you should login with 'keybase login'.  if you haven't created a user account you can do so at keybase.io
 fi
 

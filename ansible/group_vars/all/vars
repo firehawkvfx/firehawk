@@ -133,7 +133,12 @@ max_spot_capacity_mantra: 61
 
 firehawk_sync_source: "{{ lookup('env','TF_VAR_firehawk_sync_source') }}"
 
+# keybase user id or path to pgp public key on disk
+pgp_public_key: "{{ lookup('env','TF_VAR_pgp_public_key') }}"
+
 keybase_secret: "{{ lookup('env','TF_VAR_keybase_secret') }}"
+pgp_email: "{{ lookup('env','TF_VAR_pgp_email') }}"
+pgp_secret: "{{ lookup('env','TF_VAR_pgp_secret') }}"
 
 aws_region: "{{ lookup('env','TF_VAR_aws_region') }}"
 AWS_REGION: "{{ lookup('env','TF_VAR_aws_region') }}"

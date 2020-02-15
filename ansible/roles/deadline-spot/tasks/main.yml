@@ -3,20 +3,31 @@
     name: expect
   become: true
 
-- name: Run expect to wait for a keybase pass and decrypt - first time is dirty output.
+- name: "Keybase: Run expect to wait for a keybase pass and decrypt - first time is dirty output."
   shell: |
-    /deployuser/scripts/pgp-expect.sh {{ keybase_secret | regex_escape() }} {{ spot_secret | regex_escape() }}
+    /deployuser/scripts/pgp-expect-keybase.sh {{ keybase_secret | regex_escape() }} {{ spot_secret | regex_escape() }}
   become_user: deployuser
   connection: local
   no_log: true
+  when: "'keybase:' in pgp_public_key"
 
-- name: Run expect to wait for a keybase pass and decrypt - collect output.
+- name: "Keybase: Run expect to wait for a keybase pass and decrypt - collect output."
   shell: |
-    /deployuser/scripts/pgp-expect.sh {{ keybase_secret | regex_escape() }} {{ spot_secret | regex_escape() }}
+    /deployuser/scripts/pgp-expect-keybase.sh {{ keybase_secret | regex_escape() }} {{ spot_secret | regex_escape() }}
   become_user: deployuser
   connection: local
   register: spot_secret_output
   no_log: true
+  when: "'keybase:' in pgp_public_key"
+
+- name: "GPG: Run expect to wait for a pgp pass and decrypt - collect output."
+  shell: |
+    echo {{ spot_secret | regex_escape() }} | base64 --decode | gpg -dq --no-tty --passphrase {{ pgp_secret | regex_escape() }} --no-use-agent
+  become_user: deployuser
+  connection: local
+  register: spot_secret_output
+  no_log: true
+  when: "'keybase:' not in pgp_public_key"
 
 - set_fact:
     spot_secret_key: "{{ spot_secret_output.stdout }}"

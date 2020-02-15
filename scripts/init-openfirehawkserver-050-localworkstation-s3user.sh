@@ -72,7 +72,7 @@ ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_
 
 
 # install keybase and test decryption
-$TF_VAR_firehawk_path/scripts/keybase-test.sh; exit_test
+$TF_VAR_firehawk_path/scripts/keybase-pgp-test.sh; exit_test
 
 # legacy manual keybase activation steps
 # echo "Press ENTER if you have initialised a keybase pgp passphrase for this shell. Otherwise exit (ctrl+c) and run:"
