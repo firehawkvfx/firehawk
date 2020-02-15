@@ -19,7 +19,7 @@ if {$force_conservative} {
 }
 
 # pipe encrypted secret in and use keybase pass to retrieve
-set timeout 300
+set timeout -1
 
 spawn ./scripts/firehawk-ssh.sh $hostname $port $tier
 match_max 100000
