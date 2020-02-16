@@ -11,10 +11,15 @@ exit_test () {
     if [ $? -eq 0 ]; then
         printf "\n${GREEN}Command Succeeded${NC}\n"
     else
-        printf "\n${RED}Failed Command${NC}\n" >&2
-        # exit will exit the shell if sourced
-        exit 1
-        # return will exit the bash script with a return code
-        # return 1
+        if [ "$LIVE_TERMINAL" == true ]; then
+            printf "\n${RED}Failed command in live terminal. ${NC}\n" >&2
+        else
+            printf "\n${RED}Failed command ...exiting${NC}\n" >&2
+            # exit will exit the shell if sourced
+
+            exit 1
+        fi
+            # return will exit the bash script with a return code
+            # return 1
     fi
 }
