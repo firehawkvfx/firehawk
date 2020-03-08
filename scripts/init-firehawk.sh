@@ -76,8 +76,11 @@ else
     terraform destroy --auto-approve -lock=false; exit_test
   fi
   terraform apply --auto-approve -lock=false; exit_test
+
   if [[ "$TF_VAR_destroy_after_deploy" == true ]]; then
     terraform destroy --auto-approve -lock=false; exit_test
+  else
+    terraform apply --auto-approve -var sleep=true # turn of all nodes to save cloud costs after provisioning
   fi
 
 
