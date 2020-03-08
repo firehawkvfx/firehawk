@@ -133,21 +133,19 @@ if [[ ! -z "$box_file_in" ]] ; then
 else
     source ./update_vars.sh --$TF_VAR_envtier --vagrant
 fi
+echo "...Finished sourcing"
 
-if [[ "$test_vm" = false ]] ; then
+if [[ "$test_vm" = false ]] ; then # If an encrypted var is provided for the vault key, test decrypt that var before proceeding
     if [[ ! -z "$firehawksecret" ]]; then
-        # to manually enter an ecnrypted variable in you configuration use:
+        # To manually enter an ecnrypted variable in you configuration use:
         # firehawksecret=$(echo -n "test some input that will be encrypted and stored as an env var" | ansible-vault encrypt_string --vault-id $vault_key --stdin-name firehawksecret | base64 -w 0)
-        # that variable can be extracted here if specified
+        # That encrypted variable can be extracted here if specified in your environment prior to running this script.
         echo "Aquire firehawksecret..."
         password=$(./scripts/ansible-encrypt.sh --vault-id $vault_key --decrypt $firehawksecret)
         if [[ -z "$password" ]]; then
             echo "ERROR: unable to extract password from defined firehawksecret.  Either remove the firehawksecret variable, or debugging will be required for automation to continue."
             exit 1
         fi
-    else
-        echo -n Password:
-        read -s password
     fi
 fi
 
@@ -190,10 +188,13 @@ if [ "$test_vm" = false ] ; then
         # use expect to pipe through the password aquired initially.
         echo "...Logging in to Vagrant host"
         ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier"; exit_test
+        echo "...Deployment Complete"
     fi
 fi
 
-if [[ ! -z "$box_file_out" ]] ; then
+echo "test"
+
+if [[ ! -z "$box_file_out" ]]; then
     # If a box_file_out is defined, then we package the images for each box out to files.  The vm will be stopped to eprform this step.
     echo "Set Vagrant box out $ansiblecontrol_box_out"
     echo "Set Vagrant box out $firehawkgateway_box_out"
