@@ -21,6 +21,14 @@
 
 # BEGIN CONFIGURATION #
 
+# TF_VAR_init:
+# default: TF_VAR_init=false
+TF_VAR_init=insertvalue
+
+# TF_VAR_destroy_after_deploy:
+# default: TF_VAR_destroy_after_deploy=false
+TF_VAR_destroy_after_deploy=insertvalue
+
 # TF_VAR_enable_vpc:
 # Enable a Virtual Private Cloud.  All infrastructure is built in a VPC.  the first stage is to provision a user that has haccess to s3 bucket storage, which doesn't require a VPC.
 # default: TF_VAR_enable_vpc=true

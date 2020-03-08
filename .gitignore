@@ -26,3 +26,5 @@ tmp/*
 keys/*
 *.DS_Store
 secrets/*
+.nfs*
+*.box

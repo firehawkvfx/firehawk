@@ -9,9 +9,9 @@
   file:
     path: /prod/tmp
     state: directory
-    mode: u=rwX,g=rwX
-    owner: deadlineuser
-    group: syscontrol
+    mode: 1777
+    owner: root
+    group: root
   become: yes
 
 - name: ansible distro
@@ -110,6 +110,16 @@
     src: /deployuser/modules/node_centos/modules/houdini_install_script/
     dest: /opt/houdini_install_script/
     mode: u=rwX,g=rwX,o-wx
+    owner: "{{ variable_user }}"
+    group: syscontrol
+    directory_mode: yes
+  become: true
+
+- name: Copy Houdini auto install script to remote host from ansible control.
+  copy:
+    src: /deployuser/scripts/exit_test.sh
+    dest: /opt/houdini_install_script/
+    mode: u=rx,g=rx,o-wx
     owner: "{{ variable_user }}"
     group: syscontrol
     directory_mode: yes

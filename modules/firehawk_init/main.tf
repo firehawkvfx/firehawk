@@ -52,7 +52,7 @@ resource "null_resource" "init-routes-houdini-license-server" {
       . /deployuser/scripts/exit_test.sh
       set -x
       cd /deployuser
-      #check db
+      # check db
       ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
       # custom events auto assign groups to slaves on startup, eg slaveautoconf
       ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-repository-custom-events.yaml; exit_test
