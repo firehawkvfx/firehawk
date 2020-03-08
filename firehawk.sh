@@ -135,19 +135,6 @@ else
 fi
 echo "...Finished sourcing"
 
-# map environment secret for current env
-if [[ "$TF_VAR_envtier" = 'dev' ]]; then
-    if [[ ! -z "$firehawksecret_dev" ]]; then
-        export firehawksecret="$firehawksecret_dev"
-        echo "...Aquired firehawksecret from dev"
-    fi
-elif [[ "$TF_VAR_envtier" = 'prod' ]]; then
-    if [[ ! -z "$firehawksecret_prod" ]]; then
-        export firehawksecret="$firehawksecret_prod"
-        echo "...Aquired firehawksecret from dev"
-    fi
-fi
-
 if [[ "$test_vm" = false ]] ; then # If an encrypted var is provided for the vault key, test decrypt that var before proceeding
     if [[ ! -z "$firehawksecret" ]]; then
         # To manually enter an ecnrypted variable in you configuration use:

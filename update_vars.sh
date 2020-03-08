@@ -298,8 +298,20 @@ if [[ $failed = true ]]; then
     return 88
 fi
 
-
 template_path="$TF_VAR_firehawk_path/secrets.template"
+
+# map environment secret for current env
+if [[ "$TF_VAR_envtier" = 'dev' ]]; then
+    if [[ ! -z "$firehawksecret_dev" ]]; then
+        export firehawksecret="$firehawksecret_dev"
+        echo "...Aquired firehawksecret from dev"
+    fi
+elif [[ "$TF_VAR_envtier" = 'prod' ]]; then
+    if [[ ! -z "$firehawksecret_prod" ]]; then
+        export firehawksecret="$firehawksecret_prod"
+        echo "...Aquired firehawksecret from dev"
+    fi
+fi
 
 source_vars () {
     local var_file=$1
