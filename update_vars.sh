@@ -14,13 +14,26 @@ BLUE='\033[0;34m' # Blue Text
 NC='\033[0m' # No Color        
 # the directory of the current script
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-export TF_VAR_firehawk_path=$SCRIPTDIR
 
+# These paths and vars are necesary to locating other scripts.
+export TF_VAR_firehawk_path=$SCRIPTDIR; exit_test
 # source an exit test to bail if non zero exit code is produced.
 . $TF_VAR_firehawk_path/scripts/exit_test.sh
+function to_abs_path {
+    local target="$1"
+    if [ "$target" == "." ]; then
+        echo "$(pwd)"
+    elif [ "$target" == ".." ]; then
+        echo "$(dirname "$(pwd)")"
+    else
+        echo "$(cd "$(dirname "$1")"; pwd)/$(basename "$1")"
+    fi
+}
+export TF_VAR_secrets_path="$(to_abs_path $TF_VAR_firehawk_path/../secrets)"; exit_test
 
 mkdir -p $TF_VAR_firehawk_path/tmp/
-mkdir -p $TF_VAR_firehawk_path/../secrets/
+mkdir -p $TF_VAR_secrets_path/keys
+
 # The template will be updated by this script
 save_template=true
 tmp_template_path=$TF_VAR_firehawk_path/tmp/secrets.template
@@ -32,13 +45,13 @@ rm $temp_output
 
 failed=false
 verbose=false
-optspec=":hv-:t:"
 
 encrypt_mode="encrypt"
 
 # IFS must allow us to iterate over lines instead of words seperated by ' '
 IFS='
 '
+optspec=":hv-:t:"
 
 verbose () {
     local OPTIND
@@ -59,11 +72,19 @@ verbose () {
                         ;;
                     var-file=*)
                         ;;
+                    box-file-in)
+                        val="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+                        opt="${OPTARG}"
+                        ;;
+                    box-file-in=*)
+                        ;;
                     vault)
                         val="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
                         opt="${OPTARG}"
                         ;;
                     vault=*)
+                        ;;
+                    vagrant)
                         ;;
                     *)
                         if [ "$OPTERR" = 1 ] && [ "${optspec:0:1}" != ":" ]; then
@@ -90,13 +111,28 @@ tier () {
     export TF_VAR_envtier=$val
 }
 
-var_file=
+export var_file=
 
 var_file () {
     if [[ "$verbose" == true ]]; then
         echo "Parsing var_file option: '--${opt}', value: '${val}'" >&2;
     fi
     export var_file="${val}"
+}
+
+export box_file_in=""
+export ansiblecontrol_box="bento/ubuntu-16.04"
+export firehawkgateway_box="bento/ubuntu-16.04"
+
+echo "box - ansiblecontrol_box $ansiblecontrol_box"
+
+box_file_in () {
+    if [[ "$verbose" == true ]]; then
+        echo "Parsing box_file_in option: '--${opt}', value: '${val}'" >&2;
+    fi
+    export box_file_in="${val}"
+    export ansiblecontrol_box="ansiblecontrol-${val}.box"
+    export firehawkgateway_box="firehawkgateway-${val}.box"
 }
 
 save_template_fn () {
@@ -124,17 +160,6 @@ vault () {
     fi
 }
 
-function to_abs_path {
-    local target="$1"
-    if [ "$target" == "." ]; then
-        echo "$(pwd)"
-    elif [ "$target" == ".." ]; then
-        echo "$(dirname "$(pwd)")"
-    else
-        echo "$(cd "$(dirname "$1")"; pwd)/$(basename "$1")"
-    fi
-}
-
 function help {
     echo "usage: source ./update_vars.sh [-v] [--tier[=]dev/prod] [--var-file[=]deployuser/secrets] [--vault[=]encrypt/decrypt]" >&2
     printf "\nUse this to source either the vagrant or encrypted secrets config in your dev or prod tier.\n" &&
@@ -147,7 +172,6 @@ function help {
 # --tier=dev
 # which each results in the same function tier() running.
 
-#OPTIND=0
 parse_opts () {
     local OPTIND
     OPTIND=0
@@ -174,6 +198,16 @@ parse_opts () {
                         val=${OPTARG#*=}
                         opt=${OPTARG%=$val}
                         var_file
+                        ;;
+                    box-file-in)
+                        val="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+                        opt="${OPTARG}"
+                        box_file_in
+                        ;;
+                    box-file-in=*)
+                        val=${OPTARG#*=}
+                        opt=${OPTARG%=$val}
+                        box_file_in
                         ;;
                     vault)
                         val="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
@@ -278,20 +312,20 @@ source_vars () {
         printf "...Using vault file $var_file\n"
         template_path="$TF_VAR_firehawk_path/secrets.template"
     elif [[ "$var_file" = "vagrant" ]]; then
-        printf '...Using variable file vagrant. No encryption/decryption will be used.\n'
+        printf '...Using variable file vagrant. No encryption/decryption needed for these contents.\n'
         encrypt_mode="none"
         template_path="$TF_VAR_firehawk_path/vagrant.template"
     elif [[ "$var_file" = "config" ]]; then
-        printf '...Using variable file config. No encryption/decryption will be used.\n'
+        printf '...Using variable file config. No encryption/decryption needed for these contents.\n'
         encrypt_mode="none"
         template_path="$TF_VAR_firehawk_path/config.template"
     elif [[ "$var_file" = "defaults" ]]; then
-        printf '...Using variable file defaults. No encryption/decryption will be used.\n'
+        printf '...Using variable file defaults. No encryption/decryption needed for these contents.\n'
         encrypt_mode="none"
         template_path="$TF_VAR_firehawk_path/defaults.template"
     elif [[ "$var_file" = "config-override" ]]; then
         var_file="config-override-$TF_VAR_envtier"
-        printf "...Using variable file $var_file. No encryption/decryption will be used.\n"
+        printf "...Using variable file $var_file. No encryption/decryption needed for these contents.\n"
         encrypt_mode="none"
         template_path="$TF_VAR_firehawk_path/config-override.template"
     else
@@ -306,7 +340,7 @@ source_vars () {
     # After a var file is source we also store the modified date of that file as a dynamic variable name.  if the modified date of the file on the next run is identical to the environment variable, then it doesn't need to be sourced again.  This allows detection of the contents being changed and sourcing the file if true.
 
     var_file_basename="$(echo $var_file | tr '-' '_')"
-    var_file="$(to_abs_path $TF_VAR_firehawk_path/../secrets/$var_file)"; exit_test
+    var_file="$(to_abs_path $TF_VAR_secrets_path/$var_file)"; exit_test
 
     echo "...Test modified date"
     file_modified_date=$(date -r $var_file)
@@ -331,19 +365,32 @@ source_vars () {
         printf "\n${BLUE}Skipping source ${var_file_basename}: last time this var file was sourced the modified date matches the current file.  No need to source the file again.${NC}\n"
     else
         printf "\n${GREEN}Will source ${var_file_basename}. encrypt_mode = $encrypt_mode ${NC}\n"
-
         # set vault key location based on envtier dev/prod
         if [[ "$TF_VAR_envtier" = 'dev' ]]; then
-            vault_key="$(to_abs_path $TF_VAR_firehawk_path/../secrets/keys/$TF_VAR_vault_key_name_dev)"
+            export vault_key="$(to_abs_path $TF_VAR_secrets_path/keys/$TF_VAR_vault_key_name_dev)"
+            echo "set vault_key $vault_key"
         elif [[ "$TF_VAR_envtier" = 'prod' ]]; then
-            vault_key="$(to_abs_path $TF_VAR_firehawk_path/../secrets/keys/$TF_VAR_vault_key_name_prod)"
+            export vault_key="$(to_abs_path $TF_VAR_secrets_path/keys/$TF_VAR_vault_key_name_prod)"
+            echo "set vault_key $vault_key"
         else 
             printf "\n...${RED}WARNING: envtier evaluated to no match for dev or prod.  Inspect update_vars.sh to handle this case correctly.${NC}\n"
             return 88
         fi
-
         # We use a local key and a password to encrypt and decrypt data.  no operation can occur without both.  in this case we decrypt first without password and then with the password.
-        vault_command="ansible-vault view --vault-id $vault_key --vault-id $vault_key@prompt $var_file"
+        
+        # If the encrypted secret is passed as an environment variable, then secrets can be passed after the secret itself is decrypted by the key.
+        if [[ ! -z "$firehawksecret" ]]; then
+            echo "...Using firehawksecret encrypted env var to decrypt instead of user input."
+            if [ ! -f scripts/ansible-encrypt.sh ]; then
+                echo "FILE NOT FOUND: scripts/ansible-encrypt.sh"
+                echo "Check existance of $TF_VAR_firehawk_path/scripts/ansible-encrypt.sh"
+            fi
+            vault_command="ansible-vault view --vault-id $vault_key --vault-id $vault_key@scripts/ansible-encrypt.sh $var_file"
+        else
+            echo "Prompt user for password:"
+            vault_command="ansible-vault view --vault-id $vault_key --vault-id $vault_key@prompt $var_file"
+        fi
+        
 
         if [[ $encrypt_mode != "none" ]]; then
             #check if a vault key exists.  if it does, then install can continue automatically.
@@ -465,7 +512,6 @@ source_vars () {
             export $i
         done
 
-
         # # Determine your current public ip for security groups.
 
         export TF_VAR_remote_ip_cidr="$(dig +short myip.opendns.com @resolver1.opendns.com)/32"
@@ -484,6 +530,19 @@ source_vars () {
         done
 
         rm $TF_VAR_firehawk_path/tmp/envtier_exports.txt
+
+        # lastly update the vault key path
+        # set vault key location based on envtier dev/prod
+        if [[ "$TF_VAR_envtier" = 'dev' ]]; then
+            export vault_key="$(to_abs_path $TF_VAR_secrets_path/keys/$TF_VAR_vault_key_name_dev)"
+            echo "set vault_key $vault_key"
+        elif [[ "$TF_VAR_envtier" = 'prod' ]]; then
+            export vault_key="$(to_abs_path $TF_VAR_secrets_path/keys/$TF_VAR_vault_key_name_prod)"
+            echo "set vault_key $vault_key"
+        else 
+            printf "\n...${RED}WARNING: envtier evaluated to no match for dev or prod.  Inspect update_vars.sh to handle this case correctly.${NC}\n"
+            return 88
+        fi
 
         # update the template if in dev environment and save template is enabled.  save template may be disabled during setup script
         if [[ "$TF_VAR_envtier" = 'dev' && $save_template = true ]]; then

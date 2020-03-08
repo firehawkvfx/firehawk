@@ -5,6 +5,12 @@
 # Don't store command history.
 unset HISTFILE
 
+if [[ ! -z "$firehawksecret" ]]; then
+  echo "Vagrant: firehawksecret:$firehawksecret"
+else
+  echo "Vagrant: No firehawk secret env var provided, will prompt user for input."
+fi
+
 # trap ctrl-c and call ctrl_c()
 trap ctrl_c INT
 function ctrl_c() {
@@ -65,8 +71,14 @@ else
   echo "...Provision Local VM's"
   $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-020-init.sh $ARGS; exit_test
   echo "...Start Terraform"
-  terraform init; exit_test
-  terraform apply --auto-approve; exit_test
+  if [[ "$TF_VAR_init" == true ]]; then
+    terraform init -lock=false; exit_test
+    terraform destroy --auto-approve -lock=false; exit_test
+  fi
+  terraform apply --auto-approve -lock=false; exit_test
+  if [[ "$TF_VAR_destroy_after_deploy" == true ]]; then
+    terraform destroy --auto-approve -lock=false; exit_test
+  fi
   # After this point provisioning will now execute from TF.
   # $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-030-tf-s3user-deadlinercs.sh $ARGS; exit_test
   # $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-040-ssh-routes-nfs-houdini-license-repository.sh $ARGS; exit_test

@@ -1,6 +1,9 @@
-- hosts: ansible_control
+- hosts: "{{ variable_host | default('ansible_control') }}"
   become: true
-  remote_user: deployuser
+  remote_user: "{{ variable_user | default('deployuser') }}"
+
+  vars:
+    variable_user: deployuser
 
   roles:
   - {role: 'pgp-decrypt-test'}

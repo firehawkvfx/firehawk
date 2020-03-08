@@ -10,6 +10,10 @@ network = ENV['TF_VAR_network']
 selected_ansible_version = ENV['TF_VAR_selected_ansible_version']
 syscontrol_gid=ENV['TF_VAR_syscontrol_gid']
 deployuser_uid=ENV['TF_VAR_deployuser_uid']
+
+# If box file in is not defined, we will use the bento base image and provision as normal.  Box file in is not the full box name, but numeric, usually marking a stage for CI
+box_file_in=ENV['box_file_in']
+
 disk = '65536MB'
 
 servers=[
@@ -19,7 +23,7 @@ servers=[
     :ip => "auto",
     :bridgenic => bridgenic,
     :promisc => false,
-    :box => "bento/ubuntu-16.04",
+    :box => ENV['ansiblecontrol_box'],
     :ram => 1024,
     :cpu => 2,
     :primary => true
@@ -30,7 +34,7 @@ servers=[
     :ip => ENV['TF_VAR_openfirehawkserver'],
     :bridgenic => bridgenic,
     :promisc => true,
-    :box => "bento/ubuntu-16.04",
+    :box => ENV['firehawkgateway_box'],
     :ram => 8192,
     :cpu => 4,
     :primary => false
@@ -46,17 +50,22 @@ Vagrant.configure(2) do |config|
         # config.vm.define machine[:hostname] do |node|
             node.vm.box = machine[:box]
             node.vm.hostname = machine[:hostname]+envtier
-            node.vm.box_version = "201912.03.0"
-            node.vm.provision "shell", inline: "sudo groupadd -g #{syscontrol_gid} syscontrol"
-            node.vm.provision "shell", inline: "sudo usermod -aG syscontrol vagrant"
-            node.vm.provision "shell", inline: "sudo useradd -m -s /bin/bash -U deployuser -u #{deployuser_uid}"
-            node.vm.provision "shell", inline: "sudo usermod -aG syscontrol deployuser"
-            node.vm.provision "shell", inline: "sudo usermod -aG sudo deployuser"
-            # give deploy user passwordless sudo as with vagrant user.
-            node.vm.provision "shell", inline: "touch /etc/sudoers.d/98_deployuser; grep -qxF 'deployuser ALL=(ALL) NOPASSWD:ALL' /etc/sudoers.d/98_deployuser || echo 'deployuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/98_deployuser"
-            # allow ssh access as deploy user
-            # node.vm.provision "shell", inline: "mkdir -p /home/deployuser/.ssh; chown -R deployuser:deployuser /home/deployuser/.ssh; chmod 700 /home/deployuser/.ssh"
-            node.vm.provision "shell", inline: "cp -fr /home/vagrant/.ssh /home/deployuser/; chown -R deployuser:deployuser /home/deployuser/.ssh; chown deployuser:deployuser /home/deployuser/.ssh/authorized_keys"
+            if box_file_in.nil? || box_file_in.empty?
+                # versions can not be specified with direct file paths for .boxes
+                node.vm.box_version = "201912.03.0"
+                node.vm.provision "shell", inline: "sudo groupadd -g #{syscontrol_gid} syscontrol"
+                node.vm.provision "shell", inline: "sudo usermod -aG syscontrol vagrant"
+                node.vm.provision "shell", inline: "sudo useradd -m -s /bin/bash -U deployuser -u #{deployuser_uid}"
+                node.vm.provision "shell", inline: "sudo usermod -aG syscontrol deployuser"
+                node.vm.provision "shell", inline: "sudo usermod -aG sudo deployuser"
+                # give deploy user initial passwordless sudo as with vagrant user.
+                node.vm.provision "shell", inline: "touch /etc/sudoers.d/98_deployuser; grep -qxF 'deployuser ALL=(ALL) NOPASSWD:ALL' /etc/sudoers.d/98_deployuser || echo 'deployuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/98_deployuser"
+                # allow ssh access as deploy user
+                # node.vm.provision "shell", inline: "mkdir -p /home/deployuser/.ssh; chown -R deployuser:deployuser /home/deployuser/.ssh; chmod 700 /home/deployuser/.ssh"
+                node.vm.provision "shell", inline: "cp -fr /home/vagrant/.ssh /home/deployuser/; chown -R deployuser:deployuser /home/deployuser/.ssh; chown deployuser:deployuser /home/deployuser/.ssh/authorized_keys"
+                ### Install yq to query yaml
+                node.vm.provision "shell", inline: "sudo snap install yq"
+            end
             # Allow deployuser to have passwordless sudo
             node.vm.synced_folder ".", "/vagrant", create: true, owner: "vagrant", group: "vagrant"
             node.vm.synced_folder ".", "/deployuser", owner: deployuser_uid, group: deployuser_uid, mount_options: ["uid=#{deployuser_uid}", "gid=#{deployuser_uid}"]
@@ -103,63 +112,67 @@ Vagrant.configure(2) do |config|
                 vb.customize ["modifyvm", :id, "--cpus", machine[:cpu]]
             end
 
-            node.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive; sudo apt-get update"
-            node.vm.provision "shell", inline: "echo 'source /vagrant/scripts/env.sh' > /etc/profile.d/sa-environment.sh", :run => 'always'
-            node.vm.provision "shell", inline: "echo DEBIAN_FRONTEND=$DEBIAN_FRONTEND"
-            node.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive"
-            node.vm.provision "shell", inline: "sudo rm /etc/localtime && sudo ln -s #{ENV['TF_VAR_timezone_localpath']} /etc/localtime", run: "always"
-            node.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive; sudo apt-get install -y sshpass"
-            ### Install Ansible Block ###
-            node.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive; sudo apt-get install -y software-properties-common"
+            if box_file_in.nil? || box_file_in.empty?
+                node.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive; sudo apt-get update"
+                node.vm.provision "shell", inline: "echo 'source /vagrant/scripts/env.sh' > /etc/profile.d/sa-environment.sh", :run => 'always'
+                node.vm.provision "shell", inline: "echo DEBIAN_FRONTEND=$DEBIAN_FRONTEND"
+                node.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive"
+                node.vm.provision "shell", inline: "sudo rm /etc/localtime && sudo ln -s #{ENV['TF_VAR_timezone_localpath']} /etc/localtime", run: "always"
+                node.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive; sudo apt-get install -y sshpass"
+                ### Install Ansible Block ###
+                node.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive; sudo apt-get install -y software-properties-common"
+                
+                if selected_ansible_version == 'latest'
+                    node.vm.provision "shell", inline: "echo 'installing latest version of ansible with apt-get'"
+                    node.vm.provision "shell", inline: "sudo apt-add-repository --yes --update ppa:ansible/ansible-2.9"
+                    node.vm.provision "shell", inline: "sudo apt-get install -y ansible"
+                else
+                    # Installing a specific version of ansible with pip creates dependency issues pip potentially.
+                    node.vm.provision "shell", inline: "sudo apt-get install -y python-pip"
+                    node.vm.provision "shell", inline: "pip install --upgrade pip"    
+                    # to list available versions - pip install ansible==
+                    node.vm.provision "shell", inline: "sudo -H pip install ansible==#{ansible_version}"
+                end
+                # configure a connection timeout to prevent ansible from getting stuck when there is an ssh issue.
+                node.vm.provision "shell", inline: "echo 'ConnectTimeout 60' >> /etc/ssh/ssh_config"
             
-            if selected_ansible_version == 'latest'
-                node.vm.provision "shell", inline: "echo 'installing latest version of ansible with apt-get'"
-                node.vm.provision "shell", inline: "sudo apt-add-repository --yes --update ppa:ansible/ansible-2.9"
-                node.vm.provision "shell", inline: "sudo apt-get install -y ansible"
-            else
-                # Installing a specific version of ansible with pip creates dependency issues pip potentially.
-                node.vm.provision "shell", inline: "sudo apt-get install -y python-pip"
-                node.vm.provision "shell", inline: "pip install --upgrade pip"    
-                # to list available versions - pip install ansible==
-                node.vm.provision "shell", inline: "sudo -H pip install ansible==#{ansible_version}"
+                # we define the location of the ansible hosts file in an environment variable.
+                node.vm.provision "shell", inline: "grep -qxF 'ANSIBLE_INVENTORY=/vagrant/ansible/hosts' /etc/environment || echo 'ANSIBLE_INVENTORY=/vagrant/ansible/hosts' | sudo tee -a /etc/environment"
+                # disable the update notifier.  We do not want to update to ubuntu 18, deadline installer doesn't work in 18 when last tested.
+                node.vm.provision "shell", inline: "sudo sed -i 's/Prompt=.*$/Prompt=never/' /etc/update-manager/release-upgrades"
+                # for dpkg or virtualbox issues, see https://superuser.com/questions/298367/how-to-fix-virtualbox-startup-error-vboxadd-service-failed
+                # disable password authentication - ssh key only.
+                node.vm.provision "shell", inline: <<-EOC
+                    sudo sed -i 's/.*PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
+                    sudo service ssh restart
+                EOC
+                if machine[:hostname] == "firehawkgateway"
+                    node.vm.provision "shell", inline: "/deployuser/scripts/init-gateway.sh --dev"
+                end
+                node.vm.provision "shell", inline: "sudo reboot"
+                # trigger reload
+                node.vm.provision :reload
+                node.trigger.after :up do |trigger|
+                    trigger.warn = "Taking Snapshot"
+                    trigger.run = {inline: "vagrant snapshot push"}
+                end
+                node.vm.provision "shell", inline: "sudo reboot"
+                node.vm.provision :reload
             end
-            # configure a connection timeout to prevent ansible from getting stuck when there is an ssh issue.
-            node.vm.provision "shell", inline: "echo 'ConnectTimeout 60' >> /etc/ssh/ssh_config"
-          
-            # we define the location of the ansible hosts file in an environment variable.
-            node.vm.provision "shell", inline: "grep -qxF 'ANSIBLE_INVENTORY=/vagrant/ansible/hosts' /etc/environment || echo 'ANSIBLE_INVENTORY=/vagrant/ansible/hosts' | sudo tee -a /etc/environment"
-            # disable the update notifier.  We do not want to update to ubuntu 18, deadline installer doesn't work in 18 when last tested.
-            node.vm.provision "shell", inline: "sudo sed -i 's/Prompt=.*$/Prompt=never/' /etc/update-manager/release-upgrades"
-            # for dpkg or virtualbox issues, see https://superuser.com/questions/298367/how-to-fix-virtualbox-startup-error-vboxadd-service-failed
-            # disable password authentication - ssh key only.
-            node.vm.provision "shell", inline: <<-EOC
-                sudo sed -i 's/.*PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
-                sudo service ssh restart
-            EOC
-            if machine[:hostname] == "firehawkgateway"
-                node.vm.provision "shell", inline: "/deployuser/scripts/init-gateway.sh --dev"
-            end
-            node.vm.provision "shell", inline: "sudo reboot"
-            # trigger reload
-            node.vm.provision :reload
-            node.trigger.after :up do |trigger|
-                trigger.warn = "Taking Snapshot"
-                trigger.run = {inline: "vagrant snapshot push"}
-            end
-            node.vm.provision "shell", inline: "sudo reboot"
-            node.vm.provision :reload
             node.vm.post_up_message = "You must install this plugin to set the disk size: vagrant plugin install vagrant-disksize\nEnsure you have installed the vbguest plugin with: vagrant plugin update; vagrant plugin install vagrant-vbguest; vagrant vbguest; vagrant vbguest --status"
+            node.vm.post_up_message = "Machine is up: #{machine[:box]}"
 
             node.trigger.before :destroy, :halt, :reload do |trigger|
                 trigger.info = "Stopping node..."
                 trigger.run = {inline: "echo 'stopping node'"}
               end
-          
         end
     end
-    VAGRANT_COMMAND = ARGV[0]
-    if VAGRANT_COMMAND == "ssh"
-        config.ssh.username = 'deployuser'
-        config.ssh.extra_args = ["-t", "cd /deployuser; bash --login"]
+    if box_file_in.nil? || box_file_in.empty?
+        VAGRANT_COMMAND = ARGV[0]
+        if VAGRANT_COMMAND == "ssh"
+            config.ssh.username = 'deployuser'
+            config.ssh.extra_args = ["-t", "cd /deployuser; bash --login"]
+        end
     end
 end
