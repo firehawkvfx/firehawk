@@ -79,6 +79,8 @@ else
   if [[ "$TF_VAR_destroy_after_deploy" == true ]]; then
     terraform destroy --auto-approve -lock=false; exit_test
   fi
+
+
   # After this point provisioning will now execute from TF.
   # $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-030-tf-s3user-deadlinercs.sh $ARGS; exit_test
   # $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-040-ssh-routes-nfs-houdini-license-repository.sh $ARGS; exit_test
@@ -91,3 +93,4 @@ else
   # $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-110-localworkstation-cloudmounts.sh $ARGS; exit_test
 fi
 
+echo "$(date) Finished a run" | tee -a tmp/log.txt
