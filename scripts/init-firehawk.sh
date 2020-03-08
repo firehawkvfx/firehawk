@@ -71,10 +71,12 @@ else
   echo "...Provision Local VM's"
   $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-020-init.sh $ARGS; exit_test
   echo "...Start Terraform"
+  terraform init -lock=false; exit_test # Required to initialise any new modules
+  
   if [[ "$TF_VAR_init" == true ]]; then
-    terraform init -lock=false; exit_test
     terraform destroy --auto-approve -lock=false; exit_test
   fi
+  
   terraform apply --auto-approve -lock=false; exit_test
 
   if [[ "$TF_VAR_destroy_after_deploy" == true ]]; then
