@@ -94,3 +94,4 @@ else
 fi
 
 echo "$(date) Finished a run" | tee -a tmp/log.txt
+cat tmp/log.txt
