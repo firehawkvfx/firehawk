@@ -16,7 +16,7 @@
 
   tasks:
 
-  - name: Connection test without sudo
+  - name: Connection test without sudo - If running for the first time ensure 'PasswordAuthentication yes' is in /etc/ssh/sshd_config. After first run, password remote access will be disabled and only the ssh key will be used.
     command: "echo connected"
 
 - hosts: "{{ variable_host | default('workstation1') }}"
