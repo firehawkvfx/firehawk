@@ -303,13 +303,15 @@ template_path="$TF_VAR_firehawk_path/secrets.template"
 # map environment secret for current env
 if [[ "$TF_VAR_envtier" = 'dev' ]]; then
     if [[ ! -z "$firehawksecret_dev" ]]; then
+        echo "...Aquiring firehawksecret from dev"
         export firehawksecret="$firehawksecret_dev"
         echo "...Aquired firehawksecret from dev"
     fi
 elif [[ "$TF_VAR_envtier" = 'prod' ]]; then
     if [[ ! -z "$firehawksecret_prod" ]]; then
+        echo "...Aquiring firehawksecret from prod"
         export firehawksecret="$firehawksecret_prod"
-        echo "...Aquired firehawksecret from dev"
+        echo "...Aquired firehawksecret from prod"
     fi
 fi
 
