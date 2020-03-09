@@ -305,12 +305,14 @@ if [[ "$TF_VAR_envtier" = 'dev' ]]; then
     if [[ ! -z "$firehawksecret_dev" ]]; then
         echo "...Aquiring firehawksecret from dev"
         export firehawksecret="$firehawksecret_dev"
+        export testsecret="$testsecret_dev"
         echo "...Aquired firehawksecret from dev"
     fi
 elif [[ "$TF_VAR_envtier" = 'prod' ]]; then
     if [[ ! -z "$firehawksecret_prod" ]]; then
         echo "...Aquiring firehawksecret from prod"
         export firehawksecret="$firehawksecret_prod"
+        export testsecret="$testsecret_prod"
         echo "...Aquired firehawksecret from prod"
     fi
 fi
