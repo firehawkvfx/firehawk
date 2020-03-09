@@ -188,11 +188,9 @@ if [ "$test_vm" = false ] ; then
         # use expect to pipe through the password aquired initially.
         echo "...Logging in to Vagrant host"
         ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier"; exit_test
-        echo "...Deployment Complete"
+        echo "...End Deployment"
     fi
 fi
-
-echo "test"
 
 if [[ ! -z "$box_file_out" ]]; then
     # If a box_file_out is defined, then we package the images for each box out to files.  The vm will be stopped to eprform this step.
