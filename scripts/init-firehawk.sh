@@ -73,7 +73,7 @@ else
   echo "...Start Terraform"
   terraform init -lock=false; exit_test # Required to initialise any new modules
   
-  if [[ "$TF_VAR_init" == true ]]; then
+  if [[ "$TF_VAR_destroy_before_deploy" == true ]]; then
     terraform destroy --auto-approve -lock=false; exit_test
   fi
   
