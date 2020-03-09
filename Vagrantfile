@@ -157,6 +157,7 @@ Vagrant.configure(2) do |config|
                     trigger.run = {inline: "vagrant snapshot push"}
                 end
                 node.vm.provision "shell", inline: "sudo reboot"
+                node.vm.provision "shell", inline: "echo 'machine IP #{machine[:box]}'; ip a"
                 node.vm.provision :reload
             end
             node.vm.post_up_message = "You must install this plugin to set the disk size: vagrant plugin install vagrant-disksize\nEnsure you have installed the vbguest plugin with: vagrant plugin update; vagrant plugin install vagrant-vbguest; vagrant vbguest; vagrant vbguest --status"
