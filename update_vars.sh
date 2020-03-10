@@ -15,6 +15,17 @@ NC='\033[0m' # No Color
 # the directory of the current script
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
+# This block allows you to echo a line number for a failure.
+set -eE -o functrace
+failure() {
+  local lineno=$1
+  local msg=$2
+  echo "Failed at $lineno: $msg"
+}
+trap 'FAILURE ${LINENO} "$BASH_COMMAND"' ERR
+
+printf "\nRunning ansiblecontrol with $1...\n"
+
 # These paths and vars are necesary to locating other scripts.
 export TF_VAR_firehawk_path=$SCRIPTDIR; exit_test
 # source an exit test to bail if non zero exit code is produced.

@@ -3,14 +3,14 @@
 # echo "Enter Secrets Decryption Password..."
 unset HISTFILE
 
-# This block allows you to echo a line number for a fialure.
+# This block allows you to echo a line number for a failure.
 set -eE -o functrace
 failure() {
   local lineno=$1
   local msg=$2
   echo "Failed at $lineno: $msg"
 }
-trap 'failure ${LINENO} "$BASH_COMMAND"' ERR
+trap 'FAILURE ${LINENO} "$BASH_COMMAND"' ERR
 
 printf "\nRunning ansiblecontrol with $1...\n"
 
