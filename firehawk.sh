@@ -12,7 +12,7 @@ failure() {
   local msg=$2
   echo "Failed at $lineno: $msg"
 }
-trap 'FAILURE ${LINENO} "$BASH_COMMAND"' ERR
+trap 'FAILURE_AT_LINE ${LINENO} "$BASH_COMMAND"' ERR
 
 # Abort script with correct exit code instead of continuing if non zero exit code occurs.
 set -e

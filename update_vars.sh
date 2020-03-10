@@ -22,7 +22,7 @@ failure() {
   local msg=$2
   echo "Failed at $lineno: $msg"
 }
-trap 'FAILURE ${LINENO} "$BASH_COMMAND"' ERR
+trap 'FAILURE_AT_LINE ${LINENO} "$BASH_COMMAND"' ERR
 
 printf "\nRunning ansiblecontrol with $1...\n"
 
