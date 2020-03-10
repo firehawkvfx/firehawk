@@ -144,10 +144,15 @@ Vagrant.configure(2) do |config|
                 # disable password authentication - ssh key only.
                 node.vm.provision "shell", inline: <<-EOC
                     sudo sed -i 's/.*PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
-                    sudo service ssh restart
+                    # sudo service ssh restart
                 EOC
+                node.vm.provision "shell", inline: "sudo reboot"
+                node.vm.provision :reload
+                node.trigger.after :up do |trigger|
+                    trigger.warn = "Restarted for SSH config service alteration"
+                end
                 if machine[:hostname] == "firehawkgateway"
-                    node.vm.provision "shell", inline: "/deployuser/scripts/init-gateway.sh --dev"
+                    node.vm.provision "shell", inline: "/deployuser/scripts/init-gateway.sh --#{envtier}"
                 end
                 node.vm.provision "shell", inline: "sudo reboot"
                 # trigger reload
