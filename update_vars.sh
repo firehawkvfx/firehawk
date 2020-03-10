@@ -16,13 +16,11 @@ NC='\033[0m' # No Color
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 # This block allows you to echo a line number for a failure.
-set -eE -o functrace
-failure() {
-  local lineno=$1
-  local msg=$2
-  echo "Failed at $lineno: $msg"
+# set -eE -o functrace
+err_report() {
+    echo "Error on line $1"
 }
-trap 'FAILURE_AT_LINE ${LINENO} "$BASH_COMMAND"' ERR
+trap 'err_report $LINENO' ERR
 
 printf "\nRunning ansiblecontrol with $1...\n"
 
