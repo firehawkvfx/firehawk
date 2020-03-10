@@ -5,14 +5,14 @@ unset HISTFILE
 
 printf "\nRunning ansiblecontrol with $1...\n"
 
-# This block allows you to echo a line number for a failure.
-set -eE -o functrace
-failure() {
-  local lineno=$1
-  local msg=$2
-  echo "Failed at $lineno: $msg"
-}
-trap 'FAILURE_AT_LINE ${LINENO} "$BASH_COMMAND"' ERR
+# # This block allows you to echo a line number for a failure.
+# set -eE -o functrace
+# failure() {
+#   local lineno=$1
+#   local msg=$2
+#   echo "Failed at $lineno: $msg"
+# }
+# trap 'FAILURE_AT_LINE ${LINENO} "$BASH_COMMAND"' ERR
 
 # Abort script with correct exit code instead of continuing if non zero exit code occurs.
 set -e
@@ -162,7 +162,7 @@ echo "Vagrant box ansiblecontrol in $ansiblecontrol_box"
 echo "Vagrant box firehawkgateway in $firehawkgateway_box"
 
 
-vagrant up #; exit_test
+vagrant up #; exit_test # ssh reset may cause a non zero exit code, but it must be ignored
 
 if [ "$test_vm" = false ] ; then
     # vagrant reload
