@@ -21,9 +21,9 @@
 
 # BEGIN CONFIGURATION #
 
-# TF_VAR_destroy_before_deploy:
-# default: TF_VAR_destroy_before_deploy=false
-TF_VAR_destroy_before_deploy=insertvalue
+# TF_VAR_tf_destroy_before_deploy:
+# default: TF_VAR_tf_destroy_before_deploy=false
+TF_VAR_tf_destroy_before_deploy=insertvalue
 
 # TF_VAR_destroy_after_deploy:
 # default: TF_VAR_destroy_after_deploy=false
