@@ -162,7 +162,7 @@ echo "Vagrant box ansiblecontrol in $ansiblecontrol_box"
 echo "Vagrant box firehawkgateway in $firehawkgateway_box"
 
 
-vagrant up; exit_test
+vagrant up #; exit_test
 
 if [ "$test_vm" = false ] ; then
     # vagrant reload
@@ -196,7 +196,7 @@ if [ "$test_vm" = false ] ; then
     if [[ ! -z "$hostname" && ! -z "$port" && ! -z "$TF_VAR_envtier" ]]; then
         # use expect to pipe through the password aquired initially.
         echo "...Logging in to Vagrant host"
-        ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier"; exit_test
+        ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier" #; exit_test
         echo "...End Deployment"
     fi
 fi
