@@ -141,8 +141,8 @@
 # ansible-playbook -i "ansible/inventory" ansible/s3-sync.yaml --tags "sync-local-push" --extra-vars "volume_path=/prod"
 # ansible-playbook -i "ansible/inventory" ansible/s3-sync.yaml --tags "sync-local-pull" --extra-vars "volume_path=/prod"
 # ansible-playbook -i "ansible/inventory" ansible/s3-sync.yaml --tags "sync-remote-pull" --extra-vars "variable_user=centos variable_host=role_node_centos volume_path=/prod"
-# ansible-playbook -i "ansible/inventory" ansible/s3-sync.yaml --tags "sync-remote-push" --extra-vars "volume_path=/pool0/volume0"
-# ansible-playbook -i "ansible/inventory" ansible/s3-sync.yaml --tags "sync-remote-pull" --extra-vars "volume_path=/pool1/volume1"
+# ansible-playbook -i "ansible/inventory" ansible/s3-sync.yaml --tags "sync-remote-push" --extra-vars "volume_path=/{{ envtier }}pool0/{{ envtier }}volume0"
+# ansible-playbook -i "ansible/inventory" ansible/s3-sync.yaml --tags "sync-remote-pull" --extra-vars "volume_path=/{{ envtier }}pool1/{{ envtier }}volume1"
 
 - hosts: "{{ variable_host | default('role_softnas') }}"
   remote_user: "{{ variable_user | default('centos') }}"
@@ -150,8 +150,8 @@
 
   vars:
     variable_user: centos
-    pool_name: pool0
-    volume_name: volume0
+    pool_name: "{{ envtier }}pool0"
+    volume_name: "{{ envtier }}volume0"
 
     bucket: "{{ show }}.{{ bucket_extension }}"
 

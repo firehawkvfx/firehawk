@@ -47,7 +47,7 @@ public_subnet2_prod: "{{ lookup('env', 'TF_VAR_public_subnet2_prod') }}"
 
 ### NAS volume mounts ###
 
-softnas_mount_source: "/pool0/volume0"
+softnas_mount_source: "/{{ envtier }}pool0/{{ envtier }}volume0"
 # "-m" will force a pool to import, which is usefull if drives used for a write log are missing.
 zpool_import_flags: "-m"
 

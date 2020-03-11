@@ -39,9 +39,9 @@
     # when paths are found at these locations, they will be added to exports.
     # these defaults can be overidden by storing a config in /secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
     exports:
-      - path: "/pool1/volume1/"
-        pool_name: pool1
-        volume_name: volume1
+      - path: "/{{ envtier }}pool1/{{ envtier }}volume1/"
+        pool_name: "{{ envtier }}pool1"
+        volume_name: "{{ envtier }}volume1"
         state: present
         bind: /prod
 
@@ -118,9 +118,9 @@
     destroy: false
     # these defaults can be overidden by storing a config in /secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
     exports:
-      - path: "/pool1/volume1/"
-        pool_name: pool1
-        volume_name: volume1
+      - path: "/{{ envtier }}pool1/{{ envtier }}volume1/"
+        pool_name: "{{ envtier }}pool1"
+        volume_name: "{{ envtier }}volume1"
         state: present
         bind: /prod
 

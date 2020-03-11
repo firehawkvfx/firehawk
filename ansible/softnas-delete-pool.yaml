@@ -7,7 +7,7 @@
   become: true
 
   vars:
-    pool_name: pool0
+    pool_name: "{{ envtier }}pool0"
 
   tasks:
   - name: delete pool
