@@ -64,6 +64,7 @@ else
     -p|--sleep)
       echo "will sleep infrastructure"
       tf_action="sleep"
+      ;;
     *)
       raise_error "Unknown argument: ${argument}"
       return
