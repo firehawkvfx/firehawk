@@ -227,7 +227,7 @@
     tags:
     - local_install
 
-  - name: "export showmount for {{ groups['role_softnas'] | map('extract', hostvars, ['ansible_host']) | first }}"
+  - name: "Export showmount for {{ groups['role_softnas'] | map('extract', hostvars, ['ansible_host']) | first }}: If this fails check the vpn is working and ports are open."
     debug:
       var: item
     when: item.rc == 0
