@@ -18,7 +18,7 @@ SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 # This block allows you to echo a line number for a failure.
 # set -eE -o functrace
 err_report() {
-    echo "Error on line $1"
+    echo "${BASH_SOURCE[0]}: err_report: Error on line $1"
 }
 trap 'err_report $LINENO' ERR
 
