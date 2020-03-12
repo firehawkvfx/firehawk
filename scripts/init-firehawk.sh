@@ -61,6 +61,9 @@ else
       echo "using prod environment"
       source ./update_vars.sh --prod; exit_test
       ;;
+    -p|--sleep)
+      echo "will sleep infrastructure"
+      tf_action="sleep"
     *)
       raise_error "Unknown argument: ${argument}"
       return
@@ -70,19 +73,24 @@ else
   $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-010-keybase.sh $ARGS; exit_test
   echo "...Provision Local VM's"
   $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-020-init.sh $ARGS; exit_test
-  echo "...Start Terraform"
-  terraform init -lock=false; exit_test # Required to initialise any new modules
   
-  if [[ "$TF_VAR_tf_destroy_before_deploy" == true ]]; then
-    terraform destroy --auto-approve -lock=false; exit_test
-  fi
+  if [[ "$tf_action" == "apply" ]]; then
+    echo "...Start Terraform"
+    terraform init -lock=false; exit_test # Required to initialise any new modules
   
-  terraform apply --auto-approve -lock=false; exit_test
+    if [[ "$TF_VAR_tf_destroy_before_deploy" == true ]]; then
+      terraform destroy --auto-approve -lock=false; exit_test
+    fi
+    
+    terraform apply --auto-approve -lock=false; exit_test
 
-  if [[ "$TF_VAR_destroy_after_deploy" == true ]]; then
-    terraform destroy --auto-approve -lock=false; exit_test
-  else
-    terraform apply --auto-approve -var sleep=true # turn of all nodes to save cloud costs after provisioning
+    if [[ "$TF_VAR_destroy_after_deploy" == true ]]; then
+      terraform destroy --auto-approve -lock=false; exit_test
+    else
+      terraform apply --auto-approve -var sleep=true # turn of all nodes to save cloud costs after provisioning
+    fi
+  elif [[ "$tf_action" == "sleep" ]]; then
+    terraform apply --auto-approve -var sleep=true
   fi
 
 
