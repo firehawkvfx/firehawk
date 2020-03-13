@@ -65,6 +65,10 @@ else
       echo "will sleep infrastructure"
       tf_action="sleep"
       ;;
+    -d|--destroy)
+      echo "will destroy infrastructure"
+      tf_action="destroy"
+      ;;
     *)
       raise_error "Unknown argument: ${argument}"
       return
@@ -84,7 +88,8 @@ else
     fi
     
     terraform apply --auto-approve -lock=false; exit_test
-
+    
+    # the following commands will only occur if there is a succesful deployment.  handling a failed deployment will require reexecution
     if [[ "$TF_VAR_destroy_after_deploy" == true ]]; then
       terraform destroy --auto-approve -lock=false; exit_test
     else
@@ -92,6 +97,8 @@ else
     fi
   elif [[ "$tf_action" == "sleep" ]]; then
     terraform apply --auto-approve -var sleep=true
+  elif [[ "$tf_action" == "destroy" ]]; then
+    terraform destroy --auto-approve
   fi
 
 

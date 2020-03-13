@@ -111,6 +111,9 @@ parse_opts () {
                     sleep)
                         tf_action='sleep'
                         ;;
+                    destroy)
+                        tf_action='destroy'
+                        ;;
                     *)
                         if [ "$OPTERR" = 1 ] && [ "${optspec:0:1}" != ":" ]; then
                             echo "Unknown option --${OPTARG}" >&2
@@ -202,6 +205,10 @@ if [ "$test_vm" = false ] ; then
         if [[ "$tf_action"=="sleep" ]]; then
             echo "...Logging in to Vagrant host to set sleep on tf deployment"
             ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --sleep" #; exit_test
+            echo "...End Deployment"
+        elif [[ "$tf_action"=="destroy" ]]; then
+            echo "...Logging in to Vagrant host to destroy tf deployment"
+            ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --destroy" #; exit_test
             echo "...End Deployment"
         else
             echo "...Logging in to Vagrant host"
