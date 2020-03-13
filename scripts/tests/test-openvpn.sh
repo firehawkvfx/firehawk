@@ -5,7 +5,7 @@ GREEN='\033[0;32m' # Green Text
 BLUE='\033[0;34m' # Blue Text
 NC='\033[0m' # No Color
 
-optspec=":hv-:t:"
+optspec=":-:"
 
 parse_opts () {
     local OPTIND
@@ -15,12 +15,11 @@ parse_opts () {
             -)
                 case "${OPTARG}" in
                     ip)
-                        val="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
-                        vpn_private_ip="${OPTARG}"
+                        vpn_private_ip="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
                         ;;
                     ip=*)
-                        val=${OPTARG#*=}
-                        vpn_private_ip=${OPTARG%=$val}
+                        vpn_private_ip=${OPTARG#*=}
+                        ;;
                     *)
                         if [ "$OPTERR" = 1 ] && [ "${optspec:0:1}" != ":" ]; then
                             echo "Unknown option --${OPTARG}" >&2
@@ -47,10 +46,10 @@ fping -c1 -t30000 $vpn_private_ip &> /dev/null && pass=true || pass=false
 
 if [ $pass == true ]
 then
-  printf "\n${GREEN}The VPN private IP was reachable.${NC}\n\n"
+  printf "\n${GREEN}The VPN private IP was reachable: $vpn_private_ip ${NC}\n\n"
   exit 0
 else
-  printf "\n${RED}The VPN private IP could not be reached.  Ensure you can login to the vpn manually, and restart the VM with 'vagrant firehawkgateway reload' before continuing.${NC}\n" >&2
+  printf "\n${RED}The VPN private IP could not be reached: $vpn_private_ip  Ensure you can login to the vpn manually, and restart the VM with 'vagrant firehawkgateway reload' before continuing.${NC}\n" >&2
   ip a
   exit 1
 fi
