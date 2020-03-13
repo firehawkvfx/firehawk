@@ -162,8 +162,8 @@ if [[ "$test_vm" = false ]] ; then # If an encrypted var is provided for the vau
     fi
 fi
 
-echo "Vagrant box ansiblecontrol in $ansiblecontrol_box"
-echo "Vagrant box firehawkgateway in $firehawkgateway_box"
+echo "Vagrant box ansiblecontrol$TF_VAR_envtier in $ansiblecontrol_box"
+echo "Vagrant box firehawkgateway$TF_VAR_envtier in $firehawkgateway_box"
 
 
 vagrant up #; exit_test # ssh reset may cause a non zero exit code, but it must be ignored
@@ -184,13 +184,13 @@ if [ "$test_vm" = false ] ; then
     fi
 
     # AFter Vagrant Hosts are up, take the SSH keys and store them in the keys folder for general use.
-    ansiblecontrol_key=$(vagrant ssh-config ansiblecontrol$TF_VAR_envtier | grep -oP "^  IdentityFile \K.*")
+    ansiblecontrol_key=$(vagrant ssh-config "ansiblecontrol$TF_VAR_envtier" | grep -oP "^  IdentityFile \K.*")
     cp -f $ansiblecontrol_key $TF_VAR_secrets_path/keys/ansible_control_private_key
     firehawkgateway_key=$(vagrant ssh-config firehawkgateway$TF_VAR_envtier | grep -oP "^  IdentityFile \K.*")
     cp -f $firehawkgateway_key $TF_VAR_secrets_path/keys/firehawkgateway_private_key
 
-    hostname=$(vagrant ssh-config ansiblecontrol | grep -Po '.*HostName\ \K(\d*.\d*.\d*.\d*)')
-    port=$(vagrant ssh-config ansiblecontrol | grep -Po '.*Port\ \K(\d*)')
+    hostname=$(vagrant ssh-config "ansiblecontrol$TF_VAR_envtier" | grep -Po '.*HostName\ \K(\d*.\d*.\d*.\d*)')
+    port=$(vagrant ssh-config "ansiblecontrol$TF_VAR_envtier" | grep -Po '.*Port\ \K(\d*)')
     
     echo "SSH to vagrant host with..."
     echo "Hostname: $hostname"
