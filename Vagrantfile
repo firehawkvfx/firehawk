@@ -18,7 +18,7 @@ disk = '65536MB'
 
 servers=[
   {
-    :hostname => "ansiblecontrol",
+    :hostname => "ansiblecontrol#{envtier}",
     :mac_string => ENV['TF_VAR_ansible_mac'],
     :ip => "auto",
     :bridgenic => bridgenic,
@@ -29,7 +29,7 @@ servers=[
     :primary => true
   },
   {
-    :hostname => "firehawkgateway",
+    :hostname => "firehawkgateway#{envtier}",
     :mac_string => ENV['TF_VAR_gateway_mac'],
     :ip => ENV['TF_VAR_openfirehawkserver'],
     :bridgenic => bridgenic,
@@ -49,7 +49,7 @@ Vagrant.configure(2) do |config|
         config.vm.define machine[:hostname], primary: machine[:primary] do |node|
         # config.vm.define machine[:hostname] do |node|
             node.vm.box = machine[:box]
-            node.vm.hostname = machine[:hostname]+envtier
+            node.vm.hostname = machine[:hostname]
             if box_file_in.nil? || box_file_in.empty?
                 # versions can not be specified with direct file paths for .boxes
                 node.vm.box_version = "201912.03.0"
@@ -70,7 +70,7 @@ Vagrant.configure(2) do |config|
             node.vm.synced_folder ".", "/vagrant", create: true, owner: "vagrant", group: "vagrant"
             node.vm.synced_folder ".", "/deployuser", owner: deployuser_uid, group: deployuser_uid, mount_options: ["uid=#{deployuser_uid}", "gid=#{deployuser_uid}"]
             node.vm.synced_folder "../secrets", "/secrets", create: true, owner: "deployuser", group: "deployuser", mount_options: ["uid=#{deployuser_uid}", "gid=#{deployuser_uid}"]
-            node.vm.define machine[:hostname]+envtier
+            node.vm.define machine[:hostname]
             node.vagrant.plugins = ['vagrant-vbguest', 'vagrant-disksize', 'vagrant-reload']
             node.disksize.size = disk
             mac_string = machine[:mac_string]
@@ -151,7 +151,7 @@ Vagrant.configure(2) do |config|
                 node.trigger.after :up do |trigger|
                     trigger.warn = "Restarted for SSH config service alteration"
                 end
-                if machine[:hostname] == "firehawkgateway"
+                if machine[:hostname].include? "firehawkgateway"
                     node.vm.provision "shell", inline: "/deployuser/scripts/init-gateway.sh --#{envtier}"
                 end
                 node.vm.provision "shell", inline: "sudo reboot"

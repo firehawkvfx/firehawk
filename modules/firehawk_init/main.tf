@@ -1,5 +1,5 @@
 
-resource "null_resource" "init-aws-deadlinedb-firehawk" {
+resource "null_resource" "init-awscli-deadlinedb-firehawk" {
   count = var.firehawk_init ? 1 : 0
 
   provisioner "local-exec" {
@@ -33,7 +33,7 @@ EOT
 }
 
 locals {
-  deadlinedb_complete = element(concat(null_resource.init-aws-deadlinedb-firehawk.*.id, list("")), 0)
+  deadlinedb_complete = element(concat(null_resource.init-awscli-deadlinedb-firehawk.*.id, list("")), 0)
 }
 
 output "deadlinedb-complete" {
@@ -44,7 +44,7 @@ output "deadlinedb-complete" {
 
 resource "null_resource" "init-routes-houdini-license-server" {
   count = var.firehawk_init ? 1 : 0
-  depends_on = [null_resource.init-aws-deadlinedb-firehawk]
+  depends_on = [null_resource.init-awscli-deadlinedb-firehawk]
 
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]

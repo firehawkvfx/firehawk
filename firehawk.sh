@@ -184,9 +184,9 @@ if [ "$test_vm" = false ] ; then
     fi
 
     # AFter Vagrant Hosts are up, take the SSH keys and store them in the keys folder for general use.
-    ansiblecontrol_key=$(vagrant ssh-config ansiblecontrol | grep -oP "^  IdentityFile \K.*")
+    ansiblecontrol_key=$(vagrant ssh-config ansiblecontrol$TF_VAR_envtier | grep -oP "^  IdentityFile \K.*")
     cp -f $ansiblecontrol_key $TF_VAR_secrets_path/keys/ansible_control_private_key
-    firehawkgateway_key=$(vagrant ssh-config firehawkgateway | grep -oP "^  IdentityFile \K.*")
+    firehawkgateway_key=$(vagrant ssh-config firehawkgateway$TF_VAR_envtier | grep -oP "^  IdentityFile \K.*")
     cp -f $firehawkgateway_key $TF_VAR_secrets_path/keys/firehawkgateway_private_key
 
     hostname=$(vagrant ssh-config ansiblecontrol | grep -Po '.*HostName\ \K(\d*.\d*.\d*.\d*)')
@@ -217,6 +217,6 @@ if [[ ! -z "$box_file_out" ]]; then
     echo "Set Vagrant box out $firehawkgateway_box_out"
     [ ! -e $ansiblecontrol_box_out ] || rm $ansiblecontrol_box_out
     [ ! -e $firehawkgateway_box_out ] || rm $firehawkgateway_box_out
-    vagrant package ansiblecontrol --output $ansiblecontrol_box_out &
-    vagrant package firehawkgateway --output $firehawkgateway_box_out
+    vagrant package "ansiblecontrol$TF_VAR_envtier" --output $ansiblecontrol_box_out &
+    vagrant package "firehawkgateway$TF_VAR_envtier" --output $firehawkgateway_box_out
 fi
