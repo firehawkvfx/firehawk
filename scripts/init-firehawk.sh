@@ -45,7 +45,7 @@ cd /deployuser
 ### Get s3 access keys from terraform ###
 
 tf_action="apply"
-init_vm=true
+init_vm_config=true
 
 optspec=":h-:"
 
@@ -72,15 +72,15 @@ parse_opts () {
                     destroy)
                         tf_action='destroy'
                         ;;
-                    init-vm)
-                        init_vm="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+                    init-vm-config)
+                        init_vm_config="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
                         opt="${OPTARG}"
-                        echo "init_vm set: $init_vm"
+                        echo "init_vm_config set: $init_vm_config"
                         ;;
-                    init-vm=*)
-                        init_vm=${OPTARG#*=}
+                    init-vm-config=*)
+                        init_vm_config=${OPTARG#*=}
                         opt=${OPTARG%=$val}
-                        echo "init_vm set: $init_vm"
+                        echo "init_vm_config set: $init_vm_config"
                         ;;
                     *)
                         if [ "$OPTERR" = 1 ] && [ "${optspec:0:1}" != ":" ]; then
@@ -107,8 +107,8 @@ if [[ -z $TF_VAR_envtier ]] ; then
   echo "Error! you must specify an environment --dev or --prod" 1>&2
   exit 64
 else
-  echo "init_vm: $init_vm"
-  if [[ "$init_vm" == true ]]; then
+  echo "init_vm_config: $init_vm_config"
+  if [[ "$init_vm_config" == true ]]; then
     echo "...Init VM's"
     echo "...Provision PGP / Keybase"
     $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-010-keybase.sh $ARGS; exit_test
