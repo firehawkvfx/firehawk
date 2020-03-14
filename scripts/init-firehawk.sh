@@ -106,10 +106,13 @@ if [[ -z $TF_VAR_envtier ]] ; then
   exit 64
 else
   if [[ "$init_vm" == true ]]; then
+    echo "...Init VM's"
     echo "...Provision PGP / Keybase"
     $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-010-keybase.sh $ARGS; exit_test
     echo "...Provision Local VM's"
     $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-020-init.sh $ARGS; exit_test
+  else
+    echo "...Bypassing Init VM's"
   fi
 
   if [[ "$tf_action" == "apply" ]]; then
