@@ -167,7 +167,7 @@ resource "null_resource" "provision_bastion" {
       . /deployuser/scripts/exit_test.sh
       set -x
       cd /deployuser
-      echo "check keys permissions"
+      echo "Check keys permissions"
       ls -ltriah /secrets/keys
       ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-public-host.yaml -v --extra-vars "public_ip=${local.public_ip} public_address=${local.bastion_address} bastion_address=${local.bastion_address} set_bastion=true"; exit_test
 EOT
