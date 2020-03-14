@@ -68,6 +68,7 @@ optspec=":hv-:t:"
 vagrant_up=true
 test_vm=false
 tf_action="apply"
+init_vm=true
 
 parse_opts () {
     local OPTIND
@@ -231,7 +232,7 @@ if [ "$test_vm" = false ] ; then
     echo "tier --$TF_VAR_envtier"
 
     if [[ ! -z "$hostname" && ! -z "$port" && ! -z "$TF_VAR_envtier" ]]; then
-        # use expect to pipe through the password aquired initially.
+        echo "init_vm: $init_vm"
         if [[ "$tf_action" == "sleep" ]]; then
             echo "...Logging in to Vagrant host to set sleep on tf deployment"
             ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --sleep --init-vm=false" #; exit_test
@@ -241,7 +242,6 @@ if [ "$test_vm" = false ] ; then
             ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --destroy --init-vm=false" #; exit_test
             echo "...End Deployment"
         else
-            echo "init_vm: $init_vm"
             echo "...Logging in to Vagrant host"
             ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --init-vm=$init_vm" #; exit_test
             echo "...End Deployment"
