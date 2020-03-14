@@ -129,10 +129,12 @@ parse_opts () {
                     init-vm)
                         init_vm="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
                         opt="${OPTARG}"
+                        echo "init_vm set: $init_vm"
                         ;;
                     init-vm=*)
                         init_vm=${OPTARG#*=}
                         opt=${OPTARG%=$val}
+                        echo "init_vm set: $init_vm"
                         ;;
                     *)
                         if [ "$OPTERR" = 1 ] && [ "${optspec:0:1}" != ":" ]; then
@@ -239,6 +241,7 @@ if [ "$test_vm" = false ] ; then
             ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --destroy --init-vm=false" #; exit_test
             echo "...End Deployment"
         else
+            echo "init_vm: $init_vm"
             echo "...Logging in to Vagrant host"
             ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --init-vm=$init_vm" #; exit_test
             echo "...End Deployment"

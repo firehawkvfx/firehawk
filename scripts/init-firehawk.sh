@@ -75,10 +75,12 @@ parse_opts () {
                     init-vm)
                         init_vm="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
                         opt="${OPTARG}"
+                        echo "init_vm set: $init_vm"
                         ;;
                     init-vm=*)
                         init_vm=${OPTARG#*=}
                         opt=${OPTARG%=$val}
+                        echo "init_vm set: $init_vm"
                         ;;
                     *)
                         if [ "$OPTERR" = 1 ] && [ "${optspec:0:1}" != ":" ]; then
@@ -105,6 +107,7 @@ if [[ -z $TF_VAR_envtier ]] ; then
   echo "Error! you must specify an environment --dev or --prod" 1>&2
   exit 64
 else
+  echo "init_vm: $init_vm"
   if [[ "$init_vm" == true ]]; then
     echo "...Init VM's"
     echo "...Provision PGP / Keybase"
