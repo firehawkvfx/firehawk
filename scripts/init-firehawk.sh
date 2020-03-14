@@ -72,6 +72,9 @@ parse_opts () {
                     destroy)
                         tf_action='destroy'
                         ;;
+                    no-tf)
+                        tf_action='none'
+                        ;;
                     init-vm-config)
                         init_vm_config="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
                         opt="${OPTARG}"
