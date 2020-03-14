@@ -83,3 +83,6 @@ echo "Ping the host as deployuser..."
 ansible -m ping firehawkgateway -i "$TF_VAR_inventory" --private-key=$TF_VAR_general_use_ssh_key -u deployuser --become; exit_test
 echo "Init the Gateway VM..."
 ansible-playbook -i "$TF_VAR_inventory" ansible/init.yaml --extra-vars "variable_host=firehawkgateway variable_user=deployuser configure_gateway=true set_hostname=firehawkgateway"; exit_test
+
+echo '...Show key permissions'
+ls -ltriah /secrets/keys/
