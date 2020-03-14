@@ -105,7 +105,7 @@ user_softnas_pw: "{{ lookup('env','TF_VAR_user_softnas_pw') }}"
 user_deadlineuser_name: "{{ lookup('env','TF_VAR_user_deadlineuser_name') }}"
 user_deadlineuser_pw: "{{ lookup('env','TF_VAR_user_deadlineuser_pw') }}"
 
-onsite_workstation_ssh_private_key: "{{ lookup('env','TF_VAR_onsite_workstation_ssh_private_key') }}"
+onsite_workstation_private_ssh_key: "{{ lookup('env','TF_VAR_onsite_workstation_private_ssh_key') }}"
 
 user_inituser_name: "{{ lookup('env', 'TF_VAR_user_inituser_name') }}"
 user_inituser_pw: "{{ lookup('env', 'TF_VAR_user_inituser_pw') }}"

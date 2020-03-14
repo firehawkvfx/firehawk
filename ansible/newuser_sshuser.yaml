@@ -74,11 +74,15 @@
     file:
       path: "{{ public_key_location }}"
       mode: 0400
+      owner: deployuser
+    become: yes
 
   - name: "ensure permissions are correct on {{ general_use_ssh_key }}"
     file:
       path: "{{ general_use_ssh_key }}"
       mode: 0400
+      owner: deployuser
+    become: yes
 
   - name: Disable Password Authentication.  Only SSH keys will be accepted after this point.
     lineinfile:

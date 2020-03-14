@@ -217,15 +217,15 @@ TF_VAR_general_use_ssh_key_dev=insertvalue
 # default: TF_VAR_general_use_ssh_key_prod=/secrets/keys/id_ssh_rsa_prod
 TF_VAR_general_use_ssh_key_prod=insertvalue
 
-# TF_VAR_onsite_workstation_ssh_private_key_dev:
+# TF_VAR_onsite_workstation_private_ssh_key_dev:
 # the path to the rsa key to copy its id to other local workstations for provisioning.  This is best left at its default value.
-# default: TF_VAR_onsite_workstation_ssh_private_key_dev=/secrets/keys/id_ssh_rsa_dev
-TF_VAR_onsite_workstation_ssh_private_key_dev=insertvalue
+# default: TF_VAR_onsite_workstation_private_ssh_key_dev=/secrets/keys/id_ssh_rsa_dev
+TF_VAR_onsite_workstation_private_ssh_key_dev=insertvalue
 
-# TF_VAR_onsite_workstation_ssh_private_key_prod:
+# TF_VAR_onsite_workstation_private_ssh_key_prod:
 # the path to the rsa key to copy its id to other local workstations for provisioning.  This is best left at its default value.
-# default: TF_VAR_onsite_workstation_ssh_private_key_prod=/secrets/keys/id_ssh_rsa_prod
-TF_VAR_onsite_workstation_ssh_private_key_prod=insertvalue
+# default: TF_VAR_onsite_workstation_private_ssh_key_prod=/secrets/keys/id_ssh_rsa_prod
+TF_VAR_onsite_workstation_private_ssh_key_prod=insertvalue
 
 # TF_VAR_pgp_key_path_dev:
 # the path to the pgp key for the dev environment.  the default should be fine.  ensure that unencrypted keys are never commited to version control.  this path should be in git ignore, or build a CI workflow to ensure that keys are encrypted before any commits occur.
