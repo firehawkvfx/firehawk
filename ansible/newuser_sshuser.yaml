@@ -68,7 +68,7 @@
     authorized_key:
       user: "{{ user_inituser_name }}"
       key: "{{ lookup('file', public_key_location) }}"
-      state: 
+      state: present
         
   - name: "ensure permissions are correct on {{ public_key_location }}"
     file:
