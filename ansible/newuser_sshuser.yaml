@@ -68,7 +68,17 @@
     authorized_key:
       user: "{{ user_inituser_name }}"
       key: "{{ lookup('file', public_key_location) }}"
-      state: present
+      state: 
+        
+  - name: "ensure permissions are correct on {{ public_key_location }}"
+    file:
+      path: "{{ public_key_location }}"
+      mode: 0400
+
+  - name: "ensure permissions are correct on {{ general_use_ssh_key }}"
+    file:
+      path: "{{ general_use_ssh_key }}"
+      mode: 0400
 
   - name: Disable Password Authentication.  Only SSH keys will be accepted after this point.
     lineinfile:
