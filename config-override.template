@@ -21,6 +21,10 @@
 
 # BEGIN CONFIGURATION #
 
+# TF_VAR_vagrant_destroy_before_deploy:
+# default: TF_VAR_tf_destroy_before_deploy=false
+TF_VAR_vagrant_destroy_before_deploy=insertvalue
+
 # TF_VAR_tf_destroy_before_deploy:
 # default: TF_VAR_tf_destroy_before_deploy=false
 TF_VAR_tf_destroy_before_deploy=insertvalue
@@ -54,3 +58,15 @@ TF_VAR_remote_mounts_on_local=insertvalue
 # If enabled, the deadline spot fleet plugin will be automatically configured.  
 # Note that because we alter the mongo db, this may not be supported with future versions of deadline.  You may need to disable it and configure the plugin manually in these circumstances.
 TF_VAR_provision_deadline_spot_plugin=insertvalue
+
+# TF_VAR_install_houdini:
+# default: TF_VAR_install_houdini=true
+TF_VAR_install_houdini=insertvalue
+
+# TF_VAR_sofnas_update:
+# default: TF_VAR_sofnas_update=true
+TF_VAR_sofnas_update=insertvalue
+
+# TF_VAR_install_deadline:
+# default: TF_VAR_install_deadline=true
+TF_VAR_install_deadline=insertvalue

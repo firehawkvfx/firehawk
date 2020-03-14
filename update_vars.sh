@@ -18,9 +18,9 @@ SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 # This block allows you to echo a line number for a failure.
 # set -eE -o functrace
 err_report() {
-    echo "${BASH_SOURCE[0]}: err_report: Error on line $1"
+    echo "${BASH_SOURCE[0]}: $1 script err_report: Error on line $2"
 }
-trap 'err_report $LINENO' ERR
+trap 'err_report $0 $LINENO' ERR
 
 printf "\nRunning ansiblecontrol with $1...\n"
 

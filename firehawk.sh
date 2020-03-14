@@ -10,7 +10,7 @@ set -eE -o functrace
 err_report() {
   local lineno=$1
   local msg=$2
-  echo "Failed at $lineno: $msg"
+  echo "$0 script Failed at $lineno: $msg"
 }
 trap 'err_report ${LINENO} "$BASH_COMMAND"' ERR
 
@@ -65,6 +65,7 @@ IFS='
 '
 optspec=":hv-:t:"
 
+vagrant_up=true
 test_vm=false
 tf_action="apply"
 
@@ -113,6 +114,25 @@ parse_opts () {
                         ;;
                     destroy)
                         tf_action='destroy'
+                        echo "...will destroy"
+                        ;;
+                    vagrant-up)
+                        vagrant_up="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+                        opt="${OPTARG}"
+                        echo "vagrant_up set $vagrant_up"
+                        ;;
+                    vagrant-up=*)
+                        vagrant_up=${OPTARG#*=}
+                        opt=${OPTARG%=$val}
+                        echo "vagrant_up set $vagrant_up"
+                        ;;
+                    init-vm)
+                        init_vm="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+                        opt="${OPTARG}"
+                        ;;
+                    init-vm=*)
+                        init_vm=${OPTARG#*=}
+                        opt=${OPTARG%=$val}
                         ;;
                     *)
                         if [ "$OPTERR" = 1 ] && [ "${optspec:0:1}" != ":" ]; then
@@ -132,6 +152,8 @@ parse_opts () {
     done
 }
 parse_opts "$@"
+
+echo "opts $@"
 
 # This is the directory of the current script
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
@@ -162,14 +184,20 @@ if [[ "$test_vm" = false ]] ; then # If an encrypted var is provided for the vau
             echo "ERROR: unable to extract password from defined firehawksecret.  Either remove the firehawksecret variable, or debugging will be required for automation to continue."
             exit 1
         fi
+    else
+        firehawksecret='' # Set secret to an empty string if not defined.
     fi
 fi
 
 echo "Vagrant box ansiblecontrol$TF_VAR_envtier in $ansiblecontrol_box"
 echo "Vagrant box firehawkgateway$TF_VAR_envtier in $firehawkgateway_box"
 
-
-vagrant up #; exit_test # ssh reset may cause a non zero exit code, but it must be ignored
+printf "\nvagrant_up: $vagrant_up\n"
+if [[ "$vagrant_up" == true ]]; then
+    echo "Starting vagrant"
+    vagrant up
+fi
+#; exit_test # ssh reset may cause a non zero exit code, but it must be ignored
 
 if [ "$test_vm" = false ] ; then
     # vagrant reload
@@ -202,17 +230,17 @@ if [ "$test_vm" = false ] ; then
 
     if [[ ! -z "$hostname" && ! -z "$port" && ! -z "$TF_VAR_envtier" ]]; then
         # use expect to pipe through the password aquired initially.
-        if [[ "$tf_action"=="sleep" ]]; then
+        if [[ "$tf_action" == "sleep" ]]; then
             echo "...Logging in to Vagrant host to set sleep on tf deployment"
-            ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --sleep" #; exit_test
+            ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --sleep --init-vm=false" #; exit_test
             echo "...End Deployment"
-        elif [[ "$tf_action"=="destroy" ]]; then
+        elif [[ "$tf_action" == "destroy" ]]; then
             echo "...Logging in to Vagrant host to destroy tf deployment"
-            ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --destroy" #; exit_test
+            ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --destroy --init-vm=false" #; exit_test
             echo "...End Deployment"
         else
             echo "...Logging in to Vagrant host"
-            ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier" #; exit_test
+            ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --init-vm=$init_vm" #; exit_test
             echo "...End Deployment"
         fi
     fi

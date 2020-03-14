@@ -24,10 +24,12 @@ resource "null_resource" "init-awscli-deadlinedb-firehawk" {
       ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars 'variable_user=deployuser' --tags 'onsite-install'; exit_test
       # Add user to syscontrol without the new user tag, it will just add a user to the syscontrol group
       ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars 'variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deployuser' --tags 'onsite-install'; exit_test
-      # Install deadline
-      ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-install.yaml -v; exit_test
-      # First db check
-      ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      if [[ "$TF_VAR_install_deadline" == true ]]; then
+        # Install deadline
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-install.yaml -v; exit_test
+        # First db check
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      fi
 EOT
 }
 }
@@ -52,22 +54,28 @@ resource "null_resource" "init-routes-houdini-license-server" {
       . /deployuser/scripts/exit_test.sh
       set -x
       cd /deployuser
-      # check db
-      ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
-      # custom events auto assign groups to slaves on startup, eg slaveautoconf
-      ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-repository-custom-events.yaml; exit_test
+      if [[ "$TF_VAR_install_deadline" == true ]]; then
+        # check db
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+        # custom events auto assign groups to slaves on startup, eg slaveautoconf
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-repository-custom-events.yaml; exit_test
+      fi
       # configure onsite NAS mounts to firehawkgateway
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=firehawkgateway variable_user=deployuser softnas_hosts=none" --tags 'local_install_onsite_mounts'; exit_test
       # ssh will be killed from the previous script because users were added to a new group and this will not update unless your ssh session is restarted.
       # login again and continue...
-      # install houdini with the same procedure as on render nodes and workstations, and initialise the licence server on this system.
-      ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deployuser houdini_install_type=server" --skip-tags "sync_scripts"; exit_test
+      if [[ "$TF_VAR_install_houdini" == true ]]; then
+        # install houdini with the same procedure as on render nodes and workstations, and initialise the licence server on this system.
+        ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deployuser houdini_install_type=server" --skip-tags "sync_scripts"; exit_test
+      fi
       # ensure an aws pem key exists for ssh into cloud nodes
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-new-key.yaml; exit_test
       # configure routes to opposite environment for licence server to communicate if in dev environment
       ansible-playbook -i "$TF_VAR_inventory" ansible/firehawkgateway-update-routes.yaml; exit_test
-      #check db
-      ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      if [[ "$TF_VAR_install_deadline" == true ]]; then
+        #check db
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      fi
 EOT
 }
 }
@@ -103,9 +111,10 @@ resource "null_resource" "init-aws-local-workstation" {
       # configure aws for all users
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=workstation1 variable_user=deployuser aws_cli_root=true ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_private_key"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser aws_cli_root=true ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_private_key"; exit_test
-
-      #check db
-      ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      if [[ "$TF_VAR_install_deadline" == true ]]; then
+        #check db
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      fi
 EOT
 }
 }
@@ -120,10 +129,12 @@ resource "null_resource" "install-deadline-local-workstation" {
       . /deployuser/scripts/exit_test.sh
       set -x
       cd /deployuser
-      ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
-      # configure deadline on the local workstation with the keys from this install to run deadline slave and monitor
-      ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml --tags "onsite-install" --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser"; exit_test
-      ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      if [[ "$TF_VAR_install_deadline" == true ]]; then
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+        # configure deadline on the local workstation with the keys from this install to run deadline slave and monitor
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml --tags "onsite-install" --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser"; exit_test
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      fi
 EOT
 }
 }
@@ -138,9 +149,11 @@ resource "null_resource" "install-houdini-local-workstation" {
       . /deployuser/scripts/exit_test.sh
       set -x
       cd /deployuser
-      ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      if [[ "$TF_VAR_install_deadline" == true ]]; then
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      fi
       # install houdini on a local workstation with deadline submitters and environment vars.
-      if [[ "$TF_VAR_install_houdini"==true ]]; then
+      if [[ "$TF_VAR_install_houdini" == true ]]; then
         ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser" --skip-tags "sync_scripts"; exit_test
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
         ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser"; exit_test
