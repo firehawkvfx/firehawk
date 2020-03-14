@@ -6,7 +6,7 @@
 unset HISTFILE
 
 if [[ ! -z "$firehawksecret" ]]; then
-  echo "Vagrant: firehawksecret:$firehawksecret"
+  echo "Vagrant: firehawksecret encrypted env var found"
 else
   echo "Vagrant: No firehawk secret env var provided, will prompt user for input."
 fi
