@@ -74,7 +74,7 @@ ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --e
 echo "Add this host and address to ansible inventory"
 ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=firehawkgateway host_ip=$TF_VAR_openfirehawkserver group_name=role_gateway insert_ssh_key_string=ansible_ssh_private_key_file=$TF_VAR_general_use_ssh_key"; exit_test
 
-sudo chmod 0400 /secrets/keys/firehawkgateway_private_key
+sudo chmod 0600 /secrets/keys/firehawkgateway_private_key
 sudo chown deployuser:deployuser /secrets/keys/firehawkgateway_private_key
 
 # Now this will init the deployuser on the workstation.  the deployuser will become the primary user with ssh access.

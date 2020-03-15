@@ -24,7 +24,7 @@
 - name: ensure correct permissions on key.
   file:
     path: "{{ local_key_path }}"
-    mode: 0400
+    mode: 0600
   become: true
   connection: local
 

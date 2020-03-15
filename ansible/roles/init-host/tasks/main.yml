@@ -12,7 +12,7 @@
 
 - openssh_keypair:
     path: "{{ general_use_ssh_key }}"
-    mode: 0400
+    mode: 0600
     owner: deployuser
   delegate_to: ansible_control
   become: true

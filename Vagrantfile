@@ -156,12 +156,12 @@ Vagrant.configure(2) do |config|
                 end
                 node.vm.provision "shell", inline: "sudo reboot"
                 # trigger reload
-                # node.vm.provision :reload
-                # node.trigger.after :up do |trigger|
-                #     trigger.warn = "Taking Snapshot"
-                #     trigger.run = {inline: "vagrant snapshot push"}
-                # end
-                # node.vm.provision "shell", inline: "sudo reboot"
+                node.vm.provision :reload
+                node.trigger.after :up do |trigger|
+                    trigger.warn = "Taking Snapshot"
+                    trigger.run = {inline: "vagrant snapshot push"}
+                end
+                node.vm.provision "shell", inline: "sudo reboot"
                 node.vm.provision :reload
             end
             node.vm.post_up_message = "You must install this plugin to set the disk size: vagrant plugin install vagrant-disksize\nEnsure you have installed the vbguest plugin with: vagrant plugin update; vagrant plugin install vagrant-vbguest; vagrant vbguest; vagrant vbguest --status"
