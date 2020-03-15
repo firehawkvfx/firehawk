@@ -160,4 +160,5 @@ else
 fi
 
 echo "$(date) Finished a run" | tee -a tmp/log.txt
-tail 5 tmp/log.txt
+printf '\n...Show previous 5 runs\n'
+tail -n 5 tmp/log.txt

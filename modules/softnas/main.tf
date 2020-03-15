@@ -417,7 +417,6 @@ resource "null_resource" "provision_softnas" {
     inline = [
       "set -x",
       "sudo yum install -y python",
-      "sleep 300",
       "while [ ! -f /etc/ssh/ssh_host_ecdsa_key.pub ]",
       "do",
       "  sleep 10",
