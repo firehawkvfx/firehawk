@@ -132,9 +132,13 @@ else
   fi
 
   if [[ "$tf_action" == "apply" ]]; then
+  
+    echo "...Currently running instances"
+    $TF_VAR_firehawk_path/scripts/aws-running-instances.sh
+  
     echo "...Start Terraform"
     terraform init -lock=false; exit_test # Required to initialise any new modules
-  
+
     # if [[ "$TF_VAR_tf_destroy_before_deploy" == true ]]; then
     #   echo "...Destroy before deploy"
     #   terraform destroy --auto-approve -lock=false; exit_test
