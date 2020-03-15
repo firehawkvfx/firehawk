@@ -2,6 +2,10 @@
 resource "null_resource" "init-awscli-deadlinedb-firehawk" {
   count = var.firehawk_init ? 1 : 0
 
+  triggers = {
+    install_deadline = var.install_deadline
+  }
+
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
@@ -49,6 +53,11 @@ output "deadlinedb-complete" {
 resource "null_resource" "init-routes-houdini-license-server" {
   count = var.firehawk_init ? 1 : 0
   depends_on = [null_resource.init-awscli-deadlinedb-firehawk]
+
+  triggers = {
+    install_deadline = var.install_deadline
+    install_houdini = var.install_houdini
+  }
 
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
@@ -113,10 +122,10 @@ resource "null_resource" "init-aws-local-workstation" {
       # configure aws for all users
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=workstation1 variable_user=deployuser aws_cli_root=true ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser aws_cli_root=true ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key"; exit_test
-      if [[ "$TF_VAR_install_deadline" == true ]]; then
-        #check db
-        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
-      fi
+      # if [[ "$TF_VAR_install_deadline" == true ]]; then
+      #   #check db
+      #   ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      # fi
 EOT
 }
 }
@@ -124,6 +133,11 @@ EOT
 resource "null_resource" "install-deadline-local-workstation" {
   count = var.firehawk_init ? 1 : 0
   depends_on = [null_resource.init-aws-local-workstation]
+
+  triggers = {
+    install_deadline = var.install_deadline
+    install_houdini = var.install_houdini
+  }
 
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
@@ -145,6 +159,11 @@ resource "null_resource" "install-houdini-local-workstation" {
   count = var.firehawk_init ? 1 : 0
   depends_on = [null_resource.install-deadline-local-workstation]
 
+  triggers = {
+    install_deadline = var.install_deadline
+    install_houdini = var.install_houdini
+  }
+
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
@@ -157,8 +176,10 @@ resource "null_resource" "install-houdini-local-workstation" {
       # install houdini on a local workstation with deadline submitters and environment vars.
       if [[ "$TF_VAR_install_houdini" == true ]]; then
         ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser" --skip-tags "sync_scripts"; exit_test
-        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
         ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser"; exit_test
+      fi
+      if [[ "$TF_VAR_install_deadline" == true ]]; then
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
       fi
 EOT
 }
@@ -167,6 +188,11 @@ EOT
 resource "null_resource" "local-provisioning-complete" {
   count = var.firehawk_init ? 1 : 0
   depends_on = [null_resource.install-houdini-local-workstation]
+
+  triggers = {
+    install_deadline = var.install_deadline
+    install_houdini = var.install_houdini
+  }
 
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]

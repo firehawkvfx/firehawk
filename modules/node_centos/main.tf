@@ -254,9 +254,11 @@ resource "null_resource" "provision_node_centos" {
   count = var.site_mounts ? 1 : 0
   #count      = 0
   depends_on = [aws_instance.node_centos]
-
+  
   triggers = {
     instanceid = aws_instance.node_centos[0].id
+    install_deadline = var.install_deadline
+    install_houdini = var.install_houdini
   }
 
   provisioner "local-exec" {
@@ -279,8 +281,6 @@ resource "null_resource" "provision_node_centos" {
     inline = [
       "sleep 10",
       "set -x",
-      # "cloud-init status --wait  > /dev/null 2>&1",
-      # "[ $? -ne 0 ] && echo 'Cloud-init failed' && exit 1",
       "sudo yum install -y python",
       "ssh-keyscan ${aws_instance.node_centos[0].private_ip}",
     ]
@@ -301,7 +301,9 @@ resource "null_resource" "provision_node_centos" {
       # install cli for deadlineuser
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_node_centos variable_user=centos variable_become_user=deadlineuser" --skip-tags "user_access"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"; exit_test
-      ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml --tags "onsite-install" --skip-tags "multi-slave" --extra-vars "variable_host=role_node_centos variable_connect_as_user=centos variable_user=centos"; exit_test
+      if [[ "$TF_VAR_install_houdini" == true ]]; then
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml --tags "onsite-install" --skip-tags "multi-slave" --extra-vars "variable_host=role_node_centos variable_connect_as_user=centos variable_user=centos"; exit_test
+      fi
       if [[ "$TF_VAR_install_houdini" == true ]]; then
         ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source"; exit_test
         ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v; exit_test

@@ -42,6 +42,9 @@ module "firehawk_init" {
   
   storage_user_access_key_id = module.storage_user.storage_user_access_key_id
   storage_user_secret = module.storage_user.storage_user_secret
+
+  install_houdini = var.install_houdini
+  install_deadline = var.install_deadline
 }
 
 module "vpc" {
@@ -423,7 +426,10 @@ module "node" {
 
   wakeable = var.node_wakeable
 
+  install_houdini = var.install_houdini
+  install_deadline = var.install_deadline
   houdini_license_server_address = var.houdini_license_server_address
+
 }
 
 output "snapshot_id" {
