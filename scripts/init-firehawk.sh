@@ -75,6 +75,16 @@ parse_opts () {
                     no-tf)
                         tf_action='none'
                         ;;
+                    tf-action)
+                        tf_action="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+                        opt="${OPTARG}"
+                        echo "tf_action set: $tf_action"
+                        ;;
+                    tf-action=*)
+                        tf_action=${OPTARG#*=}
+                        opt=${OPTARG%=$val}
+                        echo "tf_action set: $tf_action"
+                        ;;
                     init-vm-config)
                         init_vm_config="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
                         opt="${OPTARG}"
