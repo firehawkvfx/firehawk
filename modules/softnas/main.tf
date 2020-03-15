@@ -396,7 +396,7 @@ resource "null_resource" "provision_softnas" {
 
   triggers = {
     instanceid = aws_instance.softnas1[0].id
-    sofnas_update = var.sofnas_update
+    skip_update = var.skip_update
   }
 
   # some time is required before the ecdsa key file exists.

@@ -28,8 +28,6 @@ variable "public_subnets_cidr_blocks" {
 variable "public_domain" {
 }
 
-variable "sofnas_update" {}
-
 variable "volumes" {
   default = []
 }
