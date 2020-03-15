@@ -416,11 +416,11 @@ resource "null_resource" "provision_softnas" {
     # sleep 300 is required because ecdsa key wont exist for a while, and you can't continue without it.
     inline = [
       "set -x",
-      "sleep 300",
       "sudo yum install -y python",
+      "sleep 300",
       "while [ ! -f /etc/ssh/ssh_host_ecdsa_key.pub ]",
       "do",
-      "  sleep 2",
+      "  sleep 10",
       "done",
       "cat /etc/ssh/ssh_host_ecdsa_key.pub",
       "cat /etc/ssh/ssh_host_rsa_key.pub",

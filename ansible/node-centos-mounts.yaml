@@ -218,22 +218,22 @@
     tags:
     - local_install
 
-  - name: "Check showmount to see whether /etc/exports contains the mount on {{ groups['role_softnas'] | map('extract', hostvars, ['ansible_host']) | first }}"
-    shell: "showmount -e {{ groups['role_softnas'] | map('extract', hostvars, ['ansible_host']) | first }}"
-    register: softnas_showmount
-    check_mode: no
-    ignore_errors: yes
-    changed_when: no
-    tags:
-    - local_install
+  # - name: "Check showmount to see whether /etc/exports contains the mount on {{ groups['role_softnas'] | map('extract', hostvars, ['ansible_host']) | first }}"
+  #   shell: "showmount -e {{ groups['role_softnas'] | map('extract', hostvars, ['ansible_host']) | first }}"
+  #   register: softnas_showmount
+  #   check_mode: no
+  #   ignore_errors: yes
+  #   changed_when: no
+  #   tags:
+  #   - local_install
 
-  - name: "Export showmount for {{ groups['role_softnas'] | map('extract', hostvars, ['ansible_host']) | first }}: If this fails check the vpn is working and ports are open."
-    debug:
-      var: item
-    when: item.rc == 0
-    with_items: "{{ softnas_showmount.results }}"
-    tags:
-    - local_install
+  # - name: "Export showmount for {{ groups['role_softnas'] | map('extract', hostvars, ['ansible_host']) | first }}: If this fails check the vpn is working and ports are open."
+  #   debug:
+  #     var: item
+  #   when: item.rc == 0
+  #   with_items: "{{ softnas_showmount.results }}"
+  #   tags:
+  #   - local_install
 
   - name: mount softnas NFS volume from export on local site based workstation/render nodes using original unique pool and volume names - master
     become: yes
