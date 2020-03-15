@@ -396,6 +396,7 @@ resource "null_resource" "provision_softnas" {
 
   triggers = {
     instanceid = aws_instance.softnas1[0].id
+    sofnas_update = var.sofnas_update
   }
 
   # some time is required before the ecdsa key file exists.
@@ -443,7 +444,9 @@ resource "null_resource" "provision_softnas" {
       fi
       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init.yaml -v; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init-users.yaml -v --extra-vars "variable_host=role_softnas variable_user=$TF_VAR_softnas_ssh_user set_hostname=false"; exit_test
-      if [[ "$TF_VAR_sofnas_update"=true ]]; then
+      if [[ "$TF_VAR_sofnas_skip_update" == true ]]; then
+        echo "...Skip softnas update"
+      else
         ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-update.yaml -v; exit_test
       fi
       # hotfix script to speed up instance start and shutdown

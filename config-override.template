@@ -63,9 +63,9 @@ TF_VAR_provision_deadline_spot_plugin=insertvalue
 # default: TF_VAR_install_houdini=true
 TF_VAR_install_houdini=insertvalue
 
-# TF_VAR_sofnas_update:
-# default: TF_VAR_sofnas_update=true
-TF_VAR_sofnas_update=insertvalue
+# TF_VAR_sofnas_skip_update:
+# default: TF_VAR_sofnas_skip_update=true
+TF_VAR_sofnas_skip_update=insertvalue
 
 # TF_VAR_install_deadline:
 # default: TF_VAR_install_deadline=true
