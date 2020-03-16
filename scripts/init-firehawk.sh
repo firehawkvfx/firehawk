@@ -133,7 +133,7 @@ else
 
   if [[ "$tf_action" == "apply" ]]; then
   
-    echo "...Currently running instances"
+    echo "...Currently running instances: scripts/aws-running-instances.sh"
     $TF_VAR_firehawk_path/scripts/aws-running-instances.sh
   
     echo "...Start Terraform"
@@ -176,3 +176,6 @@ fi
 echo "$(date) Finished a run" | tee -a tmp/log.txt
 printf '\n...Show previous 5 runs\n'
 tail -n 5 tmp/log.txt
+
+echo "...Currently running instances: scripts/aws-running-instances.sh"
+$TF_VAR_firehawk_path/scripts/aws-running-instances.sh
