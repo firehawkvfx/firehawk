@@ -68,6 +68,7 @@ optspec=":hv-:t:"
 vagrant_up=true
 test_vm=false
 tf_action="apply"
+tf_init=false
 init_vm_config=true
 
 parse_opts () {
@@ -136,6 +137,16 @@ parse_opts () {
                         tf_action=${OPTARG#*=}
                         opt=${OPTARG%=$val}
                         echo "tf_action set: $tf_action"
+                        ;;
+                    tf-init)
+                        tf_init="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+                        opt="${OPTARG}"
+                        echo "tf_init set: $tf_init"
+                        ;;
+                    tf-init=*)
+                        tf_init=${OPTARG#*=}
+                        opt=${OPTARG%=$val}
+                        echo "tf_init set: $tf_init"
                         ;;
                     init-vm-config)
                         init_vm_config="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
@@ -253,7 +264,7 @@ if [ "$test_vm" = false ] ; then
             echo "...End Deployment"
         else
             echo "...Logging in to Vagrant host"
-            ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --init-vm-config=$init_vm_config --tf-action=$tf_action" #; exit_test
+            ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --init-vm-config=$init_vm_config --tf-action=$tf_action --tf-init=$tf_init" #; exit_test
             echo "...End Deployment"
         fi
     fi

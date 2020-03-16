@@ -45,6 +45,7 @@ cd /deployuser
 ### Get s3 access keys from terraform ###
 
 tf_action="apply"
+tf_init=false
 init_vm_config=true
 
 optspec=":h-:"
@@ -84,6 +85,16 @@ parse_opts () {
                         tf_action=${OPTARG#*=}
                         opt=${OPTARG%=$val}
                         echo "tf_action set: $tf_action"
+                        ;;
+                    tf-init)
+                        tf_init="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+                        opt="${OPTARG}"
+                        echo "tf_init set: $tf_init"
+                        ;;
+                    tf-init=*)
+                        tf_init=${OPTARG#*=}
+                        opt=${OPTARG%=$val}
+                        echo "tf_init set: $tf_init"
                         ;;
                     init-vm-config)
                         init_vm_config="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
@@ -130,15 +141,18 @@ else
   else
     echo "...Bypassing Init VM's"
   fi
+  
+  if [[ "$tf_init" == true ]]; then
+    echo "...Terraform Init"
+    terraform init -lock=false; exit_test # Required to initialise any new modules
+  fi
 
   if [[ "$tf_action" == "apply" ]]; then
-  
     echo "...Currently running instances: scripts/aws-running-instances.sh"
     $TF_VAR_firehawk_path/scripts/aws-running-instances.sh
     echo ""
   
     echo "...Start Terraform"
-    terraform init -lock=false; exit_test # Required to initialise any new modules
 
     # if [[ "$TF_VAR_tf_destroy_before_deploy" == true ]]; then
     #   echo "...Destroy before deploy"
