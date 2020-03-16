@@ -135,6 +135,7 @@ else
   
     echo "...Currently running instances: scripts/aws-running-instances.sh"
     $TF_VAR_firehawk_path/scripts/aws-running-instances.sh
+    echo ""
   
     echo "...Start Terraform"
     terraform init -lock=false; exit_test # Required to initialise any new modules
@@ -179,3 +180,4 @@ tail -n 5 tmp/log.txt
 
 echo "...Currently running instances: scripts/aws-running-instances.sh"
 $TF_VAR_firehawk_path/scripts/aws-running-instances.sh
+echo ""
