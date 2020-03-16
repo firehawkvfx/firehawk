@@ -70,6 +70,7 @@ test_vm=false
 tf_action="apply"
 tf_init=false
 init_vm_config=true
+vagrant_halt=false
 
 parse_opts () {
     local OPTIND
@@ -127,6 +128,16 @@ parse_opts () {
                         vagrant_up=${OPTARG#*=}
                         opt=${OPTARG%=$val}
                         echo "vagrant_up set $vagrant_up"
+                        ;;
+                    vagrant-halt)
+                        vagrant_halt="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+                        opt="${OPTARG}"
+                        echo "vagrant_halt set $vagrant_halt"
+                        ;;
+                    vagrant-halt=*)
+                        vagrant_halt=${OPTARG#*=}
+                        opt=${OPTARG%=$val}
+                        echo "vagrant_halt set $vagrant_halt"
                         ;;
                     tf-action)
                         tf_action="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
@@ -215,6 +226,11 @@ fi
 
 echo "Vagrant box ansiblecontrol$TF_VAR_envtier in $ansiblecontrol_box"
 echo "Vagrant box firehawkgateway$TF_VAR_envtier in $firehawkgateway_box"
+
+if [[ "$vagrant_halt" == true ]]; then
+    echo "Halting vagrant"
+    vagrant halt
+fi
 
 printf "\nvagrant_up: $vagrant_up\n"
 if [[ "$vagrant_up" == true ]]; then
