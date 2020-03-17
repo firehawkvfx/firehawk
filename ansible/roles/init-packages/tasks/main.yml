@@ -5,14 +5,16 @@
     var: ansible_distribution
 
 - name: fping
-  package:
+  apt:
     name:
     - fping # used to ping with max reytries up to a certain time to test open vpn.
     state: present
+    update_cache: yes
   register: install_package
   until: install_package is not failed
   retries: 5
   become: true
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
 - name: install mkpasswd, pip, pexpect, passlib, fping
   package:
