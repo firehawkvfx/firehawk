@@ -144,7 +144,7 @@ else
 
   if [[ "$tf_init" == true ]]; then
     echo "...Terraform Init"
-    terraform init -lock=false; exit_test # Required to initialise any new modules
+    terraform init; exit_test # Required to initialise any new modules
   fi
 
   if [[ "$tf_action" == "apply" ]]; then
@@ -159,7 +159,7 @@ else
     #   terraform destroy --auto-approve -lock=false; exit_test
     # fi
     echo "...Terraform apply"
-    terraform apply --auto-approve -lock=false; exit_test
+    terraform apply --auto-approve; exit_test
     
     # # the following commands will only occur if there is a succesful deployment.  handling a failed deployment will require reexecution
     # if [[ "$TF_VAR_destroy_after_deploy" == true ]]; then
