@@ -196,15 +196,14 @@ echo "...Currently running instances: scripts/aws-running-instances.sh"
 $TF_VAR_firehawk_path/scripts/aws-running-instances.sh
 echo ""
 
-lines=$($TF_VAR_firehawk_path/scripts/aws-running-instances.sh | wc -l)
-echo "lines: $lines"
 
+lines=$($TF_VAR_firehawk_path/scripts/aws-running-instances.sh | wc -l)
 if [ "$lines" -gt "0" ]; then
   echo "instances are running"
 else
   echo "instances are not running"
 fi
-
+# test if the destroy command worked
 if [ "$lines" -gt "0" ] && [[ "$tf_action" == "destroy" ]]; then 
   echo "failed to destroy all running instances for the account"
   exit 1
