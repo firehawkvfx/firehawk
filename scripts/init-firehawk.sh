@@ -196,7 +196,7 @@ echo "...Currently running instances: scripts/aws-running-instances.sh"
 $TF_VAR_firehawk_path/scripts/aws-running-instances.sh
 echo ""
 
-lines=$($TF_VAR_firehawk_path/scripts/aws-running-instances.sh)
+lines=$($TF_VAR_firehawk_path/scripts/aws-running-instances.sh | wc -l)
 echo "lines: $lines"
 
 if [ "$lines" -gt "0" ]; then
