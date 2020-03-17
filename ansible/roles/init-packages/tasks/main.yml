@@ -4,10 +4,19 @@
   debug:
     var: ansible_distribution
 
-- name: install mkpasswd, pip, pexpect, passlib
+- name: fping
   package:
     name:
     - fping # used to ping with max reytries up to a certain time to test open vpn.
+    state: present
+  register: install_package
+  until: install_package is not failed
+  retries: 5
+  become: true
+
+- name: install mkpasswd, pip, pexpect, passlib, fping
+  package:
+    name:
     - python-pip
     - python-apt
     - whois
@@ -17,6 +26,7 @@
     - rng-tools
     - gpgv2
     state: present
+  become: true
 
 - name: install requests to query web pages in houdini python install script.
   pip:
