@@ -141,7 +141,7 @@ else
   else
     echo "...Bypassing Init VM's"
   fi
-  
+
   if [[ "$tf_init" == true ]]; then
     echo "...Terraform Init"
     terraform init -lock=false; exit_test # Required to initialise any new modules
@@ -195,3 +195,17 @@ tail -n 5 tmp/log.txt
 echo "...Currently running instances: scripts/aws-running-instances.sh"
 $TF_VAR_firehawk_path/scripts/aws-running-instances.sh
 echo ""
+
+lines=$($TF_VAR_firehawk_path/scripts/aws-running-instances.sh)
+echo "lines: $lines"
+
+if [ "$lines" -gt "0" ]; then
+  echo "instances are running"
+else
+  echo "instances are not running"
+fi
+
+if [ "$lines" -gt "0" ] && [[ "$tf_action" == "destroy" ]]; then 
+  echo "failed to destroy all running instances for the account"
+  exit 1
+fi
