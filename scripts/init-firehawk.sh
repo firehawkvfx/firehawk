@@ -163,6 +163,7 @@ else
     echo "...Terraform apply"
     terraform apply --auto-approve; exit_test
     
+    
     # # the following commands will only occur if there is a succesful deployment.  handling a failed deployment will require reexecution
     # if [[ "$TF_VAR_destroy_after_deploy" == true ]]; then
     #   terraform destroy --auto-approve -lock=false; exit_test
