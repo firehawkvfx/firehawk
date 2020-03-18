@@ -15,6 +15,7 @@ NC='\033[0m' # No Color
 # the directory of the current script
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
+
 # This block allows you to echo a line number for a failure.
 # set -eE -o functrace
 err_report() {
