@@ -3,7 +3,7 @@
 # echo "Enter Secrets Decryption Password..."
 unset HISTFILE
 
-echo "...TEST 2"
+echo "...TEST 3"
 
 printf "\nRunning ansiblecontrol with $1...\n"
 
