@@ -158,6 +158,8 @@ else
     #   echo "...Destroy before deploy"
     #   terraform destroy --auto-approve -lock=false; exit_test
     # fi
+    echo "...Terraform refresh"
+    terraform refresh
     echo "...Terraform apply"
     terraform apply --auto-approve; exit_test
     
@@ -168,9 +170,16 @@ else
     #   terraform apply --auto-approve -var sleep=true # turn of all nodes to save cloud costs after provisioning
     # fi
   elif [[ "$tf_action" == "sleep" ]]; then
+    echo "...Terraform refresh"
+    terraform refresh
+
     echo "...Terraform sleep"
     terraform apply --auto-approve -var sleep=true
   elif [[ "$tf_action" == "destroy" ]]; then
+
+    echo "...Terraform refresh"
+    terraform refresh
+
     echo "...Terraform destroy"
     terraform destroy --auto-approve
   fi
