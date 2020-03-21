@@ -19,7 +19,7 @@ ansible/*.retry
 ansible-log.txt
 ansible/modules/*.retry
 hostvars.log
-tmp
+tmp/
 *.DS_Store
 .nfs*
 *.box
