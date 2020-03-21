@@ -11,7 +11,7 @@ modules/node_centos/file_package
 modules/node_centos/current_deadline.ini
 IamFleetRole.json
 spot_fleet_template.json
-.vagrant
+.vagrant/
 ubuntu-xenial-16.04-cloudimg-console.log
 playbook.retry
 downloads
