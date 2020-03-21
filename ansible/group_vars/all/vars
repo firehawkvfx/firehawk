@@ -16,6 +16,8 @@ shot: "{{ lookup('env','TF_VAR_SHOT') }}"
 
 gatewaynic: "{{ lookup('env','TF_VAR_gatewaynic') }}"
 
+bridgenic: "{{ lookup('env','TF_VAR_bridgenic') }}"
+
 terraform_version: "{{ lookup('env','TF_VAR_terraform_version') }}"
 inventory: "{{ lookup('env','TF_VAR_inventory') }}"
 

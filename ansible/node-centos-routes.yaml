@@ -27,7 +27,7 @@
     houdini_build: "{{ lookup('env','TF_VAR_houdini_build') }}"
     skip_packages: false
     houdini_install_type: node
-    ethernet_device: enp9s0f0
+    ethernet_device: "{{ bridgenic }}"
 
 
   tasks:
