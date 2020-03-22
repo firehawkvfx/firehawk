@@ -53,7 +53,9 @@ Vagrant.configure(2) do |config|
             if box_file_in.nil? || box_file_in.empty?
                 # versions can not be specified with direct file paths for .boxes
                 node.vm.box_version = "201912.03.0"
+                node.vm.provision "shell", inline: "echo 'create syscontrol group'"
                 node.vm.provision "shell", inline: "sudo groupadd -g #{syscontrol_gid} syscontrol"
+                node.vm.provision "shell", inline: "echo 'done.'"
                 node.vm.provision "shell", inline: "sudo usermod -aG syscontrol vagrant"
                 node.vm.provision "shell", inline: "sudo useradd -m -s /bin/bash -U deployuser -u #{deployuser_uid}"
                 node.vm.provision "shell", inline: "sudo usermod -aG syscontrol deployuser"
