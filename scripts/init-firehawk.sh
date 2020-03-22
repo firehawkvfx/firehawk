@@ -234,3 +234,15 @@ if [ "$lines" -gt "0" ] && [[ "$tf_action" == "destroy" ]]; then
   echo "failed to destroy all running instances for the account"
   exit 1
 fi
+
+user_present=$(aws iam list-users | grep -c "deadline_spot_deployment_user") || echo "Suppress Exit Code"
+if [ "$user_present" -gt "0" ]; then
+  echo "deadline_spot_deployment_user is present"
+else
+  echo "deadline_spot_deployment_user not present"
+fi
+
+if [ "$user_present" -gt "0" ] && [[ "$tf_action" == "destroy" ]]; then 
+  echo "failed to destroy existing deadline_spot_deployment_user for the account"
+  exit 1
+fi
