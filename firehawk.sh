@@ -234,8 +234,13 @@ fi
 
 printf "\nvagrant_up: $vagrant_up\n"
 if [[ "$vagrant_up" == true ]]; then
-    echo "Starting vagrant"
-    vagrant up
+    if [[ "$init_vm_config" == true ]]; then
+        echo "Starting vagrant, and provisioning."
+        vagrant up --provision
+    else
+        echo "Starting vagrant"
+        vagrant up
+    fi
 fi
 #; exit_test # ssh reset may cause a non zero exit code, but it must be ignored
 
