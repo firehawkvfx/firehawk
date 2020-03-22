@@ -3,8 +3,6 @@
 # echo "Enter Secrets Decryption Password..."
 unset HISTFILE
 
-echo "...TEST 3"
-
 printf "\nRunning ansiblecontrol with $1...\n"
 
 # # This block allows you to echo a line number for a failure.

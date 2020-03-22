@@ -5,6 +5,15 @@
 # Don't store command history.
 unset HISTFILE
 
+# # This block allows you to echo a line number for a failure.
+set -eE -o functrace
+err_report() {
+  local lineno=$1
+  local msg=$2
+  echo "$0 script Failed at $lineno: $msg"
+}
+trap 'err_report ${LINENO} "$BASH_COMMAND"' ERR
+
 if [[ ! -z "$firehawksecret" ]]; then
   echo "Vagrant: firehawksecret encrypted env var found"
 else
