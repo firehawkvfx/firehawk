@@ -180,12 +180,19 @@ else
     #   terraform apply --auto-approve -var sleep=true # turn of all nodes to save cloud costs after provisioning
     # fi
   elif [[ "$tf_action" == "sleep" ]]; then
+    echo "...Currently running instances: scripts/aws-running-instances.sh"
+    $TF_VAR_firehawk_path/scripts/aws-running-instances.sh
+    echo ""
+
     echo "...Terraform refresh"
     terraform refresh; exit_test
 
     echo "...Terraform sleep"
     terraform apply --auto-approve -var sleep=true
   elif [[ "$tf_action" == "destroy" ]]; then
+    echo "...Currently running instances: scripts/aws-running-instances.sh"
+    $TF_VAR_firehawk_path/scripts/aws-running-instances.sh
+    echo ""
 
     echo "...Terraform refresh"
     terraform refresh; exit_test
