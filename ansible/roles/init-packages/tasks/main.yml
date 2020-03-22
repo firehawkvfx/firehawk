@@ -30,7 +30,7 @@
     state: present
   become: true
 
-- name: install requests to query web pages in houdini python install script.
+- name: Install requests module to query web pages in (houdini python install script)
   pip:
     name: requests
   become: true
