@@ -159,7 +159,7 @@ else
     #   terraform destroy --auto-approve -lock=false; exit_test
     # fi
     echo "...Terraform refresh"
-    terraform refresh
+    terraform refresh; exit_test
     echo "...Terraform apply"
     terraform apply --auto-approve; exit_test
     
@@ -172,17 +172,17 @@ else
     # fi
   elif [[ "$tf_action" == "sleep" ]]; then
     echo "...Terraform refresh"
-    terraform refresh
+    terraform refresh; exit_test
 
     echo "...Terraform sleep"
     terraform apply --auto-approve -var sleep=true
   elif [[ "$tf_action" == "destroy" ]]; then
 
     echo "...Terraform refresh"
-    terraform refresh
+    terraform refresh; exit_test
 
     echo "...Terraform destroy"
-    terraform destroy --auto-approve
+    terraform destroy --auto-approve; exit_test
   fi
 
 
