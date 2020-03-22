@@ -192,6 +192,8 @@ else
   elif [[ "$tf_action" == "destroy" ]]; then
     echo "...Currently running instances: scripts/aws-running-instances.sh"
     $TF_VAR_firehawk_path/scripts/aws-running-instances.sh
+    printf "\n...Currently existing users in the aws account"
+    aws iam list-users
     echo ""
 
     echo "...Terraform refresh"
@@ -234,6 +236,10 @@ if [ "$lines" -gt "0" ] && [[ "$tf_action" == "destroy" ]]; then
   echo "failed to destroy all running instances for the account"
   exit 1
 fi
+
+printf "\n...Currently existing users in the aws account"
+aws iam list-users
+echo ""
 
 user_present=$(aws iam list-users | grep -c "deadline_spot_deployment_user") || echo "Suppress Exit Code"
 if [ "$user_present" -gt "0" ]; then
