@@ -494,7 +494,6 @@ source_vars () {
             echo "var_file=$var_file"
             echo "vault_key=$vault_key"
             echo "encrypt_mode=$encrypt_mode"
-            echo "vault_command=$vault_command"
         fi
 
         export vault_examples_command="cat $TF_VAR_firehawk_path/secrets.example"
@@ -505,6 +504,7 @@ source_vars () {
             printf "\n...Parsing unencrypted file to template.  No decryption necesary.\n"
         else
             printf "\n...Parsing vault file to template.  Decrypting.\n"
+            echo "vault_command=$vault_command"
         fi
 
         local multiline; multiline=$(eval $vault_command); exit_test
