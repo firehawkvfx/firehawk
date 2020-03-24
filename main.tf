@@ -342,10 +342,6 @@ module "workstation" {
   vpn_cidr       = var.vpn_cidr
   remote_ip_cidr = var.remote_ip_cidr
 
-  #public_subnet_ids = "${module.vpc.public_subnets}"
-
-  #bastion_ip = "${module.bastion.public_ip}"
-
   key_name    = var.key_name
   private_key = file(var.local_key_path)
 
