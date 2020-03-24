@@ -1,0 +1,47 @@
+- hosts: role_softnas
+  remote_user: "{{ softnas_ssh_user | default('ec2-user') }}"
+  become_user: root
+  become: true
+
+  # example to execute from commandline:
+  # ansible-playbook -i ansible/inventory ansible/softnas-s3-disk-delete.yaml -v --extra-vars "s3_disk_name='/dev/s3-1'"
+
+
+  tasks:
+  - name: delete s3 extender disk
+    shell: |
+      softnas-cmd login softnas {{ user_softnas_pw }}
+      softnas-cmd diskmgmt deleteS3disk "{{ s3_disk_name }}" > /tmp/softnas_delete_s3_disk_output_dict.json
+  
+  - fetch:
+      src: /tmp/softnas_delete_s3_disk_output_dict.json
+      dest: /tmp/
+      flat: true
+
+  - include_vars:
+      file: /tmp/softnas_delete_s3_disk_output_dict.json
+      name: softnas_delete_s3_disk_output_dict
+
+  - name: all json output
+    debug:
+      msg: "{{ softnas_delete_s3_disk_output_dict }}"
+
+  - name: check if softnas cli login succeeded
+    debug:
+      msg: "softnas-cli login succeeded"
+    when: softnas_delete_s3_disk_output_dict.success
+
+  - name: check if softnas cli login failed
+    fail:
+      msg: "{{softnas_delete_s3_disk_output_dict}}"
+    failed_when: softnas_delete_s3_disk_output_dict.success == false
+
+  - name: check if disk delete succeeded
+    debug:
+      msg: "{{softnas_delete_s3_disk_output_dict.result.msg}}"
+    when: softnas_delete_s3_disk_output_dict.result.success
+
+  - name: check if disk delete failed
+    fail:
+      msg: "{{softnas_delete_s3_disk_output_dict.result.msg}}"
+    failed_when: softnas_delete_s3_disk_output_dict.result.success == false

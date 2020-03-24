@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>README</title>
+  <link rel="stylesheet" href="https://stackedit.io/style.css" />
+</head>
+
+<body class="stackedit">
+  <div class="stackedit__left">
+    <div class="stackedit__toc">
+      
+<ul>
+<li><a href="#openfirehawk">openFirehawk</a>
+<ul>
+<li><a href="#intro">Intro</a></li>
+<li><a href="#getting-started">Getting Started</a></li>
+<li><a href="#disclaimer-running-your-own-aws-account.">Disclaimer: Running your own AWS account.</a></li>
+<li><a href="#pointers-on-cost-awareness">Pointers on cost awareness:</a></li>
+<li><a href="#running-an-onsite-management-vm">Running an onsite management VM</a></li>
+<li><a href="#aws-configure">AWS configure</a></li>
+<li><a href="#install-terraform">Install Terraform</a></li>
+<li><a href="#configuring-private-variables">Configuring private variables</a></li>
+<li><a href="#your-first-terraform-apply">Your first terraform apply</a></li>
+<li><a href="#preparation-of-open-vpn">Preparation of open vpn</a></li>
+</ul>
+</li>
+</ul>
+
+    </div>
+  </div>
+  <div class="stackedit__right">
+    <div class="stackedit__html">
+      <h1 id="openfirehawk">openFirehawk</h1>
+<p>This is in developement and not ready for production.  Written by Andrew Graham for use with Hashicorp Terraform.</p>
+<p>openFirehawk is a set of modules to help VFX artists create an on demand render farm with infrastructure as code.  It is written in Terraform.  While Terraform is able to interface with many cloud providers, current implementation is with AWS.  Extension to Google Cloud Platform is planned once a good simple foundation is established with these initial modules.</p>
+<h2 id="intro">Intro</h2>
+<p>I’ll be changing the way things work to make openFirehawk easier for people over time.  Currently it is not ready for simple replication in another environment without challenges. It’s not going to be easy yet!  Much of the current work needs to be automated further, and learning it all if you are new to it is going to be a challenge.</p>
+<p>Until we are ready for beta testing, these docs are still here for people driven to learn how things work and want to be involved as an early adopter.  I will work on these docs to give you a path to learn. contribution to these docs is welcomed!</p>
+<p>But I do want to provide a path to get started for TDs that want to contribute, learn terraform, and are not afraid to push their bash skills in a shell further and learn new tools.</p>
+<p>So for those that are comfortable with a challenge at this early stage and want to help develop, I’d recommend learning Terraform and Ansible.  Terraform is how we will define our infrastructure. Ansible (though not implemented at this time of writing) is how openFirehawk will be able go forward provisioning / configuring systems in a more modular fashion.  Currently provisioning is done in terraform over ssh, and it has a dependency on your open vpn connection to the access server to be working before any nodes in the private subnet can be provisioned.   Ansible will be able to replace this dependency being better suited to the task.</p>
+<p>If you are totally new to this and you think its a lot to learn, I recommend just passively putting these tutorials on without necesarily following the steps to just expose yourself to the concepts and get an overview.  Going through the steps yourself is obviously better though.</p>
+<p>These are some good paid video courses to try-</p>
+<h3 id="pluralsight">Pluralsight:</h3>
+<ul>
+<li>Terraform - Getting Started</li>
+<li>Deep Dive - Terraform</li>
+</ul>
+<h3 id="udemy">Udemy:</h3>
+<ul>
+<li>Mastering Ansible (its a little clunky at times but its still good)</li>
+<li>Deploying to AWS with Ansible and Terraform - linux academy.</li>
+</ul>
+<h3 id="books">Books:</h3>
+<ul>
+<li>Terraform up and running.</li>
+</ul>
+<h2 id="getting-started">Getting Started</h2>
+<p>You will want to experiment with spinning up an AWS account.  You will need to start an instance in your nearest region with this ami - (softnas platinum consumption based for lower compute requirements).  take note of the AMI.  you wont need to leave this instance running.  You can terminate it, and delete the EBS volume.<br>
+Next startup up an open vpn access server instance from the openvpn AMI, and when started, take note of this AMI.  these will need to be added into terraform variables later, because they are unique to your region.</p>
+<h2 id="disclaimer-running-your-own-aws-account.">Disclaimer: Running your own AWS account.</h2>
+<p>You are going to be managing these resources from an AWS account and you are solely responsible for the costs incurred, and you should tread slowly to understand AWS charges.</p>
+<p>The first thing to do is <strong>setup 2 factor authentication.  Do not skip this</strong>.  You’ll make it easy for hackers to misuse you credit card to mine crypto.  Eye watering bills are possible!</p>
+<p>So The next thing you should do is setup budget notifications.  Set a number you are willing to spend per month, and setup email notifications for every 20% of that budget.  The notifications are there in case you forget to do this step - check your AWS costs for a daily breakdown of what you spend, and do it every day to learn.  its a good habit to do it at the start of every day.</p>
+<h2 id="pointers-on-cost-awareness">Pointers on cost awareness:</h2>
+<p>Initially run very small tests and get an understanding of costs with small tests that never use more than say 100GB of storage, that can be produced on light 2 core instances.  Cost managment in AWS is not easy, and you usually should allow a day before you can see a break down of what happenned (though its possible to implement more aggressive cost analysis with developement).</p>
+<ul>
+<li>
+<p>EBS volumes (think virtual hard drives) cost money.  check for any volumes you don’t need and delete them.</p>
+</li>
+<li>
+<p>S3 is cloud storage that also costs money.  Be mindful of it.  if you create an S3 drive with softnas, set a limit on that size that you are most comfortable spending if it fills up.  Make sure softnas is using a thin volume in S3, otherwise you allocate the full amount of data to be used even if the drive is empty.</p>
+</li>
+<li>
+<p>Check that any outstanding jobs are paused, and spot requests have been terminated in the spot fleet tab.  If you simply terminate an instance, but there are remaining render tasks, a spot fleet request may just replace it.  if you see any autoscaling groups, these should also be set to 0 (but we dont use them at the time of this writing).</p>
+</li>
+<li>
+<p>Turn off nodes when not using them.  When I’m done using the resources I do this-<br>
+terraform plan -out=plan -var sleep=true<br>
+I check the plan to see that it is going to do what it should.  then run this to execute it.<br>
+terraform apply plan</p>
+</li>
+<li>
+<p>If you run this command you can put all the infrastructure to sleep (including the NAT gateway), but you should always verify through the AWS console that this actually happenned, and that all nodes, and nate gateway are off.</p>
+</li>
+<li>
+<p>The NAT gateway is another sneaky cost visible in your AWS VPC console, usually around $5 /day if you forget about it.  It allows your private network (systems in the private subnet) outbound access to the internet.  Security groups can lock down any internet access to the minimum adresses required for licencing things like softnas or other software.  Licensing configuration with most software you would use makes possible to not need any NAT gateway but that is beyond the scope of openFirehawk at this point in time.</p>
+</li>
+</ul>
+<h2 id="running-an-onsite-management-vm">Running an onsite management VM</h2>
+<p>You can  start experimenting with an Ubuntu 16 VM with 4 vcpus, and a 50GB volume to install to.  8GB RAM is a good start.  After you start to test with more than 2 render nodes, buy a few UBL credits for deadline, $10 worth or so to play with.  You won’t be able to test deadline with more than 2 nodes visible to the manager.  Thinkbox will credit that to your AWS account on request if you email them and they provide support.</p>
+<p>The VM will need a new user.  We will call it deadlineuser.  It will also have a uid and gid of 9001.  its possible to change this uid but be mindful of the variables set in <a href="https://github.com/firehawkvfx/openfirehawk/blob/master/private-variables.example">private-variables.tf</a> if you do.</p>
+<pre><code>sudo adduser -u 9001 deadlineuser.
+</code></pre>
+<p>This user should also be the member of a group, deadlineuser, and the gid should be 9001.  you can review this with the command:</p>
+<pre><code>users
+</code></pre>
+<p>and also to check the group id:</p>
+<pre><code>cat /etc/group
+</code></pre>
+<p>Next you will want the user to be a super user for now.  it will be possible to tighten the permissions later, but for testing we will do this-</p>
+<pre><code>sudo usermod -aG wheel ${var.deadline_user}
+</code></pre>
+<p>Now log out and log back in as the new user.  You will want to install deadline DB, and deadline RCS in the vm, and take note of all the paths where you place your certificates.  We selected the ubuntu 16 VM because at this time its the easiest way to install Deadline DB and RCS with a gui installer.</p>
+<p>In the Ubuntu 16 VM you will also want to install open vpn (and any required dependencies that may arise) with:</p>
+<pre><code>sudo apt-install openvpn
+</code></pre>
+<p>Then you can try starting an OpenVPN Access Server AMI by launching a new EC2 instance on AWS through the EC2 console.  It’s a good exercise for you to create one of these on your own (not using openFirehawk at this stage) in a public subnet.  learning how to get the autoconnect feature working for the ubuntu vm to this openVPN instance will be needed.  You will also need to allow a security group to have inbound access from your onsite public static IP adress.<br>
+If you can succesfuly auto connect to this openvpn instance, then openFirehawk will be able to create its own OpenVPN Access Server and connect to it as well.</p>
+<p>Instances that reside in the private subnet are currently configured through openvpn.  This is why we are moving to Ansible to handle this instead, and remove openVPN as a dependency for most of the configuration of the network.  open vpn will still be needed for render nodes to establish a connection with licence servers and the render management DB.</p>
+<h2 id="aws-configure">AWS configure</h2>
+<p>Next you will go through the steps to install the AWS cli into the ubuntu 16 VM.<br>
+You should create a new user in aws for the cli.  don’t use the root account.  if theres ever a problem with security, you want root to be able to disable the cli users access keys.</p>
+<p>when you enter the new users cli keys with:<br>
+aws cli configure</p>
+<p>and test that its working by running<br>
+aws ec2 describe-regions --output table --debug<br>
+Which should out put a table of regions if working.</p>
+<h2 id="install-terraform">Install Terraform</h2>
+<p><a href="https://learn.hashicorp.com/terraform/getting-started/install.html">https://learn.hashicorp.com/terraform/getting-started/install.html</a></p>
+<h2 id="configuring-private-variables">Configuring private variables</h2>
+<p>Next you can clone the git repository into your ubuntu vm-<br>
+git clone <a href="https://github.com/firehawkvfx/openfirehawk.git">https://github.com/firehawkvfx/openfirehawk.git</a></p>
+<p>I do need to make it known that the way we are storing private variables is not best practice, and I intend to move to a product called vault to handle the storing of secrets in the future in an encrypted format.</p>
+<p>Currently, we have a <a href="https://github.com/firehawkvfx/openfirehawk/blob/master/private-variables.example">private-variables.example</a> file, which you will copy and rename to <a href="https://github.com/firehawkvfx/openfirehawk/blob/master/private-variables.example">private-variables.tf</a><br>
+This filename is in .gitignore, so it will not be in any git commits.  You should set permissions on it so that only you have read access, and root has write access.</p>
+<p>In it you will set your own values for these variables.  Many will be different for your environment, and you <strong>absolutely must use unique passwords and set your public static ip address for onsite</strong>.</p>
+<p>Security groups are configured to ignore any inbound internet traffic unless it comes from your onsite public ip address<br>
+which should be static and you’ll need to arrange that with your ISP if you are working from home.</p>
+<p>In terraform, each instance we start will use an AMI, and these AMI’s are unique to your region.  We would like the ability to query all ami’s for all regions (<a href="https://github.com/firehawkvfx/openfirehawk/projects/1#card-17639682">https://github.com/firehawkvfx/openfirehawk/projects/1#card-17639682</a>) but for now it doesn’t appear possible for softnas.</p>
+<p>So each instance like these that are used will need you to launch them once to get the AMI ID.</p>
+<ul>
+<li>CentOS7 (search for CentOS Linux 7 x86_64 HVM in your region)</li>
+<li>openvpn (search for OpenVPN Access Server in your region)</li>
+<li>Teradici pcoip for centos 7  (search for Teradici Cloud Access Software for CentOS 7 in your region)</li>
+</ul>
+<p>You’ll need to agree to the conditions of the ami, and then enter the ami ID that resulted ) visible from the aws ec2 instance console) for your region into the map.  Feel free to commit the added AMI map back into the repo too to help others.</p>
+<p>In terraform, a map is really a dictionary for those familiar with python.  This is an example of the ami_map variable in node_centos/variables.tf</p>
+<pre><code>variable "ami_map" {
+  type = "map"
+
+  default = {
+    ap-southeast-2 = "ami-d8c21dba"
+  }
+}
+</code></pre>
+<p>ap-southeast-2 is the sydney region, so if that region is set correctly in <a href="http://private-variables.tf">private-variables.tf</a><br>
+then when we lookup the dictionary, we will get the ami with this function in <a href="http://main.tf">main.tf</a></p>
+<pre><code>lookup(var.ami_map, var.region)
+</code></pre>
+<p>So if I’m located at us-east-1, after starting up the latest CentOS 7 AMI, I can enter that in like so</p>
+<pre><code>variable "ami_map" {
+  type = "map"
+
+  default = {
+    ap-southeast-2 = "ami-d8c21dba"
+    us-east-1 = “ami ID goes here”
+  }
+}
+</code></pre>
+<p>and provided your region is set correctly in <a href="http://private-variables.tf">private-variables.tf</a>, then that ami IDwill be looked up correctly.</p>
+<h2 id="your-first-terraform-apply">Your first terraform apply</h2>
+<p>In the open firehawk repo, I recommend you pen up the <a href="http://main.tf">main.tf</a> file and comment out everything except the vpc to ensure you can create the vpc, and also connect openvpn.  It’s necesary for the openvpn component to work before moving forward.</p>
+<p>Run:</p>
+<pre><code>terraform init
+</code></pre>
+<p>Review the plan output is without errors:</p>
+<pre><code>terraform plan -out=plan
+</code></pre>
+<p>Execute the plan.  Writing out a plan before execution and reviewing it is best practice.</p>
+<pre><code>terraform apply plan
+</code></pre>
+<h2 id="preparation-of-open-vpn">Preparation of open vpn</h2>
+<p>Read these docs to set permissions on the autostart openvpn config and <a href="http://startvpn.sh">startvpn.sh</a> script, and how to configure the access server.  Some settings are required to allow access to the ubuntu VM you have onsite, and we go through these steps in the tf_aws_openvpn readme-</p>
+<p><a href="https://github.com/firehawkvfx/tf_aws_openvpn/blob/master/README.md">README.md</a><br>
+<a href="https://github.com/firehawkvfx/tf_aws_openvpn/blob/master/startvpn.sh">startvpn.sh</a></p>
+<p>This allows permission for <a href="http://startvpn.sh">startvpn.sh</a> script to copy open vpn startup settings from the access server into your openvpn settings.  sudo permissions must be allowed for the specific commands executed so they can be performed without a password.</p>
+<p>If all goes well, the <a href="http://startvpn.sh">startvpn.sh</a> script when executed will initiate a connection with the openvpn access server, and you will be able to ping the access server’s private IP.  You should also be able to ping the public ip too.  If you can’t ping the public ip you have a security group issue and your onsite static ip isn’t in the <a href="http://private-variables.tf">private-variables.tf</a> file.</p>
+<p>You can also manually start open vpn with:</p>
+<pre><code>sudo service openvpn restart
+</code></pre>
+
+    </div>
+  </div>
+</body>
+
+</html>

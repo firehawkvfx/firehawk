@@ -1,0 +1,25 @@
+---
+- hosts: "{{ variable_host | default('ansible_control') }}"
+  remote_user: "{{ variable_connect_as_user | default(variable_user) }}"
+  become: true
+
+  vars:
+    variable_user: centos
+    variable_become_user: "{{ variable_user }}"
+    # whether to install the s3 user in the root account.
+    aws_cli_root: false
+    # sudo password may be required when installing cli on a local workstation
+    ansible_become_pass: "{{ user_deadlineuser_pw }}"
+    ansible_password: "{{ user_deadlineuser_pw }}"
+
+  pre_tasks:
+  - name: test
+    debug:
+      msg: 'test msg'
+
+  roles:
+    - role: pip
+    - role: aws-cli-ec2-install
+
+# example:
+# ansible-playbook -i ansible/inventory ansible/aws-cli-ec2.yaml -v --extra-vars "variable_user=centos variable_host=role_softnas"

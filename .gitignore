@@ -1,0 +1,16 @@
+terraform.tfstate
+terraform.tfstate.backup
+**/.terraform/
+plan
+.vagrant/
+ubuntu-xenial-16.04-cloudimg-console.log
+playbook.retry
+downloads
+ansible/*.retry
+ansible-log.txt
+ansible/modules/*.retry
+hostvars.log
+tmp/
+*.DS_Store
+.nfs*
+*.box

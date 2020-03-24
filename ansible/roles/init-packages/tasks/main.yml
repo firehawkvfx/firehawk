@@ -1,0 +1,53 @@
+---
+# tasks file for roles/init-packages
+- name: ansible distro
+  debug:
+    var: ansible_distribution
+
+- name: fping
+  apt:
+    name:
+    - fping # used to ping with max reytries up to a certain time to test open vpn.
+    state: present
+    update_cache: yes
+  register: install_package
+  until: install_package is not failed
+  retries: 5
+  become: true
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: install mkpasswd, pip, pexpect, passlib, fping
+  package:
+    name:
+    - python-pip
+    - python-apt
+    - whois
+    - python-passlib
+    - zip
+    - openvpn
+    - rng-tools
+    - gpgv2
+    state: present
+  become: true
+
+- name: Install requests module to query web pages in (houdini python install script)
+  pip:
+    name: requests
+  become: true
+
+- name: install pexpect for rhel / centos,
+  pip:
+    name: pexpect
+  become: true
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+
+# Enterprise Linux'
+# Above is for RHEL and Centos, the following is for Debian/Ubuntu:
+
+- name: install pexpect for ubuntu
+  package:
+    name:
+    - python-pexpect
+    - nfs-common
+    state: present
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'

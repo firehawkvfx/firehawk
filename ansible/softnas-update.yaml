@@ -1,0 +1,103 @@
+- hosts: role_softnas
+  remote_user: "{{ softnas_ssh_user | default('ec2-user') }}"
+  become_user: root
+  become: true
+  tasks:
+  - name: Remove updatetype file. A ticket involving softnas suggested this so that some beta isn't deployed at update.
+    file:
+      path: '/tmp/updatetype'
+      state: absent
+      
+  - name: login and checkupdate
+    shell: |
+      softnas-cmd login softnas {{ user_softnas_pw }} && softnas-cmd checkupdate > /tmp/softnas_checkupdate.json
+    register: softnas_checkupdate
+
+  - fetch:
+      src: /tmp/softnas_checkupdate.json
+      dest: /deployuser/tmp/softnas_checkupdate.json
+      force: yes
+      flat: true
+
+  - fetch:
+      src: /tmp/softnas_checkupdate.json
+      dest: /tmp/softnas_checkupdate.json
+      force: yes
+      flat: true
+
+  - include_vars:
+      file: /tmp/softnas_checkupdate.json
+      name: softnas_checkupdate_dict
+
+  - debug:
+      var: softnas_checkupdate_dict
+
+  - debug:
+      msg: "{{ item }}"
+    with_items: "{{ softnas_checkupdate_dict.result.currentVersion }}"
+
+  
+  - set_fact:
+      softnas_currentversion_var: "{{ softnas_checkupdate_dict.result.currentVersion }}"
+  - set_fact:
+      softnas_latestversion_var: "{{ softnas_checkupdate_dict.result.latestVersion }}"
+
+  - name: current version
+    debug:
+      msg: "{{ softnas_currentversion_var }}"
+
+  - name: latest version
+    debug:
+      msg: "{{ softnas_latestversion_var }}"
+
+  - name: check if versions don't match
+    set_fact:
+      softnas_uptodate: "{{ softnas_currentversion_var == softnas_latestversion_var }}"
+      softnas_runupdate: "{{ softnas_currentversion_var != softnas_latestversion_var }}"
+    when: (softnas_currentversion_var is defined) and (softnas_latestversion_var is defined)
+
+  - name: softnas run update
+    debug:
+      msg: "var softnas_runupdate is: {{ softnas_runupdate }}"
+
+  - name: softnas_uptodate status
+    debug:
+      msg: "var softnas_uptodate is: {{ softnas_uptodate }}"
+    
+  - name: login and executeupdate
+    shell: |
+      softnas-cmd login softnas {{ user_softnas_pw }} && softnas-cmd executeupdate
+    register: softnas_executeupdate
+    when: softnas_runupdate
+
+  - name: executeupdate output
+    debug:
+      var: softnas_executeupdate.stdout.split('\n')
+    when: softnas_runupdate
+
+  - name: Check if Softnas Update file exists
+    stat: 
+      path: /tmp/softnas-update.status
+    register: update_file
+
+  - name: "Wait until Softnas Update completes. This can take 15-45 mins"
+    wait_for:
+      path: /tmp/softnas-update.status
+      search_regex: "^OK.*$"
+      timeout: 3600
+    when: update_file.stat.exists and softnas_runupdate
+
+  - name: Wait for the reboot to complete if there was a change.
+    wait_for_connection:
+      connect_timeout: 20
+      sleep: 5
+      delay: 180
+      timeout: 600
+    when: update_file.stat.exists and softnas_runupdate
+
+  - name: "Verify update completed"
+    wait_for:
+      path: /tmp/softnas-update.status
+      search_regex: "^OK. SoftNAS software update to version.*completed at.*$"
+      timeout: 600
+    when: update_file.stat.exists and softnas_runupdate

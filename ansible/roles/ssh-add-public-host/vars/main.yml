@@ -1,0 +1,6 @@
+---
+# vars file for ansible/roles/softnas-s3-disk-import
+set_bastion: false
+
+public_ip: None
+public_address: None

@@ -1,0 +1,157 @@
+- name: install expect module
+  package:
+    name: expect
+  become: true
+
+- name: "Keybase: Run expect to wait for a keybase pass and decrypt - first time is dirty output."
+  shell: |
+    /deployuser/scripts/pgp-expect-keybase.sh {{ keybase_secret | regex_escape() }} {{ spot_secret | regex_escape() }}
+  become_user: deployuser
+  connection: local
+  no_log: true
+  when: "'keybase:' in pgp_public_key"
+
+- name: "Keybase: Run expect to wait for a keybase pass and decrypt - collect output."
+  shell: |
+    /deployuser/scripts/pgp-expect-keybase.sh {{ keybase_secret | regex_escape() }} {{ spot_secret | regex_escape() }}
+  become_user: deployuser
+  connection: local
+  register: spot_secret_output
+  no_log: true
+  when: "'keybase:' in pgp_public_key"
+
+- name: "GPG: Run expect to wait for a pgp pass and decrypt - collect output."
+  shell: |
+    echo {{ spot_secret | regex_escape() }} | base64 --decode | gpg -dq --no-tty --passphrase {{ pgp_secret | regex_escape() }} --no-use-agent
+  become_user: deployuser
+  connection: local
+  register: spot_secret_output
+  no_log: true
+  when: "'keybase:' not in pgp_public_key"
+
+- set_fact:
+    spot_secret_key: "{{ spot_secret_output.stdout }}"
+  no_log: true
+
+- fail:
+    msg: "invalid output from keybase expect"
+  when: '" " in spot_secret_key or spot_secret_key ==""'
+  no_log: true
+
+- debug:
+    msg: "warning, multiple subnets in the json spot fleet template may cause errors"
+
+- name: generate spot fleet config from template
+  template:
+    src: /secrets/dev/spot-fleet-templates/config_template.json
+    dest: /secrets/dev/spot-fleet-templates/config_generated.json
+
+# to list collections-
+# show collections;
+
+# To list the contents of EventPluginSettingsCollection (for example):
+# db.EventPluginSettingsCollection.find().pretty()
+
+# debug permissions with root {{ AWS_ACCESS_KEY }}
+# debug permissions with root {{ AWS_SECRET_KEY }}
+# normal use with {{ spot_access_key_id }}
+# normal use with {{ spot_secret_key }}
+
+# if using deadline > v10.0.28.2, use conf_list_blob in place of conf_json_blob
+# - name: init spot template - list blob
+#   shell: | 
+#     set -x
+#     cd /opt/Thinkbox/DeadlineDatabase10/mongo/application/bin/
+#     ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval 'db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"PluginEnabled": "1"}})'
+
+#     ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval '
+#       var StaggerInstances = "5";
+#       var IdleShutdown = "10";
+#       var spot_json = cat("/secrets/dev/spot-fleet-templates/config_generated.json");
+#       var conf_json_blob = { "State" : "Global Enabled", "AccessID" : "{{ AWS_ACCESS_KEY }}", "SecretKey" : "{{ AWS_SECRET_KEY }}", "Logging" : "Verbose", "Region" : "{{ aws_region }}", "Config" : spot_json, "IdleShutdown" : IdleShutdown, "DeleteTerminatedSlaves" : "True", "StrictHardCap" : "True", "StaggerInstances" : StaggerInstances };
+#       var conf_list_blob = [ [ "State", "Global Enabled" ], [ "ResourceTracker", "True" ], [ "AccessID", "{{ AWS_ACCESS_KEY }}" ], [ "SecretKey", "{{ AWS_SECRET_KEY }}" ], [ "Logging", "Verbose" ], [ "Region", "{{ aws_region }}" ], [ "Config", spot_json ], [ "IdleShutdown", IdleShutdown ], [ "DeleteTerminatedSlaves", "True" ], [ "StrictHardCap", "True" ], [ "StaggerInstances", StaggerInstances ] ];
+#       db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit": conf_list_blob}});
+#     '
+#     var done = "true"
+#   become: true
+#   register: deadline_db
+#   with_items:
+#   - insert
+#   - update
+
+# to query db entries ue something like - > db.EventPluginSettingsCollection.find({"_id": "spot"})
+# > db.EventPluginSettingsCollection.find({"_id": "spot"})
+# { "_id" : "spot", "LastWriteTime" : ISODate("2019-12-16T11:04:30.499Z"), "Name" : "Spot", "PluginEnabled" : 1, "DebugLogging" : false, "Icon" : null, "Limits" : [ ], "DlInit" : [ [ "State", "Disabled" ], [ "ResourceTracker", "True" ], [ "AccessID", "" ], [ "SecretKey", "" ], [ "Logging", "Standard" ], [ "Region", "us-west-2" ], [ "Config", "{}" ], [ "IdleShutdown", "10" ], [ "DeleteTerminatedSlaves", "False" ], [ "DeleteInterruptedSlaves", "False" ], [ "StrictHardCap", "True" ], [ "StaggerInstances", "50" ], [ "PreJobTaskMode", "Conservative" ], [ "AWSInstanceStatus", "Disabled" ] ], "Meta" : {  } }
+
+- name: init spot template - json
+  shell: | 
+    set -x
+    cd /opt/Thinkbox/DeadlineDatabase10/mongo/application/bin/
+    ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval '
+      var StaggerInstances = "50";
+      var IdleShutdown = "2";
+      var spot_json = cat("/secrets/dev/spot-fleet-templates/config_generated.json");
+      db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"PluginEnabled": "1"}});
+      db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit": [
+        [
+          "State",
+          "Global Enabled"
+        ],
+        [
+          "ResourceTracker",
+          "True"
+        ],
+        [
+          "AccessID",
+          "{{ spot_access_key_id }}"
+        ],
+        [
+          "SecretKey",
+          "{{ spot_secret_key }}"
+        ],
+        [
+          "Logging",
+          "Verbose"
+        ],
+        [
+          "Region",
+          "{{ aws_region }}"
+        ],
+        [
+          "Config",
+          spot_json
+        ],
+        [
+          "IdleShutdown",
+          IdleShutdown
+        ],
+        [
+          "DeleteTerminatedSlaves",
+          "True"
+        ],
+        [
+          "DeleteInterruptedSlaves",
+          "False"
+        ],
+        [
+          "StrictHardCap",
+          "True"
+        ],
+        [
+          "StaggerInstances",
+          StaggerInstances
+        ],
+        [
+          "PreJobTaskMode",
+          "Conservative"
+        ],
+        [
+          "AWSInstanceStatus",
+          "Disabled"
+        ]
+      ]}});'
+  become: true
+  no_log: true
+  with_items:
+  - insert
+  - update

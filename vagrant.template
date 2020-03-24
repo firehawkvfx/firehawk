@@ -1,0 +1,145 @@
+# ~/.bashrc
+
+# The contents of vars-vagrant.template are modified by update_vars.sh.
+# Editing these contents should only be done in secrets/vars-vagrant, and then propogated with source ./update_vars.sh
+
+# WARNING: When editing your secrets files manually do not store any secrets / sensitive information in #commented lines in these files.
+# Do not store any secrets as keys in any lines
+# Secrets should only ever be stored as values in uncommented lines.
+
+# SECRETS INITIALIZATION #
+
+# Secrets must be used as values only, since it is only the values that are kept private.
+# Comments and variable names / keys are read from your private secrets/vars-vagrant file in your private repo to auto generate the public firehawk/secrets.template file when running 'source ./update_vars.sh'.
+
+# If these steps are followed then no private values will be or should be propogated into the public repo firehawk/secrets.template file.
+# Before making any commits to the public firehawk repo ensure there are no secrets / sensitive information contained in commits.
+# Be sure to provide any new variable keys you may end up adding with a commented out description with example dummy values above your actual secret value used to assist others.
+
+# Do not put real world sensitive information in the example comments.
+
+# New comments should be only added in secrets-dev or secrets-prod as these lines will be propogated into the secrets.template schema used to initialise any new secrets/vars-vagrant file.
+
+# BEGIN CONFIGURATION #
+
+# TF_VAR_vault_key_name_dev:
+# The name of the key file to generate for ansible vault to encrypt/decrypt secrets.
+# If this file doesn't exist it will be created with a key used to encrypt and decrypt secrets in combination with a password.
+# The password and this keyfile are both needed to decrypt secrets.
+# These keyfiles should not be committed to version control, but should be backed up on an encrypted volume.
+# As they are rotated over time, these keyfiles will be needed in the future if you need to decrypt previous commits of your secrets.
+# If you suspect any breach or if any accidental commits of unencrypted secret values are made, you should:
+# 1) At the very least, any cloud (AWS) secret keys must be destroyed/rotated IMMEDIATELY from your AWS console in your dev and production environments.
+# 2) Destroy all infrastructure, Decrypt all secrets variable files, change all passwords and keys contained in them to prepare for encryption with a new key.
+# 3) Specify a new key name here (usually with todays date), and encrypt your secrets again with this new key file and password.
+# 4) This process should be applied to both dev and production environments as soon as possible.
+# Automation of key/pass rotation without destroying/rebuilding infrastructure will be possible in the future.
+# default: TF_VAR_vault_key_name_dev=.vault-key-20191208-dev
+TF_VAR_vault_key_name_dev=insertvalue
+
+# TF_VAR_vault_key_name_prod:
+# The name of the key file to generate for ansible vault to encrypt/decrypt secrets.
+# If this file doesn't exist it will be created with a key used to encrypt and decrypt secrets in combination with a password.
+# The password and this keyfile are both needed to decrypt secrets.
+# These keyfiles should not be committed to version control, but should be backed up on an encrypted volume.
+# As they are rotated over time, these keyfiles will be needed in the future if you need to decrypt previous commits of your secrets.
+# If you suspect any breach or if any accidental commits of unencrypted secret values are made, you should:
+# 1) At the very least, any cloud (AWS) secret keys must be destroyed/rotated IMMEDIATELY from your AWS console in your dev and production environments.
+# 2) Destroy all infrastructure, Decrypt all secrets variable files, change all passwords and keys contained in them to prepare for encryption with a new key.
+# 3) Specify a new key name here (usually with todays date), and encrypt your secrets again with this new key file and password.
+# 4) This process should be applied to both dev and production environments as soon as possible.
+# Automation of key/pass rotation without destroying/rebuilding infrastructure will be possible in the future.
+# default: TF_VAR_vault_key_name_prod=.vault-key-20200119-prod
+TF_VAR_vault_key_name_prod=insertvalue
+
+
+# TF_VAR_bridgenic: 
+# The network interface virtual box will use to bridge its connection 
+# If you don't know the exact string for the bridgenic (found on 'vagrant up' eg: '1) en0: Wi-Fi (AirPort)') then leave it as 'none'
+# eg 1: TF_VAR_bridgenic=none
+# eg 2: TF_VAR_bridgenic=en0: Wi-Fi (AirPort)
+# eg 3: TF_VAR_bridgenic=en1: Thunderbolt Ethernet Slot 1
+# default: TF_VAR_bridgenic=en0: Wi-Fi (AirPort)
+TF_VAR_bridgenic=insertvalue
+
+# TF_VAR_timezone_localpath: 
+# The Ubuntu file path to configure time / date for your current onsite timezone
+# eg 1: TF_VAR_timezone_localpath=/usr/share/zoneinfo/Australia/Sydney
+TF_VAR_timezone_localpath=insertvalue
+
+# TF_VAR_ansible_mac_dev: 
+# A randomly generated mac address for the VM that vagrant will use for the VM's bridged network adapter. Your onsite router will assign an ip based on this mac, and you should ensure that it is static/reserved within your router for a persistent IP address. Unicast mac addresses must not have an odd second digit, and this is required. You can use the script in scripts/random_mac_unicast.sh to generate a mac adress and use it here.  Using a peristent mac addressnis useful for consistent licencing handling.  Dev and Prod VMs must have unique mac adress values or they will not function on the same network.  For this reason, we recomend authorising all licencing on the production vm only, and route all licence requests to the production vm since the production vm should run always and it will be a more stable host.
+# default: TF_VAR_gateway_mac_dev=EEDDAAA1987C
+TF_VAR_ansible_mac_dev=insertvalue
+
+# TF_VAR_ansible_mac_prod: 
+# A randomly generated mac address for the VM that vagrant will use for the VM's bridged network adapter. Your onsite router will assign an ip based on this mac, and you should ensure that it is static/reserved within your router for a persistent IP address. Unicast mac addresses must not have an odd second digit, and this is required. You can use the script in scripts/random_mac_unicast.sh to generate a mac adress and use it here.  Using a peristent mac addressnis useful for consistent licencing handling.  Dev and Prod VMs must have unique mac adress values or they will not function on the same network.  For this reason, we recomend authorising all licencing on the production vm only, and route all licence requests to the production vm since the production vm should run always and it will be a more stable host.
+# default: TF_VAR_gateway_mac_prod=7A5EDDBC9FE0
+TF_VAR_ansible_mac_prod=insertvalue
+
+# TF_VAR_gateway_mac_dev: 
+# A randomly generated mac address for the VM that vagrant will use for the VM's bridged network adapter. Your onsite router will assign an ip based on this mac, and you should ensure that it is static/reserved within your router for a persistent IP address. Unicast mac addresses must not have an odd second digit, and this is required. You can use the script in scripts/random_mac_unicast.sh to generate a mac adress and use it here.  Using a peristent mac addressnis useful for consistent licencing handling.  Dev and Prod VMs must have unique mac adress values or they will not function on the same network.  For this reason, we recomend authorising all licencing on the production vm only, and route all licence requests to the production vm since the production vm should run always and it will be a more stable host.
+# default: TF_VAR_gateway_mac_dev=CE4C7CD0284F
+TF_VAR_gateway_mac_dev=insertvalue
+
+# TF_VAR_gateway_mac_prod: 
+# A randomly generated mac address for the VM that vagrant will use for the VM's bridged network adapter. Your onsite router will assign an ip based on this mac, and you should ensure that it is static/reserved within your router for a persistent IP address. Unicast mac addresses must not have an odd second digit, and this is required. You can use the script in scripts/random_mac_unicast.sh to generate a mac adress and use it here.  Using a peristent mac addressnis useful for consistent licencing handling.  Dev and Prod VMs must have unique mac adress values or they will not function on the same network.  For this reason, we recomend authorising all licencing on the production vm only, and route all licence requests to the production vm since the production vm should run always and it will be a more stable host.
+# eg: TF_VAR_gateway_mac_prod=FA3C6220D650
+TF_VAR_gateway_mac_prod=insertvalue
+
+# TF_VAR_openfirehawkserver_dev: 
+# The openfirehawk server vm uses this static ip assigned to the VM.  You should take the auto generated mac address above, and use it to assign a static ip in your router's settings.  That static ip is entered here.
+# It will cause issues for your installation if the IP changes within your network and is not static.
+# eg: TF_VAR_openfirehawkserver_dev=192.168.29.10
+TF_VAR_openfirehawkserver_dev=insertvalue
+
+# TF_VAR_openfirehawkserver_prod: 
+# The openfirehawk server vm uses this static ip assigned to the VM, it should be different to the dev environment ip.  You should take the auto generated mac address previously, and use it to assign a static ip in your router's settings.  That static ip is entered here.
+# It will cause issues for your installation if the IP changes within your network and is not static.
+# eg: TF_VAR_openfirehawkserver_prod=192.168.29.10
+TF_VAR_openfirehawkserver_prod=insertvalue
+
+# TF_VAR_network_dev: [public/private].  
+# Determines if the vagrant network is publicly available to other nodes in your location.  If network is set to private, the IP is internal to the host that runs vagrant.  If public, the mac address will be used for dhcp on the network when set to public, and other nodes will be able to reach this system.  public is usually desirable unless testing in a less controlled environment or there is no need to connect with any other systems like a NAS or workstation onsite.
+# default: TF_VAR_network_dev=public
+TF_VAR_network_dev=insertvalue
+
+# TF_VAR_network_prod: [public/private].
+# Determines if the vagrant network is publicly available to other nodes in your location.  If network is set to private, the IP is internal to the host that runs vagrant.  If public, the mac address will be used for dhcp on the network when set to public, and other nodes will be able to reach this system.  this isusually desirable unless testing in an uncontrolled network.
+# default: TF_VAR_network_prod=public
+TF_VAR_network_prod=insertvalue
+
+# TF_VAR_openfirehawkserver_ram_dev: 
+# The amount of ram in MB dedicated to the vagrant VM in the dev environment.  Primarily you should consider the requirements of running mongo DB for Deadline on this host.
+# default: TF_VAR_openfirehawkserver_ram_dev=6144
+TF_VAR_openfirehawkserver_ram_dev=insertvalue
+
+# TF_VAR_openfirehawkserver_ram_prod: 
+# The amount of ram in MB dedicated to the vagrant VM in the prod environment.  Primarily you should consider the requirements of running mongo DB for Deadline on this host.
+# default: TF_VAR_openfirehawkserver_ram_prod=6144
+TF_VAR_openfirehawkserver_ram_prod=insertvalue
+
+# TF_VAR_openfirehawkserver_vcpus_dev: 
+# The number of VCPU's dedicated to the vagrant VM used in the dev environment.  Primarily you should consider the requirements of running mongo DB for Deadline on this host.
+# default: TF_VAR_openfirehawkserver_vcpus_dev=2
+TF_VAR_openfirehawkserver_vcpus_dev=insertvalue
+
+# TF_VAR_openfirehawkserver_vcpus_prod: 
+# The number of VCPU's dedicated to the vagrant VM used in the prod environment.  Primarily you should consider the requirements of running mongo DB for Deadline on this host.
+# default: TF_VAR_openfirehawkserver_vcpus_prod=2
+TF_VAR_openfirehawkserver_vcpus_prod=insertvalue
+
+# TF_VAR_selected_ansible_version:
+# the version to use for ansible.  Can be 'latest', or a specific version.  due to a bug with pip and ansible we can have pip permissions and authentication issues when not using latest.
+# this is because pip installs the version instead of apt-get when using a specific version instead of latest.  Resolution by using virtualenv will be required to resolve.
+# eg: TF_VAR_selected_ansible_version=2.9.2
+# default: TF_VAR_selected_ansible_version=latest
+TF_VAR_selected_ansible_version=insertvalue
+
+# TF_VAR_syscontrol_gid:
+# the group gid for the syscontrol group
+TF_VAR_syscontrol_gid=insertvalue
+
+# TF_VAR_deployuser_uid:
+# The UID of the deployuser for all hosts.  Ansible uses this user connect to provision with.
+TF_VAR_deployuser_uid=insertvalue

@@ -1,0 +1,20 @@
+# this will authenticate an existing install of the cli.
+
+---
+- hosts: "{{ variable_host | default('ansible_control') }}"
+  remote_user: "{{ variable_user | default('deployuser') }}"
+  #become: true
+
+  vars:
+    variable_user: centos
+
+  pre_tasks:
+  - name: test
+    debug:
+      msg: 'test msg'
+
+  roles:
+    - role: aws-cli-ec2-configure
+
+# example:
+# ansible-playbook -i ansible/inventory ansible/aws-cli-ec2.yaml -v --extra-vars "variable_user=centos variable_host=role_softnas"

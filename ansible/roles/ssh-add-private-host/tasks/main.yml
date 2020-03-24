@@ -1,0 +1,74 @@
+- name: "check if /home/{{ variable_user }}/.ssh/known_hosts file exists"
+  stat: 
+    path: "/home/{{ variable_user }}/.ssh/known_hosts"
+  register: known_hosts
+
+- debug:
+    var: known_hosts
+
+- name: clean known hosts
+  shell: "ssh-agent bash && ssh-keygen -f /home/{{ variable_user }}/.ssh/known_hosts -R {{ private_ip }}"
+  become: true
+  become_user: "{{ variable_user }}"
+  when: known_hosts.stat.exists == true
+
+- name: msg delegate to bastion ip
+  debug:
+    var: bastion_ip
+  when: '"." in bastion_ip and not local'
+
+- name: msg delegate to get key for private_ip
+  debug:
+    var: private_ip
+
+- name: ensure correct permissions on key.
+  file:
+    path: "{{ local_key_path }}"
+    mode: 0600
+  become: true
+  connection: local
+
+- name: delegate keyscan to add keys from remote subnet via bastion host.
+  command: "ssh-keyscan {{ private_ip }}"
+  register: new_host_fingerprint
+  delegate_to: "centos@{{ bastion_ip }}"
+  remote_user: centos
+  become_user: centos
+  become: true
+  when: '"." in bastion_ip and not local'
+
+- name: retrieved new_host_fingerprint via bastion
+  debug:
+    var: new_host_fingerprint
+
+- name: add keyscan to known hosts
+  lineinfile:
+    dest: "/home/{{ variable_user }}/.ssh/known_hosts"
+    line: "{{ item }}"
+    create: true
+    mode: '600'
+  with_items: "{{ new_host_fingerprint.stdout_lines }}"
+  become: true
+  become_user: "{{ variable_user }}"
+  when: '"." in bastion_ip and not local'
+
+- name: keyscan to add keys of an ip on this host without bastion.
+  command: "ssh-keyscan {{ private_ip }}"
+  register: new_host_fingerprint
+  become: true
+  when: local
+
+- name: retrieved new_host_fingerprint locally
+  debug:
+    var: new_host_fingerprint
+
+- name: add keyscan to known hosts
+  lineinfile:
+    dest: "/home/{{ variable_user }}/.ssh/known_hosts"
+    line: "{{ item }}"
+    create: true
+    mode: '600'
+  with_items: "{{ new_host_fingerprint.stdout_lines }}"
+  become: true
+  become_user: "{{ variable_user }}"
+  when: local

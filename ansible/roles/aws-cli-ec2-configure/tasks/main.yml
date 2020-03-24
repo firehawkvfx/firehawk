@@ -1,0 +1,11 @@
+---
+#tasks file for roles/aws-cli
+
+- name: install mkpasswd, pip, pexpect, passlib
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - python-apt
+    - python-pip
+    - zip
