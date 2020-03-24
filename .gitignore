@@ -7,6 +7,8 @@ modules/vpn/.terraform/plugins/linux_amd64/lock.json
 modules/vpn/.terraform/modules/
 modules/vpn/.terraform/plugins/
 plan
+modules/node_centos/modules/
+modules/tf_aws_openvpn/
 modules/node_centos/file_package
 modules/node_centos/current_deadline.ini
 IamFleetRole.json
