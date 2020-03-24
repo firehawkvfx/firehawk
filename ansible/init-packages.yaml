@@ -1,7 +1,0 @@
----
-- hosts: "{{ variable_host | default('ansible_control') }}"
-  remote_user: "{{ variable_user | default('deployuser') }}"
-  become: true
-
-  roles:
-    - role: init-packages

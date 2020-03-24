@@ -1,6 +1,0 @@
----
-- hosts: ansible_control
-  become: true
-
-  roles:
-    - role: deadlinedb
