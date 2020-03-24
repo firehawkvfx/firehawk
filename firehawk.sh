@@ -281,7 +281,7 @@ if [ "$test_vm" = false ] ; then
             echo "...End Deployment"
         elif [[ "$tf_action" == "destroy" ]]; then
             echo "...Logging in to Vagrant host to destroy tf deployment"
-            ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --destroy --init-vm-config=false" #; exit_test
+            ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --destroy --init-vm-config=false --tf-init=$tf_init" #; exit_test
             echo "...End Deployment"
         else
             echo "...Logging in to Vagrant host"
