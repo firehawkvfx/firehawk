@@ -1,0 +1,281 @@
+---
+# tasks file for roles/houdini-install
+
+- name: houdini_version_item
+  debug:
+    var: item
+  with_items:
+  - "{{ houdini_version_item }}"
+  - "{{ houdini_install_type }}"
+
+- name: "set permissions and ensure dir exists /home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/scripts/"
+  file:
+    path: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/scripts/"
+    state: directory
+    mode: u=rwX,g=r
+    owner: deadlineuser
+    group: deadlineuser
+  become: true
+
+- name: "copy houdini-scripts to /home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/scripts/"
+  copy:
+    src: /deployuser/modules/node_centos/modules/houdini-scripts/
+    dest: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/scripts/"
+    directory_mode: yes
+    owner: deadlineuser
+  become: true
+
+- name: "set permissions on /home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/scripts/"
+  file: 
+    dest: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/scripts/"
+    owner: deadlineuser 
+    group: deadlineuser
+    mode: u=rwX,g=r
+    recurse: yes
+  become: true
+
+
+- name: "set permissions on /home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/scripts/"
+  file: 
+    dest: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/scripts/menus/"
+    owner: deadlineuser 
+    group: deadlineuser
+    mode: u=rwX,g=r
+    recurse: yes
+  become: true
+
+- set_fact:
+    houdini_linux_filename: "{{ houdini_version_item.houdini_linux_filename }}"
+
+- name: Query houdini filename - Houdini python script
+  shell: |
+    cd /opt/houdini_install_script/
+    . /opt/houdini_install_script/exit_test.sh
+    python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini -b {{ houdini_version_item.houdini_build }} -t {{ download_to_dir }} -q true -f {{ houdini_linux_filename }}; exit_test
+  register: houdini_query_out
+  no_log: true
+  become: true
+  when: houdini_version_item.houdini_auto_version
+
+- name: Python output
+  debug:
+    var: item
+  with_items:
+  - "{{ houdini_query_out.stdout_lines }}"
+  when: houdini_version_item.houdini_auto_version
+
+
+- set_fact:
+    houdini_linux_filename: "{{ item | regex_search(regexp) }}"
+  vars:
+    regexp: '(houdini.*.tar.*)'
+  with_items:
+  - "{{ houdini_query_out.stdout_lines }}"
+  when: houdini_version_item.houdini_auto_version and 'File:' in item
+
+- name: Houdini filename to install from sidefx website result
+  debug:
+    var: houdini_linux_filename
+
+- fail:
+    msg: 'no valid houdini_linux_filename was defined / found'
+  when: '".tar" not in houdini_linux_filename'
+
+- name: (UBUNTU) Sync houdini from s3 if exist - pull
+  shell: |
+    set -x
+    cd {{ download_to_dir }}/
+    aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ houdini_linux_filename }}"
+  become_user: "{{ variable_user }}"
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: (CENTOS) Sync houdini from s3 if exist - pull
+  shell: |
+    set -x
+    cd {{ download_to_dir }}/
+    aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ houdini_linux_filename }}"
+  become_user: "{{ variable_user }}"
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+
+- name: Auto download / install Houdini with python script - auto version only
+  shell: |
+    cd /opt/houdini_install_script/
+    . /opt/houdini_install_script/exit_test.sh
+    sudo python /opt/houdini_install_script/houdini_install.py -u '{{ sesi_username }}' -p '{{ sesi_password }}' -i /opt/houdini -b {{ houdini_version_item.houdini_build }} -t {{ download_to_dir }} -q false; exit_test
+  register: houdini_install_out
+  no_log: true
+  become: true
+  when: houdini_version_item.houdini_auto_version
+  failed_when:
+  - "'Nothing was installed.' in houdini_install_out.stderr"
+
+- debug:
+    msg:  "{{ houdini_install_out.stdout }}"
+  when: houdini_install_type != "server" and houdini_version_item.houdini_auto_version
+
+- name: NODE/WORKSTATION INSTALL - Permissions on zip file - node/workstation
+  file:
+    path: "{{ download_to_dir }}/{{ houdini_linux_filename }}"
+    mode: u+rw,g+rw,o+rw
+    owner: "{{ variable_user }}"
+    group: syscontrol
+  become: true
+  when: houdini_install_type != "server"
+
+- name: NODE/WORKSTATION INSTALL - Install Houdini with python script - specific existing version from s3 bucket
+  shell: |
+    cd /opt/houdini_install_script/
+    . /opt/houdini_install_script/exit_test.sh
+    sudo python /opt/houdini_install_script/houdini_install.py -u '{{ sesi_username }}' -p '{{ sesi_password }}' -i /opt/houdini -b {{ houdini_version_item.houdini_build }} -t {{ download_to_dir }} -q false -f {{ houdini_linux_filename }}; exit_test
+  register: houdini_install_out
+  no_log: true
+  become: true
+  when: houdini_install_type != "server" and not houdini_version_item.houdini_auto_version
+  failed_when:
+  - "'Nothing was installed.' in houdini_install_out.stderr"
+
+- debug:
+    msg:  "{{ houdini_install_out.stdout }}"
+  when: houdini_install_type != "server" and not houdini_version_item.houdini_auto_version
+
+- name: "NODE/WORKSTATION INSTALL - setup licensing mode will write to /opt/hfs{{ houdini_version_item.houdini_major_version }}/houdini/Licensing.opt"
+  shell: |
+    cd /opt/hfs{{ houdini_version_item.houdini_major_version }}
+    sudo sed -i '/licensingMode = sesinetd/s/^# //g' /opt/hfs{{ houdini_version_item.houdini_major_version }}/houdini/Licensing.opt
+    sudo cat /opt/hfs{{ houdini_version_item.houdini_major_version }}/houdini/Licensing.opt
+  register: houdini_hserver_out
+  become: true
+  when: houdini_install_type != "server"
+
+- name: NODE/WORKSTATION INSTALL - setup licensing server ip as deadline user will write to $HOME/.sesi_licenses.pref
+  shell: |
+    cd /opt/hfs{{ houdini_version_item.houdini_major_version }}
+    source ./houdini_setup
+    hserver
+    hserver -S {{ houdini_license_server_address }}
+    hserver -l
+    echo $HOME
+  register: houdini_hserver_deadlineuser_out
+  become_user: deadlineuser
+  when: houdini_install_type != "server"
+
+### SERVER INSTALL
+- name: SERVER INSTALL - check if hserver file exists
+  stat: 
+    path: /opt/hfs{{ houdini_version_item.houdini_major_version }}/bin/hserver
+  register: hserver_check
+  become: true
+  when: houdini_install_type == "server"
+
+- name: SERVER INSTALL - Stop licensing server if already running / installed.  Please ignore any error if hserver not running.
+  shell: |
+    pgrep hserver
+    if [ $? -eq 0 ]; then
+      /opt/hfs{{ houdini_version_item.houdini_major_version }}/bin/hserver -q
+    else
+      echo "hserver is not running.  No need to kill process"
+    fi
+  become: true
+  when: houdini_install_type == "server" and hserver_check.stat.exists
+
+- name: SERVER INSTALL - Permissions on zip file
+  file:
+    path: "{{ download_to_dir }}/{{ houdini_linux_filename }}"
+    mode: u=rw,g=rw,o=r
+    owner: "{{ variable_user }}"
+    group: syscontrol
+  become: true
+  when: houdini_install_type == "server"
+
+- name: SERVER INSTALL - make dir.
+  shell: |
+    set -x
+    cd {{ download_to_dir }}
+    dir={{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}
+    echo "$dir"
+    sudo mkdir -p "$dir"
+    cd "$dir"
+  register: houdini_install_out
+  become_user: "{{ variable_user }}"
+  become: true
+  when: houdini_install_type == "server"
+
+- name: SERVER INSTALL - unarchive houdini with correct dir.
+  shell: |
+    set -x
+    dir={{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}
+    cd {{ download_to_dir }}
+    sudo tar -xvf {{ houdini_linux_filename }} -C "{{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}" --strip-components 1
+    ls -ltriah
+  register: houdini_install_out
+  become_user: "{{ variable_user }}"
+  become: true
+  when: houdini_install_type == "server"
+
+
+- name: SERVER INSTALL - Permissions on installer
+  file:
+    path: "{{ download_to_dir }}/{{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}/houdini.install"
+    mode: u=rX,g=rX,o=r
+    owner: "{{ variable_user }}"
+    group: syscontrol
+  become: true
+  when: houdini_install_type == "server"
+
+# - name: Unarchive a file with extra options # this has some problems with idempotency and its slow.
+#   unarchive:
+#     src: "{{ download_to_dir }}/{{ houdini_linux_filename }}"
+#     dest: "{{ download_to_dir }}/{{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}"
+#     # extra_opts:
+#     # - --strip-components 1
+#   become_user: "{{ variable_user }}"
+#   become: true
+#   when: houdini_install_type == "server"
+
+# sudo ./houdini.install --auto-install --accept-EULA --install-houdini --no-license --install-hfs-symlink --make-dir /opt/houdini/18.0.221
+
+- name: SERVER INSTALL - install houdini with correct dir.
+  shell: |
+    set -x
+    cd {{ download_to_dir }}/{{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}
+    ls
+    sudo ./houdini.install --accept-EULA --install-houdini --install-license --install-hfs-symlink --auto-install
+  register: houdini_install_out
+  # become_user: "{{ variable_user }}"
+  become: true
+  when: houdini_install_type == "server"
+
+- debug:
+    msg:  "{{ houdini_install_out.stdout }}"
+  when: houdini_install_type == "server"
+
+- name: SERVER INSTALL - setup licensing mode
+  shell: |
+    cd /opt/hfs{{ houdini_version_item.houdini_major_version }}
+    sudo sed -i '/licensingMode = sesinetd/s/^# //g' /opt/hfs{{ houdini_version_item.houdini_major_version }}/houdini/Licensing.opt
+    sudo cat /opt/hfs{{ houdini_version_item.houdini_major_version }}/houdini/Licensing.opt
+    /opt/hfs{{ houdini_version_item.houdini_major_version }}/bin/hserver
+  become: true
+  when: houdini_install_type == "server"
+### END SERVER INSTALL
+
+# After install sync houdini download with bucket
+
+- name: "Ensure permissions on the file allow access for upload to s3 for {{ variable_user }} and group syscontrol"
+  file:
+    path: "{{ download_to_dir }}/{{ houdini_linux_filename }}"
+    mode: u+rw,g+rw,o+rw
+    owner: "{{ variable_user }}"
+    group: syscontrol
+  become: true
+
+- name: "ensure the houdini installer exists in the s3 bucket {{ installers_bucket }} Push if it doesn't."
+  s3_sync:
+    bucket: "{{ installers_bucket }}"
+    file_root: "{{ download_to_dir }}"
+    include: "{{ houdini_linux_filename }}"
+    region: "{{ aws_region }}"
+    mode: push
+  become_user: "{{ variable_user }}"
+  tags:
+    - sync_installers

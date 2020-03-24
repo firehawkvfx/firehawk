@@ -1,0 +1,45 @@
+---
+# tasks file for ansible/roles/validate-encryption
+# if the secrets file is not encrypted, then encrypt it.
+-
+
+- name: read the secrets file
+  shell: "cat {{ secret_path }}"
+  register: check
+  no_log: true
+
+- name: File is already encrypted
+  when: '"ANSIBLE_VAULT" in check.stdout'
+  debug: msg="Secrets file at {{ secret_path }} is already encrypted."
+
+- name: File is not encrypted
+  when: '"ANSIBLE_VAULT" not in check.stdout'
+  debug:
+    msg: "Secrets file at {{ secret_path }} is not encrypted.  Will encrypt"
+
+- name: encrypt
+  when: '"ANSIBLE_VAULT" not in check.stdout'
+  shell: |
+    ansible-vault encrypt --vault-id {{ vault_key_path }} {{ secret_path }}
+  register: encrypt_shell
+  connection: local
+
+- name: encrypt result
+  when: '"ANSIBLE_VAULT" not in check.stdout'
+  debug:
+    msg: "{{ encrypt_shell.stdout }}"
+
+- name: read the passwd file - validate update
+  shell: "cat {{ secret_path }}"
+  register: check_post
+  connection: local
+
+- name: check post encryption result
+  when: '"ANSIBLE_VAULT" not in check.stdout'
+  debug:
+    msg: "{{ check_post.stdout }}"
+
+- name: validate check - skipping if passed
+  fail:
+    msg: "Warning, wasn't able to encrypt secrets file."
+  when: "'$ANSIBLE_VAULT;1.1;AES256' not in check_post.stdout"

@@ -1,0 +1,50 @@
+- hosts: localhost
+  user: deployuser
+  sudo: yes
+
+  vars_prompt:
+    - name: "my_password"
+      prompt: "Enter password"
+      private: yes
+      encrypt: "sha512_crypt"
+      confirm: yes
+      salt_size: 7
+
+  tasks:
+    - stat:
+        path: "/home/deadlineuser"
+      register: result
+
+    - debug:
+        msg: "deadlineuser home directory exists already.  Will not create user or make any changes.  The password was not changed/set."
+      when: result.stat.exists == true and result.stat.isdir == true
+    - debug:
+        msg: "deadlineuser home directory doesn't exist.  Will create user and set password."
+      when: result.stat.exists == false
+    # - pause:
+    #     prompt: "Sudo password for localhost "
+    #     echo: no
+    #   when: result.stat.exists == false
+    #   register: my_password
+    #   no_log: true
+    #   tags:
+    #     - always
+    - name: Create a login user - deadlineuser
+      user:
+        name: deadlineuser
+        uid: 9001
+        password: "{{ my_password }}"
+        groups: # Empty by default, here we give it some groups
+          - sudo
+        state: present
+        shell: /bin/bash # Defaults to /bin/bash
+        system: no # Defaults to no
+        createhome: yes # Defaults to yes
+      when: result.stat.exists == false
+      
+    - name: change the default ubuntu user passwd
+      user:
+        name: ubuntu
+        password: "{{ my_password }}"
+        state: present
+      when: result.stat.exists == false

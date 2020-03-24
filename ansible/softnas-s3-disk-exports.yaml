@@ -1,0 +1,162 @@
+- hosts: ansible_control
+  remote_user: deployuser
+
+  vars:
+    # if pool name and volume name match an existing bucket, then it will be imported.  creation will skip.
+    # commandline example to override defaults:
+    # ansible-playbook -i ansible/inventory ansible/softnas-s3-disk.yaml --extra-vars "pool_name=pool0 volume_name=volume0 s3_disk_size_max_value=600 disk_device=0 encrypt_s3=true"
+    # all disk_device numbers should be unique for any nas name.  /dev/s3- will be prepended to the disk_device number when mounted
+    # volume names pools should both existing buckets match only if you intend to use raid.
+
+    pool_name: "{{ envtier }}pool0"
+    volume_name: "{{ envtier }}volume0"
+    disk_device: 0
+    nas_name: softnas
+    encrypt_s3: false
+    s3_disk_size_max_value: 500
+    s3_disk_size_max_units: GB
+    s3_disk_region: "{{ aws_region }}"
+    existing_bucket: false
+
+  tasks:
+  - set_fact:
+      pool_name: "{{ pool_name }}"
+      volume_name: "{{ volume_name }}"
+      disk_device: "{{ disk_device }}"
+      nas_name: "{{ nas_name }}"
+      encrypt_s3: "{{ encrypt_s3 }}"
+      s3_disk_size_max_value: "{{ s3_disk_size_max_value }}"
+      s3_disk_size_max_units: "{{ s3_disk_size_max_units }}"
+      s3_disk_region: "{{ s3_disk_region }}"
+      existing_bucket: "{{ existing_bucket }}"
+
+  - name: Create s3 extender disk. Query existing buckets.
+    shell: |
+      aws s3api list-buckets --query "Buckets[].Name"
+    register: bucket_out
+
+  - set_fact:
+      buckets: "{{ bucket_out.stdout | from_json }}"
+      search_string: "{{ public_domain | replace('.','') }}-{{ nas_name }}-{{ pool_name }}-{{ volume_name }}-{{ disk_device }}" 
+      search_string_domain: "{{ public_domain | replace('.','') }}"
+      search_string_device: "-{{ disk_device }}-"
+      search_string_nas_name: "-{{ nas_name }}-"
+
+  - debug:
+      msg: "{{ buckets }}"
+
+
+
+  - name: check for matching device - existing pool name, volume name, device name on the same nas name
+    set_fact:
+      existing_bucket: "{{ item }}"
+    when:  search_string in item
+    with_items:
+      - "{{ buckets }}"
+
+  - name: report no existing bucket found.  proceed to create new bucket.
+    debug:
+      msg: "report no existing bucket found.  proceed to create new bucket."
+    when: existing_bucket == false
+
+  - name: check existing disk_device for nas.
+    fail:
+      msg: |
+        disk_device name already exists for this nas name in s3 bucket: "{{ item }}"
+        Choose a different disk device name or nas name target to mount
+    failed_when: (search_string_domain in item) and (search_string_nas_name in item) and (search_string_device in item) and (existing_bucket == false)
+    with_items:
+      - "{{ buckets }}"
+
+  - name: existing_bucket
+    debug:
+      msg: "existing_bucket: {{ existing_bucket }}"
+    when: existing_bucket != false
+
+  - name: get bucket region if match found
+    shell: |
+      aws s3api get-bucket-location --bucket {{ existing_bucket }}
+    register: bucket_location_shell_output
+    when: existing_bucket != false
+
+  - name: register bucket location
+    set_fact:
+      bucket_location: "{{ (bucket_location_shell_output.stdout|from_json).LocationConstraint }}"
+    when: existing_bucket != false
+
+  - name: Existing bucket with pool and volume name.  Will mount this to SoftNAS instead of creating a new bucket.
+    debug:
+      msg: "found bucket: {{ existing_bucket }}\nlocation: {{ bucket_location }}"
+    when: existing_bucket != false
+
+# create a new bucket
+- hosts: role_softnas
+  remote_user: "{{ softnas_ssh_user | default('ec2-user') }}"
+  become_user: root
+  become: true
+
+  vars:
+    pool_name: "{{ hostvars['ansible_control']['pool_name'] }}"
+    volume_name: "{{ hostvars['ansible_control']['volume_name'] }}"
+    disk_device: "{{ hostvars['ansible_control']['disk_device'] }}"
+    nas_name: "{{ hostvars['ansible_control']['nas_name'] }}"
+    encrypt_s3: "{{ hostvars['ansible_control']['encrypt_s3'] }}"
+    s3_disk_size_max_value: "{{ hostvars['ansible_control']['s3_disk_size_max_value'] }}"
+    s3_disk_size_max_units: "{{ hostvars['ansible_control']['s3_disk_size_max_units'] }}"
+    s3_disk_region: "{{ hostvars['ansible_control']['s3_disk_region'] }}"
+    existing_bucket: "{{ hostvars['ansible_control']['existing_bucket'] }}"
+  
+  # import by bucket name if bucket name exists, then import, else create.
+  # if created, then also:
+  # create pool from disk mount
+  # create volume from pool
+  # ----
+  # create nfs share.
+
+  # create ability to delete
+  tasks:
+    - debug:
+        msg: "existing_bucket: {{ existing_bucket }}"
+      when: existing_bucket == false
+
+    - include_role: 
+        name: softnas-s3-disk-create
+      when: existing_bucket == false
+
+# mount / import an existing bucket if pool and volume name match
+- hosts: role_softnas
+  remote_user: "{{ softnas_ssh_user | default('ec2-user') }}"
+  become_user: root
+  become: true
+
+  vars:
+    pool_name: "{{ hostvars['ansible_control']['pool_name'] }}"
+    volume_name: "{{ hostvars['ansible_control']['volume_name'] }}"
+    disk_device: "{{ hostvars['ansible_control']['disk_device'] }}"
+    nas_name: "{{ hostvars['ansible_control']['nas_name'] }}"
+    encrypt_s3: "{{ hostvars['ansible_control']['encrypt_s3'] }}"
+    s3_disk_size_max_value: "{{ hostvars['ansible_control']['s3_disk_size_max_value'] }}"
+    s3_disk_size_max_units: "{{ hostvars['ansible_control']['s3_disk_size_max_units'] }}"
+    s3_disk_region: "{{ hostvars['ansible_control']['s3_disk_region'] }}"
+    existing_bucket: "{{ hostvars['ansible_control']['existing_bucket'] }}"
+    bucket_location: "{{ hostvars['ansible_control']['bucket_location'] }}"
+  
+  # import by bucket name if bucket name exists, then import, else create.
+  # if created, then also:
+  # create pool from disk mount
+  # create volume from pool
+  # ----
+  # create nfs share.
+
+  # create ability to delete
+  tasks:
+    - debug:
+        msg: "existing_bucket: {{ existing_bucket }}\nImporting."
+      when: existing_bucket != false
+
+    - include_role: 
+        name: softnas-s3-disk-import
+      when: existing_bucket != false
+
+
+

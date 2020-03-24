@@ -1,0 +1,22 @@
+- hosts: localhost
+
+  vars_prompt:
+    - name: "deadline_linux_installers_tar"
+      prompt: "What is the path to the deadline linux installers .tar?"
+      default: "/deployuser/downloads/Deadline-{{ deadline_version }}-linux-installers.tar"
+      private: no
+
+  vars:
+    no_extension: "{{ deadline_linux_installers_tar | splitext | first }}"
+    parent_folder: "{{ no_extension.split('/')[-1] }}"
+
+  tasks:
+    - name: "Ansible find files in subdirectory downloads"
+      find:
+        paths: "/home/deadlineuser/Downloads/Deadline-{{ deadline_version }}-linux-installers"
+        patterns: "*DeadlineRepository-{{ deadline_version }}-linux-x64-installer.run"
+      register: files_matched
+      become: true
+
+    - debug:
+        msg: "{{ files_matched.files[0].path }}"

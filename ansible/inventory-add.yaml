@@ -1,0 +1,84 @@
+# adds hosts / updates if present.  optionally add under a group name
+
+- hosts: ansible_control
+  remote_user: deployuser
+  gather_facts: "{{ variable_gather_facts | default('true') }}"
+  become: true
+  
+  vars:
+    hosts_file: "/deployuser/{{ inventory }}/hosts"
+    group_name: ''
+    backup: false
+  
+  tasks:
+    - name: hosts file path is
+      debug:
+        var: hosts_file
+        
+    - name: ensure 2 new lines exist at end of file always
+      shell: |
+        /deployuser/scripts/append_blank_line.sh {{ hosts_file }}
+      become: true
+
+    - name: update ansible_control or add if not exist
+      lineinfile:
+        state: present
+        path: "{{ hosts_file }}"
+        line: "ansible_control ansible_connection=local"
+        backup: "{{ backup }}"
+        owner: deployuser
+        regexp: "^ansible_control ansible_connection=.*"
+        insertbefore: BOF
+        create: true
+      become: yes
+
+    - name: ensure 2 new lines exist at end of file always
+      shell: |
+        /deployuser/scripts/append_blank_line.sh {{ hosts_file }}
+      become: true
+
+    - name: update group or add if not exist
+      lineinfile:
+        state: present
+        path: "{{ hosts_file }}"
+        line: "[{{ group_name }}]\n"
+        backup: "{{ backup }}"
+        owner: deployuser
+        regexp: ".{{ group_name }}."
+      when: group_name != ''
+      become: yes
+
+    - name: ensure 2 new lines exist at end of file always
+      shell: |
+        /deployuser/scripts/append_blank_line.sh {{ hosts_file }}
+      become: true
+      
+    - name: Group add host- update host or add if not exist
+      lineinfile:
+        state: present
+        path: "{{ hosts_file }}"
+        line: "{{ host_name }} ansible_host={{ host_ip }} {{ insert_ssh_key_string | default('') }}"
+        backup: "{{ backup }}"
+        owner: deployuser
+        regexp: "^{{ host_name }} ansible_host=.*"
+        insertafter: "^\\[{{ group_name }}\\]"
+        create: true
+      when: group_name != ''
+      become: yes
+
+    - name: Add host at start of file if not exist or update
+      lineinfile:
+        state: present
+        path: "{{ hosts_file }}"
+        line: "{{ host_name }} ansible_host={{ host_ip }} {{ insert_ssh_key_string | default('') }}"
+        backup: "{{ backup }}"
+        owner: deployuser
+        regexp: "^{{ host_name }} ansible_host=.*"
+        insertafter: "^ansible_control ansible_connection=.*"
+      when: group_name == ''
+      become: yes
+
+    - name: ensure 2 new lines exist at end of file always
+      shell: |
+        /deployuser/scripts/append_blank_line.sh {{ hosts_file }}
+      become: true

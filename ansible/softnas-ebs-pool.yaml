@@ -1,0 +1,87 @@
+- hosts: ansible_control
+  remote_user: deployuser
+  become: true
+
+  tasks:
+    - name: test local connection.
+      debug:
+        msg: "test local connection"
+
+- hosts: role_softnas
+  remote_user: "{{ softnas_ssh_user | default('ec2-user') }}"
+  become: true
+
+  tasks:
+    - name: test role_softnas connection.
+      debug:
+        msg: "test role_softnas connection"
+
+- hosts: role_softnas
+  remote_user: "{{ softnas_ssh_user | default('ec2-user') }}"
+  become: true
+
+  vars:
+    mounts:
+      - path: "/dev/sdf"
+        int: "1"
+      - path: "/dev/sdg"
+        int: "2"
+      - path: "/dev/sdh"
+        int: "3"
+      - path: "/dev/sdi"
+        int: "4"
+
+  tasks:
+  - name: Check for existance of custom mounts in /secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml and override default mounts
+    stat:
+      path:  ../../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
+    connection: local
+    register: custom_ebs_list
+
+  - name: Override default mounts
+    include_vars:
+      file:  ../../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
+    connection: local
+    when: custom_ebs_list.stat.exists
+
+  - name: all volumes retrieved
+    debug:
+      var: "{{ mounts }}"
+
+  - name: search for existing pools, to later create if missing
+    stat:
+      path: "/{{ item.pool_name }}/"
+    register: existing_pools
+    with_items:
+      - "{{ exports }}"
+
+  - name: result existing_pools
+    debug:
+      var: existing_pools
+
+  - include_role:
+      name: softnas-ebs-pool-create
+    when: not outer_item.stat.exists
+    with_items:
+      - "{{ existing_pools.results }}"
+    loop_control:
+      loop_var: outer_item
+
+  - name: search for existing volumes, to later create if missing
+    stat:
+      path: "/{{ item.pool_name }}/{{ item.volume_name }}/"
+    register: existing_volumes
+    with_items:
+      - "{{ exports }}"
+
+  - name: result existing_volumes
+    debug:
+      var: existing_volumes
+
+  - include_role:
+      name: softnas-ebs-volume-create
+    when: not outer_item.stat.exists
+    with_items:
+      - "{{ existing_volumes.results }}"
+    loop_control:
+      loop_var: outer_item

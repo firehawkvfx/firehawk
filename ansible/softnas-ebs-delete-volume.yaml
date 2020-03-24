@@ -1,0 +1,16 @@
+- debug:
+    var: item.volumes[0].id
+
+- name: detach ebs volume
+  ec2_vol:
+    region: "{{ ebs_disk_region }}"
+    id: "{{ item.volumes[0].id }}"
+    instance: None
+  when: item.item.volatile
+
+- name: delete ebs volume
+  ec2_vol:
+    region: "{{ ebs_disk_region }}"
+    id: "{{ item.volumes[0].id }}"
+    state: absent
+  when: item.item.volatile

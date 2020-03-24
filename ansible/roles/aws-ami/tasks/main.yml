@@ -1,0 +1,39 @@
+# create an ami with ansible - https://stackoverflow.com/questions/45933961/creating-ami-using-ec2-ami-with-ansible
+- name: Check if AMI with the same name exists
+  ec2_ami_facts:
+    filters:
+      name: "{{ ami_name }}"
+    region: "{{ aws_region }}"
+  register: ami_find
+  become_user: deployuser
+
+- debug:
+    msg: ami_find.images[0]
+  when: ami_find.images | length
+  become_user: deployuser
+
+- name: Deregister AMI if it exists
+  ec2_ami:
+    image_id: "{{ ami_find.images[0].image_id }}"
+    state: absent
+    region: "{{ aws_region }}"
+  when: ami_find.images | length and ami_find.images[0].state == 'available'
+  become_user: deployuser
+
+- name: Stop the softnas instance for ami creation
+  ec2:
+    instance_ids: '{{ instance_id }}'
+    region: '{{ aws_region }}'
+    state: stopped
+    wait: True
+  become_user: deployuser
+
+- name: Creating the AMI from of the instance
+  ec2_ami:
+    instance_id: "{{ instance_id }}"
+    wait: yes
+    name: "{{ ami_name }}"
+    description: "{{ description }}"
+    region: "{{ aws_region }}"
+  register: image
+  become_user: deployuser

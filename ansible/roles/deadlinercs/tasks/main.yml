@@ -1,0 +1,139 @@
+---
+# tasks file for roles/deadlinercs
+- name: Ensures dir exists
+  file:
+    path: "/home/deadlineuser/Downloads/Deadline-{{ deadline_version }}-linux-installers/"
+    state: directory
+    owner: deadlineuser
+  become: yes
+
+- name: Ensures dir exists
+  file:
+    path: /opt/Thinkbox/certs
+    state: directory
+    owner: deadlineuser
+  become: yes
+
+- name: Extract
+  unarchive:
+    src: "{{ deadline_linux_installers_tar }}"
+    dest: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
+    owner: deadlineuser
+    mode: u+x
+  become: yes
+
+- name: set permissions
+  file:
+    path: /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx
+    mode: u=r,g=r,o=r
+    owner: deadlineuser
+  become: yes
+
+- name: deadline must have full access to repository
+  file: 
+    path: /opt/Thinkbox/DeadlineRepository10
+    owner: deadlineuser
+    mode: u=rwX,g=rwX,o=r
+    recurse: yes
+  become: yes
+
+- name: check permissions and ownership on certificates
+  command: ls -ltria /opt/Thinkbox/DeadlineDatabase10/certs/
+  register: cert_permissions
+
+- debug: msg="{{ cert_permissions.stdout }}"
+- debug: msg="{{ cert_permissions.stderr }}"
+
+
+- name: "Ansible find files in subdirectory download"
+  find:
+    paths: /home/deadlineuser/Downloads/{{ deadline_linux_basename }}
+    patterns: "*DeadlineClient-{{ deadline_version }}-linux-x64-installer.run"
+  register: files_matched
+  become: true
+
+- debug:
+    msg: "installer path: {{ files_matched.files[0].path }}"
+
+- stat:
+    path: /var/lib/Thinkbox/Deadline10/deadline.ini
+  register: deadline_ini_file
+
+- name: get date
+  shell: |
+    date +"%Y%m%d_%H%M%S"
+  register: current_date
+
+- set_fact:
+    backup_dest: "/var/lib/Thinkbox/Deadline10/deadline.bak_{{ current_date.stdout }}"
+  when: deadline_ini_file.stat.exists
+
+- debug:
+    msg: "will backup file to {{ backup_dest }}"
+  when: deadline_ini_file.stat.exists
+
+- name: move old config to backup.  this prevents old conf settings staying around.
+  command: "mv /var/lib/Thinkbox/Deadline10/deadline.ini {{ backup_dest }}"
+  when: deadline_ini_file.stat.exists
+
+- name: install deadline rcs
+  shell: |
+    set -x
+    {{ files_matched.files[0].path }} --mode unattended --launcherdaemon true --enable-components proxyconfig --servercert /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --debuglevel 2 --prefix /opt/Thinkbox/Deadline10 --connectiontype Repository --repositorydir /opt/Thinkbox/DeadlineRepository10/ --dbsslcertificate /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --dbsslpassword {{ deadline_proxy_certificate_password }} --licensemode UsageBased --daemonuser deadlineuser --connserveruser deadlineuser --httpport 8080 --tlsport 4433 --enabletls true --tlscertificates generate  --generatedcertdir /opt/Thinkbox/certs/ --clientcert_pass {{ deadline_proxy_certificate_password }} --slavestartup false --proxycertificatepassword 684HeftyPlanes --proxyrootdir {{ deadline_proxy_root_dir }} --proxycertificate /opt/Thinkbox/certs/Deadline10RemoteClient.pfx
+  register: deadline_rcs_install_output_shell
+  become: true
+    
+- name: check deadline rcs install output
+  debug:
+    msg: "{{ deadline_rcs_install_output_shell.stdout }}"
+
+- name: check /var/lib/Thinkbox/Deadline10/deadline.ini
+  command: cat /var/lib/Thinkbox/Deadline10/deadline.ini 
+  register: deadline_config
+
+- debug: msg="{{ deadline_config.stdout }}"
+- debug: msg="{{ deadline_config.stderr }}"
+
+- name: set permissions, deadline installer may be interfering.
+  file:
+    path: /opt/Thinkbox/certs/Deadline10RemoteClient.pfx
+    mode: u=r,g=r,o=r
+    owner: deadlineuser
+  become: yes
+
+- name: Allow new lines from ansible shell output.  Logout or reboot for this to take effect.
+  lineinfile:
+    path: /var/lib/Thinkbox/Deadline10/deadline.ini
+    line: "{{ item }}"
+    create: yes
+  become: true
+  with_items:
+    - "LaunchPulseAtStartup=True"
+    - "LaunchRemoteConnectionServerAtStartup=True"
+    - "ProxyRoot={{ deadline_proxy_root_dir }}"
+    - "ProxyUseSSL=True"
+    - "ProxySSLCertificate=/opt/Thinkbox/certs/Deadline10RemoteClient.pfx"
+    - "ProxyRoot0={{ deadline_proxy_root_dir }};/opt/Thinkbox/certs/Deadline10RemoteClient.pfx"
+
+- name: Restart service for deadlinedb
+  service:
+    name: deadline10launcher
+    state: restarted
+  become: true
+
+- name: check /var/lib/Thinkbox/Deadline10/deadline.ini
+  command: cat /var/lib/Thinkbox/Deadline10/deadline.ini 
+  register: deadline_config
+
+- debug: msg="{{ deadline_config.stdout }}"
+- debug: msg="{{ deadline_config.stderr }}"
+
+- name: Allow new lines from ansible shell output.  Logout or reboot for this to take effect.
+  lineinfile:
+    path: /home/deadlineuser/.bashrc
+    line: "{{ item }}"
+    create: yes
+  with_items:
+    - "alias deadlinemonitor='cd /opt/Thinkbox/Deadline10/bin && ./deadlinemonitor -proxyserver {{ deadline_proxy_root_dir }}'"
+    - "alias deadlinercs='cd /opt/Thinkbox/Deadline10/bin && ./deadlinercs'"
+    - "alias deadlinepulse='cd /opt/Thinkbox/Deadline10/bin && ./deadlinepulse'"

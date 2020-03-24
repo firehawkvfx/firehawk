@@ -1,0 +1,134 @@
+---
+# tasks file for roles/houdini-module
+
+- name: s3 sync openfirehawk-houdini-tools push (from local filesystem) and get (from s3 to node) 
+  include_role:
+    name: houdini-openfirehawk-houdini-tools-sync
+
+- name: dir permissions on /prod/tmp
+  file:
+    path: /prod/tmp
+    state: directory
+    mode: 1777
+    owner: root
+    group: root
+  become: yes
+
+- name: ansible distro
+  debug:
+    var: ansible_distribution
+
+- name: package dependencies CentOS
+  package:
+    name:
+    - mesa-libGLw
+    - libXp
+    - libXp-devel
+    - mesa-libGLU
+    - libXScrnSaver
+    state: present
+  tags:
+    - packages
+  when: not skip_packages and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
+
+- name: package dependencies Ubuntu
+  package:
+    name:
+    #- libglu1-mesa:i386
+    - libglu1
+    - libsm6
+    #- libxmu6:i386
+    - libxmu6
+    state: present
+  tags:
+    - packages
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: install pip
+  package:
+    name: python-pip
+    state: latest
+  when: not skip_packages
+
+- name: install nmap to open port range for tops
+  package:
+    name: nmap
+    state: present
+  become: true
+
+- name: dir permissions on /opt/houdini_install_script
+  file:
+    path: /opt/houdini_install_script
+    state: directory
+    mode: 0700
+    owner: "{{ variable_user }}"
+    group: syscontrol
+  become: true
+
+- name: dir permissions on "{{ download_to_dir }}"
+  file:
+    path: "{{ download_to_dir }}"
+    state: directory
+    mode: u=rwX,g=rwX,o-wx
+    owner: "{{ variable_user }}"
+    group: syscontrol
+  become: true
+
+- name: check permissions
+  shell: |
+    cd "{{ download_to_dir }}"
+    ls -ltriah
+    cd ..
+    ls -ltriah
+  become: true
+  register: check_permisions
+
+- name: show permissions
+  debug:
+    var: check_permisions.stdout
+
+- name: Install requests for web page crawling
+  pip:
+    name: requests
+  become: true
+
+- name: Install requests for web page crawling as user
+  pip:
+    name: requests
+    extra_args: --user
+  become_user: "{{ variable_user }}"
+  become: true
+
+
+- name: Install beautifulsoup4 for web page crawling
+  pip:
+    name: beautifulsoup4
+  become: true
+
+- name: Copy Houdini auto install script to remote host from ansible control.
+  copy:
+    src: /deployuser/modules/node_centos/modules/houdini_install_script/
+    dest: /opt/houdini_install_script/
+    mode: u=rwX,g=rwX,o-wx
+    owner: "{{ variable_user }}"
+    group: syscontrol
+    directory_mode: yes
+  become: true
+
+- name: Copy Houdini auto install script to remote host from ansible control.
+  copy:
+    src: /deployuser/scripts/exit_test.sh
+    dest: /opt/houdini_install_script/
+    mode: u=rx,g=rx,o-wx
+    owner: "{{ variable_user }}"
+    group: syscontrol
+    directory_mode: yes
+  become: true
+
+- name: set permissions on houdini_install.py
+  file:
+    path: /opt/houdini_install_script/houdini_install.py
+    mode: u=rwX,g=rwX,o-wx
+    owner: "{{ variable_user }}"
+    group: syscontrol
+  become: true

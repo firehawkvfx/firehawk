@@ -1,0 +1,24 @@
+- hosts: localhost
+  user: deployuser
+  sudo: yes
+
+  tasks:
+    - name: install mkpasswd
+      package:
+        name: whois
+        state: present
+
+    - name: install pip
+      package:
+        name: python-pip
+        state: present
+
+    - name: install pexpect
+      pip:
+        name: pexpect
+      become: yes
+      
+    - name: install passlib
+      pip:
+        name: passlib
+      become: yes

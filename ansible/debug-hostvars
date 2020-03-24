@@ -1,0 +1,7 @@
+---
+- name: dump all
+  hosts: localhost
+
+  tasks:
+  - name: get variables
+    debug: var=hostvars

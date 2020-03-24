@@ -1,0 +1,26 @@
+- name: test
+  debug:
+    msg: "{{ item.key }}, {{ item.value.location }} is from: {{ item.value.location | dirname }} \n will encrypt at: {{ item.value.target | dirname }}"
+
+- name: ensure dir exists
+  file:
+    path: "{{ item.value.target | dirname }}"
+    state: directory
+    recurse: true
+
+- name: copy secret
+  copy:
+    src: "{{ item.value.location }}"
+    dest: "{{ item.value.target }}"
+    remote_src: true
+  become: true
+
+- name: ready to encrypt
+  debug:
+    msg: "use key to encrypt {{ vault_key_path }}"
+
+- name: Pass secret to encrypt
+  include_role:
+    name: validate-encryption
+  vars:
+    secret_path: "{{ item.value.target }}"

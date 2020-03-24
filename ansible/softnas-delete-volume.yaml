@@ -1,0 +1,51 @@
+# example 
+# ansible-playbook -i ansible/inventory ansible/softnas-delete-volume.yaml -v --extra-vars "volume_name=volume0 pool_name=pool0
+
+- hosts: role_softnas
+  remote_user: "{{ softnas_ssh_user | default('ec2-user') }}"
+  become_user: root
+  become: true
+
+  vars:
+    volume_name: "{{ envtier }}volume0"
+    pool_name: "{{ envtier }}pool0"
+
+  tasks:
+  - name: delete volume
+    shell: |
+      softnas-cmd login softnas {{ user_softnas_pw }}
+      softnas-cmd deletevolume "{{ volume_name }}" "{{ pool_name }}" > /tmp/softnas_delete_volume_output_dict.json
+
+  
+  - fetch:
+      src: /tmp/softnas_delete_volume_output_dict.json
+      dest: /tmp/
+      flat: true
+
+  - include_vars:
+      file: /tmp/softnas_delete_volume_output_dict.json
+      name: softnas_delete_volume_output_dict
+
+  - name: delete volume all json output
+    debug:
+      msg: "{{ softnas_delete_volume_output_dict }}"
+
+  - name: check if softnas cli login succeeded
+    debug:
+      msg: "softnas-cli login succeeded"
+    when: softnas_delete_volume_output_dict.success
+
+  - name: check if softnas cli login failed
+    fail:
+      msg: "{{softnas_delete_volume_output_dict}}"
+    failed_when: softnas_delete_volume_output_dict.success == false
+
+  - name: check if volume delete succeeded
+    debug:
+      msg: "{{softnas_delete_volume_output_dict.result.msg }}"
+    when: softnas_delete_volume_output_dict.result.success
+
+  - name: check if volume delete failed
+    fail:
+      msg: "{{softnas_delete_volume_output_dict.result.msg}}"
+    failed_when: softnas_delete_volume_output_dict.result.success == false

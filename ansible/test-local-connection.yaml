@@ -1,0 +1,8 @@
+- hosts: ansible_control
+  remote_user: deployuser
+  become: true
+
+  tasks:
+    - name: test update
+      debug:
+        msg: "test local connection"

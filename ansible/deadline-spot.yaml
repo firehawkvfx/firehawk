@@ -1,0 +1,12 @@
+- hosts: firehawkgateway
+  become: true
+  remote_user: deployuser
+  become_user: root
+
+  vars:
+    spot_template_path: '/secrets/dev/spot-fleet-templates/config.json'
+    # ensure a spot template in your secrets path per the deadline spot plugin instructions on the thiunkbox website.
+    # the contents of this json file will be written to the deadline db.
+
+  roles:
+  - {role: 'deadline-spot', tags: 'update'}

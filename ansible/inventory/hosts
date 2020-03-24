@@ -1,0 +1,2 @@
+localhost ansible_connection=local
+ansible_control ansible_connection=local

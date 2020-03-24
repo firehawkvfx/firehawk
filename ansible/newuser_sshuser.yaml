@@ -1,0 +1,111 @@
+---
+# this is the bootstraping process to create a deployment user on your local workstation.  it will initially create the user with another known password and user name, then disable remote access via passwords. the ssh key will only be accepted for remote administration. 
+# guide : https://www.howtoforge.com/tutorial/setup-new-user-and-ssh-key-authentication-using-ansible/
+# guide : https://medium.com/@khandelwal12nidhi/setup-ssh-key-and-initial-user-using-ansible-playbook-61eabbb0dba4
+
+- hosts: "{{ variable_host | default('workstation1') }}"
+  remote_user: "{{ variable_connect_as_user | default(user_inituser_name) }}"
+  gather_facts: no
+
+  vars:
+    ansible_become_password: "{{ user_inituser_pw }}"
+    ansible_password: "{{ user_inituser_pw }}"
+    public_key_location: "{{ general_use_ssh_key }}.pub"
+    disable_pass_auth: True
+    disable_root: True
+
+  tasks:
+
+  - name: Connection test without sudo - If running for the first time ensure 'PasswordAuthentication yes' is in /etc/ssh/sshd_config. After first run, password remote access will be disabled and only the ssh key will be used.
+    command: "echo connected"
+
+- hosts: "{{ variable_host | default('workstation1') }}"
+  remote_user: "{{ variable_connect_as_user | default(user_inituser_name) }}"
+  gather_facts: no
+  become: true
+
+  vars:
+    ansible_become_password: "{{ user_inituser_pw }}"
+    ansible_password: "{{ user_inituser_pw }}"
+    public_key_location: "{{ general_use_ssh_key }}.pub"
+    disable_pass_auth: True
+    disable_root: True
+
+  tasks:
+
+  - name: Connection test
+    command: "echo connected"
+
+  - name: Add a new user named deployuser
+    user:
+      name: deployuser
+      shell: /bin/bash
+      password: "{{ user_deployuser_pw }}"
+      uid: "{{ deployuser_uid }}"
+
+  - name: Add deployuser user to the sudoers
+    copy:
+      dest: "/etc/sudoers.d/deployuser"
+      content: "deployuser  ALL=(ALL)  NOPASSWD: ALL"
+
+  - name: generate ssh key
+    command : ssh-keygen -q -t rsa -f /home/deployuser/.ssh/id_rsa.pub -C "" -N ""
+    args:
+      creates: /home/deployuser/.ssh/id_rsa.pub
+    become_user: deployuser
+    register: output
+
+  - debug: var=output.stdout_lines
+
+  - name: add deployuser as an authorized key on the remote host as deployuser
+    authorized_key:
+      user: deployuser
+      key: "{{ lookup('file', public_key_location) }}"
+      state: present
+  
+  # this step allows repetition of this script after password is disabled.
+  - name: "add connection user {{ user_inituser_name }} as an authorized key on the remote host as {{ user_inituser_name }}"
+    authorized_key:
+      user: "{{ user_inituser_name }}"
+      key: "{{ lookup('file', public_key_location) }}"
+      state: present
+        
+  # - name: "ensure permissions are correct on {{ public_key_location }}"
+  #   file:
+  #     path: "{{ public_key_location }}"
+  #     mode: 0400
+  #     owner: deployuser
+  #   become: yes
+
+  # - name: "ensure permissions are correct on {{ general_use_ssh_key }}"
+  #   file:
+  #     path: "{{ general_use_ssh_key }}"
+  #     mode: 0400
+  #     owner: deployuser
+  #   become: yes
+
+  - name: Disable Password Authentication.  Only SSH keys will be accepted after this point.
+    lineinfile:
+      dest: /etc/ssh/sshd_config
+      regexp: '^PasswordAuthentication'
+      line: "PasswordAuthentication no"
+      state: present
+      backup: yes
+    when: disable_pass_auth
+
+  - name: Disable Root Login.
+    lineinfile:
+      dest: /etc/ssh/sshd_config
+      regexp: '^PermitRootLogin'
+      line: "PermitRootLogin no"
+      state: present
+      backup: yes
+    when: disable_root
+    notify:
+      - restart ssh
+
+  handlers:
+  - name: restart ssh
+    service:
+      name: sshd
+      state: restarted
