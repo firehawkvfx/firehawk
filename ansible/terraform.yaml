@@ -1,7 +1,0 @@
----
-- hosts: ansible_control
-  become: true
-  
-  roles:
-    - terraform
-
