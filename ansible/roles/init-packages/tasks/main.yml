@@ -20,7 +20,7 @@
   package:
     name:
     - python-pip
-    - python3-pip
+    # - python3-pip
     - python-apt
     - whois
     - python-passlib
