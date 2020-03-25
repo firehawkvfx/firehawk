@@ -39,7 +39,7 @@
         responses:
           (?i)password: "{{ openvpn_user_pw }}"
           (?i)Retype new password: "{{ openvpn_user_pw }}"
-      no_log: false
+      no_log: true
 
 - hosts: "{{ variable_host | default('openvpnip_private') }}"
   remote_user: openvpnas
