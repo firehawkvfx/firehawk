@@ -54,7 +54,7 @@
     tags:
       - add-routes
 
-  - name: add routes via vpn
+  - name: "add routes via vpn - prod - {{ variable_host }}"
     shell: |
       ip route add {{ item.subnet }} via {{ item.next_hop }} dev {{ ethernet_device }}
     with_items:
@@ -101,7 +101,7 @@
     tags:
       - add-routes
 
-  - name: add routes via vpn
+  - name: "add routes via vpn - dev - {{ variable_host }}"
     shell: |
       ip route add {{ item.subnet }} via {{ item.next_hop }} dev {{ ethernet_device }}
     with_items:
