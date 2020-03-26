@@ -120,6 +120,9 @@ openfirehawkserver_dev: "{{ lookup('env','TF_VAR_openfirehawkserver_dev') }}"
 openfirehawkserver_prod: "{{ lookup('env','TF_VAR_openfirehawkserver_prod') }}"
 openfirehawkserver_name: "{{ lookup('env', 'TF_VAR_openfirehawkserver_name') }}"
 
+gateway_hostname: "{{ lookup('env', 'TF_VAR_gateway_hostname') }}"
+control_hostname: "{{ lookup('env', 'TF_VAR_control_hostname') }}"
+
 usage_based_url: "{{ lookup('env', 'TF_VAR_usage_based_url') }}"
 usage_based_activation_code: "{{ lookup('env', 'TF_VAR_usage_based_activation_code') }}"
 
