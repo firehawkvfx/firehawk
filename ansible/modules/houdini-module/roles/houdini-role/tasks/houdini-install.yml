@@ -54,7 +54,7 @@
     ls /opt/houdini_install_script/
     python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini -b {{ houdini_version_item.houdini_build }} -t {{ download_to_dir }} -q true -f {{ houdini_linux_filename }}; exit_test
   register: houdini_query_out
-  no_log: false
+  no_log: true
   become: true
   when: houdini_version_item.houdini_auto_version
 
