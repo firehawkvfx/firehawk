@@ -26,20 +26,20 @@
   with_items:
     - { ip: "{{ openfirehawkserver }}", hostname: "{{ openfirehawkserver_name }}" }
 
-- name: check if hosts template exists
-  stat:
-    path: /secrets/hosts
-  register: hosts_template
+# - name: check if hosts template exists
+#   stat:
+#     path: /secrets/hosts
+#   register: hosts_template
 
-- name: insert/update block in /etc/hosts from template
-  blockinfile:
-    path: /etc/hosts
-    block: |
-      {{ item.content }}
-    marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.path }}"
-  with_items:
-    - { path: "/secrets/hosts", content: "{{ lookup('file', '/secrets/hosts') }}" }
-  when: hosts_template.stat.exists == True
+# - name: insert/update block in /etc/hosts from template
+#   blockinfile:
+#     path: /etc/hosts
+#     block: |
+#       {{ item.content }}
+#     marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.path }}"
+#   with_items:
+#     - { path: "/secrets/hosts", content: "{{ lookup('file', '/secrets/hosts') }}" }
+#   when: hosts_template.stat.exists == True
 
 - name: Allow new lines from ansible shell output.  Logout or reboot for this to take effect.
   lineinfile:
