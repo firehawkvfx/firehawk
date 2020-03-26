@@ -75,7 +75,7 @@ resource "null_resource" "init-routes-houdini-license-server" {
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=firehawkgateway variable_user=deployuser softnas_hosts=none" --tags 'local_install_onsite_mounts'; exit_test
       # ssh will be killed from the previous script because users were added to a new group and this will not update unless your ssh session is restarted.
       # login again and continue...
-      if [[ "$TF_VAR_install_houdini" == true ]]; then
+      if [[ "$TF_VAR_install_houdini_license_server" == true ]]; then
         # install houdini with the same procedure as on render nodes and workstations, and initialise the licence server on this system.
         ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deployuser houdini_install_type=server" --skip-tags "sync_scripts"; exit_test
       fi
