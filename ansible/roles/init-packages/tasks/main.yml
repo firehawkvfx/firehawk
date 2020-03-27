@@ -34,11 +34,13 @@
 - name: Install requests module to query web pages in (houdini python install script)
   pip:
     name: requests
+    executable: pip
   become: true
 
 - name: install pexpect for rhel / centos,
   pip:
     name: pexpect
+    executable: pip
   become: true
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
 
