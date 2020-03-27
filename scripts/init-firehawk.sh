@@ -164,7 +164,7 @@ else
     echo "...Start Terraform"
 
     echo "...Terraform refresh"
-    terraform refresh; exit_test
+    terraform refresh -lock=false; exit_test
     echo "...Terraform state list"
     terraform state list
     echo "...Terraform apply"
