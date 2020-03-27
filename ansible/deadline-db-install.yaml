@@ -32,8 +32,8 @@
         location: /opt/Thinkbox/certs/Deadline10RemoteClient.pfx
         target: "{{ secrets_archive }}/opt/Thinkbox/certs/Deadline10RemoteClient.pfx"
       secret3:
-        location: /opt/Thinkbox/certs/{{ gateway_hostname }}.pfx
-        target: "{{ secrets_archive }}/opt/Thinkbox/certs/{{ gateway_hostname }}.pfx"
+        location: /opt/Thinkbox/certs/localhost.pfx
+        target: "{{ secrets_archive }}/opt/Thinkbox/certs/localhost.pfx"
       secret4:
         location: /opt/Thinkbox/DeadlineDatabase10/certs/ca.crt
         target: "{{ secrets_archive }}/opt/Thinkbox/DeadlineDatabase10/certs/ca.crt"
@@ -41,8 +41,8 @@
         location: /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx
         target: "{{ secrets_archive }}/opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx"
       secret6:
-        location: /opt/Thinkbox/DeadlineDatabase10/certs/{{ gateway_hostname }}.pem
-        target: "{{ secrets_archive }}/opt/Thinkbox/DeadlineDatabase10/certs/{{ gateway_hostname }}.pem"
+        location: /opt/Thinkbox/DeadlineDatabase10/certs/localhost.pem
+        target: "{{ secrets_archive }}/opt/Thinkbox/DeadlineDatabase10/certs/localhost.pem"
       secret7:
         location: /opt/Thinkbox/DeadlineDatabase10/certs/mongo_client.pem
         target: "{{ secrets_archive }}/opt/Thinkbox/DeadlineDatabase10/certs/mongo_client.pem"

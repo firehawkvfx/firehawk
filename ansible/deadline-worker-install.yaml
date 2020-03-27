@@ -171,7 +171,7 @@
   - name: set deadline remote client certificate permissions locally
     file: 
       path: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
-      mode: 0644
+      mode: u=rw,g=r,o=r
       owner: deadlineuser
       group: syscontrol
     become: yes

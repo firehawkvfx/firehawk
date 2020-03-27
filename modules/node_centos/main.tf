@@ -301,7 +301,7 @@ resource "null_resource" "provision_node_centos" {
       # install cli for deadlineuser
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_node_centos variable_user=centos variable_become_user=deadlineuser" --skip-tags "user_access"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"; exit_test
-      if [[ "$TF_VAR_install_houdini" == true ]]; then
+      if [[ "$TF_VAR_install_deadline" == true ]]; then
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml --tags "onsite-install" --skip-tags "multi-slave" --extra-vars "variable_host=role_node_centos variable_connect_as_user=centos variable_user=centos"; exit_test
       fi
       if [[ "$TF_VAR_install_houdini" == true ]]; then
