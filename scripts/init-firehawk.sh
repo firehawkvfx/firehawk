@@ -168,7 +168,7 @@ else
     echo "...Terraform state list"
     terraform state list
     echo "...Terraform apply"
-    terraform apply --auto-approve; exit_test
+    terraform apply -lock=false --auto-approve; exit_test
     
   elif [[ "$tf_action" == "sleep" ]]; then
     echo "...Currently running instances: scripts/aws-running-instances.sh"
@@ -176,10 +176,10 @@ else
     echo ""
 
     echo "...Terraform refresh"
-    terraform refresh; exit_test
+    terraform refresh -lock=false; exit_test
 
     echo "...Terraform sleep"
-    terraform apply --auto-approve -var sleep=true
+    terraform apply -lock=false --auto-approve -var sleep=true
   elif [[ "$tf_action" == "destroy" ]]; then
     echo "...Currently running instances: scripts/aws-running-instances.sh"
     $TF_VAR_firehawk_path/scripts/aws-running-instances.sh
@@ -188,10 +188,10 @@ else
     echo ""
 
     echo "...Terraform refresh"
-    terraform refresh; exit_test
+    terraform refresh -lock=false; exit_test
 
     echo "...Terraform destroy"
-    terraform destroy --auto-approve; exit_test
+    terraform destroy -lock=false --auto-approve; exit_test
   fi
 
 
