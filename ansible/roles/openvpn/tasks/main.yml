@@ -17,8 +17,6 @@
 
 - debug:
     var: "{{ openvpn_contents.stdout }}"
-    
-- debug: msg="{{ openvpn_contents.stderr }}"
 
 - name: prep permissions
   file:
