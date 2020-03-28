@@ -57,6 +57,7 @@
 
     - name: configure openvpn server settings
       shell: |
+        ls -la /usr/local/openvpn_as/scripts/sacli
         /usr/local/openvpn_as/scripts/sacli -k vpn.daemon.0.client.network -v {{ client_network }} ConfigPut
         /usr/local/openvpn_as/scripts/sacli -k vpn.daemon.0.client.netmask_bits -v {{ client_netmask_bits }} ConfigPut
         /usr/local/openvpn_as/scripts/sacli --key 'vpn.server.tls_auth' --value 'true' ConfigPut
@@ -77,6 +78,8 @@
         chown {{ openvpn_user }} seperate/*
         /usr/local/openvpn_as/scripts/sacli start
         ls -la seperate
+      register: command_result
+      failed_when: "'ERROR' in command_result.stderr"
 
   roles:
     - role: openvpn
