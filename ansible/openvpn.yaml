@@ -57,7 +57,7 @@
 
     - name: configure openvpn server settings
       shell: |
-        ls -la /usr/local/openvpn_as/scripts/sacli
+        ls -la /usr/local/openvpn_as/scripts/
         /usr/local/openvpn_as/scripts/sacli -k vpn.daemon.0.client.network -v {{ client_network }} ConfigPut
         /usr/local/openvpn_as/scripts/sacli -k vpn.daemon.0.client.netmask_bits -v {{ client_netmask_bits }} ConfigPut
         /usr/local/openvpn_as/scripts/sacli --key 'vpn.server.tls_auth' --value 'true' ConfigPut
