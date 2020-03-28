@@ -168,6 +168,16 @@
     - cloud-install
     - onsite-install
 
+  - name: check permissions
+    shell: |
+      ls -ltriah "{{ deadline_certificates_location }}"
+    become: true
+    register: check_permisions
+
+  - name: show permissions
+    debug:
+      var: check_permisions.stdout
+
   - name: set deadline remote client certificate permissions locally
     file: 
       path: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
