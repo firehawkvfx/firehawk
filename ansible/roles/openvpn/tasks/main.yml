@@ -16,7 +16,7 @@
   register: openvpn_contents
 
 - debug:
-    var: "{{ openvpn_contents.stdout }}"
+    var: openvpn_contents.stdout
 
 - name: prep permissions
   file:
