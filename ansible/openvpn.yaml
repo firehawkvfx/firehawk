@@ -33,13 +33,13 @@
 
   # set user password.  this is a temporary measure as it should be handled by user data, but for some reason open vpn isn't accepting that approach as of 2.71““““““““““““
   post_tasks:
-    - name: set user pass
+    - name: "set user pass {{ openvpn_user }}"
       expect:
         command: passwd {{ openvpn_user }}
         responses:
           (?i)password: "{{ openvpn_user_pw }}"
           (?i)Retype new password: "{{ openvpn_user_pw }}"
-      no_log: true
+      no_log: false
 
 - hosts: "{{ variable_host | default('openvpnip_private') }}"
   remote_user: openvpnas
