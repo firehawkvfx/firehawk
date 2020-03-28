@@ -1,3 +1,25 @@
+
+- name: check /opt/Thinkbox/certs/
+  shell: |
+    ls -ltriah /opt/Thinkbox/certs/
+  become: true
+  register: certsdir
+
+- name: show /opt/Thinkbox/certs/
+  debug:
+    var: certsdir.stdout
+  become: true
+
+- name: check for /opt/Thinkbox/certs/Deadline10RemoteClient.pfx
+  stat: path=/opt/Thinkbox/certs/Deadline10RemoteClient.pfx
+  register: Deadline10RemoteClient
+  become: true
+
+- name: Fail if missing
+  fail: msg="/opt/Thinkbox/certs/Deadline10RemoteClient.pfx is missing"
+  when: Deadline10RemoteClient.stat.exists == False
+  become: true
+
 - name: Ensure db is still valid.  if this fails, db is corrupted or there is a permissions issue
   shell: |
     set -x

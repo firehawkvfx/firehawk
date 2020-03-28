@@ -173,10 +173,16 @@
       ls -ltriah "{{ deadline_certificates_location }}"
     become: true
     register: check_permisions
+    tags:
+    - cloud-install
+    - onsite-install
 
   - name: show permissions
     debug:
       var: check_permisions.stdout
+    tags:
+    - cloud-install
+    - onsite-install
 
   - name: set deadline remote client certificate permissions locally
     file: 
