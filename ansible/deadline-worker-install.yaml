@@ -184,7 +184,7 @@
     - cloud-install
     - onsite-install
 
-  - name: set deadline remote client certificate permissions locally
+  - name: set deadline remote client certificate permissions locally - deadline-worker-install.yaml
     file: 
       path: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
       mode: u=rw,g=r,o=r

@@ -116,7 +116,8 @@ resource "null_resource" "init-routes-houdini-license-server" {
       fi
 
       if [[ "$TF_VAR_install_deadline" == true ]]; then
-        #check db
+        # check db
+        echo "test db 7"
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
       fi
 EOT
