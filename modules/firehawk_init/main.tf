@@ -134,27 +134,104 @@ resource "null_resource" "init-aws-local-workstation" {
       . /deployuser/scripts/exit_test.sh
       set -x
       cd /deployuser
+      
+      if [[ "$TF_VAR_install_deadline" == true ]]; then
+        # check db
+        echo "test db 8"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      fi
+
       export storage_user_access_key_id=${var.storage_user_access_key_id}
       echo "storage_user_access_key_id=$storage_user_access_key_id"
       export storage_user_secret=${var.storage_user_secret}
       echo "storage_user_secret= $storage_user_secret"
       # add local host ssh keys to list of accepted keys on ansible control. Example for another onsite workstation-
       ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=$TF_VAR_workstation_address local=True"; exit_test
+
+      if [[ "$TF_VAR_install_deadline" == true ]]; then
+        # check db
+        echo "test db 9"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      fi
+
       ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "variable_host=$TF_VAR_workstation_address variable_user=deployuser local=True"; exit_test
+
+      if [[ "$TF_VAR_install_deadline" == true ]]; then
+        # check db
+        echo "test db 10"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      fi
+
       # now add this host and address to ansible inventory
       ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=workstation1 host_ip=$TF_VAR_workstation_address group_name=role_local_workstation insert_ssh_key_string=ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key"; exit_test
+
+      if [[ "$TF_VAR_install_deadline" == true ]]; then
+        # check db
+        echo "test db 11"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      fi
+
       # Now this will init the deployuser on the workstation.  the deployuser wil become the primary user with ssh access.  once this process completes the first time.
       ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_sshuser.yaml -v --extra-vars "variable_host=workstation1 user_inituser_name=$TF_VAR_user_inituser_name ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key"; exit_test
+
+      if [[ "$TF_VAR_install_deadline" == true ]]; then
+        # check db
+        echo "test db 12"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      fi
+
       # test connection as new deployuser
       ansible -m ping workstation1 -i "$TF_VAR_inventory" --private-key=$TF_VAR_general_use_ssh_key -u deployuser --become; exit_test
+
+      if [[ "$TF_VAR_install_deadline" == true ]]; then
+        # check db
+        echo "test db 13"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      fi
+
       # we can use the deploy user to create more users as well, like the deadlineuser for artist use.
       ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars "variable_connect_as_user=deployuser variable_user=deadlineuser variable_host=workstation1 ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key" --tags 'newuser,onsite-install'; exit_test
+
+      if [[ "$TF_VAR_install_deadline" == true ]]; then
+        # check db
+        echo "test db 14"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      fi
+
       # create and copy an ssh rsa key from ansible control to the workstation for provisioning.  1st time will error, run it twice
       ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-copy-id-private-host.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key"; exit_test
+
+      if [[ "$TF_VAR_install_deadline" == true ]]; then
+        # check db
+        echo "test db 15"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      fi
+
       ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-copy-id-private-host.yaml -v --extra-vars "variable_host=workstation1 variable_user=$TF_VAR_user_inituser_name ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key"; exit_test
+
+      if [[ "$TF_VAR_install_deadline" == true ]]; then
+        # check db
+        echo "test db 16"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      fi
+
       # configure aws for all users
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=workstation1 variable_user=deployuser aws_cli_root=true ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key"; exit_test
+
+      if [[ "$TF_VAR_install_deadline" == true ]]; then
+        # check db
+        echo "test db 17"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      fi
+
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser aws_cli_root=true ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key"; exit_test
+
+      if [[ "$TF_VAR_install_deadline" == true ]]; then
+        # check db
+        echo "test db 18"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      fi
+
       # if [[ "$TF_VAR_install_deadline" == true ]]; then
       #   #check db
       #   ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
