@@ -67,22 +67,54 @@ resource "null_resource" "init-routes-houdini-license-server" {
       cd /deployuser
       if [[ "$TF_VAR_install_deadline" == true ]]; then
         # check db
+        echo "test db 1"
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
         # custom events auto assign groups to slaves on startup, eg slaveautoconf
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-repository-custom-events.yaml; exit_test
+        echo "test db 2"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
       fi
       # configure onsite NAS mounts to firehawkgateway
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=firehawkgateway variable_user=deployuser softnas_hosts=none" --tags 'local_install_onsite_mounts'; exit_test
+      
+      if [[ "$TF_VAR_install_deadline" == true ]]; then
+        # check db
+        echo "test db 3"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      fi
+      
       # ssh will be killed from the previous script because users were added to a new group and this will not update unless your ssh session is restarted.
       # login again and continue...
       if [[ "$TF_VAR_install_houdini_license_server" == true ]]; then
         # install houdini with the same procedure as on render nodes and workstations, and initialise the licence server on this system.
         ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deployuser houdini_install_type=server" --skip-tags "sync_scripts"; exit_test
       fi
+
+      if [[ "$TF_VAR_install_deadline" == true ]]; then
+        # check db
+        echo "test db 4"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      fi
+
+
       # ensure an aws pem key exists for ssh into cloud nodes
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-new-key.yaml; exit_test
+
+      if [[ "$TF_VAR_install_deadline" == true ]]; then
+        # check db
+        echo "test db 5"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      fi
+
       # configure routes to opposite environment for licence server to communicate if in dev environment
       ansible-playbook -i "$TF_VAR_inventory" ansible/firehawkgateway-update-routes.yaml; exit_test
+
+      if [[ "$TF_VAR_install_deadline" == true ]]; then
+        # check db
+        echo "test db 6"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      fi
+
       if [[ "$TF_VAR_install_deadline" == true ]]; then
         #check db
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
