@@ -34,18 +34,11 @@ resource "null_resource" "init-awscli-deadlinedb-firehawk" {
         # Install deadline
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-install.yaml -v; exit_test
         # First db check
+        echo "test db 0"
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
       fi
 EOT
 }
-}
-
-locals {
-  deadlinedb_complete = element(concat(null_resource.init-awscli-deadlinedb-firehawk.*.id, list("")), 0)
-}
-
-output "deadlinedb-complete" {
-  value = local.deadlinedb_complete
 }
 
 # Consider placing a dependency on cloud nodes on the deadline install.  Not likely to occur but would be better practice.
@@ -57,6 +50,7 @@ resource "null_resource" "init-routes-houdini-license-server" {
   triggers = {
     install_deadline = var.install_deadline
     install_houdini = var.install_houdini
+    deadlinedb = null_resource.init-awscli-deadlinedb-firehawk
   }
 
   provisioner "local-exec" {
@@ -126,7 +120,13 @@ EOT
 
 resource "null_resource" "init-aws-local-workstation" {
   count = var.firehawk_init ? 1 : 0
-  depends_on = [null_resource.init-routes-houdini-license-server]
+  depends_on = [null_resource.init-routes-houdini-license-server, null_resource.init-awscli-deadlinedb-firehawk]
+
+  triggers = {
+    install_deadline = var.install_deadline
+    install_houdini = var.install_houdini
+    deadlinedb = null_resource.init-awscli-deadlinedb-firehawk
+  }
 
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
@@ -242,7 +242,7 @@ EOT
 
 resource "null_resource" "install-deadline-local-workstation" {
   count = var.firehawk_init ? 1 : 0
-  depends_on = [null_resource.init-aws-local-workstation]
+  depends_on = [null_resource.init-aws-local-workstation, null_resource.init-routes-houdini-license-server, null_resource.init-awscli-deadlinedb-firehawk]
 
   triggers = {
     install_deadline = var.install_deadline
@@ -265,9 +265,11 @@ EOT
 }
 }
 
+
+
 resource "null_resource" "install-houdini-local-workstation" {
   count = var.firehawk_init ? 1 : 0
-  depends_on = [null_resource.install-deadline-local-workstation]
+  depends_on = [null_resource.install-deadline-local-workstation, null_resource.init-aws-local-workstation, null_resource.init-routes-houdini-license-server, null_resource.init-awscli-deadlinedb-firehawk]
 
   triggers = {
     install_deadline = var.install_deadline
@@ -297,7 +299,7 @@ EOT
 
 resource "null_resource" "local-provisioning-complete" {
   count = var.firehawk_init ? 1 : 0
-  depends_on = [null_resource.install-houdini-local-workstation]
+  depends_on = [null_resource.install-houdini-local-workstation, null_resource.install-deadline-local-workstation, null_resource.init-aws-local-workstation, null_resource.init-routes-houdini-license-server, null_resource.init-awscli-deadlinedb-firehawk]
 
   triggers = {
     install_deadline = var.install_deadline
@@ -310,6 +312,14 @@ resource "null_resource" "local-provisioning-complete" {
       echo '...Firehawk Init Complete'
 EOT
 }
+}
+
+locals {
+  deadlinedb_complete = element(concat(null_resource.init-awscli-deadlinedb-firehawk.*.id, list("")), 0)
+}
+
+output "deadlinedb-complete" {
+  value = local.deadlinedb_complete
 }
 
 locals {
