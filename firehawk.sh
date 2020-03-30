@@ -246,6 +246,7 @@ fi
 #; exit_test # ssh reset may cause a non zero exit code, but it must be ignored
 
 if [ "$test_vm" = false ] ; then
+    vagrant status
     # vagrant reload
     echo "Vagrant SSH config:"
     n=0; retries=100

@@ -185,7 +185,7 @@ resource "null_resource" "dependency_node_centos" {
 
 resource "null_resource" "provision_deadline_spot" {
   count      = (var.site_mounts && var.provision_deadline_spot_plugin) ? 1 : 0
-  depends_on = [null_resource.dependency_deadline_spot, null_resource.dependency_node_centos]
+  depends_on = [null_resource.dependency_deadline_spot, null_resource.dependency_node_centos, module.firehawk_init.local-provisioning-complete]
 
   triggers = {
     ami_id                  = module.node.ami_id
