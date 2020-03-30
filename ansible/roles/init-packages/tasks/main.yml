@@ -47,11 +47,18 @@
 # Enterprise Linux'
 # Above is for RHEL and Centos, the following is for Debian/Ubuntu:
 
+- name: Install expect pip for Ubuntu
+  pip:
+    name: pexpect
+    executable: pip
+  become: true
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
 - name: install pexpect for ubuntu
   package:
     name:
-    - python-pexpect
+    # - python-pexpect
     - nfs-common
     state: present
-    executable: pip
+  become: true
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
