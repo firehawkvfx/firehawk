@@ -303,39 +303,14 @@ resource "null_resource" "provision_node_centos" {
       # ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "variable_host=firehawkgateway variable_user=deployuser private_ip=${aws_instance.node_centos[0].private_ip} bastion_ip=${var.bastion_ip}"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=node0 host_ip=${aws_instance.node_centos[0].private_ip} group_name=role_node_centos insert_ssh_key_string=ansible_ssh_private_key_file=$TF_VAR_local_key_path"; exit_test
 
-      if [[ "$TF_VAR_install_deadline" == true ]]; then
-        # check db
-        echo "test db centos 2"
-        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
-      fi
-
-
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init-users.yaml -v --extra-vars "set_hostname=false"; exit_test
-
-      if [[ "$TF_VAR_install_deadline" == true ]]; then
-        # check db
-        echo "test db centos 3"
-        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
-      fi
 
       # install cli for centos user
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_node_centos variable_user=centos" --skip-tags "user_access"; exit_test
 
-      if [[ "$TF_VAR_install_deadline" == true ]]; then
-        # check db
-        echo "test db centos 4"
-        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
-      fi
-
       # install cli for deadlineuser
 
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_node_centos variable_user=centos variable_become_user=deadlineuser" --skip-tags "user_access"; exit_test
-
-      if [[ "$TF_VAR_install_deadline" == true ]]; then
-        # check db
-        echo "test db centos 5"
-        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
-      fi
 
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"; exit_test
       if [[ "$TF_VAR_install_deadline" == true ]]; then
@@ -351,12 +326,6 @@ resource "null_resource" "provision_node_centos" {
       if [[ "$TF_VAR_install_houdini" == true ]]; then
         ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source"; exit_test
         ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v; exit_test
-      fi
-
-      if [[ "$TF_VAR_install_deadline" == true ]]; then
-        # check db
-        echo "test db centos 7"
-        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
       fi
 
       if [[ $TF_VAR_houdini_test_connection == true ]]; then
