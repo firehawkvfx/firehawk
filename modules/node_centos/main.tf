@@ -218,7 +218,7 @@ variable "centos_v7" {
 
 resource "aws_instance" "node_centos" {
   count                = var.site_mounts ? 1 : 0
-  depends_on           = [null_resource.dependency_softnas_and_bastion, null_resource.dependency_deadlinedb]
+  depends_on           = [null_resource.dependency_softnas_and_bastion, null_resource.dependency_deadlinedb, var.dependency]
   iam_instance_profile = var.instance_profile_name
 
   #instance type and ami are determined by the gateway type variable for if you want a graphical or non graphical instance.
@@ -253,7 +253,7 @@ USERDATA
 resource "null_resource" "provision_node_centos" {
   count = var.site_mounts ? 1 : 0
   #count      = 0
-  depends_on = [aws_instance.node_centos]
+  depends_on = [aws_instance.node_centos, null_resource.dependency_softnas_and_bastion, null_resource.dependency_deadlinedb]
   
   triggers = {
     instanceid = aws_instance.node_centos[0].id

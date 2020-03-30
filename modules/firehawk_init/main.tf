@@ -47,6 +47,9 @@ locals {
 
 output "deadlinedb-complete" {
   value = local.deadlinedb_complete
+  depends_on = [
+    null_resource.init-awscli-deadlinedb-firehawk
+  ]
 }
 
 # Consider placing a dependency on cloud nodes on the deadline install.  Not likely to occur but would be better practice.
@@ -247,5 +250,8 @@ locals {
 
 output "local-provisioning-complete" {
   value = local.local_provisioning_complete
+  depends_on = [
+    null_resource.local-provisioning-complete
+  ]
 }
 

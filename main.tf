@@ -375,7 +375,7 @@ variable "node_sleep_on_create" {
 }
 
 module "node" {
-  dependency = module.firehawk_init.local-provisioning-complete
+  
   # need to ensure mounts exist on start 
   source = "./modules/node_centos"
   name   = "centos"
@@ -396,6 +396,7 @@ module "node" {
   remote_subnet_cidr          = var.remote_subnet_cidr
 
   # dependencies
+  dependency = module.firehawk_init.local-provisioning-complete
   softnas_private_ip1             = module.softnas.softnas1_private_ip
   provision_softnas_volumes       = module.softnas.provision_softnas_volumes
   attach_local_mounts_after_start = module.softnas.attach_local_mounts_after_start
