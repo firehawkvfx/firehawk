@@ -53,4 +53,5 @@
     - python-pexpect
     - nfs-common
     state: present
+    executable: pip
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
