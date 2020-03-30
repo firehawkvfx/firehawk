@@ -41,6 +41,14 @@ EOT
 }
 }
 
+locals {
+  deadlinedb_complete = element(concat(null_resource.init-awscli-deadlinedb-firehawk.*.id, list("")), 0)
+}
+
+output "deadlinedb-complete" {
+  value = local.deadlinedb_complete
+}
+
 # Consider placing a dependency on cloud nodes on the deadline install.  Not likely to occur but would be better practice.
 
 resource "null_resource" "init-routes-houdini-license-server" {
@@ -50,7 +58,7 @@ resource "null_resource" "init-routes-houdini-license-server" {
   triggers = {
     install_deadline = var.install_deadline
     install_houdini = var.install_houdini
-    deadlinedb = null_resource.init-awscli-deadlinedb-firehawk
+    deadlinedb = local.deadlinedb_complete
   }
 
   provisioner "local-exec" {
@@ -125,7 +133,7 @@ resource "null_resource" "init-aws-local-workstation" {
   triggers = {
     install_deadline = var.install_deadline
     install_houdini = var.install_houdini
-    deadlinedb = null_resource.init-awscli-deadlinedb-firehawk
+    deadlinedb = local.deadlinedb_complete
   }
 
   provisioner "local-exec" {
@@ -247,6 +255,7 @@ resource "null_resource" "install-deadline-local-workstation" {
   triggers = {
     install_deadline = var.install_deadline
     install_houdini = var.install_houdini
+    deadlinedb = local.deadlinedb_complete
   }
 
   provisioner "local-exec" {
@@ -274,6 +283,7 @@ resource "null_resource" "install-houdini-local-workstation" {
   triggers = {
     install_deadline = var.install_deadline
     install_houdini = var.install_houdini
+    deadlinedb = local.deadlinedb_complete
   }
 
   provisioner "local-exec" {
@@ -304,6 +314,7 @@ resource "null_resource" "local-provisioning-complete" {
   triggers = {
     install_deadline = var.install_deadline
     install_houdini = var.install_houdini
+    deadlinedb = local.deadlinedb_complete
   }
 
   provisioner "local-exec" {
@@ -312,14 +323,6 @@ resource "null_resource" "local-provisioning-complete" {
       echo '...Firehawk Init Complete'
 EOT
 }
-}
-
-locals {
-  deadlinedb_complete = element(concat(null_resource.init-awscli-deadlinedb-firehawk.*.id, list("")), 0)
-}
-
-output "deadlinedb-complete" {
-  value = local.deadlinedb_complete
 }
 
 locals {
