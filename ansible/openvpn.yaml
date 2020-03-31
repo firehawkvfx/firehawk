@@ -31,7 +31,7 @@
   roles:
     - role: init-packages
 
-  # set user password.  this is a temporary measure as it should be handled by user data, but for some reason open vpn isn't accepting that approach as of 2.71““““““““““““
+  # set user password.  this is a temporary measure as it should be handled by user data, but for some reason open vpn isn't accepting that approach as of 2.71
   post_tasks:
     - name: "set user pass {{ openvpn_user }}"
       expect:
@@ -50,6 +50,13 @@
     client_netmask_bits: None
     
   pre_tasks:
+    - name: Reboot the server and wait for it to come back up.
+      reboot:
+
+    - name: Rebooted
+      debug:
+        msg: "rebooted"
+
     - name: create dir.
       file:
         path: /usr/local/openvpn_as/scripts/seperate
