@@ -246,7 +246,9 @@ fi
 #; exit_test # ssh reset may cause a non zero exit code, but it must be ignored
 
 if [ "$test_vm" = false ] ; then
+    sleep 10
     vagrant status
+    sleep 10
     # vagrant reload
     echo "Vagrant SSH config:"
     n=0; retries=100
@@ -260,7 +262,7 @@ if [ "$test_vm" = false ] ; then
         echo "Error: timed out waiting for vagrant ssh config command - failed."
         exit 1
     fi
-
+    echo "...Get vagrant key file"
     # AFter Vagrant Hosts are up, take the SSH keys and store them in the keys folder for general use.
     ansiblecontrol_key=$(vagrant ssh-config "ansiblecontrol$TF_VAR_envtier" | grep -oP "^  IdentityFile \K.*")
     cp -f $ansiblecontrol_key $TF_VAR_secrets_path/keys/ansible_control_private_key
