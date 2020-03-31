@@ -50,7 +50,7 @@
     client_netmask_bits: None
     
   pre_tasks:
-    - name: Reboot the server and wait for it to come back up.
+    - name: Reboot the server and wait for it to come back up. # This may not be necesary but there were intermittent issues with /usr/local/openvpn_as/scripts/sacli that a reboot may have resolved
       reboot:
 
     - name: Rebooted
