@@ -211,15 +211,17 @@ echo "$(date) Finished a run" | tee -a tmp/log.txt
 printf '\n...Show previous 5 runs\n'
 tail -n 5 tmp/log.txt
 
-echo "...Currently running instances: scripts/aws-running-instances.sh"
-$TF_VAR_firehawk_path/scripts/aws-running-instances.sh
-echo ""
+if [[ "$tf_action" != "none" ]]; then # only if there are some tf actions do we check running instances, otherwise we can't asume the aws cli is installed yet.
+  echo "...Currently running instances: scripts/aws-running-instances.sh"
+  $TF_VAR_firehawk_path/scripts/aws-running-instances.sh
+  echo ""
 
-lines=$($TF_VAR_firehawk_path/scripts/aws-running-instances.sh | wc -l)
-if [ "$lines" -gt "0" ]; then
-  echo "instances are running"
-else
-  echo "instances are not running"
+  lines=$($TF_VAR_firehawk_path/scripts/aws-running-instances.sh | wc -l)
+  if [ "$lines" -gt "0" ]; then
+    echo "instances are running"
+  else
+    echo "instances are not running"
+  fi
 fi
 
 # test if the destroy command worked
