@@ -211,7 +211,7 @@ echo "$(date) Finished a run" | tee -a tmp/log.txt
 printf '\n...Show previous 5 runs\n'
 tail -n 5 tmp/log.txt
 
-# only if there are some tf actions do we check running instances, otherwise we can't asume the aws cli is installed yet.
+# only if there are tf actions do we check running instances, otherwise we can't asume the aws cli is installed yet when none
 echo "tf_action: $tf_action"
 if [ "$tf_action" != "none" ]; then 
   echo "...Currently running instances: scripts/aws-running-instances.sh"
@@ -224,26 +224,26 @@ if [ "$tf_action" != "none" ]; then
   else
     echo "instances are not running"
   fi
-fi
 
-# test if the destroy command worked
-if [ "$lines" -gt "0" ] && [[ "$tf_action" == "destroy" ]]; then 
-  echo "failed to destroy all running instances for the account"
-  exit 1
-fi
+  # test if the destroy command worked
+  if [ "$lines" -gt "0" ] && [[ "$tf_action" == "destroy" ]]; then 
+    echo "failed to destroy all running instances for the account"
+    exit 1
+  fi
 
-printf "\n...Currently existing users in the aws account"
-aws iam list-users
-echo ""
+  printf "\n...Currently existing users in the aws account"
+  aws iam list-users
+  echo ""
 
-user_present=$(aws iam list-users | grep -c "deadline_spot_deployment_user") || echo "Suppress Exit Code"
-if [ "$user_present" -gt "0" ]; then
-  echo "deadline_spot_deployment_user is present"
-else
-  echo "deadline_spot_deployment_user not present"
-fi
+  user_present=$(aws iam list-users | grep -c "deadline_spot_deployment_user") || echo "Suppress Exit Code"
+  if [ "$user_present" -gt "0" ]; then
+    echo "deadline_spot_deployment_user is present"
+  else
+    echo "deadline_spot_deployment_user not present"
+  fi
 
-if [ "$user_present" -gt "0" ] && [[ "$tf_action" == "destroy" ]]; then 
-  echo "failed to destroy existing deadline_spot_deployment_user for the account"
-  exit 1
+  if [ "$user_present" -gt "0" ] && [[ "$tf_action" == "destroy" ]]; then 
+    echo "failed to destroy existing deadline_spot_deployment_user for the account"
+    exit 1
+  fi
 fi
