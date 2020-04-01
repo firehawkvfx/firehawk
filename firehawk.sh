@@ -247,6 +247,7 @@ fi
 
 if [ "$test_vm" = false ] ; then
     sleep 10
+    echo "vagrant status:"
     vagrant status
     sleep 10
     # vagrant reload
