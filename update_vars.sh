@@ -310,6 +310,7 @@ fi
 
 template_path="$TF_VAR_firehawk_path/secrets.template"
 
+echo '...Get secrets from env'
 # map environment secret for current env
 if [[ "$TF_VAR_envtier" = 'dev' ]]; then
     if [[ ! -z "$firehawksecret_dev" ]]; then
@@ -325,6 +326,11 @@ elif [[ "$TF_VAR_envtier" = 'prod' ]]; then
         export testsecret="$testsecret_prod"
         echo "...Aquired firehawksecret from prod"
     fi
+fi
+echo '...Check for configuration'
+if [ ! -f $TF_VAR_secrets_path/config-override-$TF_VAR_envtier ]; then
+    echo "...Initialising $TF_VAR_secrets_path/config-override-$TF_VAR_envtier"
+    cp "$TF_VAR_secrets_path/defaults-config-override-$TF_VAR_envtier" "$TF_VAR_secrets_path/config-override-$TF_VAR_envtier"
 fi
 
 source_vars () {
