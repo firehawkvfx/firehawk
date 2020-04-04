@@ -327,6 +327,10 @@ elif [[ "$TF_VAR_envtier" = 'prod' ]]; then
     fi
 fi
 
+if [[ ! -f "$TF_VAR_secrets_path/config-override-$TF_VAR_envtier" ]]; then
+    echo "...Initialising $TF_VAR_secrets_path/config-override-$TF_VAR_envtier"
+    cp "$TF_VAR_secrets_path/defaults-config-override-$TF_VAR_envtier" "$TF_VAR_secrets_path/config-override-$TF_VAR_envtier"
+
 source_vars () {
     local var_file=$1
     local encrypt_mode=$2
