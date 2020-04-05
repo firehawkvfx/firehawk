@@ -18,52 +18,47 @@ firehawk_sync_source: '/deployuser/modules/node_centos/modules/openfirehawk-houd
 
 # this list is used for deadline plugin compatibility
 houdini_major_version_list:
-    - '17.5'
+    # - '17.5'
     - '18.0'
 
 # this list of dictionaries is use to install multiple versions of houdini.
 # versions should be listed from oldest to newest.
 houdini_version_list:
-- houdini_major_version: "17.5"
-  houdini_auto_version: False  
-  # houdini_auto_version: auto latest version can only be used for the latest daily/produciton build visible to your sesi account.
-  # eg, if houdini 18 is released and visible in your downloads from your account, then auto cannot be used for 17.5.
-  # to install any older version that is not the latest (auto), that version .tar.gz should exist in your s3 bucket (which you can upload manually).
-  # when using auto, the installer will be uploaded to your s3 bucket.
+# - houdini_major_version: "17.5"
+#   houdini_auto_version: False  
+#   # houdini_auto_version: auto latest version can only be used for the latest daily/produciton build visible to your sesi account.
+#   # eg, if houdini 18 is released and visible in your downloads from your account, then auto cannot be used for 17.5.
+#   # to install any older version that is not the latest (auto), that version .tar.gz should exist in your s3 bucket (which you can upload manually).
+#   # when using auto, the installer will be uploaded to your s3 bucket.
   
-  houdini_minor_version: "17.5.364"
-  # houdini_minor_version: eg "17.5.364" or "auto"
+#   houdini_minor_version: "17.5.364"
+#   # houdini_minor_version: eg "17.5.364" or "auto"
   
-  houdini_linux_filename: "houdini-17.5.364-linux_x86_64_gcc6.3.tar.gz"
-  # houdini_linux_filename: file to install from s3 bucket eg: "houdini-17.5.364-linux_x86_64_gcc6.3.tar.gz" or "auto"
+#   houdini_linux_filename: "houdini-17.5.364-linux_x86_64_gcc6.3.tar.gz"
+#   # houdini_linux_filename: file to install from s3 bucket eg: "houdini-17.5.364-linux_x86_64_gcc6.3.tar.gz" or "auto"
   
-  houdini_build: "daily"
-  # houdini_build: used to download latest "daily" or "production" build when other options set to auto.  eg: "daily" or "production"
-  # enforce_env: False
-  # optionally - only set this for a maximum of 1 version in the list.  It will enforce the houdini environment for all shells opened. it is not required, but can help with debugging deadline issues.
+#   houdini_build: "daily"
+#   # houdini_build: used to download latest "daily" or "production" build when other options set to auto.  eg: "daily" or "production"
+#   # enforce_env: False
+#   # optionally - only set this for a maximum of 1 version in the list.  It will enforce the houdini environment for all shells opened. it is not required, but can help with debugging deadline issues.
 
 - houdini_major_version: "18.0"
   houdini_auto_version: True
   houdini_minor_version: "auto"
   houdini_linux_filename: "auto"
-  houdini_build: "daily"
+  houdini_build: "production"
   # enforce_env: False
 
 houdini_license_server_version_list:
-- houdini_major_version: "17.5"
-  houdini_auto_version: False
+- houdini_major_version: "18.0"
+  houdini_auto_version: True
   # houdini_auto_version: auto latest version can only be used for the latest daily/produciton build visible to your account.
   # eg, if houdini 18 is released and visible in your downloads from your account, then auto cannot be used for 17.5.
   # to install any older version that is not the latest (auto), that version .tar.gz must exist in your s3 bucket.
   # when using auto, the installer will be uploaded to your s3 bucket.
+  houdini_minor_version: "auto" # houdini_minor_version: eg "17.5.364" or "auto"
+  houdini_linux_filename: "auto" # houdini_linux_filename: file to install from s3 bucket eg: "houdini-17.5.364-linux_x86_64_gcc6.3.tar.gz" or "auto"  
+  houdini_build: "production" # houdini_build: used to download latest "daily" or "production" build when other options set to auto.  eg: "daily" or "production"
   
-  houdini_minor_version: "17.5.364"
-  # houdini_minor_version: eg "17.5.364" or "auto"
-  
-  houdini_linux_filename: "houdini-17.5.364-linux_x86_64_gcc6.3.tar.gz"
-  # houdini_linux_filename: file to install from s3 bucket eg: "houdini-17.5.364-linux_x86_64_gcc6.3.tar.gz" or "auto"
-  
-  houdini_build: "daily"
-  # houdini_build: used to download latest "daily" or "production" build when other options set to auto.  eg: "daily" or "production"
   # enforce_env: False
   # only set this for a maximum of 1 version in the list.  It will enforce the houdini environment for all shells opened.
