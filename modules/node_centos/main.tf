@@ -330,7 +330,7 @@ resource "null_resource" "provision_node_centos" {
 
       if [[ $TF_VAR_houdini_test_connection == true ]]; then
         # last step before building ami we run a unit test to get houdini over a 4 minute hiccup on first use see sidefx RFE100149
-        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-houdini-unit-test.yaml -v --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source"; exit_test
+        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-houdini-unit-test.yaml -v --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source execute=true"; exit_test
       fi
 
       if [[ "$TF_VAR_install_deadline" == true ]]; then

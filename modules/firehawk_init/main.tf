@@ -222,6 +222,11 @@ resource "null_resource" "install-houdini-local-workstation" {
       if [[ "$TF_VAR_install_deadline" == true ]]; then
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
       fi
+
+      if [[ $TF_VAR_houdini_test_connection == true ]]; then
+        # last step before building ami we run a unit test to ensure houdini runs
+        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-houdini-unit-test.yaml -v --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source execute=true"; exit_test
+      fi
 EOT
 }
 }
