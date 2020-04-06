@@ -233,6 +233,14 @@ if [[ "$vagrant_halt" == true ]]; then
     vagrant halt
 fi
 
+vagrant_status = "$(vagrant status)"
+if [ "$(grep -cim1 "running" $vagrant_status)" -ge 2 ]; then
+    echo "Both machines are already up."
+else
+    echo "will start machines"
+    vagrant_up=true
+fi
+
 printf "\nvagrant_up: $vagrant_up\n"
 if [[ "$vagrant_up" == true ]]; then
     if [[ "$init_vm_config" == true ]]; then
