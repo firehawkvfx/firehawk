@@ -233,25 +233,25 @@ if [[ "$vagrant_halt" == true ]]; then
     vagrant halt
 fi
 
-echo "vagrant status:"
-vagrant_status="$(vagrant status)"
-echo "$vagrant_status"
-total_running_machines=$(grep -cim1 'running' $vagrant_status)
-if [ total_running_machines -ge 2 ]; then
-    echo "Both machines are already up."
-else
-    echo "will start machines"
-    vagrant_up=true
-fi
 
 printf "\nvagrant_up: $vagrant_up\n"
 if [[ "$vagrant_up" == true ]]; then
-    if [[ "$init_vm_config" == true ]]; then
-        echo "Starting vagrant, and provisioning."
-        vagrant up --provision
+    echo "vagrant status:"
+    vagrant_status="$(vagrant status)"
+    echo "$vagrant_status"
+
+    total_running_machines=$(grep -cim1 'running' $vagrant_status)
+    if [ total_running_machines -ge 2 ]; then
+        echo "Both machines are already up."
     else
-        echo "Starting vagrant"
-        vagrant up
+        echo "will start machines"
+        if [[ "$init_vm_config" == true ]]; then
+            echo "Starting vagrant, and provisioning."
+            vagrant up --provision
+        else
+            echo "Starting vagrant"
+            vagrant up
+        fi
     fi
 fi
 #; exit_test # ssh reset may cause a non zero exit code, but it must be ignored
