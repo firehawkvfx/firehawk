@@ -241,15 +241,15 @@ if [[ "$vagrant_up" == true ]]; then
     echo "$vagrant_status"
 
     total_running_machines=$(grep -cim1 'running' $vagrant_status)
-    if [ total_running_machines -ge 2 ]; then
-        echo "Both machines are already up."
+    if [ $total_running_machines -ge 2 ]; then
+        echo "...Both machines are already up."
     else
-        echo "will start machines"
+        echo "...Will start machines"
         if [[ "$init_vm_config" == true ]]; then
-            echo "Starting vagrant, and provisioning."
+            echo "...Starting vagrant, and provisioning."
             vagrant up --provision
         else
-            echo "Starting vagrant"
+            echo "...Starting vagrant"
             vagrant up
         fi
     fi
