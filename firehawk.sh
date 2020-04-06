@@ -236,7 +236,8 @@ fi
 echo "vagrant status:"
 vagrant_status="$(vagrant status)"
 echo "$vagrant_status"
-if [ "$(grep -cim1 'running' $vagrant_status)" -ge 2 ]; then
+total_running_machines=$(grep -cim1 'running' $vagrant_status)
+if [ total_running_machines -ge 2 ]; then
     echo "Both machines are already up."
 else
     echo "will start machines"
