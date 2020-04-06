@@ -233,8 +233,10 @@ if [[ "$vagrant_halt" == true ]]; then
     vagrant halt
 fi
 
-vagrant_status = "$(vagrant status)"
-if [ "$(grep -cim1 "running" $vagrant_status)" -ge 2 ]; then
+echo "vagrant status:"
+vagrant_status="$(vagrant status)"
+echo "$vagrant_status"
+if [ "$(grep -cim1 'running' $vagrant_status)" -ge 2 ]; then
     echo "Both machines are already up."
 else
     echo "will start machines"
