@@ -240,7 +240,8 @@ if [[ "$vagrant_up" == true ]]; then
     vagrant_status="$(vagrant status)"
     echo "$vagrant_status"
 
-    total_running_machines=$(echo $vagrant_status | grep -cim1 'running')
+    total_running_machines=$(echo "$vagrant_status" | grep -o running | wc -l)
+    # total_running_machines=$(grep -cim1 'running' $vagrant_status)
     if [ $total_running_machines -ge 2 ]; then
         echo "...Both machines are already up."
     else
