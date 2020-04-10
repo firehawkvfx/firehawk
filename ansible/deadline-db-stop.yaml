@@ -5,7 +5,7 @@
 
   vars:
     state: stopped
-    reboot: true
+    reboot: false
 
   roles:
   - deadline-db-restart

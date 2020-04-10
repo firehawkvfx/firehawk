@@ -198,6 +198,12 @@ else
     terraform destroy -lock=false --auto-approve; exit_test
   fi
 
+  if [[ "$deadline_action" == "stop" ]]; then
+    ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-stop.yaml -v; exit_test
+  elif [[ "$deadline_action" == "start" ]]; then
+    ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-start.yaml -v; exit_test
+  fi
+
 
   # After this point provisioning will now execute from TF.
   # $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-030-tf-s3user-deadlinercs.sh $ARGS; exit_test

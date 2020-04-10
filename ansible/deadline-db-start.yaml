@@ -4,8 +4,8 @@
   become: true
 
   vars:
-    state: stopped
-    reboot: true
-
+    state: started
+    reboot: false
+    
   roles:
   - deadline-db-restart
