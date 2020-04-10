@@ -117,7 +117,7 @@
   - name: ensure download exists
     file:
       path: /home/centos/Downloads/
-      mode: 0755
+      mode: '0755'
       owner: centos
       state: directory
 
@@ -139,7 +139,7 @@
   - get_url:
       dest: "{{ epel_dest }}"
       url: "{{ epel_url }}"
-      mode: 700
+      mode: '0700'
     when: epel_stat.stat.exists == false
   
   - name: restart pcoip.service on centos, also issue daemon-reload to pick up config changes

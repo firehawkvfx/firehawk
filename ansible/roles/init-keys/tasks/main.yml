@@ -48,7 +48,7 @@
 - name: set key permissions
   file:
     path: "{{ key_path }}"
-    mode: 0600
+    mode: '0600'
     state: touch
     access_time: preserve
     modification_time: preserve

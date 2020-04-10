@@ -21,7 +21,7 @@
 - name: prep permissions
   file:
     path: /usr/local/openvpn_as/scripts/seperate/{{ item }}
-    mode: 400
+    mode: '0400'
   with_items:
     - ca.crt
     - client.crt
@@ -34,7 +34,7 @@
     dest: ~/openvpn_config/
     force: yes
     flat: true
-    mode: 400
+    mode: '0400'
   with_items:
     - ca.crt
     - client.crt
@@ -47,6 +47,6 @@
     dest: ~/openvpn_config/openvpn.conf
     force: yes
     flat: true
-    mode: 400
+    mode: '0400'
 
 ### copy back to gateway next role

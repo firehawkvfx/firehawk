@@ -45,7 +45,7 @@
       cd /var/tmp/qc
       hython /var/tmp/qc/hip_unit_test.py /var/tmp/qc/test_ebs_read_hip.hip /obj/ropnet1/fetch1
     dest: /etc/rc.d/init.d/houdini_test.sh
-    mode: 0700
+    mode: '0700'
     owner: root
   when: run_on_boot
   become: true

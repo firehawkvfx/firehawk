@@ -69,7 +69,7 @@
   file:
     path: /opt/houdini_install_script
     state: directory
-    mode: 0700
+    mode: '0700'
     owner: "{{ variable_user }}"
     group: syscontrol
   become: true
