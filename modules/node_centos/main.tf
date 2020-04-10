@@ -329,8 +329,8 @@ resource "null_resource" "provision_node_centos" {
       fi
 
       if [[ $TF_VAR_houdini_test_connection == true ]]; then
-        # last step before building ami we run a unit test to get houdini over a 4 minute hiccup on first use see sidefx RFE100149
-        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-houdini-unit-test.yaml -v --extra-vars "firehawk_sync_source=$TF_VAR_firehawk_sync_source execute=true"; exit_test
+        # last step before building ami we run a unit test to ensure houdini runs
+        ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_user=deadlineuser firehawk_sync_source=$TF_VAR_firehawk_sync_source execute=true" --tags "houdini_unit_test"; exit_test
       fi
 
       if [[ "$TF_VAR_install_deadline" == true ]]; then

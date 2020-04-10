@@ -26,10 +26,15 @@
     hython /var/tmp/qc/hip_unit_test.py /var/tmp/qc/test_ebs_read_hip_no_deadline_rop.hip /obj/ropnet1/fetch1
     ls -ltriah /var/tmp/geo
   become_user: deadlineuser
+  register: result
   when: execute
   tags:
     - sync_scripts
   with_items: "{{ houdini_major_version_list }}"
+
+- name: output
+  debug:
+    var: result
 
 - name: Ensure unit test runs on boot.  Undesirable, but needed - See sidefx RFE100149
   copy:
