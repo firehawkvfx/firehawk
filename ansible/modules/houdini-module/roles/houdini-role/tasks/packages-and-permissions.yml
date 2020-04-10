@@ -17,7 +17,7 @@
 - name:
   shell: |
     permissions=$(stat -c '%a' /prod/tmp)
-    if [[ "permissions" != "1777" ]];
+    if [[ "permissions" != '1777' ]]; then
       echo 'FAIL: Permissions on path are incorrect: $permissions'
     fi
   become: yes
