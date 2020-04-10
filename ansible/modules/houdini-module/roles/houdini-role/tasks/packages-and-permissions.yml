@@ -9,7 +9,7 @@
   file:
     path: /prod/tmp
     state: directory
-    mode: 1777
+    mode: '1777'
     owner: root
     group: root
   become: yes
