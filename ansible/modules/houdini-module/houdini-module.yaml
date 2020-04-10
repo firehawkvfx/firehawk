@@ -198,6 +198,11 @@
 - hosts: "{{ variable_host | default('role_node_centos') }}"
   remote_user: "{{ variable_user | default('centos') }}"
   become: true
+  
+  vars_files:
+    - /deployuser/ansible/group_vars/all/vars
+    - vars.yml
+    - /secrets/overrides/ansible/modules/houdini-module/vars.yml
 
   vars:
     # the become sudo pass is only relevent for local installation if required on the host specified.
