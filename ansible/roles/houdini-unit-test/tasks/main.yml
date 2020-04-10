@@ -18,7 +18,7 @@
 - name: execute unit test
   shell: |
     set -x
-    cd /opt/hfs17.5/
+    cd /opt/hfs{{ item }}/
     source ./houdini_setup
     ls /var/tmp/
     ls /var/tmp/qc/*.hip
@@ -29,6 +29,7 @@
   when: execute
   tags:
     - sync_scripts
+  with_items: "{{ houdini_major_version_list }}"
 
 - name: Ensure unit test runs on boot.  Undesirable, but needed - See sidefx RFE100149
   copy:
@@ -39,7 +40,7 @@
       exec > /var/tmp/qc/logfile.txt
       sleep 45
       mount -a
-      cd /opt/hfs17.5/
+      cd /opt/hfs{{ item }}/
       source ./houdini_setup
       cd /var/tmp/qc
       hython /var/tmp/qc/hip_unit_test.py /var/tmp/qc/test_ebs_read_hip.hip /obj/ropnet1/fetch1
@@ -48,3 +49,4 @@
     owner: root
   when: run_on_boot
   become: true
+  with_items: "{{ houdini_major_version_list }}"
