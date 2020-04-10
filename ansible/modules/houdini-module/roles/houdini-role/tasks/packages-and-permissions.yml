@@ -14,6 +14,14 @@
     group: root
   become: yes
 
+- name:
+  shell: |
+    permissions=$(stat -c '%a' /prod/tmp)
+    if [[ "permissions" != "1777" ]];
+      echo 'FAIL: Permissions on path are incorrect: $permissions'
+    fi
+  become: yes
+
 - name: ansible distro
   debug:
     var: ansible_distribution
