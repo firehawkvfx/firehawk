@@ -14,10 +14,10 @@
     group: root
   become: yes
 
-- name:
+- name: Ensure permissions are correct in BASH
   shell: |
     permissions=$(stat -c '%a' /prod/tmp)
-    if [[ "permissions" != '1777' ]]; then
+    if [[ "permissions" != "1777" ]]; then
       echo "FAIL: Permissions on path are incorrect: $permissions"
       exit 1
     fi
