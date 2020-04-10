@@ -225,7 +225,7 @@ resource "null_resource" "install-houdini-local-workstation" {
 
       if [[ $TF_VAR_houdini_test_connection == true ]]; then
         # last step before building ami we run a unit test to ensure houdini runs
-        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-houdini-unit-test.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser firehawk_sync_source=$TF_VAR_firehawk_sync_source execute=true"; exit_test
+        ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser firehawk_sync_source=$TF_VAR_firehawk_sync_source execute=true" --tags "houdini_unit_test"; exit_test
       fi
 EOT
 }
