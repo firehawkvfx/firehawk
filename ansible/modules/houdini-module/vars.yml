@@ -16,7 +16,6 @@ firehawk_sync_source: '/deployuser/modules/node_centos/modules/openfirehawk-houd
 
 # this list is used for deadline plugin compatibility
 houdini_major_version_list:
-    # - '17.5'
     - '18.0'
 
 # this list of dictionaries is use to install multiple versions of houdini.
