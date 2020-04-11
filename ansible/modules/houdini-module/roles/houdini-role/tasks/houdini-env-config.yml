@@ -1,6 +1,19 @@
 
 ### modify houdini environment vars
 
+- name: generate spot fleet config from template
+  template:
+    src: /secrets/dev/houdini{{ houdini_version_item.houdini_major_version }}/houdini_template.env
+    dest: /secrets/dev/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env
+
+- name: "Get difference from two houdini.env files"
+  command: diff /home/deadlineuser/houdini18.0/houdini.env /secrets/dev/houdini18.0/houdini.env
+  failed_when: "diff.rc > 1"
+  register: diff
+
+- name: debug output
+  debug: msg="{{ diff.stdout }}"
+
 - name: houdini_version_item
   debug:
     var: houdini_version_item
