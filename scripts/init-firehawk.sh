@@ -160,17 +160,17 @@ else
     terraform init; exit_test # Required to initialise any new modules
   fi
 
-  echo "TF_VAR_taint_list: $TF_VAR_taint_list"
+  echo "TF_VAR_taint_single: $TF_VAR_taint_single"
   cat $TF_VAR_secrets_path/config-override-$TF_VAR_envtier
     echo ""
 
   IFS=' ' # need to define whitespace seperator
-  if [ ! -z "$TF_VAR_taint_list" ]; then
+  if [ ! -z "$TF_VAR_taint_single" ]; then
     # Iterate the string variable using for loop
-    # for item in "${TF_VAR_taint_list[@]}"; do echo "terraform taint $item"; done
-    for item in $TF_VAR_taint_list; do echo "terraform taint $item"; done
-    # for item in "${TF_VAR_taint_list[@]}"; do
-    for item in $TF_VAR_taint_list; do
+    # for item in "${TF_VAR_taint_single[@]}"; do echo "terraform taint $item"; done
+    for item in $TF_VAR_taint_single; do echo "terraform taint $item"; done
+    # for item in "${TF_VAR_taint_single[@]}"; do
+    for item in $TF_VAR_taint_single; do
       set -x
       terraform taint $item; exit_test
     done
