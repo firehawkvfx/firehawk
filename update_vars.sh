@@ -327,7 +327,7 @@ elif [[ "$TF_VAR_envtier" = 'prod' ]]; then
         echo "...Aquired firehawksecret from prod"
     fi
 fi
-echo '...Check for configuration'
+echo '...Check for configuration, init if not present.'
 if [ ! -f $TF_VAR_secrets_path/config-override-$TF_VAR_envtier ]; then
     echo "...Initialising $TF_VAR_secrets_path/config-override-$TF_VAR_envtier"
     cp "$TF_VAR_secrets_path/defaults-config-override-$TF_VAR_envtier" "$TF_VAR_secrets_path/config-override-$TF_VAR_envtier"

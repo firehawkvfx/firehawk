@@ -160,6 +160,14 @@ else
     terraform init; exit_test # Required to initialise any new modules
   fi
 
+  if [ -z "$TF_VAR_taint_list" ];
+    # Iterate the string variable using for loop
+    for val in $TF_VAR_taint_list; do
+        echo "...Will taint $val"
+        terraform taint $val; exit_test
+    done
+  fi
+
   if [[ "$tf_action" == "apply" ]]; then
     echo "...Currently running instances: scripts/aws-running-instances.sh"
     $TF_VAR_firehawk_path/scripts/aws-running-instances.sh
