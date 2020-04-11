@@ -163,7 +163,7 @@ else
   echo "TF_VAR_taint_list: $TF_VAR_taint_list"
   cat $TF_VAR_secrets_path/config-override-$TF_VAR_envtier
 
-  if [ -z "$TF_VAR_taint_list" ]; then
+  if [ ! -z "$TF_VAR_taint_list" ]; then
     # Iterate the string variable using for loop
     for val in $TF_VAR_taint_list; do
       echo "...Will taint $val"
