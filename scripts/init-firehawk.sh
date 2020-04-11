@@ -167,8 +167,10 @@ else
   IFS=' ' # need to define whitespace seperator
   if [ ! -z "$TF_VAR_taint_list" ]; then
     # Iterate the string variable using for loop
-    for item in "${TF_VAR_taint_list[@]}"; do echo "terraform taint $item"; done
-    for item in "${TF_VAR_taint_list[@]}"; do
+    # for item in "${TF_VAR_taint_list[@]}"; do echo "terraform taint $item"; done
+    for item in $TF_VAR_taint_list; do echo "terraform taint $item"; done
+    # for item in "${TF_VAR_taint_list[@]}"; do
+    for item in $TF_VAR_taint_list; do
       set -x
       terraform taint $item; exit_test
     done

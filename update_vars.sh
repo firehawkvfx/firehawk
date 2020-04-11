@@ -544,7 +544,7 @@ source_vars () {
         for i in $(echo "$multiline")
         do
             [[ "$i" =~ ^#.*$ ]] && continue
-            echo "i: $i"
+            # echo "i: $i"
             export $i
         done
 
