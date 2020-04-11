@@ -160,6 +160,9 @@ else
     terraform init; exit_test # Required to initialise any new modules
   fi
 
+  echo "TF_VAR_taint_list: $TF_VAR_taint_list"
+  cat $TF_VAR_secrets_path/config-override-$TF_VAR_envtier
+
   if [ -z "$TF_VAR_taint_list" ]; then
     # Iterate the string variable using for loop
     for val in $TF_VAR_taint_list; do
