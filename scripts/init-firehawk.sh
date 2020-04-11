@@ -160,11 +160,11 @@ else
     terraform init; exit_test # Required to initialise any new modules
   fi
 
-  if [ -z "$TF_VAR_taint_list" ];
+  if [ -z "$TF_VAR_taint_list" ]; then
     # Iterate the string variable using for loop
     for val in $TF_VAR_taint_list; do
-        echo "...Will taint $val"
-        terraform taint $val; exit_test
+      echo "...Will taint $val"
+      terraform taint $val; exit_test
     done
   fi
 
