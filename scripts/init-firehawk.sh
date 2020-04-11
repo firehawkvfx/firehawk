@@ -162,8 +162,9 @@ else
 
   echo "TF_VAR_taint_list: $TF_VAR_taint_list"
   cat $TF_VAR_secrets_path/config-override-$TF_VAR_envtier
-  echo ""
-  
+    echo ""
+
+  IFS=' ' # need to define whitespace seperator
   if [ ! -z "$TF_VAR_taint_list" ]; then
     # Iterate the string variable using for loop
     for item in $TF_VAR_taint_list; do
