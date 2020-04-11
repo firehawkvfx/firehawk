@@ -534,13 +534,17 @@ source_vars () {
 
         # substitute example var values into the template.
         envsubst < "$temp_output" > "$tmp_template_path"
-        rm $temp_output
+        
+        # cat $temp_output
+        # cat $tmp_template_path
+        # rm $temp_output
 
         printf "\n...Exporting variables to environment\n"
         # # Now set environment variables to the actual values defined in the user's secrets-prod file
         for i in $(echo "$multiline")
         do
             [[ "$i" =~ ^#.*$ ]] && continue
+            print "i: $i"
             export $i
         done
 
