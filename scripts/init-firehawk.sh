@@ -166,8 +166,10 @@ else
 
   IFS=' ' # need to define whitespace seperator
 
-  if [[ "$TF_VAR_taint_list"=='""' ]]; then echo 'unset TF_VAR_taint_list'; unset TF_VAR_taint_list; fi
-  if [[ "$TF_VAR_taint_list"=="" ]]; then echo 'unset TF_VAR_taint_list'; unset TF_VAR_taint_list; fi
+  eval TF_VAR_taint_list=${TF_VAR_taint_list}
+  export TF_VAR_taint_list=${TF_VAR_taint_list}
+  # if [[ "$TF_VAR_taint_list"=='""' ]]; then echo 'unset TF_VAR_taint_list'; unset TF_VAR_taint_list; fi
+  # if [[ "$TF_VAR_taint_list"=="" ]]; then echo 'unset TF_VAR_taint_list'; unset TF_VAR_taint_list; fi
 
   if [ ! -z "$TF_VAR_taint_list" ]; then
     # Iterate the string variable using for loop
