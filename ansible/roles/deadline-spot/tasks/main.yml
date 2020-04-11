@@ -151,7 +151,7 @@
         ]
       ]}});'
   become: true
-  no_log: false
+  no_log: true
   with_items:
   - insert
   - update
