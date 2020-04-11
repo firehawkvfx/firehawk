@@ -166,8 +166,8 @@ else
   if [ ! -z "$TF_VAR_taint_list" ]; then
     # Iterate the string variable using for loop
     for item in $TF_VAR_taint_list; do
-      echo "...Will taint $item"
-      terraform taint "$item"; exit_test
+      echo "terraform taint $item"
+      terraform taint $item; exit_test
     done
   fi
 
