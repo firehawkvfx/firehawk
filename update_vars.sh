@@ -544,8 +544,11 @@ source_vars () {
         for i in $(echo "$multiline")
         do
             [[ "$i" =~ ^#.*$ ]] && continue
-            # echo "i: $i"
-            export $i
+            key=${i%=*}
+            value=${i#*=}
+            echo "$key : $value"
+            eval value=$value
+            export "$key=$value"
         done
 
         # # Determine your current public ip for security groups.
