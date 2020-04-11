@@ -182,6 +182,8 @@ function help {
 # --tier=dev
 # which each results in the same function tier() running.
 
+force=false
+
 parse_opts () {
     local OPTIND
     OPTIND=0
@@ -251,6 +253,9 @@ parse_opts () {
                         val="prod";
                         opt="${OPTARG}"
                         tier
+                        ;;
+                    force)
+                        force=true
                         ;;
                     vagrant)
                         val="vagrant"; OPTIND=$(( $OPTIND + 1 ))
@@ -393,7 +398,7 @@ source_vars () {
         fi
     fi
 
-    if [ "$var_modified_date" == "$file_modified_date" ] && [ ! -z "$var_modified_date" ] && [[ "$encrypt_mode" != "decrypt" ]] && [[ $encrypt_required == false ]]; then
+    if [ "$var_modified_date" == "$file_modified_date" ] && [ ! -z "$var_modified_date" ] && [[ "$encrypt_mode" != "decrypt" ]] && [[ $encrypt_required == false ]] && [[ $force == false ]]; then
         printf "\n${BLUE}Skipping source ${var_file_basename}: last time this var file was sourced the modified date matches the current file.  No need to source the file again.${NC}\n"
     else
         printf "\n${GREEN}Will source ${var_file_basename}. encrypt_mode = $encrypt_mode ${NC}\n"
@@ -534,10 +539,7 @@ source_vars () {
 
         # substitute example var values into the template.
         envsubst < "$temp_output" > "$tmp_template_path"
-        
-        # cat $temp_output
-        # cat $tmp_template_path
-        # rm $temp_output
+        rm $temp_output # remove temp so as to not accumulate results
 
         printf "\n...Exporting variables to environment\n"
         # # Now set environment variables to the actual values defined in the user's secrets-prod file
@@ -546,9 +548,9 @@ source_vars () {
             [[ "$i" =~ ^#.*$ ]] && continue
             key=${i%=*}
             value=${i#*=}
-            echo "$key : $value"
-            eval value=$value
-            export "$key=$value"
+            eval value=$value # This method should eval strings withhout quotes remaining in the var
+            # echo "$key : $value"
+            export "$key=$value" # Export the environment var
         done
 
         # # Determine your current public ip for security groups.
