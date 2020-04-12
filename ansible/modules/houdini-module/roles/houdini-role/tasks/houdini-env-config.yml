@@ -12,6 +12,7 @@
   failed_when: "diff.rc > 1"
   register: diff
   become: yes
+  connection: local
 
 - name: debug output
   debug: msg="{{ diff.stdout }}"
