@@ -342,9 +342,14 @@ variable "softnas_platinum_consumption_lower_v4_3_0" {
     }
 }
 
+locals {
+  base_ami = lookup(var.softnas_platinum_consumption_v4_3_0, var.aws_region)
+  ami   = var.softnas_use_custom_ami ? var.softnas_custom_ami : local.base_ami
+}
+
 resource "aws_instance" "softnas1" {
   count = var.softnas_storage ? 1 : 0
-  ami   = var.softnas_use_custom_ami ? var.softnas_custom_ami : lookup(var.softnas_platinum_consumption_v4_3_0, var.aws_region)
+  ami   = local.ami
 
   instance_type = var.instance_type[var.softnas_mode]
 
@@ -463,15 +468,16 @@ EOT
 resource "random_id" "ami_unique_name" {
   count = var.softnas_storage ? 1 : 0
   keepers = {
-    # Generate a new id each time we switch to a new instance id
+    # Generate a new id each time we switch to a new instance id, or the base_ami cahanges.  this doesn't mean a new ami is generated.
     ami_id = aws_instance.softnas1[0].id
+    base_ami = local.base_ami
   }
 
   byte_length = 8
 }
 
 variable "testing" {
-  default = false
+  default = true
 }
 
 # when testing, the local can be set to disable ami creation in a dev environment only - for faster iteration.
@@ -490,7 +496,8 @@ resource "null_resource" "create_ami" {
   ]
 
   triggers = {
-    instanceid = aws_instance.softnas1[0].id
+    # instanceid = aws_instance.softnas1[0].id
+    base_ami = local.base_ami
   }
 
   provisioner "remote-exec" {
@@ -512,11 +519,9 @@ resource "null_resource" "create_ami" {
       set -x
       cd /deployuser
       # ami creation is unnecesary since softnas ami update.  will be needed in future again if softnas updates slow down deployment.
-      # ansible-playbook -i "$TF_VAR_inventory" ansible/aws-ami.yaml -v --extra-vars "instance_id=${aws_instance.softnas1[0].id} ami_name=softnas_ami description=softnas1_${aws_instance.softnas1[0].id}_${random_id.ami_unique_name[0].hex}"
-      # aws ec2 start-instances --instance-ids ${aws_instance.softnas1[0].id}
-  
+      ansible-playbook -i "$TF_VAR_inventory" ansible/aws-ami.yaml -v --extra-vars "instance_id=${aws_instance.softnas1[0].id} ami_name=softnas_ami_${local.ami} base_ami=${local.ami} description=softnas1_${aws_instance.softnas1[0].id}_${random_id.ami_unique_name[0].hex}"
+      aws ec2 start-instances --instance-ids ${aws_instance.softnas1[0].id}
 EOT
-
   }
 }
 
