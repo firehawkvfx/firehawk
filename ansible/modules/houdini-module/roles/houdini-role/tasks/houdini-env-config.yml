@@ -1,11 +1,11 @@
-
 ### modify houdini environment vars
 
-- name: generate spot fleet config from template
+- name: Generate houdini.env config from template
   template:
     src: /secrets/dev/houdini{{ houdini_version_item.houdini_major_version }}/houdini_template.env
     dest: /secrets/dev/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env
   become: yes
+  connection: local
 
 - name: "Get difference from two houdini.env files"
   command: diff /home/deadlineuser/houdini18.0/houdini.env /secrets/dev/houdini18.0/houdini.env
