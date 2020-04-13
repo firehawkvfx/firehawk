@@ -28,6 +28,7 @@
     - openvpn
     - rng-tools
     - gpgv2
+    - jq
     state: present
   become: true
 

@@ -476,15 +476,16 @@ resource "random_id" "ami_unique_name" {
   byte_length = 8
 }
 
-variable "testing" {
-  default = true
+# variable "testing" {
+#   default = true
 }
 
 # when testing, the local can be set to disable ami creation in a dev environment only - for faster iteration.
 locals {
-  testing            = var.envtier == "prod" ? false : var.testing
-  create_ami_testing = local.testing ? false : true
-  create_ami         = var.softnas_use_custom_ami ? false : local.create_ami_testing
+  # testing            = var.envtier == "prod" ? false : var.testing
+  # create_ami_testing = local.testing ? false : true
+  # create_ami         = var.softnas_use_custom_ami ? false : local.create_ami_testing
+  create_ami         = true
 }
 
 # At this point in time, AMI's created by terraform are destroyed with terraform destroy.  we desire the ami to be persistant for faster future redeployment, so we create the ami with ansible instead.
