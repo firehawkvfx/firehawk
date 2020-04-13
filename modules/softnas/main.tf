@@ -383,12 +383,12 @@ data "aws_ami_ids" "base_ami_list" {
 
 locals {
   base_ami = lookup(var.softnas_platinum_consumption_v4_3_0, var.aws_region)  
-  base_ami_list = data.aws_ami_ids.base_ami_list.*.ids
+  base_ami_list = data.aws_ami_ids.base_ami_list.ids
   first_element = element( data.aws_ami_ids.base_ami_list.*.ids, 0)
-  mod_list = concat( local.first_element , list("") )
+  mod_list = concat( local.base_ami_list , list("") )
   aquired_ami      = "${element( local.mod_list , 0)}" # aquired ami will use the ami in the list if found, otherwise it will default to the original ami.
   use_aquired_ami = var.softnas_use_custom_ami && length(local.mod_list) > 1 ? true : false
-  ami = local.use_aquired_ami ? element( local.aquired_ami, 0 ) : local.base_ami
+  ami = local.use_aquired_ami ? local.aquired_ami : local.base_ami
 }
 
 output "base_ami" {
