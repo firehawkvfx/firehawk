@@ -62,13 +62,13 @@ parse_opts () {
                     regions)
                         echo "--regions ${!OPTIND}"
                         val="${!OPTIND}"
-                        declare -a regions=($($val)); OPTIND=$(( $OPTIND + 1 ))
+                        declare -a regions=($(echo "$val" | tr "\\n" " " | sed 's/"//g')); OPTIND=$(( $OPTIND + 1 ))
                         opt="${OPTARG}"
                         ;;
                     regions=*)
                         echo "regions= ${OPTARG#*=}"
                         val=${OPTARG#*=}
-                        declare -a regions=($($val))
+                        declare -a regions=($(echo "$val" | tr "\\n" " " | sed 's/"//g'))
                         opt=${OPTARG%=$val}
                         ;;
                     *)
