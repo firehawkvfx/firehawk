@@ -19,6 +19,10 @@ variable "softnas_mode" {
   default = "low"
 }
 
+variable "softnas_skip_update" {
+}
+
+
 variable "azs" {
   default = ["ap-southeast-2a", "ap-southeast-2b"]
 }

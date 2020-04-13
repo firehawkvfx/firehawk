@@ -338,6 +338,14 @@ if [ ! -f $TF_VAR_secrets_path/config-override-$TF_VAR_envtier ]; then
     cp "$TF_VAR_secrets_path/defaults-config-override-$TF_VAR_envtier" "$TF_VAR_secrets_path/config-override-$TF_VAR_envtier"
 fi
 
+current_version=$(cat $TF_VAR_secrets_path/config-override-$TF_VAR_envtier | sed -e '/.*defaults_config_overide_version.*/!d')
+target_version=$(cat $TF_VAR_secrets_path/defaults-config-override-$TF_VAR_envtier | sed -e '/.*defaults_config_overide_version.*/!d')
+
+if [[ "$target_version" != "$current_version" ]]; then
+    echo "...Version doesn't match config.  Initialising $TF_VAR_secrets_path/config-override-$TF_VAR_envtier"
+    cp "$TF_VAR_secrets_path/defaults-config-override-$TF_VAR_envtier" "$TF_VAR_secrets_path/config-override-$TF_VAR_envtier"
+fi
+
 source_vars () {
     local var_file=$1
     local encrypt_mode=$2
