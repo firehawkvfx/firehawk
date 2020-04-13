@@ -364,7 +364,7 @@ variable "softnas_platinum_consumption_lower_v4_3_0" {
 #   }
 # }
 
-# data "aws_ami_ids" "base_ami_list" {
+# data "aws_ami_ids" "prebuilt_ami_list" {
 #   owners = ["self"]
 
 #   tags = {
@@ -372,7 +372,7 @@ variable "softnas_platinum_consumption_lower_v4_3_0" {
 #   }
 # }
 
-data "aws_ami_ids" "base_ami_list" {
+data "aws_ami_ids" "prebuilt_ami_list" {
   owners = ["self"]
 
   filter {
@@ -383,9 +383,9 @@ data "aws_ami_ids" "base_ami_list" {
 
 locals {
   base_ami = lookup(var.softnas_platinum_consumption_v4_3_0, var.aws_region)  
-  base_ami_list = data.aws_ami_ids.base_ami_list.ids
-  first_element = element( data.aws_ami_ids.base_ami_list.*.ids, 0)
-  mod_list = concat( local.base_ami_list , list("") )
+  prebuilt_ami_list = data.aws_ami_ids.prebuilt_ami_list.ids
+  first_element = element( data.aws_ami_ids.prebuilt_ami_list.*.ids, 0)
+  mod_list = concat( local.prebuilt_ami_list , list("") )
   aquired_ami      = "${element( local.mod_list , 0)}" # aquired ami will use the ami in the list if found, otherwise it will default to the original ami.
   use_aquired_ami = var.softnas_use_custom_ami && length(local.mod_list) > 1 ? true : false
   ami = local.use_aquired_ami ? local.aquired_ami : local.base_ami
@@ -395,8 +395,8 @@ output "base_ami" {
   value = local.base_ami
 }
 
-output "base_ami_list" {
-  value = local.base_ami_list
+output "prebuilt_ami_list" {
+  value = local.prebuilt_ami_list
 }
 
 output "first_element" {
