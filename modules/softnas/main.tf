@@ -342,9 +342,24 @@ variable "softnas_platinum_consumption_lower_v4_3_0" {
     }
 }
 
+data "external" "base_ami" {
+  program = ["bash", ${var.firehawk_path}/scripts/aws-ami-regions.sh]
+
+  query = {
+    # arbitrary map from strings to strings, passed
+    # to the external program as the data query.
+    --filters = "Name=tag:base_ami,Values=ami-051ec062f31c60ee4"
+    --owners = "self"
+    --regions = "${var.aws_region}"
+    --map_name = "restore_softnas_ami"
+  }
+}
+
+
 locals {
   base_ami = lookup(var.softnas_platinum_consumption_v4_3_0, var.aws_region)
   ami   = var.softnas_use_custom_ami ? var.softnas_custom_ami : local.base_ami
+  aquired_ami      = "${data.external.base_ami.result}"
 }
 
 resource "aws_instance" "softnas1" {
@@ -448,7 +463,7 @@ resource "null_resource" "provision_softnas" {
       fi
       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init.yaml -v; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init-users.yaml -v --extra-vars "variable_host=role_softnas variable_user=$TF_VAR_softnas_ssh_user set_hostname=false"; exit_test
-      if [[ "$TF_VAR_sofnas_skip_update" == true ]]; then
+      if [[ "$TF_VAR_softnas_skip_update" == true ]]; then
         echo "...Skip softnas update"
       else
         ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-update.yaml -v; exit_test

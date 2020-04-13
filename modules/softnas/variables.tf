@@ -25,6 +25,8 @@ variable "public_subnets_cidr_blocks" {
   default = []
 }
 
+variable "firehawk_path" {}
+
 variable "public_domain" {
 }
 

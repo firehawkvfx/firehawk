@@ -224,7 +224,6 @@ variable "gateway_type" {
 
 # A single softnas instance that resides in a private subnet for high performance nfs storage
 variable "softnas_skip_update" {
-  default = false
 }
 
 variable "softnas_use_custom_ami" {
@@ -278,6 +277,8 @@ module "softnas" {
 
   #skipping os updates will allow faster rollout, but may be non functional
   skip_update = var.softnas_skip_update
+
+  firehawk_path = var.firehawk_path
 
   #sleep will stop instances to save cost during idle time.
   sleep = var.sleep
