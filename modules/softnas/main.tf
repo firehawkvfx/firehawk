@@ -364,10 +364,28 @@ data "aws_ami" "base_ami" {
   }
 }
 
+# data "aws_ami_ids" "base_ami_list" {
+#   owners = ["self"]
+
+#   tags = {
+#     base_ami = "ami-051ec062f31c60ee4"
+#   }
+# }
+
+data "aws_ami_ids" "base_ami_list" {
+  owners = ["self"]
+
+  filter {
+    name   = "tag:base_ami"
+    values = ["ami-051ec062f31c60ee4"]
+  }
+}
+
 locals {
-  base_ami = lookup(var.softnas_platinum_consumption_v4_3_0, var.aws_region)
-  ami   = var.softnas_use_custom_ami ? var.softnas_custom_ami : local.base_ami
-  aquired_ami      = "${data.aws_ami.base_ami.id}"
+  base_ami = lookup(var.softnas_platinum_consumption_v4_3_0, var.aws_region)  
+  # aquired_ami      = "${data.aws_ami.base_ami.id}"
+  aquired_ami      = element(data.aws_ami_ids.base_ami_list, list(base_ami)), 0) # aquired ami will use the ami in the list if found, otherwise it will default to the original ami.
+  ami   = var.softnas_use_custom_ami ? local.aquired_ami : local.base_ami
 }
 
 resource "aws_instance" "softnas1" {
