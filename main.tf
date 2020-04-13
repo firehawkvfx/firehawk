@@ -225,7 +225,7 @@ variable "gateway_type" {
 # A single softnas instance that resides in a private subnet for high performance nfs storage
 
 variable "softnas_use_custom_ami" {
-  default = false
+  default = true
 }
 
 variable "softnas_custom_ami" {

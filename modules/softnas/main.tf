@@ -383,10 +383,35 @@ data "aws_ami_ids" "base_ami_list" {
 
 locals {
   base_ami = lookup(var.softnas_platinum_consumption_v4_3_0, var.aws_region)  
+  base_ami_list = data.aws_ami_ids.base_ami_list.*.ids
   first_element = element( data.aws_ami_ids.base_ami_list.*.ids, 0)
   aquired_ami      = "${element( concat( local.first_element , list(local.base_ami) ) , 0)}" # aquired ami will use the ami in the list if found, otherwise it will default to the original ami.
-  ami   = var.softnas_use_custom_ami ? element(local.aquired_ami, 0) : local.base_ami
+  
+  use_aquired_ami = var.softnas_use_custom_ami && length(base_ami_list) > 0
+  ami   = use_aquired_ami ? local.first_element : local.base_ami
 }
+
+output "base_ami" {
+  value = local.base_ami
+}
+
+output "base_ami_list" {
+  value = local.base_ami_list
+}
+
+output "first_element" {
+  first_element = local.first_element
+}
+
+output "aquired_ami" {
+  aquired_ami = local.aquired_ami
+}
+
+output "ami" {
+  ami = local.ami
+}
+
+
 
 resource "aws_instance" "softnas1" {
   count = var.softnas_storage ? 1 : 0
@@ -523,10 +548,7 @@ resource "random_id" "ami_unique_name" {
 
 # when testing, the local can be set to disable ami creation in a dev environment only - for faster iteration.
 locals {
-  # testing            = var.envtier == "prod" ? false : var.testing
-  # create_ami_testing = local.testing ? false : true
-  # create_ami         = var.softnas_use_custom_ami ? false : local.create_ami_testing
-  create_ami         = true
+  create_ami         = ! use_aquired_ami # when using an aquired ami, we will not create another ami as this would replace it.
 }
 
 # At this point in time, AMI's created by terraform are destroyed with terraform destroy.  we desire the ami to be persistant for faster future redeployment, so we create the ami with ansible instead.
