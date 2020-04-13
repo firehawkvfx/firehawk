@@ -36,32 +36,26 @@ parse_opts () {
                     filters)
                         filters="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
                         opt="${OPTARG}"
-                        tier
                         ;;
                     filters=*)
                         filters=${OPTARG#*=}
                         opt=${OPTARG%=$val}
-                        tier
                         ;;
                     owners)
                         owners="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
                         opt="${OPTARG}"
-                        tier
                         ;;
                     owners=*)
                         owners=${OPTARG#*=}
                         opt=${OPTARG%=$val}
-                        tier
                         ;;
                     map_name)
                         map_name="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
                         opt="${OPTARG}"
-                        tier
                         ;;
                     map_name=*)
                         map_name=${OPTARG#*=}
                         opt=${OPTARG%=$val}
-                        tier
                         ;;
                     *)
                         if [ "$OPTERR" = 1 ] && [ "${optspec:0:1}" != ":" ]; then
