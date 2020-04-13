@@ -342,24 +342,32 @@ variable "softnas_platinum_consumption_lower_v4_3_0" {
     }
 }
 
-data "external" "base_ami" {
-  program = ["bash", "${var.firehawk_path}/scripts/aws-ami-regions.sh"]
+# data "external" "base_ami" {
+#   program = ["bash", "${var.firehawk_path}/scripts/aws-ami-regions.sh"]
 
-  query = {
-    # arbitrary map from strings to strings, passed
-    # to the external program as the data query.
-    --filters = "Name=tag:base_ami,Values=ami-051ec062f31c60ee4"
-    --owners = "self"
-    --regions = "${var.aws_region}"
-    --map_name = "restore_softnas_ami"
+#   query = {
+#     # arbitrary map from strings to strings, passed
+#     # to the external program as the data query.
+#     --filters = "Name=tag:base_ami,Values=ami-051ec062f31c60ee4"
+#     --owners = "self"
+#     --regions = "${var.aws_region}"
+#     --map_name = "restore_softnas_ami"
+#   }
+# }
+
+data "aws_ami" "base_ami" {
+  most_recent = true
+
+  owners = ["self"]
+  tags = {
+    base_ami = "ami-051ec062f31c60ee4"
   }
 }
-
 
 locals {
   base_ami = lookup(var.softnas_platinum_consumption_v4_3_0, var.aws_region)
   ami   = var.softnas_use_custom_ami ? var.softnas_custom_ami : local.base_ami
-  aquired_ami      = "${data.external.base_ami.result}"
+  aquired_ami      = "${data.aws_ami.base_ami.id}"
 }
 
 resource "aws_instance" "softnas1" {
