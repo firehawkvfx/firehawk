@@ -60,11 +60,11 @@ parse_opts () {
                         opt=${OPTARG%=$val}
                         ;;
                     regions)
-                        declare -a regions="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+                        declare -a regions=("${!OPTIND}"); OPTIND=$(( $OPTIND + 1 ))
                         opt="${OPTARG}"
                         ;;
                     regions=*)
-                        declare -a regions=${OPTARG#*=}
+                        declare -a regions=(${OPTARG#*=})
                         opt=${OPTARG%=$val}
                         ;;
                     *)
