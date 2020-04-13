@@ -224,8 +224,8 @@ variable "gateway_type" {
 
 # A single softnas instance that resides in a private subnet for high performance nfs storage
 
-variable "softnas_use_custom_ami" {
-  default = true
+variable "softnas_use_prebuilt_ami" {
+  default = false
 }
 
 variable "softnas_custom_ami" {
@@ -239,7 +239,7 @@ module "softnas" {
 
   envtier = var.envtier
 
-  softnas_use_custom_ami = var.softnas_use_custom_ami
+  softnas_use_prebuilt_ami = var.softnas_use_prebuilt_ami
   softnas_custom_ami     = var.softnas_custom_ami
 
   #softnas_role = "${module.softnas_role.softnas_role_name}"

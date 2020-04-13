@@ -292,7 +292,7 @@ resource "aws_network_interface" "nas1eth1" {
   }
 }
 
-variable "softnas_use_custom_ami" {
+variable "softnas_use_prebuilt_ami" {
 }
 
 variable "softnas_custom_ami" {
@@ -387,7 +387,7 @@ locals {
   first_element = element( data.aws_ami_ids.prebuilt_ami_list.*.ids, 0)
   mod_list = concat( local.prebuilt_ami_list , list("") )
   aquired_ami      = "${element( local.mod_list , 0)}" # aquired ami will use the ami in the list if found, otherwise it will default to the original ami.
-  use_aquired_ami = var.softnas_use_custom_ami && length(local.mod_list) > 1 ? true : false
+  use_aquired_ami = var.softnas_use_prebuilt_ami && length(local.mod_list) > 1 ? true : false
   ami = local.use_aquired_ami ? local.aquired_ami : local.base_ami
 }
 
@@ -530,6 +530,7 @@ resource "null_resource" "provision_softnas" {
       # cli is only needed if sync operations with s3 will be run on this instance.
       # #ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli.yaml -v --extra-vars "variable_user=ec2-user variable_host=role_softnas"; exit_test
       # #ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2.yaml -v --extra-vars "variable_user=ec2-user variable_host=role_softnas"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init.yaml -v; exit_test
   
 EOT
 
@@ -715,6 +716,7 @@ EOT
       # if btier.json exists in /secrets/${var.envtier}/ebs-volumes/ then the tiers will be imported.
       # ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-backup-btier.yaml -v --extra-vars "restore=true"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk-update-exports.yaml -v --extra-vars "instance_id=${aws_instance.softnas1[0].id}"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init.yaml -v; exit_test
   
 EOT
 
@@ -821,6 +823,7 @@ resource "null_resource" "attach_local_mounts_after_start" {
         # now mount current volumes
         ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
       fi
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init.yaml -v; exit_test
 EOT
   }
 }
