@@ -5,19 +5,18 @@
 
 # You can use the output to define an ami map for terrform in json format.
 # softnas high
-# ./scripts/aws-ami-regions.sh "Name=description,Values=SoftNAS Cloud Platinum - Consumption - 4.3.0" 679593333241 "softnas_platinum_consumption_v4_3_0" 2>&1 | tee /deployuser/modules/softnas/ami_softnas_platinum_consumption_v4_3_0.auto.tfvars.json
+# ./scripts/aws-ami-regions.sh --filters "Name=description,Values=SoftNAS Cloud Platinum - Consumption - 4.3.0" --owners 679593333241 --map_name "softnas_platinum_consumption_v4_3_0" 2>&1 | tee /deployuser/modules/softnas/ami_softnas_platinum_consumption_v4_3_0.auto.tfvars.json
 # softnas low
-# ./scripts/aws-ami-regions.sh "Name=description,Values=SoftNAS Cloud Platinum - Consumption (For Lower Compute Requirements) - 4.3.0" "679593333241" "softnas_platinum_consumption_lower_v4_3_0" 2>&1 | tee /deployuser/modules/softnas/ami_softnas_platinum_consumption_lower_v4_3_0.auto.tfvars.json
+# ./scripts/aws-ami-regions.sh --filters "Name=description,Values=SoftNAS Cloud Platinum - Consumption (For Lower Compute Requirements) - 4.3.0" --owners "679593333241" --map_name "softnas_platinum_consumption_lower_v4_3_0" 2>&1 | tee /deployuser/modules/softnas/ami_softnas_platinum_consumption_lower_v4_3_0.auto.tfvars.json
 # open vpn - check the ami is correct here.
-# ./scripts/aws-ami-regions.sh "Name=name,Values=OpenVPN Access Server 2.7.5-fe8020db-5343-4c43-9e65-5ed4a825c931*" 679593333241 "openvpn_v2_7_5" 2>&1 | tee /deployuser/modules/vpn/ami_openvpn_access_server_v2_7_5.auto.tfvars.json
+# ./scripts/aws-ami-regions.sh --filters "Name=name,Values=OpenVPN Access Server 2.7.5-fe8020db-5343-4c43-9e65-5ed4a825c931*" --owners 679593333241 --map_name "openvpn_v2_7_5" 2>&1 | tee /deployuser/modules/vpn/ami_openvpn_access_server_v2_7_5.auto.tfvars.json
 # centos 7
 # render node
-# ./scripts/aws-ami-regions.sh "Name=name,Values=CentOS Linux 7 x86_64 HVM EBS ENA 1901_01-b7ee8a69-ee97-4a49-9e68-afaee216db2e*" 679593333241 "centos_v7" 2>&1 | tee /deployuser/modules/node_centos/ami_centos_v7.auto.tfvars.json
+# ./scripts/aws-ami-regions.sh --filters "Name=name,Values=CentOS Linux 7 x86_64 HVM EBS ENA 1901_01-b7ee8a69-ee97-4a49-9e68-afaee216db2e*" --owners 679593333241 --map_name "centos_v7" 2>&1 | tee /deployuser/modules/node_centos/ami_centos_v7.auto.tfvars.json
 # bastion
-# ./scripts/aws-ami-regions.sh "Name=name,Values=CentOS Linux 7 x86_64 HVM EBS ENA 1901_01-b7ee8a69-ee97-4a49-9e68-afaee216db2e*" 679593333241 "centos_v7" 2>&1 | tee /deployuser/modules/bastion/ami_centos_v7.auto.tfvars.json
-# ./scripts/aws-ami-regions.sh "Name=tag:base_ami,Values=ami-051ec062f31c60ee4" self "restore_softnas_ami"
-# aws ec2 describe-images --owners self --filters "Name=tag:base_ami,Values=ami-051ec062f31c60ee4" --query 'Images[*].{ID:ImageId}'
-
+# ./scripts/aws-ami-regions.sh --filters "Name=name,Values=CentOS Linux 7 x86_64 HVM EBS ENA 1901_01-b7ee8a69-ee97-4a49-9e68-afaee216db2e*" --owners 679593333241 --map_name "centos_v7" 2>&1 | tee /deployuser/modules/bastion/ami_centos_v7.auto.tfvars.json
+# Query my own amis based on a tag
+# ./scripts/aws-ami-regions.sh --filters "Name=tag:base_ami,Values=ami-051ec062f31c60ee4" --owners self --map_name "restore_softnas_ami" --regions="$TF_VAR_aws_region"
 
 if [ -z "$1" ] ; then
     1>&2 echo '"Provide a filter as a second argument, eg "Name=description,Values=SoftNAS Cloud Platinum - Consumption - 4.3.0"'
