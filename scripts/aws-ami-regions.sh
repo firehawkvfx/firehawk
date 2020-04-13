@@ -89,8 +89,9 @@ parse_opts "$@"
 # filters="$1"
 # owners="$2"
 # map_name="$3"
-if [ -z "$regions" ] ; then
-    # searching all regions
+# if [ -z "$regions" ] ; then
+if [ ${#regions[@]} -eq 0 ]; then
+    echo 'searching all regions'
     declare -a regions=($(aws ec2 describe-regions --output json | jq '.Regions[].RegionName' | tr "\\n" " " | sed 's/"//g'))
 fi
 printf '{\n'
