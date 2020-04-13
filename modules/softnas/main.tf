@@ -343,7 +343,7 @@ variable "softnas_platinum_consumption_lower_v4_3_0" {
 }
 
 data "external" "base_ami" {
-  program = ["bash", ${var.firehawk_path}/scripts/aws-ami-regions.sh]
+  program = ["bash", "${var.firehawk_path}/scripts/aws-ami-regions.sh"]
 
   query = {
     # arbitrary map from strings to strings, passed
