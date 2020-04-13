@@ -28,7 +28,7 @@
     wait: True
   become_user: deployuser
 
-- name: Creating the AMI from of the instance
+- name: Creating the AMI from the instance
   ec2_ami:
     instance_id: "{{ instance_id }}"
     wait: yes
