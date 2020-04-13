@@ -26,7 +26,7 @@ fi
 
 optspec=":hv-:"
 
-declare -a regions=()
+# declare -a regions=()
 
 parse_opts () {
     local OPTIND
@@ -62,13 +62,13 @@ parse_opts () {
                     regions)
                         echo "--regions ${!OPTIND}"
                         val="${!OPTIND}"
-                        declare -a regions=($(echo $val)); OPTIND=$(( $OPTIND + 1 ))
+                        declare -a regions=($($val)); OPTIND=$(( $OPTIND + 1 ))
                         opt="${OPTARG}"
                         ;;
                     regions=*)
                         echo "regions= ${OPTARG#*=}"
                         val=${OPTARG#*=}
-                        declare -a regions=($(echo $val))
+                        declare -a regions=($($val))
                         opt=${OPTARG%=$val}
                         ;;
                     *)
