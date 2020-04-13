@@ -172,13 +172,17 @@ else
   # if [[ "$TF_VAR_taint_single"=="" ]]; then echo 'unset TF_VAR_taint_single'; unset TF_VAR_taint_single; fi
 
   if [ ! -z "$TF_VAR_taint_single" ]; then
+    terraform state list
     # Iterate the string variable using for loop
     # for item in "${TF_VAR_taint_single[@]}"; do echo "terraform taint $item"; done
     for item in $TF_VAR_taint_single; do echo "terraform taint $item"; done
     # for item in "${TF_VAR_taint_single[@]}"; do
     for item in $TF_VAR_taint_single; do
       set -x
-      terraform taint $item; exit_test
+      if terraform state list | grep -q "$item"; then
+        echo "Resource exists, will taint."
+        terraform taint $item; exit_test
+      fi
     done
   fi
 
