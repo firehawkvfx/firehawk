@@ -552,7 +552,7 @@ resource "random_id" "ami_unique_name" {
 
 # when testing, the local can be set to disable ami creation in a dev environment only - for faster iteration.
 locals {
-  create_ami         = use_aquired_ami ? false : true # when using an aquired ami, we will not create another ami as this would replace it.
+  create_ami         = local.use_aquired_ami ? false : true # when using an aquired ami, we will not create another ami as this would replace it.
 }
 
 # At this point in time, AMI's created by terraform are destroyed with terraform destroy.  we desire the ami to be persistant for faster future redeployment, so we create the ami with ansible instead.
