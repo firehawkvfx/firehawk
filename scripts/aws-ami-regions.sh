@@ -15,14 +15,78 @@
 # ./scripts/aws-ami-regions.sh "Name=name,Values=CentOS Linux 7 x86_64 HVM EBS ENA 1901_01-b7ee8a69-ee97-4a49-9e68-afaee216db2e*" 679593333241 "centos_v7" 2>&1 | tee /deployuser/modules/node_centos/ami_centos_v7.auto.tfvars.json
 # bastion
 # ./scripts/aws-ami-regions.sh "Name=name,Values=CentOS Linux 7 x86_64 HVM EBS ENA 1901_01-b7ee8a69-ee97-4a49-9e68-afaee216db2e*" 679593333241 "centos_v7" 2>&1 | tee /deployuser/modules/bastion/ami_centos_v7.auto.tfvars.json
+# ./scripts/aws-ami-regions.sh "Name=tag:base_ami,Values=ami-051ec062f31c60ee4" self "restore_softnas_ami"
+# aws ec2 describe-images --owners self --filters "Name=tag:base_ami,Values=ami-051ec062f31c60ee4" --query 'Images[*].{ID:ImageId}'
+
+
 if [ -z "$1" ] ; then
     echo '"Provide a filter as a second argument, eg "Name=description,Values=SoftNAS Cloud Platinum - Consumption - 4.3.0"'
     exit 1
 fi
 
-filters="$1"
-owners="$2"
-map_name="$3"
+optspec=":hv-:"
+
+parse_opts () {
+    local OPTIND
+    OPTIND=0
+    while getopts "$optspec" optchar; do
+        case "${optchar}" in
+            -)
+                case "${OPTARG}" in
+                    filters)
+                        filters="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+                        opt="${OPTARG}"
+                        tier
+                        ;;
+                    filters=*)
+                        filters=${OPTARG#*=}
+                        opt=${OPTARG%=$val}
+                        tier
+                        ;;
+                    owners)
+                        owners="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+                        opt="${OPTARG}"
+                        tier
+                        ;;
+                    owners=*)
+                        owners=${OPTARG#*=}
+                        opt=${OPTARG%=$val}
+                        tier
+                        ;;
+                    map_name)
+                        map_name="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+                        opt="${OPTARG}"
+                        tier
+                        ;;
+                    map_name=*)
+                        map_name=${OPTARG#*=}
+                        opt=${OPTARG%=$val}
+                        tier
+                        ;;
+                    *)
+                        if [ "$OPTERR" = 1 ] && [ "${optspec:0:1}" != ":" ]; then
+                            echo "Unknown option --${OPTARG}" >&2
+                        fi
+                        ;;
+                esac;;
+            v) # verbosity is handled prior since its a dependency for this block
+                ;;
+            h)
+                help
+                ;;
+            *)
+                if [ "$OPTERR" != 1 ] || [ "${optspec:0:1}" = ":" ]; then
+                    echo "Non-option argument: '-${OPTARG}'" >&2
+                fi
+                ;;
+        esac
+    done
+}
+parse_opts "$@"
+
+# filters="$1"
+# owners="$2"
+# map_name="$3"
 
 declare -a regions=($(aws ec2 describe-regions --output json | jq '.Regions[].RegionName' | tr "\\n" " " | sed 's/"//g'))
 printf '{\n'
