@@ -20,7 +20,7 @@
 
 
 if [ -z "$1" ] ; then
-    echo '"Provide a filter as a second argument, eg "Name=description,Values=SoftNAS Cloud Platinum - Consumption - 4.3.0"'
+    1>&2 echo '"Provide a filter as a second argument, eg "Name=description,Values=SoftNAS Cloud Platinum - Consumption - 4.3.0"'
     exit 1
 fi
 
@@ -57,6 +57,14 @@ parse_opts () {
                         map_name=${OPTARG#*=}
                         opt=${OPTARG%=$val}
                         ;;
+                    regions)
+                        declare -a regions="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+                        opt="${OPTARG}"
+                        ;;
+                    regions=*)
+                        declare -a regions=${OPTARG#*=}
+                        opt=${OPTARG%=$val}
+                        ;;
                     *)
                         if [ "$OPTERR" = 1 ] && [ "${optspec:0:1}" != ":" ]; then
                             echo "Unknown option --${OPTARG}" >&2
@@ -81,8 +89,10 @@ parse_opts "$@"
 # filters="$1"
 # owners="$2"
 # map_name="$3"
-
-declare -a regions=($(aws ec2 describe-regions --output json | jq '.Regions[].RegionName' | tr "\\n" " " | sed 's/"//g'))
+if [ -z "$regions" ] ; then
+    # searching all regions
+    declare -a regions=($(aws ec2 describe-regions --output json | jq '.Regions[].RegionName' | tr "\\n" " " | sed 's/"//g'))
+fi
 printf '{\n'
 printf "    \"$map_name\": {\n"
 first=true
