@@ -62,13 +62,13 @@ parse_opts () {
                     regions)
                         echo "--regions ${!OPTIND}"
                         val="${!OPTIND}"
-                        declare -a regions=($(echo "$val" | tr "\\n" " " | sed 's/"//g')); OPTIND=$(( $OPTIND + 1 ))
+                        regions=($(echo "$val" | tr "\\n" " " | sed 's/"//g')); OPTIND=$(( $OPTIND + 1 ))
                         opt="${OPTARG}"
                         ;;
                     regions=*)
                         echo "regions= ${OPTARG#*=}"
                         val=${OPTARG#*=}
-                        declare -a regions=($(echo "$val" | tr "\\n" " " | sed 's/"//g'))
+                        regions=($(echo "$val" | tr "\\n" " " | sed 's/"//g'))
                         opt=${OPTARG%=$val}
                         ;;
                     *)
@@ -100,7 +100,7 @@ echo "regions: $regions"
 echo "length: ${#regions[@]}"
 if [ ${#regions[@]} -eq 0 ]; then
     echo 'searching all regions'
-    declare -a regions=($(aws ec2 describe-regions --output json | jq '.Regions[].RegionName' | tr "\\n" " " | sed 's/"//g'))
+    regions=($(aws ec2 describe-regions --output json | jq '.Regions[].RegionName' | tr "\\n" " " | sed 's/"//g'))
 fi
 printf '{\n'
 printf "    \"$map_name\": {\n"
