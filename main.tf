@@ -432,6 +432,10 @@ output "snapshot_id" {
   value = module.node.snapshot_id
 }
 
+output "base_ami_list" {
+  value = module.softnas.base_ami_list
+}
+
 output "node_ami_id" {
   value = module.node.ami_id
 }
