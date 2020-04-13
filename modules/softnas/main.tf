@@ -478,7 +478,7 @@ resource "random_id" "ami_unique_name" {
 
 # variable "testing" {
 #   default = true
-}
+# }
 
 # when testing, the local can be set to disable ami creation in a dev environment only - for faster iteration.
 locals {
