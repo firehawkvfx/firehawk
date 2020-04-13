@@ -400,15 +400,19 @@ output "base_ami_list" {
 }
 
 output "first_element" {
-  first_element = local.first_element
+  value = local.first_element
 }
 
 output "aquired_ami" {
-  aquired_ami = local.aquired_ami
+  value = local.aquired_ami
+}
+
+output "use_aquired_ami" {
+  value = local.use_aquired_ami
 }
 
 output "ami" {
-  ami = local.ami
+  value = local.ami
 }
 
 
