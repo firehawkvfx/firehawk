@@ -39,6 +39,8 @@ variable "node_centos_volume_type" {
 variable "route_zone_id" {
 }
 
+variable "firehawk_path" {}
+
 variable "public_domain" {
 }
 
