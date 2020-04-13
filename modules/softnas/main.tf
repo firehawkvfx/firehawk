@@ -387,7 +387,7 @@ locals {
   first_element = element( data.aws_ami_ids.base_ami_list.*.ids, 0)
   aquired_ami      = "${element( concat( local.first_element , list(local.base_ami) ) , 0)}" # aquired ami will use the ami in the list if found, otherwise it will default to the original ami.
   
-  use_aquired_ami = var.softnas_use_custom_ami && length(base_ami_list) > 0
+  use_aquired_ami = var.softnas_use_custom_ami && length(base_ami_list) > 0 ? true : false
   ami   = use_aquired_ami ? local.first_element : local.base_ami
 }
 
