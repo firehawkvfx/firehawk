@@ -315,20 +315,24 @@ data "aws_ami_ids" "softnas_platinum_consumption_lower" {
   }
 }
 
-variable "softnas_platinum_consumption_map" {
-  type=map(string)
-  default={
-        "softnas_platinum_consumption_higher":"${element( data.aws_ami_ids.softnas_platinum_consumption_higher.ids, 0 )}",
-        "softnas_platinum_consumption_lower":"${element( data.aws_ami_ids.softnas_platinum_consumption_lower.ids, 0 )}"
-    }
+locals {
+  softnas_platinum_consumption_map = zipmap( ["softnas_platinum_consumption_higher","softnas_platinum_consumption_lower"] , ["${element( data.aws_ami_ids.softnas_platinum_consumption_higher.ids, 0 )}", "${element( data.aws_ami_ids.softnas_platinum_consumption_lower.ids, 0 )}"] )
 }
+
+# variable "softnas_platinum_consumption_map" {
+#   type=map(string)
+#   default={
+#         "softnas_platinum_consumption_higher":"${element( data.aws_ami_ids.softnas_platinum_consumption_higher.ids, 0 )}",
+#         "softnas_platinum_consumption_lower":"${element( data.aws_ami_ids.softnas_platinum_consumption_lower.ids, 0 )}"
+#     }
+# }
 
 variable "softnas_performance" {
   default = "softnas_platinum_consumption_higher"
 }
 
 locals { # select the found ami to use based on the map lookup
-  base_ami = lookup(var.softnas_platinum_consumption_map, var.softnas_performance)
+  base_ami = lookup(local.softnas_platinum_consumption_map, var.softnas_performance)
 }
 
 data "aws_ami_ids" "prebuilt_softnas_ami_list" { # search for a prebuilt tagged ami with the same base image.  if there is a match, it can be used instead, allowing us to skip updates.
