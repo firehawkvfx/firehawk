@@ -465,8 +465,13 @@ USERDATA
 
 # When using ssd tiering, you must manually create the ebs volumes and specify the ebs id's in your secrets.  Then they can be locally restored automatically and attached to the instance.
 
+locals {
+  provision_softnas         = local.use_aquired_ami ? false : true # when using an aquired ami, we will not create another ami as this would replace it.
+}
+
+
 resource "null_resource" "provision_softnas" {
-  count      = var.softnas_storage ? 1 : 0
+  count      = local.provision_softnas && var.softnas_storage ? 1 : 0
   depends_on = [aws_instance.softnas1]
 
   triggers = {
@@ -517,7 +522,6 @@ resource "null_resource" "provision_softnas" {
         ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=workstation1 variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
       fi
       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init.yaml -v; exit_test
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init.yaml -v; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init-users.yaml -v --extra-vars "variable_host=role_softnas variable_user=$TF_VAR_softnas_ssh_user set_hostname=false"; exit_test
       if [[ "$TF_VAR_softnas_skip_update" == true ]]; then
         echo "...Skip softnas update"
@@ -525,14 +529,12 @@ resource "null_resource" "provision_softnas" {
         ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-update.yaml -v; exit_test
         echo "Finished Update"
       fi
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init.yaml -v; exit_test
       # hotfix script to speed up instance start and shutdown
       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-install-acpid.yaml -v; exit_test
 
       # cli is only needed if sync operations with s3 will be run on this instance.
       # #ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli.yaml -v --extra-vars "variable_user=ec2-user variable_host=role_softnas"; exit_test
       # #ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2.yaml -v --extra-vars "variable_user=ec2-user variable_host=role_softnas"; exit_test
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init.yaml -v; exit_test
   
 EOT
 
@@ -718,7 +720,6 @@ EOT
       # if btier.json exists in /secrets/${var.envtier}/ebs-volumes/ then the tiers will be imported.
       # ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-backup-btier.yaml -v --extra-vars "restore=true"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk-update-exports.yaml -v --extra-vars "instance_id=${aws_instance.softnas1[0].id}"; exit_test
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init.yaml -v; exit_test
   
 EOT
 
@@ -825,7 +826,6 @@ resource "null_resource" "attach_local_mounts_after_start" {
         # now mount current volumes
         ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
       fi
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init.yaml -v; exit_test
 EOT
   }
 }
