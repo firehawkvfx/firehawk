@@ -222,14 +222,8 @@ variable "gateway_type" {
   default = "pcoip"
 }
 
-
-
 variable "allow_prebuilt_softnas_ami" { # after an initial deployment a base AMI and any software updates are run, a prebuilt ami is created.  Once it exists, it will be used in future deployments until the base ami is altered.
   default = true
-}
-
-variable "softnas_custom_ami" {
-  default = 123456789
 }
 
 # A single softnas instance that resides in a private subnet for high performance nfs storage
@@ -242,7 +236,6 @@ module "softnas" {
   envtier = var.envtier
 
   allow_prebuilt_softnas_ami = var.allow_prebuilt_softnas_ami
-  softnas_custom_ami     = var.softnas_custom_ami
 
   #softnas_role = "${module.softnas_role.softnas_role_name}"
 

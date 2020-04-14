@@ -295,10 +295,6 @@ resource "aws_network_interface" "nas1eth1" {
 variable "allow_prebuilt_softnas_ami" {
 }
 
-variable "softnas_custom_ami" {
-}
-
-
 data "aws_ami_ids" "softnas_platinum_consumption_higher" {
   owners = ["679593333241"] # the softnas account id
   filter {
@@ -315,20 +311,14 @@ data "aws_ami_ids" "softnas_platinum_consumption_lower" {
   }
 }
 
-locals {
-  softnas_platinum_consumption_map = zipmap( ["softnas_platinum_consumption_higher","softnas_platinum_consumption_lower"] , ["${element( data.aws_ami_ids.softnas_platinum_consumption_higher.ids, 0 )}", "${element( data.aws_ami_ids.softnas_platinum_consumption_lower.ids, 0 )}"] )
-}
-
-# variable "softnas_platinum_consumption_map" {
-#   type=map(string)
-#   default={
-#         "softnas_platinum_consumption_higher":"${element( data.aws_ami_ids.softnas_platinum_consumption_higher.ids, 0 )}",
-#         "softnas_platinum_consumption_lower":"${element( data.aws_ami_ids.softnas_platinum_consumption_lower.ids, 0 )}"
-#     }
-# }
-
 variable "softnas_performance" {
   default = "softnas_platinum_consumption_higher"
+}
+
+locals {
+  keys = ["softnas_platinum_consumption_higher","softnas_platinum_consumption_lower"]
+  values = ["${element( data.aws_ami_ids.softnas_platinum_consumption_higher.ids, 0 )}", "${element( data.aws_ami_ids.softnas_platinum_consumption_lower.ids, 0 )}"]
+  softnas_platinum_consumption_map = zipmap( local.keys , local.values )
 }
 
 locals { # select the found ami to use based on the map lookup
