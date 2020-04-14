@@ -298,6 +298,16 @@ variable "softnas_use_prebuilt_ami" {
 variable "softnas_custom_ami" {
 }
 
+
+data "aws_ami_ids" "softnas_platinum_consumption" {
+  owners = ["679593333241"] # the softnas account id
+
+  filter {
+    name   = "description"
+    values = ["SoftNAS Cloud Platinum - Consumption - 4.3.0"]
+  }
+}
+
 variable "softnas_platinum_consumption_v4_3_0" {
   type=map(string)
   default={
@@ -372,17 +382,21 @@ variable "softnas_platinum_consumption_lower_v4_3_0" {
 #   }
 # }
 
-data "aws_ami_ids" "prebuilt_ami_list" {
+locals {
+  base_ami = element( data.aws_ami_ids.softnas_platinum_consumption.ids, 0 )
+}
+
+data "aws_ami_ids" "prebuilt_ami_list" { # search for a prebuilt tagged ami with the same base image.  if there is a match, it can be used instead, allowing us to skip updates.
   owners = ["self"]
 
   filter {
     name   = "tag:base_ami"
-    values = ["ami-051ec062f31c60ee4"]
+    values = ["${local.base_ami}"]
   }
 }
 
 locals {
-  base_ami = lookup(var.softnas_platinum_consumption_v4_3_0, var.aws_region)  
+  # base_ami = lookup(var.softnas_platinum_consumption_v4_3_0, var.aws_region)
   prebuilt_ami_list = data.aws_ami_ids.prebuilt_ami_list.ids
   first_element = element( data.aws_ami_ids.prebuilt_ami_list.*.ids, 0)
   mod_list = concat( local.prebuilt_ami_list , list("") )
