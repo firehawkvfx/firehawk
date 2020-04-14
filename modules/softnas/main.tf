@@ -292,103 +292,47 @@ resource "aws_network_interface" "nas1eth1" {
   }
 }
 
-variable "softnas_use_prebuilt_ami" {
+variable "allow_prebuilt_softnas_ami" {
 }
 
 variable "softnas_custom_ami" {
 }
 
 
-data "aws_ami_ids" "softnas_platinum_consumption" {
+data "aws_ami_ids" "softnas_platinum_consumption_higher" {
   owners = ["679593333241"] # the softnas account id
-
   filter {
     name   = "description"
     values = ["SoftNAS Cloud Platinum - Consumption - 4.3.0"]
   }
 }
 
-variable "softnas_platinum_consumption_v4_3_0" {
+data "aws_ami_ids" "softnas_platinum_consumption_lower" {
+  owners = ["679593333241"] # the softnas account id
+  filter {
+    name   = "description"
+    values = ["SoftNAS Cloud Platinum - Consumption (For Lower Compute Requirements) - 4.3.0"]
+  }
+}
+
+variable "softnas_platinum_consumption_map" {
   type=map(string)
   default={
-        "eu-north-1":"ami-86c64cf8",
-        "ap-south-1":"ami-0e4539f02a02f1ab4",
-        "eu-west-3":"ami-009b7f9c7dfeb92f3",
-        "eu-west-2":"ami-0ef252a1d4374265c",
-        "eu-west-1":"ami-04bd346142120053e",
-        "ap-northeast-2":"ami-018944e4872077a59",
-        "ap-northeast-1":"ami-00247989b503ef530",
-        "sa-east-1":"ami-04ba46ed92145a857",
-        "ca-central-1":"ami-041ead7c675208173",
-        "ap-southeast-1":"ami-0a7812f2df1da2ead",
-        "ap-southeast-2":"ami-051ec062f31c60ee4",
-        "eu-central-1":"ami-0364719d47383b7e3",
-        "us-east-1":"ami-09ab8f3babc9990de",
-        "us-east-2":"ami-08b218079ece9cea7",
-        "us-west-1":"ami-014f7e83a442f2f6d",
-        "us-west-2":"ami-0aec3fd870f36b7b4"
+        "softnas_platinum_consumption_higher":"${element( data.aws_ami_ids.softnas_platinum_consumption_higher.ids, 0 )}",
+        "softnas_platinum_consumption_lower":"${element( data.aws_ami_ids.softnas_platinum_consumption_lower.ids, 0 )}"
     }
 }
 
-variable "softnas_platinum_consumption_lower_v4_3_0" {
-  type=map(string)
-  default={
-        "eu-north-1": "ami-89c64cf7",
-        "ap-south-1": "ami-0bc2e596cebbf1a54",
-        "eu-west-3": "ami-08173ae3a53edfb35",
-        "eu-west-2": "ami-059330a53138116d9",
-        "eu-west-1": "ami-0b88d1ce09cdc47c7",
-        "ap-northeast-2": "ami-0843a4f279aec8e9f",
-        "ap-northeast-1": "ami-08cbcdfe14bf34ae2",
-        "sa-east-1": "ami-0f6e9baa7910efc60",
-        "ca-central-1": "ami-06f1791b8326fabfd",
-        "ap-southeast-1": "ami-0418cdeeb85ad6644",
-        "ap-southeast-2": "ami-048287b6b9f28c85c",
-        "eu-central-1": "ami-0d32d715591ae2bbb",
-        "us-east-1": "ami-0513dcb022fc5e3a7",
-        "us-east-2": "ami-0aa19b48e665bce28",
-        "us-west-1": "ami-09edaba2d8cc884ac",
-        "us-west-2": "ami-0280326becc413cb5"
-    }
+variable "softnas_performance" {
+  default = "softnas_platinum_consumption_higher"
 }
 
-# data "external" "base_ami" {
-#   program = ["bash", "${var.firehawk_path}/scripts/aws-ami-regions.sh"]
-
-#   query = {
-#     # arbitrary map from strings to strings, passed
-#     # to the external program as the data query.
-#     --filters = "Name=tag:base_ami,Values=ami-051ec062f31c60ee4"
-#     --owners = "self"
-#     --regions = "${var.aws_region}"
-#     --map_name = "restore_softnas_ami"
-#   }
-# }
-
-# data "aws_ami" "base_ami" {
-#   most_recent = true
-
-#   owners = ["self"]
-#   tags = {
-#     base_ami = "ami-051ec062f31c60ee4"
-#   }
-# }
-
-# data "aws_ami_ids" "prebuilt_ami_list" {
-#   owners = ["self"]
-
-#   tags = {
-#     base_ami = "ami-051ec062f31c60ee4"
-#   }
-# }
-
-locals {
-  base_ami = element( data.aws_ami_ids.softnas_platinum_consumption.ids, 0 )
+locals { # select the found ami to use based on the map lookup
+  base_ami = lookup(var.softnas_platinum_consumption_map, var.softnas_performance)
 }
 
-data "aws_ami_ids" "prebuilt_ami_list" { # search for a prebuilt tagged ami with the same base image.  if there is a match, it can be used instead, allowing us to skip updates.
+data "aws_ami_ids" "prebuilt_softnas_ami_list" { # search for a prebuilt tagged ami with the same base image.  if there is a match, it can be used instead, allowing us to skip updates.
   owners = ["self"]
-
   filter {
     name   = "tag:base_ami"
     values = ["${local.base_ami}"]
@@ -396,21 +340,20 @@ data "aws_ami_ids" "prebuilt_ami_list" { # search for a prebuilt tagged ami with
 }
 
 locals {
-  # base_ami = lookup(var.softnas_platinum_consumption_v4_3_0, var.aws_region)
-  prebuilt_ami_list = data.aws_ami_ids.prebuilt_ami_list.ids
-  first_element = element( data.aws_ami_ids.prebuilt_ami_list.*.ids, 0)
-  mod_list = concat( local.prebuilt_ami_list , list("") )
+  prebuilt_softnas_ami_list = data.aws_ami_ids.prebuilt_softnas_ami_list.ids
+  first_element = element( data.aws_ami_ids.prebuilt_softnas_ami_list.*.ids, 0)
+  mod_list = concat( local.prebuilt_softnas_ami_list , list("") )
   aquired_ami      = "${element( local.mod_list , 0)}" # aquired ami will use the ami in the list if found, otherwise it will default to the original ami.
-  use_aquired_ami = var.softnas_use_prebuilt_ami && length(local.mod_list) > 1 ? true : false
-  ami = local.use_aquired_ami ? local.aquired_ami : local.base_ami
+  use_prebuilt_softnas_ami = var.allow_prebuilt_softnas_ami && length(local.mod_list) > 1 ? true : false
+  ami = local.use_prebuilt_softnas_ami ? local.aquired_ami : local.base_ami
 }
 
 output "base_ami" {
   value = local.base_ami
 }
 
-output "prebuilt_ami_list" {
-  value = local.prebuilt_ami_list
+output "prebuilt_softnas_ami_list" {
+  value = local.prebuilt_softnas_ami_list
 }
 
 output "first_element" {
@@ -421,8 +364,8 @@ output "aquired_ami" {
   value = local.aquired_ami
 }
 
-output "use_aquired_ami" {
-  value = local.use_aquired_ami
+output "use_prebuilt_softnas_ami" {
+  value = local.use_prebuilt_softnas_ami
 }
 
 output "ami" {
@@ -480,7 +423,7 @@ USERDATA
 # When using ssd tiering, you must manually create the ebs volumes and specify the ebs id's in your secrets.  Then they can be locally restored automatically and attached to the instance.
 
 locals {
-  provision_softnas         = local.use_aquired_ami ? false : true # when using an aquired ami, we will not create another ami as this would replace it.
+  provision_softnas         = local.use_prebuilt_softnas_ami ? false : true # when using an aquired ami, we will not create another ami as this would replace it.
 }
 
 
@@ -572,7 +515,7 @@ resource "random_id" "ami_unique_name" {
 
 # when testing, the local can be set to disable ami creation in a dev environment only - for faster iteration.
 locals {
-  create_ami         = local.use_aquired_ami ? false : true # when using an aquired ami, we will not create another ami as this would replace it.
+  create_ami         = local.use_prebuilt_softnas_ami ? false : true # when using an aquired ami, we will not create another ami as this would replace it.
 }
 
 # At this point in time, AMI's created by terraform are destroyed with terraform destroy.  we desire the ami to be persistant for faster future redeployment, so we create the ami with ansible instead.

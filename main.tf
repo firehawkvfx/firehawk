@@ -224,7 +224,7 @@ variable "gateway_type" {
 
 
 
-variable "softnas_use_prebuilt_ami" { # after an initial deployment a base AMI and any software updates are run, a prebuilt ami is created.  Once it exists, it will be used in future deployments until the base ami is altered.
+variable "allow_prebuilt_softnas_ami" { # after an initial deployment a base AMI and any software updates are run, a prebuilt ami is created.  Once it exists, it will be used in future deployments until the base ami is altered.
   default = true
 }
 
@@ -241,7 +241,7 @@ module "softnas" {
 
   envtier = var.envtier
 
-  softnas_use_prebuilt_ami = var.softnas_use_prebuilt_ami
+  allow_prebuilt_softnas_ami = var.allow_prebuilt_softnas_ami
   softnas_custom_ami     = var.softnas_custom_ami
 
   #softnas_role = "${module.softnas_role.softnas_role_name}"
@@ -438,12 +438,12 @@ output "base_ami" {
   value = module.softnas.base_ami
 }
 
-output "prebuilt_ami_list" {
-  value = module.softnas.prebuilt_ami_list
+output "prebuilt_softnas_ami_list" {
+  value = module.softnas.prebuilt_softnas_ami_list
 }
 
-output "use_aquired_ami" {
-  value = module.softnas.use_aquired_ami
+output "use_prebuilt_softnas_ami" {
+  value = module.softnas.use_prebuilt_softnas_ami
 }
 
 output "node_ami_id" {
