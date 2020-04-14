@@ -523,7 +523,9 @@ resource "null_resource" "provision_softnas" {
         echo "...Skip softnas update"
       else
         ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-update.yaml -v; exit_test
+        echo "Finished Update"
       fi
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init.yaml -v; exit_test
       # hotfix script to speed up instance start and shutdown
       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-install-acpid.yaml -v; exit_test
 
