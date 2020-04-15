@@ -447,7 +447,6 @@ resource "null_resource" "provision_softnas" {
     # sleep 300 is required because ecdsa key wont exist for a while, and you can't continue without it.
     inline = [
       "set -x",
-      "sudo yum install -y python",
       "while [ ! -f /etc/ssh/ssh_host_ecdsa_key.pub ]",
       "do",
       "  sleep 10",
@@ -456,6 +455,8 @@ resource "null_resource" "provision_softnas" {
       "cat /etc/ssh/ssh_host_rsa_key.pub",
       "cat /etc/ssh/ssh_host_ecdsa_key.pub",
       "ssh-keyscan ${aws_instance.softnas1[0].private_ip}",
+      "which python",
+      "sudo yum install -y python",
     ]
   }
   provisioner "local-exec" {
@@ -546,7 +547,7 @@ EOT
 }
 
 # Start instance so that s3 disks can be attached
-resource "null_resource" "start-softnas-after-create_ami" {
+resource "null_resource" "start-softnas-after-create-ami" {
   count = local.create_ami && var.softnas_storage ? 1 : 0
 
   #depends_on         = ["aws_volume_attachment.softnas1_ebs_att"]
@@ -592,7 +593,7 @@ resource "null_resource" "provision_softnas_volumes" {
   count = var.softnas_storage ? 1 : 0
   depends_on = [
     null_resource.provision_softnas,
-    null_resource.start-softnas-after-create_ami,
+    null_resource.start-softnas-after-create-ami,
     null_resource.create_ami,
   ]
 
