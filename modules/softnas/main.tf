@@ -456,7 +456,8 @@ resource "null_resource" "provision_softnas" {
       "cat /etc/ssh/ssh_host_ecdsa_key.pub",
       "ssh-keyscan ${aws_instance.softnas1[0].private_ip}",
       "which python",
-      "sudo yum install -y python",
+      "python --version",
+      # "sudo yum install -y python",
     ]
   }
   provisioner "local-exec" {
@@ -471,7 +472,7 @@ resource "null_resource" "provision_softnas" {
       
       # Initialise
       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init.yaml -v; exit_test
-      
+
       # remove any mounts on local workstation first since they will have been broken if another softnas instance was just destroyed to create this one.
       # if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
       #   echo "CONFIGURE REMOTE MOUNTS ON LOCAL NODES PROVISION"
