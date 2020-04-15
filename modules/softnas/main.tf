@@ -468,6 +468,10 @@ resource "null_resource" "provision_softnas" {
       ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.softnas1[0].private_ip} bastion_ip=${var.bastion_ip}"; exit_test
       # ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "variable_host=firehawkgateway variable_user=deployuser private_ip=${aws_instance.softnas1[0].private_ip} bastion_ip=${var.bastion_ip}"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=softnas0 host_ip=${aws_instance.softnas1[0].private_ip} group_name=role_softnas insert_ssh_key_string=ansible_ssh_private_key_file=$TF_VAR_local_key_path"; exit_test
+      
+      # Initialise
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init.yaml -v; exit_test
+      
       # remove any mounts on local workstation first since they will have been broken if another softnas instance was just destroyed to create this one.
       # if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
       #   echo "CONFIGURE REMOTE MOUNTS ON LOCAL NODES PROVISION"
@@ -624,8 +628,6 @@ resource "null_resource" "provision_softnas_volumes" {
       set -x
       cd /deployuser
 
-      # Initialise
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init.yaml -v; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init-users.yaml -v --extra-vars "variable_host=role_softnas variable_user=$TF_VAR_softnas_ssh_user set_hostname=false"; exit_test
       # hotfix script to speed up instance start and shutdown
       # ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-install-acpid.yaml -v; exit_test
