@@ -26,7 +26,7 @@ trap 'err_report $0 $LINENO' ERR
 printf "\nRunning ansiblecontrol with $1...\n"
 
 # These paths and vars are necesary to locating other scripts.
-export TF_VAR_firehawk_path=$SCRIPTDIR; exit_test
+export TF_VAR_firehawk_path=$SCRIPTDIR
 # source an exit test to bail if non zero exit code is produced.
 . $TF_VAR_firehawk_path/scripts/exit_test.sh
 function to_abs_path {

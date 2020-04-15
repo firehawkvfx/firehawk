@@ -10,7 +10,7 @@
       force: no
 
 # these packages are required to pass an encrypted string via commandline into a user pass.
-  - name: install mkpasswd
+  - name: install expect
     package:
       name: expect
       state: present
