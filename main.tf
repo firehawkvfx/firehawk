@@ -226,6 +226,7 @@ variable "allow_prebuilt_softnas_ami" { # after an initial deployment a base AMI
   default = true
 }
 
+
 # A single softnas instance that resides in a private subnet for high performance nfs storage
 
 module "softnas" {  
