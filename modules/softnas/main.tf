@@ -477,10 +477,10 @@ resource "null_resource" "provision_softnas" {
       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init.yaml -v --extra-vars "skip_packages=${local.skip_packages}"; exit_test
 
       # remove any mounts on local workstation first since they will have been broken if another softnas instance was just destroyed to create this one.
-      # if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
-      #   echo "CONFIGURE REMOTE MOUNTS ON LOCAL NODES PROVISION"
-      #   ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=workstation1 variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
-      # fi
+      if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
+        echo "CONFIGURE REMOTE MOUNTS ON LOCAL NODES PROVISION"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=workstation1 variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
+      fi
       if [[ "$TF_VAR_softnas_skip_update" == true ]]; then
         echo "...Skip softnas update"
       else
