@@ -419,6 +419,7 @@ USERDATA
 locals {
   id = element(concat(aws_instance.softnas1.*.id, list("")), 0)
   provision_softnas         = local.use_prebuilt_softnas_ami ? false : true # when using an aquired ami, we will not create another ami as this would replace it.
+  skip_packages = local.use_prebuilt_softnas_ami # when using an aquired ami, we will not create another ami as this would replace it.
 }
 
 
@@ -473,7 +474,7 @@ resource "null_resource" "provision_softnas" {
       ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=softnas0 host_ip=${aws_instance.softnas1[0].private_ip} group_name=role_softnas insert_ssh_key_string=ansible_ssh_private_key_file=$TF_VAR_local_key_path"; exit_test
       
       # Initialise
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init.yaml -v; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init.yaml -v --extra-vars "skip_packages=${local.skip_packages}"; exit_test
 
       # remove any mounts on local workstation first since they will have been broken if another softnas instance was just destroyed to create this one.
       # if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then

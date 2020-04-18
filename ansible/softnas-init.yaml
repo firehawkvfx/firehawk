@@ -2,6 +2,9 @@
   remote_user: "{{ softnas_ssh_user | default('ec2-user') }}"
   become: true
 
+  vars:
+    skip_packages: false
+
   tasks:
   - name: ensure file exists
     copy:
@@ -130,6 +133,7 @@
       state: present
     with_items:
       - nmap
+    when: not skip_packages
 
   - command: "nmap -p {{ item.port }} {{ item.dest }}"
     register: nmap_result
