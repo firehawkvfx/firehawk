@@ -426,7 +426,7 @@ resource "null_resource" "provision_softnas" {
   depends_on = [aws_instance.softnas1]
 
   triggers = {
-    instanceid = aws_instance.softnas1.*.id[count.index]
+    instanceid = aws_instance.softnas1.*.id
     skip_update = var.skip_update
   }
 
@@ -604,7 +604,7 @@ resource "null_resource" "provision_softnas_volumes" {
 
   # "null_resource.start-softnas-after-ebs-attach"
   triggers = {
-    instanceid = aws_instance.softnas1.*.id[count.index]
+    instanceid = aws_instance.softnas1.*.id
   }
 
   provisioner "remote-exec" {
@@ -697,7 +697,7 @@ resource "null_resource" "start-softnas" {
   #,"null_resource.mount_volumes_onsite"]
 
   triggers = {
-    instanceid = aws_instance.softnas1.*.id[count.index]
+    instanceid = aws_instance.softnas1.*.id
   }
 
   provisioner "local-exec" {
@@ -716,7 +716,7 @@ resource "null_resource" "shutdown-softnas" {
   count = ( var.sleep && var.softnas_storage ) ? 1 : 0
 
   triggers = {
-    instanceid = aws_instance.softnas1.*.id[count.index]
+    instanceid = aws_instance.softnas1.*.id
   }
 
   provisioner "local-exec" {
