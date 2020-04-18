@@ -522,7 +522,7 @@ resource "null_resource" "create_ami" {
   ]
 
   triggers = {
-    # instanceid = aws_instance.softnas1.*.id[count.index]
+    # aws_instance.softnas1.*.id
     base_ami = local.base_ami
   }
 
