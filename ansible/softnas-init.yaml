@@ -133,7 +133,7 @@
       state: present
     with_items:
       - nmap
-    when: not skip_packages
+    when: skip_packages == false
 
   - command: "nmap -p {{ item.port }} {{ item.dest }}"
     register: nmap_result

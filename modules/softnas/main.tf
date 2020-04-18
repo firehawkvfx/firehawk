@@ -444,7 +444,7 @@ resource "null_resource" "provision_softnas" {
       private_key         = var.private_key
       bastion_private_key = var.private_key
       type                = "ssh"
-      timeout             = "30m"
+      timeout             = "15m"
     }
 
     # sleep 300 is required because ecdsa key wont exist for a while, and you can't continue without it.
@@ -494,6 +494,19 @@ resource "null_resource" "provision_softnas" {
 EOT
 
   }
+  provisioner "remote-exec" {
+    connection {
+      user                = var.softnas_ssh_user
+      host                = aws_instance.softnas1[0].private_ip
+      bastion_host        = var.bastion_ip
+      bastion_user        = "centos"
+      private_key         = var.private_key
+      bastion_private_key = var.private_key
+      type                = "ssh"
+      timeout             = "15m"
+    }
+    inline = ["set -x && echo 'booted after init'"]
+  }
 }
 
 resource "random_id" "ami_unique_name" {
@@ -538,7 +551,7 @@ resource "null_resource" "create_ami" {
       private_key         = var.private_key
       bastion_private_key = var.private_key
       type                = "ssh"
-      timeout             = "30m"
+      timeout             = "15m"
     }
 
     inline = ["set -x && echo 'booted'"]
@@ -619,7 +632,7 @@ resource "null_resource" "provision_softnas_volumes" {
       private_key         = var.private_key
       bastion_private_key = var.private_key
       type                = "ssh"
-      timeout             = "30m"
+      timeout             = "15m"
     }
 
     inline = ["set -x && echo 'booted'"]
@@ -662,7 +675,7 @@ EOT
       private_key         = var.private_key
       bastion_private_key = var.private_key
       type                = "ssh"
-      timeout             = "30m"
+      timeout             = "15m"
     }
 
     inline = ["set -x && echo 'booted'"]
@@ -756,7 +769,7 @@ resource "null_resource" "attach_local_mounts_after_start" {
       private_key         = var.private_key
       bastion_private_key = var.private_key
       type                = "ssh"
-      timeout             = "30m"
+      timeout             = "15m"
     }
     inline = [
       "set -x",
