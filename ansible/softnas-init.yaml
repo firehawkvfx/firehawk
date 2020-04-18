@@ -127,13 +127,17 @@
       state: present
       create: true
 
+  - name: skip packages
+    debug:
+      var: skip_packages
+
   - name: install nmap
     package:
       name: "{{ item }}"
       state: present
     with_items:
       - nmap
-    when: skip_packages == false
+    when: skip_packages|bool == false
 
   - command: "nmap -p {{ item.port }} {{ item.dest }}"
     register: nmap_result
