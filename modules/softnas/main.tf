@@ -741,8 +741,8 @@ resource "null_resource" "attach_local_mounts_after_start" {
   #,"null_resource.mount_volumes_onsite"]
 
   triggers = {
-    instanceid   = aws_instance.softnas1.*.id[count.index]
-    startsoftnas = null_resource.start-softnas[0].id
+    instanceid = "${join(",", aws_instance.softnas1.*.id)}"
+    startsoftnas = "${join(",", null_resource.start-softnas.*.id)}"
     remote_mounts_on_local = var.remote_mounts_on_local
   }
   provisioner "remote-exec" {
@@ -799,8 +799,8 @@ resource "null_resource" "detach_local_mounts_after_stop" {
   #,"null_resource.mount_volumes_onsite"]
 
   triggers = {
-    instanceid   = aws_instance.softnas1.*.id[count.index]
-    startsoftnas = null_resource.shutdown-softnas[0].id
+    instanceid = "${join(",", aws_instance.softnas1.*.id)}"
+    startsoftnas = "${join(",", null_resource.shutdown-softnas.*.id)}"
   }
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
