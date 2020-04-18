@@ -371,7 +371,7 @@ output "ami" {
 resource "aws_instance" "softnas1" {
   count = var.softnas_storage ? 1 : 0
   depends_on = [aws_instance.softnas1, var.vpn_private_ip]
-  
+
   ami   = local.ami
 
   instance_type = var.instance_type[var.softnas_mode]
@@ -511,16 +511,7 @@ EOT
   }
 }
 
-resource "random_id" "ami_unique_name" {
-  count = var.softnas_storage ? 1 : 0
-  keepers = {
-    # Generate a new id each time we switch to a new instance id, or the base_ami cahanges.  this doesn't mean a new ami is generated.
-    ami_id = local.id
-    base_ami = local.base_ami
-  }
 
-  byte_length = 8
-}
 
 # variable "testing" {
 #   default = true
@@ -529,6 +520,21 @@ resource "random_id" "ami_unique_name" {
 # when testing, the local can be set to disable ami creation in a dev environment only - for faster iteration.
 locals {
   create_ami         = local.use_prebuilt_softnas_ami ? false : true # when using an aquired ami, we will not create another ami as this would replace it.
+}
+
+resource "random_id" "ami_unique_name" {
+  count = local.create_ami && var.softnas_storage ? 1 : 0
+  depends_on = [
+    aws_instance.softnas1,
+    null_resource.provision_softnas,
+  ]
+  keepers = {
+    # Generate a new id each time we switch to a new instance id, or the base_ami cahanges.  this doesn't mean a new ami is generated.
+    ami_id = local.id
+    base_ami = local.base_ami
+  }
+
+  byte_length = 8
 }
 
 # At this point in time, AMI's created by terraform are destroyed with terraform destroy.  we desire the ami to be persistant for faster future redeployment, so we create the ami with ansible instead.
