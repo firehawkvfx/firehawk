@@ -186,7 +186,7 @@ else
       #   echo "Resource exists, will taint."
       #   found=true
       # fi
-      terraform taint $item || echo "Suppress Exit Code"
+      terraform taint -lock=false $item || echo "Suppress Exit Code"
     done
     if [ "$found" == false ]; then echo "No Resources were Tainted"; fi
   fi
