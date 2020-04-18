@@ -426,7 +426,7 @@ resource "null_resource" "provision_softnas" {
   depends_on = [aws_instance.softnas1]
 
   triggers = {
-    instanceid = aws_instance.softnas1[0].id
+    instanceid = aws_instance.softnas1.*.id[count.index]
     skip_update = var.skip_update
   }
 
@@ -497,7 +497,7 @@ resource "random_id" "ami_unique_name" {
   count = var.softnas_storage ? 1 : 0
   keepers = {
     # Generate a new id each time we switch to a new instance id, or the base_ami cahanges.  this doesn't mean a new ami is generated.
-    ami_id = aws_instance.softnas1[0].id
+    ami_id = aws_instance.softnas1.*.id[count.index]
     base_ami = local.base_ami
   }
 
@@ -522,7 +522,7 @@ resource "null_resource" "create_ami" {
   ]
 
   triggers = {
-    # instanceid = aws_instance.softnas1[0].id
+    # instanceid = aws_instance.softnas1.*.id[count.index]
     base_ami = local.base_ami
   }
 
@@ -545,8 +545,8 @@ resource "null_resource" "create_ami" {
       set -x
       cd /deployuser
       # ami creation is unnecesary since softnas ami update.  will be needed in future again if softnas updates slow down deployment.
-      ansible-playbook -i "$TF_VAR_inventory" ansible/aws-ami.yaml -v --extra-vars "instance_id=${aws_instance.softnas1[0].id} ami_name=softnas_ami_${local.ami} base_ami=${local.ami} description=softnas1_${aws_instance.softnas1[0].id}_${random_id.ami_unique_name[0].hex}"
-      aws ec2 start-instances --instance-ids ${aws_instance.softnas1[0].id}
+      ansible-playbook -i "$TF_VAR_inventory" ansible/aws-ami.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]} ami_name=softnas_ami_${local.ami} base_ami=${local.ami} description=softnas1_${aws_instance.softnas1.*.id[count.index]}_${random_id.ami_unique_name[0].hex}"
+      aws ec2 start-instances --instance-ids ${aws_instance.softnas1.*.id[count.index]}
 EOT
   }
 }
@@ -561,7 +561,7 @@ resource "null_resource" "start-softnas-after-create-ami" {
     null_resource.create_ami,
   ]
   provisioner "local-exec" {
-    command = "aws ec2 start-instances --instance-ids ${aws_instance.softnas1[0].id}"
+    command = "aws ec2 start-instances --instance-ids ${aws_instance.softnas1.*.id[count.index]}"
   }
 }
 
@@ -604,7 +604,7 @@ resource "null_resource" "provision_softnas_volumes" {
 
   # "null_resource.start-softnas-after-ebs-attach"
   triggers = {
-    instanceid = aws_instance.softnas1[0].id
+    instanceid = aws_instance.softnas1.*.id[count.index]
   }
 
   provisioner "remote-exec" {
@@ -639,10 +639,10 @@ resource "null_resource" "provision_softnas_volumes" {
         ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser hostname=workstation1 ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
       fi
       # mount all ebs disks before s3
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-check-able-to-stop.yaml -v --extra-vars "instance_id=${aws_instance.softnas1[0].id}"; exit_test
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk.yaml -v --extra-vars "instance_id=${aws_instance.softnas1[0].id} stop_softnas_instance=true mode=attach"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-check-able-to-stop.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]}"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]} stop_softnas_instance=true mode=attach"; exit_test
       # Although we start the instance in ansible, the aws cli can be more reliable to ensure this.
-      aws ec2 start-instances --instance-ids ${aws_instance.softnas1[0].id}; exit_test
+      aws ec2 start-instances --instance-ids ${aws_instance.softnas1.*.id[count.index]}; exit_test
   
 EOT
 
@@ -676,7 +676,7 @@ EOT
       # exports should be updated here.
       # if btier.json exists in /secrets/${var.envtier}/ebs-volumes/ then the tiers will be imported.
       # ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-backup-btier.yaml -v --extra-vars "restore=true"; exit_test
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk-update-exports.yaml -v --extra-vars "instance_id=${aws_instance.softnas1[0].id}"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk-update-exports.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]}"; exit_test
   
 EOT
 
@@ -697,15 +697,15 @@ resource "null_resource" "start-softnas" {
   #,"null_resource.mount_volumes_onsite"]
 
   triggers = {
-    instanceid = aws_instance.softnas1[0].id
+    instanceid = aws_instance.softnas1.*.id[count.index]
   }
 
   provisioner "local-exec" {
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
       # create volatile storage
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk.yaml --extra-vars "instance_id=${aws_instance.softnas1[0].id} stop_softnas_instance=true mode=attach"; exit_test
-      aws ec2 start-instances --instance-ids ${aws_instance.softnas1[0].id}; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk.yaml --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]} stop_softnas_instance=true mode=attach"; exit_test
+      aws ec2 start-instances --instance-ids ${aws_instance.softnas1.*.id[count.index]}; exit_test
   
 EOT
 
@@ -716,7 +716,7 @@ resource "null_resource" "shutdown-softnas" {
   count = ( var.sleep && var.softnas_storage ) ? 1 : 0
 
   triggers = {
-    instanceid = aws_instance.softnas1[0].id
+    instanceid = aws_instance.softnas1.*.id[count.index]
   }
 
   provisioner "local-exec" {
@@ -724,9 +724,9 @@ resource "null_resource" "shutdown-softnas" {
 
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      aws ec2 stop-instances --instance-ids ${aws_instance.softnas1[0].id}; exit_test
+      aws ec2 stop-instances --instance-ids ${aws_instance.softnas1.*.id[count.index]}; exit_test
       # delete volatile storage
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk.yaml --extra-vars "instance_id=${aws_instance.softnas1[0].id} stop_softnas_instance=true mode=destroy"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk.yaml --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]} stop_softnas_instance=true mode=destroy"; exit_test
   
 EOT
 
@@ -740,7 +740,7 @@ resource "null_resource" "attach_local_mounts_after_start" {
   #,"null_resource.mount_volumes_onsite"]
 
   triggers = {
-    instanceid   = aws_instance.softnas1[0].id
+    instanceid   = aws_instance.softnas1.*.id[count.index]
     startsoftnas = null_resource.start-softnas[0].id
     remote_mounts_on_local = var.remote_mounts_on_local
   }
@@ -774,7 +774,7 @@ resource "null_resource" "attach_local_mounts_after_start" {
       # ensure volumes and pools exist after the disks were ensured to exist - this was done before starting instance.
       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-pool.yaml -v; exit_test
       #ensure exports are correct
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk-update-exports.yaml -v --extra-vars "instance_id=${aws_instance.softnas1[0].id}"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk-update-exports.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]}"; exit_test
       # mount volumes to local site when softnas is started
       if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
         printf "\n$BLUE CONFIGURE REMOTE MOUNTS ON LOCAL NODES $NC\n"
@@ -798,7 +798,7 @@ resource "null_resource" "detach_local_mounts_after_stop" {
   #,"null_resource.mount_volumes_onsite"]
 
   triggers = {
-    instanceid   = aws_instance.softnas1[0].id
+    instanceid   = aws_instance.softnas1.*.id[count.index]
     startsoftnas = null_resource.shutdown-softnas[0].id
   }
   provisioner "local-exec" {
