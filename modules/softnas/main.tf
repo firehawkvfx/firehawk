@@ -428,418 +428,412 @@ locals {
 }
 
 
-resource "null_resource" "provision_softnas" {
-  count      = ( !var.sleep && var.softnas_storage ) ? 1 : 0
-  # count      = local.provision_softnas && var.softnas_storage ? 1 : 0
-  depends_on = [aws_instance.softnas1, var.vpn_private_ip]
+# resource "null_resource" "provision_softnas" {
+#   count      = ( !var.sleep && var.softnas_storage ) ? 1 : 0
+#   # count      = local.provision_softnas && var.softnas_storage ? 1 : 0
+#   depends_on = [aws_instance.softnas1, var.vpn_private_ip]
 
-  triggers = {
-    instanceid = "${join(",", aws_instance.softnas1.*.id)}"
-    skip_update = var.skip_update
-  }
+#   triggers = {
+#     instanceid = "${join(",", aws_instance.softnas1.*.id)}"
+#     skip_update = var.skip_update
+#   }
 
-  # some time is required before the ecdsa key file exists.
-  # some time is required before the ecdsa key file exists.
-  provisioner "remote-exec" {
-    connection {
-      user                = var.softnas_ssh_user
-      host                = aws_instance.softnas1[0].private_ip
-      bastion_host        = var.bastion_ip
-      bastion_user        = "centos"
-      private_key         = var.private_key
-      bastion_private_key = var.private_key
-      type                = "ssh"
-      timeout             = "15m"
-    }
+#   # some time is required before the ecdsa key file exists.
+#   # some time is required before the ecdsa key file exists.
+#   provisioner "remote-exec" {
+#     connection {
+#       user                = var.softnas_ssh_user
+#       host                = aws_instance.softnas1[0].private_ip
+#       bastion_host        = var.bastion_ip
+#       bastion_user        = "centos"
+#       private_key         = var.private_key
+#       bastion_private_key = var.private_key
+#       type                = "ssh"
+#       timeout             = "15m"
+#     }
 
-    # sleep 300 is required because ecdsa key wont exist for a while, and you can't continue without it.
-    inline = [
-      "set -x",
-      "while [ ! -f /etc/ssh/ssh_host_ecdsa_key.pub ]",
-      "do",
-      "  sleep 10",
-      "done",
-      "cat /etc/ssh/ssh_host_ecdsa_key.pub",
-      "cat /etc/ssh/ssh_host_rsa_key.pub",
-      "cat /etc/ssh/ssh_host_ecdsa_key.pub",
-      "ssh-keyscan ${aws_instance.softnas1[0].private_ip}",
-      "which python",
-      "python --version",
-      # "sudo yum install -y python",
-    ]
-  }
-  provisioner "local-exec" {
-    interpreter = ["/bin/bash", "-c"]
-    command = <<EOT
-      . /deployuser/scripts/exit_test.sh
-      set -x
-      cd /deployuser
-      ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.softnas1[0].private_ip} bastion_ip=${var.bastion_ip}"; exit_test
-      # ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "variable_host=firehawkgateway variable_user=deployuser private_ip=${aws_instance.softnas1[0].private_ip} bastion_ip=${var.bastion_ip}"; exit_test
-      ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=softnas0 host_ip=${aws_instance.softnas1[0].private_ip} group_name=role_softnas insert_ssh_key_string=ansible_ssh_private_key_file=$TF_VAR_local_key_path"; exit_test
+#     # sleep 300 is required because ecdsa key wont exist for a while, and you can't continue without it.
+#     inline = [
+#       "set -x",
+#       "while [ ! -f /etc/ssh/ssh_host_ecdsa_key.pub ]",
+#       "do",
+#       "  sleep 10",
+#       "done",
+#       "cat /etc/ssh/ssh_host_ecdsa_key.pub",
+#       "cat /etc/ssh/ssh_host_rsa_key.pub",
+#       "cat /etc/ssh/ssh_host_ecdsa_key.pub",
+#       "ssh-keyscan ${aws_instance.softnas1[0].private_ip}",
+#       "which python",
+#       "python --version",
+#       # "sudo yum install -y python",
+#     ]
+#   }
+#   provisioner "local-exec" {
+#     interpreter = ["/bin/bash", "-c"]
+#     command = <<EOT
+#       . /deployuser/scripts/exit_test.sh
+#       set -x
+#       cd /deployuser
+#       ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.softnas1[0].private_ip} bastion_ip=${var.bastion_ip}"; exit_test
+#       # ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "variable_host=firehawkgateway variable_user=deployuser private_ip=${aws_instance.softnas1[0].private_ip} bastion_ip=${var.bastion_ip}"; exit_test
+#       ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=softnas0 host_ip=${aws_instance.softnas1[0].private_ip} group_name=role_softnas insert_ssh_key_string=ansible_ssh_private_key_file=$TF_VAR_local_key_path"; exit_test
       
-      # Initialise
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init.yaml -v --extra-vars "skip_packages=${local.skip_packages}"; exit_test
+#       # Initialise
+#       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init.yaml -v --extra-vars "skip_packages=${local.skip_packages}"; exit_test
 
-      # remove any mounts on local workstation first since they will have been broken if another softnas instance was just destroyed to create this one.
-      if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
-        echo "CONFIGURE REMOTE MOUNTS ON LOCAL NODES PROVISION"
-        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=workstation1 variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
-      fi
-      if [[ "$TF_VAR_softnas_skip_update" == true ]]; then
-        echo "...Skip softnas update"
-      else
-        ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-update.yaml -v; exit_test
-        echo "Finished Update"
-      fi
-      # cli is only needed if sync operations with s3 will be run on this instance.
-      # #ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli.yaml -v --extra-vars "variable_user=ec2-user variable_host=role_softnas"; exit_test
-      # #ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2.yaml -v --extra-vars "variable_user=ec2-user variable_host=role_softnas"; exit_test
+#       # remove any mounts on local workstation first since they will have been broken if another softnas instance was just destroyed to create this one.
+#       if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
+#         echo "CONFIGURE REMOTE MOUNTS ON LOCAL NODES PROVISION"
+#         ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=workstation1 variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
+#       fi
+#       if [[ "$TF_VAR_softnas_skip_update" == true ]]; then
+#         echo "...Skip softnas update"
+#       else
+#         ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-update.yaml -v; exit_test
+#         echo "Finished Update"
+#       fi
+#       # cli is only needed if sync operations with s3 will be run on this instance.
+#       # #ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli.yaml -v --extra-vars "variable_user=ec2-user variable_host=role_softnas"; exit_test
+#       # #ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2.yaml -v --extra-vars "variable_user=ec2-user variable_host=role_softnas"; exit_test
   
-EOT
+# EOT
 
-  }
-  provisioner "remote-exec" {
-    connection {
-      user                = var.softnas_ssh_user
-      host                = aws_instance.softnas1[0].private_ip
-      bastion_host        = var.bastion_ip
-      bastion_user        = "centos"
-      private_key         = var.private_key
-      bastion_private_key = var.private_key
-      type                = "ssh"
-      timeout             = "15m"
-    }
-    inline = ["set -x && echo 'booted after init'"]
-  }
-}
-
-
-
-# variable "testing" {
-#   default = true
+#   }
+#   provisioner "remote-exec" {
+#     connection {
+#       user                = var.softnas_ssh_user
+#       host                = aws_instance.softnas1[0].private_ip
+#       bastion_host        = var.bastion_ip
+#       bastion_user        = "centos"
+#       private_key         = var.private_key
+#       bastion_private_key = var.private_key
+#       type                = "ssh"
+#       timeout             = "15m"
+#     }
+#     inline = ["set -x && echo 'booted after init'"]
+#   }
 # }
 
-# when testing, the local can be set to disable ami creation in a dev environment only - for faster iteration.
-locals {
-  create_ami         = local.use_prebuilt_softnas_ami ? false : true # when using an aquired ami, we will not create another ami as this would replace it.
-}
+# # when testing, the local can be set to disable ami creation in a dev environment only - for faster iteration.
+# locals {
+#   create_ami         = local.use_prebuilt_softnas_ami ? false : true # when using an aquired ami, we will not create another ami as this would replace it.
+# }
 
-resource "random_id" "ami_unique_name" {
-  count = local.create_ami && var.softnas_storage ? 1 : 0
-  depends_on = [
-    aws_instance.softnas1,
-    null_resource.provision_softnas,
-  ]
-  keepers = {
-    # Generate a new id each time we switch to a new instance id, or the base_ami cahanges.  this doesn't mean a new ami is generated.
-    ami_id = local.id
-    base_ami = local.base_ami
-  }
+# resource "random_id" "ami_unique_name" {
+#   count = local.create_ami && var.softnas_storage ? 1 : 0
+#   depends_on = [
+#     aws_instance.softnas1,
+#     null_resource.provision_softnas,
+#   ]
+#   keepers = {
+#     # Generate a new id each time we switch to a new instance id, or the base_ami cahanges.  this doesn't mean a new ami is generated.
+#     ami_id = local.id
+#     base_ami = local.base_ami
+#   }
 
-  byte_length = 8
-}
+#   byte_length = 8
+# }
 
-# At this point in time, AMI's created by terraform are destroyed with terraform destroy.  we desire the ami to be persistant for faster future redeployment, so we create the ami with ansible instead.
-resource "null_resource" "create_ami" {
-  count = local.create_ami && var.softnas_storage ? 1 : 0
-  depends_on = [
-    aws_instance.softnas1,
-    null_resource.provision_softnas,
-  ]
+# # At this point in time, AMI's created by terraform are destroyed with terraform destroy.  we desire the ami to be persistant for faster future redeployment, so we create the ami with ansible instead.
+# resource "null_resource" "create_ami" {
+#   count = local.create_ami && var.softnas_storage ? 1 : 0
+#   depends_on = [
+#     aws_instance.softnas1,
+#     null_resource.provision_softnas,
+#   ]
 
-  triggers = {
-    # aws_instance.softnas1.*.id
-    base_ami = local.base_ami
-  }
+#   triggers = {
+#     # aws_instance.softnas1.*.id
+#     base_ami = local.base_ami
+#   }
 
-  provisioner "remote-exec" {
-    connection {
-      user                = var.softnas_ssh_user
-      host                = aws_instance.softnas1[0].private_ip
-      bastion_host        = var.bastion_ip
-      bastion_user        = "centos"
-      private_key         = var.private_key
-      bastion_private_key = var.private_key
-      type                = "ssh"
-      timeout             = "15m"
-    }
+#   provisioner "remote-exec" {
+#     connection {
+#       user                = var.softnas_ssh_user
+#       host                = aws_instance.softnas1[0].private_ip
+#       bastion_host        = var.bastion_ip
+#       bastion_user        = "centos"
+#       private_key         = var.private_key
+#       bastion_private_key = var.private_key
+#       type                = "ssh"
+#       timeout             = "15m"
+#     }
 
-    inline = ["set -x && echo 'booted'"]
-  }
-  provisioner "local-exec" {
-    command = <<EOT
-      set -x
-      cd /deployuser
-      # ami creation is unnecesary since softnas ami update.  will be needed in future again if softnas updates slow down deployment.
-      ansible-playbook -i "$TF_VAR_inventory" ansible/aws-ami.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]} ami_name=softnas_${local.ami} base_ami=${local.ami} description=softnas1_${aws_instance.softnas1.*.id[count.index]}_${random_id.ami_unique_name[0].hex}"
-      aws ec2 start-instances --instance-ids ${aws_instance.softnas1.*.id[count.index]}
-EOT
-  }
-}
+#     inline = ["set -x && echo 'booted'"]
+#   }
+#   provisioner "local-exec" {
+#     command = <<EOT
+#       set -x
+#       cd /deployuser
+#       # ami creation is unnecesary since softnas ami update.  will be needed in future again if softnas updates slow down deployment.
+#       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-ami.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]} ami_name=softnas_${local.ami} base_ami=${local.ami} description=softnas1_${aws_instance.softnas1.*.id[count.index]}_${random_id.ami_unique_name[0].hex}"
+#       aws ec2 start-instances --instance-ids ${aws_instance.softnas1.*.id[count.index]}
+# EOT
+#   }
+# }
 
-# Start instance so that s3 disks can be attached
-resource "null_resource" "start-softnas-after-create-ami" {
-  count = local.create_ami && var.softnas_storage ? 1 : 0
+# # Start instance so that s3 disks can be attached
+# resource "null_resource" "start-softnas-after-create-ami" {
+#   count = local.create_ami && var.softnas_storage ? 1 : 0
 
-  #depends_on         = ["aws_volume_attachment.softnas1_ebs_att"]
-  depends_on = [
-    null_resource.provision_softnas,
-    null_resource.create_ami,
-  ]
-  provisioner "local-exec" {
-    command = "aws ec2 start-instances --instance-ids ${aws_instance.softnas1.*.id[count.index]}"
-  }
-}
+#   #depends_on         = ["aws_volume_attachment.softnas1_ebs_att"]
+#   depends_on = [
+#     null_resource.provision_softnas,
+#     null_resource.create_ami,
+#   ]
+#   provisioner "local-exec" {
+#     command = "aws ec2 start-instances --instance-ids ${aws_instance.softnas1.*.id[count.index]}"
+#   }
+# }
 
-# If ebs volumes are attached, don't automatically import the pool. manual intervention may be required.
-locals {
-  import_pool = true
-  #"${length(local.softnas1_volumes) > 0 ? false : true}"
-}
+# # If ebs volumes are attached, don't automatically import the pool. manual intervention may be required.
+# locals {
+#   import_pool = true
+#   #"${length(local.softnas1_volumes) > 0 ? false : true}"
+# }
 
-# Once an AMI is built above, then we test the connection to the instance via a bastion below.
-# When connection to softnas is established, we know the instance has booted.  We continue to provision an s3 extender disk below.
-# this creates an s3 bucket if it doesn't already exist.  if there is a bucket with the same disk_device number, same nas name, and same domain,
-# then the existing bucket will be mounted instead and existing data wil be available.  you may need to login to the softnas web ui to import the existing pool and volume,
-# but the disk should be mounted correctly.
-# Domains can be used to differentiate dev environments from production.
-# for example, dev.example.com vs prod.example.com are different namespaces for two different buckets with otherwise identical properties to coexist in the same aws account.
-# if an existing bucket is detected, s3_disk_size_max_value and encrypt_s3 are overidden by the settings on the bucket, and commandline variables ignored.
-# the s3 encryption password is stored in your encrypted vault in ansible/host_vars/all/vault
+# # Once an AMI is built above, then we test the connection to the instance via a bastion below.
+# # When connection to softnas is established, we know the instance has booted.  We continue to provision an s3 extender disk below.
+# # this creates an s3 bucket if it doesn't already exist.  if there is a bucket with the same disk_device number, same nas name, and same domain,
+# # then the existing bucket will be mounted instead and existing data wil be available.  you may need to login to the softnas web ui to import the existing pool and volume,
+# # but the disk should be mounted correctly.
+# # Domains can be used to differentiate dev environments from production.
+# # for example, dev.example.com vs prod.example.com are different namespaces for two different buckets with otherwise identical properties to coexist in the same aws account.
+# # if an existing bucket is detected, s3_disk_size_max_value and encrypt_s3 are overidden by the settings on the bucket, and commandline variables ignored.
+# # the s3 encryption password is stored in your encrypted vault in ansible/host_vars/all/vault
 
-# IMPORTANT: if creating a new disk, the disk_device should be the next number available to the instance.
-# eg if these are already moujnted, /dev/s3-0, /dev/s3-1, /dev/s3-2, then the disk_device for the next bucket should be "3".
+# # IMPORTANT: if creating a new disk, the disk_device should be the next number available to the instance.
+# # eg if these are already moujnted, /dev/s3-0, /dev/s3-1, /dev/s3-2, then the disk_device for the next bucket should be "3".
 
-output "softnas1_instanceid" {
-  value = aws_instance.softnas1.*.id
-}
+# output "softnas1_instanceid" {
+#   value = aws_instance.softnas1.*.id
+# }
 
-output "softnas1_private_ip" {
-  value = aws_instance.softnas1.*.private_ip
-}
+# output "softnas1_private_ip" {
+#   value = aws_instance.softnas1.*.private_ip
+# }
 
-# there is currently too much activity here, but due to the way dependencies work in tf 0.11 its better to keep it in one block.
-# in tf .12 we should split these up and handle dependencies properly.
-resource "null_resource" "provision_softnas_volumes" {
-  count      = ( !var.sleep && var.softnas_storage ) ? 1 : 0
-  depends_on = [
-    null_resource.provision_softnas,
-    null_resource.start-softnas-after-create-ami,
-    null_resource.create_ami,
-  ]
+# # there is currently too much activity here, but due to the way dependencies work in tf 0.11 its better to keep it in one block.
+# # in tf .12 we should split these up and handle dependencies properly.
+# resource "null_resource" "provision_softnas_volumes" {
+#   count      = ( !var.sleep && var.softnas_storage ) ? 1 : 0
+#   depends_on = [
+#     null_resource.provision_softnas,
+#     null_resource.start-softnas-after-create-ami,
+#     null_resource.create_ami,
+#   ]
 
-  # "null_resource.start-softnas-after-ebs-attach"
-  triggers = {
-    instanceid = "${join(",", aws_instance.softnas1.*.id)}"
-  }
+#   # "null_resource.start-softnas-after-ebs-attach"
+#   triggers = {
+#     instanceid = "${join(",", aws_instance.softnas1.*.id)}"
+#   }
 
-  provisioner "remote-exec" {
-    connection {
-      user                = var.softnas_ssh_user
-      host                = aws_instance.softnas1[0].private_ip
-      bastion_host        = var.bastion_ip
-      bastion_user        = "centos"
-      private_key         = var.private_key
-      bastion_private_key = var.private_key
-      type                = "ssh"
-      timeout             = "15m"
-    }
+#   provisioner "remote-exec" {
+#     connection {
+#       user                = var.softnas_ssh_user
+#       host                = aws_instance.softnas1[0].private_ip
+#       bastion_host        = var.bastion_ip
+#       bastion_user        = "centos"
+#       private_key         = var.private_key
+#       bastion_private_key = var.private_key
+#       type                = "ssh"
+#       timeout             = "15m"
+#     }
 
-    inline = ["set -x && echo 'booted'"]
-  }
+#     inline = ["set -x && echo 'booted'"]
+#   }
 
-  provisioner "local-exec" {
-    interpreter = ["/bin/bash", "-c"]
-    command = <<EOT
-      . /deployuser/scripts/exit_test.sh
-      set -x
-      cd /deployuser
+#   provisioner "local-exec" {
+#     interpreter = ["/bin/bash", "-c"]
+#     command = <<EOT
+#       . /deployuser/scripts/exit_test.sh
+#       set -x
+#       cd /deployuser
 
-      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init-users.yaml -v --extra-vars "variable_host=role_softnas variable_user=$TF_VAR_softnas_ssh_user set_hostname=false"; exit_test
-      # hotfix script to speed up instance start and shutdown
-      # ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-install-acpid.yaml -v; exit_test
+#       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init-users.yaml -v --extra-vars "variable_host=role_softnas variable_user=$TF_VAR_softnas_ssh_user set_hostname=false"; exit_test
+#       # hotfix script to speed up instance start and shutdown
+#       # ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-install-acpid.yaml -v; exit_test
 
-      # ensure all old mounts onsite are removed if they exist.
-      if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
-        echo "CONFIGURE REMOTE MOUNTS ON LOCAL NODES"
-        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser hostname=workstation1 ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
-      fi
-      # mount all ebs disks before s3
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-check-able-to-stop.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]}"; exit_test
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]} stop_softnas_instance=true mode=attach"; exit_test
-      # Although we start the instance in ansible, the aws cli can be more reliable to ensure this.
-      aws ec2 start-instances --instance-ids ${aws_instance.softnas1.*.id[count.index]}; exit_test
+#       # ensure all old mounts onsite are removed if they exist.
+#       if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
+#         echo "CONFIGURE REMOTE MOUNTS ON LOCAL NODES"
+#         ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser hostname=workstation1 ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
+#       fi
+#       # mount all ebs disks before s3
+#       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-check-able-to-stop.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]}"; exit_test
+#       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]} stop_softnas_instance=true mode=attach"; exit_test
+#       # Although we start the instance in ansible, the aws cli can be more reliable to ensure this.
+#       aws ec2 start-instances --instance-ids ${aws_instance.softnas1.*.id[count.index]}; exit_test
   
-EOT
+# EOT
 
-  }
+#   }
 
-  # connect to the instance again to ensure it has booted.
-  # connect to the instance again to ensure it has booted.
-  provisioner "remote-exec" {
-    connection {
-      user                = var.softnas_ssh_user
-      host                = aws_instance.softnas1[0].private_ip
-      bastion_host        = var.bastion_ip
-      bastion_user        = "centos"
-      private_key         = var.private_key
-      bastion_private_key = var.private_key
-      type                = "ssh"
-      timeout             = "15m"
-    }
+#   # connect to the instance again to ensure it has booted.
+#   # connect to the instance again to ensure it has booted.
+#   provisioner "remote-exec" {
+#     connection {
+#       user                = var.softnas_ssh_user
+#       host                = aws_instance.softnas1[0].private_ip
+#       bastion_host        = var.bastion_ip
+#       bastion_user        = "centos"
+#       private_key         = var.private_key
+#       bastion_private_key = var.private_key
+#       type                = "ssh"
+#       timeout             = "15m"
+#     }
 
-    inline = ["set -x && echo 'booted'"]
-  }
-  provisioner "local-exec" {
-    command = <<EOT
-      . /deployuser/scripts/exit_test.sh
-      set -x
-      cd /deployuser
-      # ensure volumes and pools exist after disks are ensured to exist.
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-pool.yaml -v; exit_test
-      # ensure s3 disks exist and are mounted.  the s3 features are disabled currently in favour of migrating to using the aws cli and pdg to sync data
-      # ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-s3-disk.yaml -v --extra-vars "pool_name=$(TF_VAR_envtier)pool0 volume_name=$(TF_VAR_envtier)volume0 disk_device=0 s3_disk_size_max_value=${var.s3_disk_size} encrypt_s3=true import_pool=${local.import_pool}"; exit_test
-      # exports should be updated here.
-      # if btier.json exists in /secrets/${var.envtier}/ebs-volumes/ then the tiers will be imported.
-      # ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-backup-btier.yaml -v --extra-vars "restore=true"; exit_test
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk-update-exports.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]}"; exit_test
+#     inline = ["set -x && echo 'booted'"]
+#   }
+#   provisioner "local-exec" {
+#     command = <<EOT
+#       . /deployuser/scripts/exit_test.sh
+#       set -x
+#       cd /deployuser
+#       # ensure volumes and pools exist after disks are ensured to exist.
+#       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-pool.yaml -v; exit_test
+#       # ensure s3 disks exist and are mounted.  the s3 features are disabled currently in favour of migrating to using the aws cli and pdg to sync data
+#       # ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-s3-disk.yaml -v --extra-vars "pool_name=$(TF_VAR_envtier)pool0 volume_name=$(TF_VAR_envtier)volume0 disk_device=0 s3_disk_size_max_value=${var.s3_disk_size} encrypt_s3=true import_pool=${local.import_pool}"; exit_test
+#       # exports should be updated here.
+#       # if btier.json exists in /secrets/${var.envtier}/ebs-volumes/ then the tiers will be imported.
+#       # ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-backup-btier.yaml -v --extra-vars "restore=true"; exit_test
+#       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk-update-exports.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]}"; exit_test
   
-EOT
+# EOT
 
-  }
-}
+#   }
+# }
 
-output "provision_softnas_volumes" {
-  value = null_resource.provision_softnas_volumes.*.id
-}
+# output "provision_softnas_volumes" {
+#   value = null_resource.provision_softnas_volumes.*.id
+# }
 
-# todo : need to report success at correct time after it has started.  see email from steven melnikov at softnas to check how to do this.
+# # todo : need to report success at correct time after it has started.  see email from steven melnikov at softnas to check how to do this.
 
-# wakeup a node after sleep
-resource "null_resource" "start-softnas" {
-  count      = ( !var.sleep && var.softnas_storage ) ? 1 : 0
-  depends_on = [null_resource.provision_softnas_volumes]
+# # wakeup a node after sleep
+# resource "null_resource" "start-softnas" {
+#   count      = ( !var.sleep && var.softnas_storage ) ? 1 : 0
+#   depends_on = [null_resource.provision_softnas_volumes]
 
-  #,"null_resource.mount_volumes_onsite"]
+#   #,"null_resource.mount_volumes_onsite"]
 
-  triggers = {
-    instanceid = "${join(",", aws_instance.softnas1.*.id)}"
-  }
+#   triggers = {
+#     instanceid = "${join(",", aws_instance.softnas1.*.id)}"
+#   }
 
-  provisioner "local-exec" {
-    command = <<EOT
-      . /deployuser/scripts/exit_test.sh
-      # create volatile storage
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk.yaml --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]} stop_softnas_instance=true mode=attach"; exit_test
-      aws ec2 start-instances --instance-ids ${aws_instance.softnas1.*.id[count.index]}; exit_test
+#   provisioner "local-exec" {
+#     command = <<EOT
+#       . /deployuser/scripts/exit_test.sh
+#       # create volatile storage
+#       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk.yaml --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]} stop_softnas_instance=true mode=attach"; exit_test
+#       aws ec2 start-instances --instance-ids ${aws_instance.softnas1.*.id[count.index]}; exit_test
   
-EOT
+# EOT
 
-  }
-}
+#   }
+# }
 
-resource "null_resource" "shutdown-softnas" {
-  count = ( var.sleep && var.softnas_storage ) ? 1 : 0
+# resource "null_resource" "shutdown-softnas" {
+#   count = ( var.sleep && var.softnas_storage ) ? 1 : 0
 
-  triggers = {
-    instanceid = "${join(",", aws_instance.softnas1.*.id)}"
-  }
+#   triggers = {
+#     instanceid = "${join(",", aws_instance.softnas1.*.id)}"
+#   }
 
-  provisioner "local-exec" {
-    #command = "aws ec2 stop-instances --instance-ids ${aws_instance.softnas1.id}"
+#   provisioner "local-exec" {
+#     #command = "aws ec2 stop-instances --instance-ids ${aws_instance.softnas1.id}"
 
-    command = <<EOT
-      . /deployuser/scripts/exit_test.sh
-      aws ec2 stop-instances --instance-ids ${aws_instance.softnas1.*.id[count.index]}; exit_test
-      # delete volatile storage
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk.yaml --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]} stop_softnas_instance=true mode=destroy"; exit_test
+#     command = <<EOT
+#       . /deployuser/scripts/exit_test.sh
+#       aws ec2 stop-instances --instance-ids ${aws_instance.softnas1.*.id[count.index]}; exit_test
+#       # delete volatile storage
+#       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk.yaml --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]} stop_softnas_instance=true mode=destroy"; exit_test
   
-EOT
+# EOT
 
-  }
-}
+#   }
+# }
 
-resource "null_resource" "attach_local_mounts_after_start" {
-  count      = ( !var.sleep && var.softnas_storage ) ? 1 : 0
-  depends_on = [null_resource.start-softnas]
+# resource "null_resource" "attach_local_mounts_after_start" {
+#   count      = ( !var.sleep && var.softnas_storage ) ? 1 : 0
+#   depends_on = [null_resource.start-softnas]
 
-  #,"null_resource.mount_volumes_onsite"]
+#   #,"null_resource.mount_volumes_onsite"]
 
-  triggers = {
-    instanceid = "${join(",", aws_instance.softnas1.*.id)}"
-    startsoftnas = "${join(",", null_resource.start-softnas.*.id)}"
-    remote_mounts_on_local = var.remote_mounts_on_local
-  }
-  provisioner "remote-exec" {
-    connection {
-      user                = var.softnas_ssh_user
-      host                = aws_instance.softnas1[0].private_ip
-      bastion_host        = var.bastion_ip
-      bastion_user        = "centos"
-      private_key         = var.private_key
-      bastion_private_key = var.private_key
-      type                = "ssh"
-      timeout             = "15m"
-    }
-    inline = [
-      "set -x",
-      "echo 'connection established'",
-    ]
-  }
-  provisioner "local-exec" {
-    interpreter = ["/bin/bash", "-c"]
-    command = <<EOT
-      . /deployuser/scripts/exit_test.sh
-      set -x
-      echo "TF_VAR_remote_mounts_on_local= $TF_VAR_remote_mounts_on_local"
-      # ensure routes on workstation exist
-      if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
-        printf "\n$BLUE CONFIGURE REMOTE ROUTES ON LOCAL NODES $NC\n"
-        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-routes.yaml -v -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser hostname=workstation1 ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key ethernet_device=$TF_VAR_workstation_ethernet_device"; exit_test
-      fi
-      # ensure volumes and pools exist after the disks were ensured to exist - this was done before starting instance.
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-pool.yaml -v; exit_test
-      #ensure exports are correct
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk-update-exports.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]}"; exit_test
-      # mount volumes to local site when softnas is started
-      if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
-        printf "\n$BLUE CONFIGURE REMOTE MOUNTS ON LOCAL NODES $NC\n"
-        # unmount volumes from local site - same as when softnas is shutdown, we need to ensure no mounts are present since existing mounts pointed to an incorrect environment will be wrong
-        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=workstation1 variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
-        # now mount current volumes
-        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
-      fi
-EOT
-  }
-}
+#   triggers = {
+#     instanceid = "${join(",", aws_instance.softnas1.*.id)}"
+#     startsoftnas = "${join(",", null_resource.start-softnas.*.id)}"
+#     remote_mounts_on_local = var.remote_mounts_on_local
+#   }
+#   provisioner "remote-exec" {
+#     connection {
+#       user                = var.softnas_ssh_user
+#       host                = aws_instance.softnas1[0].private_ip
+#       bastion_host        = var.bastion_ip
+#       bastion_user        = "centos"
+#       private_key         = var.private_key
+#       bastion_private_key = var.private_key
+#       type                = "ssh"
+#       timeout             = "15m"
+#     }
+#     inline = [
+#       "set -x",
+#       "echo 'connection established'",
+#     ]
+#   }
+#   provisioner "local-exec" {
+#     interpreter = ["/bin/bash", "-c"]
+#     command = <<EOT
+#       . /deployuser/scripts/exit_test.sh
+#       set -x
+#       echo "TF_VAR_remote_mounts_on_local= $TF_VAR_remote_mounts_on_local"
+#       # ensure routes on workstation exist
+#       if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
+#         printf "\n$BLUE CONFIGURE REMOTE ROUTES ON LOCAL NODES $NC\n"
+#         ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-routes.yaml -v -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser hostname=workstation1 ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key ethernet_device=$TF_VAR_workstation_ethernet_device"; exit_test
+#       fi
+#       # ensure volumes and pools exist after the disks were ensured to exist - this was done before starting instance.
+#       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-pool.yaml -v; exit_test
+#       #ensure exports are correct
+#       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk-update-exports.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]}"; exit_test
+#       # mount volumes to local site when softnas is started
+#       if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
+#         printf "\n$BLUE CONFIGURE REMOTE MOUNTS ON LOCAL NODES $NC\n"
+#         # unmount volumes from local site - same as when softnas is shutdown, we need to ensure no mounts are present since existing mounts pointed to an incorrect environment will be wrong
+#         ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=workstation1 variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
+#         # now mount current volumes
+#         ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
+#       fi
+# EOT
+#   }
+# }
 
-output "attach_local_mounts_after_start" {
-  value = null_resource.attach_local_mounts_after_start.*.id
-}
+# output "attach_local_mounts_after_start" {
+#   value = null_resource.attach_local_mounts_after_start.*.id
+# }
 
-resource "null_resource" "detach_local_mounts_after_stop" {
-  count      = ( var.sleep && var.softnas_storage ) ? 1 : 0
-  depends_on = [null_resource.shutdown-softnas]
+# resource "null_resource" "detach_local_mounts_after_stop" {
+#   count      = ( var.sleep && var.softnas_storage ) ? 1 : 0
+#   depends_on = [null_resource.shutdown-softnas]
 
-  #,"null_resource.mount_volumes_onsite"]
+#   #,"null_resource.mount_volumes_onsite"]
 
-  triggers = {
-    instanceid = "${join(",", aws_instance.softnas1.*.id)}"
-    startsoftnas = "${join(",", null_resource.shutdown-softnas.*.id)}"
-  }
-  provisioner "local-exec" {
-    interpreter = ["/bin/bash", "-c"]
-    command = <<EOT
-      . /deployuser/scripts/exit_test.sh
-      set -x
-      if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
-        # unmount volumes from local site when softnas is shutdown.
-        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=workstation1 variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
-      fi
+#   triggers = {
+#     instanceid = "${join(",", aws_instance.softnas1.*.id)}"
+#     startsoftnas = "${join(",", null_resource.shutdown-softnas.*.id)}"
+#   }
+#   provisioner "local-exec" {
+#     interpreter = ["/bin/bash", "-c"]
+#     command = <<EOT
+#       . /deployuser/scripts/exit_test.sh
+#       set -x
+#       if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
+#         # unmount volumes from local site when softnas is shutdown.
+#         ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=workstation1 variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
+#       fi
   
-EOT
+# EOT
 
-  }
-}
+#   }
+# }
 
