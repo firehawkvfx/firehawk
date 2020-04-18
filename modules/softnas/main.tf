@@ -423,7 +423,8 @@ locals {
 
 
 resource "null_resource" "provision_softnas" {
-  count      = local.provision_softnas && var.softnas_storage ? 1 : 0
+  count      = ( !var.sleep && var.softnas_storage ) ? 1 : 0
+  # count      = local.provision_softnas && var.softnas_storage ? 1 : 0
   depends_on = [aws_instance.softnas1]
 
   triggers = {
@@ -596,7 +597,7 @@ output "softnas1_private_ip" {
 # there is currently too much activity here, but due to the way dependencies work in tf 0.11 its better to keep it in one block.
 # in tf .12 we should split these up and handle dependencies properly.
 resource "null_resource" "provision_softnas_volumes" {
-  count = var.softnas_storage ? 1 : 0
+  count      = ( !var.sleep && var.softnas_storage ) ? 1 : 0
   depends_on = [
     null_resource.provision_softnas,
     null_resource.start-softnas-after-create-ami,

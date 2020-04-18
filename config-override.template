@@ -1,5 +1,4 @@
 # ~/.bashrc
-
 # config override is altered by install scripts but can also be used to override configuration variables.
 
 # WARNING: When editing your config file do not store any secrets / sensitive information here.
@@ -20,6 +19,9 @@
 # New comments should be only added in secrets/config as these lines will be propogated into the config.template schema used to initialise any new  secrets/config file for other users of the Firehawk repo.
 
 # BEGIN CONFIGURATION #
+
+# defaults_config_overide_version:
+defaults_config_overide_version=insertvalue
 
 # TF_VAR_vagrant_destroy_before_deploy:
 # default: TF_VAR_tf_destroy_before_deploy=false
@@ -70,3 +72,7 @@ TF_VAR_softnas_skip_update=insertvalue
 # TF_VAR_install_deadline:
 # default: TF_VAR_install_deadline=true
 TF_VAR_install_deadline=insertvalue
+
+# TF_VAR_taint_single:
+# default: TF_VAR_taint_single=""
+TF_VAR_taint_single=insertvalue
