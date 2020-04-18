@@ -417,6 +417,7 @@ USERDATA
 # When using ssd tiering, you must manually create the ebs volumes and specify the ebs id's in your secrets.  Then they can be locally restored automatically and attached to the instance.
 
 locals {
+  id = element(concat(aws_instance.softnas1.*.id, list("")), 0)
   provision_softnas         = local.use_prebuilt_softnas_ami ? false : true # when using an aquired ami, we will not create another ami as this would replace it.
 }
 
@@ -426,7 +427,7 @@ resource "null_resource" "provision_softnas" {
   depends_on = [aws_instance.softnas1]
 
   triggers = {
-    instanceid = aws_instance.softnas1.*.id
+    instanceid = local.id
     skip_update = var.skip_update
   }
 
@@ -497,7 +498,7 @@ resource "random_id" "ami_unique_name" {
   count = var.softnas_storage ? 1 : 0
   keepers = {
     # Generate a new id each time we switch to a new instance id, or the base_ami cahanges.  this doesn't mean a new ami is generated.
-    ami_id = aws_instance.softnas1.*.id[count.index]
+    ami_id = local.id
     base_ami = local.base_ami
   }
 
@@ -604,7 +605,7 @@ resource "null_resource" "provision_softnas_volumes" {
 
   # "null_resource.start-softnas-after-ebs-attach"
   triggers = {
-    instanceid = aws_instance.softnas1.*.id
+    instanceid = local.id
   }
 
   provisioner "remote-exec" {
@@ -697,7 +698,7 @@ resource "null_resource" "start-softnas" {
   #,"null_resource.mount_volumes_onsite"]
 
   triggers = {
-    instanceid = aws_instance.softnas1.*.id
+    instanceid = local.id
   }
 
   provisioner "local-exec" {
@@ -716,7 +717,7 @@ resource "null_resource" "shutdown-softnas" {
   count = ( var.sleep && var.softnas_storage ) ? 1 : 0
 
   triggers = {
-    instanceid = aws_instance.softnas1.*.id
+    instanceid = local.id
   }
 
   provisioner "local-exec" {
