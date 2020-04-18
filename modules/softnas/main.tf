@@ -270,28 +270,6 @@ resource "aws_security_group" "softnas" {
   }
 }
 
-resource "aws_network_interface" "nas1eth0" {
-  count = var.softnas_storage ? 1 : 0
-  subnet_id       = var.private_subnets[0]
-  private_ips     = [var.softnas1_private_ip1]
-  security_groups = aws_security_group.softnas.*.id
-
-  tags = {
-    Name = "primary_network_interface"
-  }
-}
-
-resource "aws_network_interface" "nas1eth1" {
-  count = var.softnas_storage ? 1 : 0
-  subnet_id       = var.private_subnets[0]
-  private_ips     = [var.softnas1_private_ip2]
-  security_groups = aws_security_group.softnas.*.id
-
-  tags = {
-    Name = "secondary_network_interface"
-  }
-}
-
 variable "allow_prebuilt_softnas_ami" {
 }
 
@@ -366,11 +344,32 @@ output "ami" {
   value = local.ami
 }
 
+# resource "aws_network_interface" "nas1eth0" {
+#   count = var.softnas_storage ? 1 : 0
+#   subnet_id       = var.private_subnets[0]
+#   private_ips     = [var.softnas1_private_ip1]
+#   security_groups = aws_security_group.softnas.*.id
 
+#   tags = {
+#     Name = "primary_network_interface"
+#   }
+# }
+
+# resource "aws_network_interface" "nas1eth1" {
+#   count = var.softnas_storage ? 1 : 0
+#   subnet_id       = var.private_subnets[0]
+#   private_ips     = [var.softnas1_private_ip2]
+#   security_groups = aws_security_group.softnas.*.id
+
+#   tags = {
+#     Name = "secondary_network_interface"
+#   }
+# }
 
 resource "aws_instance" "softnas1" {
   count = var.softnas_storage ? 1 : 0
-  depends_on = [aws_instance.softnas1, var.vpn_private_ip]
+  # depends_on = [ aws_instance.softnas1, var.vpn_private_ip, aws_network_interface.nas1eth0, aws_network_interface.nas1eth1 ]
+  depends_on = [ aws_instance.softnas1, var.vpn_private_ip ]
 
   ami   = local.ami
 
@@ -380,17 +379,21 @@ resource "aws_instance" "softnas1" {
 
   iam_instance_profile = aws_iam_instance_profile.softnas_profile.name
 
-  network_interface {
-    device_index         = 0
-    network_interface_id = element(concat(aws_network_interface.nas1eth0.*.id, list("")), 0)
-    #delete_on_termination = true
-  }
+  # network_interface {
+  #   device_index         = 0
+  #   network_interface_id = element(concat(aws_network_interface.nas1eth0.*.id, list("")), 0)
+  #   #delete_on_termination = true
+  # }
 
-  network_interface {
-    device_index         = 1
-    network_interface_id = element(concat(aws_network_interface.nas1eth1.*.id, list("")), 0)
-    #delete_on_termination = true
-  }
+  # network_interface {
+  #   device_index         = 1
+  #   network_interface_id = element(concat(aws_network_interface.nas1eth1.*.id, list("")), 0)
+  #   #delete_on_termination = true
+  # }
+
+  subnet_id      = element(var.private_subnet_ids, count.index)
+  private_ip     = var.softnas1_private_ip1
+  vpc_security_group_ids = aws_security_group.softnas.*.id
 
   root_block_device {
     volume_size = "100"
