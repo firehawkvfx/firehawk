@@ -152,8 +152,6 @@ else
   fi
 
   if [[ "$tf_action" == "destroy" ]]; then
-
-
     echo "...Currently running instances: scripts/aws-running-instances.sh"
     $TF_VAR_firehawk_path/scripts/aws-running-instances.sh
     printf "\n...Currently existing users in the aws account"
@@ -235,19 +233,20 @@ else
 
     echo "...Terraform sleep"
     terraform apply -lock=false --auto-approve -var sleep=true
-  elif [[ "$tf_action" == "destroy" ]]; then
-    # echo "...Currently running instances: scripts/aws-running-instances.sh"
-    # $TF_VAR_firehawk_path/scripts/aws-running-instances.sh
-    # printf "\n...Currently existing users in the aws account"
-    # aws iam list-users
-    # echo ""
-
-    # echo "...Terraform refresh"
-    # terraform refresh -lock=false; exit_test
-
-    # echo "...Terraform destroy"
-    # terraform destroy -lock=false --auto-approve; exit_test
   fi
+  # elif [[ "$tf_action" == "destroy" ]]; then
+  #   # echo "...Currently running instances: scripts/aws-running-instances.sh"
+  #   # $TF_VAR_firehawk_path/scripts/aws-running-instances.sh
+  #   # printf "\n...Currently existing users in the aws account"
+  #   # aws iam list-users
+  #   # echo ""
+
+  #   # echo "...Terraform refresh"
+  #   # terraform refresh -lock=false; exit_test
+
+  #   # echo "...Terraform destroy"
+  #   # terraform destroy -lock=false --auto-approve; exit_test
+  # fi
 
 
 
