@@ -1,4 +1,3 @@
----
 - hosts: "{{ variable_host | default('ansible_control') }}"
   remote_user: "{{ variable_user | default('deployuser') }}"
   become: true
@@ -6,8 +5,10 @@
   vars:
     source: '/var/log/cloud-init-output.log'
     dest: 'firehawk/tmp/'
-
-  fetch:
-    src: source
-    dest: dest
-    flat: yes
+  
+  tasks:
+  - name: get file
+    fetch:
+      src: source
+      dest: dest
+      flat: yes

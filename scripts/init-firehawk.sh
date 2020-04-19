@@ -204,12 +204,12 @@ else
       found=false
       for item in $TF_VAR_taint_single; do
         set -x
-        # problems with grepping for predefined strings with []
-        # if terraform state list | grep -q $item; then 
-        #   echo "Resource exists, will taint."
-        #   found=true
-        # fi
-        terraform taint -lock=false $item || echo "Suppress Exit Code"
+        test_string="${item%[*}" # ignore the brackets on resources
+        if terraform state list | grep -q $test_string; then 
+          echo "Resource exists, will taint."
+          found=true
+          terraform taint -lock=false $item || echo "Suppress Exit Code"
+        fi
       done
       if [ "$found" == false ]; then echo "No Resources were Tainted"; fi
     fi
