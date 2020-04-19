@@ -176,27 +176,28 @@ else
   # if [[ "$TF_VAR_taint_single"=='""' ]]; then echo 'unset TF_VAR_taint_single'; unset TF_VAR_taint_single; fi
   # if [[ "$TF_VAR_taint_single"=="" ]]; then echo 'unset TF_VAR_taint_single'; unset TF_VAR_taint_single; fi
 
-  if [ ! -z "$TF_VAR_taint_single" ]; then
-    terraform state list
-    # Iterate the string variable using for loop
-    for item in $TF_VAR_taint_single; do echo "terraform taint $item"; done
-    echo "...Terraform refresh"
-    terraform refresh -lock=false; exit_test
-    echo "...Finding Resources to taint"
-    found=false
-    for item in $TF_VAR_taint_single; do
-      set -x
-      # problems with grepping for predefined strings with []
-      # if terraform state list | grep -q $item; then 
-      #   echo "Resource exists, will taint."
-      #   found=true
-      # fi
-      terraform taint -lock=false $item || echo "Suppress Exit Code"
-    done
-    if [ "$found" == false ]; then echo "No Resources were Tainted"; fi
-  fi
-
   if [[ "$tf_action" == "apply" ]]; then
+
+    if [ ! -z "$TF_VAR_taint_single" ]; then
+      terraform state list
+      # Iterate the string variable using for loop
+      for item in $TF_VAR_taint_single; do echo "terraform taint $item"; done
+      echo "...Terraform refresh"
+      terraform refresh -lock=false; exit_test
+      echo "...Finding Resources to taint"
+      found=false
+      for item in $TF_VAR_taint_single; do
+        set -x
+        # problems with grepping for predefined strings with []
+        # if terraform state list | grep -q $item; then 
+        #   echo "Resource exists, will taint."
+        #   found=true
+        # fi
+        terraform taint -lock=false $item || echo "Suppress Exit Code"
+      done
+      if [ "$found" == false ]; then echo "No Resources were Tainted"; fi
+    fi
+
     echo "...Currently running instances: scripts/aws-running-instances.sh"
     $TF_VAR_firehawk_path/scripts/aws-running-instances.sh
     echo ""
