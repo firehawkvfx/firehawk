@@ -153,7 +153,8 @@ else
 
   if [[ "$tf_action" == "destroy" ]]; then
     echo "...Use state backup.  This shouldn't care if a deployment failed last"
-    cp -f terraform.tfstate.backup terraform.tfstate
+    cp -fv terraform.tfstate.backup terraform.tfstate
+    ls -ltriah
   fi
 
   if [[ "$tf_init" == true ]]; then
