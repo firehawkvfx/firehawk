@@ -7,8 +7,9 @@
     dest: 'firehawk/tmp/'
   
   tasks:
-  - name: get file
+  - name: "Get file {{ source }} copy to {{ dest }}"
     fetch:
-      src: source
-      dest: dest
+      src: "{{ source }}"
+      dest: "{{ dest }}"
       flat: yes
+    become: true
