@@ -71,6 +71,7 @@ tf_action="apply"
 tf_init=false
 init_vm_config=true
 vagrant_halt=false
+fast=false
 
 parse_opts () {
     local OPTIND

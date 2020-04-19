@@ -56,6 +56,7 @@ cd /deployuser
 tf_action="apply"
 tf_init=false
 init_vm_config=true
+fast=false
 
 optspec=":h-:"
 
@@ -114,6 +115,16 @@ parse_opts () {
                         init_vm_config=${OPTARG#*=}
                         opt=${OPTARG%=$val}
                         echo "init_vm_config set: $init_vm_config"
+                        ;;
+                    fast)
+                        fast="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+                        opt="${OPTARG}"
+                        echo "fast set: $fast"
+                        ;;
+                    fast=*)
+                        fast=${OPTARG#*=}
+                        opt=${OPTARG%=$val}
+                        echo "fast: $fast"
                         ;;
                     *)
                         if [ "$OPTERR" = 1 ] && [ "${optspec:0:1}" != ":" ]; then

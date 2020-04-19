@@ -467,7 +467,7 @@ resource "null_resource" "wait_softnas_up" {
       "ssh-keyscan ${aws_instance.softnas1[0].private_ip}",
       "which python",
       "python --version",
-      "rm /etc/udev/rules.d/70-persistent-net.rules", # this file may need to be removed in order to create an image that will work.
+      "rm -fv /etc/udev/rules.d/70-persistent-net.rules", # this file may need to be removed in order to create an image that will work.
       # "sudo yum install -y python",
     ]
   }
