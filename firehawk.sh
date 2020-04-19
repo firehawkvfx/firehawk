@@ -169,6 +169,16 @@ parse_opts () {
                         opt=${OPTARG%=$val}
                         echo "init_vm_config set: $init_vm_config"
                         ;;
+                    fast)
+                        fast="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+                        opt="${OPTARG}"
+                        echo "fast set: $fast"
+                        ;;
+                    fast=*)
+                        fast=${OPTARG#*=}
+                        opt=${OPTARG%=$val}
+                        echo "fast: $fast"
+                        ;;
                     *)
                         if [ "$OPTERR" = 1 ] && [ "${optspec:0:1}" != ":" ]; then
                             echo "Unknown option --${OPTARG}" >&2
@@ -189,6 +199,11 @@ parse_opts () {
 parse_opts "$@"
 
 echo "opts $@"
+
+if [[ "$fast" == true ]]; then
+    echo "Fast start.  Disable init_vm_config"
+    init_vm_config=false
+fi
 
 # This is the directory of the current script
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
