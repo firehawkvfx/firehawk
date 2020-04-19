@@ -151,6 +151,11 @@ else
     echo "...Bypassing Init VM's"
   fi
 
+  if [[ "$tf_action" == "destroy" ]]; then
+    echo "...Use state backup.  This shouldn't care if a deployment failed last"
+    cp -f terraform.tfstate.backup terraform.tfstate
+  fi
+
   if [[ "$tf_init" == true ]]; then
     echo "...Currently running instances: scripts/aws-running-instances.sh"
     $TF_VAR_firehawk_path/scripts/aws-running-instances.sh
@@ -221,8 +226,6 @@ else
     printf "\n...Currently existing users in the aws account"
     aws iam list-users
     echo ""
-    echo "Use state backup.  This shouldn't care if a deployment failed last"
-    cp -f terraform.tfstate.backup terraform.tfstate
 
     echo "...Terraform refresh"
     terraform refresh -lock=false; exit_test
@@ -230,6 +233,8 @@ else
     echo "...Terraform destroy"
     terraform destroy -lock=false --auto-approve; exit_test
   fi
+
+
 
   if [[ "$deadline_action" == "stop" ]]; then
     ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-stop.yaml -v; exit_test
