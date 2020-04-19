@@ -391,7 +391,7 @@ resource "aws_instance" "softnas1" {
   #   #delete_on_termination = true
   # }
 
-  subnet_id      = element(var.private_subnets, count.index)
+  subnet_id      = element(concat(var.private_subnets, list("")), count.index)
   private_ip     = var.softnas1_private_ip1
   vpc_security_group_ids = aws_security_group.softnas.*.id
 

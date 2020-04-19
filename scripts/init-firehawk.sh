@@ -159,7 +159,6 @@ else
     echo ""
     echo "...Use state backup for destroy.  This shouldn't care if a deployment failed last"
     cp -fv terraform.tfstate.backup terraform.tfstate
-    ls -ltriah
 
     # echo "...Terraform refresh"
     # terraform refresh -lock=false; exit_test
