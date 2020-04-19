@@ -221,6 +221,8 @@ else
     printf "\n...Currently existing users in the aws account"
     aws iam list-users
     echo ""
+    echo "Use state backup.  This shouldn't care if a deployment failed last"
+    cp -f terraform.tfstate.backup terraform.tfstate
 
     echo "...Terraform refresh"
     terraform refresh -lock=false; exit_test
