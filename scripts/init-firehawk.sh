@@ -165,6 +165,10 @@ else
 
     echo "...Terraform destroy"
     terraform destroy -lock=false --auto-approve; exit_test
+
+    rm terraform.tfstate --auto-approve; exit_test
+
+    terraform init; exit_test # Required to initialise any new modules
   fi
 
   if [[ "$tf_init" == true ]]; then
@@ -190,6 +194,7 @@ else
   if [[ "$tf_action" == "apply" ]]; then
 
     if [ ! -z "$TF_VAR_taint_single" ]; then
+      echo "...Terraform state"
       terraform state list
       # Iterate the string variable using for loop
       for item in $TF_VAR_taint_single; do echo "terraform taint $item"; done
