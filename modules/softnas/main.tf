@@ -311,8 +311,7 @@ data "aws_ami_ids" "prebuilt_softnas_ami_list" { # search for a prebuilt tagged 
   }
   filter {
     name = "name"
-    values = ["softnas_prebuilt_.*"]
-    regex = true
+    values = ["softnas_prebuilt_*"]
   }
 }
 
