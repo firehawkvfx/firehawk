@@ -427,11 +427,9 @@ locals {
   skip_packages = local.use_prebuilt_softnas_ami # when using an aquired ami, we will not create another ami as this would replace it.
 }
 
-
-resource "null_resource" "provision_softnas" {
+resource "null_resource" "wait_softnas_up" {
   count      = ( !var.sleep && var.softnas_storage ) ? 1 : 0
-  # count      = local.provision_softnas && var.softnas_storage ? 1 : 0
-  depends_on = [aws_instance.softnas1, var.vpn_private_ip]
+  depends_on = [aws_instance.softnas1]
 
   triggers = {
     instanceid = "${join(",", aws_instance.softnas1.*.id)}"
@@ -449,7 +447,97 @@ resource "null_resource" "provision_softnas" {
       private_key         = var.private_key
       bastion_private_key = var.private_key
       type                = "ssh"
-      timeout             = "15m"
+      timeout             = "10m"
+    }
+
+    # sleep 300 is required because ecdsa key wont exist for a while, and you can't continue without it.
+    inline = [
+      "set -x",
+      "while [ ! -f /etc/ssh/ssh_host_ecdsa_key.pub ]",
+      "do",
+      "  sleep 10",
+      "done",
+      "cat /etc/ssh/ssh_host_ecdsa_key.pub",
+      "cat /etc/ssh/ssh_host_rsa_key.pub",
+      "cat /etc/ssh/ssh_host_ecdsa_key.pub",
+      "ssh-keyscan ${aws_instance.softnas1[0].private_ip}",
+      "which python",
+      "python --version",
+      # "sudo yum install -y python",
+    ]
+  }
+}
+
+resource "random_id" "ami_init_unique_name" {
+  count = local.create_ami && var.softnas_storage ? 1 : 0
+  depends_on = [
+    aws_instance.softnas1,
+    null_resource.wait_softnas_up,
+  ]
+  keepers = { # Generate a new id each time we switch to a new instance id, or the base_ami cahanges.  this doesn't mean a new ami is generated.
+    ami_id = local.id
+    base_ami = local.base_ami
+  }
+  byte_length = 8
+}
+
+# This init ami is for testing to verify the base image can be used with other instances.  In some versions of softnas this stage has failed.
+resource "null_resource" "create_ami_init" {
+  count = local.create_ami && var.softnas_storage ? 1 : 0
+  depends_on = [
+    aws_instance.softnas1,
+    null_resource.wait_softnas_up,
+  ]
+  triggers = {
+    instanceid = "${join(",", aws_instance.softnas1.*.id)}"
+    base_ami = local.base_ami
+  }
+  provisioner "remote-exec" {
+    connection {
+      user                = var.softnas_ssh_user
+      host                = aws_instance.softnas1[0].private_ip
+      bastion_host        = var.bastion_ip
+      bastion_user        = "centos"
+      private_key         = var.private_key
+      bastion_private_key = var.private_key
+      type                = "ssh"
+      timeout             = "10m"
+    }
+    inline = ["set -x && echo 'booted'"]
+  }
+  provisioner "local-exec" {
+    command = <<EOT
+      set -x
+      cd /deployuser
+      # ami creation is unnecesary since softnas ami update.  will be needed in future again if softnas updates slow down deployment.
+      ansible-playbook -i "$TF_VAR_inventory" ansible/aws-ami.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]} ami_name=softnas_init_${local.ami} base_ami=${local.ami} description=softnas1_${aws_instance.softnas1.*.id[count.index]}_${random_id.ami_init_unique_name[0].hex}"
+      aws ec2 start-instances --instance-ids ${aws_instance.softnas1.*.id[count.index]}
+EOT
+  }
+}
+
+
+resource "null_resource" "provision_softnas" {
+  count      = ( !var.sleep && var.softnas_storage ) ? 1 : 0
+  depends_on = [aws_instance.softnas1, null_resource.wait_softnas_up, null_resource.create_ami_init, var.vpn_private_ip]
+
+  triggers = {
+    instanceid = "${join(",", aws_instance.softnas1.*.id)}"
+    skip_update = var.skip_update
+  }
+
+  # some time is required before the ecdsa key file exists.
+  # some time is required before the ecdsa key file exists.
+  provisioner "remote-exec" {
+    connection {
+      user                = var.softnas_ssh_user
+      host                = aws_instance.softnas1[0].private_ip
+      bastion_host        = var.bastion_ip
+      bastion_user        = "centos"
+      private_key         = var.private_key
+      bastion_private_key = var.private_key
+      type                = "ssh"
+      timeout             = "10m"
     }
 
     # sleep 300 is required because ecdsa key wont exist for a while, and you can't continue without it.
@@ -512,7 +600,7 @@ EOT
       private_key         = var.private_key
       bastion_private_key = var.private_key
       type                = "ssh"
-      timeout             = "15m"
+      timeout             = "10m"
     }
     inline = ["set -x && echo 'booted after init'"]
   }
@@ -529,12 +617,10 @@ resource "random_id" "ami_unique_name" {
     aws_instance.softnas1,
     null_resource.provision_softnas,
   ]
-  keepers = {
-    # Generate a new id each time we switch to a new instance id, or the base_ami cahanges.  this doesn't mean a new ami is generated.
+  keepers = { # Generate a new id each time we switch to a new instance id, or the base_ami cahanges.  this doesn't mean a new ami is generated.
     ami_id = local.id
     base_ami = local.base_ami
   }
-
   byte_length = 8
 }
 
@@ -545,13 +631,10 @@ resource "null_resource" "create_ami" {
     aws_instance.softnas1,
     null_resource.provision_softnas,
   ]
-
   triggers = {
     instanceid = "${join(",", aws_instance.softnas1.*.id)}"
-    # aws_instance.softnas1.*.id
     base_ami = local.base_ami
   }
-
   provisioner "remote-exec" {
     connection {
       user                = var.softnas_ssh_user
@@ -561,9 +644,8 @@ resource "null_resource" "create_ami" {
       private_key         = var.private_key
       bastion_private_key = var.private_key
       type                = "ssh"
-      timeout             = "15m"
+      timeout             = "10m"
     }
-
     inline = ["set -x && echo 'booted'"]
   }
   provisioner "local-exec" {
@@ -642,7 +724,7 @@ resource "null_resource" "provision_softnas_volumes" {
       private_key         = var.private_key
       bastion_private_key = var.private_key
       type                = "ssh"
-      timeout             = "15m"
+      timeout             = "10m"
     }
 
     inline = ["set -x && echo 'booted'"]
@@ -687,7 +769,7 @@ EOT
       private_key         = var.private_key
       bastion_private_key = var.private_key
       type                = "ssh"
-      timeout             = "15m"
+      timeout             = "10m"
     }
 
     inline = ["set -x && echo 'booted'"]
@@ -790,7 +872,7 @@ resource "null_resource" "attach_local_mounts_after_start" {
       private_key         = var.private_key
       bastion_private_key = var.private_key
       type                = "ssh"
-      timeout             = "15m"
+      timeout             = "10m"
     }
     inline = [
       "set -x",
