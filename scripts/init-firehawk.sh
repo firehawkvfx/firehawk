@@ -209,8 +209,14 @@ else
       terraform state list
       # Iterate the string variable using for loop
       for item in $TF_VAR_taint_single; do echo "terraform taint $item"; done
-      echo "...Terraform refresh"
-      terraform refresh -lock=false; exit_test
+
+      if [[ "$fast" == true ]]; then
+        echo "Fast start.  Skip refresh"
+      else
+        echo "...Terraform refresh"
+        terraform refresh -lock=false; exit_test
+      fi
+
       echo "...Finding Resources to taint"
       found=false
       for item in $TF_VAR_taint_single; do
@@ -231,8 +237,12 @@ else
   
     echo "...Start Terraform"
 
-    echo "...Terraform refresh"
-    terraform refresh -lock=false; exit_test
+    if [[ "$fast" == true ]]; then
+      echo "Fast start.  Skip refresh"
+    else
+      echo "...Terraform refresh"
+      terraform refresh -lock=false; exit_test
+    fi
     echo "...Terraform state list"
     terraform state list
     echo "...Terraform apply"
