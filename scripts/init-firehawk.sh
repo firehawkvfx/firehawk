@@ -166,7 +166,7 @@ else
     echo "...Terraform destroy"
     terraform destroy -lock=false --auto-approve; exit_test
 
-    rm terraform.tfstate --auto-approve; exit_test
+    rm -fv terraform.tfstate; exit_test
 
     terraform init; exit_test # Required to initialise any new modules
   fi

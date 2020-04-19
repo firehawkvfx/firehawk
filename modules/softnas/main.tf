@@ -309,6 +309,11 @@ data "aws_ami_ids" "prebuilt_softnas_ami_list" { # search for a prebuilt tagged 
     name   = "tag:base_ami"
     values = ["${local.base_ami}"]
   }
+  filter {
+    name = "name"
+    values = ["softnas_prebuilt_.*"]
+    regex = true
+  }
 }
 
 locals {
@@ -463,6 +468,7 @@ resource "null_resource" "wait_softnas_up" {
       "ssh-keyscan ${aws_instance.softnas1[0].private_ip}",
       "which python",
       "python --version",
+      "rm /etc/udev/rules.d/70-persistent-net.rules", # this file may need to be removed in order to create an image that will work.
       # "sudo yum install -y python",
     ]
   }
@@ -653,7 +659,7 @@ resource "null_resource" "create_ami" {
       set -x
       cd /deployuser
       # ami creation is unnecesary since softnas ami update.  will be needed in future again if softnas updates slow down deployment.
-      ansible-playbook -i "$TF_VAR_inventory" ansible/aws-ami.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]} ami_name=softnas_${local.ami} base_ami=${local.ami} description=softnas1_${aws_instance.softnas1.*.id[count.index]}_${random_id.ami_unique_name[0].hex}"
+      ansible-playbook -i "$TF_VAR_inventory" ansible/aws-ami.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]} ami_name=softnas_prebuilt_${local.ami} base_ami=${local.ami} description=softnas1_${aws_instance.softnas1.*.id[count.index]}_${random_id.ami_unique_name[0].hex}"
       aws ec2 start-instances --instance-ids ${aws_instance.softnas1.*.id[count.index]}
 EOT
   }
