@@ -277,30 +277,30 @@ data "aws_ami_ids" "burrst_softnas" {
   owners = ["679593333241"] # the softnas account id
   filter {
     name   = "description"
-    values = ["SoftNAS*4.4.1"]
+    values = ["SoftNAS - 4.4.1"]
   }
 }
 
-data "aws_ami_ids" "softnas_platinum_consumption_lower" {
+data "aws_ami_ids" "burrst_softnas_byol" {
   owners = ["679593333241"] # the softnas account id
   filter {
     name   = "description"
-    values = ["SoftNAS Cloud Platinum - Consumption (For Lower Compute Requirements) - 4.3.0"]
+    values = ["SoftNAS BYOL - 4.4.1"]
   }
 }
 
-variable "softnas_performance" {
+variable "softnas_ami_option" {
   default = "burrst_softnas"
 }
 
 locals {
-  keys = ["burrst_softnas","softnas_platinum_consumption_lower"]
-  values = ["${element( data.aws_ami_ids.burrst_softnas.ids, 0 )}", "${element( data.aws_ami_ids.softnas_platinum_consumption_lower.ids, 0 )}"]
+  keys = ["burrst_softnas","burrst_softnas_byol"]
+  values = ["${element( data.aws_ami_ids.burrst_softnas.ids, 0 )}", "${element( data.aws_ami_ids.burrst_softnas_byol.ids, 0 )}"]
   softnas_platinum_consumption_map = zipmap( local.keys , local.values )
 }
 
 locals { # select the found ami to use based on the map lookup
-  base_ami = lookup(local.softnas_platinum_consumption_map, var.softnas_performance)
+  base_ami = lookup(local.softnas_platinum_consumption_map, var.softnas_ami_option)
 }
 
 data "aws_ami_ids" "prebuilt_softnas_ami_list" { # search for a prebuilt tagged ami with the same base image.  if there is a match, it can be used instead, allowing us to skip updates.
