@@ -168,8 +168,8 @@ else
     printf "\n...Currently existing users in the aws account"
     aws iam list-users
     echo ""
-    echo "...Use state backup for destroy.  This shouldn't care if a deployment failed last"
-    cp -fv terraform.tfstate.backup terraform.tfstate
+    # echo "...Use state backup for destroy.  This shouldn't care if a deployment failed last" # temp disable.  this is not best practice.  reserve for recovery in case of failure
+    # cp -fv terraform.tfstate.backup terraform.tfstate
 
     # echo "...Terraform refresh"
     # terraform refresh -lock=false; exit_test
