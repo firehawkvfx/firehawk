@@ -179,7 +179,10 @@ else
     echo "...Terraform destroy"
     terraform destroy -lock=false --auto-approve; exit_test
 
-    rm -fv terraform.tfstate; exit_test
+    if [-f terraform.tfstate ]; then
+      echo "...Removing terraform.tfstate for clean start."
+      rm -fv terraform.tfstate; exit_test
+    fi
 
     terraform init; exit_test # Required to initialise any new modules
   fi
