@@ -273,11 +273,11 @@ resource "aws_security_group" "softnas" {
 variable "allow_prebuilt_softnas_ami" {
 }
 
-data "aws_ami_ids" "softnas_platinum_consumption_higher" {
+data "aws_ami_ids" "burrst_softnas" {
   owners = ["679593333241"] # the softnas account id
   filter {
     name   = "description"
-    values = ["SoftNAS Cloud Platinum - Consumption - 4.3.0"]
+    values = ["SoftNAS*4.4.1"]
   }
 }
 
@@ -290,12 +290,12 @@ data "aws_ami_ids" "softnas_platinum_consumption_lower" {
 }
 
 variable "softnas_performance" {
-  default = "softnas_platinum_consumption_higher"
+  default = "burrst_softnas"
 }
 
 locals {
-  keys = ["softnas_platinum_consumption_higher","softnas_platinum_consumption_lower"]
-  values = ["${element( data.aws_ami_ids.softnas_platinum_consumption_higher.ids, 0 )}", "${element( data.aws_ami_ids.softnas_platinum_consumption_lower.ids, 0 )}"]
+  keys = ["burrst_softnas","softnas_platinum_consumption_lower"]
+  values = ["${element( data.aws_ami_ids.burrst_softnas.ids, 0 )}", "${element( data.aws_ami_ids.softnas_platinum_consumption_lower.ids, 0 )}"]
   softnas_platinum_consumption_map = zipmap( local.keys , local.values )
 }
 
@@ -558,6 +558,7 @@ resource "null_resource" "provision_softnas" {
       "ssh-keyscan ${aws_instance.softnas1[0].private_ip}",
       "which python",
       "python --version",
+      # "sudo rm -fv /etc/udev/rules.d/70-persistent-net.rules", # this file may need to be removed in order to create an image that will work.
       # "sudo yum install -y python",
     ]
   }
