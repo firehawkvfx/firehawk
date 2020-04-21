@@ -478,11 +478,12 @@ resource "random_id" "ami_init_unique_name" {
   depends_on = [
     aws_instance.softnas1,
     null_resource.wait_softnas_up,
-    ami = local.ami,
+    local.ami,
   ]
   keepers = { # Generate a new id each time we switch to a new instance id, or the base_ami cahanges.  this doesn't mean a new ami is generated.
     ami_id = local.id
     base_ami = local.base_ami
+    ami = local.ami
   }
   byte_length = 8
 }
