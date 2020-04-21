@@ -213,6 +213,13 @@ else
   if [[ "$tf_action" == "apply" ]]; then
 
     if [ ! -z "$TF_VAR_taint_single" ]; then
+      if [[ "$fast" == true ]]; then
+        echo "Fast start.  Skip refresh"
+      else
+        echo "...Terraform refresh"
+        terraform refresh -lock=false; exit_test
+      fi
+
       echo "...Terraform state"
       terraform state list
 
@@ -220,12 +227,7 @@ else
       # Iterate the string variable using for loop
       for item in "${TF_VAR_taint_single[@]}"; do echo "terraform taint $item"; done
 
-      if [[ "$fast" == true ]]; then
-        echo "Fast start.  Skip refresh"
-      else
-        echo "...Terraform refresh"
-        terraform refresh -lock=false; exit_test
-      fi
+
 
       echo "...Finding Resources to taint: ${TF_VAR_taint_single[*]}"
       found=false
