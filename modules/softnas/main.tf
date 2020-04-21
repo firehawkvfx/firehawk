@@ -436,8 +436,9 @@ resource "null_resource" "wait_softnas_up" {
   depends_on = [aws_instance.softnas1]
 
   triggers = {
-    instanceid = "${join(",", aws_instance.softnas1.*.id)}"
-    skip_update = var.skip_update
+    instanceid = "${join(",", aws_instance.softnas1.*.id)}",
+    skip_update = var.skip_update,
+    ami = local.ami,
   }
 
   # some time is required before the ecdsa key file exists.
@@ -477,6 +478,7 @@ resource "random_id" "ami_init_unique_name" {
   depends_on = [
     aws_instance.softnas1,
     null_resource.wait_softnas_up,
+    ami = local.ami,
   ]
   keepers = { # Generate a new id each time we switch to a new instance id, or the base_ami cahanges.  this doesn't mean a new ami is generated.
     ami_id = local.id
@@ -519,15 +521,20 @@ resource "null_resource" "create_ami_init" {
 EOT
   }
 }
+locals {
+  create_ami_resource_id = concat(null_resource.create_ami_init.*.id, list(""))
+}
 
 
 resource "null_resource" "provision_softnas" {
   count      = ( !var.sleep && var.softnas_storage ) ? 1 : 0
-  depends_on = [aws_instance.softnas1, null_resource.wait_softnas_up, null_resource.create_ami_init, var.vpn_private_ip]
+  depends_on = [aws_instance.softnas1, null_resource.wait_softnas_up, local.create_ami_resource_id, var.vpn_private_ip]
 
   triggers = {
-    instanceid = "${join(",", aws_instance.softnas1.*.id)}"
-    skip_update = var.skip_update
+    instanceid = "${join(",", aws_instance.softnas1.*.id)}",
+    create_ami_resource_id = local.create_ami_resource_id,
+    skip_update = var.skip_update,
+    ami = local.ami
   }
 
   # some time is required before the ecdsa key file exists.

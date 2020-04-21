@@ -179,7 +179,7 @@ else
     echo "...Terraform destroy"
     terraform destroy -lock=false --auto-approve; exit_test
 
-    if [-f terraform.tfstate ]; then
+    if [ -f terraform.tfstate ]; then
       echo "...Removing terraform.tfstate for clean start."
       rm -fv terraform.tfstate; exit_test
     fi
@@ -224,7 +224,7 @@ else
         terraform refresh -lock=false; exit_test
       fi
 
-      echo "...Finding Resources to taint"
+      echo "...Finding Resources to taint: ${TF_VAR_taint_single[*]}"
       found=false
       for item in "${TF_VAR_taint_single[@]}"; do
         set -x
