@@ -533,7 +533,7 @@ resource "null_resource" "provision_softnas" {
 
   triggers = {
     instanceid = "${join(",", aws_instance.softnas1.*.id)}",
-    create_ami_resource_id = local.create_ami_resource_id,
+    # create_ami_resource_id = local.create_ami_resource_id,
     skip_update = var.skip_update,
     ami = local.ami
   }
