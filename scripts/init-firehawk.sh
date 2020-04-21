@@ -168,17 +168,15 @@ else
     printf "\n...Currently existing users in the aws account"
     aws iam list-users
     echo ""
-    echo "...Terraform refresh"
-    terraform refresh -lock=false; exit_test
+    
 
     # echo "...Use state backup for destroy.  This shouldn't care if a deployment failed last" # temp disable.  this is not best practice.  reserve for recovery in case of failure
     # 
 
-
-
-    echo "...Terraform destroy"
-    if terraform destroy -lock=false --auto-approve; then
-      echo "Destroy succeeded."
+    echo "...Terraform refresh"
+    if terraform refresh -lock=false; then
+      echo "...Terraform destroy"
+      terraform destroy -lock=false --auto-approve
     else
       echo "...First destroy attempts failed.  terraform.tfstate is likely corrupted, we will restore from backup and attempt destroy again."
       cp -fv terraform.tfstate.backup terraform.tfstate
