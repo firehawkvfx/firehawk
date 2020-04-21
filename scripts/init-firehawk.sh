@@ -213,7 +213,7 @@ else
       echo "...Terraform state"
       terraform state list
       # Iterate the string variable using for loop
-      for item in $TF_VAR_taint_single; do echo "terraform taint $item"; done
+      for item in "${TF_VAR_taint_single[@]}"; do echo "terraform taint $item"; done
 
       if [[ "$fast" == true ]]; then
         echo "Fast start.  Skip refresh"
@@ -224,8 +224,9 @@ else
 
       echo "...Finding Resources to taint"
       found=false
-      for item in $TF_VAR_taint_single; do
+      for item in "${TF_VAR_taint_single[@]}"; do
         set -x
+        echo "Check item: $item"
         test_string="${item%[*}" # ignore the brackets on resources
         if terraform state list | grep -q $test_string; then 
           echo "Resource exists, will taint."
