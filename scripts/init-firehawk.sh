@@ -196,14 +196,14 @@ else
     terraform init; exit_test # Required to initialise any new modules
   fi
 
-  echo "TF_VAR_taint_single: $TF_VAR_taint_single"
+  echo "TF_VAR_taint_single: ${TF_VAR_taint_single[*]}"
   cat $TF_VAR_secrets_path/config-override-$TF_VAR_envtier
   echo ""
 
   IFS=' ' # need to define whitespace seperator
 
-  eval TF_VAR_taint_single=${TF_VAR_taint_single}
-  export TF_VAR_taint_single=${TF_VAR_taint_single}
+  # eval TF_VAR_taint_single=${TF_VAR_taint_single}
+  # export TF_VAR_taint_single=${TF_VAR_taint_single}
   # if [[ "$TF_VAR_taint_single"=='""' ]]; then echo 'unset TF_VAR_taint_single'; unset TF_VAR_taint_single; fi
   # if [[ "$TF_VAR_taint_single"=="" ]]; then echo 'unset TF_VAR_taint_single'; unset TF_VAR_taint_single; fi
 
@@ -212,6 +212,8 @@ else
     if [ ! -z "$TF_VAR_taint_single" ]; then
       echo "...Terraform state"
       terraform state list
+
+      echo "iterate through array: ${TF_VAR_taint_single[*]}"
       # Iterate the string variable using for loop
       for item in "${TF_VAR_taint_single[@]}"; do echo "terraform taint $item"; done
 
