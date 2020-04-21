@@ -172,12 +172,17 @@ else
     terraform refresh -lock=false; exit_test
 
     # echo "...Use state backup for destroy.  This shouldn't care if a deployment failed last" # temp disable.  this is not best practice.  reserve for recovery in case of failure
-    # cp -fv terraform.tfstate.backup terraform.tfstate
+    # 
 
 
 
     echo "...Terraform destroy"
-    terraform destroy -lock=false --auto-approve; exit_test
+    if terraform destroy -lock=false --auto-approve; then
+      echo "Destroy succeeded."
+    else
+      echo "...First destroy attempts failed.  terraform.tfstate is likely corrupted, we will restore from backup and attempt destroy again."
+      cp -fv terraform.tfstate.backup terraform.tfstate
+    fi
 
     if [ -f terraform.tfstate ]; then
       echo "...Removing terraform.tfstate for clean start."
