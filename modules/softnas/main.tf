@@ -467,8 +467,7 @@ resource "null_resource" "wait_softnas_up" {
       "ssh-keyscan ${aws_instance.softnas1[0].private_ip}",
       "which python",
       "python --version",
-      "sudo rm -fv /etc/udev/rules.d/70-persistent-net.rules", # this file may need to be removed in order to create an image that will work.
-      # "sudo yum install -y python",
+      "if [-f /etc/udev/rules.d/70-persistent-net.rules ]; then sudo rm -fv /etc/udev/rules.d/70-persistent-net.rules; fi", # this file may need to be removed in order to create an image that will work.
     ]
   }
 }
@@ -558,8 +557,7 @@ resource "null_resource" "provision_softnas" {
       "ssh-keyscan ${aws_instance.softnas1[0].private_ip}",
       "which python",
       "python --version",
-      # "sudo rm -fv /etc/udev/rules.d/70-persistent-net.rules", # this file may need to be removed in order to create an image that will work.
-      # "sudo yum install -y python",
+      "if [-f /etc/udev/rules.d/70-persistent-net.rules ]; then sudo rm -fv /etc/udev/rules.d/70-persistent-net.rules; fi", # this file may need to be removed in order to create an image that will work.
     ]
   }
   provisioner "local-exec" {
