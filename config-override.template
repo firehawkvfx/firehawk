@@ -76,3 +76,8 @@ TF_VAR_install_deadline=insertvalue
 # TF_VAR_taint_single:
 # default: TF_VAR_taint_single=""
 TF_VAR_taint_single=insertvalue
+
+# TF_VAR_allow_prebuilt_softnas_ami:
+# If set to false, it will replace the existing prebuilt ami.
+# default: TF_VAR_allow_prebuilt_softnas_ami=true
+TF_VAR_allow_prebuilt_softnas_ami=insertvalue
