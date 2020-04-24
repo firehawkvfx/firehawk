@@ -44,6 +44,15 @@
     recurse: yes
   become: true
 
+# - name: "set permissions on download_houdini.py"
+#   file: 
+#     dest: "/opt/houdini_install_script/download_houdini.py"
+#     owner: deadlineuser 
+#     group: syscontrol
+#     mode: u=rwX,g=rwX,o=r
+#   become: true
+  
+
 - set_fact:
     houdini_linux_filename: "{{ houdini_version_item.houdini_linux_filename }}"
 
@@ -67,6 +76,9 @@
   register: houdini_query_out
   become: true
   when: houdini_version_item.houdini_auto_version
+  environment:
+    sesi_client_id: "{{ lookup('env','sesi_client_id') }}"
+    sesi_client_secret_key: "{{ lookup('env','sesi_client_secret_key') }}"
 
 - name: Python output
   debug:
