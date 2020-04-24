@@ -161,7 +161,7 @@
     cd /opt/houdini_install_script/
     . /opt/houdini_install_script/exit_test.sh
     tar -xvf {{ download_to_dir }}/{{ houdini_linux_filename }} -C {{ download_to_dir }}; exit_test
-    sudo {{ download_to_dir }}/{{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}/houdini.install --auto-install --accept-EULA --install-houdini --install-hfs-symlink --install-dir /opt/houdini/{{ build }}; exit_test
+    sudo {{ download_to_dir }}/{{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}/houdini.install --auto-install --accept-EULA --install-houdini --no-license --install-hfs-symlink --make-dir /opt/houdini/{{ build }}; exit_test
   register: houdini_install_out
   become: true
   when: houdini_version_item.houdini_auto_version
