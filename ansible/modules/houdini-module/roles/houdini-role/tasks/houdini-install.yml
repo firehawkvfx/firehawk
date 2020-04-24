@@ -62,10 +62,9 @@
   shell: |
     cd /opt/houdini_install_script/
     . /opt/houdini_install_script/exit_test.sh
-    ls /opt/houdini_install_script/
+    ls -ltriah /opt/houdini_install_script/
     python /opt/houdini_install_script/download_houdini.py; exit_test
   register: houdini_query_out
-  no_log: true
   become: true
   when: houdini_version_item.houdini_auto_version
 
