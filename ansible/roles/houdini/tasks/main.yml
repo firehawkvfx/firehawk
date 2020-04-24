@@ -15,7 +15,12 @@
 
 - file:
     path: /opt/houdini_install_script/houdini_install.py
-    mode: '0700'
+    mode: u=rwX,g=rwX,o-wx
+    owner: deployuser
+
+- file:
+    path: /opt/houdini_install_script/download_houdini.py
+    mode: u=rwX,g=rwX,o-wx
     owner: deployuser
 
 # temp alternate install for ubuntu

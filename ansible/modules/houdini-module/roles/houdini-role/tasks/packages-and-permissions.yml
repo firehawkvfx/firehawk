@@ -141,3 +141,11 @@
     owner: "{{ variable_user }}"
     group: syscontrol
   become: true
+
+- name: set permissions on download_houdini.py
+  file:
+    path: /opt/houdini_install_script/download_houdini.py
+    mode: u=rwX,g=rwX,o-wx
+    owner: "{{ variable_user }}"
+    group: syscontrol
+  become: true

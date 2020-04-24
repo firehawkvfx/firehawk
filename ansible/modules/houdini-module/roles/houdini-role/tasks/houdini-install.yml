@@ -47,12 +47,23 @@
 - set_fact:
     houdini_linux_filename: "{{ houdini_version_item.houdini_linux_filename }}"
 
-- name: Query houdini filename - Houdini python script
+# - name: Query houdini filename - Houdini python script
+#   shell: |
+#     cd /opt/houdini_install_script/
+#     . /opt/houdini_install_script/exit_test.sh
+#     ls /opt/houdini_install_script/
+#     python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini -b {{ houdini_version_item.houdini_build }} -t {{ download_to_dir }} -q true -f {{ houdini_linux_filename }}; exit_test
+#   register: houdini_query_out
+#   no_log: true
+#   become: true
+#   when: houdini_version_item.houdini_auto_version
+
+- name: Query houdini filename - download_houdini.py
   shell: |
     cd /opt/houdini_install_script/
     . /opt/houdini_install_script/exit_test.sh
     ls /opt/houdini_install_script/
-    python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini -b {{ houdini_version_item.houdini_build }} -t {{ download_to_dir }} -q true -f {{ houdini_linux_filename }}; exit_test
+    python /opt/houdini_install_script/download_houdini.py; exit_test
   register: houdini_query_out
   no_log: true
   become: true
@@ -65,14 +76,32 @@
   - "{{ houdini_query_out.stdout_lines }}"
   when: houdini_version_item.houdini_auto_version
 
-
-- set_fact:
+- name: get filename from output
+  set_fact:
     houdini_linux_filename: "{{ item | regex_search(regexp) }}"
   vars:
     regexp: '(houdini.*.tar.*)'
   with_items:
   - "{{ houdini_query_out.stdout_lines }}"
   when: houdini_version_item.houdini_auto_version and 'File:' in item
+
+- name: get url from output
+  set_fact:
+    download_url: "{{ item | regex_search(regexp) }}"
+  vars:
+    regexp: '(https.*)'
+  with_items:
+  - "{{ houdini_query_out.stdout_lines }}"
+  when: houdini_version_item.houdini_auto_version and 'URL:' in item
+
+- name: get build from output
+  set_fact:
+    build: "{{ item | regex_search(regexp) }}"
+  vars:
+    regexp: 'Build:.(.*)'
+  with_items:
+  - "{{ houdini_query_out.stdout_lines }}"
+  when: houdini_version_item.houdini_auto_version and 'Build:' in item
 
 - name: Houdini filename to install from sidefx website result
   debug:
@@ -98,30 +127,50 @@
   become_user: "{{ variable_user }}"
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
 
-- name: Auto download / install Houdini with python script - auto version only
+- name: Download Houdini from SESI website - auto versions
+  get_url:
+    url: "{{ download_url }}"
+    dest: "{{ download_to_dir }}/{{ houdini_linux_filename }}"
+    mode: u=rw,g=rw,o=rw
+  become: true
+  when: houdini_version_item.houdini_auto_version
+
+- name: Install Houdini with python script - auto version only
   shell: |
     cd /opt/houdini_install_script/
     . /opt/houdini_install_script/exit_test.sh
-    sudo python /opt/houdini_install_script/houdini_install.py -u '{{ sesi_username }}' -p '{{ sesi_password }}' -i /opt/houdini -b {{ houdini_version_item.houdini_build }} -t {{ download_to_dir }} -q false; exit_test
+    tar -xvf {{ download_to_dir }}/{{ houdini_linux_filename }} -C {{ download_to_dir }}; exit_test
+    sudo {{ download_to_dir }}/houdini.install --auto-install --accept-EULA --install-houdini --no-local-licensing --install-hfs-symlink --install-dir /opt/houdini/{{ build }}; exit_test
   register: houdini_install_out
-  no_log: true
   become: true
   when: houdini_version_item.houdini_auto_version
   failed_when:
   - "'Nothing was installed.' in houdini_install_out.stderr"
 
+# - name: Auto download / install Houdini with python script - auto version only
+#   shell: |
+#     cd /opt/houdini_install_script/
+#     . /opt/houdini_install_script/exit_test.sh
+#     sudo python /opt/houdini_install_script/houdini_install.py -u '{{ sesi_username }}' -p '{{ sesi_password }}' -i /opt/houdini -b {{ houdini_version_item.houdini_build }} -t {{ download_to_dir }} -q false; exit_test
+#   register: houdini_install_out
+#   no_log: true
+#   become: true
+#   when: houdini_version_item.houdini_auto_version
+#   failed_when:
+#   - "'Nothing was installed.' in houdini_install_out.stderr"
+
 - debug:
     msg:  "{{ houdini_install_out.stdout }}"
   when: houdini_install_type != "server" and houdini_version_item.houdini_auto_version
 
-- name: NODE/WORKSTATION INSTALL - Permissions on zip file - node/workstation
-  file:
-    path: "{{ download_to_dir }}/{{ houdini_linux_filename }}"
-    mode: u+rw,g+rw,o+rw
-    owner: "{{ variable_user }}"
-    group: syscontrol
-  become: true
-  when: houdini_install_type != "server"
+# - name: NODE/WORKSTATION INSTALL - Permissions on zip file - node/workstation
+#   file:
+#     path: "{{ download_to_dir }}/{{ houdini_linux_filename }}"
+#     mode: u+rw,g+rw,o+rw
+#     owner: "{{ variable_user }}"
+#     group: syscontrol
+#   become: true
+#   when: houdini_install_type != "server"
 
 - name: NODE/WORKSTATION INSTALL - Install Houdini with python script - specific existing version from s3 bucket
   shell: |
