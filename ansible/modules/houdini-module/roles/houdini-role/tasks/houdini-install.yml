@@ -109,7 +109,7 @@
   set_fact:
     build: "{{ item | regex_search(regexp) }}"
   vars:
-    regexp: 'Build:.(.*)'
+    regexp: '({{ houdini_version_item.houdini_major_version }}.*)'
   with_items:
   - "{{ houdini_query_out.stdout_lines }}"
   when: houdini_version_item.houdini_auto_version and 'Build:' in item
