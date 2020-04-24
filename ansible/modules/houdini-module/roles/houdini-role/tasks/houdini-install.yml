@@ -146,13 +146,15 @@
   become: true
   when: houdini_version_item.houdini_auto_version
 
-- name: curl Houdini from SESI website - auto versions
-  shell: |
-    cd /opt/houdini_install_script/
-    . /opt/houdini_install_script/exit_test.sh
-    curl {{ download_url }} -o {{ download_to_dir }}/{{ houdini_linux_filename }}
-  when: houdini_version_item.houdini_auto_version
-  become: true
+# - name: curl Houdini from SESI website - auto versions
+#   shell: |
+#     cd /opt/houdini_install_script/
+#     . /opt/houdini_install_script/exit_test.sh
+#     url=$({{ download_url }})
+#     echo "url: $url"
+#     curl $url -o {{ download_to_dir }}/{{ houdini_linux_filename }}
+#   when: houdini_version_item.houdini_auto_version
+#   become: true
 
 - name: Install Houdini with python script - auto version only
   shell: |
