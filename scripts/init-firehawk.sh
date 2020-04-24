@@ -180,6 +180,8 @@ else
     else
       echo "...First destroy attempts failed.  terraform.tfstate is likely corrupted, we will restore from backup and attempt destroy again."
       cp -fv terraform.tfstate.backup terraform.tfstate
+      echo "...Terraform destroy"
+      terraform destroy -lock=false --auto-approve
     fi
 
     if [ -f terraform.tfstate ]; then
