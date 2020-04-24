@@ -161,12 +161,12 @@
     cd /opt/houdini_install_script/
     . /opt/houdini_install_script/exit_test.sh
     tar -xvf {{ download_to_dir }}/{{ houdini_linux_filename }} -C {{ download_to_dir }}; exit_test
-    sudo {{ download_to_dir }}/{{ houdini_linux_filename | regex_replace('.tar.gz$', '') }} houdini.install --auto-install --accept-EULA --install-houdini --no-local-licensing --install-hfs-symlink --install-dir /opt/houdini/{{ build }}; exit_test
+    sudo {{ download_to_dir }}/{{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}/houdini.install --auto-install --accept-EULA --install-houdini --no-local-licensing --install-hfs-symlink --install-dir /opt/houdini/{{ build }}; exit_test
   register: houdini_install_out
   become: true
   when: houdini_version_item.houdini_auto_version
-  failed_when:
-  - "'Nothing was installed.' in houdini_install_out.stderr"
+  # failed_when:
+  # - "'Nothing was installed.' in houdini_install_out.stderr"
 
 # - name: Auto download / install Houdini with python script - auto version only
 #   shell: |
