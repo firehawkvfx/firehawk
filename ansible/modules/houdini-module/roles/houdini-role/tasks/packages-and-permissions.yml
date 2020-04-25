@@ -96,24 +96,6 @@
   debug:
     var: check_permisions.stdout
 
-- name: Install requests for web page crawling
-  pip:
-    name: requests
-  become: true
-
-- name: Install requests for web page crawling as user
-  pip:
-    name: requests
-    extra_args: --user
-  become_user: "{{ variable_user }}"
-  become: true
-
-
-- name: Install beautifulsoup4 for web page crawling
-  pip:
-    name: beautifulsoup4
-  become: true
-
 - name: Copy Houdini auto install script to remote host from ansible control.
   copy:
     src: /deployuser/modules/node_centos/modules/houdini_install_script/
