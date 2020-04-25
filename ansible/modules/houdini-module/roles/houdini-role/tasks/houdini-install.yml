@@ -122,21 +122,22 @@
     msg: 'no valid houdini_linux_tar_filename was defined / found'
   when: '".tar" not in houdini_linux_tar_filename'
 
-- name: (UBUNTU) Sync houdini from s3 if exist - pull
+- name: Sync houdini from s3 if exist - pull
   shell: |
     set -x
-    cd {{ download_to_dir }}/
-    aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ houdini_linux_tar_filename }}"
-  become_user: "{{ variable_user }}"
-  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+    cd /opt/houdini_install_script/
+    . /opt/houdini_install_script/exit_test.sh
 
-- name: (CENTOS) Sync houdini from s3 if exist - pull
-  shell: |
-    set -x
     cd {{ download_to_dir }}/
-    aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ houdini_linux_tar_filename }}"
+    
+    wordcount=`aws s3 ls s3://{{ bucket }}/|grep {{ houdini_linux_tar_filename }}|wc -c`
+    echo wordcount=${wordcount}
+    if [[ "${wordcount}" -eq 0 ]]; then
+      echo "File not present in S3 bucket.  Will download"
+    else
+      aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ houdini_linux_tar_filename }}"
+    fi
   become_user: "{{ variable_user }}"
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
 
 - name: Download Houdini from SESI website - auto versions
   get_url:
