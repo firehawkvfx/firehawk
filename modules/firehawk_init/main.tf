@@ -110,7 +110,7 @@ resource "null_resource" "init-aws-local-workstation" {
 
   triggers = {
     install_deadline = var.install_deadline
-    install_houdini = var.install_houdini
+    # install_houdini = var.install_houdini
     deadlinedb = local.deadlinedb_complete
   }
 

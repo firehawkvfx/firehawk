@@ -83,36 +83,18 @@
     group: syscontrol
   become: true
 
-- name: check permissions
-  shell: |
-    cd "{{ download_to_dir }}"
-    ls -ltriah
-    cd ..
-    ls -ltriah
-  become: true
-  register: check_permisions
+# - name: check permissions
+#   shell: |
+#     cd "{{ download_to_dir }}"
+#     ls -ltriah
+#     cd ..
+#     ls -ltriah
+#   become: true
+#   register: check_permisions
 
-- name: show permissions
-  debug:
-    var: check_permisions.stdout
-
-- name: Install requests for web page crawling
-  pip:
-    name: requests
-  become: true
-
-- name: Install requests for web page crawling as user
-  pip:
-    name: requests
-    extra_args: --user
-  become_user: "{{ variable_user }}"
-  become: true
-
-
-- name: Install beautifulsoup4 for web page crawling
-  pip:
-    name: beautifulsoup4
-  become: true
+# - name: show permissions
+#   debug:
+#     var: check_permisions.stdout
 
 - name: Copy Houdini auto install script to remote host from ansible control.
   copy:
@@ -137,6 +119,14 @@
 - name: set permissions on houdini_install.py
   file:
     path: /opt/houdini_install_script/houdini_install.py
+    mode: u=rwX,g=rwX,o-wx
+    owner: "{{ variable_user }}"
+    group: syscontrol
+  become: true
+
+- name: set permissions on download_houdini.py
+  file:
+    path: /opt/houdini_install_script/download_houdini.py
     mode: u=rwX,g=rwX,o-wx
     owner: "{{ variable_user }}"
     group: syscontrol
