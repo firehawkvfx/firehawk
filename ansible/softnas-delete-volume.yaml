@@ -7,8 +7,8 @@
   become: true
 
   vars:
-    volume_name: volume0
-    pool_name: pool0
+    volume_name: "{{ envtier }}volume0"
+    pool_name: "{{ envtier }}pool0"
 
   tasks:
   - name: delete volume

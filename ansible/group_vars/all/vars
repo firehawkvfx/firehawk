@@ -16,6 +16,8 @@ shot: "{{ lookup('env','TF_VAR_SHOT') }}"
 
 gatewaynic: "{{ lookup('env','TF_VAR_gatewaynic') }}"
 
+bridgenic: "{{ lookup('env','TF_VAR_bridgenic') }}"
+
 terraform_version: "{{ lookup('env','TF_VAR_terraform_version') }}"
 inventory: "{{ lookup('env','TF_VAR_inventory') }}"
 
@@ -47,7 +49,7 @@ public_subnet2_prod: "{{ lookup('env', 'TF_VAR_public_subnet2_prod') }}"
 
 ### NAS volume mounts ###
 
-softnas_mount_source: "/pool0/volume0"
+softnas_mount_source: "/{{ envtier }}pool0/{{ envtier }}volume0"
 # "-m" will force a pool to import, which is usefull if drives used for a write log are missing.
 zpool_import_flags: "-m"
 
@@ -105,7 +107,7 @@ user_softnas_pw: "{{ lookup('env','TF_VAR_user_softnas_pw') }}"
 user_deadlineuser_name: "{{ lookup('env','TF_VAR_user_deadlineuser_name') }}"
 user_deadlineuser_pw: "{{ lookup('env','TF_VAR_user_deadlineuser_pw') }}"
 
-onsite_workstation_ssh_private_key: "{{ lookup('env','TF_VAR_onsite_workstation_ssh_private_key') }}"
+onsite_workstation_private_ssh_key: "{{ lookup('env','TF_VAR_onsite_workstation_private_ssh_key') }}"
 
 user_inituser_name: "{{ lookup('env', 'TF_VAR_user_inituser_name') }}"
 user_inituser_pw: "{{ lookup('env', 'TF_VAR_user_inituser_pw') }}"
@@ -117,6 +119,9 @@ openfirehawkserver: "{{ lookup('env','TF_VAR_openfirehawkserver') }}"
 openfirehawkserver_dev: "{{ lookup('env','TF_VAR_openfirehawkserver_dev') }}"
 openfirehawkserver_prod: "{{ lookup('env','TF_VAR_openfirehawkserver_prod') }}"
 openfirehawkserver_name: "{{ lookup('env', 'TF_VAR_openfirehawkserver_name') }}"
+
+gateway_hostname: "{{ lookup('env', 'TF_VAR_gateway_hostname') }}"
+control_hostname: "{{ lookup('env', 'TF_VAR_control_hostname') }}"
 
 usage_based_url: "{{ lookup('env', 'TF_VAR_usage_based_url') }}"
 usage_based_activation_code: "{{ lookup('env', 'TF_VAR_usage_based_activation_code') }}"

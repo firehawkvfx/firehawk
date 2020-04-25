@@ -2,7 +2,7 @@
 
 # example local install
 
-# ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-routes.yaml -v -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser hostname=workstation1 ansible_become_pass=somepass ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_private_key"
+# ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-routes.yaml -v -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser hostname=workstation1 ansible_become_pass=somepass ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key"
 
 - hosts: "{{ variable_host | default('role_node_centos') }}"
   remote_user: "{{ variable_user | default('centos') }}"
@@ -27,7 +27,7 @@
     houdini_build: "{{ lookup('env','TF_VAR_houdini_build') }}"
     skip_packages: false
     houdini_install_type: node
-    ethernet_device: enp9s0f0
+    ethernet_device: "{{ bridgenic }}"
 
 
   tasks:
@@ -54,7 +54,7 @@
     tags:
       - add-routes
 
-  - name: add routes via vpn
+  - name: "add routes via vpn - prod - {{ variable_host }} - device {{ ethernet_device }}"
     shell: |
       ip route add {{ item.subnet }} via {{ item.next_hop }} dev {{ ethernet_device }}
     with_items:
@@ -101,7 +101,7 @@
     tags:
       - add-routes
 
-  - name: add routes via vpn
+  - name: "add routes via vpn - dev - {{ variable_host }} - device {{ ethernet_device }}"
     shell: |
       ip route add {{ item.subnet }} via {{ item.next_hop }} dev {{ ethernet_device }}
     with_items:

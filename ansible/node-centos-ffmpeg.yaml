@@ -41,7 +41,8 @@
     yum:
       name: https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-7.noarch.rpm
 
-  - package:
+  - name: Install ffmpeg packages
+    package:
       name: "{{ item }}"
       state: present
     when: not skip_packages

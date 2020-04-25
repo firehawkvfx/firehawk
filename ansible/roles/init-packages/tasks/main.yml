@@ -4,11 +4,23 @@
   debug:
     var: ansible_distribution
 
-- name: install mkpasswd, pip, pexpect, passlib
-  package:
+- name: fping
+  apt:
     name:
     - fping # used to ping with max reytries up to a certain time to test open vpn.
+    state: present
+    update_cache: yes
+  register: install_package
+  until: install_package is not failed
+  retries: 5
+  become: true
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: install mkpasswd, pip, pexpect, passlib, fping
+  package:
+    name:
     - python-pip
+    # - python3-pip
     - python-apt
     - whois
     - python-passlib
@@ -16,26 +28,38 @@
     - openvpn
     - rng-tools
     - gpgv2
+    - jq
     state: present
+  become: true
 
-- name: install requests to query web pages in houdini python install script.
+- name: Install requests module to query web pages in (houdini python install script)
   pip:
     name: requests
+    executable: pip
   become: true
 
 - name: install pexpect for rhel / centos,
   pip:
     name: pexpect
+    executable: pip
   become: true
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
 
 # Enterprise Linux'
 # Above is for RHEL and Centos, the following is for Debian/Ubuntu:
 
+- name: Install expect pip for Ubuntu
+  pip:
+    name: pexpect
+    executable: pip
+  become: true
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
 - name: install pexpect for ubuntu
   package:
     name:
-    - python-pexpect
+    # - python-pexpect
     - nfs-common
     state: present
+  become: true
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'

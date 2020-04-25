@@ -20,8 +20,8 @@
     # another example for idempotenccy.  good read!
     # https://medium.com/devopslinks/attaching-a-persistent-ebs-volume-to-a-self-healing-instance-with-ansible-d0140431a22a
 
-    pool_name: pool2
-    volume_name: volume2
+    pool_name: "{{ envtier }}pool2"
+    volume_name: "{{ envtier }}volume2"
     #instance_id: undefined
     disk_device: 2
     nas_name: softnas
@@ -201,9 +201,9 @@
 #   vars:
 #     # when paths are found at these locations, they will be added to exports. otherwise no action will occur.
 #     exports:
-#       - path: "/pool1/volume1/"
-#         pool_name: pool1
-#         volume_name: volume1
+#       - path: "/{{ envtier }}pool1/{{ envtier }}volume1/"
+#         pool_name: "{{ envtier }}pool1"
+#         volume_name: "{{ envtier }}volume1"
 #         state: present
 #         bind: /prod
 

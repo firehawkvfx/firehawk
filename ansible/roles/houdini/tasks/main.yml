@@ -2,7 +2,7 @@
 - file:
     path: /opt/houdini_install_script
     state: directory
-    mode: 0700
+    mode: '0700'
     owner: deployuser
 
 - pip:
@@ -15,7 +15,7 @@
 
 - file:
     path: /opt/houdini_install_script/houdini_install.py
-    mode: 0700
+    mode: '0700'
     owner: deployuser
 
 # temp alternate install for ubuntu

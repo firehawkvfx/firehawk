@@ -28,12 +28,15 @@
     wait: True
   become_user: deployuser
 
-- name: Creating the AMI from of the instance
+- name: Creating the AMI from the instance
   ec2_ami:
     instance_id: "{{ instance_id }}"
     wait: yes
     name: "{{ ami_name }}"
     description: "{{ description }}"
     region: "{{ aws_region }}"
+    tags:
+      base_ami: "{{ base_ami }}"
+      base_instance_id: '{{ instance_id }}'
   register: image
   become_user: deployuser

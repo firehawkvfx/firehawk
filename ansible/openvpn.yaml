@@ -18,6 +18,9 @@
   gather_facts: "{{ variable_gather_facts | default('true') }}"
   become: true
 
+  vars:
+    ansible_python_interpreter: "/usr/bin/python2.7"
+
   tasks:
     - name: Test vpn connection.
       debug:
@@ -27,13 +30,16 @@
   remote_user: openvpnas
   become: true
 
+  vars:
+    ansible_python_interpreter: "/usr/bin/python2.7"
+
   # install pexpect and its dependencies to use passwd
   roles:
     - role: init-packages
 
-  # set user password.  this is a temporary measure as it should be handled by user data, but for some reason open vpn isn't accepting that approach as of 2.71““““““““““““
+  # set user password.  this is a temporary measure as it should be handled by user data, but for some reason open vpn isn't accepting that approach as of 2.71
   post_tasks:
-    - name: set user pass
+    - name: "set user pass {{ openvpn_user }}"
       expect:
         command: passwd {{ openvpn_user }}
         responses:
@@ -48,8 +54,16 @@
   vars:
     client_network: None
     client_netmask_bits: None
+    ansible_python_interpreter: "/usr/bin/python2.7"
     
   pre_tasks:
+    - name: Reboot the server and wait for it to come back up. # This may not be necesary but there were intermittent issues with /usr/local/openvpn_as/scripts/sacli that a reboot may have resolved
+      reboot:
+
+    - name: Rebooted
+      debug:
+        msg: "rebooted"
+
     - name: create dir.
       file:
         path: /usr/local/openvpn_as/scripts/seperate
@@ -57,6 +71,7 @@
 
     - name: configure openvpn server settings
       shell: |
+        ls -la /usr/local/openvpn_as/scripts/
         /usr/local/openvpn_as/scripts/sacli -k vpn.daemon.0.client.network -v {{ client_network }} ConfigPut
         /usr/local/openvpn_as/scripts/sacli -k vpn.daemon.0.client.netmask_bits -v {{ client_netmask_bits }} ConfigPut
         /usr/local/openvpn_as/scripts/sacli --key 'vpn.server.tls_auth' --value 'true' ConfigPut
@@ -77,6 +92,8 @@
         chown {{ openvpn_user }} seperate/*
         /usr/local/openvpn_as/scripts/sacli start
         ls -la seperate
+      register: command_result
+      failed_when: "'ERROR' in command_result.stderr"
 
   roles:
     - role: openvpn

@@ -45,10 +45,10 @@
     key_test: true
   when: key_contents != ''
 
-- name: set key permissions to read only
+- name: set key permissions
   file:
     path: "{{ key_path }}"
-    mode: 0400
+    mode: '0600'
     state: touch
     access_time: preserve
     modification_time: preserve

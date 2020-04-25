@@ -39,6 +39,6 @@
   copy:
     content: "{{ ec2_key_result.key.private_key }}"
     dest: "{{ local_key_path }}"
-    mode: 0400
+    mode: '0600'
   become: true
   when: (not key_result.stat.exists) and ec2_key_result.changed

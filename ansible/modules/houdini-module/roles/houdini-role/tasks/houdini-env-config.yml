@@ -1,5 +1,35 @@
-
 ### modify houdini environment vars
+
+- name: Generate houdini.env config from template
+  template:
+    src: /secrets/dev/houdini{{ houdini_version_item.houdini_major_version }}/houdini_template.env
+    dest: /secrets/dev/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env
+  become: yes
+  connection: local
+  tags:
+  - cloud-install
+  - onsite-install
+
+- name: copy env
+  copy:
+    src: /secrets/dev/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env
+    dest: /home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini_from_template.env
+  become: true
+  tags:
+  - cloud-install
+  - onsite-install
+
+- name: "Get difference from two houdini.env files"
+  command: diff /home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env /home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini_from_template.env
+  failed_when: "diff.rc > 1"
+  register: diff
+  become: yes
+  tags:
+  - cloud-install
+  - onsite-install
+
+- name: debug output
+  debug: msg="{{ diff.stdout }}"
 
 - name: houdini_version_item
   debug:

@@ -8,7 +8,7 @@
     owner: deployuser
     group: deployuser
     force: yes
-    mode: 400
+    mode: '0400'
   become_user: deployuser
   become: true
   with_items:
@@ -24,7 +24,7 @@
               {{ openvpn_user }}
               {{ openvpn_user_pw }}
     dest: /home/deployuser/openvpn_config/yourserver.txt
-    mode: 400
+    mode: '0400'
 
 - name: replace
   lineinfile:
@@ -64,7 +64,7 @@
     dest: /etc/openvpn/{{ item }}
     owner: deployuser
     group: deployuser
-    mode: 0400
+    mode: '0400'
     force: yes
     remote_src: true
   become: true

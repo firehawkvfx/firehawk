@@ -168,10 +168,26 @@
     - cloud-install
     - onsite-install
 
-  - name: set deadline remote client certificate permissions locally
+  - name: check permissions
+    shell: |
+      ls -ltriah "{{ deadline_certificates_location }}"
+    become: true
+    register: check_permisions
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: show permissions
+    debug:
+      var: check_permisions.stdout
+    tags:
+    - cloud-install
+    - onsite-install
+
+  - name: set deadline remote client certificate permissions locally - deadline-worker-install.yaml
     file: 
       path: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
-      mode: 0644
+      mode: u=rw,g=r,o=r
       owner: deadlineuser
       group: syscontrol
     become: yes
@@ -188,7 +204,7 @@
     fetch: 
       src: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
       dest: "/secrets/keys/"
-      mode: 0600
+      mode: '0600'
       owner: deadlineuser
       group: syscontrol
       flat: true
@@ -224,7 +240,7 @@
     copy: 
       src: "/secrets/keys/Deadline10RemoteClient.pfx"
       dest: "/opt/Thinkbox/certs/"
-      mode: 0600
+      mode: '0600'
       owner: deadlineuser
       group: syscontrol
     become: yes
@@ -304,7 +320,7 @@
   - name: set execute permissions on installer
     file:
       path: "{{ files_matched.files[0].path }}"
-      mode: 0700
+      mode: '0700'
       owner: deadlineuser
       group: syscontrol
     become: yes
@@ -445,7 +461,7 @@
       dest: /etc/systemd/system/multislaveservice.service
       owner: root
       group: root
-      mode: 0644
+      mode: '0644'
     become: yes
     tags:
     - cloud-install

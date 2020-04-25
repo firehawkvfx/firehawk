@@ -42,6 +42,9 @@ module "firehawk_init" {
   
   storage_user_access_key_id = module.storage_user.storage_user_access_key_id
   storage_user_secret = module.storage_user.storage_user_secret
+
+  install_houdini = var.install_houdini
+  install_deadline = var.install_deadline
 }
 
 module "vpc" {
@@ -182,7 +185,7 @@ resource "null_resource" "dependency_node_centos" {
 
 resource "null_resource" "provision_deadline_spot" {
   count      = (var.site_mounts && var.provision_deadline_spot_plugin) ? 1 : 0
-  depends_on = [null_resource.dependency_deadline_spot, null_resource.dependency_node_centos]
+  depends_on = [null_resource.dependency_deadline_spot, null_resource.dependency_node_centos, module.firehawk_init.local-provisioning-complete]
 
   triggers = {
     ami_id                  = module.node.ami_id
@@ -219,18 +222,12 @@ variable "gateway_type" {
   default = "pcoip"
 }
 
+variable "allow_prebuilt_softnas_ami" { # after an initial deployment a base AMI and any software updates are run, a prebuilt ami is created.  Once it exists, it will be used in future deployments until the base ami is altered.
+  default = true
+}
+
+
 # A single softnas instance that resides in a private subnet for high performance nfs storage
-variable "softnas_skip_update" {
-  default = false
-}
-
-variable "softnas_use_custom_ami" {
-  default = false
-}
-
-variable "softnas_custom_ami" {
-  default = 123456789
-}
 
 module "softnas" {  
   softnas_storage                = var.softnas_storage
@@ -239,8 +236,7 @@ module "softnas" {
 
   envtier = var.envtier
 
-  softnas_use_custom_ami = var.softnas_use_custom_ami
-  softnas_custom_ami     = var.softnas_custom_ami
+  allow_prebuilt_softnas_ami = var.allow_prebuilt_softnas_ami
 
   #softnas_role = "${module.softnas_role.softnas_role_name}"
 
@@ -275,6 +271,8 @@ module "softnas" {
 
   #skipping os updates will allow faster rollout, but may be non functional
   skip_update = var.softnas_skip_update
+
+  firehawk_path = var.firehawk_path
 
   #sleep will stop instances to save cost during idle time.
   sleep = var.sleep
@@ -339,10 +337,6 @@ module "workstation" {
   vpn_cidr       = var.vpn_cidr
   remote_ip_cidr = var.remote_ip_cidr
 
-  #public_subnet_ids = "${module.vpc.public_subnets}"
-
-  #bastion_ip = "${module.bastion.public_ip}"
-
   key_name    = var.key_name
   private_key = file(var.local_key_path)
 
@@ -376,7 +370,7 @@ variable "node_sleep_on_create" {
 }
 
 module "node" {
-  dependency = module.firehawk_init.deadlinedb-complete
+  
   # need to ensure mounts exist on start 
   source = "./modules/node_centos"
   name   = "centos"
@@ -397,6 +391,7 @@ module "node" {
   remote_subnet_cidr          = var.remote_subnet_cidr
 
   # dependencies
+  dependency = module.firehawk_init.local-provisioning-complete
   softnas_private_ip1             = module.softnas.softnas1_private_ip
   provision_softnas_volumes       = module.softnas.provision_softnas_volumes
   attach_local_mounts_after_start = module.softnas.attach_local_mounts_after_start
@@ -423,11 +418,26 @@ module "node" {
 
   wakeable = var.node_wakeable
 
+  install_houdini = var.install_houdini
+  install_deadline = var.install_deadline
   houdini_license_server_address = var.houdini_license_server_address
+
 }
 
 output "snapshot_id" {
   value = module.node.snapshot_id
+}
+
+output "base_ami" {
+  value = module.softnas.base_ami
+}
+
+output "prebuilt_softnas_ami_list" {
+  value = module.softnas.prebuilt_softnas_ami_list
+}
+
+output "use_prebuilt_softnas_ami" {
+  value = module.softnas.use_prebuilt_softnas_ami
 }
 
 output "node_ami_id" {

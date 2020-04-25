@@ -5,7 +5,7 @@
   vars:
     #bastion_ip: false
     local: false
-    ansible_ssh_private_key_file: "{{ onsite_workstation_ssh_private_key }}"
+    ansible_ssh_private_key_file: "{{ onsite_workstation_private_ssh_key }}"
     public_key_location: "{{ general_use_ssh_key }}.pub"
 
   tasks:
@@ -35,7 +35,7 @@
   gather_facts: false
 
   vars:
-    ansible_ssh_public_key_file: "{{ onsite_workstation_ssh_private_key }}.pub"
+    ansible_ssh_public_key_file: "{{ onsite_workstation_private_ssh_key }}.pub"
     ansible_become_pass: "{{ user_deadlineuser_pw }}"
     ansible_password: "{{ user_deadlineuser_pw }}"
 

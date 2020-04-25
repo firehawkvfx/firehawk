@@ -86,8 +86,11 @@ if [[ $keybase_disabled != true ]]; then
     echo "Installing pgp and expect"
     # Currently this imports existing keys.  need to handle generation of keys if nothing exists with ansible instead of bash.
     sudo apt-get install expect -y
+    echo "...Import key"
     gpg --import $TF_VAR_pgp_private_key
+    echo "...Trust key"
     expect -c "spawn gpg --edit-key $TF_VAR_pgp_email trust quit; send \"5\ry\r\"; expect eof"
+    echo "...Finished GPG import"
   fi
   # install keybase and test decryption
   $TF_VAR_firehawk_path/scripts/keybase-pgp-test.sh; exit_test

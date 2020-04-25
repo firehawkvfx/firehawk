@@ -6,14 +6,14 @@
 - name: "Keybase: encrypt test secrets"
   shell:
     keybase pgp encrypt -m "this is a decrypted test secret" | base64
-  become_user: deployuser
+  become_user: "{{ variable_user }}"
   register: pgp_secret_encrypted
   when: "'keybase:' in pgp_public_key"
 
 - name: "GPG: encrypt test secrets"
   shell:
     echo "this is a decrypted test secret" | gpg -r "{{ pgp_email }}" --encrypt | base64
-  become_user: deployuser
+  become_user: "{{ variable_user }}"
   register: pgp_secret_encrypted
   when: "'keybase:' not in pgp_public_key"
 
@@ -21,7 +21,7 @@
   shell: |
     test=$(keybase pgp encrypt -m "this is a decrypted test secret" | base64)
     /deployuser/scripts/pgp-expect-keybase.sh {{ keybase_secret | regex_escape() }} {{ pgp_secret_encrypted.stdout | regex_escape() }}
-  become_user: deployuser
+  become_user: "{{ variable_user }}"
   connection: local
   no_log: true
   when: "'keybase:' in pgp_public_key"
@@ -30,7 +30,7 @@
   shell: |
     test=$(keybase pgp encrypt -m "this is a decrypted test secret" | base64)
     /deployuser/scripts/pgp-expect-keybase.sh {{ keybase_secret | regex_escape() }} {{ pgp_secret_encrypted.stdout | regex_escape() }}
-  become_user: deployuser
+  become_user: "{{ variable_user }}"
   connection: local
   register: pgp_secret_output
   no_log: true
@@ -39,7 +39,7 @@
 - name: "GPG: decrypt inline - collect output."
   shell: |
     echo {{ pgp_secret_encrypted.stdout | regex_escape() }} | base64 --decode | gpg -dq --no-tty --passphrase {{ pgp_secret | regex_escape() }} --no-use-agent
-  become_user: deployuser
+  become_user: "{{ variable_user }}"
   connection: local
   register: pgp_secret_output
   no_log: true

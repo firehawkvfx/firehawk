@@ -218,7 +218,7 @@ variable "centos_v7" {
 
 resource "aws_instance" "node_centos" {
   count                = var.site_mounts ? 1 : 0
-  depends_on           = [null_resource.dependency_softnas_and_bastion, null_resource.dependency_deadlinedb]
+  depends_on           = [null_resource.dependency_softnas_and_bastion, null_resource.dependency_deadlinedb, var.dependency]
   iam_instance_profile = var.instance_profile_name
 
   #instance type and ami are determined by the gateway type variable for if you want a graphical or non graphical instance.
@@ -253,10 +253,12 @@ USERDATA
 resource "null_resource" "provision_node_centos" {
   count = var.site_mounts ? 1 : 0
   #count      = 0
-  depends_on = [aws_instance.node_centos]
-
+  depends_on = [aws_instance.node_centos, null_resource.dependency_softnas_and_bastion, null_resource.dependency_deadlinedb]
+  
   triggers = {
     instanceid = aws_instance.node_centos[0].id
+    install_deadline = var.install_deadline
+    install_houdini = var.install_houdini
   }
 
   provisioner "local-exec" {
@@ -279,8 +281,6 @@ resource "null_resource" "provision_node_centos" {
     inline = [
       "sleep 10",
       "set -x",
-      # "cloud-init status --wait  > /dev/null 2>&1",
-      # "[ $? -ne 0 ] && echo 'Cloud-init failed' && exit 1",
       "sudo yum install -y python",
       "ssh-keyscan ${aws_instance.node_centos[0].private_ip}",
     ]
@@ -293,21 +293,53 @@ resource "null_resource" "provision_node_centos" {
       set -x
       cd /deployuser
       ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.node_centos[0].private_ip} bastion_ip=${var.bastion_ip}"; exit_test
+
+      if [[ "$TF_VAR_install_deadline" == true ]]; then
+        # check db
+        echo "test db centos 1"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      fi
+
       # ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "variable_host=firehawkgateway variable_user=deployuser private_ip=${aws_instance.node_centos[0].private_ip} bastion_ip=${var.bastion_ip}"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=node0 host_ip=${aws_instance.node_centos[0].private_ip} group_name=role_node_centos insert_ssh_key_string=ansible_ssh_private_key_file=$TF_VAR_local_key_path"; exit_test
+
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init-users.yaml -v --extra-vars "set_hostname=false"; exit_test
+
       # install cli for centos user
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_node_centos variable_user=centos" --skip-tags "user_access"; exit_test
+
       # install cli for deadlineuser
+
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_node_centos variable_user=centos variable_become_user=deadlineuser" --skip-tags "user_access"; exit_test
+
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"; exit_test
-      ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml --tags "onsite-install" --skip-tags "multi-slave" --extra-vars "variable_host=role_node_centos variable_connect_as_user=centos variable_user=centos"; exit_test
-      ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source"; exit_test
-      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v; exit_test
-      if [[ $TF_VAR_houdini_test_connection == true ]]; then
-        # last step before building ami we run a unit test to get houdini over a 4 minute hiccup on first use see sidefx RFE100149
-        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-houdini-unit-test.yaml -v --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source"; exit_test
+      if [[ "$TF_VAR_install_deadline" == true ]]; then
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml --tags "onsite-install" --skip-tags "multi-slave" --extra-vars "variable_host=role_node_centos variable_connect_as_user=centos variable_user=centos"; exit_test
       fi
+
+      if [[ "$TF_VAR_install_deadline" == true ]]; then
+        # check db
+        echo "test db centos 6"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      fi
+
+      if [[ "$TF_VAR_install_houdini" == true ]]; then
+        ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source"; exit_test
+        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v; exit_test
+      fi
+
+      if [[ $TF_VAR_houdini_test_connection == true ]]; then
+        # last step before building ami we run a unit test to ensure houdini runs
+        ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_user=deadlineuser firehawk_sync_source=$TF_VAR_firehawk_sync_source execute=true" --tags "houdini_unit_test"; exit_test
+      fi
+
+      if [[ "$TF_VAR_install_deadline" == true ]]; then
+        # check db
+        echo "test db centos 8"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      fi
+
+
       # stop the instance to ensure ami is created from a stable state
       aws ec2 stop-instances --instance-ids ${aws_instance.node_centos[0].id}; exit_test
       aws ec2 wait instance-stopped --instance-ids ${aws_instance.node_centos[0].id}; exit_test

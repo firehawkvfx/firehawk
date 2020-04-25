@@ -1,4 +1,6 @@
 import os
+import re
+
 envtier=os.environ["TF_VAR_envtier"]
 TF_VAR_firehawk_path=os.environ["TF_VAR_firehawk_path"]
 outdict = {}
@@ -11,7 +13,10 @@ with open(template_path) as f:
     for line in f:
         if not line.startswith('#'):
             if ('_dev' in line) or ('_prod' in line): 
-                varname=line.replace('_dev', '').replace('_prod', '').split('=')[0]
+                s = line.split('=')[0]
+                s = re.sub('_prod$', '', s)
+                s = re.sub('_dev$', '', s)
+                varname=s
                 outdict[varname] = varname+'_'+envtier
 
 # write environment mappings to tmp file

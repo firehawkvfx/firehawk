@@ -16,6 +16,10 @@ variable "remote_ip_cidr" {
 variable "remote_subnet_cidr" {
 }
 
+variable "install_deadline" {}
+
+variable "install_houdini" {}
+
 variable "provision_softnas_volumes" {
   default = []
 }

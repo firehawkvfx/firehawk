@@ -1,5 +1,4 @@
 # ~/.bashrc
-
 # config override is altered by install scripts but can also be used to override configuration variables.
 
 # WARNING: When editing your config file do not store any secrets / sensitive information here.
@@ -20,6 +19,21 @@
 # New comments should be only added in secrets/config as these lines will be propogated into the config.template schema used to initialise any new  secrets/config file for other users of the Firehawk repo.
 
 # BEGIN CONFIGURATION #
+
+# defaults_config_overide_version:
+defaults_config_overide_version=insertvalue
+
+# TF_VAR_vagrant_destroy_before_deploy:
+# default: TF_VAR_tf_destroy_before_deploy=false
+TF_VAR_vagrant_destroy_before_deploy=insertvalue
+
+# TF_VAR_tf_destroy_before_deploy:
+# default: TF_VAR_tf_destroy_before_deploy=false
+TF_VAR_tf_destroy_before_deploy=insertvalue
+
+# TF_VAR_destroy_after_deploy:
+# default: TF_VAR_destroy_after_deploy=false
+TF_VAR_destroy_after_deploy=insertvalue
 
 # TF_VAR_enable_vpc:
 # Enable a Virtual Private Cloud.  All infrastructure is built in a VPC.  the first stage is to provision a user that has haccess to s3 bucket storage, which doesn't require a VPC.
@@ -46,3 +60,24 @@ TF_VAR_remote_mounts_on_local=insertvalue
 # If enabled, the deadline spot fleet plugin will be automatically configured.  
 # Note that because we alter the mongo db, this may not be supported with future versions of deadline.  You may need to disable it and configure the plugin manually in these circumstances.
 TF_VAR_provision_deadline_spot_plugin=insertvalue
+
+# TF_VAR_install_houdini:
+# default: TF_VAR_install_houdini=true
+TF_VAR_install_houdini=insertvalue
+
+# TF_VAR_softnas_skip_update:
+# default: TF_VAR_softnas_skip_update=false
+TF_VAR_softnas_skip_update=insertvalue
+
+# TF_VAR_install_deadline:
+# default: TF_VAR_install_deadline=true
+TF_VAR_install_deadline=insertvalue
+
+# TF_VAR_taint_single:
+# default: TF_VAR_taint_single=""
+TF_VAR_taint_single=insertvalue
+
+# TF_VAR_allow_prebuilt_softnas_ami:
+# If set to false, it will replace the existing prebuilt ami.
+# default: TF_VAR_allow_prebuilt_softnas_ami=true
+TF_VAR_allow_prebuilt_softnas_ami=insertvalue

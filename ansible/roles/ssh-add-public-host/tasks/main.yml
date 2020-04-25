@@ -31,7 +31,7 @@
 - name: define ssh config for bastion if set_bastion=true.
   copy:
     dest: "/home/{{ variable_user }}/.ssh/config"
-    mode: 0600
+    mode: '0600'
     owner: "{{ variable_user }}"
     content: |
       Host bastion
@@ -58,7 +58,7 @@
 - name: define ssh config for bastion if set_bastion=true.
   copy:
     dest: "/home/{{ variable_user }}/.ssh/config"
-    mode: 0600
+    mode: '0600'
     owner: "{{ variable_user }}"
     content: |
       Host bastion

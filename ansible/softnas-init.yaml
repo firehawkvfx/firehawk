@@ -2,6 +2,9 @@
   remote_user: "{{ softnas_ssh_user | default('ec2-user') }}"
   become: true
 
+  vars:
+    skip_packages: false
+
   tasks:
   - name: ensure file exists
     copy:
@@ -10,7 +13,7 @@
       force: no
 
 # these packages are required to pass an encrypted string via commandline into a user pass.
-  - name: install mkpasswd
+  - name: install expect
     package:
       name: expect
       state: present
@@ -124,12 +127,17 @@
       state: present
       create: true
 
+  - name: skip packages
+    debug:
+      var: skip_packages
+
   - name: install nmap
     package:
       name: "{{ item }}"
       state: present
     with_items:
       - nmap
+    when: skip_packages|bool == false
 
   - command: "nmap -p {{ item.port }} {{ item.dest }}"
     register: nmap_result

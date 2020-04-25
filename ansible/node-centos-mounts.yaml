@@ -7,7 +7,7 @@
 # ansible-playbook -i ansible/inventory ansible/node-centos-mounts.yaml
 
 # to update an onsite centos workstation use-
-# ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser hostname=workstation1 ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_ssh_private_key" --skip-tags 'cloud_install'
+# ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser hostname=workstation1 ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key" --skip-tags 'cloud_install'
 
 # to configure onsite mounts only on the ansible control, skipping softnas export check
 # ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v -v --extra-vars "variable_host=localhost variable_user=deployuser softnas_hosts=none" --tags 'local_install_onsite_mounts'
@@ -39,9 +39,9 @@
     # when paths are found at these locations, they will be added to exports.
     # these defaults can be overidden by storing a config in /secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
     exports:
-      - path: "/pool1/volume1/"
-        pool_name: pool1
-        volume_name: volume1
+      - path: "/{{ envtier }}pool1/{{ envtier }}volume1/"
+        pool_name: "{{ envtier }}pool1"
+        volume_name: "{{ envtier }}volume1"
         state: present
         bind: /prod
 
@@ -118,9 +118,9 @@
     destroy: false
     # these defaults can be overidden by storing a config in /secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
     exports:
-      - path: "/pool1/volume1/"
-        pool_name: pool1
-        volume_name: volume1
+      - path: "/{{ envtier }}pool1/{{ envtier }}volume1/"
+        pool_name: "{{ envtier }}pool1"
+        volume_name: "{{ envtier }}volume1"
         state: present
         bind: /prod
 
@@ -217,6 +217,23 @@
       msg: 'local onsite install will use different mounts'
     tags:
     - local_install
+
+  # - name: "Check showmount to see whether /etc/exports contains the mount on {{ groups['role_softnas'] | map('extract', hostvars, ['ansible_host']) | first }}"
+  #   shell: "showmount -e {{ groups['role_softnas'] | map('extract', hostvars, ['ansible_host']) | first }}"
+  #   register: softnas_showmount
+  #   check_mode: no
+  #   ignore_errors: yes
+  #   changed_when: no
+  #   tags:
+  #   - local_install
+
+  # - name: "Export showmount for {{ groups['role_softnas'] | map('extract', hostvars, ['ansible_host']) | first }}: If this fails check the vpn is working and ports are open."
+  #   debug:
+  #     var: item
+  #   when: item.rc == 0
+  #   with_items: "{{ softnas_showmount.results }}"
+  #   tags:
+  #   - local_install
 
   - name: mount softnas NFS volume from export on local site based workstation/render nodes using original unique pool and volume names - master
     become: yes

@@ -115,7 +115,7 @@
       .*output format \[.*\]: json
   become_user: "{{ variable_become_user }}"
   become: true
-  # no_log: true
+  no_log: true
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
   tags:
   - user_access

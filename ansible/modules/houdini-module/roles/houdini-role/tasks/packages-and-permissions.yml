@@ -9,9 +9,18 @@
   file:
     path: /prod/tmp
     state: directory
-    mode: u=rwX,g=rwX
-    owner: deadlineuser
-    group: syscontrol
+    mode: '1777'
+    owner: root
+    group: root
+  become: yes
+
+- name: Ensure permissions are correct in BASH
+  shell: |
+    permissions=$(stat -c '%a' /prod/tmp)
+    if [[ "$permissions" != "1777" ]]; then
+      echo "FAIL: Permissions on path are incorrect: $permissions"
+      exit 1
+    fi
   become: yes
 
 - name: ansible distro
@@ -60,7 +69,7 @@
   file:
     path: /opt/houdini_install_script
     state: directory
-    mode: 0700
+    mode: '0700'
     owner: "{{ variable_user }}"
     group: syscontrol
   become: true
@@ -110,6 +119,16 @@
     src: /deployuser/modules/node_centos/modules/houdini_install_script/
     dest: /opt/houdini_install_script/
     mode: u=rwX,g=rwX,o-wx
+    owner: "{{ variable_user }}"
+    group: syscontrol
+    directory_mode: yes
+  become: true
+
+- name: Copy Houdini auto install script to remote host from ansible control.
+  copy:
+    src: /deployuser/scripts/exit_test.sh
+    dest: /opt/houdini_install_script/
+    mode: u=rx,g=rx,o-wx
     owner: "{{ variable_user }}"
     group: syscontrol
     directory_mode: yes

@@ -3,7 +3,7 @@
 - name: Stop Deadline10db service
   service:
     name: Deadline10db
-    state: stopped
+    state: "{{ state }}"
   become: true
 
 - name: Reboot the server and wait for it to come back up.

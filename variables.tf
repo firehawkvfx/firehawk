@@ -19,6 +19,10 @@ variable "softnas_mode" {
   default = "low"
 }
 
+variable "softnas_skip_update" {
+}
+
+
 variable "azs" {
   default = ["ap-southeast-2a", "ap-southeast-2b"]
 }
@@ -34,6 +38,8 @@ variable "node_centos_volume_type" {
 # once you setup an ssl certificate with your domain, it will have a route zone id.
 variable "route_zone_id" {
 }
+
+variable "firehawk_path" {}
 
 variable "public_domain" {
 }
@@ -173,3 +179,7 @@ variable "pgp_public_key" {
 
 variable "provision_deadline_spot_plugin" {
 }
+
+variable "install_deadline" {}
+
+variable "install_houdini" {}

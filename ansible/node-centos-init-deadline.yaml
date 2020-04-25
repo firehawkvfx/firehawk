@@ -39,7 +39,7 @@
     file: 
       path: /opt/Thinkbox/
       state: directory
-      mode: 0700
+      mode: '0700'
       owner: deadlineuser
       group: syscontrol
     become: yes
@@ -48,7 +48,7 @@
     file: 
       path: /opt/Thinkbox/certs
       state: directory
-      mode: 0700
+      mode: '0700'
       owner: deadlineuser
       group: syscontrol
     become: yes
@@ -56,7 +56,7 @@
   - name: set deadline remote client certificate permissions locally
     file: 
       path: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
-      mode: 0644
+      mode: '0644'
       owner: deadlineuser
       group: syscontrol
     become: yes
@@ -66,7 +66,7 @@
     copy: 
       src: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
       dest: "/opt/Thinkbox/certs/"
-      mode: 0600
+      mode: '0600'
       owner: deadlineuser
       group: syscontrol
     become: yes
@@ -74,7 +74,7 @@
   - name: Strange requirement here.  For some reason read permissions needed for everyone to be set above or the ansible copy doesn't work.  So we set it back to normal here.
     file: 
       path: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
-      mode: 0640
+      mode: '0640'
       owner: deadlineuser
       group: syscontrol
     become: yes
@@ -136,7 +136,7 @@
   - name: set execute permissions on installer
     file:
       path: "{{ files_matched.files[0].path }}"
-      mode: 0700
+      mode: '0700'
       owner: deadlineuser
       group: syscontrol
     become: yes

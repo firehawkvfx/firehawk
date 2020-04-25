@@ -8,8 +8,8 @@
     # all disk_device numbers should be unique for any nas name.  /dev/s3- will be prepended to the disk_device number when mounted
     # volume names pools should both existing buckets match only if you intend to use raid.
 
-    pool_name: pool0
-    volume_name: volume0
+    pool_name: "{{ envtier }}pool0"
+    volume_name: "{{ envtier }}volume0"
     disk_device: 0
     nas_name: softnas
     encrypt_s3: false

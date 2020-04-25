@@ -29,7 +29,7 @@
   - name: set permissions on install_acpid.sh
     file:
       path: /tmp/install_acpid.sh
-      mode: 700
+      mode: '0700'
       owner: root
 
   - name: login and import install_acpid
