@@ -245,7 +245,7 @@ echo "Vagrant box firehawkgateway$TF_VAR_envtier in $firehawkgateway_box"
 
 if [[ "$vagrant_halt" == true ]]; then
     echo "Halting vagrant"
-    echo "Warning: Doing this to the database vm (firehawkgateway) may corrupt it."
+    echo "Warning: Doing this deadlinedb while running (firehawkgateway) may corrupt it."
     vagrant halt
 fi
 
