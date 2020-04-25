@@ -31,8 +31,8 @@ houdini_version_list:
 #   houdini_minor_version: "17.5.364"
 #   # houdini_minor_version: eg "17.5.364" or "auto"
   
-#   houdini_linux_filename: "houdini-17.5.364-linux_x86_64_gcc6.3.tar.gz"
-#   # houdini_linux_filename: file to install from s3 bucket eg: "houdini-17.5.364-linux_x86_64_gcc6.3.tar.gz" or "auto"
+#   houdini_linux_tar_filename: "houdini-17.5.364-linux_x86_64_gcc6.3.tar.gz"
+#   # houdini_linux_tar_filename: file to install from s3 bucket eg: "houdini-17.5.364-linux_x86_64_gcc6.3.tar.gz" or "auto"
   
 #   houdini_build: "daily"
 #   # houdini_build: used to download latest "daily" or "production" build when other options set to auto.  eg: "daily" or "production"
@@ -42,7 +42,7 @@ houdini_version_list:
 - houdini_major_version: "18.0"
   houdini_auto_version: True
   houdini_minor_version: "auto"
-  houdini_linux_filename: "auto"
+  houdini_linux_tar_filename: "auto"
   houdini_build: "production"
   # enforce_env: False
 
@@ -54,7 +54,7 @@ houdini_license_server_version_list:
   # to install any older version that is not the latest (auto), that version .tar.gz must exist in your s3 bucket.
   # when using auto, the installer will be uploaded to your s3 bucket.
   houdini_minor_version: "auto" # houdini_minor_version: eg "17.5.364" or "auto"
-  houdini_linux_filename: "auto" # houdini_linux_filename: file to install from s3 bucket eg: "houdini-17.5.364-linux_x86_64_gcc6.3.tar.gz" or "auto"  
+  houdini_linux_tar_filename: "auto" # houdini_linux_tar_filename: file to install from s3 bucket eg: "houdini-17.5.364-linux_x86_64_gcc6.3.tar.gz" or "auto"  
   houdini_build: "production" # houdini_build: used to download latest "daily" or "production" build when other options set to auto.  eg: "daily" or "production"
   
   # enforce_env: False

@@ -54,14 +54,14 @@
   
 
 - set_fact:
-    houdini_linux_filename: "{{ houdini_version_item.houdini_linux_filename }}"
+    houdini_linux_tar_filename: "{{ houdini_version_item.houdini_linux_tar_filename }}"
 
 # - name: Query houdini filename - Houdini python script
 #   shell: |
 #     cd /opt/houdini_install_script/
 #     . /opt/houdini_install_script/exit_test.sh
 #     ls /opt/houdini_install_script/
-#     python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini -b {{ houdini_version_item.houdini_build }} -t {{ download_to_dir }} -q true -f {{ houdini_linux_filename }}; exit_test
+#     python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini -b {{ houdini_version_item.houdini_build }} -t {{ download_to_dir }} -q true -f {{ houdini_linux_tar_filename }}; exit_test
 #   register: houdini_query_out
 #   no_log: true
 #   become: true
@@ -72,7 +72,7 @@
     cd /opt/houdini_install_script/
     . /opt/houdini_install_script/exit_test.sh
     ls -ltriah /opt/houdini_install_script/
-    python /opt/houdini_install_script/download_houdini.py; exit_test
+    python /opt/houdini_install_script/download_houdini.py -b {{ houdini_version_item.houdini_build }}; exit_test
   register: houdini_query_out
   become: true
   when: houdini_version_item.houdini_auto_version
@@ -89,7 +89,7 @@
 
 - name: get filename from output
   set_fact:
-    houdini_linux_filename: "{{ item | regex_search(regexp) }}"
+    houdini_linux_tar_filename: "{{ item | regex_search(regexp) }}"
   vars:
     regexp: '(houdini.*.tar.*)'
   with_items:
@@ -116,17 +116,17 @@
 
 - name: Houdini filename to install from sidefx website result
   debug:
-    var: houdini_linux_filename
+    var: houdini_linux_tar_filename
 
 - fail:
-    msg: 'no valid houdini_linux_filename was defined / found'
-  when: '".tar" not in houdini_linux_filename'
+    msg: 'no valid houdini_linux_tar_filename was defined / found'
+  when: '".tar" not in houdini_linux_tar_filename'
 
 - name: (UBUNTU) Sync houdini from s3 if exist - pull
   shell: |
     set -x
     cd {{ download_to_dir }}/
-    aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ houdini_linux_filename }}"
+    aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ houdini_linux_tar_filename }}"
   become_user: "{{ variable_user }}"
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
@@ -134,35 +134,26 @@
   shell: |
     set -x
     cd {{ download_to_dir }}/
-    aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ houdini_linux_filename }}"
+    aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ houdini_linux_tar_filename }}"
   become_user: "{{ variable_user }}"
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
 
 - name: Download Houdini from SESI website - auto versions
   get_url:
     url: "{{ download_url }}"
-    dest: "{{ download_to_dir }}/{{ houdini_linux_filename }}"
+    dest: "{{ download_to_dir }}/{{ houdini_linux_tar_filename }}"
     mode: u=rw,g=rw,o=rw
   become: true
   when: houdini_version_item.houdini_auto_version
-
-# - name: curl Houdini from SESI website - auto versions
-#   shell: |
-#     cd /opt/houdini_install_script/
-#     . /opt/houdini_install_script/exit_test.sh
-#     url=$({{ download_url }})
-#     echo "url: $url"
-#     curl $url -o {{ download_to_dir }}/{{ houdini_linux_filename }}
-#   when: houdini_version_item.houdini_auto_version
-#   become: true
 
 - name: Install Houdini with python script - auto version only
   shell: |
     cd /opt/houdini_install_script/
     . /opt/houdini_install_script/exit_test.sh
-    tar -xvf {{ download_to_dir }}/{{ houdini_linux_filename }} -C {{ download_to_dir }}; exit_test
-    sudo {{ download_to_dir }}/{{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}/houdini.install --auto-install --accept-EULA --install-houdini --no-license --install-hfs-symlink --make-dir /opt/houdini/{{ build }}; exit_test
-    
+    tar -xvf {{ download_to_dir }}/{{ houdini_linux_tar_filename }} -C {{ download_to_dir }}; exit_test
+    sudo {{ download_to_dir }}/{{ houdini_linux_tar_filename | regex_replace('.tar.gz$', '') }}/houdini.install --auto-install --accept-EULA --install-houdini --no-license --install-hfs-symlink --make-dir /opt/houdini/{{ build }}; exit_test
+  when: houdini_version_item.houdini_auto_version
+
   register: houdini_install_out
   become: true
   when: houdini_version_item.houdini_auto_version
@@ -185,26 +176,23 @@
     msg:  "{{ houdini_install_out.stdout }}"
   when: houdini_install_type != "server" and houdini_version_item.houdini_auto_version
 
-# - name: NODE/WORKSTATION INSTALL - Permissions on zip file - node/workstation
-#   file:
-#     path: "{{ download_to_dir }}/{{ houdini_linux_filename }}"
-#     mode: u+rw,g+rw,o+rw
-#     owner: "{{ variable_user }}"
-#     group: syscontrol
-#   become: true
-#   when: houdini_install_type != "server"
+- name: NODE/WORKSTATION INSTALL - Permissions on zip file - node/workstation
+  file:
+    path: "{{ download_to_dir }}/{{ houdini_linux_tar_filename }}"
+    mode: u+rw,g+rw,o+rw
+    owner: "{{ variable_user }}"
+    group: syscontrol
+  become: true
+  when: houdini_install_type != "server"
 
 - name: NODE/WORKSTATION INSTALL - Install Houdini with python script - specific existing version from s3 bucket
   shell: |
     cd /opt/houdini_install_script/
     . /opt/houdini_install_script/exit_test.sh
-    sudo python /opt/houdini_install_script/houdini_install.py -u '{{ sesi_username }}' -p '{{ sesi_password }}' -i /opt/houdini -b {{ houdini_version_item.houdini_build }} -t {{ download_to_dir }} -q false -f {{ houdini_linux_filename }}; exit_test
+    tar -xvf {{ download_to_dir }}/{{ houdini_linux_tar_filename }} -C {{ download_to_dir }}; exit_test
+    sudo {{ download_to_dir }}/{{ houdini_linux_tar_filename | regex_replace('.tar.gz$', '') }}/houdini.install --auto-install --accept-EULA --install-houdini --no-license --install-hfs-symlink --make-dir /opt/houdini/{{ houdini_version_item.houdini_minor_version }}; exit_test
   register: houdini_install_out
-  no_log: true
-  become: true
   when: houdini_install_type != "server" and not houdini_version_item.houdini_auto_version
-  failed_when:
-  - "'Nothing was installed.' in houdini_install_out.stderr"
 
 - debug:
     msg:  "{{ houdini_install_out.stdout }}"
@@ -252,7 +240,7 @@
 
 - name: SERVER INSTALL - Permissions on zip file
   file:
-    path: "{{ download_to_dir }}/{{ houdini_linux_filename }}"
+    path: "{{ download_to_dir }}/{{ houdini_linux_tar_filename }}"
     mode: u=rw,g=rw,o=r
     owner: "{{ variable_user }}"
     group: syscontrol
@@ -263,7 +251,7 @@
   shell: |
     set -x
     cd {{ download_to_dir }}
-    dir={{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}
+    dir={{ houdini_linux_tar_filename | regex_replace('.tar.gz$', '') }}
     echo "$dir"
     sudo mkdir -p "$dir"
     cd "$dir"
@@ -275,9 +263,9 @@
 - name: SERVER INSTALL - unarchive houdini with correct dir.
   shell: |
     set -x
-    dir={{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}
+    dir={{ houdini_linux_tar_filename | regex_replace('.tar.gz$', '') }}
     cd {{ download_to_dir }}
-    sudo tar -xvf {{ houdini_linux_filename }} -C "{{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}" --strip-components 1
+    sudo tar -xvf {{ houdini_linux_tar_filename }} -C "{{ houdini_linux_tar_filename | regex_replace('.tar.gz$', '') }}" --strip-components 1
     ls -ltriah
   register: houdini_install_out
   become_user: "{{ variable_user }}"
@@ -287,7 +275,7 @@
 
 - name: SERVER INSTALL - Permissions on installer
   file:
-    path: "{{ download_to_dir }}/{{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}/houdini.install"
+    path: "{{ download_to_dir }}/{{ houdini_linux_tar_filename | regex_replace('.tar.gz$', '') }}/houdini.install"
     mode: u=rX,g=rX,o=r
     owner: "{{ variable_user }}"
     group: syscontrol
@@ -296,8 +284,8 @@
 
 # - name: Unarchive a file with extra options # this has some problems with idempotency and its slow.
 #   unarchive:
-#     src: "{{ download_to_dir }}/{{ houdini_linux_filename }}"
-#     dest: "{{ download_to_dir }}/{{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}"
+#     src: "{{ download_to_dir }}/{{ houdini_linux_tar_filename }}"
+#     dest: "{{ download_to_dir }}/{{ houdini_linux_tar_filename | regex_replace('.tar.gz$', '') }}"
 #     # extra_opts:
 #     # - --strip-components 1
 #   become_user: "{{ variable_user }}"
@@ -309,7 +297,7 @@
 - name: SERVER INSTALL - install houdini with correct dir.
   shell: |
     set -x
-    cd {{ download_to_dir }}/{{ houdini_linux_filename | regex_replace('.tar.gz$', '') }}
+    cd {{ download_to_dir }}/{{ houdini_linux_tar_filename | regex_replace('.tar.gz$', '') }}
     ls
     sudo ./houdini.install --accept-EULA --install-houdini --install-license --install-hfs-symlink --auto-install
   register: houdini_install_out
@@ -335,7 +323,7 @@
 
 - name: "Ensure permissions on the file allow access for upload to s3 for {{ variable_user }} and group syscontrol"
   file:
-    path: "{{ download_to_dir }}/{{ houdini_linux_filename }}"
+    path: "{{ download_to_dir }}/{{ houdini_linux_tar_filename }}"
     mode: u+rw,g+rw,o+rw
     owner: "{{ variable_user }}"
     group: syscontrol
@@ -345,7 +333,7 @@
   s3_sync:
     bucket: "{{ installers_bucket }}"
     file_root: "{{ download_to_dir }}"
-    include: "{{ houdini_linux_filename }}"
+    include: "{{ houdini_linux_tar_filename }}"
     region: "{{ aws_region }}"
     mode: push
   become_user: "{{ variable_user }}"
