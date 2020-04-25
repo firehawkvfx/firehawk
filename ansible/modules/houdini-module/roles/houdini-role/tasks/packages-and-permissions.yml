@@ -83,18 +83,18 @@
     group: syscontrol
   become: true
 
-- name: check permissions
-  shell: |
-    cd "{{ download_to_dir }}"
-    ls -ltriah
-    cd ..
-    ls -ltriah
-  become: true
-  register: check_permisions
+# - name: check permissions
+#   shell: |
+#     cd "{{ download_to_dir }}"
+#     ls -ltriah
+#     cd ..
+#     ls -ltriah
+#   become: true
+#   register: check_permisions
 
-- name: show permissions
-  debug:
-    var: check_permisions.stdout
+# - name: show permissions
+#   debug:
+#     var: check_permisions.stdout
 
 - name: Copy Houdini auto install script to remote host from ansible control.
   copy:

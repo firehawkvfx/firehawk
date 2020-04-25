@@ -135,8 +135,10 @@
     if [[ "${wordcount}" -eq 0 ]]; then
       echo "File not present in S3 bucket.  Will download"
     else
+      echo "Sync S3 Bucket with local path."
       aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ houdini_linux_tar_filename }}"
     fi
+  register: output
   become_user: "{{ variable_user }}"
 
 - name: Download Houdini from SESI website - auto versions
@@ -145,7 +147,7 @@
     dest: "{{ download_to_dir }}/{{ houdini_linux_tar_filename }}"
     mode: u=rw,g=rw,o=rw
   become: true
-  when: houdini_version_item.houdini_auto_version
+  when: houdini_version_item.houdini_auto_version and not output.stdout is search("Sync S3 Bucket with local path.") # If the S3 sync does not occur, download from Side FX.
 
 - name: Install Houdini with python script - auto version only
   shell: |
