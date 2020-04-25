@@ -44,28 +44,8 @@
     recurse: yes
   become: true
 
-# - name: "set permissions on download_houdini.py"
-#   file: 
-#     dest: "/opt/houdini_install_script/download_houdini.py"
-#     owner: deadlineuser 
-#     group: syscontrol
-#     mode: u=rwX,g=rwX,o=r
-#   become: true
-  
-
 - set_fact:
     houdini_linux_tar_filename: "{{ houdini_version_item.houdini_linux_tar_filename }}"
-
-# - name: Query houdini filename - Houdini python script
-#   shell: |
-#     cd /opt/houdini_install_script/
-#     . /opt/houdini_install_script/exit_test.sh
-#     ls /opt/houdini_install_script/
-#     python /opt/houdini_install_script/houdini_install.py -u {{ sesi_username }} -p {{ sesi_password }} -i /opt/houdini -b {{ houdini_version_item.houdini_build }} -t {{ download_to_dir }} -q true -f {{ houdini_linux_tar_filename }}; exit_test
-#   register: houdini_query_out
-#   no_log: true
-#   become: true
-#   when: houdini_version_item.houdini_auto_version
 
 - name: Query houdini filename - download_houdini.py
   shell: |
@@ -114,6 +94,17 @@
   - "{{ houdini_query_out.stdout_lines }}"
   when: houdini_version_item.houdini_auto_version and 'Build:' in item
 
+- name: get hash from output
+  set_fact:
+    hash: "{{ item | regex_replace('^Hash:\ (.*)$', '\\1') }}"
+  with_items:
+  - "{{ houdini_query_out.stdout_lines }}"
+  when: houdini_version_item.houdini_auto_version and 'Hash:' in item
+
+- name: Hash for file that will be downloaded from sesi.
+  debug:
+    var: hash
+
 - name: Houdini filename to install from sidefx website result
   debug:
     var: houdini_linux_tar_filename
@@ -146,6 +137,7 @@
     url: "{{ download_url }}"
     dest: "{{ download_to_dir }}/{{ houdini_linux_tar_filename }}"
     mode: u=rw,g=rw,o=rw
+    checksum: "md5:{{hash}}"
   become: true
   when: houdini_version_item.houdini_auto_version and not output.stdout is search("Sync S3 Bucket with local path.") # If the S3 sync does not occur, download from Side FX.
 
