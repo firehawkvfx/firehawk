@@ -2,6 +2,7 @@
   find:
     paths: "/opt/Thinkbox/DeadlineDatabase10/mongo/data/logs/"
   register: found_files
+  no_log: true
 
 - name: Get latest file
   set_fact:
