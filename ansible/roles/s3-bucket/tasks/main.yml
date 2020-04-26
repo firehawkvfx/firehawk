@@ -1,0 +1,19 @@
+# Warning: this bucket and its policies is shared by the production and dev environment.
+# changes will affect all environments simultaneusly.
+
+- name: Generate houdini.env config from template
+  template:
+    src: bucket_policy.template.json
+    dest: "{{ firehawk_path }}/tmp/bucket_policy.json"
+  become: yes
+  connection: local
+
+- name: ensure an s3 bucket exists - with the aws user credentials
+  s3_bucket:
+    name: "{{ installers_bucket }}"
+    region: "{{ aws_region }}"
+    policy: "{{ lookup('file','{{ firehawk_path }}/tmp/bucket_policy.json') }}"
+  become: false
+  environment: # this bucket is shared between dev and prod accounts to ensure installers are available to both accounts.
+    AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID_prod') }}"
+    AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY_prod') }}"

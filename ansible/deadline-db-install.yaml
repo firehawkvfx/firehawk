@@ -10,6 +10,7 @@
     houdini_major_version: 18.0
     
   roles:
+    - role: s3-bucket
     - {role: deadlinedb, tags: 'deadlinedb'}
     - role: deadlinercs
 

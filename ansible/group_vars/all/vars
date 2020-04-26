@@ -21,6 +21,9 @@ bridgenic: "{{ lookup('env','TF_VAR_bridgenic') }}"
 terraform_version: "{{ lookup('env','TF_VAR_terraform_version') }}"
 inventory: "{{ lookup('env','TF_VAR_inventory') }}"
 
+firehawk_path: "{{ lookup('env','TF_VAR_firehawk_path') }}"
+secrets_path: "{{ lookup('env','TF_VAR_secrets_path') }}"
+
 # domains
 public_domain: "{{ lookup('env','TF_VAR_public_domain') }}"
 # in most cases only the above public_domain should be referenced, which can be switched between dev and prod based on the environment - envtier
@@ -29,7 +32,7 @@ public_domain: "{{ lookup('env','TF_VAR_public_domain') }}"
 public_domain_prod: "{{ lookup('env','TF_VAR_public_domain_prod') }}"
 
 bucket_extension: "{{ lookup('env','TF_VAR_bucket_extension') }}"
-installers_bucket: "installers.{{ bucket_extension }}"
+installers_bucket: "installers.{{ lookup('env','TF_VAR_bucket_extension_prod') }}" # the production bucket is always used to store installation files.
 
 private_subnet1: "{{ lookup('env', 'TF_VAR_private_subnet1') }}"
 private_subnet1_dev: "{{ lookup('env', 'TF_VAR_private_subnet1_dev') }}"

@@ -199,7 +199,6 @@ resource "null_resource" "provision_deadline_spot" {
     volume_type             = var.node_centos_volume_type
   }
 
-  # needs subnets id eg subnet-019d702254060c2f9, and ami_id, arn id eg arn:aws:iam::972620357255:instance-profile/DeadlineSlaveRole, snapshot id snap-06c90e54aaf77dbe5, security group id, sg-0b1e4b21eb893f712
   provisioner "local-exec" {
     command = <<EOT
       set -x

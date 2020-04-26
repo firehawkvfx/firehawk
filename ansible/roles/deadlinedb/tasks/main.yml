@@ -1,14 +1,14 @@
 ---
 # tasks file for roles/deadlinedb
 
-- name: ensure an s3 bucket exists - with the aws user credentials
-  s3_bucket:
-    name: "{{ installers_bucket }}"
-    region: "{{ aws_region }}"
-  become: false
-  tags:
-  - install
-  - sync_installers
+# - name: ensure an s3 bucket exists - with the aws user credentials
+#   s3_bucket:
+#     name: "{{ installers_bucket }}"
+#     region: "{{ aws_region }}"
+#   become: false
+#   tags:
+#   - install
+#   - sync_installers
 
 - name: Sync deadline from s3 if exist - pull - with the aws user credentials
   shell: |
