@@ -9,7 +9,7 @@
 
 - name: "Get file {{ latest_file }} copy to {{ firehawk_path }}/tmp/deadline_db.log"
   fetch:
-    src: "{{ latest_file }}"
+    src: "{{ latest_file.path }}"
     dest: "{{ firehawk_path }}/tmp/deadline_db.log"
     flat: yes
   become: true
