@@ -32,7 +32,7 @@ public_domain: "{{ lookup('env','TF_VAR_public_domain') }}"
 public_domain_prod: "{{ lookup('env','TF_VAR_public_domain_prod') }}"
 
 bucket_extension: "{{ lookup('env','TF_VAR_bucket_extension') }}"
-installers_bucket: "installers.{{ lookup('env','TF_VAR_bucket_extension_prod') }}" # the production bucket is always used to store installation files.
+installers_bucket: "software.{{ lookup('env','TF_VAR_bucket_extension_prod') }}" # the production bucket is always used to store installation files.
 
 private_subnet1: "{{ lookup('env', 'TF_VAR_private_subnet1') }}"
 private_subnet1_dev: "{{ lookup('env', 'TF_VAR_private_subnet1_dev') }}"
