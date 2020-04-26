@@ -13,7 +13,7 @@
       "Resource": "arn:aws:s3:::{{ installers_bucket }}/*",
       "Principal": {
         "AWS": [
-          "{{ AWS_ACCOUNT_ID_dev }}"
+          "{{ AWS_ACCOUNT_ID_dev }}", "{{ AWS_ACCOUNT_ID_prod }}"
         ]
       }
     }
