@@ -124,7 +124,12 @@
     wordcount=`aws s3 ls s3://{{ bucket }}/|grep {{ houdini_linux_tar_filename }}|wc -c`
     echo wordcount=${wordcount}
     if [[ "${wordcount}" -eq 0 ]]; then
-      echo "File not present in S3 bucket.  Will download"
+      if [[ {{ houdini_version_item.houdini_auto_version }} ]]; then
+        echo "File not present in S3 bucket.  Will download"
+      else
+        echo "Auto Version is false, but the file is not present in the S3 Bucket.  When using a specific verion of houdini, the file must exist in the S3 bucket."
+        exit 1
+      fi
     else
       echo "Sync S3 Bucket with local path."
       aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ houdini_linux_tar_filename }}"
@@ -141,7 +146,7 @@
   become: true
   when: houdini_version_item.houdini_auto_version and not output.stdout is search("Sync S3 Bucket with local path.") # If the S3 sync does not occur, download from Side FX.
 
-- name: Install Houdini with python script - auto version only
+- name: Install Houdini 
   shell: |
     cd /opt/houdini_install_script/
     . /opt/houdini_install_script/exit_test.sh
