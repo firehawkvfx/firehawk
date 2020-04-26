@@ -1,0 +1,15 @@
+- name: Get files in a folder
+  find:
+    paths: "/opt/Thinkbox/DeadlineDatabase10/mongo/data/logs/"
+  register: found_files
+
+- name: Get latest file
+  set_fact:
+    latest_file: "{{ found_files.files | sort(attribute='mtime',reverse=true) | first }}"
+
+- name: "Get file {{ latest_file }} copy to {{ firehawk_path }}/tmp/deadline_db.log"
+  fetch:
+    src: "{{ latest_file }}"
+    dest: "{{ firehawk_path }}/tmp/deadline_db.log"
+    flat: yes
+  become: true
