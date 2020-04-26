@@ -1,14 +1,14 @@
 # Warning: this bucket and its policies is shared by the production and dev environment.
 # changes will affect all environments simultaneusly.
 
-- name: Generate houdini.env config from template
+- name: Generate bucket policy from template
   template:
     src: bucket_policy.template.json
     dest: "{{ firehawk_path }}/tmp/bucket_policy.json"
   become: yes
   connection: local
 
-- name: ensure an s3 bucket exists - with the aws user credentials
+- name: "Ensure an s3 bucket exists - with the aws user credentials - {{ installers_bucket }}"
   s3_bucket:
     name: "{{ installers_bucket }}"
     region: "{{ aws_region }}"

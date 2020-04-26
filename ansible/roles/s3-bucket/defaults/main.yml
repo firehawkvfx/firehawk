@@ -1,0 +1,5 @@
+---
+# defaults file for roles/s3-bucket
+
+AWS_ACCOUNT_ID_dev: "{{ lookup('env','AWS_ACCESS_KEY_ID_dev') }}"
+AWS_ACCOUNT_ID_prod: "{{ lookup('env','AWS_ACCESS_KEY_ID_prod') }}"
