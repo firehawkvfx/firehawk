@@ -95,7 +95,7 @@
         latest_file: "{{ found_files.files | sort(attribute='mtime',reverse=true) | first }}"
     - name: "Get file {{ source }} copy to {{ dest }}"
       fetch:
-        src: latest_file
+        src: "{{ latest_file }}"
         dest: "{{ firehawk_path }}/tmp/deadline_db.log"
         flat: yes
       become: true
