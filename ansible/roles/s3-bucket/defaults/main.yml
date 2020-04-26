@@ -3,3 +3,4 @@
 
 AWS_ACCOUNT_ID_dev: "{{ lookup('env','AWS_ACCESS_KEY_ID_dev') }}"
 AWS_ACCOUNT_ID_prod: "{{ lookup('env','AWS_ACCESS_KEY_ID_prod') }}"
+policy_file: "{{ firehawk_path }}/tmp/bucket_policy.json"
