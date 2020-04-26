@@ -7,7 +7,10 @@
         "s3:*"
       ],
       "Effect": "Allow",
-      "Resource": "arn:aws:s3:::{{ installers_bucket }}/*",
+      "Resource": [
+        "arn:aws:s3:::{{ installers_bucket }}",
+        "arn:aws:s3:::{{ installers_bucket }}/*"
+      ],
       "Principal": {
         "AWS": [
           "{{ AWS_ACCOUNT_ID_dev }}", "{{ AWS_ACCOUNT_ID_prod }}", "arn:aws:iam::{{ AWS_ACCOUNT_ID_dev }}:user/*"
