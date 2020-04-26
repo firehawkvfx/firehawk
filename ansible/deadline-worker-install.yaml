@@ -10,7 +10,7 @@
 
   tasks:
   - include_role:
-    name: s3-bucket
+      name: s3-bucket
     tags:
     - cloud-install
     - onsite-install
