@@ -76,13 +76,29 @@
   tags:
   - install
 
-- name: install deadline db
-  shell: |
-    set -x
-    cd /home/deadlineuser/Downloads/
-    {{ files_matched.files[0].path }} --mode unattended --debuglevel 2 --prefix /opt/Thinkbox/DeadlineRepository10 --setpermissions true --installmongodb true --dbOverwrite true --mongodir /opt/Thinkbox/DeadlineDatabase10 --dbListeningPort 27017 --certgen_outdir /opt/Thinkbox/DeadlineDatabase10/certs --certgen_password {{ deadline_proxy_certificate_password }} --createX509dbuser true --requireSSL true --dbhost {{ openfirehawkserver }} --dbport 27017 --dbuser {{ user_deadlineuser_name }} --dbpassword {{ deadline_proxy_certificate_password }} --dbauth true --dbcertpass {{ deadline_proxy_certificate_password }} --dbssl true
-  register: deadline_db_install_output_shell
-  become: true
+- name: install deadline db, pull log if it errors.
+  block:
+    - name: install deadline db
+      shell: |
+        set -x
+        cd /home/deadlineuser/Downloads/
+        {{ files_matched.files[0].path }} --mode unattended --debuglevel 2 --prefix /opt/Thinkbox/DeadlineRepository10 --setpermissions true --installmongodb true --dbOverwrite true --mongodir /opt/Thinkbox/DeadlineDatabase10 --dbListeningPort 27017 --certgen_outdir /opt/Thinkbox/DeadlineDatabase10/certs --certgen_password {{ deadline_proxy_certificate_password }} --createX509dbuser true --requireSSL true --dbhost {{ openfirehawkserver }} --dbport 27017 --dbuser {{ user_deadlineuser_name }} --dbpassword {{ deadline_proxy_certificate_password }} --dbauth true --dbcertpass {{ deadline_proxy_certificate_password }} --dbssl true
+      register: deadline_db_install_output_shell
+      become: true
+  rescue:
+    - name: Get files in a folder
+      find:
+        paths: "/opt/Thinkbox/DeadlineDatabase10/mongo/data/logs/"
+      register: found_files
+    - name: Get latest file
+      set_fact:
+        latest_file: "{{ found_files.files | sort(attribute='mtime',reverse=true) | first }}"
+    - name: "Get file {{ source }} copy to {{ dest }}"
+      fetch:
+        src: latest_file
+        dest: "{{ firehawk_path }}/tmp/deadline_db.log"
+        flat: yes
+      become: true
   tags:
   - install
 
