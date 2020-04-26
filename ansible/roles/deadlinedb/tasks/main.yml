@@ -92,6 +92,13 @@
     - include_role:
         name: "deadlinedb"
         tasks_from: "logs"
+    - name: fatal
+      set_fact:
+        fatal_error: true
+  always:
+  - meta: end_play
+    when: fatal_error is defined and fatal_error
+  any_errors_fatal: yes
   tags:
   - install
 
