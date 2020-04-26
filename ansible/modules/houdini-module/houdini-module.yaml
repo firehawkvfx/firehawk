@@ -46,13 +46,13 @@
   #   include_role:
   #     name: houdini-tops-ports-vpn
 
-  - name: ensure an s3 bucket exists to store large files / installers for faster redeployment.
-    s3_bucket:
-      name: "{{ bucket }}"
-      region: "{{ aws_region }}"
-    become: false
-    tags:
-      - sync_installers
+  # - name: ensure an s3 bucket exists to store large files / installers for faster redeployment.
+  #   s3_bucket:
+  #     name: "{{ bucket }}"
+  #     region: "{{ aws_region }}"
+  #   become: false
+  #   tags:
+  #     - sync_installers
 
   - name: Ensure the downloads folder is syncronised with the bucket
     s3_sync:

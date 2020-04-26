@@ -9,6 +9,12 @@
   become: true
 
   tasks:
+  - include_role:
+    name: s3-bucket
+    tags:
+    - cloud-install
+    - onsite-install
+
   - name: set permissions Thinkbox dir - non recursive
     file: 
       path: /opt/Thinkbox/
@@ -259,13 +265,13 @@
     - cloud-install
     - onsite-install
 
-  - name: ensure an s3 bucket exists
-    s3_bucket:
-      name: "{{ installers_bucket }}"
-      region: "{{ aws_region }}"
-    tags:
-    - cloud-install
-    - onsite-install
+  # - name: ensure an s3 bucket exists
+  #   s3_bucket:
+  #     name: "{{ installers_bucket }}"
+  #     region: "{{ aws_region }}"
+  #   tags:
+  #   - cloud-install
+  #   - onsite-install
 
   - name: S3 GET deadline
     aws_s3:

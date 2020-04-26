@@ -47,11 +47,17 @@
       msg: "installer path: {{ files_matched.files[0].path }}"
 
   - name: ensure an s3 bucket exists to store large files / installers for faster redeployment.
-    s3_bucket:
-      name: "{{ installers_bucket }}"
-      region: "{{ aws_region }}"
+  - include_role:
+    name: s3-bucket
     tags:
       - sync_installers
+
+  # - name: ensure an s3 bucket exists to store large files / installers for faster redeployment.
+  #   s3_bucket:
+  #     name: "{{ installers_bucket }}"
+  #     region: "{{ aws_region }}"
+  #   tags:
+  #     - sync_installers
 
   - name: ensure the nvidia installer is syncronised with the bucket
     s3_sync:
