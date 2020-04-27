@@ -1,6 +1,6 @@
 {
   "Version": "2012-10-17",
-  "Id": "s3DevProdPolicy",
+  "Id": "s3ProdDevSharePolicy",
   "Statement": [
     {
       "Action": [
