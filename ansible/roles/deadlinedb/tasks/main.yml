@@ -120,7 +120,7 @@
   tags:
   - install
 
-- name: ensure the deadline linux installer tar exists in the s3 bucket.  Push if it doesn't.
+- name: "Ensure the deadline linux installer tar exists in the s3 bucket {{ installers_bucket }} - Push if it doesn't."
   s3_sync:
     bucket: "{{ installers_bucket }}"
     file_root: "{{ deadline_linux_installers_tar | dirname }}"
