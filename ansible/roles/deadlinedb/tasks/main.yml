@@ -76,7 +76,22 @@
   tags:
   - install
 
-- name: install deadline db, pull log if it errors.
+- name: Ensures dir exists
+  file:
+    path: "/deployuser/tmp/mongo/backup/"
+    state: directory
+    owner: deadlineuser
+  become: yes
+  
+- find: paths=/opt/Thinkbox/DeadlineDatabase10/mongo/backup/ file_type=directory patterns="*"
+  register: backup_paths
+  become: yes
+
+- shell: mv * /deployuser/tmp/mongo/backup
+  when: backup_paths.matched|int != 0
+  become: yes
+
+- name: Install Deadline DB & pull latest log.
   block:
     - name: install deadline db
       shell: |
