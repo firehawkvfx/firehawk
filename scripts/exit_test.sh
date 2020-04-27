@@ -7,7 +7,14 @@ GREEN='\033[0;32m' # Green Text
 BLUE='\033[0;34m' # Blue Text
 NC='\033[0m' # No Color
 
+interrupt=false
+failed=false
+
 exit_test () {
+    if [ -d "/deployuser" && -f "/deployuser/interrupt" ]; then
+        printf "\n${RED}Interrrupt file found.  Exiting... ${NC}\n" >&2
+        interrupt=true
+    fi
     if [ $? -eq 0 ]; then
         printf "\n${GREEN}Command Succeeded${NC}\n"
     else
@@ -16,10 +23,12 @@ exit_test () {
         else
             printf "\n${RED}Failed command ...exiting${NC}\n" >&2
             # exit will exit the shell if sourced
-
-            exit 1
+            failed=true
         fi
             # return will exit the bash script with a return code
             # return 1
+    fi
+    if [[ "$interrupt" == true || "$failed" == true  ]]; then
+        exit 1
     fi
 }

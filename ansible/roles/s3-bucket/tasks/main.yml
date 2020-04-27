@@ -17,6 +17,9 @@
     name: "{{ installers_bucket }}"
     region: "{{ aws_region }}"
     policy: "{{ lookup('file', policy_file_path) }}"
+    tags:
+      ansible_play_name: "{{ ansible_play_name }}"
+      playbook_dir: "{{ playbook_dir }}"
   become: false
   environment: # this bucket is shared between dev and prod accounts to ensure installers are available to both accounts.
     AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID_prod') }}"
