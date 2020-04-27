@@ -1,8 +1,6 @@
 - name: Sync S3
   shell: |
     set -x
-    cd /opt/houdini_install_script/
-    . /opt/houdini_install_script/exit_test.sh
 
     cd {{ basedir }}/
     
@@ -39,6 +37,11 @@
     fi
   register: output
   become_user: "{{ variable_user }}"
+
+- name: show output
+  debug:
+    var: output
+
 
 # - name: Download Houdini from SESI website - auto versions
 #   get_url:

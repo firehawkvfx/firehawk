@@ -265,7 +265,7 @@
     - cloud-install
     - onsite-install
 
-  - name: s3-sync push houdini installer to bucket
+  - name: s3-sync push deadline installer to bucket
     include_role:
       name: s3-sync
     vars:
