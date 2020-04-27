@@ -52,13 +52,6 @@
     tags:
       - sync_installers
 
-  # - name: ensure an s3 bucket exists to store large files / installers for faster redeployment.
-  #   s3_bucket:
-  #     name: "{{ installers_bucket }}"
-  #     region: "{{ aws_region }}"
-  #   tags:
-  #     - sync_installers
-
   - name: ensure the nvidia installer is syncronised with the bucket
     s3_sync:
       bucket: "{{ installers_bucket }}"

@@ -265,14 +265,6 @@
     - cloud-install
     - onsite-install
 
-  # - name: ensure an s3 bucket exists
-  #   s3_bucket:
-  #     name: "{{ installers_bucket }}"
-  #     region: "{{ aws_region }}"
-  #   tags:
-  #   - cloud-install
-  #   - onsite-install
-
   - name: S3 GET deadline
     aws_s3:
       bucket: "{{ installers_bucket }}"
