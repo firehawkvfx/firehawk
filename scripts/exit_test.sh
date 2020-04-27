@@ -11,10 +11,11 @@ interrupt=false
 failed=false
 
 exit_test () {
-    if [ -d "/deployuser" && -f "/deployuser/interrupt" ]; then
+    if [[ -d "/deployuser" ]] && [[ -f "/deployuser/interrupt" ]]; then
         printf "\n${RED}Interrrupt file found.  Exiting... ${NC}\n" >&2
         interrupt=true
     fi
+
     if [ $? -eq 0 ]; then
         printf "\n${GREEN}Command Succeeded${NC}\n"
     else
@@ -28,6 +29,7 @@ exit_test () {
             # return will exit the bash script with a return code
             # return 1
     fi
+    
     if [[ "$interrupt" == true || "$failed" == true  ]]; then
         exit 1
     fi
