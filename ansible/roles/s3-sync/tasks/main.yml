@@ -37,6 +37,8 @@
     fi
   register: output
   become_user: "{{ variable_user }}"
+  args:
+    executable: /bin/bash
 
 - name: show output
   debug:

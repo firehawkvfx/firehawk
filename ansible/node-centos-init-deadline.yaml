@@ -105,28 +105,25 @@
       group: syscontrol
     become: yes
 
-  - name: S3 GET deadline
-    aws_s3:
-      bucket: "{{ bucket }}"
-      object: "{{ deadline_linux_filename }}"
-      dest: "/home/deadlineuser/Downloads/{{ deadline_linux_filename }}"
-      mode: get
-      # AWS_ACCESS_KEY: "{{ AWS_ACCESS_KEY }}"
-      # AWS_SECRET_KEY: "{{ AWS_SECRET_KEY }}"
-      region: "{{ aws_region }}"
+  # - name: S3 GET deadline
+  #   aws_s3:
+  #     bucket: "{{ bucket }}"
+  #     object: "{{ deadline_linux_filename }}"
+  #     dest: "/home/deadlineuser/Downloads/{{ deadline_linux_filename }}"
+  #     mode: get
+  #     # AWS_ACCESS_KEY: "{{ AWS_ACCESS_KEY }}"
+  #     # AWS_SECRET_KEY: "{{ AWS_SECRET_KEY }}"
+  #     region: "{{ aws_region }}"
 
-  - name: s3-sync push deadline installer
+  - name: s3-sync pull deadline installer
     include_role:
       name: s3-sync
     vars:
-      mode: "push"
+      mode: "pull"
       bucket: "{{ bucket }}"
       basedir: "/home/deadlineuser/Downloads"
       filename: "{{ deadline_linux_filename }}"
       variable_user: "{{ variable_user }}"
-    tags:
-    - cloud-install
-    - onsite-install
 
   # - name: Sync deadline from s3 if exist and not present on file system- pull
   #   shell: |
