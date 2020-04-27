@@ -19,6 +19,27 @@
   register: deadline_linux_installers_tar_stat
   become: yes
 
+- name: Get the current caller identity information
+  aws_caller_info:
+  register: caller_info
+  become: false
+
+- name: show aws caller info
+  debug:
+    var: caller_info
+
+- name: "Ensure the deadline linux installer tar exists in the s3 bucket {{ installers_bucket }} - Push if it doesn't."
+  s3_sync:
+    bucket: "{{ installers_bucket }}"
+    file_root: "{{ deadline_linux_installers_tar | dirname }}"
+    include: "{{ deadline_linux_installers_tar | basename }}"
+    # region: "{{ aws_region }}"
+    mode: push
+  become: false
+  tags:
+  - install
+  - sync_installers
+
 - name: "Test: Fail if not existing tar."
   fail:
     msg: "Bailing out: You need to place the installer in the download directory.  Installer not found - {{ deadline_linux_installers_tar }}"
@@ -114,7 +135,7 @@
 - name: Get the current caller identity information
   aws_caller_info:
   register: caller_info
-  become_user: false
+  become: false
 
 - name: show aws caller info
   debug:
@@ -127,7 +148,7 @@
     include: "{{ deadline_linux_installers_tar | basename }}"
     region: "{{ aws_region }}"
     mode: push
-  become_user: false
+  become: false
   tags:
   - install
   - sync_installers
