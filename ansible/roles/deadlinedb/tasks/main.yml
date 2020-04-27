@@ -9,7 +9,7 @@
     bucket: "{{ installers_bucket }}"
     basedir: "{{ deadline_linux_installers_tar | dirname }}"
     filename: "{{ deadline_linux_installers_tar | basename }}"
-    variable_user: "{{ variable_user }}"
+    variable_user: "deadlineuser"
   tags:
   - install
   - sync_installers
