@@ -111,6 +111,15 @@
   tags:
   - install
 
+- name: Get the current caller identity information
+  aws_caller_info:
+  register: caller_info
+  become_user: false
+
+- name: show aws caller info
+  debug:
+    var: caller_info
+
 - name: "Ensure the deadline linux installer tar exists in the s3 bucket {{ installers_bucket }} - Push if it doesn't."
   s3_sync:
     bucket: "{{ installers_bucket }}"
@@ -122,10 +131,7 @@
   tags:
   - install
   - sync_installers
-  environment: # this bucket is shared between dev and prod accounts to ensure installers are available to both accounts.
-    AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID_prod') }}"
-    AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY_prod') }}"
-    
+
 - name: check deadline db install output
   debug:
     msg: "{{ deadline_db_install_output_shell.stdout }}"
