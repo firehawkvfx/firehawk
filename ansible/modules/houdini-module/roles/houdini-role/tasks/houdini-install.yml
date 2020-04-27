@@ -329,13 +329,23 @@
     group: syscontrol
   become: true
 
+# - name: "ensure the houdini installer exists in the s3 bucket {{ installers_bucket }} Push if it doesn't."
+#   s3_sync:
+#     bucket: "{{ installers_bucket }}"
+#     file_root: "{{ download_to_dir }}"
+#     include: "{{ houdini_linux_tar_filename }}"
+#     region: "{{ aws_region }}"
+#     mode: push
+#   become_user: "{{ variable_user }}"
+#   tags:
+#     - sync_installers
+
 - name: "ensure the houdini installer exists in the s3 bucket {{ installers_bucket }} Push if it doesn't."
-  s3_sync:
-    bucket: "{{ installers_bucket }}"
-    file_root: "{{ download_to_dir }}"
-    include: "{{ houdini_linux_tar_filename }}"
-    region: "{{ aws_region }}"
-    mode: push
+  shell: |
+    set -x
+    # aws sts get-caller-identity
+    cd {{ download_to_dir }}/
+    aws s3 sync . s3://{{ installers_bucket }}/ --exclude "*" --include "{{ houdini_linux_tar_filename }}"
   become_user: "{{ variable_user }}"
   tags:
     - sync_installers

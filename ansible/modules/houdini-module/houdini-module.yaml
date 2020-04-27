@@ -54,16 +54,16 @@
   #   tags:
   #     - sync_installers
 
-  - name: Ensure the downloads folder is syncronised with the bucket
-    s3_sync:
-      bucket: "{{ bucket }}"
-      file_root: /deployuser/downloads/
-      include: "*"
-      region: "{{ aws_region }}"
-    when: sync_downloads
-    become: false
-    tags:
-      - sync_installers
+  # - name: Ensure the downloads folder is syncronised with the bucket
+  #   s3_sync:
+  #     bucket: "{{ bucket }}"
+  #     file_root: /deployuser/downloads/
+  #     include: "*"
+  #     region: "{{ aws_region }}"
+  #   when: sync_downloads
+  #   become: false
+  #   tags:
+  #     - sync_installers
 
 # store deadline components required for submitter.
 

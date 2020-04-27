@@ -20,23 +20,33 @@
   #     - sync_installers
 
   - name: ensure the deadline installer is syncronised with the bucket
-    s3_sync:
-      bucket: "{{ bucket }}"
-      file_root: /deployuser/downloads/
-      include: "{{ deadline_linux_filename }}"
-      region: "{{ aws_region }}"
+    shell: |
+      set -x
+      # aws sts get-caller-identity
+      cd /deployuser/downloads/
+      aws s3 sync . s3://{{ bucket }}/ --exclude "*" --include "{{ deadline_linux_filename }}"
+    become_user: deployuser
     tags:
       - sync_installers
 
-  - name: ensure the downloads folder is syncronised with the bucket
-    s3_sync:
-      bucket: "{{ bucket }}"
-      file_root: /deployuser/downloads/
-      include: "*"
-      region: "{{ aws_region }}"
-    when: sync_downloads
-    tags:
-      - sync_installers
+  # - name: ensure the deadline installer is syncronised with the bucket
+  #   s3_sync:
+  #     bucket: "{{ bucket }}"
+  #     file_root: /deployuser/downloads/
+  #     include: "{{ deadline_linux_filename }}"
+  #     region: "{{ aws_region }}"
+  #   tags:
+  #     - sync_installers
+
+  # - name: ensure the downloads folder is syncronised with the bucket
+  #   s3_sync:
+  #     bucket: "{{ bucket }}"
+  #     file_root: /deployuser/downloads/
+  #     include: "*"
+  #     region: "{{ aws_region }}"
+  #   when: sync_downloads
+  #   tags:
+  #     - sync_installers
 
 ### end steps to create new user
 
@@ -99,8 +109,8 @@
       object: "{{ deadline_linux_filename }}"
       dest: "/home/deadlineuser/Downloads/{{ deadline_linux_filename }}"
       mode: get
-      AWS_ACCESS_KEY: "{{ AWS_ACCESS_KEY }}"
-      AWS_SECRET_KEY: "{{ AWS_SECRET_KEY }}"
+      # AWS_ACCESS_KEY: "{{ AWS_ACCESS_KEY }}"
+      # AWS_SECRET_KEY: "{{ AWS_SECRET_KEY }}"
       region: "{{ aws_region }}"
 
   # - name: Sync deadline from s3 if exist and not present on file system- pull
