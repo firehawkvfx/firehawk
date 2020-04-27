@@ -27,21 +27,22 @@
 - name: Sync deadline to s3
   shell: |
     set -x
+    aws sts get-caller-identity
     cd {{ deadline_linux_installers_tar | dirname }}/
     aws s3 sync . s3://{{ installers_bucket }}/ --exclude "*" --include "{{ deadline_linux_installers_tar | basename }}"
-  become: false
+  become: deadlineuser
   tags:
   - install
   - sync_installers
 
-- name: "Ensure the deadline linux installer tar exists in the s3 bucket {{ installers_bucket }} - Push if it doesn't."
+- name: "Ensure deadline {{ deadline_linux_installers_tar | dirname }} exists in the s3 bucket {{ installers_bucket }} - Push if it doesn't."
   s3_sync:
     bucket: "{{ installers_bucket }}"
     file_root: "{{ deadline_linux_installers_tar | dirname }}"
     include: "{{ deadline_linux_installers_tar | basename }}"
     # region: "{{ aws_region }}"
     mode: push
-  become: false
+  become: deadlineuser
   tags:
   - install
   - sync_installers
