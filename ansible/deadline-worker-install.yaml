@@ -265,15 +265,15 @@
     - cloud-install
     - onsite-install
 
-  - name: s3-sync push deadline installer to bucket
+  - name: s3-sync get deadline installer
     include_role:
       name: s3-sync
     vars:
-      mode: "push"
+      mode: "pull"
       bucket: "{{ installers_bucket }}"
       basedir: "/home/deadlineuser/Downloads"
       filename: "{{ deadline_linux_filename }}"
-      variable_user: "{{ variable_user }}"
+      variable_user: "deadlineuser"
     tags:
     - cloud-install
     - onsite-install
