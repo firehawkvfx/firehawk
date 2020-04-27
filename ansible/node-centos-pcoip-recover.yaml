@@ -23,14 +23,25 @@
       path: "/deployuser/downloads/nvidia/{{ grid_folder }}/{{ driver_file }}"
     register: driver_stat
 
-  - name: get nvidia driver
-    shell: |
-      set -x
-      cd /deployuser/downloads/nvidia/{{ grid_folder }}
-      aws s3 sync s3://ec2-linux-nvidia-drivers/{{ grid_folder }}/ . --delete
-      #cp *.run /deployuser/downloads/nvidia/.
-    become_user: deployuser
+  - name: s3-sync pull nvidia driver
+    include_role:
+      name: s3-sync
+    vars:
+      mode: "pull"
+      bucket: "ec2-linux-nvidia-drivers/{{ grid_folder }}"
+      basedir: "/deployuser/downloads/nvidia/{{ grid_folder }}"
+      filename: "*"
+      variable_user: "deployuser"
     when: driver_stat.stat.exists == false
+
+  # - name: get nvidia driver
+  #   shell: |
+  #     set -x
+  #     cd /deployuser/downloads/nvidia/{{ grid_folder }}
+  #     aws s3 sync s3://ec2-linux-nvidia-drivers/{{ grid_folder }}/ . --delete
+  #     #cp *.run /deployuser/downloads/nvidia/.
+  #   become_user: deployuser
+  #   when: driver_stat.stat.exists == false
 
   - name: "Ansible find files in subdirectory downloads /deployuser/downloads/nvidia/{{ grid_folder }}/"
     find:

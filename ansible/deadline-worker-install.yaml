@@ -265,16 +265,29 @@
     - cloud-install
     - onsite-install
 
-  - name: "ensure the houdini installer exists in the s3 bucket {{ installers_bucket }} Push if it doesn't."
-    shell: |
-      set -x
-      aws sts get-caller-identity
-      cd /home/deadlineuser/Downloads/
-      aws s3 sync s3://{{ installers_bucket }}/ . --exclude "*" --include "{{ deadline_linux_filename }}"
-    become_user: "{{ variable_user }}"
+  - name: s3-sync push houdini installer to bucket
+    include_role:
+      name: s3-sync
+    vars:
+      mode: "push"
+      bucket: "{{ installers_bucket }}"
+      basedir: "/home/deadlineuser/Downloads"
+      filename: "{{ deadline_linux_filename }}"
+      variable_user: "{{ variable_user }}"
     tags:
     - cloud-install
     - onsite-install
+
+  # - name: "ensure the houdini installer exists in the s3 bucket {{ installers_bucket }} Push if it doesn't."
+  #   shell: |
+  #     set -x
+  #     aws sts get-caller-identity
+  #     cd /home/deadlineuser/Downloads/
+  #     aws s3 sync s3://{{ installers_bucket }}/ . --exclude "*" --include "{{ deadline_linux_filename }}"
+  #   become_user: "{{ variable_user }}"
+  #   tags:
+  #   - cloud-install
+  #   - onsite-install
 
   # - name: S3 GET deadline
   #   aws_s3:

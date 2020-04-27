@@ -19,15 +19,17 @@
   #   tags:
   #     - sync_installers
 
-  - name: ensure the deadline installer is syncronised with the bucket
-    shell: |
-      set -x
-      # aws sts get-caller-identity
-      cd /deployuser/downloads/
-      aws s3 sync . s3://{{ bucket }}/ --exclude "*" --include "{{ deadline_linux_filename }}"
-    become_user: deployuser
-    tags:
-      - sync_installers
+
+
+  # - name: ensure the deadline installer is syncronised with the bucket
+  #   shell: |
+  #     set -x
+  #     # aws sts get-caller-identity
+  #     cd /deployuser/downloads/
+  #     aws s3 sync . s3://{{ bucket }}/ --exclude "*" --include "{{ deadline_linux_filename }}"
+  #   become_user: deployuser
+  #   tags:
+  #     - sync_installers
 
   # - name: ensure the deadline installer is syncronised with the bucket
   #   s3_sync:
@@ -113,10 +115,23 @@
       # AWS_SECRET_KEY: "{{ AWS_SECRET_KEY }}"
       region: "{{ aws_region }}"
 
+  - name: s3-sync push deadline installer
+    include_role:
+      name: s3-sync
+    vars:
+      mode: "push"
+      bucket: "{{ bucket }}"
+      basedir: "/home/deadlineuser/Downloads"
+      filename: "{{ deadline_linux_filename }}"
+      variable_user: "{{ variable_user }}"
+    tags:
+    - cloud-install
+    - onsite-install
+
   # - name: Sync deadline from s3 if exist and not present on file system- pull
   #   shell: |
   #     set -x
-  #     cd /home/deadlineuser/Downloads/
+  #     cd /home/deadlineuser/Downloads
   #     ~/.local/bin/aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ deadline_linux_filename }}"
   #   become_user: "{{ variable_user }}"
 

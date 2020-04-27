@@ -1,0 +1,50 @@
+- name: Sync S3
+  shell: |
+    set -x
+    cd /opt/houdini_install_script/
+    . /opt/houdini_install_script/exit_test.sh
+
+    cd {{ basedir }}/
+    
+    wordcount=`aws s3 ls s3://{{ bucket }}/|grep {{ filename }}|wc -c`
+    echo wordcount=${wordcount}
+    if [[ "${wordcount}" -eq 0 ]]; then
+      if [[ {{ mode }} == 'push' ]]; then
+        echo "Sync Push: File not present in S3 bucket, will push."
+        if [ -f "{{ filename }}" ]; then
+            aws s3 sync . s3://{{ bucket }}/ --exclude "*" --include "{{ filename }}"
+        else 
+            echo "{{ filename }} does not exist"
+            exit 1
+        fi
+        exit 0
+      else
+        echo "Won't pull, File not present in S3 bucket."
+        exit 0
+      fi
+    else
+      if [[ {{ mode }} == 'push' ]]; then
+        echo "Sync Push: File already present in S3 bucket, won't push."
+        exit 0
+      else
+        echo "Sync Pull: File present in S3 bucket, will pull."
+        if [ -f "{{ filename }}" ]; then
+            echo "{{ filename }} exists"
+            exit 0
+        else 
+            aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ filename }}"
+            exit 0
+        fi
+      fi
+    fi
+  register: output
+  become_user: "{{ variable_user }}"
+
+# - name: Download Houdini from SESI website - auto versions
+#   get_url:
+#     url: "{{ download_url }}"
+#     dest: "{{ basedir }}/{{ filename }}"
+#     mode: u=rw,g=rw,o=rw
+#     checksum: "md5:{{hash}}"
+#   become: true
+#   when: houdini_version_item.houdini_auto_version and not output.stdout is search("Sync S3 Bucket with local path.") # If the S3 sync does not occur, download from Side FX.

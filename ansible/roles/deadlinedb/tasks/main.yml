@@ -1,17 +1,30 @@
 ---
 # tasks file for roles/deadlinedb
 
-- name: Sync deadline from s3 if exist - pull - with the aws user credentials
-  shell: |
-    set -x
-    cd {{ deadline_linux_installers_tar | dirname }}/
-    aws s3 sync s3://{{ installers_bucket }}/ . --exclude "*" --include "{{ deadline_linux_installers_tar | basename }}"
-  args:
-    creates: "{{ deadline_linux_installers_tar | dirname }}/{{ deadline_linux_installers_tar | basename }}"
-  become: false
+- name: s3-sync pull deadline installer
+  include_role:
+    name: s3-sync
+  vars:
+    mode: "pull"
+    bucket: "{{ installers_bucket }}"
+    basedir: "{{ deadline_linux_installers_tar | dirname }}"
+    filename: "{{ deadline_linux_installers_tar | basename }}"
+    variable_user: "{{ variable_user }}"
   tags:
   - install
   - sync_installers
+
+# - name: Sync deadline from s3 if exist - pull - with the aws user credentials
+#   shell: |
+#     set -x
+#     cd {{ deadline_linux_installers_tar | dirname }}/
+#     aws s3 sync s3://{{ installers_bucket }}/ . --exclude "*" --include "{{ deadline_linux_installers_tar | basename }}"
+#   args:
+#     creates: "{{ deadline_linux_installers_tar | dirname }}/{{ deadline_linux_installers_tar | basename }}"
+#   become: false
+#   tags:
+#   - install
+#   - sync_installers
 
 - name: "Ensures tar exists {{ deadline_linux_installers_tar }}"
   stat:
@@ -125,13 +138,26 @@
 #   register: caller_info
 #   become_user: deadlineuser
 
-- name: Sync deadline to s3
-  shell: |
-    set -x
-    # aws sts get-caller-identity
-    cd {{ deadline_linux_installers_tar | dirname }}/
-    aws s3 sync . s3://{{ installers_bucket }}/ --exclude "*" --include "{{ deadline_linux_installers_tar | basename }}"
-  become_user: deadlineuser
+# - name: Sync deadline to s3
+#   shell: |
+#     set -x
+#     # aws sts get-caller-identity
+#     cd {{ deadline_linux_installers_tar | dirname }}/
+#     aws s3 sync . s3://{{ installers_bucket }}/ --exclude "*" --include "{{ deadline_linux_installers_tar | basename }}"
+#   become_user: deadlineuser
+#   tags:
+#   - install
+#   - sync_installers
+
+- name: s3-sync push deadline installer
+  include_role:
+    name: s3-sync
+  vars:
+    mode: "push"
+    bucket: "{{ installers_bucket }}"
+    basedir: "{{ deadline_linux_installers_tar | dirname }}"
+    filename: "{{ deadline_linux_installers_tar | basename }}"
+    variable_user: "deadlineuser"
   tags:
   - install
   - sync_installers
