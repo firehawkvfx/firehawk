@@ -82,12 +82,14 @@
     state: directory
     owner: deadlineuser
   become: yes
-  
+
+- name: Find backups if present.
 - find: paths=/opt/Thinkbox/DeadlineDatabase10/mongo/backup/ file_type=directory patterns="*"
   register: backup_paths
   become: yes
 
-- shell: mv * /deployuser/tmp/mongo/backup
+- name: Move backups if present out of the vm to conserve space.
+  shell: mv -f /opt/Thinkbox/DeadlineDatabase10/mongo/backup/* /deployuser/tmp/mongo/backup
   when: backup_paths.matched|int != 0
   become: yes
 
