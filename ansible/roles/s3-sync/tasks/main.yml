@@ -25,7 +25,7 @@
       if [[ {{ mode }} == 'push' ]]; then
         echo "Sync Push: File not yet present in S3 bucket, will push."
         if [ -f "{{ filename }}" ]; then
-          aws s3 sync . s3://{{ bucket }}/ --exclude "*" --include "{{ filename }}"
+          aws s3 sync . s3://{{ bucket }}/ --exclude "*" --include "{{ filename }}" --no-progress
           test_file "$filename"
           if [[ "$file_in_bucket" == false ]]; then
             echo "Failed: File not present in bucket after attempt to push."
@@ -52,7 +52,7 @@
           echo "{{ filename }} already exists.  Won't Pull"
           exit 0
         else 
-          aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ filename }}"
+          aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ filename }}" --no-progress
           if [ -f "{{ filename }}" ]; then
             echo "Success: File is present on disk after pull."
             exit 0
@@ -69,9 +69,9 @@
     executable: /bin/bash
   # failed_when: output.rc != 0
 
-- name: show output
-  debug:
-    var: output
+# - name: show output
+#   debug:
+#     var: output
 
 
 # - name: Download Houdini from SESI website - auto versions
