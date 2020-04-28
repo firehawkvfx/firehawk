@@ -7,7 +7,6 @@ GREEN='\033[0;32m' # Green Text
 BLUE='\033[0;34m' # Blue Text
 NC='\033[0m' # No Color
 
-
 exit_test () {
     exit_code=$?
     interrupt=false
@@ -34,7 +33,7 @@ exit_test () {
         printf "\n${RED}Interrrupt file found.  Exiting... ${NC}\n" >&2
         interrupt=true
     fi
-    if [[ "$interrupt" == true || "$failed" == true  ]]; then
+    if [[ "$interrupt" == true ]] || [[ "$failed" == true  ]]; then
         exit 1
     fi
 }
