@@ -4,18 +4,35 @@
 
     cd {{ basedir }}/
     
-    wordcount=`aws s3 ls s3://{{ bucket }}/|grep {{ filename }}|wc -c`
-    echo wordcount=${wordcount}
-    if [[ "${wordcount}" -eq 0 ]]; then
+    test_file () {
+      local filename="$1"
+      wordcount=`aws s3 ls s3://{{ bucket }}/|grep {{ filename }}|wc -c`
+      if [[ "${wordcount}" -eq 0 ]]; then
+        file_in_bucket=true
+      else
+        file_in_bucket=false
+      fi
+    }
+    test_file "$filename"
+    # echo wordcount=${wordcount}
+    
+    if [[ "$file_in_bucket" == true ]]; then
       if [[ {{ mode }} == 'push' ]]; then
-        echo "Sync Push: File not present in S3 bucket, will push."
+        echo "Sync Push: File not yet present in S3 bucket, will push."
         if [ -f "{{ filename }}" ]; then
-            aws s3 sync . s3://{{ bucket }}/ --exclude "*" --include "{{ filename }}"
-        else 
-            echo "{{ filename }} does not exist"
+          aws s3 sync . s3://{{ bucket }}/ --exclude "*" --include "{{ filename }}"
+          test_file "$filename"
+          if [[ "$file_in_bucket" == false ]]; then
+            echo "Failed: File not present in bucket after attempt to push."
             exit 1
+          fi
+          echo "Success: File is present in bucket after push."
+          exit 0
+        else 
+          echo "Failed: {{ filename }} does not exist on disk, won't push."
+          exit 1
         fi
-        exit 0
+        
       else
         echo "Won't pull, File not present in S3 bucket."
         exit 0
@@ -25,13 +42,19 @@
         echo "Sync Push: File already present in S3 bucket, won't push."
         exit 0
       else
-        echo "Sync Pull: File present in S3 bucket, will pull."
+        echo "Sync Pull: File present in S3 bucket..."
         if [ -f "{{ filename }}" ]; then
-            echo "{{ filename }} exists"
-            exit 0
+          echo "{{ filename }} already exists.  Won't Pull"
+          exit 0
         else 
-            aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ filename }}"
+          aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ filename }}"
+          if [ -f "{{ filename }}" ]; then
+            echo "Success: File is present on disk after pull."
             exit 0
+          else
+            echo "Failed: Pull not present on disk after attempt to pull."
+            exit 1
+          fi
         fi
       fi
     fi
