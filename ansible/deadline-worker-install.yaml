@@ -203,6 +203,7 @@
       state: directory
       owner: deadlineuser
       group: syscontrol
+      mode: '0700'
     become: yes
 
   - name: create deadline installer dir
@@ -211,6 +212,7 @@
       state: directory
       owner: deadlineuser
       group: syscontrol
+      mode: '0700'
     become: yes
 
   - name: "s3-sync get {{ deadline_linux_filename }} from {{ installers_bucket }}"
