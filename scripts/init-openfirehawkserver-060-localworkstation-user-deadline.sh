@@ -59,7 +59,7 @@ echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
 
 # configure deadline on the local workstation with the keys from this install to run deadline slave and monitor
-ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml -v --tags "onsite-install" --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser"; exit_test
+ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser"; exit_test
 
 ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
 

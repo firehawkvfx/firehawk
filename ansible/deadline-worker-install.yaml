@@ -1,7 +1,7 @@
 # To configure ssh for a local workstation, read https://www.tecmint.com/ssh-passwordless-login-using-ssh-keygen-in-5-easy-steps/
 
 #then run these two commmands.  for some reason ping is required first or hang on gathering facts occurs.
-# ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml --tags "onsite-install"
+# ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml
 
 # # these permissions are now handled post install of the deadline db.
 - hosts: firehawkgateway
@@ -11,9 +11,6 @@
   tasks:
   - include_role:
       name: s3-bucket
-    tags:
-    - cloud-install
-    - onsite-install
 
   - name: set permissions Thinkbox dir - non recursive
     file: 
@@ -23,9 +20,6 @@
       owner: deadlineuser
       group: syscontrol
     become: yes
-    tags:
-    - cloud-install
-    - onsite-install
 
   - name: set permissions Thinkbox cert dir - non recursive
     file: 
@@ -35,9 +29,6 @@
       owner: deadlineuser
       group: syscontrol
     become: yes
-    tags:
-    - cloud-install
-    - onsite-install
 
   - name: set permissions DeadlineRepository10 - recursive
     file:
@@ -47,9 +38,6 @@
       mode: u=rX,g=rX,o-rwx
       recurse: yes
     become: true
-    tags:
-    - cloud-install
-    - onsite-install
 
   - name: set permissions DeadlineRepository10/jobs jobsArchived reports
     file:
@@ -80,9 +68,6 @@
     stat:
       path: "/home/deadlineuser"
     register: result
-    tags:
-    - cloud-install
-    - onsite-install
 
 - hosts: "{{ variable_host | default('workstation1') }}"
   remote_user: "{{ variable_user | default('root') }}"
@@ -103,9 +88,6 @@
       state: present
       gid: "{{ syscontrol_gid }}"
     become: true
-    tags:
-    - cloud-install
-    - onsite-install
 
   - name: adding existing user "{{ item }}" to group syscontrol
     user:
@@ -115,9 +97,6 @@
     with_items:
     - deadlineuser
     become: true
-    tags:
-    - cloud-install
-    - onsite-install
 
   - name: create Thinkbox dir
     file: 
@@ -127,9 +106,6 @@
       owner: deadlineuser
       group: syscontrol
     become: yes
-    tags:
-    - cloud-install
-    - onsite-install
 
   - name: create Thinkbox cert dir
     file: 
@@ -139,9 +115,6 @@
       owner: deadlineuser
       group: syscontrol
     become: yes
-    tags:
-    - cloud-install
-    - onsite-install
 
   - name: Create submission scripts dir if it doesn't exist on remote
     file: 
@@ -152,9 +125,6 @@
       group: syscontrol
       recurse: yes
     become: yes
-    tags:
-    - cloud-install
-    - onsite-install
 
 - hosts: firehawkgateway
   remote_user: deployuser
@@ -170,25 +140,16 @@
       group: syscontrol
       recurse: yes
     become: yes
-    tags:
-    - cloud-install
-    - onsite-install
 
   - name: check permissions
     shell: |
       ls -ltriah "{{ deadline_certificates_location }}"
     become: true
     register: check_permisions
-    tags:
-    - cloud-install
-    - onsite-install
 
   - name: show permissions
     debug:
       var: check_permisions.stdout
-    tags:
-    - cloud-install
-    - onsite-install
 
   - name: set deadline remote client certificate permissions locally - deadline-worker-install.yaml
     file: 
@@ -197,9 +158,6 @@
       owner: deadlineuser
       group: syscontrol
     become: yes
-    tags:
-    - cloud-install
-    - onsite-install
 
 - hosts: firehawkgateway
   remote_user: deployuser
@@ -216,9 +174,6 @@
       flat: true
     become: yes
     # delegate_to: firehawkgateway
-    tags:
-    - cloud-install
-    - onsite-install
 
 - hosts: "{{ variable_host | default('workstation1') }}"
   remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
@@ -230,17 +185,11 @@
     package:
       name: expect
       state: present
-    tags:
-    - cloud-install
-    - onsite-install
 
   - name: restart sshd.service
     service: 
       name: sshd
       state: restarted
-    tags:
-    - cloud-install
-    - onsite-install
 
   - name: Copy deadline remote client certificate
     copy: 
@@ -250,9 +199,6 @@
       owner: deadlineuser
       group: syscontrol
     become: yes
-    tags:
-    - cloud-install
-    - onsite-install
 
   - name: create download dir
     file: 
@@ -261,9 +207,6 @@
       owner: deadlineuser
       group: syscontrol
     become: yes
-    tags:
-    - cloud-install
-    - onsite-install
 
   - name: "s3-sync get {{ deadline_linux_filename }} from {{ installers_bucket }}"
     include_role:
@@ -274,9 +217,6 @@
       basedir: "/home/deadlineuser/Downloads"
       filename: "{{ deadline_linux_filename }}"
       variable_user: "deadlineuser"
-    tags:
-    - cloud-install
-    - onsite-install
 
   # - name: S3 GET deadline
   #   aws_s3:
@@ -296,9 +236,6 @@
       owner: deadlineuser
       group: syscontrol
     become: yes
-    tags:
-    - cloud-install
-    - onsite-install
 
   - name: Extract
     unarchive:
@@ -308,9 +245,6 @@
       mode: u+x
       remote_src: true
     become: yes
-    tags:
-    - cloud-install
-    - onsite-install
 
   - name: "Ansible find files in subdirectory downloads"
     find:
@@ -318,15 +252,9 @@
       patterns: "*DeadlineClient-{{ deadline_version }}-linux-x64-installer.run"
     register: files_matched
     become: true
-    tags:
-    - cloud-install
-    - onsite-install
 
   - debug:
       msg: "installer path: {{ files_matched.files[0].path }}"
-    tags:
-    - cloud-install
-    - onsite-install
 
   - name: set execute permissions on installer
     file:
@@ -335,9 +263,6 @@
       owner: deadlineuser
       group: syscontrol
     become: yes
-    tags:
-    - cloud-install
-    - onsite-install
 
   - name: deadline dependencies
     package:
@@ -352,45 +277,27 @@
       - nmap
       state: present
 
-    tags:
-    - cloud-install
-    - onsite-install
 
   - stat:
       path: /var/lib/Thinkbox/Deadline10/deadline.ini
     register: deadline_ini_file
-    tags:
-    - cloud-install
-    - onsite-install
 
   - name: get date
     shell: |
       date +"%Y%m%d_%H%M%S"
     register: current_date
-    tags:
-    - cloud-install
-    - onsite-install
 
   - set_fact:
       backup_dest: "/var/lib/Thinkbox/Deadline10/deadline.bak_{{ current_date.stdout }}"
     when: deadline_ini_file.stat.exists
-    tags:
-    - cloud-install
-    - onsite-install
 
   - debug:
       msg: "will backup file to {{ backup_dest }}"
     when: deadline_ini_file.stat.exists
-    tags:
-    - cloud-install
-    - onsite-install
 
   - name: move old config to backup.  this prevents old conf settings staying around.
     command: "mv /var/lib/Thinkbox/Deadline10/deadline.ini {{ backup_dest }}"
     when: deadline_ini_file.stat.exists
-    tags:
-    - cloud-install
-    - onsite-install
 
   - name: install deadline client
     shell: |
@@ -399,33 +306,18 @@
       {{ files_matched.files[0].path }} --mode unattended --debuglevel 2 --prefix {{ deadline_prefix }} --connectiontype Remote --noguimode true --licensemode UsageBased --launcherdaemon true --slavestartup 1 --daemonuser {{ user_deadlineuser_name }} --enabletls true --tlsport 4433 --httpport 8080 --proxyrootdir {{ deadline_proxy_root_dir }} --proxycertificate {{ deadline_proxy_certificate }} --proxycertificatepassword {{ deadline_proxy_certificate_password }}
     register: deadline_client_install_output_shell
     become: true
-    tags:
-    - cloud-install
-    - onsite-install
 
   - name: check deadline client install output
     debug:
       msg: "{{ deadline_client_install_output_shell.stdout }}"
-    tags:
-    - cloud-install
-    - onsite-install
 
   - name: check /var/lib/Thinkbox/Deadline10/deadline.ini
     command: cat /var/lib/Thinkbox/Deadline10/deadline.ini 
     register: deadline_config
-    tags:
-    - cloud-install
-    - onsite-install
 
   - debug: msg="{{ deadline_config.stdout }}"
-    tags:
-    - cloud-install
-    - onsite-install
 
   - debug: msg="{{ deadline_config.stderr }}"
-    tags:
-    - cloud-install
-    - onsite-install
 
   - name: Add alias for deadlinemonitor
     lineinfile:
@@ -436,9 +328,6 @@
       owner: deadlineuser
       regexp: ".*alias deadlinemonitor=.*"
     become: yes
-    tags:
-    - cloud-install
-    - onsite-install
 
 # multislave functionality
   - copy:
@@ -449,8 +338,6 @@
       mode: u=rx,g=rx,o-rwx
     become: yes
     tags:
-    - cloud-install
-    - onsite-install
     - multi-slave
 
 # wrapper for multislave script to run as service
@@ -462,8 +349,6 @@
       mode: u=rx,g=rx,o=rx
     become: yes
     tags:
-    - cloud-install
-    - onsite-install
     - multi-slave
 
 # service wraper for multislave
@@ -475,8 +360,6 @@
       mode: '0644'
     become: yes
     tags:
-    - cloud-install
-    - onsite-install
     - multi-slave
     
   - name: Start service multislaveservice, if not started
@@ -487,15 +370,11 @@
       enabled: true
     become: yes
     tags:
-    - cloud-install
-    - onsite-install
     - multi-slave
 
   - debug:
       msg: "to disable multilsave service for deadline use 'systemctl disable multislaveservice.service'"
     tags:
-    - cloud-install
-    - onsite-install
     - multi-slave
 
   - name: allow permission for deadline to shutdown the machine.
@@ -505,6 +384,3 @@
       line: "deadlineuser ALL=(ALL) NOPASSWD: /sbin/poweroff, /sbin/reboot, /sbin/shutdown"
       insertafter: '^.*localhost=/sbin/shutdown.*$'
     become: true
-    tags:
-    - cloud-install
-    - onsite-install

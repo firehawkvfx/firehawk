@@ -63,10 +63,10 @@
       fi
     fi
   register: output
-  failed_when: output.rc != 0
   become_user: "{{ variable_user }}"
   args:
     executable: /bin/bash
+  # failed_when: output.rc != 0
 
 - name: show output
   debug:
