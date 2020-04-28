@@ -265,7 +265,7 @@
     - cloud-install
     - onsite-install
 
-  - name: s3-sync get deadline installer
+  - name: "s3-sync get {{ deadline_linux_filename }} from {{ installers_bucket }}"
     include_role:
       name: s3-sync
     vars:

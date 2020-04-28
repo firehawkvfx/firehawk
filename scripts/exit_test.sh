@@ -9,11 +9,11 @@ NC='\033[0m' # No Color
 
 
 exit_test () {
-
+    exit_code=$?
     interrupt=false
     failed=false
     
-    if [ $? -eq 0 ]; then
+    if [ "$exit_code" -eq 0 ]; then
         printf "\n${GREEN}Command Succeeded${NC}\n"
     else
         if [ "$LIVE_TERMINAL" == true ]; then

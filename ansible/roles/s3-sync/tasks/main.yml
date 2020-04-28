@@ -1,3 +1,7 @@
+- name: Test output
+  debug:
+    msg: "variable_user:{{ variable_user }}"
+
 - name: Sync S3
   shell: |
     set -x
