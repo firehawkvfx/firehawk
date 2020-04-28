@@ -10,13 +10,14 @@ NC='\033[0m' # No Color
 exit_test () {
     exit_code=$?
     interrupt=false
-    failed=false
     
     if [ "$exit_code" -eq 0 ]; then
         printf "\n${GREEN}Command Succeeded${NC}\n"
+        failed=false
     else
         if [ "$LIVE_TERMINAL" == true ]; then
             printf "\n${RED}Failed command in live terminal. ${NC}\n" >&2
+            failed=true
         else
             printf "\n${RED}Failed command ...exiting${NC}\n" >&2
             # exit will exit the shell if sourced
@@ -25,15 +26,14 @@ exit_test () {
             # return will exit the bash script with a return code
             # return 1
     fi
-    if [[ "$failed" == true  ]]; then
+    if [[ "$failed" == true ]]; then
         exit 1
     fi
-
     if [[ -d "/deployuser" ]] && [[ -f "/deployuser/interrupt" ]]; then
         printf "\n${RED}Interrrupt file found.  Exiting... ${NC}\n" >&2
         interrupt=true
     fi
-    if [[ "$interrupt" == true ]] || [[ "$failed" == true  ]]; then
+    if [[ "$interrupt" == true ]]; then
         exit 1
     fi
 }

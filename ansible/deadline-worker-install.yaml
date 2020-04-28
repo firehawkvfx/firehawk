@@ -199,6 +199,14 @@
 
   - name: create download dir
     file: 
+      path: "/home/deadlineuser/Downloads"
+      state: directory
+      owner: deadlineuser
+      group: syscontrol
+    become: yes
+
+  - name: create deadline installer dir
+    file: 
       path: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
       state: directory
       owner: deadlineuser
@@ -226,13 +234,7 @@
   #   - cloud-install
   #   - onsite-install
 
-  - name: create deadline installer dir
-    file: 
-      path: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
-      state: directory
-      owner: deadlineuser
-      group: syscontrol
-    become: yes
+
 
   - name: Extract
     unarchive:
