@@ -278,17 +278,6 @@
     - cloud-install
     - onsite-install
 
-  # - name: "ensure the houdini installer exists in the s3 bucket {{ installers_bucket }} Push if it doesn't."
-  #   shell: |
-  #     set -x
-  #     aws sts get-caller-identity
-  #     cd /home/deadlineuser/Downloads/
-  #     aws s3 sync s3://{{ installers_bucket }}/ . --exclude "*" --include "{{ deadline_linux_filename }}"
-  #   become_user: "{{ variable_user }}"
-  #   tags:
-  #   - cloud-install
-  #   - onsite-install
-
   # - name: S3 GET deadline
   #   aws_s3:
   #     bucket: "{{ installers_bucket }}"
