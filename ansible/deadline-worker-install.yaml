@@ -47,9 +47,6 @@
       mode: u=rwX,g=rwX,o-rwx
       recurse: yes
     become: true
-    tags:
-    - cloud-install
-    - onsite-install
     with_items:
     - /opt/Thinkbox/DeadlineRepository10/jobs
     - /opt/Thinkbox/DeadlineRepository10/jobsArchived

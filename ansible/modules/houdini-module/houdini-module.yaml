@@ -79,9 +79,6 @@
     with_items:
     - otls
     - soho
-    tags:
-    - cloud-install
-    - onsite-install
 
   - name: Fetch from the remote recursively and save to local
     synchronize:
@@ -96,9 +93,6 @@
     - DeadlineHoudiniClient.py
     - MainMenuCommon.xml
     - CallDeadlineCommand.py
-    tags:
-    - cloud-install
-    - onsite-install
 
   - name: Ansible set permissions for items to be copied - /opt/Thinkbox/DeadlineRepository10/submission/... - should not be necesary since root is covered prior, but may fix issues.
     file:
@@ -113,9 +107,6 @@
     - HServer
     - Houdini
     - Nuke
-    tags:
-    - cloud-install
-    - onsite-install
 
   - name: Ensure tmp dirs exist - submission
     file:
@@ -130,9 +121,6 @@
     - HServer
     - Houdini
     - Nuke
-    tags:
-    - cloud-install
-    - onsite-install
 
   - name: Fetch submission plugins
     synchronize:
@@ -144,9 +132,6 @@
     - HServer
     - Houdini
     - Nuke
-    tags:
-    - cloud-install
-    - onsite-install
 
 - hosts: "{{ variable_host | default('role_node_centos') }}"
   remote_user: "{{ variable_connect_as_user | default('centos') }}"
