@@ -6,6 +6,15 @@
   shell: |
     set -x
 
+    awk -F':' '{ print $1}' /etc/passwd
+
+    cd ~
+
+    echo "become user {{ variable_user }}"
+
+    echo "pwd:"
+    pwd
+
     cd {{ basedir }}
     exit_code=$?
     pwd
