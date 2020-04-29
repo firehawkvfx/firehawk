@@ -2,24 +2,16 @@
   debug:
     msg: "variable_user:{{ variable_user }}"
 
-- name: Sync S3
+- name: Sync S3 # warning: there appears to be a bug with ansible that may result in variable user being defined at the include_role level not setting the variable_user var correctly.  consider this if errors should occur.
   shell: |
     set -x
-
-    awk -F':' '{ print $1}' /etc/passwd
-
     cd ~
-
     echo "become user {{ variable_user }}"
-    echo "whoami"
-    whoami
-
-    echo "pwd:"
-    pwd
-
+    echo "whoami $(whoami)"
+    echo "pwd: $(pwd)"
     cd {{ basedir }}
     exit_code=$?
-    pwd
+    echo "pwd: $(pwd)"
     ls -ltriah
     if [[ ! "$exit_code" -eq 0 ]]; then echo "Failed: Couldn't cd to base directory."; exit 1; fi
     
