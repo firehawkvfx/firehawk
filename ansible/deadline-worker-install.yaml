@@ -67,10 +67,11 @@
     register: result
 
 - hosts: "{{ variable_host | default('workstation1') }}"
-  remote_user: "{{ variable_user | default('root') }}"
+  remote_user: "{{ variable_user | default('deadlineuser') }}"
   become: true
 
   vars:
+    variable_user: deadlineuser
     pcoip: False
     ansible_become_pass: "{{ user_deadlineuser_pw }}"
 
