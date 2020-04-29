@@ -123,7 +123,7 @@
       bucket: "{{ bucket }}"
       basedir: "/home/deadlineuser/Downloads"
       filename: "{{ deadline_linux_filename }}"
-      variable_user: "{{ variable_user }}"
+      variable_user: "deadlineuser"
 
   # - name: Sync deadline from s3 if exist and not present on file system- pull
   #   shell: |
