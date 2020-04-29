@@ -132,7 +132,7 @@
       fi
     else
       echo "Sync S3 Bucket with local path."
-      aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ houdini_linux_tar_filename }}"
+      aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ houdini_linux_tar_filename }}" --no-progres
     fi
   register: output
   become_user: "{{ variable_user }}"
@@ -334,7 +334,7 @@
     set -x
     # aws sts get-caller-identity
     cd {{ download_to_dir }}/
-    aws s3 sync . s3://{{ installers_bucket }}/ --exclude "*" --include "{{ houdini_linux_tar_filename }}"
+    aws s3 sync . s3://{{ installers_bucket }}/ --exclude "*" --include "{{ houdini_linux_tar_filename }}" --no-progress
   become_user: "{{ variable_user }}"
   tags:
     - sync_installers
