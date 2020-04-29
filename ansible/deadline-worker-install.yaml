@@ -202,8 +202,8 @@
       path: "/home/deadlineuser/Downloads"
       state: directory
       owner: deadlineuser
-      group: syscontrol
-      mode: '0700'
+      group: deadlineuser
+      mode: '0755'
     become: yes
 
   - name: create deadline installer dir
@@ -211,14 +211,17 @@
       path: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
       state: directory
       owner: deadlineuser
-      group: syscontrol
-      mode: '0700'
+      group: deadlineuser
+      mode: '0755'
     become: yes
 
   - name: Sync S3
     shell: |
       set -x
       cd ~/
+      ls -ltriah
+      cd Downloads
+      pwd
       ls -ltriah
     register: output
     become_user: "deadlineuser"

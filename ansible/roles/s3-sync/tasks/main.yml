@@ -6,8 +6,11 @@
   shell: |
     set -x
 
-    cd {{ basedir }}/
-    exit_code=$?; if [[ ! "$exit_code" -eq 0 ]]; then echo "Failed: Couldn't cd to base directory."; exit 1; fi
+    cd {{ basedir }}
+    exit_code=$?
+    pwd
+    ls -ltriah
+    if [[ ! "$exit_code" -eq 0 ]]; then echo "Failed: Couldn't cd to base directory."; exit 1; fi
     
     test_file () {
       local filename="$1"
