@@ -11,6 +11,8 @@
     cd ~
 
     echo "become user {{ variable_user }}"
+    echo "whoami"
+    whoami
 
     echo "pwd:"
     pwd
