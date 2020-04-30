@@ -266,9 +266,9 @@ resource "aws_security_group" "softnas_vpn" {
   count = var.softnas_storage ? 1 : 0
   depends_on = [var.vpn_private_ip]
 
-  name        = "softnas"
+  name        = "softnas_vpn"
   vpc_id      = var.vpc_id
-  description = "SoftNAS security group"
+  description = "SoftNAS VPN security group for remote subnet"
 
   tags = {
     Name = "softnas"
