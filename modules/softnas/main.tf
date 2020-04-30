@@ -113,7 +113,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "-1"
     from_port   = 0
     to_port     = 0
-    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.public_subnets_cidr_blocks[0], var.vpn_cidr]
+    cidr_blocks = [ var.vpc_cidr, var.public_subnets_cidr_blocks[0] ]
     description = "all incoming traffic"
   }
 
@@ -121,7 +121,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "tcp"
     from_port   = 53
     to_port     = 53
-    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.public_subnets_cidr_blocks[0], var.vpn_cidr]
+    cidr_blocks = [ var.vpc_cidr, var.public_subnets_cidr_blocks[0] ]
     description = "DNS"
   }
 
@@ -129,7 +129,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "udp"
     from_port   = 53
     to_port     = 53
-    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.public_subnets_cidr_blocks[0], var.vpn_cidr]
+    cidr_blocks = [ var.vpc_cidr, var.public_subnets_cidr_blocks[0] ]
     description = "DNS"
   }
 
@@ -137,7 +137,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "icmp"
     from_port   = 8
     to_port     = 0
-    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.public_subnets_cidr_blocks[0], var.vpn_cidr]
+    cidr_blocks = [ var.vpc_cidr, var.public_subnets_cidr_blocks[0] ]
     description = "icmp"
   }
 
@@ -145,7 +145,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "tcp"
     from_port   = 22
     to_port     = 22
-    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.public_subnets_cidr_blocks[0], var.vpn_cidr]
+    cidr_blocks = [ var.vpc_cidr, var.public_subnets_cidr_blocks[0] ]
     description = "ssh"
   }
 
@@ -153,23 +153,15 @@ resource "aws_security_group" "softnas" {
     protocol    = "tcp"
     from_port   = 443
     to_port     = 443
-    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.public_subnets_cidr_blocks[0], var.vpn_cidr]
+    cidr_blocks = [ var.vpc_cidr, var.public_subnets_cidr_blocks[0] ]
     description = "https"
   }
-
-  # ingress {
-  #   protocol    = "udp"
-  #   from_port   = 1194
-  #   to_port     = 1194
-  #   cidr_blocks = ["${var.remote_subnet_cidr}", "${var.vpc_cidr}", "${var.public_subnets_cidr_blocks[0]}", "${var.vpn_cidr}"]
-  #   description = "from softnas default template"
-  # }
 
   ingress {
     protocol    = "tcp"
     from_port   = 0
     to_port     = 65535
-    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.vpn_cidr]
+    cidr_blocks = [ var.vpc_cidr ]
     description = "all incoming traffic from remote vpn"
   }
 
@@ -177,7 +169,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "udp"
     from_port   = 49152
     to_port     = 65535
-    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.vpn_cidr]
+    cidr_blocks = [ var.vpc_cidr ]
     description = ""
   }
 
@@ -185,7 +177,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "tcp"
     from_port   = 111
     to_port     = 111
-    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.vpn_cidr]
+    cidr_blocks = [ var.vpc_cidr ]
     description = "NFS"
   }
 
@@ -193,7 +185,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "udp"
     from_port   = 111
     to_port     = 111
-    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.vpn_cidr]
+    cidr_blocks = [ var.vpc_cidr ]
     description = "NFS"
   }
 
@@ -201,7 +193,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "tcp"
     from_port   = 892
     to_port     = 892
-    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.vpn_cidr]
+    cidr_blocks = [ var.vpc_cidr ]
     description = "rquotad, nlockmgr, mountd, status"
   }
 
@@ -209,7 +201,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "udp"
     from_port   = 892
     to_port     = 892
-    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.vpn_cidr]
+    cidr_blocks = [ var.vpc_cidr ]
     description = "rquotad, nlockmgr, mountd, status"
   }
 
@@ -217,7 +209,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "tcp"
     from_port   = 2010
     to_port     = 2010
-    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.vpn_cidr]
+    cidr_blocks = [ var.vpc_cidr ]
     description = "rquotad, nlockmgr, mountd, status"
   }
 
@@ -225,7 +217,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "udp"
     from_port   = 2010
     to_port     = 2010
-    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.vpn_cidr]
+    cidr_blocks = [ var.vpc_cidr ]
     description = "rquotad, nlockmgr, mountd, status"
   }
 
@@ -233,7 +225,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "tcp"
     from_port   = 2014
     to_port     = 2014
-    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.vpn_cidr]
+    cidr_blocks = [ var.vpc_cidr ]
     description = "rquotad, nlockmgr, mountd, status"
   }
 
@@ -241,7 +233,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "udp"
     from_port   = 2014
     to_port     = 2014
-    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.vpn_cidr]
+    cidr_blocks = [ var.vpc_cidr ]
     description = "rquotad, nlockmgr, mountd, status"
   }
 
@@ -249,7 +241,7 @@ resource "aws_security_group" "softnas" {
     protocol    = "tcp"
     from_port   = 2049
     to_port     = 2049
-    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.vpn_cidr]
+    cidr_blocks = [ var.vpc_cidr ]
     description = "rquotad, nlockmgr, mountd, status"
   }
 
@@ -257,7 +249,171 @@ resource "aws_security_group" "softnas" {
     protocol    = "udp"
     from_port   = 2049
     to_port     = 2049
-    cidr_blocks = [var.remote_subnet_cidr, var.vpc_cidr, var.vpn_cidr]
+    cidr_blocks = [ var.vpc_cidr ]
+    description = "rquotad, nlockmgr, mountd, status"
+  }
+
+  egress {
+    protocol    = "-1"
+    from_port   = 0
+    to_port     = 0
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "all outgoing traffic"
+  }
+}
+
+resource "aws_security_group" "softnas_vpn" {
+  count = var.softnas_storage ? 1 : 0
+
+  name        = "softnas"
+  vpc_id      = var.vpc_id
+  description = "SoftNAS security group"
+
+  tags = {
+    Name = "softnas"
+  }
+
+  ingress {
+    protocol    = "-1"
+    from_port   = 0
+    to_port     = 0
+    cidr_blocks = [var.remote_subnet_cidr, var.vpn_cidr]
+    description = "all incoming traffic"
+  }
+
+  ingress {
+    protocol    = "tcp"
+    from_port   = 53
+    to_port     = 53
+    cidr_blocks = [var.remote_subnet_cidr, var.vpn_cidr]
+    description = "DNS"
+  }
+
+  ingress {
+    protocol    = "udp"
+    from_port   = 53
+    to_port     = 53
+    cidr_blocks = [var.remote_subnet_cidr, var.vpn_cidr]
+    description = "DNS"
+  }
+
+  ingress {
+    protocol    = "icmp"
+    from_port   = 8
+    to_port     = 0
+    cidr_blocks = [var.remote_subnet_cidr, var.vpn_cidr]
+    description = "icmp"
+  }
+
+  ingress {
+    protocol    = "tcp"
+    from_port   = 22
+    to_port     = 22
+    cidr_blocks = [var.remote_subnet_cidr, var.vpn_cidr]
+    description = "ssh"
+  }
+
+  ingress {
+    protocol    = "tcp"
+    from_port   = 443
+    to_port     = 443
+    cidr_blocks = [var.remote_subnet_cidr, var.vpn_cidr]
+    description = "https"
+  }
+
+  ingress {
+    protocol    = "tcp"
+    from_port   = 0
+    to_port     = 65535
+    cidr_blocks = [var.remote_subnet_cidr, var.vpn_cidr]
+    description = "all incoming traffic from remote vpn"
+  }
+
+  ingress {
+    protocol    = "udp"
+    from_port   = 49152
+    to_port     = 65535
+    cidr_blocks = [var.remote_subnet_cidr, var.vpn_cidr]
+    description = ""
+  }
+
+  ingress {
+    protocol    = "tcp"
+    from_port   = 111
+    to_port     = 111
+    cidr_blocks = [var.remote_subnet_cidr, var.vpn_cidr]
+    description = "NFS"
+  }
+
+  ingress {
+    protocol    = "udp"
+    from_port   = 111
+    to_port     = 111
+    cidr_blocks = [var.remote_subnet_cidr, var.vpn_cidr]
+    description = "NFS"
+  }
+
+  ingress {
+    protocol    = "tcp"
+    from_port   = 892
+    to_port     = 892
+    cidr_blocks = [var.remote_subnet_cidr, var.vpn_cidr]
+    description = "rquotad, nlockmgr, mountd, status"
+  }
+
+  ingress {
+    protocol    = "udp"
+    from_port   = 892
+    to_port     = 892
+    cidr_blocks = [var.remote_subnet_cidr, var.vpn_cidr]
+    description = "rquotad, nlockmgr, mountd, status"
+  }
+
+  ingress {
+    protocol    = "tcp"
+    from_port   = 2010
+    to_port     = 2010
+    cidr_blocks = [var.remote_subnet_cidr, var.vpn_cidr]
+    description = "rquotad, nlockmgr, mountd, status"
+  }
+
+  ingress {
+    protocol    = "udp"
+    from_port   = 2010
+    to_port     = 2010
+    cidr_blocks = [var.remote_subnet_cidr, var.vpn_cidr]
+    description = "rquotad, nlockmgr, mountd, status"
+  }
+
+  ingress {
+    protocol    = "tcp"
+    from_port   = 2014
+    to_port     = 2014
+    cidr_blocks = [var.remote_subnet_cidr, var.vpn_cidr]
+    description = "rquotad, nlockmgr, mountd, status"
+  }
+
+  ingress {
+    protocol    = "udp"
+    from_port   = 2014
+    to_port     = 2014
+    cidr_blocks = [var.remote_subnet_cidr, var.vpn_cidr]
+    description = "rquotad, nlockmgr, mountd, status"
+  }
+
+  ingress {
+    protocol    = "tcp"
+    from_port   = 2049
+    to_port     = 2049
+    cidr_blocks = [var.remote_subnet_cidr, var.vpn_cidr]
+    description = "rquotad, nlockmgr, mountd, status"
+  }
+
+  ingress {
+    protocol    = "udp"
+    from_port   = 2049
+    to_port     = 2049
+    cidr_blocks = [var.remote_subnet_cidr, var.vpn_cidr]
     description = "rquotad, nlockmgr, mountd, status"
   }
 
@@ -352,7 +508,7 @@ resource "aws_network_interface" "nas1eth0" {
   count = var.softnas_storage ? 1 : 0
   subnet_id       = var.private_subnets[0]
   private_ips     = [var.softnas1_private_ip1]
-  security_groups = aws_security_group.softnas.*.id
+  # security_groups = aws_security_group.softnas.*.id
 
   tags = {
     Name = "primary_network_interface"
@@ -370,10 +526,13 @@ resource "aws_network_interface" "nas1eth0" {
 #   }
 # }
 
+locals {
+  network_interface_id = element(concat(aws_network_interface.nas1eth0.*.id, list("")), 0)
+}
+
 resource "aws_instance" "softnas1" {
   count = var.softnas_storage ? 1 : 0
-  # depends_on = [ aws_instance.softnas1, var.vpn_private_ip, aws_network_interface.nas1eth0, aws_network_interface.nas1eth1 ]
-  depends_on = [ aws_instance.softnas1, var.vpn_private_ip ]
+  depends_on = [ aws_instance.softnas1 ]
 
   ami   = local.ami
 
@@ -385,7 +544,7 @@ resource "aws_instance" "softnas1" {
 
   network_interface {
     device_index         = 0
-    network_interface_id = element(concat(aws_network_interface.nas1eth0.*.id, list("")), 0)
+    network_interface_id = local.network_interface_id
     #delete_on_termination = true
   }
 
@@ -421,6 +580,17 @@ USERDATA
     Route = "private"
     Role  = "softnas"
   }
+}
+
+resource "aws_network_interface_sg_attachment" "sg_attachment" {
+  security_group_id    = aws_security_group.softnas.*.id
+  network_interface_id = data.aws_instance.instance.network_interface_id
+}
+
+resource "aws_network_interface_sg_attachment" "sg_attachment_vpn" { # This attachment occurs only after the vpn is available.  Prior to this, the attachment would be meaningless.
+  depends_on = [var.vpn_private_ip]
+  security_group_id    = aws_security_group.softnas_vpn.*.id
+  network_interface_id = data.aws_instance.instance.network_interface_id
 }
 
 # When using ssd tiering, you must manually create the ebs volumes and specify the ebs id's in your secrets.  Then they can be locally restored automatically and attached to the instance.
@@ -529,7 +699,7 @@ locals {
 
 resource "null_resource" "provision_softnas" {
   count      = ( !var.sleep && var.softnas_storage ) ? 1 : 0
-  depends_on = [aws_instance.softnas1, null_resource.wait_softnas_up, null_resource.create_ami_init, var.vpn_private_ip]
+  depends_on = [aws_instance.softnas1, null_resource.wait_softnas_up, null_resource.create_ami_init]
 
   triggers = {
     instanceid = aws_instance.softnas1[0].id
@@ -584,7 +754,7 @@ resource "null_resource" "provision_softnas" {
 
       # remove any mounts on local workstation first since they will have been broken if another softnas instance was just destroyed to create this one.
       if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
-        echo "CONFIGURE REMOTE MOUNTS ON LOCAL NODES PROVISION"
+        echo "ENSURE REMOTE MOUNTS ON LOCAL NODES ARE REMOVED BEFORE CREATING NEW VOLUME"
         ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=workstation1 variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
       fi
       if [[ "$TF_VAR_softnas_skip_update" == true ]]; then
@@ -855,7 +1025,7 @@ EOT
 
 resource "null_resource" "attach_local_mounts_after_start" {
   count      = ( !var.sleep && var.softnas_storage ) ? 1 : 0
-  depends_on = [null_resource.start-softnas]
+  depends_on = [null_resource.start-softnas, var.vpn_private_ip] # when softnas mounts are attached to onsite network, we require the vpn to be up.
 
   #,"null_resource.mount_volumes_onsite"]
 
