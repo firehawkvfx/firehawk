@@ -583,11 +583,13 @@ USERDATA
 }
 
 resource "aws_network_interface_sg_attachment" "sg_attachment" {
+  count = var.softnas_storage ? 1 : 0
   security_group_id    = element( concat( aws_security_group.softnas.*.id, list("") ), 0)
   network_interface_id = local.network_interface_id
 }
 
 resource "aws_network_interface_sg_attachment" "sg_attachment_vpn" { # This attachment occurs only after the vpn is available.  Prior to this, the attachment would be meaningless.
+  count = var.softnas_storage ? 1 : 0
   depends_on = [var.vpn_private_ip]
   security_group_id    = element( concat( aws_security_group.softnas_vpn.*.id, list("") ), 0)
   network_interface_id = local.network_interface_id
