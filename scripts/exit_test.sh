@@ -10,18 +10,18 @@ NC='\033[0m' # No Color
 exit_test () {
     exit_code=$?
     interrupt=false
-    
+    failed=false
     if [ "$exit_code" -eq 0 ]; then
         printf "\n${GREEN}Command Succeeded${NC}\n"
         failed=false
     else
+        failed=true
         if [ "$LIVE_TERMINAL" == true ]; then
             printf "\n${RED}Failed command in live terminal. ${NC}\n" >&2
-            failed=true
+            
         else
             printf "\n${RED}Failed command ...exiting${NC}\n" >&2
             # exit will exit the shell if sourced
-            failed=true
         fi
             # return will exit the bash script with a return code
             # return 1

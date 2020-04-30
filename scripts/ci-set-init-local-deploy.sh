@@ -20,4 +20,5 @@ sed -i 's/^TF_VAR_remote_mounts_on_local=.*$/TF_VAR_remote_mounts_on_local=false
 sed -i 's/^TF_VAR_provision_deadline_spot_plugin=.*$/TF_VAR_provision_deadline_spot_plugin=false/' $config_override # Don't provision the deadline spot plugin for this stage
 sed -i 's/^TF_VAR_install_houdini=.*$/TF_VAR_install_houdini=true/' $config_override # install houdini
 sed -i 's/^TF_VAR_install_deadline=.*$/TF_VAR_install_deadline=true/' $config_override # install deadline
-sed -i 's/^TF_VAR_taint_single=.*$/TF_VAR_taint_single=(module.firehawk_init.null_resource.init-awscli-deadlinedb-firehawk[0])/' $config_override # taint vpn
+# sed -i 's/^TF_VAR_taint_single=.*$/TF_VAR_taint_single=(module.firehawk_init.null_resource.init-awscli-deadlinedb-firehawk[0])/' $config_override # taint vpn
+sed -i 's/^TF_VAR_taint_single=.*$/TF_VAR_taint_single=()/' $config_override # taint vpn

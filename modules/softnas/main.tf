@@ -264,6 +264,7 @@ resource "aws_security_group" "softnas" {
 
 resource "aws_security_group" "softnas_vpn" {
   count = var.softnas_storage ? 1 : 0
+  depends_on = [var.vpn_private_ip]
 
   name        = "softnas"
   vpc_id      = var.vpc_id
