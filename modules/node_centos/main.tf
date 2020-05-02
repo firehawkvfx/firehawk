@@ -293,7 +293,6 @@ locals {
 
 resource "aws_instance" "node_centos" {
   count                = var.site_mounts ? 1 : 0
-  depends_on           = [null_resource.dependency_softnas, null_resource.dependency_deadlinedb, var.dependency]
   iam_instance_profile = var.instance_profile_name
 
   #instance type and ami are determined by the gateway type variable for if you want a graphical or non graphical instance.
@@ -346,7 +345,7 @@ resource "aws_network_interface_sg_attachment" "node_centos_sg_attachment_vpn" {
 
 resource "null_resource" "provision_node_centos" {
   count = var.site_mounts ? 1 : 0
-  depends_on = [aws_instance.node_centos, var.bastion_ip, aws_network_interface_sg_attachment.node_centos_sg_attachment, aws_network_interface_sg_attachment.node_centos_sg_attachment_vpn ]
+  depends_on = [aws_instance.node_centos, var.bastion_ip, aws_network_interface_sg_attachment.node_centos_sg_attachment ]
   
   triggers = {
     instanceid = aws_instance.node_centos[0].id
@@ -444,7 +443,7 @@ EOT
 resource "null_resource" "install_deadline" {
   count = var.site_mounts ? 1 : 0
 
-  depends_on = [ null_resource.provision_node_centos, null_resource.dependency_deadlinedb ]
+  depends_on = [ null_resource.provision_node_centos, null_resource.dependency_deadlinedb, aws_network_interface_sg_attachment.node_centos_sg_attachment_vpn ]
 
   triggers = {
     instanceid = aws_instance.node_centos[0].id
