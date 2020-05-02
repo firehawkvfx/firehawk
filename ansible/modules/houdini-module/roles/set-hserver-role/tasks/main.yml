@@ -1,7 +1,23 @@
-- name: set hserver ip for nodes to aquire licenses from for items in list
-  include: houdini-set-hserver.yml
+# - name: set hserver ip for nodes to aquire licenses from for items in list
+#   include: houdini-set-hserver.yml
+#   loop: "{{ houdini_version_list }}"
+#   loop_control:
+#     loop_var: houdini_version_item
+#   when: houdini_install_type != "server"
+#   tags: set_hserver
+
+- name: NODE/WORKSTATION INSTALL - setup licensing server ip as deadline user will write to $HOME/.sesi_licenses.pref
+  shell: |
+    cd /opt/hfs{{ houdini_version_item.houdini_major_version }}
+    source ./houdini_setup
+    hserver
+    hserver -S {{ houdini_license_server_address }}
+    hserver -l
+    echo $HOME
+  register: houdini_hserver_deadlineuser_out
+  become_user: deadlineuser
+  when: houdini_install_type != "server"
   loop: "{{ houdini_version_list }}"
   loop_control:
     loop_var: houdini_version_item
-  when: houdini_install_type != "server"
   tags: set_hserver
