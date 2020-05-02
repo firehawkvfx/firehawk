@@ -1,0 +1,7 @@
+- name: set hserver ip for nodes to aquire licenses from for items in list
+  include: houdini-set-hserver.yml
+  loop: "{{ houdini_version_list }}"
+  loop_control:
+    loop_var: houdini_version_item
+  when: houdini_install_type != "server"
+  tags: set_hserver

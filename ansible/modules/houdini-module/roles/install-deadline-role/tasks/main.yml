@@ -1,0 +1,12 @@
+- name: configure houdini.env and deadline for items in list
+  include: houdini-env-config.yml
+  loop: "{{ houdini_version_list }}"
+  loop_control:
+    loop_var: houdini_version_item
+  when: houdini_install_type != "server"
+  tags: install_deadline
+
+- name: configure houdini and deadline config
+  include: houdini-deadline-config.yml
+  when: houdini_install_type != "server"
+  tags: install_deadline

@@ -124,6 +124,25 @@
   - name: Install Houdini
     include_role:
       name: houdini-role
+      apply:
+        tags:
+          - install_houdini
+    tags: always
+
+  - name: Configure Hserver
+    include_role:
+      name: set-hserver-role
+      apply:
+        tags:
+          - set_hserver
+    tags: always
+
+  - name: Install Deadline
+    include_role:
+      name: install-deadline-role
+      apply:
+        tags:
+          - install_deadline
     tags: always
 
 ### Houdini Deadline Plugin
@@ -146,11 +165,15 @@
   - name: setup houdini plugin in deadline repository for each major version.  This identical role use occurs in 2 locations - after deadline install and with install of Houdini
     include_role:
       name: 'deadlinedb-houdini-plugins'
+      apply:
+        tags:
+          - install_deadline
+    tags:
+    - always
     loop: "{{ houdini_major_version_list }}"
     loop_control:
       loop_var: houdini_major_version
     when: houdini_install_type != "server"
-    tags: install_deadline
 
   - name: ensure db is still valid.  a corrupted db may fail at this point if entryies have not been modified correctly
     shell: |
@@ -195,11 +218,17 @@
   - name: s3 sync openfirehawk-houdini-tools push (from local filesystem) and get (from s3 to node) 
     include_role:
       name: houdini-openfirehawk-houdini-tools-sync
+      apply:
+        tags:
+          - houdini_unit_test
     tags:
-    - unit-test
+    - always
 
   - name: run houdini unit test
     include_role:
       name: houdini-unit-test
+      apply:
+        tags:
+          - houdini_unit_test
     tags:
-    - houdini_unit_test
+    - always
