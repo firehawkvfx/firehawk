@@ -311,7 +311,7 @@ resource "aws_instance" "node_centos" {
   network_interface {
     device_index         = 0
     network_interface_id = local.network_interface_id
-    delete_on_termination = true
+    # delete_on_termination = true
   }
 
   key_name               = var.key_name
