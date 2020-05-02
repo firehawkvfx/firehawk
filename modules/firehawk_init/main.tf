@@ -69,6 +69,11 @@ resource "null_resource" "init_deadlinedb_firehawk" {
         # First db check
         echo "test db 0"
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+
+        # custom events auto assign groups to slaves on startup, eg slaveautoconf
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-repository-custom-events.yaml; exit_test
+        echo "test db 2"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
       fi
 EOT
 }
@@ -103,15 +108,6 @@ resource "null_resource" "init_routes_houdini_license_server" {
       . /deployuser/scripts/exit_test.sh
       set -x
       cd /deployuser
-      if [[ "$TF_VAR_install_deadline" == true ]]; then
-        # check db
-        echo "test db 1"
-        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
-        # custom events auto assign groups to slaves on startup, eg slaveautoconf
-        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-repository-custom-events.yaml; exit_test
-        echo "test db 2"
-        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
-      fi
       
       # ssh will be killed from the previous script because users were added to a new group and this will not update unless your ssh session is restarted.
       # login again and continue...
@@ -125,24 +121,17 @@ resource "null_resource" "init_routes_houdini_license_server" {
 
       # configure routes to opposite environment for licence server to communicate if in dev environment
       ansible-playbook -i "$TF_VAR_inventory" ansible/firehawkgateway-update-routes.yaml; exit_test
-
-      if [[ "$TF_VAR_install_deadline" == true ]]; then
-        # check db
-        echo "test db 6"
-        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
-      fi
 EOT
 }
 }
 
 resource "null_resource" "init_aws_local_workstation" {
   count = var.firehawk_init ? 1 : 0
-  depends_on = [null_resource.init_routes_houdini_license_server, null_resource.init_deadlinedb_firehawk]
+  # depends_on = [null_resource.init_routes_houdini_license_server]
 
   triggers = {
-    install_deadline = var.install_deadline
-    # install_houdini = var.install_houdini
-    deadlinedb = local.deadlinedb_complete
+    # deadlinedb = local.deadlinedb_complete
+    storage_user_access_key_id = var.storage_user_access_key_id
   }
 
   provisioner "local-exec" {
@@ -151,12 +140,6 @@ resource "null_resource" "init_aws_local_workstation" {
       . /deployuser/scripts/exit_test.sh
       set -x
       cd /deployuser
-      
-      if [[ "$TF_VAR_install_deadline" == true ]]; then
-        # check db
-        echo "test db 8"
-        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
-      fi
 
       export storage_user_access_key_id=${var.storage_user_access_key_id}
       echo "storage_user_access_key_id=$storage_user_access_key_id"
@@ -188,11 +171,29 @@ resource "null_resource" "init_aws_local_workstation" {
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -vv --extra-vars "variable_host=workstation1 variable_user=deployuser aws_cli_root=true ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key"; exit_test
 
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -vv --extra-vars "variable_host=workstation1 variable_user=deadlineuser aws_cli_root=true ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key"; exit_test
+EOT
+}
+}
 
-      if [[ "$TF_VAR_install_deadline" == true ]]; then
-        # check db
-        echo "test db 18"
-        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+resource "null_resource" "install_houdini_local_workstation" {
+  count = var.firehawk_init ? 1 : 0
+  depends_on = [null_resource.init_awscli, null_resource.init_aws_local_workstation]
+
+  triggers = {
+    install_houdini = var.install_houdini
+    init_awscli = "${join(",", null_resource.init_awscli.*.id)}"
+  }
+
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    command = <<EOT
+      . /deployuser/scripts/exit_test.sh
+      set -x
+      cd /deployuser
+      # install houdini on a local workstation with deadline submitters and environment vars.
+      if [[ "$TF_VAR_install_houdini" == true ]]; then
+        ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser" --tags "install_houdini" --skip-tags "sync_scripts"; exit_test
+        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser"; exit_test
       fi
 EOT
 }
@@ -223,31 +224,6 @@ resource "null_resource" "install_deadline_local_workstation" {
 EOT
 }
 }
-
-resource "null_resource" "install_houdini_local_workstation" {
-  count = var.firehawk_init ? 1 : 0
-  depends_on = [null_resource.init_awscli]
-
-  triggers = {
-    install_houdini = var.install_houdini
-    init_awscli = "${join(",", null_resource.init_awscli.*.id)}"
-  }
-
-  provisioner "local-exec" {
-    interpreter = ["/bin/bash", "-c"]
-    command = <<EOT
-      . /deployuser/scripts/exit_test.sh
-      set -x
-      cd /deployuser
-      # install houdini on a local workstation with deadline submitters and environment vars.
-      if [[ "$TF_VAR_install_houdini" == true ]]; then
-        ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser" --tags "install_houdini" --skip-tags "sync_scripts"; exit_test
-        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser"; exit_test
-      fi
-EOT
-}
-}
-
 
 
 resource "null_resource" "install_houdini_deadline_plugin_local_workstation" {

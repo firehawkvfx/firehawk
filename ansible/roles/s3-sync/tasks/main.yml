@@ -12,7 +12,6 @@
     cd {{ basedir }}
     exit_code=$?
     echo "pwd: $(pwd)"
-    ls -ltriah
     if [[ ! "$exit_code" -eq 0 ]]; then echo "Failed: Couldn't cd to base directory."; exit 1; fi
     
     test_file () {
@@ -25,7 +24,6 @@
       fi
     }
     test_file "$filename"
-    # echo wordcount=${wordcount}
     
     if [[ "$file_in_bucket" == true ]]; then
       if [[ {{ mode }} == 'push' ]]; then

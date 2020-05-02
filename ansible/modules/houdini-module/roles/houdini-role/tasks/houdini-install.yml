@@ -122,7 +122,6 @@
     cd {{ download_to_dir }}/
     
     wordcount=`aws s3 ls s3://{{ bucket }}/|grep {{ houdini_linux_tar_filename }}|wc -c`
-    echo wordcount=${wordcount}
     if [[ "${wordcount}" -eq 0 ]]; then
       if [[ {{ houdini_version_item.houdini_auto_version }} ]]; then
         echo "File not present in S3 bucket.  Will download"
