@@ -403,8 +403,6 @@ resource "null_resource" "provision_node_centos" {
       # install cli for deadlineuser
 
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_node_centos variable_user=centos variable_become_user=deadlineuser" --skip-tags "user_access"; exit_test
-
-      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"; exit_test
 EOT
 
   }
@@ -455,7 +453,7 @@ EOT
   }
 }
 
-resource "null_resource" "houdini_test" {
+resource "null_resource" "mounts_and_houdini_test" {
   count = var.site_mounts ? 1 : 0
 
   depends_on = [ null_resource.dependency_softnas, null_resource.install_deadline ]
@@ -472,6 +470,8 @@ resource "null_resource" "houdini_test" {
       . /deployuser/scripts/exit_test.sh
       set -x
       cd /deployuser
+
+      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"; exit_test
 
       if [[ "$TF_VAR_install_houdini" == true ]] && [[ $TF_VAR_houdini_test_connection == true ]]; then
         # last step before building ami we run a unit test to ensure houdini runs
@@ -506,7 +506,7 @@ resource "random_id" "ami_unique_name" {
 
 resource "aws_ami_from_instance" "node_centos" {
   count              = var.site_mounts ? 1 : 0
-  depends_on         = [null_resource.provision_node_centos, random_id.ami_unique_name, null_resource.houdini_test]
+  depends_on         = [null_resource.provision_node_centos, random_id.ami_unique_name, null_resource.mounts_and_houdini_test]
   name               = "node_centos_houdini_${aws_instance.node_centos[0].id}_${random_id.ami_unique_name[0].hex}"
   source_instance_id = aws_instance.node_centos[0].id
   tags = {
