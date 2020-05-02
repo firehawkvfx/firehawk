@@ -98,12 +98,12 @@ resource "aws_security_group" "node_centos_vpn" {
   count       = var.site_mounts ? 1 : 0
   depends_on = [var.vpn_private_ip]
 
-  name        = var.name
+  name        = "${var.name}_vpn"
   vpc_id      = var.vpc_id
   description = "Centos VPN security group"
 
   tags = {
-    Name = var.name
+    Name = "${var.name}_vpn"
   }
 
   # todo need to tighten down ports.
@@ -383,11 +383,11 @@ resource "null_resource" "provision_node_centos" {
       cd /deployuser
       ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.node_centos[0].private_ip} bastion_ip=${var.bastion_ip}"; exit_test
 
-      if [[ "$TF_VAR_install_deadline" == true ]]; then
-        # check db
-        echo "test db centos 1"
-        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
-      fi
+      # if [[ "$TF_VAR_install_deadline" == true ]]; then
+      #   # check db
+      #   echo "test db centos 1"
+      #   ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      # fi
 
       # ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "variable_host=firehawkgateway variable_user=deployuser private_ip=${aws_instance.node_centos[0].private_ip} bastion_ip=${var.bastion_ip}"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=node0 host_ip=${aws_instance.node_centos[0].private_ip} group_name=role_node_centos insert_ssh_key_string=ansible_ssh_private_key_file=$TF_VAR_local_key_path"; exit_test
@@ -402,6 +402,7 @@ resource "null_resource" "provision_node_centos" {
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_node_centos variable_user=centos variable_become_user=deadlineuser" --skip-tags "user_access"; exit_test
 
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"; exit_test
+      
       if [[ "$TF_VAR_install_deadline" == true ]]; then
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml -v --skip-tags "multi-slave" --extra-vars "variable_host=role_node_centos variable_connect_as_user=centos variable_user=deadlineuser"; exit_test
       fi
@@ -436,6 +437,17 @@ EOT
 
   }
 }
+
+# resource "null_resource" "install_deadline" {
+#   count = var.sleep && var.site_mounts ? 1 : 0
+
+#   provisioner "local-exec" {
+#     interpreter = ["/bin/bash", "-c"]
+#     command = <<EOT
+# EOT
+
+#   }
+# }
 
 # to replace the ami after further provisioning, use:
 # terraform taint module.node.random_id.ami_unique_name[0]
