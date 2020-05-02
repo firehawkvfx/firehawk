@@ -25,7 +25,7 @@
   when: execute
   with_items: "{{ houdini_major_version_list }}"
 
-- name: Ensure unit test runs on boot.  Undesirable, but needed - See sidefx RFE100149
+- name: Ensure unit test runs on boot.  Undesirable, but needed sometimes to test slow spinup - See sidefx RFE100149
   copy:
     content: |
       #!/bin/bash

@@ -193,6 +193,7 @@ resource "null_resource" "install_houdini_local_workstation" {
       # install houdini on a local workstation with deadline submitters and environment vars.
       if [[ "$TF_VAR_install_houdini" == true ]]; then
         ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser" --tags "install_houdini" --skip-tags "sync_scripts"; exit_test
+        ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/configure-hserver.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser firehawk_sync_source=$TF_VAR_firehawk_sync_source"; exit_test
         ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser"; exit_test
       fi
 EOT
@@ -247,7 +248,7 @@ resource "null_resource" "install_houdini_deadline_plugin_local_workstation" {
       fi
       # install houdini on a local workstation with deadline submitters and environment vars.
       if [[ "$TF_VAR_install_houdini" == true ]]; then
-        ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser" --tags "install_houdini set_hserver install_deadline" --skip-tags "sync_scripts"; exit_test
+        ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser" --tags "install_deadline" --skip-tags "sync_scripts"; exit_test
         ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser"; exit_test
       fi
       if [[ "$TF_VAR_install_deadline" == true ]]; then
