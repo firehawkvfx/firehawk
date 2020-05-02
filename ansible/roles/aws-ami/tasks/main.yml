@@ -15,6 +15,7 @@
 - name: Deregister AMI if it exists
   ec2_ami:
     image_id: "{{ ami_find.images[0].image_id }}"
+    delete_snapshot: yes
     state: absent
     region: "{{ aws_region }}"
   when: ami_find.images | length and ami_find.images[0].state == 'available'
