@@ -230,7 +230,7 @@ resource "null_resource" "install_houdini_local_workstation" {
 
   triggers = {
     install_houdini = var.install_houdini
-    init_awscli = null_resource.init_awscli
+    init_awscli = join(",", null_resource.init_awscli)
   }
 
   provisioner "local-exec" {
