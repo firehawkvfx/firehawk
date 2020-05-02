@@ -171,12 +171,6 @@
   #     - monit
 
   - name: login and ack agreement
-    #command: "softnas-cmd login softnas {{ user_softnas_pw }} && softnas-cmd ackagreement"
     shell: |
       softnas-cmd login softnas {{ user_softnas_pw }} && softnas-cmd ackagreement
-    register: softnas_login
-    no_log: false
-
-  # - name: login and ack agreement
-  #   debug:
-  #     var: softnas_login.stdout.split('\n')
+    no_log: true

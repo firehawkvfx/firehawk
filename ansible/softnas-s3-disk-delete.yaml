@@ -12,6 +12,7 @@
     shell: |
       softnas-cmd login softnas {{ user_softnas_pw }}
       softnas-cmd diskmgmt deleteS3disk "{{ s3_disk_name }}" > /tmp/softnas_delete_s3_disk_output_dict.json
+    no_log: true
   
   - fetch:
       src: /tmp/softnas_delete_s3_disk_output_dict.json

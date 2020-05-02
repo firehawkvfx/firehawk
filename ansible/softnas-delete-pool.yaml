@@ -14,6 +14,7 @@
     shell: |
       softnas-cmd login softnas {{ user_softnas_pw }}
       softnas-cmd deletepool "{{ pool_name }}" > /tmp/softnas_delete_pool_output_dict.json
+    no_log: true
 
   
   - fetch:

@@ -42,6 +42,7 @@
     shell: |
       softnas-cmd login softnas {{ user_softnas_pw }} && php /var/www/softnas/snserver/btier.php
     register: btier_import
+    no_log: true
     when: restore and btier.stat.exists
 
   - name: btier output

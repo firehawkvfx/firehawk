@@ -46,6 +46,7 @@
     {{ import_s3_command }} >> /tmp/softnas_s3_disk_import_output
   register: shell_out_s3_import
   failed_when: shell_out_s3_import.rc != 1 and shell_out_s3_import.rc != 0
+  no_log: true
   # a failed pool import isn't a good enough reason to stop the entire deployment.  this can likely be recovered manually.
 
 - name: import s3 extender command
@@ -62,6 +63,7 @@
     set -x
     {{ import_s3_pool }} >> /tmp/softnas_s3_pool_import_output
   when: import_pool
+  no_log: true
     
 - name: import command
   shell: "cat /tmp/softnas_s3_pool_import_output"

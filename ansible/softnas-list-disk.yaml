@@ -11,6 +11,7 @@
     shell: |
       softnas-cmd login softnas {{ user_softnas_pw }}
       softnas-cmd diskdevices > /tmp/softnas_list_disk_output_dict.json
+    no_log: true
 
   - name: format output
     shell: |

@@ -12,6 +12,7 @@
     shell: |
       softnas-cmd login softnas {{ user_softnas_pw }} && softnas-cmd checkupdate > /tmp/softnas_checkupdate.json
     register: softnas_checkupdate
+    no_log: true
 
   - fetch:
       src: /tmp/softnas_checkupdate.json
@@ -69,6 +70,7 @@
       softnas-cmd login softnas {{ user_softnas_pw }} && softnas-cmd executeupdate
     register: softnas_executeupdate
     when: softnas_runupdate
+    no_log: true
 
   - name: executeupdate output
     debug:
