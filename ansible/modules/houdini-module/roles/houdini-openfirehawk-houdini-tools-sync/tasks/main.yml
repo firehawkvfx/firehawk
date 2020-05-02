@@ -33,7 +33,7 @@
   shell: |
     set -x
     cd {{ firehawk_sync_source }}
-    aws s3 sync . s3://{{ bucket }}/openfirehawk-houdini-tools/ --include "*" --exclude ".git/*"
+    aws s3 sync . s3://{{ bucket }}/openfirehawk-houdini-tools/ --include "*" --exclude ".git/*" --no-progress
   become_user: deployuser
   connection: local
   tags:
@@ -45,7 +45,7 @@
     mount
     cat /etc/fstab
     cd /prod/assets/openfirehawk-houdini-tools
-    aws s3 sync s3://{{ bucket }}/openfirehawk-houdini-tools/ . --include "*" --exclude ".git/*"
+    aws s3 sync s3://{{ bucket }}/openfirehawk-houdini-tools/ . --include "*" --exclude ".git/*" --no-progress
   become_user: deadlineuser
   tags:
     - sync_scripts

@@ -112,6 +112,7 @@
   become: true
 
   vars:
+    variable_user: centos
     ansible_become_pass: "{{ user_deadlineuser_pw }}"
     softnas_exports: "{{ hostvars[groups['role_softnas'][0]]['presence']['results'] }}"
     pcoip: false
@@ -453,6 +454,7 @@
   become: true
 
   vars:
+    variable_user: centos
     ansible_become_pass: "{{ user_deadlineuser_pw }}"
     softnas_exports: "{{ hostvars[groups['role_softnas'][0]]['presence']['results'] }}"
     pcoip: False
