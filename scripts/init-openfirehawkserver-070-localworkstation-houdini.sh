@@ -61,7 +61,7 @@ ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_
 
 # install houdini on a local workstation with deadline submitters and environment vars.
 
-ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser" --skip-tags "sync_scripts"; exit_test
+ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser" --tags "install_houdini, set_hserver, install_deadline" --skip-tags "sync_scripts"; exit_test
 
 ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
 

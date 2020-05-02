@@ -405,36 +405,6 @@ resource "null_resource" "provision_node_centos" {
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_node_centos variable_user=centos variable_become_user=deadlineuser" --skip-tags "user_access"; exit_test
 
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"; exit_test
-      
-      # if [[ "$TF_VAR_install_deadline" == true ]]; then
-      #   ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml -v --skip-tags "multi-slave" --extra-vars "variable_host=role_node_centos variable_connect_as_user=centos variable_user=deadlineuser"; exit_test
-      # fi
-
-      # if [[ "$TF_VAR_install_deadline" == true ]]; then
-      #   # check db
-      #   echo "test db centos 6"
-      #   ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
-      # fi
-
-      # if [[ "$TF_VAR_install_houdini" == true ]]; then
-      #   ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source"; exit_test
-      #   ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v; exit_test
-      # fi
-
-      # if [[ $TF_VAR_houdini_test_connection == true ]]; then
-      #   # last step before building ami we run a unit test to ensure houdini runs
-      #   ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_user=deadlineuser firehawk_sync_source=$TF_VAR_firehawk_sync_source execute=true" --tags "houdini_unit_test"; exit_test
-      # fi
-
-      # if [[ "$TF_VAR_install_deadline" == true ]]; then
-      #   # check db
-      #   echo "test db centos"
-      #   ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
-      # fi
-
-      # # stop the instance to ensure ami is created from a stable state
-      # aws ec2 stop-instances --instance-ids ${aws_instance.node_centos[0].id}; exit_test
-      # aws ec2 wait instance-stopped --instance-ids ${aws_instance.node_centos[0].id}; exit_test
 EOT
 
   }
@@ -471,25 +441,15 @@ resource "null_resource" "install_deadline" {
       fi
 
       if [[ "$TF_VAR_install_houdini" == true ]]; then
-        ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source"; exit_test
+        ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source" --tags "install_houdini, set_hserver, install_deadline"; exit_test
         ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v; exit_test
       fi
-
-      # if [[ $TF_VAR_houdini_test_connection == true ]]; then
-      #   # last step before building ami we run a unit test to ensure houdini runs
-      #   ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_user=deadlineuser firehawk_sync_source=$TF_VAR_firehawk_sync_source execute=true" --tags "houdini_unit_test"; exit_test
-      # fi
 
       if [[ "$TF_VAR_install_deadline" == true ]]; then
         # check db
         echo "test db centos"
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
       fi
-
-      # # stop the instance to ensure ami is created from a stable state
-      # aws ec2 stop-instances --instance-ids ${aws_instance.node_centos[0].id}; exit_test
-      # aws ec2 wait instance-stopped --instance-ids ${aws_instance.node_centos[0].id}; exit_test
-
 EOT
 
   }

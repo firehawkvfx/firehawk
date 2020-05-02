@@ -69,7 +69,7 @@ ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-
 # login again and continue...
 
 # install houdini with the same procedure as on render nodes and workstations, and initialise the licence server on this system.
-ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deployuser houdini_install_type=server" --skip-tags "sync_scripts"; exit_test
+ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deployuser houdini_install_type=server" --tags "install_houdini, set_hserver, install_deadline" --skip-tags "sync_scripts"; exit_test
 
 # ensure an aws pem key exists for ssh into cloud nodes
 ansible-playbook -i "$TF_VAR_inventory" ansible/aws-new-key.yaml; exit_test

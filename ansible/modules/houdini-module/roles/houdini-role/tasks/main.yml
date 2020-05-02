@@ -1,8 +1,9 @@
 ---
 # tasks file for roles/houdini-module
 
-- name: configure packages, permsissions and scripts
+- name: configure packages, permissions and scripts
   include: packages-and-permissions.yml
+  tags: install_houdini
 
 - name: install houdini for items in list
   include: houdini-install.yml
@@ -10,6 +11,7 @@
   loop_control:
     loop_var: houdini_version_item
   when: houdini_install_type != "server"
+  tags: install_houdini
 
 - name: install houdini server for items in list
   include: houdini-install.yml
@@ -17,6 +19,15 @@
   loop_control:
     loop_var: houdini_version_item
   when: houdini_install_type == "server"
+  tags: install_houdini
+
+- name: set hserver ip for nodes to aquire licenses from for items in list
+  include: houdini-set-hserver.yml
+  loop: "{{ houdini_version_list }}"
+  loop_control:
+    loop_var: houdini_version_item
+  when: houdini_install_type != "server"
+  tags: set_hserver
 
 - name: configure houdini.env and deadline for items in list
   include: houdini-env-config.yml
@@ -24,7 +35,9 @@
   loop_control:
     loop_var: houdini_version_item
   when: houdini_install_type != "server"
+  tags: install_deadline
 
 - name: configure houdini and deadline config
   include: houdini-deadline-config.yml
   when: houdini_install_type != "server"
+  tags: install_deadline

@@ -37,14 +37,8 @@
     - vars.yml
     - /secrets/overrides/ansible/modules/houdini-module/vars.yml
 
-  vars:
-    sync_downloads: false
-    bucket: "{{ installers_bucket }}"
-
   tasks:
-
-# store deadline components required for submitter.
-
+  # store deadline components required for submitter.
   - name: Ensure tmp dir exist - HoudiniSubmitter
     file:
       path: /deployuser/tmp/HoudiniSubmitter/{{ item }}
@@ -57,6 +51,7 @@
     with_items:
     - otls
     - soho
+    tags: install_deadline
 
   - name: Fetch from the remote recursively and save to local
     synchronize:
@@ -71,6 +66,7 @@
     - DeadlineHoudiniClient.py
     - MainMenuCommon.xml
     - CallDeadlineCommand.py
+    tags: install_deadline
 
   - name: Ansible set permissions for items to be copied - /opt/Thinkbox/DeadlineRepository10/submission/... - should not be necesary since root is covered prior, but may fix issues.
     file:
@@ -85,6 +81,7 @@
     - HServer
     - Houdini
     - Nuke
+    tags: install_deadline
 
   - name: Ensure tmp dirs exist - submission
     file:
@@ -99,6 +96,7 @@
     - HServer
     - Houdini
     - Nuke
+    tags: install_deadline
 
   - name: Fetch submission plugins
     synchronize:
@@ -110,6 +108,9 @@
     - HServer
     - Houdini
     - Nuke
+    tags: install_deadline
+
+### Houdini Install
 
 - hosts: "{{ variable_host | default('role_node_centos') }}"
   remote_user: "{{ variable_connect_as_user | default('centos') }}"
@@ -124,6 +125,8 @@
     include_role:
       name: houdini-role
 
+### Houdini Deadline Plugin
+
 - hosts: firehawkgateway
   remote_user: deployuser
   become: true
@@ -136,7 +139,6 @@
     my_password: "{{ user_deadlineuser_pw }}"
     no_extension: "{{ deadline_linux_installers_tar | splitext | first }}"
     basename: "{{ no_extension.split('/')[-1] }}"
-    #houdini_major_version: 18.0
     houdini_install_type: 'node'
     
   tasks:
@@ -147,6 +149,7 @@
     loop_control:
       loop_var: houdini_major_version
     when: houdini_install_type != "server"
+    tags: install_deadline
 
   - name: ensure db is still valid.  a corrupted db may fail at this point if entryies have not been modified correctly
     shell: |
@@ -155,6 +158,7 @@
       ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval ''
     no_log: true
     become: true
+    tags: install_deadline
 
 ### HOUDINI UNIT TEST ###
 

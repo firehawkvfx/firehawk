@@ -86,7 +86,7 @@ resource "null_resource" "init-routes-houdini-license-server" {
       # login again and continue...
       if [[ "$TF_VAR_install_houdini_license_server" == true ]]; then
         # install houdini with the same procedure as on render nodes and workstations, and initialise the licence server on this system.
-        ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deployuser houdini_install_type=server" --skip-tags "sync_scripts"; exit_test
+        ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deployuser houdini_install_type=server" --tags "install_houdini, set_hserver, install_deadline" --skip-tags "sync_scripts"; exit_test
       fi
 
       # ensure an aws pem key exists for ssh into cloud nodes
@@ -167,7 +167,7 @@ EOT
 }
 }
 
-resource "null_resource" "install-deadline-local-workstation" {
+resource "null_resource" "install_deadline_local_workstation" {
   count = var.firehawk_init ? 1 : 0
   depends_on = [null_resource.init-aws-local-workstation, null_resource.init-routes-houdini-license-server, null_resource.init-awscli-deadlinedb-firehawk]
 
@@ -195,9 +195,9 @@ EOT
 
 
 
-resource "null_resource" "install-houdini-local-workstation" {
+resource "null_resource" "install_houdini_local_workstation" {
   count = var.firehawk_init ? 1 : 0
-  depends_on = [null_resource.install-deadline-local-workstation, null_resource.init-aws-local-workstation, null_resource.init-routes-houdini-license-server, null_resource.init-awscli-deadlinedb-firehawk]
+  depends_on = [null_resource.install_deadline_local_workstation, null_resource.init-aws-local-workstation, null_resource.init-routes-houdini-license-server, null_resource.init-awscli-deadlinedb-firehawk]
 
   triggers = {
     install_deadline = var.install_deadline
@@ -216,7 +216,7 @@ resource "null_resource" "install-houdini-local-workstation" {
       fi
       # install houdini on a local workstation with deadline submitters and environment vars.
       if [[ "$TF_VAR_install_houdini" == true ]]; then
-        ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser" --skip-tags "sync_scripts"; exit_test
+        ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser" --tags "install_houdini, set_hserver, install_deadline" --skip-tags "sync_scripts"; exit_test
         ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser"; exit_test
       fi
       if [[ "$TF_VAR_install_deadline" == true ]]; then
@@ -233,7 +233,7 @@ EOT
 
 resource "null_resource" "local-provisioning-complete" {
   count = var.firehawk_init ? 1 : 0
-  depends_on = [null_resource.install-houdini-local-workstation, null_resource.install-deadline-local-workstation, null_resource.init-aws-local-workstation, null_resource.init-routes-houdini-license-server, null_resource.init-awscli-deadlinedb-firehawk]
+  depends_on = [null_resource.install_houdini_local_workstation, null_resource.install_deadline_local_workstation, null_resource.init-aws-local-workstation, null_resource.init-routes-houdini-license-server, null_resource.init-awscli-deadlinedb-firehawk]
 
   triggers = {
     install_deadline = var.install_deadline
