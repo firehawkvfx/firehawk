@@ -509,7 +509,6 @@ resource "aws_network_interface" "nas1eth0" {
   count = var.softnas_storage ? 1 : 0
   subnet_id       = var.private_subnets[0]
   private_ips     = [var.softnas1_private_ip1]
-  # security_groups = aws_security_group.softnas.*.id
 
   tags = {
     Name = "primary_network_interface"

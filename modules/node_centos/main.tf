@@ -7,7 +7,7 @@ resource "aws_security_group" "node_centos" {
 
   name        = var.name
   vpc_id      = var.vpc_id
-  description = "Teradici PCOIP security group"
+  description = "Centos And Teradici PCOIP security group"
 
   tags = {
     Name = var.name
@@ -19,6 +19,91 @@ resource "aws_security_group" "node_centos" {
     to_port     = 0
     cidr_blocks = [var.vpc_cidr]
     description = "all incoming traffic from vpc"
+  }
+
+  # if all incoming from the onsite subnet is allowed, the rules below aren't required.
+
+  # For OpenVPN Client Web Server & Admin Web UI
+
+  ingress {
+    protocol  = "tcp"
+    from_port = 22
+    to_port   = 22
+    # TF-UPGRADE-TODO: In Terraform v0.10 and earlier, it was sometimes necessary to
+    # force an interpolation expression to be interpreted as a list by wrapping it
+    # in an extra set of list brackets. That form was supported for compatibilty in
+    # v0.11, but is no longer supported in Terraform v0.12.
+    #
+    # If the expression in the following list itself returns a list, remove the
+    # brackets to avoid interpretation as a list of lists. If the expression
+    # returns a single list item then leave it as-is and remove this TODO comment.
+    cidr_blocks = [var.private_subnets_cidr_blocks]
+    description = "ssh"
+  }
+  ingress {
+    protocol  = "tcp"
+    from_port = 27100
+    to_port   = 27100
+    # TF-UPGRADE-TODO: In Terraform v0.10 and earlier, it was sometimes necessary to
+    # force an interpolation expression to be interpreted as a list by wrapping it
+    # in an extra set of list brackets. That form was supported for compatibilty in
+    # v0.11, but is no longer supported in Terraform v0.12.
+    #
+    # If the expression in the following list itself returns a list, remove the
+    # brackets to avoid interpretation as a list of lists. If the expression
+    # returns a single list item then leave it as-is and remove this TODO comment.
+    cidr_blocks = [var.private_subnets_cidr_blocks]
+    description = "DeadlineDB MongoDB"
+  }
+  ingress {
+    protocol  = "tcp"
+    from_port = 8080
+    to_port   = 8080
+    # TF-UPGRADE-TODO: In Terraform v0.10 and earlier, it was sometimes necessary to
+    # force an interpolation expression to be interpreted as a list by wrapping it
+    # in an extra set of list brackets. That form was supported for compatibilty in
+    # v0.11, but is no longer supported in Terraform v0.12.
+    #
+    # If the expression in the following list itself returns a list, remove the
+    # brackets to avoid interpretation as a list of lists. If the expression
+    # returns a single list item then leave it as-is and remove this TODO comment.
+    cidr_blocks = [var.private_subnets_cidr_blocks]
+    description = "Deadline And Deadline RCS"
+  }
+  ingress {
+    protocol  = "tcp"
+    from_port = 4433
+    to_port   = 4433
+    # TF-UPGRADE-TODO: In Terraform v0.10 and earlier, it was sometimes necessary to
+    # force an interpolation expression to be interpreted as a list by wrapping it
+    # in an extra set of list brackets. That form was supported for compatibilty in
+    # v0.11, but is no longer supported in Terraform v0.12.
+    #
+    # If the expression in the following list itself returns a list, remove the
+    # brackets to avoid interpretation as a list of lists. If the expression
+    # returns a single list item then leave it as-is and remove this TODO comment.
+    cidr_blocks = [var.private_subnets_cidr_blocks]
+    description = "Deadline RCS TLS HTTPS"
+  }
+  egress {
+    protocol    = "-1"
+    from_port   = 0
+    to_port     = 0
+    cidr_blocks = ["0.0.0.0/0"]
+    description = "all outgoing traffic"
+  }
+}
+
+resource "aws_security_group" "node_centos_vpn" {
+  count       = var.site_mounts ? 1 : 0
+  depends_on = [var.vpn_private_ip]
+
+  name        = var.name
+  vpc_id      = var.vpc_id
+  description = "Centos VPN security group"
+
+  tags = {
+    Name = var.name
   }
 
   # todo need to tighten down ports.
@@ -48,22 +133,6 @@ resource "aws_security_group" "node_centos" {
 
   # if all incoming from the onsite subnet is allowed, the rules below aren't required.
 
-  # ingress {
-  #   protocol    = "-1"
-  #   from_port   = 0
-  #   to_port     = 0
-  #   cidr_blocks = ["${var.houdini_license_server_address}/32"]
-  #   description = "Houdini License Server"
-  # }
-
-  # ingress {
-  #   protocol    = "-1"
-  #   from_port   = 0
-  #   to_port     = 0
-  #   cidr_blocks = ["${var.openfirehawkserver}/32"]
-  #   description = "Deadline DB"
-  # }
-
   # For OpenVPN Client Web Server & Admin Web UI
 
   ingress {
@@ -78,7 +147,7 @@ resource "aws_security_group" "node_centos" {
     # If the expression in the following list itself returns a list, remove the
     # brackets to avoid interpretation as a list of lists. If the expression
     # returns a single list item then leave it as-is and remove this TODO comment.
-    cidr_blocks = concat([var.remote_subnet_cidr, var.remote_ip_cidr], var.private_subnets_cidr_blocks)
+    cidr_blocks = [var.remote_subnet_cidr, var.remote_ip_cidr]
     description = "ssh"
   }
   ingress {
@@ -100,7 +169,7 @@ resource "aws_security_group" "node_centos" {
     # If the expression in the following list itself returns a list, remove the
     # brackets to avoid interpretation as a list of lists. If the expression
     # returns a single list item then leave it as-is and remove this TODO comment.
-    cidr_blocks = concat([var.remote_subnet_cidr], var.private_subnets_cidr_blocks)
+    cidr_blocks = [var.remote_subnet_cidr]
     description = "DeadlineDB MongoDB"
   }
   ingress {
@@ -115,7 +184,7 @@ resource "aws_security_group" "node_centos" {
     # If the expression in the following list itself returns a list, remove the
     # brackets to avoid interpretation as a list of lists. If the expression
     # returns a single list item then leave it as-is and remove this TODO comment.
-    cidr_blocks = concat([var.remote_subnet_cidr], var.private_subnets_cidr_blocks)
+    cidr_blocks = [var.remote_subnet_cidr]
     description = "Deadline And Deadline RCS"
   }
   ingress {
@@ -130,7 +199,7 @@ resource "aws_security_group" "node_centos" {
     # If the expression in the following list itself returns a list, remove the
     # brackets to avoid interpretation as a list of lists. If the expression
     # returns a single list item then leave it as-is and remove this TODO comment.
-    cidr_blocks = concat([var.remote_subnet_cidr], var.private_subnets_cidr_blocks)
+    cidr_blocks = [var.remote_subnet_cidr]
     description = "Deadline RCS TLS HTTPS"
   }
   ingress {
@@ -159,13 +228,6 @@ resource "aws_security_group" "node_centos" {
     to_port     = 0
     cidr_blocks = [var.remote_ip_cidr]
     description = "icmp"
-  }
-  egress {
-    protocol    = "-1"
-    from_port   = 0
-    to_port     = 0
-    cidr_blocks = ["0.0.0.0/0"]
-    description = "all outgoing traffic"
   }
 }
 
@@ -216,6 +278,20 @@ variable "centos_v7" {
     }
 }
 
+resource "aws_network_interface" "eth0" {
+  count = var.site_mounts ? 1 : 0
+  subnet_id       = element(var.private_subnet_ids, count.index)
+  private_ips     = [cidrhost("${data.aws_subnet.private_subnet[count.index].cidr_block}", 20)]
+
+  tags = {
+    Name = "primary_network_interface"
+  }
+}
+
+locals {
+  network_interface_id = element(concat(aws_network_interface.eth0.*.id, list("")), 0)
+}
+
 resource "aws_instance" "node_centos" {
   count                = var.site_mounts ? 1 : 0
   depends_on           = [null_resource.dependency_softnas_and_bastion, null_resource.dependency_deadlinedb, var.dependency]
@@ -234,9 +310,9 @@ resource "aws_instance" "node_centos" {
   }
 
   key_name               = var.key_name
-  subnet_id              = element(var.private_subnet_ids, count.index)
-  private_ip             = cidrhost("${data.aws_subnet.private_subnet[count.index].cidr_block}", 20)
-  vpc_security_group_ids = aws_security_group.node_centos.*.id
+  # subnet_id              = element(var.private_subnet_ids, count.index)
+  # private_ip             = cidrhost("${data.aws_subnet.private_subnet[count.index].cidr_block}", 20)
+  # vpc_security_group_ids = aws_security_group.node_centos.*.id
   tags = {
     Name  = "node_centos"
     Route = "private"
@@ -250,10 +326,23 @@ network:
 USERDATA
 }
 
+resource "aws_network_interface_sg_attachment" "node_centos_sg_attachment" {
+  count                = var.site_mounts ? 1 : 0
+  security_group_id    = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
+  network_interface_id = local.network_interface_id
+}
+
+resource "aws_network_interface_sg_attachment" "node_centos_sg_attachment_vpn" { # This attachment occurs only after the vpn is available.  Prior to this, the attachment would be meaningless.
+  count                = var.site_mounts ? 1 : 0
+  depends_on = [var.vpn_private_ip]
+  security_group_id    = element( concat( aws_security_group.node_centos_vpn.*.id, list("") ), 0)
+  network_interface_id = local.network_interface_id
+}
+
 resource "null_resource" "provision_node_centos" {
   count = var.site_mounts ? 1 : 0
   #count      = 0
-  depends_on = [aws_instance.node_centos, null_resource.dependency_softnas_and_bastion, null_resource.dependency_deadlinedb]
+  depends_on = [aws_instance.node_centos, null_resource.dependency_softnas_and_bastion, null_resource.dependency_deadlinedb, aws_network_interface_sg_attachment.node_centos_sg_attachment, aws_network_interface_sg_attachment.node_centos_sg_attachment_vpn ]
   
   triggers = {
     instanceid = aws_instance.node_centos[0].id

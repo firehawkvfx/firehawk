@@ -83,6 +83,8 @@ variable "skip_update" {
 variable "vpn_cidr" {
 }
 
+variable "vpn_private_ip" {}
+
 variable "site_mounts" {
   default = false
 }

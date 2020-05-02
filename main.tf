@@ -390,6 +390,7 @@ module "node" {
   remote_subnet_cidr          = var.remote_subnet_cidr
 
   # dependencies
+  vpn_private_ip                 = module.vpc.vpn_private_ip
   dependency = module.firehawk_init.local-provisioning-complete
   softnas_private_ip1             = module.softnas.softnas1_private_ip
   provision_softnas_volumes       = module.softnas.provision_softnas_volumes
