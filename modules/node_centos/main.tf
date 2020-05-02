@@ -437,7 +437,7 @@ EOT
 resource "null_resource" "install_deadline" {
   count = var.site_mounts ? 1 : 0
 
-  depends_on = [ null_resource.provision_node_centos, null_resource.dependency_deadlinedb, aws_network_interface_sg_attachment.node_centos_sg_attachment_vpn, null_resource.install_houdini ]
+  depends_on = [ null_resource.provision_node_centos, null_resource.dependency_deadlinedb, aws_network_interface_sg_attachment.node_centos_sg_attachment_vpn, null_resource.install_houdini, var.vpn_private_ip ]
 
   triggers = {
     instanceid = aws_instance.node_centos[0].id
@@ -457,7 +457,7 @@ resource "null_resource" "install_deadline" {
         echo "test db centos 1"
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
 
-        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml -v --skip-tags "multi-slave" --extra-vars "variable_host=role_node_centos variable_connect_as_user=centos variable_user=deadlineuser"; exit_test
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml -vvv --skip-tags "multi-slave" --extra-vars "variable_host=role_node_centos variable_connect_as_user=centos variable_user=deadlineuser"; exit_test
 
         # check db
         echo "test db centos 6"
