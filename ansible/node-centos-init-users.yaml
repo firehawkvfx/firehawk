@@ -47,6 +47,7 @@
     package:
       name: expect
       state: present
+      lock_timeout: 180
 
   - name: check major version
     debug:
