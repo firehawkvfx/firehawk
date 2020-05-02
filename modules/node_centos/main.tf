@@ -425,6 +425,8 @@ resource "null_resource" "install_houdini" {
       set -x
       cd /deployuser
 
+      aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id} # ensure instance is started
+
       if [[ "$TF_VAR_install_houdini" == true ]]; then
         ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source" --tags "install_houdini"; exit_test
         ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v; exit_test
@@ -452,12 +454,14 @@ resource "null_resource" "install_deadline" {
       set -x
       cd /deployuser
 
+      aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id} # ensure instance is started
+
       if [[ "$TF_VAR_install_deadline" == true ]]; then
         # check db
         echo "test db centos 1"
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
 
-        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml -vvv --skip-tags "multi-slave" --extra-vars "variable_host=role_node_centos variable_connect_as_user=centos variable_user=deadlineuser"; exit_test
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml -v --skip-tags "multi-slave" --extra-vars "variable_host=role_node_centos variable_connect_as_user=centos variable_user=deadlineuser"; exit_test
 
         # check db
         echo "test db centos 6"
@@ -496,6 +500,8 @@ resource "null_resource" "mounts_and_houdini_test" {
       . /deployuser/scripts/exit_test.sh
       set -x
       cd /deployuser
+
+      aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id} # ensure instance is started
 
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"; exit_test
 
