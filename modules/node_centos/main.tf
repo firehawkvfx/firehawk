@@ -231,10 +231,9 @@ resource "aws_security_group" "node_centos_vpn" {
   }
 }
 
-resource "null_resource" "dependency_softnas_and_bastion" {
+resource "null_resource" "dependency_softnas" {
   triggers = {
     softnas_private_ip1             = join(",", var.softnas_private_ip1)
-    bastion_ip                      = var.bastion_ip
     provision_softnas_volumes       = join(",", var.provision_softnas_volumes)
     attach_local_mounts_after_start = join(",", var.attach_local_mounts_after_start)
   }
@@ -294,7 +293,7 @@ locals {
 
 resource "aws_instance" "node_centos" {
   count                = var.site_mounts ? 1 : 0
-  depends_on           = [null_resource.dependency_softnas_and_bastion, null_resource.dependency_deadlinedb, var.dependency]
+  depends_on           = [null_resource.dependency_softnas, null_resource.dependency_deadlinedb, var.dependency]
   iam_instance_profile = var.instance_profile_name
 
   #instance type and ami are determined by the gateway type variable for if you want a graphical or non graphical instance.
@@ -341,8 +340,7 @@ resource "aws_network_interface_sg_attachment" "node_centos_sg_attachment_vpn" {
 
 resource "null_resource" "provision_node_centos" {
   count = var.site_mounts ? 1 : 0
-  #count      = 0
-  depends_on = [aws_instance.node_centos, null_resource.dependency_softnas_and_bastion, null_resource.dependency_deadlinedb, aws_network_interface_sg_attachment.node_centos_sg_attachment, aws_network_interface_sg_attachment.node_centos_sg_attachment_vpn ]
+  depends_on = [aws_instance.node_centos, var.bastion_ip, aws_network_interface_sg_attachment.node_centos_sg_attachment, aws_network_interface_sg_attachment.node_centos_sg_attachment_vpn ]
   
   triggers = {
     instanceid = aws_instance.node_centos[0].id
@@ -403,11 +401,65 @@ resource "null_resource" "provision_node_centos" {
 
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"; exit_test
       
-      if [[ "$TF_VAR_install_deadline" == true ]]; then
-        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml -v --skip-tags "multi-slave" --extra-vars "variable_host=role_node_centos variable_connect_as_user=centos variable_user=deadlineuser"; exit_test
-      fi
+      # if [[ "$TF_VAR_install_deadline" == true ]]; then
+      #   ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml -v --skip-tags "multi-slave" --extra-vars "variable_host=role_node_centos variable_connect_as_user=centos variable_user=deadlineuser"; exit_test
+      # fi
+
+      # if [[ "$TF_VAR_install_deadline" == true ]]; then
+      #   # check db
+      #   echo "test db centos 6"
+      #   ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      # fi
+
+      # if [[ "$TF_VAR_install_houdini" == true ]]; then
+      #   ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "sesi_username=$TF_VAR_sesi_username sesi_password=$TF_VAR_sesi_password houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source"; exit_test
+      #   ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v; exit_test
+      # fi
+
+      # if [[ $TF_VAR_houdini_test_connection == true ]]; then
+      #   # last step before building ami we run a unit test to ensure houdini runs
+      #   ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_user=deadlineuser firehawk_sync_source=$TF_VAR_firehawk_sync_source execute=true" --tags "houdini_unit_test"; exit_test
+      # fi
+
+      # if [[ "$TF_VAR_install_deadline" == true ]]; then
+      #   # check db
+      #   echo "test db centos"
+      #   ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      # fi
+
+      # # stop the instance to ensure ami is created from a stable state
+      # aws ec2 stop-instances --instance-ids ${aws_instance.node_centos[0].id}; exit_test
+      # aws ec2 wait instance-stopped --instance-ids ${aws_instance.node_centos[0].id}; exit_test
+EOT
+
+  }
+}
+
+resource "null_resource" "install_deadline" {
+  count = var.site_mounts ? 1 : 0
+
+  depends_on = [ null_resource.provision_node_centos, null_resource.dependency_deadlinedb ]
+
+  triggers = {
+    instanceid = aws_instance.node_centos[0].id
+    install_deadline = var.install_deadline
+    install_houdini = var.install_houdini
+  }
+
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    command = <<EOT
+      . /deployuser/scripts/exit_test.sh
+      set -x
+      cd /deployuser
 
       if [[ "$TF_VAR_install_deadline" == true ]]; then
+        # check db
+        echo "test db centos 1"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml -v --skip-tags "multi-slave" --extra-vars "variable_host=role_node_centos variable_connect_as_user=centos variable_user=deadlineuser"; exit_test
+
         # check db
         echo "test db centos 6"
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
@@ -418,10 +470,10 @@ resource "null_resource" "provision_node_centos" {
         ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v; exit_test
       fi
 
-      if [[ $TF_VAR_houdini_test_connection == true ]]; then
-        # last step before building ami we run a unit test to ensure houdini runs
-        ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_user=deadlineuser firehawk_sync_source=$TF_VAR_firehawk_sync_source execute=true" --tags "houdini_unit_test"; exit_test
-      fi
+      # if [[ $TF_VAR_houdini_test_connection == true ]]; then
+      #   # last step before building ami we run a unit test to ensure houdini runs
+      #   ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_user=deadlineuser firehawk_sync_source=$TF_VAR_firehawk_sync_source execute=true" --tags "houdini_unit_test"; exit_test
+      # fi
 
       if [[ "$TF_VAR_install_deadline" == true ]]; then
         # check db
@@ -429,6 +481,37 @@ resource "null_resource" "provision_node_centos" {
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
       fi
 
+      # # stop the instance to ensure ami is created from a stable state
+      # aws ec2 stop-instances --instance-ids ${aws_instance.node_centos[0].id}; exit_test
+      # aws ec2 wait instance-stopped --instance-ids ${aws_instance.node_centos[0].id}; exit_test
+
+EOT
+
+  }
+}
+
+resource "null_resource" "install_deadline" {
+  count = var.site_mounts ? 1 : 0
+
+  depends_on = [ null_resource.dependency_softnas, null_resource.install_deadline ]
+
+  triggers = {
+    instanceid = aws_instance.node_centos[0].id
+    install_deadline = var.install_deadline
+    install_houdini = var.install_houdini
+  }
+
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    command = <<EOT
+      . /deployuser/scripts/exit_test.sh
+      set -x
+      cd /deployuser
+
+      if [[ "$TF_VAR_install_houdini" == true ]] && [[ $TF_VAR_houdini_test_connection == true ]]; then
+        # last step before building ami we run a unit test to ensure houdini runs
+        ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_user=deadlineuser firehawk_sync_source=$TF_VAR_firehawk_sync_source execute=true" --tags "houdini_unit_test"; exit_test
+      fi
 
       # stop the instance to ensure ami is created from a stable state
       aws ec2 stop-instances --instance-ids ${aws_instance.node_centos[0].id}; exit_test
@@ -437,17 +520,6 @@ EOT
 
   }
 }
-
-# resource "null_resource" "install_deadline" {
-#   count = var.sleep && var.site_mounts ? 1 : 0
-
-#   provisioner "local-exec" {
-#     interpreter = ["/bin/bash", "-c"]
-#     command = <<EOT
-# EOT
-
-#   }
-# }
 
 # to replace the ami after further provisioning, use:
 # terraform taint module.node.random_id.ami_unique_name[0]
@@ -469,9 +541,13 @@ resource "random_id" "ami_unique_name" {
 
 resource "aws_ami_from_instance" "node_centos" {
   count              = var.site_mounts ? 1 : 0
-  depends_on         = [null_resource.provision_node_centos, random_id.ami_unique_name]
+  depends_on         = [null_resource.provision_node_centos, random_id.ami_unique_name, null_resource.install_deadline]
   name               = "node_centos_houdini_${aws_instance.node_centos[0].id}_${random_id.ami_unique_name[0].hex}"
   source_instance_id = aws_instance.node_centos[0].id
+  tags = {
+    Name = var.name
+  }
+
 }
 
 #wakeup after ami
@@ -488,10 +564,10 @@ resource "null_resource" "start-node-after-ami" {
   }
 }
 
-# wakeup a node after sleep.  ensure the softnas instaqnce has finished creating its volumes otherwise mounts will not work - dependency_softnas_and_bastion
+# wakeup a node after sleep.  ensure the softnas instaqnce has finished creating its volumes otherwise mounts will not work - dependency_softnas
 resource "null_resource" "start-node" {
   count      = ! var.sleep && var.site_mounts && var.wakeable ? 1 : 0
-  depends_on = [null_resource.dependency_softnas_and_bastion]
+  depends_on = [null_resource.dependency_softnas]
 
   provisioner "local-exec" {
     command = "aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id}"

@@ -42,28 +42,6 @@
     bucket: "{{ installers_bucket }}"
 
   tasks:
-  # - name: Open tops ports for vpn. May not be necesary in H18.
-  #   include_role:
-  #     name: houdini-tops-ports-vpn
-
-  # - name: ensure an s3 bucket exists to store large files / installers for faster redeployment.
-  #   s3_bucket:
-  #     name: "{{ bucket }}"
-  #     region: "{{ aws_region }}"
-  #   become: false
-  #   tags:
-  #     - sync_installers
-
-  # - name: Ensure the downloads folder is syncronised with the bucket
-  #   s3_sync:
-  #     bucket: "{{ bucket }}"
-  #     file_root: /deployuser/downloads/
-  #     include: "*"
-  #     region: "{{ aws_region }}"
-  #   when: sync_downloads
-  #   become: false
-  #   tags:
-  #     - sync_installers
 
 # store deadline components required for submitter.
 
@@ -142,7 +120,7 @@
     - /secrets/overrides/ansible/modules/houdini-module/vars.yml
 
   tasks:
-  - name: install houdini module
+  - name: Install Houdini
     include_role:
       name: houdini-role
 
