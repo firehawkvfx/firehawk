@@ -37,7 +37,7 @@ resource "aws_security_group" "node_centos" {
     # If the expression in the following list itself returns a list, remove the
     # brackets to avoid interpretation as a list of lists. If the expression
     # returns a single list item then leave it as-is and remove this TODO comment.
-    cidr_blocks = [var.private_subnets_cidr_blocks]
+    cidr_blocks = var.private_subnets_cidr_blocks
     description = "ssh"
   }
   ingress {
@@ -52,7 +52,7 @@ resource "aws_security_group" "node_centos" {
     # If the expression in the following list itself returns a list, remove the
     # brackets to avoid interpretation as a list of lists. If the expression
     # returns a single list item then leave it as-is and remove this TODO comment.
-    cidr_blocks = [var.private_subnets_cidr_blocks]
+    cidr_blocks = var.private_subnets_cidr_blocks
     description = "DeadlineDB MongoDB"
   }
   ingress {
@@ -67,7 +67,7 @@ resource "aws_security_group" "node_centos" {
     # If the expression in the following list itself returns a list, remove the
     # brackets to avoid interpretation as a list of lists. If the expression
     # returns a single list item then leave it as-is and remove this TODO comment.
-    cidr_blocks = [var.private_subnets_cidr_blocks]
+    cidr_blocks = var.private_subnets_cidr_blocks
     description = "Deadline And Deadline RCS"
   }
   ingress {
@@ -82,7 +82,7 @@ resource "aws_security_group" "node_centos" {
     # If the expression in the following list itself returns a list, remove the
     # brackets to avoid interpretation as a list of lists. If the expression
     # returns a single list item then leave it as-is and remove this TODO comment.
-    cidr_blocks = [var.private_subnets_cidr_blocks]
+    cidr_blocks = var.private_subnets_cidr_blocks
     description = "Deadline RCS TLS HTTPS"
   }
   egress {
