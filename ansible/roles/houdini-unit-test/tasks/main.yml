@@ -4,6 +4,7 @@
   connection: local
   tags:
     - sync_scripts
+    - houdini-unit-test
 
 - name: copy hip file unit test to local ebs volume. if this fails there may be an issue with the onsite nfs mount.  check routes. Check that you did vagrant reload after provisioning vpn.  This is necesary for routes to work.
   shell: |
@@ -14,6 +15,7 @@
   become_user: deadlineuser
   tags:
     - sync_scripts
+    - houdini-unit-test
 
 - name: execute unit test
   shell: |
@@ -29,6 +31,7 @@
   when: execute
   tags:
     - sync_scripts
+    - houdini-unit-test
   with_items: "{{ houdini_major_version_list }}"
 
 - name: Ensure unit test runs on boot.  Undesirable, but needed - See sidefx RFE100149

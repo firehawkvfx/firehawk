@@ -5,7 +5,7 @@ enforce_henv: false
 # the become sudo pass is only relevent for local installation if required on the host specified.
 ansible_become_pass: "{{ user_deadlineuser_pw }}"
 houdini_major_version: 18.0
-download_to_dir: /prod/tmp/firehawk
+download_to_dir: /tmp/firehawk
 variable_user: centos
 bastionip: "{{ groups['bastionip'][0] }}"
 skip_packages: false

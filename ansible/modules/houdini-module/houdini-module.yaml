@@ -124,6 +124,7 @@
   - name: Install Houdini
     include_role:
       name: houdini-role
+    tags: always
 
 ### Houdini Deadline Plugin
 
