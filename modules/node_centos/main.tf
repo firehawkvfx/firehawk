@@ -465,12 +465,12 @@ resource "null_resource" "install_deadline" {
       fi
 
       if [[ "$TF_VAR_install_houdini" == true ]]; then
-        ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source" --tags "set_hserver install_deadline"; exit_test
+        ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/configure-hserver.yaml -v --extra-vars "houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source"; exit_test
         ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v; exit_test
       fi
 
       if [[ "$TF_VAR_install_deadline" == true ]]; then
-        # check db
+        ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source" --tags "install_deadline"; exit_test
         echo "test db centos"
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
       fi
