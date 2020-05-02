@@ -308,6 +308,12 @@ resource "aws_instance" "node_centos" {
     delete_on_termination = true
   }
 
+  network_interface {
+    device_index         = 0
+    network_interface_id = local.network_interface_id
+    delete_on_termination = true
+  }
+
   key_name               = var.key_name
   # subnet_id              = element(var.private_subnet_ids, count.index)
   # private_ip             = cidrhost("${data.aws_subnet.private_subnet[count.index].cidr_block}", 20)
