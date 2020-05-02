@@ -1,10 +1,6 @@
 
-resource "null_resource" "init-awscli-deadlinedb-firehawk" {
+resource "null_resource" "init_awscli" {
   count = var.firehawk_init ? 1 : 0
-
-  triggers = {
-    install_deadline = var.install_deadline
-  }
 
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
@@ -30,6 +26,43 @@ resource "null_resource" "init-awscli-deadlinedb-firehawk" {
       ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars 'variable_user=deployuser' --tags 'onsite-install'; exit_test
       # Add user to syscontrol without the new user tag, it will just add a user to the syscontrol group
       ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars 'variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deployuser' --tags 'onsite-install'; exit_test
+
+      # configure onsite NAS mounts to firehawkgateway and ansible control for sync handling
+      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=firehawkgateway variable_user=deployuser softnas_hosts=none" --tags 'local_install_onsite_mounts'; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=localhost variable_user=deployuser softnas_hosts=none" --tags 'local_install_onsite_mounts'; exit_test
+EOT
+}
+}
+
+output "init_awscli_complete" {
+  value = null_resource.init_awscli
+  depends_on = [
+    null_resource.init_awscli
+  ]
+}
+
+resource "null_resource" "init_deadlinedb_firehawk" {
+  count = var.firehawk_init ? 1 : 0
+
+  depends_on = [ null_resource.init_awscli ]
+
+  triggers = {
+    install_deadline = var.install_deadline
+  }
+
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    command = <<EOT
+      . /deployuser/scripts/exit_test.sh
+      set -x
+      cd /deployuser
+      echo "...Check keys permissions"
+      ls -ltriah /secrets/keys
+      export storage_user_access_key_id=${var.storage_user_access_key_id}
+      echo "storage_user_access_key_id=$storage_user_access_key_id"
+      export storage_user_secret=${var.storage_user_secret}
+      echo "storage_user_secret= $storage_user_secret"
+
       if [[ "$TF_VAR_install_deadline" == true ]]; then
         # Install deadline
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-install.yaml -v; exit_test
@@ -42,13 +75,13 @@ EOT
 }
 
 locals {
-  deadlinedb_complete = element(concat(null_resource.init-awscli-deadlinedb-firehawk.*.id, list("")), 0)
+  deadlinedb_complete = element(concat(null_resource.init_deadlinedb_firehawk.*.id, list("")), 0)
 }
 
-output "deadlinedb-complete" {
+output "deadlinedb_complete" {
   value = local.deadlinedb_complete
   depends_on = [
-    null_resource.init-awscli-deadlinedb-firehawk
+    null_resource.init_deadlinedb_firehawk
   ]
 }
 
@@ -56,7 +89,7 @@ output "deadlinedb-complete" {
 
 resource "null_resource" "init-routes-houdini-license-server" {
   count = var.firehawk_init ? 1 : 0
-  depends_on = [null_resource.init-awscli-deadlinedb-firehawk]
+  depends_on = [null_resource.init_deadlinedb_firehawk]
 
   triggers = {
     install_deadline = var.install_deadline
@@ -79,8 +112,6 @@ resource "null_resource" "init-routes-houdini-license-server" {
         echo "test db 2"
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
       fi
-      # configure onsite NAS mounts to firehawkgateway
-      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=firehawkgateway variable_user=deployuser softnas_hosts=none" --tags 'local_install_onsite_mounts'; exit_test
       
       # ssh will be killed from the previous script because users were added to a new group and this will not update unless your ssh session is restarted.
       # login again and continue...
@@ -106,7 +137,7 @@ EOT
 
 resource "null_resource" "init-aws-local-workstation" {
   count = var.firehawk_init ? 1 : 0
-  depends_on = [null_resource.init-routes-houdini-license-server, null_resource.init-awscli-deadlinedb-firehawk]
+  depends_on = [null_resource.init-routes-houdini-license-server, null_resource.init_deadlinedb_firehawk]
 
   triggers = {
     install_deadline = var.install_deadline
@@ -169,7 +200,7 @@ EOT
 
 resource "null_resource" "install_deadline_local_workstation" {
   count = var.firehawk_init ? 1 : 0
-  depends_on = [null_resource.init-aws-local-workstation, null_resource.init-routes-houdini-license-server, null_resource.init-awscli-deadlinedb-firehawk]
+  depends_on = [null_resource.init-aws-local-workstation, null_resource.init-routes-houdini-license-server, null_resource.init_deadlinedb_firehawk]
 
   triggers = {
     install_deadline = var.install_deadline
@@ -197,7 +228,7 @@ EOT
 
 resource "null_resource" "install_houdini_local_workstation" {
   count = var.firehawk_init ? 1 : 0
-  depends_on = [null_resource.install_deadline_local_workstation, null_resource.init-aws-local-workstation, null_resource.init-routes-houdini-license-server, null_resource.init-awscli-deadlinedb-firehawk]
+  depends_on = [null_resource.install_deadline_local_workstation, null_resource.init-aws-local-workstation, null_resource.init-routes-houdini-license-server, null_resource.init_deadlinedb_firehawk]
 
   triggers = {
     install_deadline = var.install_deadline
@@ -233,7 +264,7 @@ EOT
 
 resource "null_resource" "local-provisioning-complete" {
   count = var.firehawk_init ? 1 : 0
-  depends_on = [null_resource.install_houdini_local_workstation, null_resource.install_deadline_local_workstation, null_resource.init-aws-local-workstation, null_resource.init-routes-houdini-license-server, null_resource.init-awscli-deadlinedb-firehawk]
+  depends_on = [null_resource.install_houdini_local_workstation, null_resource.install_deadline_local_workstation, null_resource.init-aws-local-workstation, null_resource.init-routes-houdini-license-server, null_resource.init_deadlinedb_firehawk]
 
   triggers = {
     install_deadline = var.install_deadline

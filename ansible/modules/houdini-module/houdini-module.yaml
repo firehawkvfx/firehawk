@@ -203,7 +203,7 @@
     bastionip: "{{ groups['bastionip'][0] }}"
     
     # whether to execute the unit test.  False will just copy the file.
-    execute: false
+    execute: true
 
     # run on boot to test startup latency.
     run_on_boot: false

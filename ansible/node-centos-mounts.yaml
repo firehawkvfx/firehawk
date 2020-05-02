@@ -168,8 +168,8 @@
     file: 
       path: "{{ item.item.path }}"
       state: directory
-      owner: deadlineuser
-      group: deadlineuser
+      owner: "{{ variable_user }}"
+      group: "{{ variable_user }}"
     become: true
     when: destroy == false and item.rc == 0
     with_items: 
@@ -182,8 +182,8 @@
     file: 
       path: "{{ item.item.bind1 }}"
       state: directory
-      owner: deadlineuser
-      group: deadlineuser
+      owner: "{{ variable_user }}"
+      group: "{{ variable_user }}"
     when: destroy == false and item.item.bind1 and item.rc == 0
     with_items: 
     - "{{ softnas_exports }}"
@@ -195,8 +195,8 @@
     file: 
       path: "{{ item.item.bind2 }}"
       state: directory
-      owner: deadlineuser
-      group: deadlineuser
+      owner: "{{ variable_user }}"
+      group: "{{ variable_user }}"
     when: destroy == false and item.item.bind2 and item.rc == 0
     with_items: 
     - "{{ softnas_exports }}"
@@ -535,8 +535,8 @@
     file: 
       path: "{{ item.item.mount_path }}"
       state: directory
-      owner: deadlineuser
-      group: deadlineuser
+      owner: "{{ variable_user }}"
+      group: "{{ variable_user }}"
     become: true
     when: item.rc == 0
     with_items: 
@@ -549,8 +549,8 @@
     file: 
       path: "{{ item.item.site_bind1 }}"
       state: directory
-      owner: deadlineuser
-      group: deadlineuser
+      owner: "{{ variable_user }}"
+      group: "{{ variable_user }}"
     become: true
     when: item.item.site_bind1 and item.rc == 0
     with_items: 
@@ -562,8 +562,8 @@
     file: 
       path: "{{ item.item.bind1 }}"
       state: directory
-      owner: deadlineuser
-      group: deadlineuser
+      owner: "{{ variable_user }}"
+      group: "{{ variable_user }}"
     when: item.item.bind1 and item.rc == 0
     with_items: 
     - "{{ site_presence.results }}"
@@ -574,8 +574,8 @@
     file: 
       path: "{{ item.item.bind2 }}"
       state: directory
-      owner: deadlineuser
-      group: deadlineuser
+      owner: "{{ variable_user }}"
+      group: "{{ variable_user }}"
     when: item.item.bind2 and item.rc == 0
     with_items: 
     - "{{ site_presence.results }}"
