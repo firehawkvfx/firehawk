@@ -49,7 +49,6 @@ TF_VAR_firehawk_sync_source=insertvalue
 
 # TF_VAR_softnas_mode_dev:
 # The ability to switch the performance of the softnas between [low/high] to save costs in dev environment.  
-# Since this uses different AMI's for low and high, each allowing different instance ranges to be used, the settings should be identical for dev and prod environments.
 # default: TF_VAR_softnas_mode_dev=high 
 TF_VAR_softnas_mode_dev=insertvalue
 
