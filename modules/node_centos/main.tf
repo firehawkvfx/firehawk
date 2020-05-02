@@ -490,7 +490,7 @@ EOT
   }
 }
 
-resource "null_resource" "install_deadline" {
+resource "null_resource" "houdini_test" {
   count = var.site_mounts ? 1 : 0
 
   depends_on = [ null_resource.dependency_softnas, null_resource.install_deadline ]
@@ -541,7 +541,7 @@ resource "random_id" "ami_unique_name" {
 
 resource "aws_ami_from_instance" "node_centos" {
   count              = var.site_mounts ? 1 : 0
-  depends_on         = [null_resource.provision_node_centos, random_id.ami_unique_name, null_resource.install_deadline]
+  depends_on         = [null_resource.provision_node_centos, random_id.ami_unique_name, null_resource.houdini_test]
   name               = "node_centos_houdini_${aws_instance.node_centos[0].id}_${random_id.ami_unique_name[0].hex}"
   source_instance_id = aws_instance.node_centos[0].id
   tags = {
