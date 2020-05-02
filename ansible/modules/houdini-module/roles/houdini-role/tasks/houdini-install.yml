@@ -51,7 +51,7 @@
   shell: |
     cd /opt/houdini_install_script/
     . /opt/houdini_install_script/exit_test.sh
-    ls -ltriah /opt/houdini_install_script/
+    # ls -ltriah /opt/houdini_install_script/
     python /opt/houdini_install_script/download_houdini.py -b {{ houdini_version_item.houdini_build }}; exit_test
   register: houdini_query_out
   become: true
@@ -100,6 +100,7 @@
   with_items:
   - "{{ houdini_query_out.stdout_lines }}"
   when: houdini_version_item.houdini_auto_version and 'Hash:' in item
+  no_log: true
 
 - name: Hash for file that will be downloaded from sesi.
   debug:
@@ -251,7 +252,6 @@
     dir={{ houdini_linux_tar_filename | regex_replace('.tar.gz$', '') }}
     cd {{ download_to_dir }}
     sudo tar -xvf {{ houdini_linux_tar_filename }} -C "{{ houdini_linux_tar_filename | regex_replace('.tar.gz$', '') }}" --strip-components 1
-    ls -ltriah
   register: houdini_install_out
   become_user: "{{ variable_user }}"
   become: true
