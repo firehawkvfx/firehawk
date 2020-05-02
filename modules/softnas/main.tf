@@ -954,6 +954,7 @@ EOT
     inline = ["set -x && echo 'booted'"]
   }
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
       set -x
@@ -991,6 +992,7 @@ resource "null_resource" "start-softnas" {
   }
 
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
 
@@ -1011,8 +1013,8 @@ resource "null_resource" "shutdown-softnas" {
   }
 
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     #command = "aws ec2 stop-instances --instance-ids ${aws_instance.softnas1.id}"
-
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
 
