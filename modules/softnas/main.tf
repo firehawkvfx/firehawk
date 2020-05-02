@@ -1028,7 +1028,7 @@ EOT
 
 resource "null_resource" "attach_local_mounts_after_start" {
   count      = ( !var.sleep && var.softnas_storage ) ? 1 : 0
-  depends_on = [null_resource.start-softnas, var.vpn_private_ip] # when softnas mounts are attached to onsite network, we require the vpn to be up.
+  depends_on = [null_resource.start-softnas, var.vpn_private_ip, aws_network_interface_sg_attachment.sg_attachment_vpn] # when softnas mounts are attached to onsite network, we require the vpn to be up.
 
   #,"null_resource.mount_volumes_onsite"]
 
@@ -1087,9 +1087,7 @@ output "attach_local_mounts_after_start" {
 
 resource "null_resource" "detach_local_mounts_after_stop" {
   count      = ( var.sleep && var.softnas_storage ) ? 1 : 0
-  depends_on = [null_resource.shutdown-softnas]
-
-  #,"null_resource.mount_volumes_onsite"]
+  depends_on = [null_resource.shutdown-softnas, var.vpn_private_ip, aws_network_interface_sg_attachment.sg_attachment_vpn]
 
   triggers = {
     instanceid = "${join(",", aws_instance.softnas1.*.id)}"

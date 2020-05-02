@@ -335,7 +335,7 @@ resource "null_resource" "provision_node_centos" {
 
       if [[ "$TF_VAR_install_deadline" == true ]]; then
         # check db
-        echo "test db centos 8"
+        echo "test db centos"
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
       fi
 
