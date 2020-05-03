@@ -1,6 +1,6 @@
 - hosts: ansible_control
   remote_user: deployuser
-  gather_facts: "{{ variable_gather_facts | default('true') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
 
   vars:
     # if pool name and volume name match an existing bucket, then it will be imported.  creation will skip.
@@ -93,7 +93,7 @@
 # create a new bucket
 - hosts: role_softnas
   remote_user: "{{ softnas_ssh_user | default('ec2-user') }}"
-  gather_facts: "{{ variable_gather_facts | default('true') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
   become_user: root
   become: true
 
@@ -128,7 +128,7 @@
 # mount / import an existing bucket if pool and volume name match
 - hosts: role_softnas
   remote_user: "{{ softnas_ssh_user | default('ec2-user') }}"
-  gather_facts: "{{ variable_gather_facts | default('true') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
   become_user: root
   become: true
 

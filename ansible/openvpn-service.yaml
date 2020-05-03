@@ -1,6 +1,6 @@
 - hosts: firehawkgateway
   remote_user: deployuser
-  gather_facts: "{{ variable_gather_facts | default('true') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
 
   vars:

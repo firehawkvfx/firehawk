@@ -1,5 +1,5 @@
 - hosts: firehawkgateway
-  gather_facts: "{{ variable_gather_facts | default('true') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
   remote_user: deployuser
   become_user: root

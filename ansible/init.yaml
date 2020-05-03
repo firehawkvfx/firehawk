@@ -1,7 +1,7 @@
 ---
 - hosts: "{{ variable_host | default('ansible_control') }}"
   remote_user: "{{ variable_user | default('deployuser') }}"
-  gather_facts: "{{ variable_gather_facts | default('true') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
 
   tasks:
@@ -11,7 +11,7 @@
 
 - hosts: "{{ variable_host | default('ansible_control') }}"
   remote_user: "{{ variable_user | default('deployuser') }}"
-  gather_facts: "{{ variable_gather_facts | default('true') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
 
   vars:
@@ -33,7 +33,7 @@
 
 - hosts: "{{ variable_host | default('ansible_control') }}"
   remote_user: "{{ variable_user | default('deployuser') }}"
-  gather_facts: "{{ variable_gather_facts | default('true') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
 
   tasks:

@@ -1,6 +1,6 @@
 ---
 - hosts: localhost
   remote_user: root
-  gather_facts: "{{ variable_gather_facts | default('true') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
   roles:
     - roles/houdini-module

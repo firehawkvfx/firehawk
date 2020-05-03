@@ -5,7 +5,7 @@
 
 - hosts: firehawkgateway
   remote_user: deployuser
-  gather_facts: "{{ variable_gather_facts | default('true') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
 
   tasks:
@@ -15,7 +15,7 @@
 
 - hosts: "{{ variable_host | default('openvpnip_private') }}"
   remote_user: openvpnas
-  gather_facts: "{{ variable_gather_facts | default('true') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
 
   vars:
@@ -28,7 +28,7 @@
 
 - hosts: "{{ variable_host | default('openvpnip_private') }}"
   remote_user: openvpnas
-  gather_facts: "{{ variable_gather_facts | default('true') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
 
   vars:
@@ -50,7 +50,7 @@
 
 - hosts: "{{ variable_host | default('openvpnip_private') }}"
   remote_user: openvpnas
-  gather_facts: "{{ variable_gather_facts | default('true') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
 
   vars:
@@ -102,7 +102,7 @@
 
 - hosts: firehawkgateway
   remote_user: deployuser
-  gather_facts: "{{ variable_gather_facts | default('true') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
 
   vars:

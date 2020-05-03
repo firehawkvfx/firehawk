@@ -1,5 +1,5 @@
 - hosts: localhost
-  gather_facts: "{{ variable_gather_facts | default('true') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
 
   vars_prompt:
     - name: "deadline_linux_installers_tar"

@@ -1,5 +1,5 @@
 - hosts: ansible_control
-  gather_facts: "{{ variable_gather_facts | default('true') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
 
   tasks:

@@ -6,7 +6,7 @@
 # # these permissions are now handled post install of the deadline db.
 - hosts: firehawkgateway
   remote_user: deployuser
-  gather_facts: "{{ variable_gather_facts | default('true') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
 
   tasks:
@@ -55,7 +55,7 @@
 
 - hosts: "{{ variable_host | default('workstation1') }}"
   remote_user: "{{ variable_user | default('user') }}"
-  gather_facts: "{{ variable_gather_facts | default('true') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
 
   vars:
@@ -70,7 +70,7 @@
 
 - hosts: "{{ variable_host | default('workstation1') }}"
   remote_user: "{{ variable_user | default('deadlineuser') }}"
-  gather_facts: "{{ variable_gather_facts | default('true') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
 
   vars:
@@ -129,7 +129,7 @@
 
 - hosts: firehawkgateway
   remote_user: deployuser
-  gather_facts: "{{ variable_gather_facts | default('true') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
 
   tasks:
@@ -163,7 +163,7 @@
 
 - hosts: firehawkgateway
   remote_user: deployuser
-  gather_facts: "{{ variable_gather_facts | default('true') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
 
   tasks:
@@ -180,7 +180,7 @@
 
 - hosts: "{{ variable_host | default('workstation1') }}"
   remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
-  gather_facts: "{{ variable_gather_facts | default('true') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
   
   tasks:
