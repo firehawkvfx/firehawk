@@ -264,7 +264,7 @@ else
     set -o pipefail # Allow exit status of last command to fail.
     
     echo "...Terraform apply"
-    terraform apply -lock=false --auto-approve | '[%H:%M:%S]'; exit_test
+    terraform apply -lock=false --auto-approve | ts '[%H:%M:%S]'; exit_test
     
   elif [[ "$tf_action" == "sleep" ]]; then
     echo "...Currently running instances: scripts/aws-running-instances.sh"
