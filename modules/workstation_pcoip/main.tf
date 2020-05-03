@@ -381,6 +381,7 @@ resource "null_resource" "workstation_pcoip" {
   # add ssh keys and initialise users
   # add ssh keys and initialise users
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       set -x
       cd /deployuser
@@ -412,6 +413,7 @@ EOT
   }
 
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       set -x
       cd /deployuser
@@ -435,6 +437,7 @@ EOT
   #after dracut, we reboot the instance locally.  A reboot command will otherwise cause a terraform error.
   #after dracut, we reboot the instance locally.  A reboot command will otherwise cause a terraform error.
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     command = var.pcoip_sleep_after_creation ? "aws ec2 stop-instances --instance-ids ${aws_instance.workstation_pcoip[0].id}" : "aws ec2 reboot-instances --instance-ids ${aws_instance.workstation_pcoip[0].id}"
   }
 }
@@ -443,6 +446,7 @@ resource "null_resource" "shutdown_workstation_pcoip" {
   count = var.sleep && var.site_mounts && var.workstation_enabled ? 1 : 0
 
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     command = "aws ec2 stop-instances --instance-ids ${aws_instance.workstation_pcoip[0].id}"
   }
 }

@@ -685,6 +685,7 @@ resource "null_resource" "create_ami_init" {
     inline = ["set -x && echo 'booted'"]
   }
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       set -x
       cd /deployuser
@@ -830,6 +831,7 @@ resource "null_resource" "create_ami" {
     inline = ["set -x && echo 'booted'"]
   }
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       set -x
       cd /deployuser
@@ -850,6 +852,7 @@ resource "null_resource" "start-softnas-after-create-ami" {
     null_resource.create_ami,
   ]
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     command = "aws ec2 start-instances --instance-ids ${aws_instance.softnas1.*.id[count.index]}"
   }
 }

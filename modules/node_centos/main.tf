@@ -354,6 +354,7 @@ resource "null_resource" "provision_node_centos" {
   }
 
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     command = "aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id}"
   }
 
@@ -557,6 +558,7 @@ resource "null_resource" "start-node-after-ami" {
   depends_on = [aws_ami_from_instance.node_centos]
 
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     command = "aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id}"
   }
 }
@@ -567,6 +569,7 @@ resource "null_resource" "start-node" {
   depends_on = [null_resource.dependency_softnas]
 
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     command = "aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id}"
   }
 }
@@ -575,6 +578,7 @@ resource "null_resource" "shutdown-node" {
   count = var.sleep && var.site_mounts ? 1 : 0
 
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     command = "aws ec2 stop-instances --instance-ids ${aws_instance.node_centos[0].id}"
   }
 }

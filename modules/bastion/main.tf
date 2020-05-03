@@ -163,6 +163,7 @@ resource "null_resource" "provision_bastion" {
   }
 
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
       set -x
@@ -194,6 +195,7 @@ resource "null_resource" "start-bastion" {
   count = ( !var.sleep && var.create_vpc) ? 1 : 0
 
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     command = "aws ec2 start-instances --instance-ids ${local.id}"
   }
 }
@@ -202,6 +204,7 @@ resource "null_resource" "shutdown-bastion" {
   count = var.sleep && var.create_vpc ? 1 : 0
 
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       aws ec2 stop-instances --instance-ids ${local.id}
   

@@ -200,6 +200,7 @@ resource "null_resource" "provision_deadline_spot" {
   }
 
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       set -x
       cd /deployuser

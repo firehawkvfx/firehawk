@@ -361,6 +361,7 @@ resource "null_resource" "pcoipgw" {
   }
 
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
       set -x
@@ -377,6 +378,7 @@ EOT
 
   #after dracut, we reboot the instance locally.  A terraform reboot command will cause a terraform error.
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     command = var.pcoip_sleep_after_creation ? "aws ec2 stop-instances --instance-ids ${aws_instance.pcoipgw.id}" : "aws ec2 reboot-instances --instance-ids ${aws_instance.pcoipgw.id}"
   }
 }
@@ -385,6 +387,7 @@ resource "null_resource" "shutdownpcoipgw" {
   count = var.sleep ? 1 : 0
 
   provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
     command = "aws ec2 stop-instances --instance-ids ${aws_instance.pcoipgw.id}"
   }
 }
