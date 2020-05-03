@@ -39,3 +39,4 @@
   roles:
   - role: houdini-openfirehawk-houdini-tools-sync
   - role: houdini-unit-test
+  - role: cleanup

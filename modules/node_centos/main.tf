@@ -507,7 +507,7 @@ resource "null_resource" "mounts_and_houdini_test" {
       ansible-playbook -i "$TF_VAR_inventory" ansible/linux-volume-mounts.yaml -v --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"; exit_test
 
       if [[ "$TF_VAR_install_houdini" == true ]] && [[ $TF_VAR_houdini_test_connection == true ]]; then
-        # last step before building ami we run a unit test to ensure houdini runs
+        # last step before building ami we run a unit test to ensure houdini runs.  We also cleanup any uneeded data afterwards, including tmp folders
         ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-unit-test.yaml -v --extra-vars "variable_user=deadlineuser firehawk_sync_source=$TF_VAR_firehawk_sync_source execute=true"; exit_test
       fi
 
