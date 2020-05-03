@@ -503,7 +503,7 @@ resource "null_resource" "mounts_and_houdini_test" {
 
       aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id} # ensure instance is started
 
-      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/linux-volume-mounts.yaml -v --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"; exit_test
 
       if [[ "$TF_VAR_install_houdini" == true ]] && [[ $TF_VAR_houdini_test_connection == true ]]; then
         # last step before building ami we run a unit test to ensure houdini runs

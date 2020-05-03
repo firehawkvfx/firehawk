@@ -419,7 +419,7 @@ EOT
       # ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init-deadline.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.$TF_VAR_public_domain pcoip=true"
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_workstation_centos variable_user=deadlineuser"
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_workstation_centos variable_user=centos"
-      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.$TF_VAR_public_domain pcoip=true" --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"
+      ansible-playbook -i "$TF_VAR_inventory" ansible/linux-volume-mounts.yaml --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.$TF_VAR_public_domain pcoip=true" --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"
       # to configure deadline scripts-
       ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml -v --extra-vars "variable_host=role_workstation_centos variable_user=centos variable_connect_as_user=centos"
       # configure houdini and submission scripts

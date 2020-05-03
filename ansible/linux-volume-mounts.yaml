@@ -1,16 +1,16 @@
 # This playbook will validate exports on softnas and mount those with the /etc/fstab file.
 
 # to update a workstation after altering any softnas mounts for the first time use the command -
-# ansible-playbook -i ansible/inventory ansible/node-centos-mounts.yaml --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.$TF_VAR_public_domain pcoip=true"
+# ansible-playbook -i ansible/inventory ansible/linux-volume-mounts.yaml --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.$TF_VAR_public_domain pcoip=true"
 
 # to update a render node, just use -
-# ansible-playbook -i ansible/inventory ansible/node-centos-mounts.yaml
+# ansible-playbook -i ansible/inventory ansible/linux-volume-mounts.yaml
 
 # to update an onsite centos workstation use-
-# ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser hostname=workstation1 ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key" --skip-tags 'cloud_install'
+# ansible-playbook -i "$TF_VAR_inventory" ansible/linux-volume-mounts.yaml -v -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser hostname=workstation1 ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key" --skip-tags 'cloud_install'
 
 # to configure onsite mounts only on the ansible control, skipping softnas export check
-# ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-mounts.yaml -v -v --extra-vars "variable_host=localhost variable_user=deployuser softnas_hosts=none" --tags 'local_install_onsite_mounts'
+# ansible-playbook -i "$TF_VAR_inventory" ansible/linux-volume-mounts.yaml -v -v --extra-vars "variable_host=localhost variable_user=deployuser softnas_hosts=none" --tags 'local_install_onsite_mounts'
 
 - hosts: "{{ variable_host | default('role_node_centos') }}"
   remote_user: "{{ variable_user | default('centos') }}"
