@@ -78,7 +78,7 @@ sudo chmod 0600 /secrets/keys/firehawkgateway_private_key
 sudo chown deployuser:deployuser /secrets/keys/firehawkgateway_private_key
 
 # Now this will init the deployuser on the workstation.  the deployuser will become the primary user with ssh access.
-ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_sshuser.yaml -vvvv --extra-vars "variable_host=firehawkgateway user_inituser_name=deployuser user_inituser_pw='' ansible_ssh_private_key_file=/secrets/keys/firehawkgateway_private_key"; exit_test
+ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_sshuser.yaml -v --extra-vars "variable_host=firehawkgateway user_inituser_name=deployuser user_inituser_pw='' ansible_ssh_private_key_file=/secrets/keys/firehawkgateway_private_key"; exit_test
 echo "Ping the host as deployuser..."
 ansible -m ping firehawkgateway -i "$TF_VAR_inventory" --private-key=$TF_VAR_general_use_ssh_key -u deployuser --become; exit_test
 echo "Init the Gateway VM..."
