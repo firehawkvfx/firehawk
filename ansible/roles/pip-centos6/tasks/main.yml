@@ -5,6 +5,11 @@
       name: python-pip
       state: latest
 
+  - name: install expect
+    package:
+      name: expect
+      state: present
+
   - name: uninstall urllib3 because of conflict with rhel 8 packages
     pip:
       name: urllib3
@@ -16,11 +21,6 @@
       name: 'python-urllib3'
       state: present
     become: yes
-
-  - name: install expect
-    package:
-      name: expect
-      state: present
 
   - name: install epel-release
     package:
