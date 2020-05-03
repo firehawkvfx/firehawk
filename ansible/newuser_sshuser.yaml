@@ -36,6 +36,14 @@
   - name: Connection test
     command: "echo connected"
 
+  - name: Collect some facts only for ansible_distribution
+    setup:
+      gather_subset:
+        - '!all'
+        - 'min'
+    tags:
+    - always
+
   - name: Add a new user named deployuser
     user:
       name: deployuser
