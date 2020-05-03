@@ -132,7 +132,7 @@
       fi
     else
       echo "Sync S3 Bucket with local path."
-      aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ houdini_linux_tar_filename }}" --no-progres
+      aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ houdini_linux_tar_filename }}" --no-progress
     fi
   register: output
   become_user: "{{ variable_user }}"
