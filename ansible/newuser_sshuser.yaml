@@ -21,7 +21,7 @@
 
 - hosts: "{{ variable_host | default('workstation1') }}"
   remote_user: "{{ variable_connect_as_user | default(user_inituser_name) }}"
-  gather_facts: "{{ variable_gather_facts | default('true') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
 
   vars:
@@ -36,13 +36,13 @@
   - name: Connection test
     command: "echo connected"
 
-  # - name: Collect some facts only for ansible_distribution
-  #   setup:
-  #     gather_subset:
-  #       - '!all'
-  #       - 'min'
-  #   tags:
-  #   - always
+  - name: Collect some facts only for ansible_distribution
+    setup:
+      gather_subset:
+        - '!all'
+        - 'min'
+    tags:
+    - always
 
   - name: Add a new user named deployuser
     user:
@@ -57,7 +57,9 @@
       content: "deployuser  ALL=(ALL)  NOPASSWD: ALL"
 
   - name: generate ssh key
-    command : ssh-keygen -q -t rsa -f /home/deployuser/.ssh/id_rsa.pub -C "" -N ""
+    shell: |
+      df -h
+      ssh-keygen -q -t rsa -f /home/deployuser/.ssh/id_rsa.pub -C "" -N ""
     args:
       creates: /home/deployuser/.ssh/id_rsa.pub
     become_user: deployuser
