@@ -137,6 +137,13 @@
   become: yes
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
 
+- name: uninstall python-urllib3 package
+  package:
+    name: 'python-urllib3'
+    state: absent
+  become: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+
 - name: install python-urllib3 package
   package:
     name: 'python-urllib3'
