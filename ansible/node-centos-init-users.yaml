@@ -10,6 +10,14 @@
     init_users:
       deadlineuser
       centos
+  tasks:
+  - name: Collect some facts only for ansible_distribution
+    setup:
+      gather_subset:
+        - '!all'
+        - 'min'
+    tags:
+    - always
 
   post_tasks:
   - name: init authorized_keys

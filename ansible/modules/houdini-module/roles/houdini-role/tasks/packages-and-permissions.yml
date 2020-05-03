@@ -1,6 +1,14 @@
 ---
 # tasks file for roles/houdini-module
 
+- name: Collect some facts only for ansible_distribution
+  setup:
+    gather_subset:
+      - '!all'
+      - 'min'
+  tags:
+  - always
+
 - name: s3 sync openfirehawk-houdini-tools push (from local filesystem) and get (from s3 to node) 
   include_role:
     name: houdini-openfirehawk-houdini-tools-sync

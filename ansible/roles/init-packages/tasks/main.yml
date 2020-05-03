@@ -1,5 +1,14 @@
 ---
 # tasks file for roles/init-packages
+
+- name: Collect some facts only for ansible_distribution
+  setup:
+    gather_subset:
+      - '!all'
+      - 'min'
+  tags:
+  - always
+  
 - name: ansible distro
   debug:
     var: ansible_distribution
