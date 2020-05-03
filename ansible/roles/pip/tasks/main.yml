@@ -2,6 +2,14 @@
 # tasks file for ./ansible/roles/pip
 # these packages are required to pass an encrypted string via commandline into a user pass and are suited to centos, and also for aws cli.
 
+- name: Collect only facts returned by facter
+  setup:
+    gather_subset:
+      - '!all'
+      - 'min'
+  tags:
+  - always
+
 - name: Add epel repository for centos7
   yum_repository:
     name: epel
