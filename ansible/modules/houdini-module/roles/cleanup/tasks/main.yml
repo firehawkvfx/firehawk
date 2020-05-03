@@ -1,9 +1,8 @@
 - name: "Clean contents of temp paths {{ download_to_dir }}/" # important before building an ami
-  file:
-    state: absent
-    path: "{{ item }}"
-  tags: install_deadline
+  shell: |
+    rm -fr {{ item }}
+  become: true
   with_items:
-  - "{{ download_to_dir }}/"
-  - "/var/tmp/"
-  - "/tmp/"
+  - "{{ download_to_dir }}/*"
+  - "/var/tmp/*"
+  - "/tmp/*"
