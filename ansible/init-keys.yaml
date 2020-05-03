@@ -1,4 +1,5 @@
 - hosts: localhost
+  gather_facts: "{{ variable_gather_facts | default('true') }}"
   # become: true
 
   vars:

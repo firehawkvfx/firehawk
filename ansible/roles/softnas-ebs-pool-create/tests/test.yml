@@ -1,5 +1,7 @@
 ---
 - hosts: localhost
   remote_user: root
+  gather_facts: "{{ variable_gather_facts | default('true') }}"
+  
   roles:
     - ansible/roles/softnas-ebs-pool-create

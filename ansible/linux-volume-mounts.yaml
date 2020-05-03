@@ -14,6 +14,7 @@
 
 - hosts: "{{ variable_host | default('role_node_centos') }}"
   remote_user: "{{ variable_user | default('centos') }}"
+  gather_facts: "{{ variable_gather_facts | default('true') }}"
   become: true
 
   vars:
@@ -30,9 +31,9 @@
 # check exports on softnas.
 - hosts: "{{ softnas_hosts | default('role_softnas') }}"
   remote_user: centos
+  gather_facts: "{{ variable_gather_facts | default('true') }}"
   become_user: root
   become: true
-  gather_facts: "{{ variable_gather_facts | default('yes') }}"
 
   vars:
     destroy: false
@@ -109,6 +110,7 @@
 
 - hosts: "{{ variable_host | default('role_node_centos') }}"
   remote_user: "{{ variable_user | default('centos') }}"
+  gather_facts: "{{ variable_gather_facts | default('true') }}"
   become: true
 
   vars:
@@ -451,6 +453,7 @@
 ### check exports of onsite nas are available on cloud based host.  site mounts are never destroyed, since acces to onsite nas is assumed to exist at all times.
 - hosts: "{{ variable_host | default('role_node_centos') }}"
   remote_user: "{{ variable_user | default('centos') }}"
+  gather_facts: "{{ variable_gather_facts | default('true') }}"
   become: true
 
   vars:

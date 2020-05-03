@@ -6,6 +6,7 @@
 
 - hosts: "{{ variable_host | default('role_node_centos') }}"
   remote_user: "{{ variable_user | default('centos') }}"
+  gather_facts: "{{ variable_gather_facts | default('true') }}"
   become: true
 
   vars:
@@ -18,6 +19,7 @@
 
 - hosts: "{{ variable_host | default('role_node_centos') }}"
   remote_user: "{{ variable_user | default('centos') }}"
+  gather_facts: "{{ variable_gather_facts | default('true') }}"
   become: true
 
   vars:

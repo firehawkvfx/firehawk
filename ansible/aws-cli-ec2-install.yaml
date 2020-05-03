@@ -1,6 +1,7 @@
 ---
 - hosts: "{{ variable_host | default('ansible_control') }}"
   remote_user: "{{ variable_connect_as_user | default(variable_user) }}"
+  gather_facts: "{{ variable_gather_facts | default('true') }}"
   become: true
 
   vars:

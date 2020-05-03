@@ -1,5 +1,6 @@
 - hosts: localhost
   user: deployuser
+  gather_facts: "{{ variable_gather_facts | default('true') }}"
   sudo: yes
 
   tasks:

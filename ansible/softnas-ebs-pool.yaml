@@ -1,5 +1,6 @@
 - hosts: ansible_control
   remote_user: deployuser
+  gather_facts: "{{ variable_gather_facts | default('true') }}"
   become: true
 
   tasks:
@@ -9,6 +10,7 @@
 
 - hosts: role_softnas
   remote_user: "{{ softnas_ssh_user | default('ec2-user') }}"
+  gather_facts: "{{ variable_gather_facts | default('true') }}"
   become: true
 
   tasks:
@@ -18,6 +20,7 @@
 
 - hosts: role_softnas
   remote_user: "{{ softnas_ssh_user | default('ec2-user') }}"
+  gather_facts: "{{ variable_gather_facts | default('true') }}"
   become: true
 
   vars:

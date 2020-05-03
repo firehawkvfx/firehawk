@@ -6,6 +6,7 @@
 - hosts: ansible_control
   become: true
   remote_user: deadlineuser
+  gather_facts: "{{ variable_gather_facts | default('true') }}"
   become_user: root
 
   vars:
