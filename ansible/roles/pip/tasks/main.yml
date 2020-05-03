@@ -153,3 +153,17 @@
   pip: 
     name: boto3
   become: true
+
+- name: uninstall urllib3 because of conflict with rhel 8 packages
+  pip:
+    name: urllib3
+    state: absent
+  become: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+
+- name: install python-urllib3 package
+  package:
+    name: 'python-urllib3'
+    state: present
+  become: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
