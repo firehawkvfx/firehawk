@@ -5,7 +5,7 @@
 
 - hosts: "{{ variable_host | default('workstation1') }}"
   remote_user: "{{ variable_connect_as_user | default(user_inituser_name) }}"
-  gather_facts: no
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
 
   vars:
     ansible_become_password: "{{ user_inituser_pw }}"
@@ -21,7 +21,7 @@
 
 - hosts: "{{ variable_host | default('workstation1') }}"
   remote_user: "{{ variable_connect_as_user | default(user_inituser_name) }}"
-  gather_facts: no
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
 
   vars:

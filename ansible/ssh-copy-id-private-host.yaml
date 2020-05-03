@@ -1,6 +1,6 @@
 - hosts: localhost
   remote_user: deployuser
-  gather_facts: no
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
 
   vars:
     #bastion_ip: false
@@ -32,7 +32,7 @@
 - hosts: "{{ variable_host | default('workstation.example.com') }}"
   remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
   become: true
-  gather_facts: false
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
 
   vars:
     ansible_ssh_public_key_file: "{{ onsite_workstation_private_ssh_key }}.pub"

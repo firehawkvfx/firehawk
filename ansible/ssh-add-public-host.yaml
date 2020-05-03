@@ -1,7 +1,7 @@
 - hosts: ansible_control
   remote_user: deployuser
   become: true
-  gather_facts: no
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
 
   vars:
     variable_user: deployuser
@@ -13,7 +13,7 @@
 - hosts: firehawkgateway
   remote_user: deployuser
   become: true
-  gather_facts: no
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
 
   vars:
     variable_user: deployuser
