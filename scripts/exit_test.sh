@@ -21,9 +21,9 @@ exit_test () {
     interrupt=false
     failed=false
     if [ "$exit_code" -eq 0 ]; then
-        printf "\n${GREEN}Command Succeeded${NC}\n"
+        printf "\n${GREEN}Command Succeeded${NC} : "
         duration_block=$SECONDS
-        printf "$(($duration_block / 60)) minutes and $(($duration_block % 60)) seconds elapsed for block.\n"
+        printf "$(($duration_block / 60)) minutes $(($duration_block % 60)) seconds elapsed for block.\n"
         failed=false
     else
         failed=true

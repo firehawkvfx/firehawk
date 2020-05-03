@@ -21,7 +21,7 @@
 
 - hosts: "{{ variable_host | default('workstation1') }}"
   remote_user: "{{ variable_connect_as_user | default(user_inituser_name) }}"
-  gather_facts: "{{ variable_gather_facts | default('false') }}"
+  gather_facts: "{{ variable_gather_facts | default('true') }}"
   become: true
 
   vars:
@@ -36,13 +36,13 @@
   - name: Connection test
     command: "echo connected"
 
-  - name: Collect some facts only for ansible_distribution
-    setup:
-      gather_subset:
-        - '!all'
-        - 'min'
-    tags:
-    - always
+  # - name: Collect some facts only for ansible_distribution
+  #   setup:
+  #     gather_subset:
+  #       - '!all'
+  #       - 'min'
+  #   tags:
+  #   - always
 
   - name: Add a new user named deployuser
     user:
