@@ -319,7 +319,14 @@
     set -x
     # aws sts get-caller-identity
     cd {{ download_to_dir }}/
-    aws s3 sync . s3://{{ installers_bucket }}/ --exclude "*" --include "{{ houdini_linux_tar_filename }}" --no-progress
+    
+    wordcount=`aws s3 ls s3://{{ bucket }}/|grep {{ houdini_linux_tar_filename }}|wc -c`
+    if [[ "${wordcount}" -eq 0 ]]; then
+      echo "File not present in S3 bucket.  Will upload"
+      aws s3 sync . s3://{{ installers_bucket }}/ --exclude "*" --include "{{ houdini_linux_tar_filename }}" --no-progress
+    else
+      echo "File present in s3 bucket.  Will not sync."
+    fi
   become_user: "{{ variable_user }}"
   tags:
     - sync_installers
