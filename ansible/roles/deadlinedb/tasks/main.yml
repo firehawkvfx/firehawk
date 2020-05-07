@@ -87,15 +87,28 @@
     owner: deadlineuser
   become: yes
 
-- name: Find backups if present.
+- name: Find backups if present - DeadlineDatabase10
   find: paths=/opt/Thinkbox/DeadlineDatabase10/mongo/backup/ file_type=directory patterns="*"
   register: backup_paths
   become: yes
 
 - name: Move backups if present out of the vm to conserve space.
-  shell: mv -f /opt/Thinkbox/DeadlineDatabase10/mongo/backup/* /deployuser/tmp/mongo/backup
+  shell: mv -f /opt/Thinkbox/DeadlineDatabase10/mongo/backup/* /deployuser/tmp/DeadlineDatabase10/mongo/backup
   when: backup_paths.matched|int != 0
   become: yes
+
+- name: Find backups if present - DeadlineRepository10
+  find: paths=/opt/Thinkbox/DeadlineRepository10/backup/ file_type=directory patterns="*"
+  register: backup_paths_repo
+  become: yes
+
+- name: Move backups if present out of the vm to conserve space.
+  shell: mv -f /opt/Thinkbox/DeadlineRepository10/backup/* /deployuser/tmp/DeadlineRepository10/backup
+  when: backup_paths_repo.matched|int != 0
+  become: yes
+
+
+
 
 - name: Install Deadline DB & pull latest log.
   block:
