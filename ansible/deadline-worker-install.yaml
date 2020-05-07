@@ -8,6 +8,7 @@
   remote_user: deployuser
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
+  any_errors_fatal: true
 
   tasks:
   - include_role:

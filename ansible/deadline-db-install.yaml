@@ -3,6 +3,7 @@
   remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
+  any_errors_fatal: true
 
   vars:
     my_password: "{{ user_deadlineuser_pw }}"
@@ -28,6 +29,7 @@
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
   become_user: root
+  any_errors_fatal: true
   
   # secret 2 seems to occaisionally have issues and corrupts the shell output somehow.
   vars:
@@ -62,8 +64,8 @@
     include_role:
       name: store-secret
 
-#   roles:
-#   - deadline-db-check # Check the db is functioning.
+  roles:
+  - deadline-db-check # Check the db is functioning.
 #   - deadline-groups # Update groups for nodes.
 #   - deadline-ubl # Configure Usage Base Licesning.
 #   - deadline-db-check # Check the db is functioning after alterations.
