@@ -3,6 +3,7 @@
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become_user: root
   become: true
+  any_errors_fatal: true
 
   roles:
   - deadline-db-check
