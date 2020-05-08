@@ -1,10 +1,17 @@
 ---
 # tasks file for diskspace-check
 
-- name: Check /tmp freespace
-  shell: df /tmp --output\=avail | tail -1
-  register: tmp_freespace
-    
-- fail:
-    msg: /tmp does not have the minimum space required to continue (5Gb requested). 
-  when: tmp_freespace.stdout|float is lt 5000000
+- name: Collect some facts for disk mounts
+  setup:
+    gather_subset:
+      - '!all'
+      - 'hardware'
+  tags:
+  - always
+
+- name: 'Ensure that free space on {{ mountname }} is grater than 30%'
+  assert:
+    that: item.size_available > item.size_total|float * 0.3
+    msg: 'disk space has reached 70% threshold'
+  when: item.mount == mountname
+  with_items: '{{ ansible_mounts }}'
