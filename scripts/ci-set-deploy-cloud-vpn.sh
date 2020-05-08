@@ -22,7 +22,7 @@ sed -i 's/^TF_VAR_provision_deadline_spot_plugin=.*$/TF_VAR_provision_deadline_s
 sed -i 's/^TF_VAR_install_houdini=.*$/TF_VAR_install_houdini=false/' $config_override # install houdini
 sed -i 's/^TF_VAR_install_deadline=.*$/TF_VAR_install_deadline=false/' $config_override # install deadline
 # sed -i 's/^TF_VAR_taint_single=.*$/TF_VAR_taint_single=/' $config_override # dont taint
-sed -i 's/^TF_VAR_tf_destroy_before_deploy=.*$/TF_VAR_tf_destroy_before_deploy=true/' $config_override # destroy before deploy
+sed -i 's/^TF_VAR_tf_destroy_before_deploy=.*$/TF_VAR_tf_destroy_before_deploy=false/' $config_override # destroy before deploy
 # sed -i 's/^TF_VAR_taint_single=.*$/TF_VAR_taint_single=module.vpc.module.vpn.module.openvpn.aws_instance.openvpn[0]/' $config_override # taint vpn
 sed -i 's/^TF_VAR_taint_single=.*$/TF_VAR_taint_single=(module.bastion.aws_instance.bastion[0])/' $config_override # taint vpn
 
