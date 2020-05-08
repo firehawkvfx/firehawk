@@ -1,2 +1,4 @@
 ---
 # defaults file for diskspace-check
+
+mountname: '/'
