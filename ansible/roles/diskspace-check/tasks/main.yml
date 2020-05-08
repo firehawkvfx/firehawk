@@ -9,9 +9,9 @@
   tags:
   - always
 
-- debug:
-    var: item
-  with_items: "{{ ansible_mounts }}"
+# - debug:
+#     var: item
+#   with_items: "{{ ansible_mounts }}"
 
 - name: "Ensure that free space on {{ mountname }} is grater than 30%"
   assert:
