@@ -13,4 +13,5 @@
     src: "{{ latest_file.path }}"
     dest: "{{ firehawk_path }}/tmp/deadline_db.log"
     flat: yes
+    validate_checksum: no # logs may have incorrect checksums, possibly since data changes rapidly after download.
   become: true
