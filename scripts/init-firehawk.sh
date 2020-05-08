@@ -214,22 +214,20 @@ else
 
   if [[ "$tf_action" == "apply" ]]; then
 
+    if [[ "$fast" == true ]]; then
+      echo "Fast start.  Skip refresh"
+    else
+      echo "...Terraform refresh"
+      terraform refresh -lock=false; exit_test
+    fi
+
+    echo "...Terraform state"
+    terraform state list
+
     if [ ! -z "$TF_VAR_taint_single" ]; then
-      if [[ "$fast" == true ]]; then
-        echo "Fast start.  Skip refresh"
-      else
-        echo "...Terraform refresh"
-        terraform refresh -lock=false; exit_test
-      fi
-
-      echo "...Terraform state"
-      terraform state list
-
       echo "iterate through array: ${TF_VAR_taint_single[*]}"
       # Iterate the string variable using for loop
       for item in "${TF_VAR_taint_single[@]}"; do echo "terraform taint $item"; done
-
-
 
       echo "...Finding Resources to taint: ${TF_VAR_taint_single[*]}"
       found=false
@@ -249,20 +247,19 @@ else
     echo "...Currently running instances: scripts/aws-running-instances.sh"
     $TF_VAR_firehawk_path/scripts/aws-running-instances.sh
     echo ""
-  
-    echo "...Start Terraform"
 
-    if [[ "$fast" == true ]]; then
-      echo "Fast start.  Skip refresh"
-    else
-      echo "...Terraform refresh"
-      terraform refresh -lock=false; exit_test
-    fi
-    echo "...Terraform state list"
-    terraform state list
+    # if [[ "$fast" == true ]]; then
+    #   echo "Fast start.  Skip refresh"
+    # else
+    #   echo "...Terraform refresh"
+    #   terraform refresh -lock=false; exit_test
+    # fi
+    # echo "...Terraform state list"
+    # terraform state list
     
     set -o pipefail # Allow exit status of last command to fail.
     
+    echo "...Start Terraform"
     echo "...Terraform apply"
     terraform apply -lock=false --auto-approve | ts '[%H:%M:%S]'; exit_test
     

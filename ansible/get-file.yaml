@@ -19,4 +19,5 @@
       src: "{{ source }}"
       dest: "{{ dest }}"
       flat: yes
+      validate_checksum: no # logs may have incorrect checksums, possibly since data changes rapidly after download.
     become: true
