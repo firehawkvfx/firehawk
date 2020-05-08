@@ -9,9 +9,13 @@
   tags:
   - always
 
+- debug:
+    var: item
+  with_items: "{{ ansible_mounts }}"
+
 - name: 'Ensure that free space on {{ mountname }} is grater than 30%'
   assert:
     that: item.size_available > item.size_total|float * 0.3
     msg: 'disk space has reached 70% threshold'
   when: item.mount == mountname
-  with_items: '{{ ansible_mounts }}'
+  with_items: "{{ ansible_mounts }}"
