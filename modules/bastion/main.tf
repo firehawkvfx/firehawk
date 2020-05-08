@@ -133,7 +133,6 @@ locals {
   id = element(concat(aws_instance.bastion.*.id, list("")), 0)
   security_group_id = element(concat(aws_security_group.bastion.*.id, list("")), 0)
   bastion_address = var.route_public_domain_name ? "bastion.${var.public_domain_name}":"${local.public_ip}"
-  bastion_dependency = element(concat(null_resource.provision_bastion.*.id, list("")), 0)
 }
 
 
@@ -171,9 +170,15 @@ resource "null_resource" "provision_bastion" {
       echo "Check keys permissions"
       ls -ltriah /secrets/keys
       ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-public-host.yaml -v --extra-vars "public_ip=${local.public_ip} public_address=${local.bastion_address} bastion_address=${local.bastion_address} set_bastion=true"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=bastion host_ip=${local.public_ip} insert_ssh_key_string=ansible_ssh_private_key_file=$TF_VAR_local_key_path"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/get-file.yaml -v --extra-vars "source=/var/log/cloud-init-output.log dest=$TF_VAR_firehawk_path/tmp/cloud-init-output-bastion.log variable_user=ec2-user variable_host=bastion"; exit_test
 EOT
 
   }
+}
+
+locals {
+  bastion_dependency = element(concat(null_resource.provision_bastion.*.id, list("")), 0)
 }
 
 variable "route_zone_id" {
