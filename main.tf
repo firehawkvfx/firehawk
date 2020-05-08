@@ -234,8 +234,6 @@ module "softnas" {
   source                         = "./modules/softnas"
   cloudformation_role_stack_name = var.softnas1_cloudformation_role_name
 
-  # bastion_dependency = module.bastion.bastion_dependency
-
   envtier = var.envtier
 
   allow_prebuilt_softnas_ami = var.allow_prebuilt_softnas_ami
