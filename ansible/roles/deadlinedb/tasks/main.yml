@@ -82,7 +82,7 @@
 
 - name: Ensures dir exists
   file:
-    path: "/deployuser/tmp/mongo/backup/"
+    path: "/deployuser/tmp/DeadlineDatabase10/mongo/backup/"
     state: directory
     owner: deadlineuser
   become: yes
@@ -95,6 +95,13 @@
 - name: Move backups if present out of the vm to conserve space.
   shell: mv -f /opt/Thinkbox/DeadlineDatabase10/mongo/backup/* /deployuser/tmp/DeadlineDatabase10/mongo/backup
   when: backup_paths.matched|int != 0
+  become: yes
+
+- name: Ensures dir exists
+  file:
+    path: "/deployuser/tmp/DeadlineRepository10/backup"
+    state: directory
+    owner: deadlineuser
   become: yes
 
 - name: Find backups if present - DeadlineRepository10
