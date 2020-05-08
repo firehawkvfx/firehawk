@@ -93,7 +93,7 @@
   become: yes
 
 - name: Move backups if present out of the vm to conserve space.
-  shell: sudo rsync -ah --inplace --no-perms --omit-dir-times --no-o --no-g /opt/Thinkbox/DeadlineDatabase10/mongo/backup/* /deployuser/tmp/DeadlineDatabase10/mongo/backup --remove-source-files
+  shell: sudo rsync --inplace --no-perms --omit-dir-times --no-o --no-g /opt/Thinkbox/DeadlineDatabase10/mongo/backup/* /deployuser/tmp/DeadlineDatabase10/mongo/backup --remove-source-files
   when: backup_paths.matched|int != 0
   become: yes
 
@@ -112,7 +112,7 @@
   become: yes
 
 - name: Move backups if present out of the vm to conserve space.
-  shell: sudo rsync -ah --inplace --no-perms --omit-dir-times --no-o --no-g /opt/Thinkbox/DeadlineRepository10/backup/* /deployuser/tmp/DeadlineRepository10/backup --remove-source-files
+  shell: sudo rsync --inplace --no-perms --omit-dir-times --no-o --no-g /opt/Thinkbox/DeadlineRepository10/backup/* /deployuser/tmp/DeadlineRepository10/backup --remove-source-files
   when: backup_paths_repo.matched|int != 0
   become: yes
 
