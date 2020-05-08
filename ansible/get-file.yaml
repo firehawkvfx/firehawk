@@ -8,6 +8,12 @@
     dest: 'firehawk/tmp/'
   
   tasks:
+  - name: show dir contents
+    shell: |
+      dir=$(dirname "{{ source }}")
+      ls -ltriah $dir
+    become: true
+
   - name: "Get file {{ source }} copy to {{ dest }}"
     fetch:
       src: "{{ source }}"
