@@ -107,8 +107,9 @@
   when: backup_paths_repo.matched|int != 0
   become: yes
 
-
-
+- name: diskspace-check
+  include_role:
+    name: diskspace-check
 
 - name: Install Deadline DB & pull latest log.
   block:

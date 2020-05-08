@@ -1,0 +1,10 @@
+---
+# tasks file for diskspace-check
+
+- name: Check /tmp freespace
+  shell: df /tmp --output\=avail | tail -1
+  register: tmp_freespace
+    
+- fail:
+    msg: /tmp does not have the minimum space required to continue (5Gb requested). 
+  when: tmp_freespace.stdout|float is lt 5000000
