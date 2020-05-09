@@ -151,6 +151,11 @@
   become: yes
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
 
+- name: install wheel
+  pip: 
+    name: wheel
+  become: true
+
 - name: install boto
   pip: 
     name: boto
