@@ -183,6 +183,8 @@ else
     aws iam list-users
     echo ""
 
+    ansible-playbook -vv -i "$TF_VAR_inventory" ansible/aws-new-key.yaml; exit_test # ensure aws key is present.
+    
     echo "...Terraform refresh"
     if terraform refresh -lock=false; then
       echo "...Terraform destroy"
