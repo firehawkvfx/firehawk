@@ -343,7 +343,7 @@ variable "pcoip_skip_update" {
 
 module "workstation" {
   source = "./modules/workstation_pcoip"
-  name   = "workstation"
+  name   = "workstation_pipeid${lookup(local.common_tags, "pipelineid", "-1")}"
 
   workstation_enabled = var.workstation_enabled
 
@@ -390,7 +390,7 @@ module "node" {
   
   # need to ensure mounts exist on start 
   source = "./modules/node_centos"
-  name   = "centos"
+  name   = "centos_pipeid${lookup(local.common_tags, "pipelineid", "-1")}"
 
   # region will determine the ami
   region = var.aws_region
