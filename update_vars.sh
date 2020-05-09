@@ -358,7 +358,7 @@ else
     echo "CI_PIPELINE_ID is set to '$CI_PIPELINE_ID'"
     echo "...Set CI_PIPELINE_ID at config_override path- $config_override"
     
-    sed -i 's/^TF_VAR_CI_PIPELINE_ID=.*$/TF_VAR_CI_PIPELINE_ID="$CI_PIPELINE_ID"/' $config_override # ...Enable the vpc.
+    sed -i "s/^TF_VAR_CI_PIPELINE_ID=.*$/TF_VAR_CI_PIPELINE_ID=${CI_PIPELINE_ID}/" $config_override # ...Enable the vpc.
 
     export TF_VAR_CI_PIPELINE_ID=$(cat $config_override | sed -e '/.*TF_VAR_CI_PIPELINE_ID=.*/!d')
 fi
