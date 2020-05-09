@@ -11,7 +11,7 @@ resource "aws_iam_user_group_membership" "s3_group_membership" {
 }
 
 resource "aws_iam_group" "query_instances_group" {
-  name = "query_instances_group_pid${lookup(local.common_tags, pipelineid, '-1')}"
+  name = "query_instances_group_pid${lookup(local.common_tags, pipelineid, "-1")}"
   path = "/users/"
   tags = merge(
     local.common_tags,
