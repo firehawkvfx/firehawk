@@ -11,8 +11,15 @@ resource "aws_iam_user_group_membership" "s3_group_membership" {
 }
 
 resource "aws_iam_group" "query_instances_group" {
-  name = "query_instances_group"
+  name = "query_instances_group_pid${local.common_tags.pipelineid}"
   path = "/users/"
+  tags = "${merge(
+    local.common_tags,
+    map(
+        "resource", "aws_iam_group-query_instances_group"
+    )
+)}"
+
 }
 
 resource "aws_iam_group_policy" "query_instances_group_policy" {

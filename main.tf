@@ -14,13 +14,12 @@ variable "active_pipeline" {}
 # if var.pgp_public_key contains keybase, then use that.  else take the contents of the var as a file on disc
 locals {
   pgp_public_key = length(regexall(".*keybase:.*", var.pgp_public_key)) > 0 ? var.pgp_public_key : filebase64("/secrets/keys/gpg_pub_key.gpg.pub")
-  
-  # common_tags = {
-  #   environment  = "${var.envtier}"
-  #   pipelineid   = "${var.active_pipeline}"
-  #   owner        = "${data.aws_canonical_user_id.current.display_name}"
-  #   accountid    = "${data.aws_caller_identity.current.account_id}"
-  # }
+  common_tags = {
+    environment  = "${var.envtier}"
+    pipelineid   = "${var.active_pipeline}"
+    owner        = "${data.aws_canonical_user_id.current.display_name}"
+    accountid    = "${data.aws_caller_identity.current.account_id}"
+  }
 }
 
 
@@ -163,6 +162,7 @@ output "vpn_private_ip" {
 module "storage_user" {
   source          = "./modules/storage_user"
   pgp_public_key = local.pgp_public_key
+  common_tags = local.common_tags
 }
 
 output "storage_user_access_key_id" {
