@@ -189,6 +189,10 @@ else
       rm -fv terraform.tfstate; exit_test
     fi
 
+    sed -i "s/^TF_VAR_active_pipeline=.*$/TF_VAR_active_pipeline=${TF_VAR_CI_PIPELINE_ID}/" $config_override # ...Enable the vpc.
+    export TF_VAR_active_pipeline=$(cat $config_override | sed -e '/.*TF_VAR_active_pipeline=.*/!d')
+    echo "TF_VAR_active_pipeline: $TF_VAR_active_pipeline"
+
     terraform init; exit_test # Required to initialise any new modules
   fi
 
@@ -258,6 +262,8 @@ else
     # terraform state list
     
     set -o pipefail # Allow exit status of last command to fail.
+
+    echo "TF_VAR_active_pipeline: $TF_VAR_active_pipeline"
     
     echo "...Start Terraform"
     echo "...Terraform apply"
