@@ -673,7 +673,9 @@ else
     source_vars "$var_file" "$encrypt_mode"; exit_test
 fi
 
+echo "...Current pipeline vars:"
 echo "TF_VAR_CI_PIPELINE_ID: $TF_VAR_CI_PIPELINE_ID"
 echo "TF_VAR_active_pipeline: $TF_VAR_active_pipeline"
+echo "TF_VAR_key_name: $TF_VAR_key_name"
 
 printf "\nDone.\n\n"
