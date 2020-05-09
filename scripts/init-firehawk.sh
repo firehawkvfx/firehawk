@@ -184,7 +184,7 @@ else
     echo ""
 
     ansible-playbook -vv -i "$TF_VAR_inventory" ansible/aws-new-key.yaml; exit_test # ensure aws key is present.
-    
+
     echo "...Terraform refresh"
     if terraform refresh -lock=false; then
       echo "...Terraform destroy"
@@ -231,6 +231,14 @@ else
 
   if [[ "$tf_action" == "apply" ]]; then
 
+    if [ -f $TF_VAR_firehawk_path/.initpipe ]; then
+      echo "...Init new pipe based on the current JOB ID: Found $TF_VAR_firehawk_path/.initpipe"
+      set_pipe $TF_VAR_CI_JOB_ID # initalise all new resources with this pipe id
+      ansible-playbook -i "$TF_VAR_inventory" ansible/aws-new-key.yaml; exit_test # ensure an aws pem key exists for ssh into cloud nodes
+      rm -fr $TF_VAR_firehawk_path/.initpipe # remove old init file.
+      ### End init new infra id and prerequisites
+    fi
+
     if [[ "$fast" == true ]]; then
       echo "Fast start.  Skip refresh"
     else
@@ -267,15 +275,6 @@ else
     echo ""
     
     set -o pipefail # Allow exit status of last command to fail to catch errors after pipe for ts function.
-
-    if [ -f $TF_VAR_firehawk_path/.initpipe ]; then
-      echo "...Init new pipe based on the current JOB ID: Found $TF_VAR_firehawk_path/.initpipe"
-
-      set_pipe $TF_VAR_CI_JOB_ID # initalise all new resources with this pipe id
-      ansible-playbook -i "$TF_VAR_inventory" ansible/aws-new-key.yaml; exit_test # ensure an aws pem key exists for ssh into cloud nodes
-      rm -fr $TF_VAR_firehawk_path/.initpipe # remove old init file.
-      ### End init new infra id and prerequisites
-    fi
 
     echo "TF_VAR_active_pipeline: $TF_VAR_active_pipeline"
     
