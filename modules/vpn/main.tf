@@ -112,6 +112,7 @@ variable "bastion_dependency" {}
 
 variable "private_route_table_ids" {}
 variable "public_route_table_ids" {}
+variable "common_tags" {}
 
 module "openvpn" {
   #source = "github.com/firehawkvfx/tf_aws_openvpn"
@@ -130,7 +131,7 @@ module "openvpn" {
   public_subnets  = var.public_subnets
   private_subnets = var.private_subnets
 
-  name = "openvpn_ec2"
+  name = "openvpn_ec2_pipeid${lookup(local.common_tags, "pipelineid", "0")}"
 
   # VPC Inputs
   vpc_id             = var.vpc_id
@@ -171,6 +172,8 @@ module "openvpn" {
 
   #sleep will stop instances to save cost during idle time.
   sleep = var.sleep
+
+  common_tags = var.common_tags
 }
 
 output "id" {
