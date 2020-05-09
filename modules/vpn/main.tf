@@ -131,7 +131,7 @@ module "openvpn" {
   public_subnets  = var.public_subnets
   private_subnets = var.private_subnets
 
-  name = "openvpn_ec2_pipeid${lookup(local.common_tags, "pipelineid", "0")}"
+  name = "openvpn_ec2_pipeid${lookup(var.common_tags, "pipelineid", "0")}"
 
   # VPC Inputs
   vpc_id             = var.vpc_id
