@@ -120,8 +120,6 @@ resource "null_resource" "init_routes_houdini_license_server" {
         ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deployuser houdini_install_type=server" --tags "install_houdini set_hserver install_deadline" --skip-tags "sync_scripts"; exit_test
       fi
 
-      # ensure an aws pem key exists for ssh into cloud nodes
-      ansible-playbook -i "$TF_VAR_inventory" ansible/aws-new-key.yaml; exit_test
 
       # configure routes to opposite environment for licence server to communicate if in dev environment
       ansible-playbook -i "$TF_VAR_inventory" ansible/firehawkgateway-update-routes.yaml; exit_test

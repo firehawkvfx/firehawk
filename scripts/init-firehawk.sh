@@ -189,6 +189,7 @@ else
       rm -fv terraform.tfstate; exit_test
     fi
 
+    ### Initialisation for new resources occur after a destroy operation, since the infra is garunteed to be new after his point.
     sed -i "s/^TF_VAR_active_pipeline=.*$/TF_VAR_active_pipeline=${TF_VAR_CI_PIPELINE_ID}/" $config_override # ...Enable the vpc.
     source ./update_vars --$TF_VAR_envtier --init
     echo "TF_VAR_active_pipeline: $TF_VAR_active_pipeline"
@@ -199,6 +200,8 @@ else
     sed -i "s/^TF_VAR_local_key_path_${TF_VAR_envtier}=.*$/TF_VAR_local_key_path_${TF_VAR_envtier}=${key_path}}/" $config_override
     source ./update_vars --$TF_VAR_envtier --init
     echo "TF_VAR_local_key_path: $TF_VAR_local_key_path"
+    ansible-playbook -i "$TF_VAR_inventory" ansible/aws-new-key.yaml; exit_test # ensure an aws pem key exists for ssh into cloud nodes
+    ### End init new infra
 
     terraform init; exit_test # Required to initialise any new modules
   fi
