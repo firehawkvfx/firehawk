@@ -144,12 +144,13 @@
 
 # consider removing -  unpacking of archive failed on file /usr/lib/python2.7/site-packages/urllib3/packages/ssl_match_hostname
 
-- name: Remove file
+- name: Remove file - due to intermittent bug with urllib 3 install
   file:
     path: /usr/lib/python2.7/site-packages/urllib3/packages/ssl_match_hostname
     state: absent
   become: yes
   changed_when: false
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
   
 - name: install python-urllib3 package - for some reason, installing, uninstalling, reinstalling fixes isues with boto3 install.
   package:
