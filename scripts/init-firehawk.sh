@@ -196,7 +196,7 @@ else
     sed -i "s/^TF_VAR_key_name_${TF_VAR_envtier}=.*$/TF_VAR_key_name_${TF_VAR_envtier}=my_key_pair_pipeid${TF_VAR_CI_PIPELINE_ID}_${TF_VAR_envtier}/" $config_override
     source ./update_vars.sh --$TF_VAR_envtier --init
     echo "TF_VAR_key_name: $TF_VAR_key_name"
-    key_path=/secrets/keys/my_key_pair_pipeid$TF_VAR_CI_PIPELINE_ID_$TF_VAR_envtier.pem
+    key_path="/secrets/keys/my_key_pair_pipeid${TF_VAR_CI_PIPELINE_ID}_${TF_VAR_envtier}.pem"
     echo "key_path: $key_path"
     sed -i "s/^TF_VAR_local_key_path_${TF_VAR_envtier}=.*$/TF_VAR_local_key_path_${TF_VAR_envtier}=${key_path}}/" $config_override
     source ./update_vars.sh --$TF_VAR_envtier --init
