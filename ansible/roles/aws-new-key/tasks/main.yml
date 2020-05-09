@@ -22,7 +22,14 @@
     ec2_region: "{{ aws_region }}"
     state: absent
   register: ec2_key_result
-  when: not key_result.stat.exists
+  when: destroy or not key_result.stat.exists
+
+- name: remove key from disk
+  file:
+    path: "{{ local_key_path }}"
+    state: absent
+  become: true
+  when: destroy
 
 - name: create a new ec2 key pair, returns generated private key
   ec2_key:
@@ -33,7 +40,7 @@
     ec2_region: "{{ aws_region }}"
     force: yes
   register: ec2_key_result
-  when: not key_result.stat.exists
+  when: ( not destroy ) and ( not key_result.stat.exists )
 
 - name: Save private key
   copy:
@@ -41,4 +48,5 @@
     dest: "{{ local_key_path }}"
     mode: '0600'
   become: true
-  when: (not key_result.stat.exists) and ec2_key_result.changed
+  when: ( not destroy ) and ( not key_result.stat.exists ) and ec2_key_result.changed
+

@@ -352,13 +352,13 @@ fi
 
 ### The dynamic vars here are set by the environment during dpeloyment, and commit messages for gitlab ci.
 x='-1' # if pipeline id is provided, set it in the file.  note this is not always the pipeline id that should be used for tags, since we preserve the id used after an init step.  That pipeline id becomes the tag until the next destroy/init step.
-if [ -z ${CI_PIPELINE_ID+x} ]; then
-    echo "CI_PIPELINE_ID is unset.  defaulting to $x or it will be aquired by the config override file"
+if [ -z ${CI_JOB_ID+x} ]; then
+    echo "CI_JOB_ID is unset.  defaulting to $x or it will be aquired by the config override file"
 else
-    echo "CI_PIPELINE_ID is set to '$CI_PIPELINE_ID'"
-    echo "...Set CI_PIPELINE_ID at config_override path- $config_override"
-    sed -i "s/^TF_VAR_CI_PIPELINE_ID=.*$/TF_VAR_CI_PIPELINE_ID=${CI_PIPELINE_ID}/" $config_override # ...Enable the vpc.
-    export TF_VAR_CI_PIPELINE_ID=$(cat $config_override | sed -e '/.*TF_VAR_CI_PIPELINE_ID=.*/!d')
+    echo "CI_JOB_ID is set to '$CI_JOB_ID'"
+    echo "...Set CI_JOB_ID at config_override path- $config_override"
+    sed -i "s/^TF_VAR_CI_JOB_ID=.*$/TF_VAR_CI_JOB_ID=${CI_JOB_ID}/" $config_override # ...Enable the vpc.
+    export TF_VAR_CI_JOB_ID=$(cat $config_override | sed -e '/.*TF_VAR_CI_JOB_ID=.*/!d')
 fi
 
 x=false
@@ -674,7 +674,7 @@ else
 fi
 
 echo "...Current pipeline vars:"
-echo "TF_VAR_CI_PIPELINE_ID: $TF_VAR_CI_PIPELINE_ID"
+echo "TF_VAR_CI_JOB_ID: $TF_VAR_CI_JOB_ID"
 echo "TF_VAR_active_pipeline: $TF_VAR_active_pipeline"
 echo "TF_VAR_key_name: $TF_VAR_key_name"
 echo "TF_VAR_local_key_path: $TF_VAR_local_key_path"

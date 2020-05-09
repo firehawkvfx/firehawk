@@ -8,7 +8,7 @@ provider "aws" {
 data "aws_caller_identity" "current" {}
 data "aws_canonical_user_id" "current" {}
 
-variable "CI_PIPELINE_ID" {}
+variable "CI_JOB_ID" {}
 variable "active_pipeline" {}
 
 # if var.pgp_public_key contains keybase, then use that.  else take the contents of the var as a file on disc

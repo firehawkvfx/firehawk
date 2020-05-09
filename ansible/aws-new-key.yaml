@@ -3,5 +3,8 @@
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
   
+  vars:
+    destroy: false
+  
   roles:
     - role: aws-new-key

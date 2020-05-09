@@ -24,9 +24,9 @@
 # If the version of this file changes, the file will be replaced in any deployment.
 defaults_config_overide_version=insertvalue
 
-# TF_VAR_CI_PIPELINE_ID:
+# TF_VAR_CI_JOB_ID:
 # This pipeline number is used to updat the active pipeline in the working dir when a new deployment is initialised
-TF_VAR_CI_PIPELINE_ID=insertvalue
+TF_VAR_CI_JOB_ID=insertvalue
 
 # TF_VAR_active_pipeline:
 # This pipeline number will update when a new deployment is initialised. It is used to tag the creation of assets, and potentially define subnets ranges.
