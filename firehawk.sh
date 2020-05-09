@@ -287,11 +287,10 @@ fi
 time_passed
 
 if [ "$test_vm" = false ] ; then
-    sleep 10
-    echo "vagrant status:"
-    vagrant status
-    sleep 10
-    # vagrant reload
+    # sleep 10
+    # echo "vagrant status:"
+    # vagrant status
+    # sleep 10
     echo "Vagrant SSH config:"
     n=0; retries=100
     until [ $n -ge $retries ]
@@ -306,13 +305,16 @@ if [ "$test_vm" = false ] ; then
     fi
     echo "...Get vagrant key file"
     # AFter Vagrant Hosts are up, take the SSH keys and store them in the keys folder for general use.
-    ansiblecontrol_key=$(vagrant ssh-config "ansiblecontrol$TF_VAR_envtier" | grep -oP "^  IdentityFile \K.*")
+    ansiblecontrol_config=$(vagrant ssh-config "ansiblecontrol$TF_VAR_envtier")
+    firehawkgateway_config=$(vagrant ssh-config firehawkgateway$TF_VAR_envtier)
+    
+    ansiblecontrol_key=$(echo $ansiblecontrol_config | grep -oP "^  IdentityFile \K.*")
     cp -f $ansiblecontrol_key $TF_VAR_secrets_path/keys/ansible_control_private_key
-    firehawkgateway_key=$(vagrant ssh-config firehawkgateway$TF_VAR_envtier | grep -oP "^  IdentityFile \K.*")
+    firehawkgateway_key=$(echo $firehawkgateway_config | grep -oP "^  IdentityFile \K.*")
     cp -f $firehawkgateway_key $TF_VAR_secrets_path/keys/firehawkgateway_private_key
 
-    hostname=$(vagrant ssh-config "ansiblecontrol$TF_VAR_envtier" | grep -Po '.*HostName\ \K(\d*.\d*.\d*.\d*)')
-    port=$(vagrant ssh-config "ansiblecontrol$TF_VAR_envtier" | grep -Po '.*Port\ \K(\d*)')
+    hostname=$(echo $ansiblecontrol_config | grep -Po '.*HostName\ \K(\d*.\d*.\d*.\d*)')
+    port=$(echo $ansiblecontrol_config | grep -Po '.*Port\ \K(\d*)')
     
     echo "SSH to vagrant host with..."
     echo "Hostname: $hostname"

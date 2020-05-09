@@ -2,6 +2,10 @@
 resource "null_resource" "init_awscli" {
   count = var.firehawk_init ? 1 : 0
 
+  triggers = {
+    storage_user_access_key_id = var.storage_user_access_key_id
+  }
+
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
