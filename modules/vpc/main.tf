@@ -12,12 +12,21 @@ resource "null_resource" "firehawk_init_dependency" {
   }
 }
 
+variable "common_tags" {}
+
+locals {
+  name = "firehawk-compute_pipeid${lookup(var.common_tags, "pipelineid", "0")}"
+  extra_tags = { 
+    role = "vpc"
+  }
+}
+
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
   create_vpc = var.create_vpc
 
-  name = "firehawk-compute"
+  name = local.name
   cidr = var.vpc_cidr
 
   azs             = var.azs
@@ -35,10 +44,8 @@ module "vpc" {
   enable_dns_support   = true
   enable_dns_hostnames = true
 
-  tags = {
-    Terraform   = "true"
-    Environment = "dev"
-  }
+  tags = merge(map("Name", format("%s", local.name)), var.common_tags, local.extra_tags)
+  
 }
 
 variable "remote_subnet_cidr" {
@@ -93,6 +100,8 @@ module "vpn" {
 
   #sleep will stop instances to save cost during idle time.
   sleep = var.sleep
+
+  common_tags = var.common_tags
 }
 
 locals {

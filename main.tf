@@ -19,6 +19,7 @@ locals {
     pipelineid   = "${var.active_pipeline}"
     owner        = "${data.aws_canonical_user_id.current.display_name}"
     accountid    = "${data.aws_caller_identity.current.account_id}"
+    terraform    = "true"
   }
 }
 
@@ -107,6 +108,8 @@ module "vpc" {
 
   bastion_ip         = module.bastion.public_ip
   bastion_dependency = module.bastion.bastion_dependency
+
+  common_tags = local.common_tags
 }
 
 variable "node_skip_update" {
@@ -118,7 +121,7 @@ module "bastion" {
 
   create_vpc = var.enable_vpc
 
-  name = "bastion_pipeid${lookup(local.common_tags, "pipelineid", "-1")}"
+  name = "bastion_pipeid${lookup(local.common_tags, "pipelineid", "0")}"
 
   route_public_domain_name = var.route_public_domain_name
 
@@ -343,7 +346,7 @@ variable "pcoip_skip_update" {
 
 module "workstation" {
   source = "./modules/workstation_pcoip"
-  name   = "workstation_pipeid${lookup(local.common_tags, "pipelineid", "-1")}"
+  name   = "workstation_pipeid${lookup(local.common_tags, "pipelineid", "0")}"
 
   workstation_enabled = var.workstation_enabled
 
@@ -390,7 +393,7 @@ module "node" {
   
   # need to ensure mounts exist on start 
   source = "./modules/node_centos"
-  name   = "centos_pipeid${lookup(local.common_tags, "pipelineid", "-1")}"
+  name   = "centos_pipeid${lookup(local.common_tags, "pipelineid", "0")}"
 
   # region will determine the ami
   region = var.aws_region
