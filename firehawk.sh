@@ -3,6 +3,8 @@
 # echo "Enter Secrets Decryption Password..."
 unset HISTFILE
 
+SECONDS=0
+
 printf "\nRunning ansiblecontrol with $1...\n"
 
 # # This block allows you to echo a line number for a failure.
@@ -216,6 +218,12 @@ printf "\n...checking scripts directory at $SCRIPTDIR\n\n"
 # If not buildinging a package (.box file) and we specify a box file, then it must be the basis to start from
 # else if we are building a package, it will be a post process .
 
+time_passed () {
+    duration_block=$SECONDS; printf "$(($duration_block / 60)) minutes $(($duration_block % 60)) seconds elapsed for firehawk.sh.\n"
+}
+time_passed
+
+
 # If box file in is defined, then vagrant will use this file in place of the standard image.
 if [[ ! -z "$box_file_in" ]] ; then
     source ./update_vars.sh --$TF_VAR_envtier --box-file-in "$box_file_in" --vagrant
@@ -239,6 +247,9 @@ if [[ "$test_vm" = false ]] ; then # If an encrypted var is provided for the vau
         firehawksecret='' # Set secret to an empty string if not defined.
     fi
 fi
+
+time_passed
+
 
 echo "Vagrant box ansiblecontrol$TF_VAR_envtier in $ansiblecontrol_box"
 echo "Vagrant box firehawkgateway$TF_VAR_envtier in $firehawkgateway_box"
@@ -273,6 +284,8 @@ if [[ "$vagrant_up" == true ]]; then
 fi
 #; exit_test # ssh reset may cause a non zero exit code, but it must be ignored
 
+time_passed
+
 if [ "$test_vm" = false ] ; then
     sleep 10
     echo "vagrant status:"
@@ -305,6 +318,8 @@ if [ "$test_vm" = false ] ; then
     echo "Hostname: $hostname"
     echo "Port: $port"
     echo "tier --$TF_VAR_envtier"
+
+    time_passed
 
     if [[ ! -z "$hostname" && ! -z "$port" && ! -z "$TF_VAR_envtier" ]]; then
         echo "init_vm_config: $init_vm_config"

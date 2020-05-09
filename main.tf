@@ -118,7 +118,7 @@ module "bastion" {
 
   create_vpc = var.enable_vpc
 
-  name = "bastion"
+  name = "bastion_pipeid${lookup(var.common_tags, "pipelineid", "-1")}"
 
   route_public_domain_name = var.route_public_domain_name
 
@@ -147,6 +147,8 @@ module "bastion" {
 
   #sleep will stop instances to save cost during idle time.
   sleep = var.sleep
+
+  common_tags = local.common_tags
 }
 
 output "vpn_private_ip" {
