@@ -5,7 +5,7 @@ provider "aws" {
   version = "~> 2.24"
 }
 
-data "aws_caller_identity" "current" {}=
+data "aws_caller_identity" "current" {}
 data "aws_canonical_user_id" "current" {}
 
 variable "CI_PIPELINE_ID" {}
