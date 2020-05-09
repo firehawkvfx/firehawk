@@ -221,6 +221,7 @@ else
     if [[ "$fast" == true ]]; then
       echo "Fast start.  Skip refresh"
     else
+      echo "TF_VAR_fast: $TF_VAR_fast"
       echo "...Terraform refresh"
       terraform refresh -lock=false; exit_test
     fi
@@ -251,15 +252,6 @@ else
     echo "...Currently running instances: scripts/aws-running-instances.sh"
     $TF_VAR_firehawk_path/scripts/aws-running-instances.sh
     echo ""
-
-    # if [[ "$fast" == true ]]; then
-    #   echo "Fast start.  Skip refresh"
-    # else
-    #   echo "...Terraform refresh"
-    #   terraform refresh -lock=false; exit_test
-    # fi
-    # echo "...Terraform state list"
-    # terraform state list
     
     set -o pipefail # Allow exit status of last command to fail.
 
@@ -273,7 +265,6 @@ else
     echo "...Currently running instances: scripts/aws-running-instances.sh"
     $TF_VAR_firehawk_path/scripts/aws-running-instances.sh
     echo ""
-
     echo "...Terraform refresh"
     terraform refresh -lock=false; exit_test
 

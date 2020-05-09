@@ -11,19 +11,13 @@ resource "aws_iam_user_group_membership" "s3_group_membership" {
 }
 
 resource "aws_iam_group" "query_instances_group" {
-  name = "query_instances_group_pid${lookup(var.common_tags, "pipelineid", "-1")}"
+  name = "query_instances_group_pipeid${lookup(var.common_tags, "pipelineid", "-1")}"
   path = "/users/"
 }
 
 resource "aws_iam_group_policy" "query_instances_group_policy" {
-  name  = "query_instances_group_policy"
+  name  = "query_instances_group_policy_pipeid${lookup(var.common_tags, "pipelineid", "-1")}"
   group = aws_iam_group.query_instances_group.id
-  tags = merge(
-    var.common_tags,
-    map(
-        "resource", "aws_iam_group-query_instances_group"
-    )
-)
 
   policy = <<EOF
 {
@@ -44,12 +38,12 @@ EOF
 }
 
 resource "aws_iam_group" "s3_admin_group" {
-  name = "s3_admin_group"
+  name = "s3_admin_group_pipeid${lookup(var.common_tags, "pipelineid", "-1")}"
   path = "/users/"
 }
 
 resource "aws_iam_group_policy" "s3_admin_group_policy" {
-  name  = "s3_admin_group_policy"
+  name  = "s3_admin_group_policy_pipeid${lookup(var.common_tags, "pipelineid", "-1")}"
   group = aws_iam_group.s3_admin_group.id
 
   policy = <<EOF
