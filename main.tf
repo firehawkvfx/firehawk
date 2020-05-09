@@ -118,7 +118,7 @@ module "bastion" {
 
   create_vpc = var.enable_vpc
 
-  name = "bastion_pipeid${lookup(var.common_tags, "pipelineid", "-1")}"
+  name = "bastion_pipeid${lookup(local.common_tags, "pipelineid", "-1")}"
 
   route_public_domain_name = var.route_public_domain_name
 
