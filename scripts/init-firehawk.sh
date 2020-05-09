@@ -191,14 +191,14 @@ else
 
     ### Initialisation for new resources occur after a destroy operation, since the infra is garunteed to be new after his point.
     sed -i "s/^TF_VAR_active_pipeline=.*$/TF_VAR_active_pipeline=${TF_VAR_CI_PIPELINE_ID}/" $config_override # ...Enable the vpc.
-    source ./update_vars --$TF_VAR_envtier --init
+    source ./update_vars.sh --$TF_VAR_envtier --init
     echo "TF_VAR_active_pipeline: $TF_VAR_active_pipeline"
     sed -i "s/^TF_VAR_key_name_${TF_VAR_envtier}=.*$/TF_VAR_key_name_${TF_VAR_envtier}=my_key_pair_pipeid${TF_VAR_CI_PIPELINE_ID}_${TF_VAR_envtier}/" $config_override
-    source ./update_vars --$TF_VAR_envtier --init
+    source ./update_vars.sh --$TF_VAR_envtier --init
     echo "TF_VAR_key_name: $TF_VAR_key_name"
     key_path=/secrets/keys/my_key_pair_pipeid${TF_VAR_CI_PIPELINE_ID}_${TF_VAR_envtier}.pem
     sed -i "s/^TF_VAR_local_key_path_${TF_VAR_envtier}=.*$/TF_VAR_local_key_path_${TF_VAR_envtier}=${key_path}}/" $config_override
-    source ./update_vars --$TF_VAR_envtier --init
+    source ./update_vars.sh --$TF_VAR_envtier --init
     echo "TF_VAR_local_key_path: $TF_VAR_local_key_path"
     ansible-playbook -i "$TF_VAR_inventory" ansible/aws-new-key.yaml; exit_test # ensure an aws pem key exists for ssh into cloud nodes
     ### End init new infra
