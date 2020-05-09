@@ -674,5 +674,6 @@ else
 fi
 
 echo "TF_VAR_CI_PIPELINE_ID: $TF_VAR_CI_PIPELINE_ID"
+echo "TF_VAR_active_pipeline: $TF_VAR_active_pipeline"
 
 printf "\nDone.\n\n"
