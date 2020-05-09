@@ -412,12 +412,12 @@ source_vars () {
     var_file_basename="$(echo $var_file | tr '-' '_')"
     var_file="$(to_abs_path $TF_VAR_secrets_path/$var_file)"; exit_test
 
-    echo "...Test modified date"
+    # echo "...Test modified date"
     file_modified_date=$(date -r $var_file)
     var_modified_date_name="modified_date_${var_file_basename}"
     var_modified_date="${!var_modified_date_name}"
-    echo "existing modified date variable= ${var_modified_date}"
-    echo "compare with file modified date= ${file_modified_date}"
+    # echo "existing modified date variable= ${var_modified_date}"
+    # echo "compare with file modified date= ${file_modified_date}"
 
     encrypt_required=false
     if [[ $encrypt_mode = "encrypt" ]]; then
@@ -677,5 +677,5 @@ echo "...Current pipeline vars:"
 echo "TF_VAR_CI_PIPELINE_ID: $TF_VAR_CI_PIPELINE_ID"
 echo "TF_VAR_active_pipeline: $TF_VAR_active_pipeline"
 echo "TF_VAR_key_name: $TF_VAR_key_name"
-
-printf "\nDone.\n\n"
+echo "TF_VAR_local_key_path: $TF_VAR_local_key_path"
+printf "\n...Done.\n\n"
