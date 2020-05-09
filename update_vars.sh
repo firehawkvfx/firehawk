@@ -332,18 +332,35 @@ elif [[ "$TF_VAR_envtier" = 'prod' ]]; then
         echo "...Aquired firehawksecret from prod"
     fi
 fi
+
+# Update the ci pipeline ID after a destroy operation.  Tagging of new resources will inherit this ID.
+config_override=$(to_abs_path $TF_VAR_secrets_path/config-override-$TF_VAR_envtier) # ...Config Override path $config_override.
+
 echo '...Check for configuration, init if not present.'
-if [ ! -f $TF_VAR_secrets_path/config-override-$TF_VAR_envtier ]; then
-    echo "...Initialising $TF_VAR_secrets_path/config-override-$TF_VAR_envtier"
-    cp "$TF_VAR_secrets_path/defaults-config-override-$TF_VAR_envtier" "$TF_VAR_secrets_path/config-override-$TF_VAR_envtier"
+if [ ! -f $config_override ]; then
+    echo "...Initialising $config_override"
+    cp "$TF_VAR_secrets_path/defaults-config-override-$TF_VAR_envtier" "$config_override"
 fi
 
-current_version=$(cat $TF_VAR_secrets_path/config-override-$TF_VAR_envtier | sed -e '/.*defaults_config_overide_version=.*/!d')
+current_version=$(cat $config_override | sed -e '/.*defaults_config_overide_version=.*/!d')
 target_version=$(cat $TF_VAR_secrets_path/defaults-config-override-$TF_VAR_envtier | sed -e '/.*defaults_config_overide_version=.*/!d')
 
 if [[ "$target_version" != "$current_version" ]]; then
-    echo "...Version doesn't match config.  Initialising $TF_VAR_secrets_path/config-override-$TF_VAR_envtier"
-    cp "$TF_VAR_secrets_path/defaults-config-override-$TF_VAR_envtier" "$TF_VAR_secrets_path/config-override-$TF_VAR_envtier"
+    echo "...Version doesn't match config.  Initialising $config_override"
+    cp "$TF_VAR_secrets_path/defaults-config-override-$TF_VAR_envtier" "$config_override"
+fi
+
+
+x='-1' # if pipeline id is provided, set it in the file.  note this is not always the pipeline id that should be used for tags, since we preserve the id used after an init step.  That pipeline id becomes the tag until the next destroy/init step.
+if [ -z ${CI_PIPELINE_ID+x} ]; then
+    echo "CI_PIPELINE_ID is unset.  defaulting to $x"
+else
+    echo "CI_PIPELINE_ID is set to '$CI_PIPELINE_ID'"
+    echo "...Set CI_PIPELINE_ID at config_override path- $config_override"
+    
+    sed -i 's/^TF_VAR_CI_PIPELINE_ID=.*$/TF_VAR_CI_PIPELINE_ID="$CI_PIPELINE_ID"/' $config_override # ...Enable the vpc.
+    # source ./update_vars.sh --$tier --init
+    # echo "TF_VAR_CI_PIPELINE_ID: $TF_VAR_CI_PIPELINE_ID"
 fi
 
 source_vars () {

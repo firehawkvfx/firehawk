@@ -5,10 +5,24 @@ provider "aws" {
   version = "~> 2.24"
 }
 
+data "aws_caller_identity" "current" {}=
+data "aws_canonical_user_id" "current" {}
+
+variable "CI_PIPELINE_ID" {}
+
 # if var.pgp_public_key contains keybase, then use that.  else take the contents of the var as a file on disc
 locals {
   pgp_public_key = length(regexall(".*keybase:.*", var.pgp_public_key)) > 0 ? var.pgp_public_key : filebase64("/secrets/keys/gpg_pub_key.gpg.pub")
+  
+  # common_tags = {
+  #   environment  = "${var.envtier}"
+  #   pipelineid   = "${var.CI_PIPELINE_ID}"
+  #   owner        = "${data.aws_canonical_user_id.current.display_name}"
+  #   accountid    = "${data.aws_caller_identity.current.account_id}"
+  # }
 }
+
+
 
 provider "null" {
   version = "~> 2.0"
