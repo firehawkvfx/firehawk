@@ -190,8 +190,15 @@ else
     fi
 
     sed -i "s/^TF_VAR_active_pipeline=.*$/TF_VAR_active_pipeline=${TF_VAR_CI_PIPELINE_ID}/" $config_override # ...Enable the vpc.
-    export TF_VAR_active_pipeline=$(cat $config_override | sed -e '/.*TF_VAR_active_pipeline=.*/!d')
+    source ./update_vars --$TF_VAR_envtier --init
     echo "TF_VAR_active_pipeline: $TF_VAR_active_pipeline"
+    sed -i "s/^TF_VAR_key_name_${TF_VAR_envtier}=.*$/TF_VAR_key_name_${TF_VAR_envtier}=my_key_pair_pipeid${TF_VAR_CI_PIPELINE_ID}_${TF_VAR_envtier}/" $config_override
+    source ./update_vars --$TF_VAR_envtier --init
+    echo "TF_VAR_key_name: $TF_VAR_key_name"
+    key_path=/secrets/keys/my_key_pair_pipeid${TF_VAR_CI_PIPELINE_ID}_${TF_VAR_envtier}.pem
+    sed -i "s/^TF_VAR_local_key_path_${TF_VAR_envtier}=.*$/TF_VAR_local_key_path_${TF_VAR_envtier}=${key_path}}/" $config_override
+    source ./update_vars --$TF_VAR_envtier --init
+    echo "TF_VAR_local_key_path: $TF_VAR_local_key_path"
 
     terraform init; exit_test # Required to initialise any new modules
   fi
