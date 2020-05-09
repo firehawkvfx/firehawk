@@ -168,12 +168,6 @@ else
     printf "\n...Currently existing users in the aws account"
     aws iam list-users
     echo ""
-    
-
-    # echo "...Use state backup for destroy.  This shouldn't care if a deployment failed last" # temp disable.  this is not best practice.  reserve for recovery in case of failure
-    # 
-    echo "current TF_VAR_local_key_path: $TF_VAR_local_key_path"
-    touch $TF_VAR_local_key_path
 
     echo "...Terraform refresh"
     if terraform refresh -lock=false; then
