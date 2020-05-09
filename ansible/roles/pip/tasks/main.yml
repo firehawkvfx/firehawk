@@ -137,6 +137,13 @@
   become: yes
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
 
+- name: install python-urllib3 package - for some reason, installing, uninstalling, reinstalling fixes isues with boto3 install.
+  package:
+    name: 'python-urllib3'
+    state: present
+  become: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+
 - name: uninstall python-urllib3 package
   package:
     name: 'python-urllib3'
