@@ -199,8 +199,9 @@ else
       rm -fv terraform.tfstate; exit_test
     fi
 
-    ansible-playbook -i "$TF_VAR_inventory" ansible/aws-new-key.yaml --extra-vars "destroy=true"; exit_test # destroy the key from the aws account and on disk
-    set_pipe 0 # if resources are accidentally created, they will now have an id of 0, which should never happen, but this provides a safeguard.
+    ansible-playbook -vv -i "$TF_VAR_inventory" ansible/aws-new-key.yaml --extra-vars "destroy=true"; exit_test # destroy the key from the aws account and on disk
+    # check no resources exist anymore, then set pipe to 0
+    # set_pipe 0 # if resources are accidentally created, they will now have an id of 0, which should never happen, but this provides a safeguard.
     touch $TF_VAR_firehawk_path/.initpipe; exit_test # the initpipe file will provide permission to create a new pipe in the same working path.
 
     terraform init; exit_test # Required to initialise any new modules

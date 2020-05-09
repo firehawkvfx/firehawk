@@ -13,7 +13,7 @@
   debug:
     var: key_result.stat.exists
 
-- name: force removal of key from account if not present on disk.  regenerate next step.
+- name: "Force removal of key {{ key_name }} from account if not present on disk or if destroy is true.  regenerate next step."
   ec2_key:
     name: "{{ key_name }}"
     #these must be defined if the module is used.
@@ -24,7 +24,7 @@
   register: ec2_key_result
   when: destroy or not key_result.stat.exists
 
-- name: remove key from disk
+- name: "remove key from disk: {{ local_key_path }}"
   file:
     path: "{{ local_key_path }}"
     state: absent
