@@ -253,13 +253,11 @@ variable "allow_prebuilt_softnas_ami" { # after an initial deployment a base AMI
 module "softnas" {  
   softnas_storage                = var.softnas_storage
   source                         = "./modules/softnas"
-  cloudformation_role_stack_name = var.softnas1_cloudformation_role_name
 
   envtier = var.envtier
 
   allow_prebuilt_softnas_ami = var.allow_prebuilt_softnas_ami
 
-  cloudformation_stack_name      = "FCB-SoftNAS1Stack"
   aws_region                     = var.aws_region
   softnas_mode                   = var.softnas_mode
   vpn_private_ip                 = module.vpc.vpn_private_ip

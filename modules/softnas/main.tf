@@ -1,10 +1,3 @@
-#variable "name" {}
-# resource "aws_cloudformation_stack" "SoftNASRole" {
-#   name         = "${var.cloudformation_role_stack_name}"
-#   capabilities = ["CAPABILITY_IAM", "CAPABILITY_NAMED_IAM"]
-#   template_url = "https://s3-ap-southeast-2.amazonaws.com/aws-softnas-cloudformation/softnas-role.json"
-# }
-
 resource "aws_iam_role" "softnas_role" {
   name = local.softnas_role_name
 

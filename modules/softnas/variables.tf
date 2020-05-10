@@ -75,12 +75,6 @@ variable "remote_mounts_on_local" {
 variable "softnas_ssh_user" {
 }
 
-variable "cloudformation_stack_name" {
-}
-
-variable "cloudformation_role_stack_name" {
-}
-
 variable "softnas1_private_ip1" {
 }
 

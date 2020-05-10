@@ -2,6 +2,13 @@
 # This module creates all resources necessary for a PCOIP instance in AWS
 #----------------------------------------------------------------
 
+locals {
+  extra_tags = {
+    route = "private"
+    role  = "node_centos"
+  }
+}
+
 resource "aws_security_group" "node_centos" {
   count       = var.site_mounts ? 1 : 0
 
@@ -9,9 +16,7 @@ resource "aws_security_group" "node_centos" {
   vpc_id      = var.vpc_id
   description = "Centos And Teradici PCOIP security group"
 
-  tags = {
-    Name = var.name
-  }
+  tags = merge(map("Name", format("%s", var.name)), var.common_tags, local.extra_tags)
 
   ingress {
     protocol    = "-1"
@@ -98,13 +103,11 @@ resource "aws_security_group" "node_centos_vpn" {
   count       = var.site_mounts ? 1 : 0
   depends_on = [var.vpn_private_ip]
 
-  name        = "${var.name}_vpn"
+  name        = "vpn_${var.name}"
   vpc_id      = var.vpc_id
   description = "Centos VPN security group"
 
-  tags = {
-    Name = "${var.name}_vpn"
-  }
+  tags = merge(map("Name", format("%s", "vpn_${var.name}")), var.common_tags, local.extra_tags)
 
   # todo need to tighten down ports.
   ingress {
@@ -282,9 +285,7 @@ resource "aws_network_interface" "eth0" {
   subnet_id       = element(var.private_subnet_ids, count.index)
   private_ips     = [cidrhost("${data.aws_subnet.private_subnet[count.index].cidr_block}", 20)]
 
-  tags = {
-    Name = "primary_network_interface"
-  }
+  tags = merge(map("Name", format("%s", "primary_network_interface_pipeid${lookup(local.common_tags, "pipelineid", "0")}")), var.common_tags, local.extra_tags)
 }
 
 locals {
@@ -317,11 +318,8 @@ resource "aws_instance" "node_centos" {
   # subnet_id              = element(var.private_subnet_ids, count.index)
   # private_ip             = cidrhost("${data.aws_subnet.private_subnet[count.index].cidr_block}", 20)
   # vpc_security_group_ids = aws_security_group.node_centos.*.id
-  tags = {
-    Name  = "node_centos"
-    Route = "private"
-    Role  = "node_centos"
-  }
+  tags = merge(map("Name", format("%s", "node_centos_pipeid${lookup(local.common_tags, "pipelineid", "0")}")), var.common_tags, local.extra_tags)
+
   # cloud init resets network delay settings if configured outside of cloud-init
   user_data = <<USERDATA
 #cloud-config
@@ -542,9 +540,8 @@ resource "aws_ami_from_instance" "node_centos" {
   depends_on         = [null_resource.provision_node_centos, random_id.ami_unique_name, null_resource.mounts_and_houdini_test]
   name               = "node_centos_houdini_${aws_instance.node_centos[0].id}_${random_id.ami_unique_name[0].hex}"
   source_instance_id = aws_instance.node_centos[0].id
-  tags = {
-    Name = var.name
-  }
+  
+  tags = merge(map("Name", format("%s", var.name)), var.common_tags, local.extra_tags)
 
 }
 
