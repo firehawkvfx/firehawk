@@ -362,12 +362,13 @@ fi
 x='1' # if pipeline id is provided, set it in the file.  note this is not always the pipeline id that should be used for tags, since we preserve the id used after an init step.  That pipeline id becomes the tag until the next destroy/init step.
 if [ -z ${CI_JOB_ID+x} ]; then
     echo "CI_JOB_ID is unset.  defaulting to $x or it will be aquired by the config override file"
+    export CI_JOB_ID=1
 else
     echo "CI_JOB_ID is set to '$CI_JOB_ID'"
     echo "...Set CI_JOB_ID at config_override path- $config_override"
-    sed -i "s/^TF_VAR_CI_JOB_ID=.*$/TF_VAR_CI_JOB_ID=${CI_JOB_ID}/" $config_override # ...Enable the vpc.
-    export TF_VAR_CI_JOB_ID=$(cat $config_override | sed -e '/.*TF_VAR_CI_JOB_ID=.*/!d')
 fi
+sed -i "s/^TF_VAR_CI_JOB_ID=.*$/TF_VAR_CI_JOB_ID=${CI_JOB_ID}/" $config_override # ...Enable the vpc.
+export TF_VAR_CI_JOB_ID=$(cat $config_override | sed -e '/.*TF_VAR_CI_JOB_ID=.*/!d')
 
 x=false
 if [ -z ${TF_VAR_fast+x} ]; then
@@ -681,9 +682,9 @@ else
     source_vars "$var_file" "$encrypt_mode"; exit_test
 fi
 
-echo "...Current pipeline vars:"
+echo_if_not_silent "...Current pipeline vars:"
 # echo "TF_VAR_CI_JOB_ID: $TF_VAR_CI_JOB_ID"
-echo "TF_VAR_active_pipeline: $TF_VAR_active_pipeline"
+echo_if_not_silent "TF_VAR_active_pipeline: $TF_VAR_active_pipeline"
 # echo "TF_VAR_key_name: $TF_VAR_key_name"
 # echo "TF_VAR_local_key_path: $TF_VAR_local_key_path"
-printf "\n...Done.\n\n"
+echo_if_not_silent "\n...Done.\n\n"
