@@ -259,8 +259,6 @@ module "softnas" {
 
   allow_prebuilt_softnas_ami = var.allow_prebuilt_softnas_ami
 
-  #softnas_role = "${module.softnas_role.softnas_role_name}"
-
   cloudformation_stack_name      = "FCB-SoftNAS1Stack"
   aws_region                     = var.aws_region
   softnas_mode                   = var.softnas_mode
@@ -297,6 +295,8 @@ module "softnas" {
 
   #sleep will stop instances to save cost during idle time.
   sleep = var.sleep
+
+  common_tags = local.common_tags
 }
 
 variable "pcoip_sleep_after_creation" {
@@ -444,6 +444,7 @@ module "node" {
   install_deadline = var.install_deadline
   houdini_license_server_address = var.houdini_license_server_address
 
+  common_tags = local.common_tags
 }
 
 output "snapshot_id" {

@@ -6,7 +6,7 @@
 # }
 
 resource "aws_iam_role" "softnas_role" {
-  name = "SoftNAS_HA_IAM"
+  name = local.softnas_role_name
 
   assume_role_policy = <<EOF
 {
@@ -30,7 +30,7 @@ EOF
 }
 
 resource "aws_iam_instance_profile" "softnas_profile" {
-  name = "SoftNAS_HA_IAM"
+  name = local.softnas_role_name
   role = aws_iam_role.softnas_role.name
 }
 
@@ -40,7 +40,7 @@ resource "aws_iam_role_policy_attachment" "softnas_ssm_attach" {
 }
 
 resource "aws_iam_role_policy" "softnas_policy" {
-  name = "SoftNAS_HA_IAM"
+  name = local.softnas_role_name
   role = aws_iam_role.softnas_role.id
 
   policy = <<EOF
@@ -92,7 +92,13 @@ EOF
 }
 
 locals {
+  softnas_role_name = "SoftNAS_HA_IAM_pipeid${lookup(var.common_tags, "pipelineid", "0")}"
   softnas_mode_ami = "${var.softnas_mode}_${var.aws_region}"
+  name = "softnas_pipeid${lookup(var.common_tags, "pipelineid", "0")}"
+  extra_tags = {
+    role = "softnas"
+    route = "private"
+  }
 }
 
 resource "random_uuid" "test" {
@@ -101,13 +107,10 @@ resource "random_uuid" "test" {
 resource "aws_security_group" "softnas" {
   count = var.softnas_storage ? 1 : 0
 
-  name        = "softnas"
+  name        = "softnas_pipeid${lookup(var.common_tags, "pipelineid", "0")}"
   vpc_id      = var.vpc_id
   description = "SoftNAS security group"
-
-  tags = {
-    Name = "softnas"
-  }
+  tags = merge(map("Name", format("%s", local.name)), var.common_tags, local.extra_tags)
 
   ingress {
     protocol    = "-1"
@@ -266,13 +269,11 @@ resource "aws_security_group" "softnas_vpn" {
   count = var.softnas_storage ? 1 : 0
   depends_on = [var.vpn_private_ip]
 
-  name        = "softnas_vpn"
+  name        = "softnas_vpn_pipeid${lookup(var.common_tags, "pipelineid", "0")}"
   vpc_id      = var.vpc_id
   description = "SoftNAS VPN security group for remote subnet"
 
-  tags = {
-    Name = "softnas"
-  }
+  tags = merge(map("Name", format("%s", local.name)), var.common_tags, local.extra_tags)
 
   ingress {
     protocol    = "-1"
@@ -510,9 +511,7 @@ resource "aws_network_interface" "nas1eth0" {
   subnet_id       = var.private_subnets[0]
   private_ips     = [var.softnas1_private_ip1]
 
-  tags = {
-    Name = "primary_network_interface"
-  }
+  tags = merge(map("Name", format("%s", "primary_network_interface_pipeid${lookup(var.common_tags, "pipelineid", "0")}")), var.common_tags, local.extra_tags)
 }
 
 # resource "aws_network_interface" "nas1eth1" {
@@ -574,12 +573,7 @@ fqdn: nas1
 manage_etc_hosts: false
 USERDATA
 
-
-  tags = {
-    Name  = "SoftNAS1_PlatinumConsumption${var.softnas_mode}Compute"
-    Route = "private"
-    Role  = "softnas"
-  }
+  tags = merge(map("Name", format("%s", local.name)), var.common_tags, local.extra_tags)
 }
 
 resource "aws_network_interface_sg_attachment" "sg_attachment" {
