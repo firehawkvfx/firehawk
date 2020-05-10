@@ -1,0 +1,9 @@
+---
+- hosts: "{{ variable_host | default('ansible_control') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
+  remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
+  become: true
+  any_errors_fatal: true
+
+  roles:
+    - role: diskspace-check
