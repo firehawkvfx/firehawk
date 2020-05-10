@@ -70,12 +70,12 @@ parse_opts () {
                     dev)
                         ARGS='--dev'
                         echo "using dev environment"
-                        source ./update_vars.sh --dev; exit_test
+                        source ./update_vars.sh --dev --silent; exit_test
                         ;;
                     prod)
                         ARGS='--prod'
                         echo "using prod environment"
-                        source ./update_vars.sh --prod; exit_test
+                        source ./update_vars.sh --prod --silent; exit_test
                         ;;
                     sleep)
                         tf_action='sleep'
