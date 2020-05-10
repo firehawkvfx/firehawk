@@ -43,8 +43,8 @@
 
 - name: generate spot fleet config from template
   template:
-    src: /secrets/dev/spot-fleet-templates/config_template.json
-    dest: /secrets/dev/spot-fleet-templates/config_generated.json
+    src: /secrets/spot-fleet-templates/config_template.json
+    dest: /secrets/spot-fleet-templates/config_generated.json
 
 # to list collections-
 # show collections;
@@ -67,7 +67,7 @@
 #     ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval '
 #       var StaggerInstances = "5";
 #       var IdleShutdown = "10";
-#       var spot_json = cat("/secrets/dev/spot-fleet-templates/config_generated.json");
+#       var spot_json = cat("/secrets/spot-fleet-templates/config_generated.json");
 #       var conf_json_blob = { "State" : "Global Enabled", "AccessID" : "{{ AWS_ACCESS_KEY }}", "SecretKey" : "{{ AWS_SECRET_KEY }}", "Logging" : "Verbose", "Region" : "{{ aws_region }}", "Config" : spot_json, "IdleShutdown" : IdleShutdown, "DeleteTerminatedSlaves" : "True", "StrictHardCap" : "True", "StaggerInstances" : StaggerInstances };
 #       var conf_list_blob = [ [ "State", "Global Enabled" ], [ "ResourceTracker", "True" ], [ "AccessID", "{{ AWS_ACCESS_KEY }}" ], [ "SecretKey", "{{ AWS_SECRET_KEY }}" ], [ "Logging", "Verbose" ], [ "Region", "{{ aws_region }}" ], [ "Config", spot_json ], [ "IdleShutdown", IdleShutdown ], [ "DeleteTerminatedSlaves", "True" ], [ "StrictHardCap", "True" ], [ "StaggerInstances", StaggerInstances ] ];
 #       db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit": conf_list_blob}});
@@ -90,7 +90,7 @@
     ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval '
       var StaggerInstances = "50";
       var IdleShutdown = "2";
-      var spot_json = cat("/secrets/dev/spot-fleet-templates/config_generated.json");
+      var spot_json = cat("/secrets/spot-fleet-templates/config_generated.json");
       db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"PluginEnabled": "1"}});
       db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit": [
         [

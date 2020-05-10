@@ -2,8 +2,8 @@
 
 - name: Generate houdini.env config from template
   template:
-    src: /secrets/dev/houdini{{ houdini_version_item.houdini_major_version }}/houdini_template.env
-    dest: /secrets/dev/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env
+    src: /secrets/houdini{{ houdini_version_item.houdini_major_version }}/houdini_template.env
+    dest: /secrets/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env
   become: yes
   connection: local
   tags:
@@ -12,7 +12,7 @@
 
 - name: copy env
   copy:
-    src: /secrets/dev/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env
+    src: /secrets/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env
     dest: /home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini_from_template.env
   become: true
   tags:
@@ -40,7 +40,7 @@
 
 - name: copy houdini.env and overwrite
   copy:
-    src: /secrets/dev/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env
+    src: /secrets/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env
     dest: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env"
   become: true
   tags:
