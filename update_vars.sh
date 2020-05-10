@@ -682,8 +682,8 @@ else
 fi
 
 echo "...Current pipeline vars:"
-echo "TF_VAR_CI_JOB_ID: $TF_VAR_CI_JOB_ID"
+# echo "TF_VAR_CI_JOB_ID: $TF_VAR_CI_JOB_ID"
 echo "TF_VAR_active_pipeline: $TF_VAR_active_pipeline"
-echo "TF_VAR_key_name: $TF_VAR_key_name"
-echo "TF_VAR_local_key_path: $TF_VAR_local_key_path"
+# echo "TF_VAR_key_name: $TF_VAR_key_name"
+# echo "TF_VAR_local_key_path: $TF_VAR_local_key_path"
 printf "\n...Done.\n\n"
