@@ -16,8 +16,8 @@ exit_test () {
     if [ "$exit_code" -eq 0 ]; then
         if [[ -z "$silent" ]] || [[ "$silent" == false ]]; then printf "\n${GREEN}Command Succeeded${NC} : "; fi
         duration_block=$SECONDS
-        h=$("%02d" $(($duration_block / 60)))
-        m=$("%02d" $(($duration_block % 60)))
+        h=$(printf "%02d" $(($duration_block / 60)))
+        m=$(printf "%02d" $(($duration_block % 60)))
         if [[ -z "$silent" ]] || [[ "$silent" == false ]]; then printf "$(($duration_block / 60))m:$(($duration_block % 60))s $h:$m elapsed for block.\n"; fi
         failed=false
     else
