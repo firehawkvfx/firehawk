@@ -23,6 +23,10 @@ err_report() {
 }
 trap 'err_report $0 $LINENO' ERR
 
+echo_if_not_silent() {
+    if [[ -z "$silent" ]] || [[ "$silent" == false ]]; then echo $1; fi
+}
+
 printf "\nRunning ansiblecontrol with $1...\n"
 
 # These paths and vars are necesary to locating other scripts.
@@ -183,6 +187,7 @@ function help {
 # which each results in the same function tier() running.
 
 force=false
+silent=false
 
 parse_opts () {
     local OPTIND
@@ -256,6 +261,9 @@ parse_opts () {
                         ;;
                     force)
                         force=true
+                        ;;
+                    silent)
+                        silent=true
                         ;;
                     vagrant)
                         val="vagrant"; OPTIND=$(( $OPTIND + 1 ))
@@ -351,7 +359,7 @@ if [[ "$target_version" != "$current_version" ]]; then
 fi
 
 ### The dynamic vars here are set by the environment during dpeloyment, and commit messages for gitlab ci.
-x='-1' # if pipeline id is provided, set it in the file.  note this is not always the pipeline id that should be used for tags, since we preserve the id used after an init step.  That pipeline id becomes the tag until the next destroy/init step.
+x='1' # if pipeline id is provided, set it in the file.  note this is not always the pipeline id that should be used for tags, since we preserve the id used after an init step.  That pipeline id becomes the tag until the next destroy/init step.
 if [ -z ${CI_JOB_ID+x} ]; then
     echo "CI_JOB_ID is unset.  defaulting to $x or it will be aquired by the config override file"
 else
@@ -438,10 +446,10 @@ source_vars () {
         # set vault key location based on envtier dev/prod
         if [[ "$TF_VAR_envtier" = 'dev' ]]; then
             export vault_key="$(to_abs_path $TF_VAR_secrets_path/keys/$TF_VAR_vault_key_name_dev)"
-            echo "set vault_key $vault_key"
+            echo_if_not_silent "set vault_key $vault_key"
         elif [[ "$TF_VAR_envtier" = 'prod' ]]; then
             export vault_key="$(to_abs_path $TF_VAR_secrets_path/keys/$TF_VAR_vault_key_name_prod)"
-            echo "set vault_key $vault_key"
+            echo_if_not_silent "set vault_key $vault_key"
         else 
             printf "\n...${RED}WARNING: envtier evaluated to no match for dev or prod.  Inspect update_vars.sh to handle this case correctly.${NC}\n"
             return 88
@@ -450,7 +458,7 @@ source_vars () {
         
         # If the encrypted secret is passed as an environment variable, then secrets can be passed after the secret itself is decrypted by the key.
         if [[ ! -z "$firehawksecret" ]]; then
-            echo "...Using firehawksecret encrypted env var to decrypt instead of user input."
+            echo_if_not_silent "...Using firehawksecret encrypted env var to decrypt instead of user input."
             if [ ! -f scripts/ansible-encrypt.sh ]; then
                 echo "FILE NOT FOUND: scripts/ansible-encrypt.sh"
                 echo "Check existance of $TF_VAR_firehawk_path/scripts/ansible-encrypt.sh"

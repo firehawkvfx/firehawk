@@ -42,7 +42,7 @@
   register: ec2_key_result
   when: ( not destroy ) and ( not key_result.stat.exists )
 
-- name: Save private key to file
+- name: "Save private key to file {{ local_key_path }}"
   copy:
     content: "{{ ec2_key_result.key.private_key }}"
     dest: "{{ local_key_path }}"
