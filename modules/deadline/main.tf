@@ -27,7 +27,7 @@ resource "aws_iam_role_policy_attachment" "AmazonS3FullAccess" {
 }
 
 resource "aws_iam_role_policy" "spot_instance_role_worker_policy" {
-  name = "SlaveStatement"
+  name = "SlaveStatement_pipeid${lookup(var.common_tags, "pipelineid", "0")}"
   role = aws_iam_role.spot_instance_role.id
 
   policy = <<EOF
@@ -95,7 +95,7 @@ resource "aws_iam_role_policy" "spot_instance_role_s3_policy" {
 EOF
 }
 resource "aws_iam_role_policy" "spot_instance_role_describe_policy" {
-  name = "DescribeInstances"
+  name = "DescribeInstances_pipeid${lookup(var.common_tags, "pipelineid", "0")}"
   role = aws_iam_role.spot_instance_role.id
 
   policy = <<EOF
@@ -140,12 +140,12 @@ resource "aws_iam_user_group_membership" "deadline_spot_group_membership" {
 }
 
 resource "aws_iam_group" "deadline_spot_group" {
-  name = "deadline_spot_group"
+  name = "deadline_spot_group_pipeid${lookup(var.common_tags, "pipelineid", "0")}"
   path = "/users/"
 }
 
 resource "aws_iam_group_policy" "deadline_spot_group_policy" {
-  name  = "deadline_spot_group_policy"
+  name  = "deadline_spot_group_policy_pipeid${lookup(var.common_tags, "pipelineid", "0")}"
   group = aws_iam_group.deadline_spot_group.id
 
   policy = <<EOF
@@ -285,8 +285,9 @@ EOF
 }
 
 resource "aws_iam_user" "deadline_spot_deployment_user" {
-  name = "deadline_spot_deployment_user"
+  name = "deadline_spot_deployment_user_pipeid${lookup(var.common_tags, "pipelineid", "0")}"
   force_destroy = true
+  tags = var.common_tags
 }
 
 resource "aws_iam_access_key" "deadline_spot_access_key" {

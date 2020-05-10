@@ -183,6 +183,7 @@ module "deadline" {
   pgp_public_key = local.pgp_public_key
   remote_ip_cidr  = var.remote_ip_cidr
   cidr_list       = concat([var.remote_subnet_cidr, var.remote_ip_cidr], module.vpc.private_subnets_cidr_blocks)
+  common_tags = local.common_tags
 }
 
 output "spot_access_key_id" {

@@ -4,3 +4,5 @@ variable "cidr_list" {
 }
 variable "pgp_public_key" {
 }
+
+variable "common_tags" {}
