@@ -7,14 +7,6 @@ GREEN='\033[0;32m' # Green Text
 BLUE='\033[0;34m' # Blue Text
 NC='\033[0m' # No Color
 
-echo_if_not_silent() {
-    if [[ -z "$silent" ]] || [[ "$silent" == false ]]; then echo "$#"; fi
-}
-
-printf_if_not_silent() {
-    if [[ -z "$silent" ]] || [[ "$silent" == false ]]; then printf "$#"; fi
-}
-
 export SECONDS=0
 
 exit_test () {
@@ -22,14 +14,14 @@ exit_test () {
     interrupt=false
     failed=false
     if [ "$exit_code" -eq 0 ]; then
-        printf_if_not_silent "\n${GREEN}Command Succeeded${NC} : "
+        if [[ -z "$silent" ]] || [[ "$silent" == false ]]; then printf "\n${GREEN}Command Succeeded${NC} : "; fi
         duration_block=$SECONDS
-        printf_if_not_silent "$(($duration_block / 60))m:$(($duration_block % 60))s elapsed for block.\n"
+        if [[ -z "$silent" ]] || [[ "$silent" == false ]]; then printf "$(($duration_block / 60))m:$(($duration_block % 60))s elapsed for block.\n"; fi
         failed=false
     else
         failed=true
         if [ "$LIVE_TERMINAL" == true ]; then
-            printf_if_not_silent "\n${RED}Failed command in live terminal. ${NC}\n" >&2
+            if [[ -z "$silent" ]] || [[ "$silent" == false ]]; then printf "\n${RED}Failed command in live terminal. ${NC}\n" >&2; fi
             
         else
             printf "\n${RED}Failed command ...exiting${NC}\n" >&2
