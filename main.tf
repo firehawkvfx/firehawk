@@ -345,7 +345,7 @@ variable "pcoip_skip_update" {
 
 module "workstation" {
   source = "./modules/workstation_pcoip"
-  name   = "workstation_pipeid${lookup(local.common_tags, "pipelineid", "0")}"
+  name   = "workstation_pcoip_pipeid${lookup(local.common_tags, "pipelineid", "0")}"
 
   workstation_enabled = var.workstation_enabled
 
@@ -382,6 +382,8 @@ module "workstation" {
   openfirehawkserver = var.openfirehawkserver
 
   houdini_license_server_address = var.houdini_license_server_address
+
+  common_tags = local.common_tags
 }
 
 variable "node_sleep_on_create" {

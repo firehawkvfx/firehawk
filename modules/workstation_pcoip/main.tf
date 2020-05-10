@@ -2,6 +2,13 @@
 # This module creates all resources necessary for a PCOIP instance in AWS
 #----------------------------------------------------------------
 
+locals {
+  extra_tags = {
+    route = "private"
+    role  = "workstation_centos"
+  }
+}
+
 variable "houdini_license_server_address" {
 }
 
@@ -22,9 +29,7 @@ resource "aws_security_group" "workstation_pcoip" {
   vpc_id      = var.vpc_id
   description = "Workstation - Teradici PCOIP security group"
 
-  tags = {
-    Name = var.name
-  }
+  tags = merge(map("Name", format("%s", "pcoip_${var.name}")), var.common_tags, local.extra_tags)
 
   ingress {
     protocol    = "-1"
@@ -109,13 +114,11 @@ resource "aws_security_group" "workstation_pcoip" {
 resource "aws_security_group" "workstation_centos" {
   count         = var.site_mounts && var.workstation_enabled ? 1 : 0
 
-  name        = "gateway_centos"
+  name        = "gateway_centos_${var.name}"
   vpc_id      = var.vpc_id
   description = "Workstation - Security group"
 
-  tags = {
-    Name = "gateway_centos"
-  }
+  tags = merge(map("Name", format("%s", "gateway_centos_${var.name}")), var.common_tags, local.extra_tags)
 
   ingress {
     protocol    = "-1"
@@ -317,11 +320,7 @@ resource "aws_instance" "workstation_pcoip" {
     delete_on_termination = true
   }
 
-  tags = {
-    Name  = "workstation_centos"
-    Route = "private"
-    Role  = "workstation_centos"
-  }
+  tags = merge(map("Name", format("%s", "${var.name}")), var.common_tags, local.extra_tags)
 
   provisioner "remote-exec" {
     connection {
