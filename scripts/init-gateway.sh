@@ -65,6 +65,6 @@ else
 fi
 
 # enable promisc mode
-ansible-playbook -i "$TF_VAR_inventory" ansible/init.yaml --extra-vars "variable_host=localhost variable_user=deployuser configure_gateway=true set_hostname=firehawkgateway" --tags "init-host init"; exit_test
+ansible-playbook -i "$TF_VAR_inventory" ansible/init.yaml --extra-vars "variable_host=localhost variable_user=deployuser configure_gateway=true set_hostname=firehawkgateway" --tags "init-host,init"; exit_test
 # enable ipforwarding
 ansible-playbook -i "$TF_VAR_inventory" ansible/openvpn-init.yaml -v --extra-vars "variable_host=localhost" --tags "init"; exit_test

@@ -5,16 +5,12 @@
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
 
-  tasks:
-  - name: test connection as deployuser
-    debug:
-      msg: "connection established"
-    tags: ['cloud-install', 'onsite-install', 'newuser']
 
-- hosts: "{{ variable_host | default('ansible_control') }}"
-  remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
-  gather_facts: "{{ variable_gather_facts | default('false') }}"
-  become: true
+
+# - hosts: "{{ variable_host | default('ansible_control') }}"
+#   remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
+#   gather_facts: "{{ variable_gather_facts | default('false') }}"
+#   become: true
 
   vars:
     variable_user: deadlineuser
@@ -24,23 +20,29 @@
     no_extension: "{{ deadline_linux_installers_tar | splitext | first }}"
     basename: "{{ no_extension.split('/')[-1] }}"
     houdini_major_version: 18.0
-    
+  
+  pre_tasks:
+  - name: test connection as deployuser
+    debug:
+      msg: "connection established"
+    tags: ['cloud-install', 'onsite-install', 'newuser']
+
   roles:
-    - role: pip
-      tags: 'newuser'
-    - role: 'newuser'
-      tags: 'newuser'
-    - role: 'add-user-to-group'
-      vars:
-        variable_group: 'syscontrol'
-      tags: ['cloud-install', 'onsite-install']
+  - role: pip
+    tags: 'newuser'
+  - role: 'newuser'
+    tags: 'newuser'
+  - role: 'add-user-to-group'
+    vars:
+      variable_group: 'syscontrol'
+    tags: ['cloud-install', 'onsite-install']
 # ADD deployuser USER TO THE GROUP AS WELL
 # after deadline install we need to ensure deployuser is part of the syscontrol group.
 
-- hosts: "{{ variable_host | default('ansible_control') }}"
-  remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
-  gather_facts: "{{ variable_gather_facts | default('false') }}"
-  become: true
+# - hosts: "{{ variable_host | default('ansible_control') }}"
+#   remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
+#   gather_facts: "{{ variable_gather_facts | default('false') }}"
+#   become: true
   
   tasks:
   - name: reset ssh connection to allow user changes to affect 'current login user'
