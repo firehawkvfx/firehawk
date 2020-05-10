@@ -1,6 +1,8 @@
 variable "name" {
 }
 
+variable "common_tags" {}
+
 variable "vpc_id" {
 }
 
