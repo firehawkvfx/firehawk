@@ -237,7 +237,7 @@ else
     fi
     echo "...Ensuring aws key is destroyed for current pipe."
     ansible-playbook -vv -i "$TF_VAR_inventory" ansible/aws-new-key.yaml --extra-vars "destroy=true"; exit_test # destroy the key from the aws account and on disk
-    test_destroyed # check no resources exist anymore, then set pipe to 0 to allow init on next run
+    test_destroyed; exit_test # check no resources exist anymore, then set pipe to 0 to allow init on next run
     set_pipe 0 # if resources are accidentally created, they would now have an id of 0, which should never happen, but this provides a safeguard.  if the active pipeline var is 0, this is used to initialise.
 
     # terraform init; exit_test # Required to initialise any new modules
@@ -369,5 +369,5 @@ tail -n 5 tmp/log.txt
 # only if there are tf actions do we check running instances, otherwise we can't asume the aws cli is installed yet when none
 echo "tf_action: $tf_action"
 if [ "$tf_action" != "none" ]; then 
-  test_destroyed
+  test_destroyed; exit_test
 fi
