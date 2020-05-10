@@ -582,7 +582,7 @@ source_vars () {
         envsubst < "$temp_output" > "$tmp_template_path"
         rm $temp_output # remove temp so as to not accumulate results
 
-        printf "\n...Exporting variables to environment\n"
+        echo_if_not_silent "...Exporting variables to environment"
         # # Now set environment variables to the actual values defined in the user's secrets-prod file
         for i in $(echo "$multiline")
         do
@@ -628,7 +628,7 @@ source_vars () {
 
         # update the template if in dev environment and save template is enabled.  save template may be disabled during setup script
         if [[ "$TF_VAR_envtier" = 'dev' && $save_template = true ]]; then
-            echo "save_template: $save_template"
+            echo_if_not_silent "save_template: $save_template"
             # The template will now be written to the public repository without any private values
             echo_if_not_silent "...Saving template to $template_path"
             mv -fv $tmp_template_path $template_path
@@ -643,7 +643,7 @@ source_vars () {
         fi
 
         # after completion, we store the modified date of the var file after encryption to compare in future if we must source again.
-        echo "Set date for $var_file modified_date_${var_file_basename}"
+        echo_if_not_silent "Set date for $var_file modified_date_${var_file_basename}"
         export modified_date_${var_file_basename}=$(date -r $var_file)
     fi
 }
