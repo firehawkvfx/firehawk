@@ -18,7 +18,7 @@ exit_test () {
         duration_block=$SECONDS
         h=$(printf "%02d" $(($duration_block / 60)))
         m=$(printf "%02d" $(($duration_block % 60)))
-        if [[ -z "$silent" ]] || [[ "$silent" == false ]]; then printf "$(($duration_block / 60))m:$(($duration_block % 60))s $h:$m elapsed for block.\n"; fi
+        if [[ -z "$silent" ]] || [[ "$silent" == false ]]; then printf "$h:$m elapsed for block.\n"; fi
         failed=false
     else
         failed=true
