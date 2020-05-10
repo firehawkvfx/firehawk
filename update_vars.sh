@@ -359,15 +359,19 @@ if [[ "$target_version" != "$current_version" ]]; then
 fi
 
 ### The dynamic vars here are set by the environment during dpeloyment, and commit messages for gitlab ci.
-x='1' # if pipeline id is provided, set it in the file.  note this is not always the pipeline id that should be used for tags, since we preserve the id used after an init step.  That pipeline id becomes the tag until the next destroy/init step.
-if [ -z ${CI_JOB_ID+x} ]; then
-    echo "CI_JOB_ID is unset.  defaulting to $x or it will be aquired by the config override file"
-    export CI_JOB_ID=1
+# x='1' 
+
+# if [ -z ${CI_JOB_ID+x} ]; then
+#     echo "CI_JOB_ID is not set.  defaulting to $x or it will be aquired by the config override file"
+
+if [ -z ${CI_JOB_ID+x} ]; then # if pipeline id is provided, set it in the file.  note this is not always the pipeline id that should be used for tags, since we preserve the id used during an init step.  That pipeline id becomes the tag until the next destroy/init step.
+    echo "CI_JOB_ID is not set, will not alter config."
 else
     echo "CI_JOB_ID is set to '$CI_JOB_ID'"
     echo "...Set CI_JOB_ID at config_override path- $config_override"
+    sed -i "s/^TF_VAR_CI_JOB_ID=.*$/TF_VAR_CI_JOB_ID=${CI_JOB_ID}/" $config_override # ...Enable the vpc.
 fi
-sed -i "s/^TF_VAR_CI_JOB_ID=.*$/TF_VAR_CI_JOB_ID=${CI_JOB_ID}/" $config_override # ...Enable the vpc.
+
 export TF_VAR_CI_JOB_ID=$(cat $config_override | sed -e '/.*TF_VAR_CI_JOB_ID=.*/!d')
 
 x=false
