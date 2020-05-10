@@ -18,6 +18,7 @@
     package:
       name: expect
       state: present
+      lock_timeout: 180
 
   - name: install pip
     package:
