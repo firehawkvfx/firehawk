@@ -8,11 +8,11 @@ BLUE='\033[0;34m' # Blue Text
 NC='\033[0m' # No Color
 
 echo_if_not_silent() {
-    if [[ -z "$silent" ]] || [[ "$silent" == false ]]; then echo $1; fi
+    if [[ -z "$silent" ]] || [[ "$silent" == false ]]; then echo "$#"; fi
 }
 
 printf_if_not_silent() {
-    if [[ -z "$silent" ]] || [[ "$silent" == false ]]; then printf $1; fi
+    if [[ -z "$silent" ]] || [[ "$silent" == false ]]; then printf "$#"; fi
 }
 
 export SECONDS=0
