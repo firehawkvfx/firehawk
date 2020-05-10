@@ -1,7 +1,7 @@
 ### deadline spot instance IAM policy.  This allows instances launched by a spot fleet template to be recognised by deadline, and must be assigned when creating a spot fleet template.
 
 resource "aws_iam_role" "spot_instance_role" {
-  name = "spot_instance_role"
+  name = "spot_instance_role_pipeid${lookup(var.common_tags, "pipelineid", "0")}"
   path = "/"
 
   assume_role_policy = <<EOF
@@ -126,6 +126,9 @@ output "spot_instance_profile_arn" {
 }
 output "spot_instance_profile_name" {
   value = aws_iam_instance_profile.spot_instance_profile.name
+}
+output "spot_instance_role_name" {
+  value = aws_iam_role.spot_instance_role.name
 }
 
 ### deadline spot fleet user IAM
