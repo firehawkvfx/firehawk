@@ -383,27 +383,27 @@ source_vars () {
     local var_file=$1
     local encrypt_mode=$2
 
-    printf "\n...Sourcing var_file $var_file\n"
+    echo_if_not_silent "...Sourcing var_file $var_file"
     # If initialising vagrant vars, no encryption is required
     if [[ -z "$var_file" ]] || [[ "$var_file" = "secrets" ]]; then
         var_file="secrets-$TF_VAR_envtier"
-        printf "...Using vault file $var_file\n"
+        echo_if_not_silent "...Using vault file $var_file"
         template_path="$TF_VAR_firehawk_path/secrets.template"
     elif [[ "$var_file" = "vagrant" ]]; then
-        printf '...Using variable file vagrant. No encryption/decryption needed for these contents.\n'
+        echo_if_not_silent '...Using variable file vagrant. No encryption/decryption needed for these contents.'
         encrypt_mode="none"
         template_path="$TF_VAR_firehawk_path/vagrant.template"
     elif [[ "$var_file" = "config" ]]; then
-        printf '...Using variable file config. No encryption/decryption needed for these contents.\n'
+        echo_if_not_silent '...Using variable file config. No encryption/decryption needed for these contents.'
         encrypt_mode="none"
         template_path="$TF_VAR_firehawk_path/config.template"
     elif [[ "$var_file" = "defaults" ]]; then
-        printf '...Using variable file defaults. No encryption/decryption needed for these contents.\n'
+        echo_if_not_silent '...Using variable file defaults. No encryption/decryption needed for these contents.'
         encrypt_mode="none"
         template_path="$TF_VAR_firehawk_path/defaults.template"
     elif [[ "$var_file" = "config-override" ]]; then
         var_file="config-override-$TF_VAR_envtier"
-        printf "...Using variable file $var_file. No encryption/decryption needed for these contents.\n"
+        echo_if_not_silent "...Using variable file $var_file. No encryption/decryption needed for these contents."
         encrypt_mode="none"
         template_path="$TF_VAR_firehawk_path/config-override.template"
     else
@@ -536,7 +536,7 @@ source_vars () {
                 
             export vault_command="cat $var_file"
         elif [[ $encrypt_mode = "none" ]]; then
-            echo "Assuming variables are not encrypted to set environment vars"
+            echo_if_not_silent "Assuming variables are not encrypted to set environment vars"
             export vault_command="cat $var_file"
         fi
 
@@ -553,9 +553,9 @@ source_vars () {
         ### Use the vault command to iterate over variables and export them without values to the template
 
         if [[ $encrypt_mode = "none" ]]; then
-            printf "\n...Parsing unencrypted file to template.  No decryption necesary.\n"
+            echo_if_not_silent "...Parsing unencrypted file to template.  No decryption necesary."
         else
-            printf "\n...Parsing vault file to template.  Decrypting.\n"
+            echo_if_not_silent "...Parsing vault file to template.  Decrypting."
             echo "vault_command=$vault_command"
         fi
 
@@ -650,7 +650,7 @@ source_vars () {
 
 if [[ "$TF_VAR_envtier" = 'dev' ]] || [[ "$TF_VAR_envtier" = 'prod' ]]; then
     # check for valid environment
-    printf "\n...Using environment $TF_VAR_envtier"
+    echo_if_not_silent "...Using environment $TF_VAR_envtier"
 else 
     printf "\n...${RED}WARNING: envtier evaluated to no match for dev or prod.  Inspect update_vars.sh to handle this case correctly.${NC}\n"
     return 88
