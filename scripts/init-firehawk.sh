@@ -293,7 +293,6 @@ else
       echo "...Finding Resources to taint: ${TF_VAR_taint_single[*]}"
       found=false
       for item in "${TF_VAR_taint_single[@]}"; do
-        set -x
         echo "Check item: $item"
         test_string="${item%[*}" # ignore the brackets on resources
         if terraform state list | grep -q $test_string; then 

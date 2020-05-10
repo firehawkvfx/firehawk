@@ -3,6 +3,7 @@
     msg: "{{ item }}"
   with_items:
     - "{{ public_ip }}"
+    
 - file:
     path: "/home/{{ variable_user }}/.ssh/known_hosts"
     state: touch

@@ -13,7 +13,7 @@ resource "null_resource" "init_awscli" {
       set -x
       cd /deployuser
       echo "...Check keys permissions"
-      ls -ltriah /secrets/keys
+      # ls -ltriah /secrets/keys
       export storage_user_access_key_id=${var.storage_user_access_key_id}
       echo "storage_user_access_key_id=$storage_user_access_key_id"
       export storage_user_secret=${var.storage_user_secret}

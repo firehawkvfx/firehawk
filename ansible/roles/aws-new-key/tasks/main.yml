@@ -14,10 +14,9 @@
 #   debug:
 #     var: key_result.stat.exists
 
-- name: "Force removal of key {{ key_name }} from account if not present on disk or if destroy is true.  regenerate next step."
+- name: "Force removal of key {{ key_name }} from account if missing on disk or if destroy is true.  regenerate next step."
   ec2_key:
     name: "{{ key_name }}"
-    #these must be defined if the module is used.
     aws_access_key: "{{ AWS_ACCESS_KEY }}"
     aws_secret_key: "{{ AWS_SECRET_KEY }}"
     ec2_region: "{{ aws_region }}"
@@ -35,7 +34,6 @@
 - name: create a new ec2 key pair, returns generated private key
   ec2_key:
     name: "{{ key_name }}"
-    #these must be defined if the module is used.
     aws_access_key: "{{ AWS_ACCESS_KEY }}"
     aws_secret_key: "{{ AWS_SECRET_KEY }}"
     ec2_region: "{{ aws_region }}"
