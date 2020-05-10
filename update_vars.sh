@@ -617,10 +617,10 @@ source_vars () {
         # set vault key location based on envtier dev/prod
         if [[ "$TF_VAR_envtier" = 'dev' ]]; then
             export vault_key="$(to_abs_path $TF_VAR_secrets_path/keys/$TF_VAR_vault_key_name_dev)"
-            echo "set vault_key $vault_key"
+            echo_if_not_silent "set vault_key $vault_key"
         elif [[ "$TF_VAR_envtier" = 'prod' ]]; then
             export vault_key="$(to_abs_path $TF_VAR_secrets_path/keys/$TF_VAR_vault_key_name_prod)"
-            echo "set vault_key $vault_key"
+            echo_if_not_silent "set vault_key $vault_key"
         else 
             printf "\n...${RED}WARNING: envtier evaluated to no match for dev or prod.  Inspect update_vars.sh to handle this case correctly.${NC}\n"
             return 88
@@ -630,13 +630,13 @@ source_vars () {
         if [[ "$TF_VAR_envtier" = 'dev' && $save_template = true ]]; then
             echo "$save_template"
             # The template will now be written to the public repository without any private values
-            printf "\n...Saving template to $template_path\n"
+            echo_if_not_silent "...Saving template to $template_path"
             mv -fv $tmp_template_path $template_path
         elif [[ "$TF_VAR_envtier" = 'prod' ]]; then
-            printf "\n...Bypassing saving of template to public repository since we are in a prod environment.  Writes to the Firehawk repository path are only done in the dev environment.\n"
+            echo_if_not_silent "...Bypassing saving of template to public repository since we are in a prod environment.  Writes to the Firehawk repository path are only done in the dev environment."
             rm -fv $tmp_template_path
         elif [[ $save_template = false ]]; then
-            printf "\n...Skipping saving of template\n"
+            echo_if_not_silent "...Skipping saving of template"
         else 
             printf "\n...${RED}WARNING: envtier evaluated to no match for dev or prod.  Inspect update_vars.sh to handle this case correctly.${NC}\n"
             return 88

@@ -4,6 +4,7 @@
   stat:
     path: "{{ local_key_path }}"
   register: key_result
+  no_log: true
 
 # - name: debug
 #   debug:
@@ -41,6 +42,7 @@
     force: yes
   register: ec2_key_result
   when: ( not destroy ) and ( not key_result.stat.exists )
+  no_log: true
 
 - name: "Save private key to file {{ local_key_path }}"
   copy:

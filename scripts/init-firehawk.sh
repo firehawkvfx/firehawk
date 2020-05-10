@@ -218,7 +218,6 @@ else
     aws iam list-users
     echo ""
 
-    # ansible-playbook -i "$TF_VAR_inventory" ansible/aws-new-key.yaml; exit_test # ensure aws key is present.
     touch $TF_VAR_local_key_path # ensure a file is present or tf will not be able to destroy anything.
 
     echo "...Terraform refresh"
@@ -236,7 +235,7 @@ else
       echo "...Removing terraform.tfstate for clean start."
       rm -fv terraform.tfstate; exit_test
     fi
-
+    echo "...Ensuring aws key is destroyed for current pipe."
     ansible-playbook -vv -i "$TF_VAR_inventory" ansible/aws-new-key.yaml --extra-vars "destroy=true"; exit_test # destroy the key from the aws account and on disk
     test_destroyed # check no resources exist anymore, then set pipe to 0 to allow init on next run
     set_pipe 0 # if resources are accidentally created, they would now have an id of 0, which should never happen, but this provides a safeguard.  if the active pipeline var is 0, this is used to initialise.
@@ -269,6 +268,7 @@ else
     if [ $TF_VAR_active_pipeline -eq 0 ]; then
       echo "...Init new pipe based on the current JOB ID: Found active pipeline is init: $TF_VAR_active_pipeline"
       set_pipe $TF_VAR_CI_JOB_ID # initalise all new resources with this pipe id
+      echo "...Ensuring aws key exists for current pipe."
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-new-key.yaml; exit_test # ensure an aws pem key exists for ssh into cloud nodes
       rm -fr $TF_VAR_firehawk_path/.initpipe # remove old init file.
       ### End init new infra id and prerequisites
