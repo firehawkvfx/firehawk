@@ -27,7 +27,7 @@ echo_if_not_silent() {
     if [[ -z "$silent" ]] || [[ "$silent" == false ]]; then echo $1; fi
 }
 
-printf "\nRunning ansiblecontrol with $1...\n"
+echo_if_not_silent "Running ansiblecontrol with $1..."
 
 # These paths and vars are necesary to locating other scripts.
 export TF_VAR_firehawk_path=$SCRIPTDIR
@@ -138,7 +138,7 @@ export box_file_in=""
 export ansiblecontrol_box="bento/ubuntu-16.04"
 export firehawkgateway_box="bento/ubuntu-16.04"
 
-echo "box - ansiblecontrol_box $ansiblecontrol_box"
+echo_if_not_silent "box - ansiblecontrol_box $ansiblecontrol_box"
 
 box_file_in () {
     if [[ "$verbose" == true ]]; then
@@ -323,7 +323,7 @@ fi
 
 template_path="$TF_VAR_firehawk_path/secrets.template"
 
-echo '...Get secrets from env'
+echo_if_not_silent '...Get secrets from env'
 # map environment secret for current env
 if [[ "$TF_VAR_envtier" = 'dev' ]]; then
     if [[ ! -z "$firehawksecret_dev" ]]; then
@@ -344,9 +344,9 @@ fi
 # Update the ci pipeline ID after a destroy operation.  Tagging of new resources will inherit this ID.
 config_override=$(to_abs_path $TF_VAR_secrets_path/config-override-$TF_VAR_envtier) # ...Config Override path $config_override.
 
-echo '...Check for configuration, init if not present.'
+echo_if_not_silent '...Check for configuration, init if not present.'
 if [ ! -f $config_override ]; then
-    echo "...Initialising $config_override"
+    echo_if_not_silent "...Initialising $config_override"
     cp "$TF_VAR_secrets_path/defaults-config-override-$TF_VAR_envtier" "$config_override"
 fi
 
@@ -371,10 +371,10 @@ fi
 
 x=false
 if [ -z ${TF_VAR_fast+x} ]; then
-    echo "TF_VAR_fast is unset.  defaulting to $x or it will be aquired by the config override file"
+    echo_if_not_silent "TF_VAR_fast is unset.  defaulting to $x or it will be aquired by the config override file"
 else
-    echo "TF_VAR_fast is set to '$TF_VAR_fast'"
-    echo "...Set TF_VAR_fast at config_override path- $TF_VAR_fast"
+    echo_if_not_silent "TF_VAR_fast is set to '$TF_VAR_fast'"
+    echo_if_not_silent "...Set TF_VAR_fast at config_override path- $TF_VAR_fast"
     sed -i "s/^TF_VAR_fast=.*$/TF_VAR_fast=${TF_VAR_fast}/" $config_override # ...Enable the vpc.
     export TF_VAR_fast=$(cat $config_override | sed -e '/.*TF_VAR_fast=.*/!d')
 fi
@@ -628,7 +628,7 @@ source_vars () {
 
         # update the template if in dev environment and save template is enabled.  save template may be disabled during setup script
         if [[ "$TF_VAR_envtier" = 'dev' && $save_template = true ]]; then
-            echo "$save_template"
+            echo "save_template: $save_template"
             # The template will now be written to the public repository without any private values
             echo_if_not_silent "...Saving template to $template_path"
             mv -fv $tmp_template_path $template_path
