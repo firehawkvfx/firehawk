@@ -7,14 +7,7 @@ GREEN='\033[0;32m' # Green Text
 BLUE='\033[0;34m' # Blue Text
 NC='\033[0m' # No Color
 
-#export SECONDS=0
 export SECONDS=0
-
-# # do some work
-# duration=$SECONDS
-# duration_block=$SECONDS
-# echo "$(($duration / 60)) minutes and $(($duration % 60)) seconds elapsed since last test."
-# echo "$(($duration_block / 60)) minutes and $(($duration_block % 60)) seconds elapsed for block."
 
 exit_test () {
     exit_code=$?
@@ -23,7 +16,7 @@ exit_test () {
     if [ "$exit_code" -eq 0 ]; then
         printf "\n${GREEN}Command Succeeded${NC} : "
         duration_block=$SECONDS
-        printf "$(($duration_block / 60)) minutes $(($duration_block % 60)) seconds elapsed for block.\n"
+        printf "$(($duration_block / 60))m:$(($duration_block % 60))s elapsed for block.\n"
         failed=false
     else
         failed=true
