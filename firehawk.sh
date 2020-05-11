@@ -208,7 +208,7 @@ if [[ "$fast" == true ]]; then
     init_vm_config=false
 fi
 
-set -Eeuo pipefail # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
+set -o pipefail # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 # set -o pipefail # Allow exit status of last command to fail to catch errors after pipe for ts function.
 # This is the directory of the current script
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
