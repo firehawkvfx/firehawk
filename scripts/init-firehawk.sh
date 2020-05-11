@@ -268,7 +268,7 @@ else
 
   if [[ "$tf_action" == "apply" ]]; then
 
-    if [ $TF_VAR_active_pipeline -eq 0 ]; then
+    if [ "$TF_VAR_active_pipeline" -eq 0 ]; then
       echo "...Init new pipe based on the current JOB ID: Found active pipeline is init: $TF_VAR_active_pipeline"
       set_pipe $TF_VAR_CI_JOB_ID # initalise all new resources with this pipe id
       echo "...Ensuring aws key exists for current pipe."
