@@ -32,12 +32,7 @@
     systemd:
       state: started
       daemon_reload: yes
-      name: disable-transparent-huge-pages
-
-  - name: enable the service on boot
-    systemd:
-      state: enabled
-      daemon_reload: yes
+      enabled: yes
       name: disable-transparent-huge-pages
 
   - name: check hugepages disabled
