@@ -137,3 +137,10 @@
     - "alias deadlinemonitor='cd /opt/Thinkbox/Deadline10/bin && ./deadlinemonitor -proxyserver {{ deadline_proxy_root_dir }}'"
     - "alias deadlinercs='cd /opt/Thinkbox/Deadline10/bin && ./deadlinercs'"
     - "alias deadlinepulse='cd /opt/Thinkbox/Deadline10/bin && ./deadlinepulse'"
+
+- name: show ulimits
+  command: cat /etc/init.d/Deadline10db
+  register: deadline_initd
+
+- debug: msg="{{ deadline_initd.stdout }}"
+- debug: msg="{{ deadline_initd.stderr }}"
