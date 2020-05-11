@@ -316,7 +316,7 @@ else
     
     echo "...Start Terraform"
     echo "...Terraform apply"
-    terraform apply -lock=false --auto-approve | ts '[%H:%M:%S]'; exit_test
+    terraform apply -lock=false --auto-approve; exit_test
     
   elif [[ "$tf_action" == "sleep" ]]; then
     echo "...Currently running instances: scripts/aws-running-instances.sh"

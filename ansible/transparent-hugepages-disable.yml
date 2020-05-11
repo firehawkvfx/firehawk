@@ -6,10 +6,45 @@
   any_errors_fatal: true
 
   tasks:
-  - name: Install hugepages for disabling transparent huge pages
-    package:
-      name: hugepages
-      state: latest
+  # - name: Install hugepages for disabling transparent huge pages
+  #   package:
+  #     name: hugepages
+  #     state: latest
+
+  - name: Service file # This is a service to ensure transparent huge pages is always disabled.
+    copy:
+      dest: "/etc/systemd/system/disable-transparent-huge-pages.service"
+      content: |
+        [Unit]
+        Description=Disable Transparent Huge Pages (THP)
+        DefaultDependencies=no
+        After=sysinit.target local-fs.target
+        Before=mongod.service
+
+        [Service]
+        Type=oneshot
+        ExecStart=/bin/sh -c 'echo never | tee /sys/kernel/mm/transparent_hugepage/enabled > /dev/null'
+
+        [Install]
+        WantedBy=basic.target
+
+  - name: start the service
+    systemd:
+      state: started
+      daemon_reload: yes
+      name: disable-transparent-huge-pages
+
+  - name: enable the service on boot
+    systemd:
+      state: enabled
+      daemon_reload: yes
+      name: disable-transparent-huge-pages
+
+  - name: check hugepages disabled
+    shell: |
+      cat /sys/kernel/mm/transparent_hugepage/enabled
+    register: command_result
+    failed_when: "'[never]' not in command_result.stdout"
 
   # - name: Install sysfsutils for disabling transparent huge pages
   #   package:
@@ -26,16 +61,16 @@
   # - name: disable transparent huge pages for mongo performance and stability - live change  - may only work on centos, unverified
   #   shell: echo never {{ ">" }} /sys/kernel/mm/transparent_hugepage/enabled
 
-  - name: disable transparent huge pages for mongo performance and stability - live change  - may only work on ubuntu, unverified
-    shell: |
-      hugeadm --thp-never
-    become: true
+  # - name: disable transparent huge pages for mongo performance and stability - live change  - may only work on ubuntu, unverified
+  #   shell: |
+  #     hugeadm --thp-never
+  #   become: true
 
 
-  - name: transparent hugepages status
-    shell: |
-      cat /sys/kernel/mm/transparent_hugepage/enabled
-    become: true
+  # - name: transparent hugepages status
+  #   shell: |
+  #     cat /sys/kernel/mm/transparent_hugepage/enabled
+  #   become: true
 
 # if test -f /sys/kernel/mm/transparent_hugepage/enabled; then
 #    echo never > /sys/kernel/mm/transparent_hugepage/enabled
