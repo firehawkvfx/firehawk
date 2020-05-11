@@ -5,3 +5,9 @@
     cat /sys/kernel/mm/transparent_hugepage/enabled
   register: command_result
   failed_when: "'[never]' not in command_result.stdout"
+
+- name: check defrag disabled
+  shell: |
+    cat /sys/kernel/mm/transparent_hugepage/defrag
+  register: command_result
+  failed_when: "'[never]' not in command_result.stdout"
