@@ -35,7 +35,10 @@
 
 - name: Ensure db is still valid.  if this fails, db is corrupted or there is a permissions issue
   block:
-    - name: install deadline db
+    # - name: fatal error will be unset if success
+    #   set_fact:
+    #     fatal_error: true
+    - name: check db
       shell: |
         cd /opt/Thinkbox/DeadlineDatabase10/mongo/application/bin/
         ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval '
@@ -49,14 +52,18 @@
     - include_role:
         name: "deadlinedb"
         tasks_from: "logs"
+    # - name: fatal error will be unset if success
+    #   set_fact:
+    #     fatal_error: false
   rescue:
     - include_role:
         name: "deadlinedb"
         tasks_from: "logs"
-    - name: fatal
-      set_fact:
-        fatal_error: true
-  always:
-  - meta: end_play
-    when: fatal_error is defined and fatal_error
-  any_errors_fatal: yes
+    # - name: fatal error
+    #   set_fact:
+    #     fatal_error: true
+    - meta: end_play
+  # always:
+  # - meta: end_play
+  #   when: fatal_error is defined and fatal_error
+  # any_errors_fatal: yes
