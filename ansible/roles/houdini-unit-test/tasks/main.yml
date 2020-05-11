@@ -5,7 +5,7 @@
 
 - name: copy hip file unit test to local ebs volume. if this fails there may be an issue with the onsite nfs mount.  check routes. Check that you did vagrant reload after provisioning vpn.  This is necesary for routes to work.
   shell: |
-    set -x
+    # set -x
     ls {{ firehawk_sync_source }}
     cp -r {{ firehawk_sync_source }}/qc /var/tmp/.
     ls /var/tmp/qc
@@ -13,7 +13,7 @@
 
 - name: execute unit test
   shell: |
-    set -x
+    # set -x
     cd /opt/hfs{{ item }}/
     source ./houdini_setup
     ls /var/tmp/
@@ -29,7 +29,7 @@
   copy:
     content: |
       #!/bin/bash
-      set -x
+      # set -x
       echo 'init log' >> /var/tmp/qc/logfile.txt
       exec > /var/tmp/qc/logfile.txt
       sleep 45

@@ -371,7 +371,7 @@ resource "null_resource" "provision_node_centos" {
     # First we install python remotely via the bastion to bootstrap the instance.  We also need this remote-exec to ensure the host is up.
     inline = [
       "sleep 10",
-      "set -x",
+      "# set -x",
       "sudo yum install -y python",
       "ssh-keyscan ${aws_instance.node_centos[0].private_ip}",
     ]
@@ -381,7 +381,7 @@ resource "null_resource" "provision_node_centos" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      set -x
+      # set -x
       cd /deployuser
       ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.node_centos[0].private_ip} bastion_ip=${var.bastion_ip}"; exit_test
 
@@ -421,7 +421,7 @@ resource "null_resource" "install_houdini" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      set -x
+      # set -x
       cd /deployuser
 
       aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id} # ensure instance is started
@@ -450,7 +450,7 @@ resource "null_resource" "install_deadline" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      set -x
+      # set -x
       cd /deployuser
 
       aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id} # ensure instance is started
@@ -497,7 +497,7 @@ resource "null_resource" "mounts_and_houdini_test" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      set -x
+      # set -x
       cd /deployuser
 
       aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id} # ensure instance is started

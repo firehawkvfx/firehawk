@@ -155,14 +155,14 @@ resource "null_resource" "provision_bastion" {
       timeout     = "10m"
     }
 
-    inline = ["set -x && sudo yum install -y python"]
+    inline = ["# set -x && sudo yum install -y python"]
   }
 
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      set -x
+      # set -x
       cd /deployuser
       echo "Check keys permissions"
       ls -ltriah /secrets/keys

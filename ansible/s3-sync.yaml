@@ -84,7 +84,7 @@
 
   - name: sync_paths
     shell: |
-      set -x
+      # set -x
       cd {{ volume_path }}/{{ item.item.path }}
       aws s3 sync . s3://{{ bucket }}/{{ item.item.path }} {{ item.item.s3_push_args | default( default_s3_push_args ) }}
     become_user: deployuser
@@ -113,7 +113,7 @@
         export AWS_ACCESS_KEY_ID={{ AWS_ACCESS_KEY }}
         export AWS_SECRET_ACCESS_KEY={{ AWS_SECRET_KEY }}
         export AWS_DEFAULT_REGION={{ aws_region }}
-      set -x
+      # set -x
       cd {{ volume_path }}/{{ item.path }}
       aws s3 sync s3://{{ bucket }}/{{ item.path }} . --include "*"
     become_user: deployuser
@@ -229,7 +229,7 @@
         export AWS_ACCESS_KEY_ID={{ AWS_ACCESS_KEY }}
         export AWS_SECRET_ACCESS_KEY={{ AWS_SECRET_KEY }}
         export AWS_DEFAULT_REGION={{ aws_region }}
-      set -x
+      # set -x
       cd {{ volume_path }}/{{ item.path }}
       aws s3 sync s3://{{ bucket }}/{{ item.path }} . --include "*"
     become_user: deadlineuser
@@ -283,7 +283,7 @@
         export AWS_ACCESS_KEY_ID={{ AWS_ACCESS_KEY }}
         export AWS_SECRET_ACCESS_KEY={{ AWS_SECRET_KEY }}
         export AWS_DEFAULT_REGION={{ aws_region }}
-      set -x
+      # set -x
       cd {{ volume_path }}/{{ item.item.path }}
       aws s3 sync . s3://{{ bucket }}/{{ item.item.path }} {{ item.item.s3_push_args | default( default_s3_push_args ) }}
     become_user: "{{ variable_user }}"
@@ -311,7 +311,7 @@
 #         export AWS_ACCESS_KEY_ID={{ AWS_ACCESS_KEY }}
 #         export AWS_SECRET_ACCESS_KEY={{ AWS_SECRET_KEY }}
 #         export AWS_DEFAULT_REGION={{ aws_region }}
-#       set -x
+#       # set -x
 #       cd {{ asset_path_nas }}
 #       aws s3 sync {{ shot_path_bucket }}/asset . --include "*"
 #     become_user: "{{ variable_user }}"
@@ -324,7 +324,7 @@
 #         export AWS_ACCESS_KEY_ID={{ AWS_ACCESS_KEY }}
 #         export AWS_SECRET_ACCESS_KEY={{ AWS_SECRET_KEY }}
 #         export AWS_DEFAULT_REGION={{ aws_region }}
-#       set -x
+#       # set -x
 #       cd {{ asset_path_nas }}
 #       aws s3 sync . {{ shot_path_bucket }}/asset --include "*"
 #     become_user: "{{ variable_user }}"
@@ -347,7 +347,7 @@
 #         export AWS_ACCESS_KEY_ID={{ AWS_ACCESS_KEY }}
 #         export AWS_SECRET_ACCESS_KEY={{ AWS_SECRET_KEY }}
 #         export AWS_DEFAULT_REGION={{ aws_region }}
-#       set -x
+#       # set -x
 #       cd {{ shot_path_nas }}/cache
 #       aws s3 sync {{ shot_path_bucket }}/cache . --include "*"
 #     become_user: "{{ variable_user }}"
@@ -360,7 +360,7 @@
 #         export AWS_ACCESS_KEY_ID={{ AWS_ACCESS_KEY }}
 #         export AWS_SECRET_ACCESS_KEY={{ AWS_SECRET_KEY }}
 #         export AWS_DEFAULT_REGION={{ aws_region }}
-#       set -x
+#       # set -x
 #       cd {{ shot_path_nas }}/cache
 #       aws s3 sync . {{ shot_path_bucket }}/cache --include "*"
 #     become_user: "{{ variable_user }}"
@@ -383,7 +383,7 @@
 #         export AWS_ACCESS_KEY_ID={{ AWS_ACCESS_KEY }}
 #         export AWS_SECRET_ACCESS_KEY={{ AWS_SECRET_KEY }}
 #         export AWS_DEFAULT_REGION={{ aws_region }}
-#       set -x
+#       # set -x
 #       cd {{ shot_path_nas }}/houdini
 #       aws s3 sync {{ shot_path_bucket }}/houdini . --include "*"
 #     become_user: "{{ variable_user }}"
@@ -396,7 +396,7 @@
 #         export AWS_ACCESS_KEY_ID={{ AWS_ACCESS_KEY }}
 #         export AWS_SECRET_ACCESS_KEY={{ AWS_SECRET_KEY }}
 #         export AWS_DEFAULT_REGION={{ aws_region }}
-#       set -x
+#       # set -x
 #       cd {{ shot_path_nas }}/houdini
 #       aws s3 sync . {{ shot_path_bucket }}/houdini --include "*"
 #     become_user: "{{ variable_user }}"

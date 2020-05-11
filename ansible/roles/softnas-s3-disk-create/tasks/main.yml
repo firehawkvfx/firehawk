@@ -42,7 +42,7 @@
 - name: create s3 extender disk
   shell: |
     softnas-cmd login softnas {{ user_softnas_pw }}
-    set -x
+    # set -x
     softnas-cmd diskmgmt createExtenderDisk type=amazon accessKey={{ AWS_ACCESS_KEY }} secretKey={{ AWS_SECRET_KEY }} bucketName={{ s3_disk_bucket_name }} sizeMaxValue={{ s3_disk_size_max_value }} sizeMaxUnits={{ s3_disk_size_max_units }} region={{ s3_disk_region }} {{ encrypt_option }}> /tmp/softnas_init_s3_disk_output_dict.json
   no_log: true
 

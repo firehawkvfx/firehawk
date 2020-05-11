@@ -42,7 +42,7 @@
 - name: import s3 extender disk
   shell: |
     softnas-cmd login softnas {{ user_softnas_pw }}
-    set -x
+    # set -x
     {{ import_s3_command }} >> /tmp/softnas_s3_disk_import_output
   register: shell_out_s3_import
   failed_when: shell_out_s3_import.rc != 1 and shell_out_s3_import.rc != 0
@@ -60,7 +60,7 @@
 - name: import all pools
   shell: |
     softnas-cmd login softnas {{ user_softnas_pw }}
-    set -x
+    # set -x
     {{ import_s3_pool }} >> /tmp/softnas_s3_pool_import_output
   when: import_pool
   no_log: true

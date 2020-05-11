@@ -31,7 +31,7 @@
 
 - name: Sync openfirehawk-houdini-tools to s3 - push
   shell: |
-    set -x
+    # set -x
     cd {{ firehawk_sync_source }}
     aws s3 sync . s3://{{ bucket }}/openfirehawk-houdini-tools/ --include "*" --exclude ".git/*" --no-progress
   become_user: deployuser
@@ -41,7 +41,7 @@
 
 - name: Sync openfirehawk-houdini-tools from s3
   shell: |
-    set -x
+    # set -x
     mount
     cat /etc/fstab
     cd /prod/assets/openfirehawk-houdini-tools

@@ -54,7 +54,7 @@
 
 # - name: Sync deadline from s3 if exist - pull - with the aws user credentials
 #   shell: |
-#     set -x
+#     # set -x
 #     cd {{ deadline_linux_installers_tar | dirname }}/
 #     aws s3 sync s3://{{ installers_bucket }}/ . --exclude "*" --include "{{ deadline_linux_installers_tar | basename }}"
 #   args:
@@ -122,7 +122,7 @@
   block:
     - name: install deadline db
       shell: |
-        set -x
+        # set -x
         cd /home/deadlineuser/Downloads/
         df -h
         {{ files_matched.files[0].path }} --mode unattended --debuglevel 2 --prefix /opt/Thinkbox/DeadlineRepository10 --setpermissions true --installmongodb true --dbOverwrite true --mongodir /opt/Thinkbox/DeadlineDatabase10 --dbListeningPort 27017 --certgen_outdir /opt/Thinkbox/DeadlineDatabase10/certs --certgen_password {{ deadline_proxy_certificate_password }} --createX509dbuser true --requireSSL true --dbhost {{ openfirehawkserver }} --dbport 27017 --dbuser {{ user_deadlineuser_name }} --dbpassword {{ deadline_proxy_certificate_password }} --dbauth true --dbcertpass {{ deadline_proxy_certificate_password }} --dbssl true
@@ -161,7 +161,7 @@
 
 # - name: Sync deadline to s3
 #   shell: |
-#     set -x
+#     # set -x
 #     # aws sts get-caller-identity
 #     cd {{ deadline_linux_installers_tar | dirname }}/
 #     aws s3 sync . s3://{{ installers_bucket }}/ --exclude "*" --include "{{ deadline_linux_installers_tar | basename }}"

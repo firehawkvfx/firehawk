@@ -181,7 +181,7 @@
 
   - name: ensure db is still valid.  a corrupted db may fail at this point if entryies have not been modified correctly
     shell: |
-      set -x
+      # set -x
       cd /opt/Thinkbox/DeadlineDatabase10/mongo/application/bin/
       ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval '
         var TEST = "0";'

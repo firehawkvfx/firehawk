@@ -4,7 +4,7 @@
 
 - name: Sync S3 # warning: there appears to be a bug with ansible that may result in variable user being defined at the include_role level not setting the variable_user var correctly.  consider this if errors should occur.
   shell: |
-    set -x
+    # set -x
     cd ~
     echo "become user {{ variable_user }}"
     echo "whoami $(whoami)"

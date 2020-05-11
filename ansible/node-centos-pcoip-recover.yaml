@@ -37,7 +37,7 @@
 
   # - name: get nvidia driver
   #   shell: |
-  #     set -x
+  #     # set -x
   #     cd /deployuser/downloads/nvidia/{{ grid_folder }}
   #     aws s3 sync s3://ec2-linux-nvidia-drivers/{{ grid_folder }}/ . --delete
   #     #cp *.run /deployuser/downloads/nvidia/.
@@ -164,7 +164,7 @@
 
   - name: fix boot and gui
     shell: |
-      set -x
+      # set -x
       uptime
       #systemctl restart pcoip.service
       /bin/sh /home/centos/Downloads/{{ driver_file }} --dkms -s --install-libglvnd

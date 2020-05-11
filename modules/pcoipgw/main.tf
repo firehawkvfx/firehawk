@@ -357,14 +357,14 @@ resource "null_resource" "pcoipgw" {
     }
 
     # First we install python remotely via the bastion to bootstrap the instance.  We also need this remote-exec to ensure the host is up.
-    inline = ["sleep 10 && set -x && sudo yum install -y python"]
+    inline = ["sleep 10 && # set -x && sudo yum install -y python"]
   }
 
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      set -x
+      # set -x
       cd /deployuser
       ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-public-host.yaml -v --extra-vars "public_ip=${aws_eip.pcoipgw_eip.public_ip} public_address=gateway.${var.public_domain_name} set_bastion=false"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init.yaml -v --extra-vars "variable_host=pcoipgw_eip.0 hostname=gateway.${var.public_domain_name} pcoip=true"; exit_test

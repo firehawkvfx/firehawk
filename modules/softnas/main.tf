@@ -616,7 +616,7 @@ resource "null_resource" "wait_softnas_up" {
 
     # sleep 300 is required because ecdsa key wont exist for a while, and you can't continue without it.
     inline = [
-      "set -x",
+      "# set -x",
       "while [ ! -f /etc/ssh/ssh_host_ecdsa_key.pub ]",
       "do",
       "  sleep 10",
@@ -669,12 +669,12 @@ resource "null_resource" "create_ami_init" {
       type                = "ssh"
       timeout             = "10m"
     }
-    inline = ["set -x && echo 'booted'"]
+    inline = ["# set -x && echo 'booted'"]
   }
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
-      set -x
+      # set -x
       cd /deployuser
       # ami creation is unnecesary since softnas ami update.  will be needed in future again if softnas updates slow down deployment.
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-ami.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]} ami_name=softnas_init_${local.ami} base_ami=${local.ami} description=softnas1_${aws_instance.softnas1.*.id[count.index]}_${random_id.ami_init_unique_name[0].hex}"
@@ -713,7 +713,7 @@ resource "null_resource" "provision_softnas" {
 
     # sleep 300 is required because ecdsa key wont exist for a while, and you can't continue without it.
     inline = [
-      "set -x",
+      "# set -x",
       "while [ ! -f /etc/ssh/ssh_host_ecdsa_key.pub ]",
       "do",
       "  sleep 10",
@@ -731,7 +731,7 @@ resource "null_resource" "provision_softnas" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      set -x
+      # set -x
       cd /deployuser
 
       ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.softnas1[0].private_ip} bastion_ip=${var.bastion_ip}"; exit_test
@@ -771,7 +771,7 @@ EOT
       type                = "ssh"
       timeout             = "10m"
     }
-    inline = ["set -x && echo 'booted after init'"]
+    inline = ["# set -x && echo 'booted after init'"]
   }
 }
 
@@ -815,12 +815,12 @@ resource "null_resource" "create_ami" {
       type                = "ssh"
       timeout             = "10m"
     }
-    inline = ["set -x && echo 'booted'"]
+    inline = ["# set -x && echo 'booted'"]
   }
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
-      set -x
+      # set -x
       cd /deployuser
       # ami creation is unnecesary since softnas ami update.  will be needed in future again if softnas updates slow down deployment.
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-ami.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]} ami_name=softnas_prebuilt_${local.ami} base_ami=${local.ami} description=softnas1_${aws_instance.softnas1.*.id[count.index]}_${random_id.ami_unique_name[0].hex}"
@@ -898,14 +898,14 @@ resource "null_resource" "provision_softnas_volumes" {
       timeout             = "10m"
     }
 
-    inline = ["set -x && echo 'booted'"]
+    inline = ["# set -x && echo 'booted'"]
   }
 
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      set -x
+      # set -x
       cd /deployuser
 
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init-users.yaml -v --extra-vars "variable_host=role_softnas variable_user=$TF_VAR_softnas_ssh_user set_hostname=false"; exit_test
@@ -941,13 +941,13 @@ EOT
       timeout             = "10m"
     }
 
-    inline = ["set -x && echo 'booted'"]
+    inline = ["# set -x && echo 'booted'"]
   }
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      set -x
+      # set -x
       cd /deployuser
 
       # ensure volumes and pools exist after disks are ensured to exist.
@@ -1040,7 +1040,7 @@ resource "null_resource" "attach_local_mounts_after_start" {
       timeout             = "10m"
     }
     inline = [
-      "set -x",
+      "# set -x",
       "echo 'connection established'",
     ]
   }
@@ -1048,7 +1048,7 @@ resource "null_resource" "attach_local_mounts_after_start" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      set -x
+      # set -x
 
       echo "TF_VAR_remote_mounts_on_local= $TF_VAR_remote_mounts_on_local"
       # ensure routes on workstation exist
@@ -1088,7 +1088,7 @@ resource "null_resource" "detach_local_mounts_after_stop" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      set -x
+      # set -x
 
       if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
         # unmount volumes from local site when softnas is shutdown.

@@ -60,7 +60,7 @@
 # if using deadline > v10.0.28.2, use conf_list_blob in place of conf_json_blob
 # - name: init spot template - list blob
 #   shell: | 
-#     set -x
+#     # set -x
 #     cd /opt/Thinkbox/DeadlineDatabase10/mongo/application/bin/
 #     ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval 'db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"PluginEnabled": "1"}})'
 
@@ -85,7 +85,7 @@
 
 - name: init spot template - json
   shell: | 
-    set -x
+    # set -x
     cd /opt/Thinkbox/DeadlineDatabase10/mongo/application/bin/
     ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval '
       var StaggerInstances = "50";
