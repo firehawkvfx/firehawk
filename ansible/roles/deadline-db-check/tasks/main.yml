@@ -25,16 +25,22 @@
     # - name: fatal error will be unset if success
     #   set_fact:
     #     fatal_error: true
+    - name: check limits # https://serverfault.com/questions/591812/how-to-set-ulimits-for-mongod
+      shell: |
+        cat /etc/security/limits.conf
+      become: true
+
     - name: check db
       shell: |
         cd /opt/Thinkbox/DeadlineDatabase10/mongo/application/bin/
-        ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval "printjson(db.getCollectionNames())"
+        ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval 'printjson(db.getCollectionNames())'
       no_log: false
       become: true
       retries: 5
       delay: 5
       register: result
       until: result.rc == 0
+
     - include_role:
         name: "deadlinedb"
         tasks_from: "logs"
