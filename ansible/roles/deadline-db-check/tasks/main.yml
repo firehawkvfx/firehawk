@@ -20,19 +20,6 @@
   when: Deadline10RemoteClient.stat.exists == False
   become: true
 
-# - name: Ensure db is still valid.  if this fails, db is corrupted or there is a permissions issue
-#   shell: |
-#     # set -x
-#     cd /opt/Thinkbox/DeadlineDatabase10/mongo/application/bin/
-#     ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval '
-#       var TEST = "0";'
-#   no_log: false
-#   become: true
-#   retries: 5
-#   delay: 5
-#   register: result
-#   until: result.rc == 0
-
 - name: Ensure db is still valid.  if this fails, db is corrupted or there is a permissions issue
   block:
     # - name: fatal error will be unset if success
@@ -41,8 +28,7 @@
     - name: check db
       shell: |
         cd /opt/Thinkbox/DeadlineDatabase10/mongo/application/bin/
-        ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval '
-          var TEST = "0";'
+        ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval "printjson(db.getCollectionNames())"
       no_log: false
       become: true
       retries: 5
@@ -59,6 +45,8 @@
     - include_role:
         name: "deadlinedb"
         tasks_from: "logs"
+    - shell: |
+        ls -ltriah /var/lib/mongodb/
     # - name: fatal error
     #   set_fact:
     #     fatal_error: true

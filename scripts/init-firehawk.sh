@@ -346,8 +346,10 @@ else
 
 
   if [[ "$deadline_action" == "stop" ]]; then
+    echo "...Stopping Deadline DB with playbook"
     ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-stop.yaml -v; exit_test
   elif [[ "$deadline_action" == "start" ]]; then
+    echo "...Starting Deadline DB with playbook"
     ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-start.yaml -v; exit_test
   fi
 

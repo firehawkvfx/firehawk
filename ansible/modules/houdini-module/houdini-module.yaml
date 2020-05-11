@@ -183,8 +183,7 @@
     shell: |
       # set -x
       cd /opt/Thinkbox/DeadlineDatabase10/mongo/application/bin/
-      ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval '
-        var TEST = "0";'
+      ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval 'printjson(db.getCollectionNames())'
     no_log: false
     become: true
     tags: install_deadline
