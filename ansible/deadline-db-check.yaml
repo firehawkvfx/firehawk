@@ -1,3 +1,4 @@
+---
 - hosts: "{{ variable_host | default('firehawkgateway') }}"
   remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
   gather_facts: "{{ variable_gather_facts | default('false') }}"

@@ -28,3 +28,7 @@
       var TEST = "0";'
   no_log: false
   become: true
+  retries: 5
+  delay: 5
+  register: result
+  until: result.rc == 0
