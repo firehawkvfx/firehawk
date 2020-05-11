@@ -82,7 +82,7 @@
       #promiscuous mode required for routing
       /sbin/ifconfig {{ vpn_nic }} up
       /sbin/ifconfig {{ vpn_nic }} promisc
-  when: configure_gateway
+  when: configure_gateway|bool
   tags:
   - init
 
