@@ -275,10 +275,17 @@ if [[ "$vagrant_up" == true ]]; then
         echo "...Will start machines"
         if [[ "$init_vm_config" == true ]]; then
             echo "...Starting vagrant, and provisioning."
-            vagrant up --provision
+            # vagrant up --provision ansiblecontrol$TF_VAR_envtier | ts '[%H:%M:%S]'
+            vagrant status | \
+            awk '
+            BEGIN{ tog=0; }
+            /^$/{ tog=!tog; }
+            /./ { if(tog){print $1} }
+            ' | \
+            xargs -P2 -I {} vagrant up --provision {}
         else
             echo "...Starting vagrant"
-            vagrant up
+            vagrant up | ts '[%H:%M:%S]'
         fi
     fi
 fi
@@ -305,7 +312,7 @@ if [ "$test_vm" = false ] ; then
     fi
     echo "...Get vagrant key file"
     # AFter Vagrant Hosts are up, take the SSH keys and store them in the keys folder for general use.
-    ansiblecontrol_config=$(vagrant ssh-config "ansiblecontrol$TF_VAR_envtier")
+    ansiblecontrol_config=$(vagrant ssh-config ansiblecontrol$TF_VAR_envtier)
     firehawkgateway_config=$(vagrant ssh-config firehawkgateway$TF_VAR_envtier)
     ansiblecontrol_key=$(echo "$ansiblecontrol_config" | grep -oP "^  IdentityFile \K.*")
     cp -f $ansiblecontrol_key $TF_VAR_secrets_path/keys/ansible_control_private_key
