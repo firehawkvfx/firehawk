@@ -118,6 +118,13 @@
   tags:
   - install
 
+- name: check hugepages disabled
+  shell: |
+    cat /sys/kernel/mm/transparent_hugepage/enabled
+  register: command_result
+  failed_when: "'[never]' not in command_result.stdout"
+  
+
 - name: Install Deadline DB & pull latest log.
   block:
     - name: install deadline db
@@ -125,6 +132,7 @@
         # set -x
         cd /home/deadlineuser/Downloads/
         df -h
+        if cat /sys/kernel/mm/transparent_hugepage/enabled | grep -q \[never\]; then echo 'continue'; else exit 1; fi
         {{ files_matched.files[0].path }} --mode unattended --debuglevel 2 --prefix /opt/Thinkbox/DeadlineRepository10 --setpermissions true --installmongodb true --dbOverwrite true --mongodir /opt/Thinkbox/DeadlineDatabase10 --dbListeningPort 27017 --certgen_outdir /opt/Thinkbox/DeadlineDatabase10/certs --certgen_password {{ deadline_proxy_certificate_password }} --createX509dbuser true --requireSSL true --dbhost {{ openfirehawkserver }} --dbport 27017 --dbuser {{ user_deadlineuser_name }} --dbpassword {{ deadline_proxy_certificate_password }} --dbauth true --dbcertpass {{ deadline_proxy_certificate_password }} --dbssl true
       register: deadline_db_install_output_shell
       become: true
