@@ -280,7 +280,7 @@ if [[ "$vagrant_up" == true ]]; then
         if [[ "$init_vm_config" == true ]]; then
             echo "...Starting vagrant, and provisioning."
             # vagrant up --provision | ts '[%H:%M:%S]'
-            vagrant_provision.sh | ts '[%H:%M:%S]'
+            $TF_VAR_firehawk_path/vagrant_provision.sh | ts '[%H:%M:%S]'
         else
             echo "...Starting vagrant"
             vagrant up | ts '[%H:%M:%S]'

@@ -139,7 +139,7 @@ Vagrant.configure(2) do |config|
             
                 # we define the location of the ansible hosts file in an environment variable.
                 node.vm.provision "shell", inline: "grep -qxF 'ANSIBLE_INVENTORY=/vagrant/ansible/hosts' /etc/environment || echo 'ANSIBLE_INVENTORY=/vagrant/ansible/hosts' | sudo tee -a /etc/environment"
-                node.vm.provision "shell", inline: "cd /vagrant; ansible-playbook -v ansible/transparent-hugepages-disable.yml" # mongo requires no transparent hugepages
+                node.vm.provision "shell", inline: "cd /vagrant; ansible-playbook ansible/transparent-hugepages-disable.yml" # mongo requires no transparent hugepages
                 # disable the update notifier.  We do not want to update to ubuntu 18, deadline installer doesn't work in 18 when last tested.
                 node.vm.provision "shell", inline: "sudo sed -i 's/Prompt=.*$/Prompt=never/' /etc/update-manager/release-upgrades"
                 # for dpkg or virtualbox issues, see https://superuser.com/questions/298367/how-to-fix-virtualbox-startup-error-vboxadd-service-failed
