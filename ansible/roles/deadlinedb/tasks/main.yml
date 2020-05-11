@@ -124,18 +124,29 @@
   register: command_result
   failed_when: "'[never]' not in command_result.stdout"
   
-
 - name: Install Deadline DB & pull latest log.
   block:
     - name: install deadline db
       shell: |
         # set -x
         cd /home/deadlineuser/Downloads/
-        df -h
-        if cat /sys/kernel/mm/transparent_hugepage/enabled | grep -q \[never\]; then echo 'continue'; else exit 1; fi
         {{ files_matched.files[0].path }} --mode unattended --debuglevel 2 --prefix /opt/Thinkbox/DeadlineRepository10 --setpermissions true --installmongodb true --dbOverwrite true --mongodir /opt/Thinkbox/DeadlineDatabase10 --dbListeningPort 27017 --certgen_outdir /opt/Thinkbox/DeadlineDatabase10/certs --certgen_password {{ deadline_proxy_certificate_password }} --createX509dbuser true --requireSSL true --dbhost {{ openfirehawkserver }} --dbport 27017 --dbuser {{ user_deadlineuser_name }} --dbpassword {{ deadline_proxy_certificate_password }} --dbauth true --dbcertpass {{ deadline_proxy_certificate_password }} --dbssl true
       register: deadline_db_install_output_shell
       become: true
+    - name: Started service for deadlinedb # may need process to wait for process to be started
+      service:
+        name: Deadline10db
+        state: started
+        enabled: true
+        daemon_reload: true
+      become: true
+    # - name: Restart service for deadlinedb # may need process to wait for process to be started
+    #   service:
+    #     name: Deadline10db
+    #     state: restarted
+    #   become: true
+    #   tags:
+    #   - install
     - include_role:
         name: "deadlinedb"
         tasks_from: "logs"
@@ -162,22 +173,6 @@
   debug:
     var: caller_info
 
-# - name: Get the current caller identity information
-#   aws_caller_info:
-#   register: caller_info
-#   become_user: deadlineuser
-
-# - name: Sync deadline to s3
-#   shell: |
-#     # set -x
-#     # aws sts get-caller-identity
-#     cd {{ deadline_linux_installers_tar | dirname }}/
-#     aws s3 sync . s3://{{ installers_bucket }}/ --exclude "*" --include "{{ deadline_linux_installers_tar | basename }}"
-#   become_user: deadlineuser
-#   tags:
-#   - install
-#   - sync_installers
-
 - name: s3-sync push deadline installer
   include_role:
     name: s3-sync
@@ -191,27 +186,8 @@
   - install
   - sync_installers
 
-# - name: "Ensure deadline {{ deadline_linux_installers_tar | dirname }}/{{ deadline_linux_installers_tar | basename }} exists in the s3 bucket {{ installers_bucket }} - Push if it doesn't."
-#   s3_sync:
-#     bucket: "{{ installers_bucket }}"
-#     file_root: "{{ deadline_linux_installers_tar | dirname }}"
-#     include: "{{ deadline_linux_installers_tar | basename }}"
-#     mode: push
-#   become_user: deadlineuser
-#   tags:
-#   - install
-#   - sync_installers
-
 - name: check deadline db install output
   debug:
     msg: "{{ deadline_db_install_output_shell.stdout }}"
-  tags:
-  - install
-
-- name: Restart service for deadlinedb
-  service:
-    name: Deadline10db
-    state: restarted
-  become: true
   tags:
   - install
