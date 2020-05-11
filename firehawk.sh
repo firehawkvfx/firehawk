@@ -208,8 +208,7 @@ if [[ "$fast" == true ]]; then
     init_vm_config=false
 fi
 
-set -o pipefail # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
-# set -o pipefail # Allow exit status of last command to fail to catch errors after pipe for ts function.
+
 # This is the directory of the current script
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 SCRIPTDIR=$(to_abs_path $SCRIPTDIR)
@@ -268,8 +267,9 @@ if [[ "$vagrant_up" == true ]]; then
     echo "vagrant status:"
     vagrant_status="$(vagrant status)"
     echo "$vagrant_status"
-
+    echo "$vagrant_status" | grep -o 'running (virtualbox)' | wc -l
     total_running_machines=$(echo "$vagrant_status" | grep -o 'running (virtualbox)' | wc -l)
+
     echo "total_running_machines $total_running_machines"
     # total_running_machines=$(grep -cim1 'running' $vagrant_status)
     if [ $total_running_machines -ge 2 ]; then
@@ -334,6 +334,8 @@ if [ "$test_vm" = false ] ; then
 
     if [[ ! -z "$hostname" && ! -z "$port" && ! -z "$TF_VAR_envtier" ]]; then
         echo "init_vm_config: $init_vm_config"
+        set -o pipefail # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
+        # set -o pipefail # Allow exit status of last command to fail to catch errors after pipe for ts function.
         if [[ "$tf_action" == "sleep" ]]; then
             echo "...Logging in to Vagrant host to set sleep on tf deployment"
             ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --sleep --init-vm-config=false" | ts '[%H:%M:%S]'; exit_test
