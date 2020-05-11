@@ -279,14 +279,8 @@ if [[ "$vagrant_up" == true ]]; then
         sleep 3
         if [[ "$init_vm_config" == true ]]; then
             echo "...Starting vagrant, and provisioning."
-            vagrant up --provision | ts '[%H:%M:%S]'
-            # vagrant status | \
-            # awk '
-            # BEGIN{ tog=0; }
-            # /^$/{ tog=!tog; }
-            # /./ { if(tog){print $1} }
-            # ' | \
-            # xargs -P2 -I {} vagrant up --provision {}
+            # vagrant up --provision | ts '[%H:%M:%S]'
+            vagrant_provision.sh | ts '[%H:%M:%S]'
         else
             echo "...Starting vagrant"
             vagrant up | ts '[%H:%M:%S]'
