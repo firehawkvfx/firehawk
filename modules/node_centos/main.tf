@@ -290,6 +290,7 @@ resource "aws_network_interface" "eth0" {
 
 locals {
   network_interface_id = element(concat(aws_network_interface.eth0.*.id, list("")), 0)
+  instanceid = element(concat(aws_instance.node_centos.*.id, list("")), 0)
 }
 
 resource "aws_instance" "node_centos" {
@@ -538,9 +539,8 @@ resource "random_id" "ami_unique_name" {
 resource "aws_ami_from_instance" "node_centos" {
   count              = var.site_mounts ? 1 : 0
   depends_on         = [null_resource.provision_node_centos, random_id.ami_unique_name, null_resource.mounts_and_houdini_test]
-  name               = "node_centos_houdini_${aws_instance.node_centos[0].id}_${random_id.ami_unique_name[0].hex}"
-  source_instance_id = aws_instance.node_centos[0].id
-  
+  name               = "node_centos_houdini_${local.instanceid}_${random_id.ami_unique_name[0].hex}"
+  source_instance_id = local.instanceid
   tags = merge(map("Name", format("%s", var.name)), var.common_tags, local.extra_tags)
 
 }
