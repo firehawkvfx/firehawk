@@ -270,6 +270,7 @@ if [[ "$vagrant_up" == true ]]; then
     echo "$vagrant_status"
 
     total_running_machines=$(echo "$vagrant_status" | grep -o 'running (virtualbox)' | wc -l)
+    echo "total_running_machines $total_running_machines"
     # total_running_machines=$(grep -cim1 'running' $vagrant_status)
     if [ $total_running_machines -ge 2 ]; then
         echo "...Both machines are already up."
