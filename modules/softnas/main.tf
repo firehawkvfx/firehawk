@@ -692,7 +692,7 @@ resource "null_resource" "provision_softnas" {
   depends_on = [aws_instance.softnas1, null_resource.wait_softnas_up, null_resource.create_ami_init]
 
   triggers = {
-    instanceid = aws_instance.softnas1[0].id
+    instanceid = "${join(",", aws_instance.softnas1.*.id)}"
     skip_update = var.skip_update
     ami = local.ami
   }

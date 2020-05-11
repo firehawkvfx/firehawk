@@ -346,7 +346,7 @@ resource "null_resource" "provision_node_centos" {
   depends_on = [aws_instance.node_centos, var.bastion_ip, aws_network_interface_sg_attachment.node_centos_sg_attachment ]
   
   triggers = {
-    instanceid = aws_instance.node_centos[0].id
+    instanceid = "${join(",", aws_instance.node_centos.*.id)}"
     install_deadline = var.install_deadline
     install_houdini = var.install_houdini
   }
@@ -413,7 +413,7 @@ resource "null_resource" "install_houdini" {
   depends_on = [ null_resource.provision_node_centos ]
 
   triggers = {
-    instanceid = aws_instance.node_centos[0].id
+    instanceid = "${join(",", aws_instance.node_centos.*.id)}"
     install_houdini = var.install_houdini
   }
 
@@ -441,7 +441,7 @@ resource "null_resource" "install_deadline" {
   depends_on = [ null_resource.provision_node_centos, null_resource.dependency_deadlinedb, aws_network_interface_sg_attachment.node_centos_sg_attachment_vpn, null_resource.install_houdini, var.vpn_private_ip ]
 
   triggers = {
-    instanceid = aws_instance.node_centos[0].id
+    instanceid = "${join(",", aws_instance.node_centos.*.id)}"
     install_deadline = var.install_deadline
     install_houdini = var.install_houdini
   }
@@ -488,7 +488,7 @@ resource "null_resource" "mounts_and_houdini_test" {
   depends_on = [ null_resource.dependency_softnas, null_resource.install_deadline ]
 
   triggers = {
-    instanceid = aws_instance.node_centos[0].id
+    instanceid = "${join(",", aws_instance.node_centos.*.id)}"
     install_deadline = var.install_deadline
     install_houdini = var.install_houdini
   }
