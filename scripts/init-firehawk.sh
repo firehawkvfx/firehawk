@@ -201,7 +201,8 @@ if [[ -z $TF_VAR_envtier ]] ; then
   exit 64
 else
   echo "init_vm_config: $init_vm_config"
-  if [[ "$init_vm_config" == true ]]; then
+  # if [[ "$init_vm_config" == true ]]; then
+  if [[ "$TF_VAR_vm_initialised" == false ]]; then
     echo "...Init VM's"
     echo "...Provision PGP / Keybase"
     $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-010-keybase.sh $ARGS; exit_test

@@ -276,6 +276,7 @@ if [[ "$vagrant_up" == true ]]; then
         echo "...Both machines are already up."
     else
         echo "...Will start machines"
+        sleep 3
         if [[ "$init_vm_config" == true ]]; then
             echo "...Starting vagrant, and provisioning."
             vagrant up --provision | ts '[%H:%M:%S]'
