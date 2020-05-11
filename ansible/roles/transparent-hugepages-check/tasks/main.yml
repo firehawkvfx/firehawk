@@ -1,0 +1,7 @@
+---
+# tasks file for ansible/transparent-hugepages-check
+- name: check hugepages disabled
+  shell: |
+    cat /sys/kernel/mm/transparent_hugepage/enabled
+  register: command_result
+  failed_when: "'[never]' not in command_result.stdout"

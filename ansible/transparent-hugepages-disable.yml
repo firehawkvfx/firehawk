@@ -5,7 +5,7 @@
   become: true
   any_errors_fatal: true
 
-  tasks:
+  pre_tasks:
   # - name: Install hugepages for disabling transparent huge pages
   #   package:
   #     name: hugepages
@@ -35,11 +35,14 @@
       enabled: yes
       name: disable-transparent-huge-pages
 
-  - name: check hugepages disabled
-    shell: |
-      cat /sys/kernel/mm/transparent_hugepage/enabled
-    register: command_result
-    failed_when: "'[never]' not in command_result.stdout"
+  roles:
+  - role: transparent-hugepages-check
+
+  # - name: check hugepages disabled
+  #   shell: |
+  #     cat /sys/kernel/mm/transparent_hugepage/enabled
+  #   register: command_result
+  #   failed_when: "'[never]' not in command_result.stdout"
 
   # - name: Install sysfsutils for disabling transparent huge pages
   #   package:

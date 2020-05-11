@@ -30,6 +30,7 @@
     - role: init-packages
     - role: terraform
     - role: aws-cli
+    - role: transparent-hugepages-check
 
 - hosts: "{{ variable_host | default('ansible_control') }}"
   remote_user: "{{ variable_user | default('deployuser') }}"
