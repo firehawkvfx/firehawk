@@ -8,10 +8,10 @@
   set_fact:
     latest_file: "{{ found_files.files | sort(attribute='mtime',reverse=true) | first }}"
 
-- name: "Get file {{ latest_file.path }} copy to {{ firehawk_path }}/tmp/deadline_db.log"
+- name: "Get file {{ latest_file.path }} copy to {{ firehawk_path }}/tmp/{{ out_file }}"
   fetch:
     src: "{{ latest_file.path }}"
-    dest: "{{ firehawk_path }}/tmp/deadline_db.log"
+    dest: "{{ firehawk_path }}/tmp/{{ out_file }}"
     flat: yes
     validate_checksum: no # logs may have incorrect checksums, possibly since data changes rapidly after download.
   become: true

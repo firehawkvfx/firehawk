@@ -11,12 +11,12 @@
       name: sysfsutils
       state: latest
 
-  - name: disable transparent huge pages for redis performance - persistent change
+  - name: disable transparent huge pages for mongo performance and stability - persistent change
     lineinfile:
       path: /etc/sysfs.conf
       create: true
       regexp: '^kernel\/mm\/transparent\_hugepage\/enabled'
       line: "kernel/mm/transparent_hugepage/enabled = never"
       
-  - name: disable transparent huge pages for redis performance - live change
+  - name: disable transparent huge pages for mongo performance and stability - live change
     shell: echo never {{ ">" }} /sys/kernel/mm/transparent_hugepage/enabled
