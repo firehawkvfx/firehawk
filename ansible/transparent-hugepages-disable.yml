@@ -1,0 +1,22 @@
+---
+- hosts: "{{ variable_host | default('localhost') }}"
+  remote_user: "{{ variable_connect_as_user | default('root') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
+  become: true
+  any_errors_fatal: true
+
+  tasks:
+  - name: install sysfsutils for disabling transparent huge pages
+    package:
+      name: sysfsutils
+      state: latest
+
+  - name: disable transparent huge pages for redis performance - persistent change
+    lineinfile:
+      path: /etc/sysfs.conf
+      create: true
+      regexp: '^kernel\/mm\/transparent\_hugepage\/enabled'
+      line: "kernel/mm/transparent_hugepage/enabled = never"
+      
+  - name: disable transparent huge pages for redis performance - live change
+    shell: echo never {{ ">" }} /sys/kernel/mm/transparent_hugepage/enabled
