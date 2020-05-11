@@ -70,6 +70,7 @@ resource "null_resource" "init_deadlinedb_firehawk" {
       if [[ "$TF_VAR_install_deadline" == true ]]; then
         # Install deadline
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-install.yaml -v; exit_test
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-start.yaml -v; exit_test
         # First db check
         echo "test db 0"
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
@@ -78,6 +79,7 @@ resource "null_resource" "init_deadlinedb_firehawk" {
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-repository-custom-events.yaml; exit_test
         echo "test db 2"
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+        
       fi
 EOT
 }

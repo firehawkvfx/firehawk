@@ -51,11 +51,6 @@
     - include_role:
         name: "deadlinedb"
         tasks_from: "logs"
-    - shell: |
-        ls -ltriah /var/lib/mongodb/
-    # - name: fatal error
-    #   set_fact:
-    #     fatal_error: true
     - meta: end_play
   # always:
   # - meta: end_play
