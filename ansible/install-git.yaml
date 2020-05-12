@@ -1,0 +1,12 @@
+- hosts: localhost
+  remote_user: "{{ variable_user | default('deployuser') }}"
+  gather_facts: "{{ variable_gather_facts | default('true') }}"
+  become: true
+
+  tasks:
+  - name: test
+    debug:
+      msg: "test"
+
+  roles:
+  - role: geerlingguy.git
