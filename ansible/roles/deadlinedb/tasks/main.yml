@@ -126,11 +126,19 @@
   tags:
   - install
 
-- name: stop mongodb
+- name: Check if mongod Service Exists
+  stat: path=/etc/init.d/{{service_name}}
+  register: service_status
+  become_user: "{{ user_deadlineuser_name }}"
+  become: true
+  tags:
+  - install
+
+- name: Stop mongodb
   service: name=mongod state=stopped enabled=false
   become_user: "{{ user_deadlineuser_name }}"
   become: true
-  when: stat_result.stat.exists
+  when: service_status.stat.exists
   tags:
   - install
 
