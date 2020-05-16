@@ -63,12 +63,7 @@
       - "{{ lookup('dict', secrets) }}"
     include_role:
       name: store-secret
-
-  roles:
-  - deadline-db-check # Check the db is functioning after alterations.
-  - deadline-groups # Update groups for nodes.
-  - deadline-ubl # Configure Usage Base Licesning.
-  - deadline-db-check # Check the db is functioning after alterations.
+      
 
 - hosts: "{{ variable_host | default('firehawkgateway') }}"
   remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
