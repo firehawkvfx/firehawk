@@ -53,7 +53,7 @@
     with_items:
     - otls
     - soho
-    tags: install_deadline
+    tags: install_deadline_db
 
   - name: Fetch from the remote recursively and save to local
     synchronize:
@@ -68,7 +68,7 @@
     - DeadlineHoudiniClient.py
     - MainMenuCommon.xml
     - CallDeadlineCommand.py
-    tags: install_deadline
+    tags: install_deadline_db
 
   - name: Ansible set permissions for items to be copied - /opt/Thinkbox/DeadlineRepository10/submission/... - should not be necesary since root is covered prior, but may fix issues.
     file:
@@ -83,7 +83,7 @@
     - HServer
     - Houdini
     - Nuke
-    tags: install_deadline
+    tags: install_deadline_db
 
   - name: Ensure tmp dirs exist - submission
     file:
@@ -98,7 +98,7 @@
     - HServer
     - Houdini
     - Nuke
-    tags: install_deadline
+    tags: install_deadline_db
 
   - name: Fetch submission plugins
     synchronize:
@@ -110,7 +110,7 @@
     - HServer
     - Houdini
     - Nuke
-    tags: install_deadline
+    tags: install_deadline_db
 
 ### Houdini Install
 
@@ -145,7 +145,7 @@
       name: install-deadline-role
       apply:
         tags:
-          - install_deadline
+          - install_deadline_db
     tags: always
 
 ### Houdini Deadline Plugin
@@ -171,7 +171,7 @@
       name: 'deadlinedb-houdini-plugins'
       apply:
         tags:
-          - install_deadline
+          - install_deadline_db
     tags:
     - always
     loop: "{{ houdini_major_version_list }}"
@@ -186,5 +186,5 @@
       ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval 'printjson(db.getCollectionNames())'
     no_log: false
     become: true
-    tags: install_deadline
+    tags: install_deadline_db
 

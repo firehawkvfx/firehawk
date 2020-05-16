@@ -83,9 +83,9 @@ TF_VAR_install_houdini=insertvalue
 # default: TF_VAR_softnas_skip_update=false
 TF_VAR_softnas_skip_update=insertvalue
 
-# TF_VAR_install_deadline:
-# default: TF_VAR_install_deadline=true
-TF_VAR_install_deadline=insertvalue
+# TF_VAR_install_deadline_db:
+# default: TF_VAR_install_deadline_db=true
+TF_VAR_install_deadline_db=insertvalue
 
 # TF_VAR_taint_single:
 # default: TF_VAR_taint_single=""

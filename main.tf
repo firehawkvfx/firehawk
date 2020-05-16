@@ -59,7 +59,9 @@ module "firehawk_init" {
   storage_user_secret = module.storage_user.storage_user_secret
 
   install_houdini = var.install_houdini
-  install_deadline = var.install_deadline
+  install_deadline_db = var.install_deadline_db
+  install_deadline_rcs = var.install_deadline_rcs
+  install_deadline_worker = var.install_deadline_worker
 }
 
 module "vpc" {
@@ -441,7 +443,7 @@ module "node" {
   wakeable = var.node_wakeable
 
   install_houdini = var.install_houdini
-  install_deadline = var.install_deadline
+  install_deadline_db = var.install_deadline_db
   houdini_license_server_address = var.houdini_license_server_address
 
   common_tags = local.common_tags

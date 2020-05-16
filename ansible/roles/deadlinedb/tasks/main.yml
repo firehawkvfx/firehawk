@@ -136,9 +136,9 @@
     - name: Started service for deadlinedb # may need process to wait for process to be started
       service:
         name: Deadline10db
-        state: started
+        # state: started
         enabled: true
-        daemon_reload: true
+        # daemon_reload: true
       become: true
     # - name: Restart service for deadlinedb # may need process to wait for process to be started
     #   service:

@@ -180,6 +180,10 @@ variable "pgp_public_key" {
 variable "provision_deadline_spot_plugin" {
 }
 
-variable "install_deadline" {}
+variable "install_deadline_db" {}
+
+variable "install_deadline_worker" {}
+
+variable "install_deadline_rcs" {}
 
 variable "install_houdini" {}

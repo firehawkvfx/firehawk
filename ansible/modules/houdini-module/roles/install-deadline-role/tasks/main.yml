@@ -4,9 +4,9 @@
   loop_control:
     loop_var: houdini_version_item
   when: houdini_install_type != "server"
-  tags: install_deadline
+  tags: install_deadline_db
 
 - name: configure houdini and deadline config
   include: houdini-deadline-config.yml
   when: houdini_install_type != "server"
-  tags: install_deadline
+  tags: install_deadline_db
