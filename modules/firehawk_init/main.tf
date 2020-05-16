@@ -133,6 +133,7 @@ EOT
 
 resource "null_resource" "init_aws_local_workstation" {
   count = var.firehawk_init ? 1 : 0
+  depends_on = [null_resource.init_deadlinedb_firehawk]
   # depends_on = [null_resource.init_routes_houdini_license_server]
 
   triggers = {
