@@ -22,9 +22,9 @@
     group: syscontrol
     mode: u=rwX,g=rX,o-rwx
   become_user: "{{ user_deadlineuser_name }}"
-  become: true
+  # become: true
   with_items:
-  - /opt/Thinkbox/
+  - /opt/Thinkbox
   - /opt/Thinkbox/certs
       
 
