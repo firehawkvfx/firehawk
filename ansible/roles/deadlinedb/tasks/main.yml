@@ -3,15 +3,16 @@
 
 - name: Ensure dirs exist
   file:
-    path: 
-    - '/home/{{ user_deadlineuser_name }}/Downloads'
-    - '/home/{{ user_deadlineuser_name }}/Downloads/{{ deadline_linux_basename }}'
-    - /opt/Thinkbox/certs
-    - /deployuser/tmp/DeadlineRepository10/backup
-    - /deployuser/tmp/DeadlineDatabase10/mongo/backup/
+    path: "{{ item }}"
     state: directory
     owner: "{{ user_deadlineuser_name }}"
   become: yes
+  with_items:
+  - '/home/{{ user_deadlineuser_name }}/Downloads'
+  - '/home/{{ user_deadlineuser_name }}/Downloads/{{ deadline_linux_basename }}'
+  - /opt/Thinkbox/certs
+  - /deployuser/tmp/DeadlineRepository10/backup
+  - /deployuser/tmp/DeadlineDatabase10/mongo/backup/
 
 - name: Find backups if present - DeadlineDatabase10
   find: paths=/opt/Thinkbox/DeadlineDatabase10/mongo/backup/ file_type=directory patterns="*"
