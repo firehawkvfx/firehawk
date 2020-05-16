@@ -127,7 +127,7 @@
   - install
 
 - name: Check if mongod Service Exists
-  stat: path=/etc/init.d/{{service_name}}
+  stat: path=/etc/init.d/mongod
   register: service_status
   become_user: "{{ user_deadlineuser_name }}"
   become: true
