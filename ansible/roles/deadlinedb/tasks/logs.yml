@@ -1,4 +1,4 @@
-- name: Get files in a folder
+- name: Get files in a folder /opt/Thinkbox/DeadlineDatabase10/mongo/data/logs/
   find:
     paths: "/opt/Thinkbox/DeadlineDatabase10/mongo/data/logs/"
   register: found_files
