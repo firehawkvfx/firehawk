@@ -13,8 +13,6 @@
     ubl: true
     
   roles:
-    # - role: s3-bucket
-    # - {role: deadlinedb, tags: 'deadlinedb'}
     - role: deadlinercs
     - role: deadline-db-check # Check the db is functioning.
     - role: deadline-groups # Update groups for nodes.
