@@ -38,19 +38,6 @@ resource "null_resource" "init_awscli" {
       # configure onsite NAS mounts to firehawkgateway and ansible control for sync handling
       ansible-playbook -i "$TF_VAR_inventory" ansible/linux-volume-mounts.yaml --extra-vars "variable_host=firehawkgateway variable_user=deployuser softnas_hosts=none" --tags 'local_install_onsite_mounts'; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/linux-volume-mounts.yaml --extra-vars "variable_host=localhost variable_user=deployuser softnas_hosts=none" --tags 'local_install_onsite_mounts'; exit_test
-
-      export storage_user_access_key_id=${var.storage_user_access_key_id}
-      echo "storage_user_access_key_id=$storage_user_access_key_id"
-      export storage_user_secret=${var.storage_user_secret}
-      echo "storage_user_secret= $storage_user_secret"
-      # ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-install.yaml -v --extra-vars "user_deadlineuser_name=deployuser"; exit_test
-      if [[ "$TF_VAR_install_deadline_db" == true ]]; then
-        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-install.yaml -v --extra-vars "user_deadlineuser_name=deployuser"; exit_test
-        # ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-install.yaml -v; exit_test
-      fi
-      if [[ "$TF_VAR_install_deadline_rcs" == true ]]; then
-        ansible-playbook -i "$TF_VAR_inventory" ansible/deadlinercs.yaml -v --extra-vars "user_deadlineuser_name=deployuser"; exit_test
-      fi
 EOT
 }
 }
@@ -80,6 +67,18 @@ resource "null_resource" "init_deadlinedb_firehawk" {
 
       export storage_user_access_key_id=${var.storage_user_access_key_id}
       export storage_user_secret=${var.storage_user_secret}
+
+      export storage_user_access_key_id=${var.storage_user_access_key_id}
+      echo "storage_user_access_key_id=$storage_user_access_key_id"
+      export storage_user_secret=${var.storage_user_secret}
+      echo "storage_user_secret= $storage_user_secret"
+      if [[ "$TF_VAR_install_deadline_db" == true ]]; then
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-install.yaml -v --extra-vars "user_deadlineuser_name=deployuser"; exit_test
+      fi
+      if [[ "$TF_VAR_install_deadline_rcs" == true ]]; then
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadlinercs.yaml -v --extra-vars "user_deadlineuser_name=deployuser"; exit_test
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-repository-custom-events.yaml -v --extra-vars "user_deadlineuser_name=deployuser"; exit_test
+      fi
 
       # if [[ "$TF_VAR_install_deadline_db" == true ]]; then
       #   # # Install deadline
