@@ -137,6 +137,8 @@
   register: deadline_db_install_output_shell
   become: true
   when: stat_result.stat.exists
+  tags:
+  - install
   
 - name: Install Deadline DB & pull latest log.
   block:
