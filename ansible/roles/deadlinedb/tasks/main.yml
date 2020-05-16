@@ -120,7 +120,35 @@
     cd /opt/Thinkbox/DeadlineRepository10
     sudo ./uninstall --mode unattended
   become_user: "{{ user_deadlineuser_name }}"
-  register: deadline_db_install_output_shell
+  register: deadline_db_uninstall_output_shell
+  become: true
+  when: stat_result.stat.exists
+  tags:
+  - install
+
+- name: stop mongodb
+  service: name=mongod state=stopped enabled=false
+  become_user: "{{ user_deadlineuser_name }}"
+  become: true
+  when: stat_result.stat.exists
+  tags:
+  - install
+
+- name: Uninstall deadline db if already present
+  shell: |
+    sudo rm -r /var/log/mongodb
+    sudo rm -r /var/lib/mongodb
+  become_user: "{{ user_deadlineuser_name }}"
+  become: true
+  when: stat_result.stat.exists
+  tags:
+  - install
+
+- name: purge mongo
+  apt:
+    name: "mongodb-org*"
+    purge: true
+  become_user: "{{ user_deadlineuser_name }}"
   become: true
   when: stat_result.stat.exists
   tags:
@@ -136,13 +164,13 @@
       become_user: "{{ user_deadlineuser_name }}"
       register: deadline_db_install_output_shell
       become: true
-    - name: Started service for deadlinedb # may need process to wait for process to be started
-      service:
-        name: Deadline10db
-        # state: started
-        enabled: true
-        # daemon_reload: true
-      become: true
+    # - name: Started service for deadlinedb # may need process to wait for process to be started
+    #   service:
+    #     name: Deadline10db
+    #     # state: started
+    #     enabled: true
+    #     # daemon_reload: true
+    #   become: true
     # - name: Restart service for deadlinedb # may need process to wait for process to be started
     #   service:
     #     name: Deadline10db
