@@ -110,7 +110,7 @@
   register: command_result
   failed_when: "'[never]' not in command_result.stdout"
 
-- name: Check that the somefile.conf exists
+- name: Check that the somefile exists
   stat:
     path: /opt/Thinkbox/DeadlineRepository10/uninstall
   register: stat_result
@@ -154,7 +154,8 @@
 
 - name: purge mongo
   apt:
-    name: "mongodb-org*"
+    name: 'mongod*'
+    state: absent
     purge: true
   become_user: "{{ user_deadlineuser_name }}"
   become: true
