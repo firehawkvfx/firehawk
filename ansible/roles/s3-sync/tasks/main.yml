@@ -53,7 +53,7 @@
       else
         echo "Sync Pull: File present in S3 bucket..."
         if [ -f "{{ filename }}" ]; then
-          echo "{{ filename }} already exists.  Won't Pull"
+          echo "{{ filename }} File already present.  Won't Pull"
           exit 0
         else 
           aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ filename }}" --no-progress
@@ -69,6 +69,8 @@
     fi
   register: output
   become_user: "{{ variable_user }}"
+  changed_when:
+    - '"File already present" not in output.stdout'
   args:
     executable: /bin/bash
   # failed_when: output.rc != 0
