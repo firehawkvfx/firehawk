@@ -4,12 +4,12 @@
 - name: Ensure dirs exist
   file:
     path: 
-    - "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
+    - "/home/{{ user_deadlineuser_name }}/Downloads/{{ deadline_linux_basename }}"
     - /opt/Thinkbox/certs
     - /deployuser/tmp/DeadlineRepository10/backup
     - /deployuser/tmp/DeadlineDatabase10/mongo/backup/
     state: directory
-    owner: deadlineuser
+    owner: "{{ user_deadlineuser_name }}"
   become: yes
 
 - name: Find backups if present - DeadlineDatabase10
@@ -86,7 +86,7 @@
   unarchive:
     src: "{{ deadline_linux_installers_tar }}"
     dest: "/home/{{ user_deadlineuser_name }}/Downloads/{{ deadline_linux_basename }}"
-    owner: deadlineuser
+    owner: "{{ user_deadlineuser_name }}"
     mode: u+x
   become: yes
   tags:
@@ -175,7 +175,7 @@
     - name: install deadline db
       shell: |
         # set -x
-        cd /home/deadlineuser/Downloads/
+        cd /home/{{ user_deadlineuser_name }}/Downloads/
         sudo {{ files_matched.files[0].path }} --mode unattended --debuglevel 2 --prefix /opt/Thinkbox/DeadlineRepository10 --setpermissions true --installmongodb true --dbOverwrite true --mongodir /opt/Thinkbox/DeadlineDatabase10 --dbListeningPort 27017 --certgen_outdir /opt/Thinkbox/DeadlineDatabase10/certs --certgen_password {{ deadline_proxy_certificate_password }} --createX509dbuser true --requireSSL true --dbhost {{ openfirehawkserver }} --dbport 27017 --dbuser {{ user_deadlineuser_name }} --dbpassword {{ deadline_proxy_certificate_password }} --dbauth true --dbcertpass {{ deadline_proxy_certificate_password }} --dbssl true
       become_user: "{{ user_deadlineuser_name }}"
       register: deadline_db_install_output_shell
