@@ -11,7 +11,7 @@
 - name: "Get file {{ latest_file.path }} copy to {{ firehawk_path }}/tmp/{{ out_file }}"
   fetch:
     src: "{{ latest_file.path }}"
-    dest: "{{ firehawk_path }}/tmp/{{ out_file }}"
+    dest: "{{ firehawk_path }}/tmp/log/{{ out_file }}"
     flat: yes
     validate_checksum: no # logs may have incorrect checksums, possibly since data changes rapidly after download.
   become: true
@@ -19,7 +19,7 @@
 - name: "Get all files: file {{ item.path }} copy to {{ firehawk_path }}/tmp/"
   fetch:
     src: "{{ item.path }}"
-    dest: "{{ firehawk_path }}/tmp/"
+    dest: "{{ firehawk_path }}/tmp/log/"
     flat: yes
     validate_checksum: no # logs may have incorrect checksums, possibly since data changes rapidly after download.
   become: true

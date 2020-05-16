@@ -46,6 +46,7 @@ function to_abs_path {
 export TF_VAR_secrets_path="$(to_abs_path $TF_VAR_firehawk_path/../secrets)"; exit_test
 
 mkdir -p $TF_VAR_firehawk_path/tmp/
+mkdir -p $TF_VAR_firehawk_path/tmp/log
 mkdir -p $TF_VAR_secrets_path/keys
 
 # The template will be updated by this script
