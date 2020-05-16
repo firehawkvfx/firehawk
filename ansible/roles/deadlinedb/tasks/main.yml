@@ -1,9 +1,13 @@
 ---
 # tasks file for roles/deadlinedb
 
-- name: Ensures dir exists
+- name: Ensure dirs exist
   file:
-    path: "/deployuser/tmp/DeadlineDatabase10/mongo/backup/"
+    path: 
+    - "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
+    - /opt/Thinkbox/certs
+    - /deployuser/tmp/DeadlineRepository10/backup
+    - /deployuser/tmp/DeadlineDatabase10/mongo/backup/
     state: directory
     owner: deadlineuser
   become: yes
@@ -18,12 +22,6 @@
   when: backup_paths.matched|int != 0
   become: yes
 
-- name: Ensures dir exists
-  file:
-    path: "/deployuser/tmp/DeadlineRepository10/backup"
-    state: directory
-    owner: deadlineuser
-  become: yes
 
 - name: Find backups if present - DeadlineRepository10
   find: paths=/opt/Thinkbox/DeadlineRepository10/backup/ file_type=directory patterns="*"
@@ -75,19 +73,7 @@
     msg: "Bailing out: You need to place the installer in the download directory.  Installer not found - {{ deadline_linux_installers_tar }}"
   when: deadline_linux_installers_tar_stat.stat.exists == false or deadline_linux_installers_tar_stat.stat.isdir == True
 
-- name: Ensures dir exists
-  file:
-    path: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
-    state: directory
-    owner: deadlineuser
-  become: yes
 
-- name: Ensures dir exists
-  file:
-    path: /opt/Thinkbox/certs
-    state: directory
-    owner: deadlineuser
-  become: yes
 
 - name: Extract
   unarchive:
