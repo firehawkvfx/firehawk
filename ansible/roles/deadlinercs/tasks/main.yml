@@ -2,23 +2,23 @@
 # tasks file for roles/deadlinercs
 - name: Ensures dir exists
   file:
-    path: "/home/deadlineuser/Downloads/Deadline-{{ deadline_version }}-linux-installers/"
+    path: "/home/{{ user_deadlineuser_name }}/Downloads/Deadline-{{ deadline_version }}-linux-installers/"
     state: directory
-    owner: deadlineuser
+    owner: "{{ user_deadlineuser_name }}"
   become: yes
 
 - name: Ensures dir exists
   file:
     path: /opt/Thinkbox/certs
     state: directory
-    owner: deadlineuser
+    owner: "{{ user_deadlineuser_name }}"
   become: yes
 
 - name: Extract
   unarchive:
     src: "{{ deadline_linux_installers_tar }}"
-    dest: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
-    owner: deadlineuser
+    dest: "/home/{{ user_deadlineuser_name }}/Downloads/{{ deadline_linux_basename }}"
+    owner: "{{ user_deadlineuser_name }}"
     mode: u+x
   become: yes
 
@@ -26,13 +26,13 @@
   file:
     path: /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx
     mode: u=r,g=r,o=r
-    owner: deadlineuser
+    owner: "{{ user_deadlineuser_name }}"
   become: yes
 
 - name: deadline must have full access to repository
   file: 
     path: /opt/Thinkbox/DeadlineRepository10
-    owner: deadlineuser
+    owner: "{{ user_deadlineuser_name }}"
     mode: u=rwX,g=rwX,o=r
     recurse: yes
   become: yes
@@ -47,7 +47,7 @@
 
 - name: "Ansible find files in subdirectory download"
   find:
-    paths: /home/deadlineuser/Downloads/{{ deadline_linux_basename }}
+    paths: /home/{{ user_deadlineuser_name }}/Downloads/{{ deadline_linux_basename }}
     patterns: "*DeadlineClient-{{ deadline_version }}-linux-x64-installer.run"
   register: files_matched
   become: true
@@ -98,7 +98,7 @@
   file:
     path: /opt/Thinkbox/certs/Deadline10RemoteClient.pfx
     mode: u=r,g=r,o=r
-    owner: deadlineuser
+    owner: "{{ user_deadlineuser_name }}"
   become: yes
 
 - name: Allow new lines from ansible shell output.  Logout or reboot for this to take effect.
@@ -130,7 +130,7 @@
 
 - name: Allow new lines from ansible shell output.  Logout or reboot for this to take effect.
   lineinfile:
-    path: /home/deadlineuser/.bashrc
+    path: "/home/{{ user_deadlineuser_name }}/.bashrc"
     line: "{{ item }}"
     create: yes
   with_items:

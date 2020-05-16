@@ -44,7 +44,13 @@ resource "null_resource" "init_awscli" {
       export storage_user_secret=${var.storage_user_secret}
       echo "storage_user_secret= $storage_user_secret"
       # ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-install.yaml -v --extra-vars "user_deadlineuser_name=deployuser"; exit_test
-      ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-install.yaml -v; exit_test
+      if [[ "$TF_VAR_install_deadline_db" == true ]]; then
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-install.yaml -v --extra-vars "user_deadlineuser_name=deployuser"; exit_test
+        # ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-install.yaml -v; exit_test
+      fi
+      if [[ "$TF_VAR_install_deadline_rcs" == true ]]; then
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadlinercs.yaml -v --extra-vars "user_deadlineuser_name=deployuser"; exit_test
+      fi
 EOT
 }
 }
@@ -130,8 +136,8 @@ resource "null_resource" "init_routes_houdini_license_server" {
         ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deployuser houdini_install_type=server" --tags "install_houdini set_hserver install_deadline_db" --skip-tags "sync_scripts"; exit_test
       fi
       
-      # # configure routes to opposite environment for licence server to communicate if in dev environment
-      # ansible-playbook -i "$TF_VAR_inventory" ansible/firehawkgateway-update-routes.yaml; exit_test
+      # # configure routes to opposite environment for licence server to communicate if in dev environment.  If you dont install the license server above, you still need routes to point at your existing license server
+      ansible-playbook -i "$TF_VAR_inventory" ansible/firehawkgateway-update-routes.yaml; exit_test
 EOT
 }
 }
