@@ -59,6 +59,14 @@
     state: present
   when: result.stat.exists == false
 
+- name: 'generate ssh key for {{ variable_user }}'
+  shell: |
+    df -h
+    ssh-keygen -q -t rsa -f /home/{{ variable_user }}/.ssh/id_rsa.pub -C "" -N ""
+  args:
+    creates: '/home/{{ variable_user }}/.ssh/id_rsa.pub'
+  become_user: '{{ variable_user }}'
+
 - name: "insert/update block in /home/{{ variable_user }}/.bashrc and home/deployuser/.bashrc"
   blockinfile:
     path: "{{ item }}"

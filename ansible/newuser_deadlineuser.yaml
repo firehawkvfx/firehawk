@@ -5,13 +5,6 @@
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
 
-
-
-# - hosts: "{{ variable_host | default('ansible_control') }}"
-#   remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
-#   gather_facts: "{{ variable_gather_facts | default('false') }}"
-#   become: true
-
   vars:
     variable_user: deadlineuser
     variable_uid: 9001
@@ -38,11 +31,6 @@
     tags: ['cloud-install', 'onsite-install']
 # ADD deployuser USER TO THE GROUP AS WELL
 # after deadline install we need to ensure deployuser is part of the syscontrol group.
-
-# - hosts: "{{ variable_host | default('ansible_control') }}"
-#   remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
-#   gather_facts: "{{ variable_gather_facts | default('false') }}"
-#   become: true
   
   tasks:
   - name: reset ssh connection to allow user changes to affect 'current login user'
