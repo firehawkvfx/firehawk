@@ -7,6 +7,7 @@
     gather_subset:
       - '!all'
       - 'min'
+    gather_timeout: 60
   tags:
   - always
 
