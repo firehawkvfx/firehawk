@@ -260,15 +260,15 @@ resource "null_resource" "install_houdini_deadline_plugin_local_workstation" {
       if [[ "$TF_VAR_install_houdini" == true ]]; then
         ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser" --tags "install_deadline_db" --skip-tags "sync_scripts"; exit_test
         ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser"; exit_test
-      fi
-      if [[ "$TF_VAR_install_deadline_worker" == true ]]; then
-        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
-      fi
 
-      if [[ $TF_VAR_houdini_test_connection == true ]]; then
-        # last step before building ami we run a unit test to ensure houdini runs
-        ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-unit-test.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser firehawk_sync_source=$TF_VAR_firehawk_sync_source execute=true"; exit_test
+        if [[ $TF_VAR_houdini_test_connection == true ]]; then
+          # last step before building ami we run a unit test to ensure houdini runs
+          ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-unit-test.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser firehawk_sync_source=$TF_VAR_firehawk_sync_source execute=true"; exit_test
+        fi
       fi
+      # if [[ "$TF_VAR_install_deadline_worker" == true ]]; then
+      #   ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      # fi
 EOT
 }
 }
@@ -287,6 +287,9 @@ resource "null_resource" "local-provisioning-complete" {
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
+      if [[ "$TF_VAR_install_deadline_db" == true ]]; then
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      fi
       echo '...Firehawk Init Complete'
 EOT
 }
