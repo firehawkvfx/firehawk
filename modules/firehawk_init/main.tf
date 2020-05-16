@@ -191,7 +191,7 @@ EOT
 
 resource "null_resource" "local_workstation_disk_space_check" {
   count = var.firehawk_init ? 1 : 0
-
+  depends_on = [null_resource.init_aws_local_workstation]
   triggers = {
     install_houdini = var.install_houdini
   }

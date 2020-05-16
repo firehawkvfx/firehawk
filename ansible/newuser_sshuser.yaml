@@ -63,9 +63,6 @@
     args:
       creates: /home/deployuser/.ssh/id_rsa.pub
     become_user: deployuser
-    register: output
-
-  - debug: var=output.stdout_lines
 
   - name: add deployuser as an authorized key on the remote host as deployuser
     authorized_key:
@@ -79,20 +76,6 @@
       user: "{{ user_inituser_name }}"
       key: "{{ lookup('file', public_key_location) }}"
       state: present
-        
-  # - name: "ensure permissions are correct on {{ public_key_location }}"
-  #   file:
-  #     path: "{{ public_key_location }}"
-  #     mode: '0400'
-  #     owner: deployuser
-  #   become: yes
-
-  # - name: "ensure permissions are correct on {{ general_use_ssh_key }}"
-  #   file:
-  #     path: "{{ general_use_ssh_key }}"
-  #     mode: '0400'
-  #     owner: deployuser
-  #   become: yes
 
   - name: Disable Password Authentication.  Only SSH keys will be accepted after this point.
     lineinfile:
