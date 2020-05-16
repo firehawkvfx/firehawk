@@ -22,7 +22,6 @@
   when: backup_paths.matched|int != 0
   become: yes
 
-
 - name: Find backups if present - DeadlineRepository10
   find: paths=/opt/Thinkbox/DeadlineRepository10/backup/ file_type=directory patterns="*"
   register: backup_paths_repo
@@ -78,7 +77,7 @@
     bucket: "{{ installers_bucket }}"
     basedir: "{{ deadline_linux_installers_tar | dirname }}"
     filename: "{{ deadline_linux_installers_tar | basename }}"
-    variable_user: "deadlineuser"
+    variable_user: "{{ user_deadlineuser_name }}"
   tags:
   - install
   - sync_installers
@@ -86,7 +85,7 @@
 - name: Extract
   unarchive:
     src: "{{ deadline_linux_installers_tar }}"
-    dest: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
+    dest: "/home/{{ user_deadlineuser_name }}/Downloads/{{ deadline_linux_basename }}"
     owner: deadlineuser
     mode: u+x
   become: yes
@@ -95,7 +94,7 @@
 
 - name: "Ansible find files in subdirectory downloads"
   find:
-    paths: /home/deadlineuser/Downloads/{{ deadline_linux_basename }}
+    paths: "/home/{{ user_deadlineuser_name }}/Downloads/{{ deadline_linux_basename }}"
     patterns: "*DeadlineRepository-{{ deadline_version }}-linux-x64-installer.run"
   register: files_matched
   become: true
@@ -107,7 +106,7 @@
   file:
     path: "{{ files_matched.files[0].path }}"
     mode: u+r,u+x,u-w
-    owner: deadlineuser
+    owner: "{{ user_deadlineuser_name }}"
   become: true
   tags:
   - install

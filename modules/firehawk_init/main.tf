@@ -24,6 +24,16 @@ resource "null_resource" "init_awscli" {
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=ansible_control variable_user=root"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=ansible_control variable_user=deployuser"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=firehawkgateway variable_user=deployuser"; exit_test
+
+      # # configure routes to opposite environment for licence server to communicate if in dev environment
+      # ansible-playbook -i "$TF_VAR_inventory" ansible/firehawkgateway-update-routes.yaml; exit_test
+
+      export storage_user_access_key_id=${var.storage_user_access_key_id}
+      echo "storage_user_access_key_id=$storage_user_access_key_id"
+      export storage_user_secret=${var.storage_user_secret}
+      echo "storage_user_secret= $storage_user_secret"
+      ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-install.yaml -v --extra-vars "user_deadlineuser_name=deployuser"; exit_test
+
       ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars "variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deadlineuser" --tags 'newuser,onsite-install'; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deadlineuser"; exit_test
       # Add deployuser user to group syscontrol.   this is local and wont apply until after reboot, so try to avoid since we dont want to reboot the ansible control.
@@ -62,17 +72,14 @@ resource "null_resource" "init_deadlinedb_firehawk" {
       cd /deployuser
       echo "...Check keys permissions"
       ls -ltriah /secrets/keys
-      export storage_user_access_key_id=${var.storage_user_access_key_id}
-      echo "storage_user_access_key_id=$storage_user_access_key_id"
-      export storage_user_secret=${var.storage_user_secret}
-      echo "storage_user_secret= $storage_user_secret"
-
-      # configure routes to opposite environment for licence server to communicate if in dev environment
-      ansible-playbook -i "$TF_VAR_inventory" ansible/firehawkgateway-update-routes.yaml; exit_test
 
       if [[ "$TF_VAR_install_deadline_db" == true ]]; then
-        # Install deadline
-        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-install.yaml -v; exit_test
+        # # Install deadline
+        # export storage_user_access_key_id=${var.storage_user_access_key_id}
+        # echo "storage_user_access_key_id=$storage_user_access_key_id"
+        # export storage_user_secret=${var.storage_user_secret}
+        # echo "storage_user_secret= $storage_user_secret"
+        # ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-install.yaml -v; exit_test
         # ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-start.yaml -v; exit_test
         # # First db check
         # echo "test db 0"
