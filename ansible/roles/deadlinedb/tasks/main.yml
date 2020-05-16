@@ -4,6 +4,7 @@
 - name: Ensure dirs exist
   file:
     path: 
+    - "/home/{{ user_deadlineuser_name }}/Downloads"
     - "/home/{{ user_deadlineuser_name }}/Downloads/{{ deadline_linux_basename }}"
     - /opt/Thinkbox/certs
     - /deployuser/tmp/DeadlineRepository10/backup
