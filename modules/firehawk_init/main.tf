@@ -43,7 +43,8 @@ resource "null_resource" "init_awscli" {
       echo "storage_user_access_key_id=$storage_user_access_key_id"
       export storage_user_secret=${var.storage_user_secret}
       echo "storage_user_secret= $storage_user_secret"
-      ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-install.yaml -v --extra-vars "user_deadlineuser_name=deployuser"; exit_test
+      # ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-install.yaml -v --extra-vars "user_deadlineuser_name=deployuser"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-install.yaml -v; exit_test
 EOT
 }
 }

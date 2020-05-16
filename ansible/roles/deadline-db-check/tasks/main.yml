@@ -15,16 +15,15 @@
   register: Deadline10RemoteClient
   become: true
 
-- name: Fail if missing
-  fail: msg="/opt/Thinkbox/certs/Deadline10RemoteClient.pfx is missing"
-  when: Deadline10RemoteClient.stat.exists == False
-  become: true
+
 
 - name: Ensure db is still valid.  if this fails, db is corrupted or there is a permissions issue
   block:
-    # - name: fatal error will be unset if success
-    #   set_fact:
-    #     fatal_error: true
+    - name: Fail if missing
+      fail: msg="/opt/Thinkbox/certs/Deadline10RemoteClient.pfx is missing"
+      when: Deadline10RemoteClient.stat.exists == False
+      become: true
+
     - name: check limits # https://serverfault.com/questions/591812/how-to-set-ulimits-for-mongod
       shell: |
         cat /etc/security/limits.conf
@@ -44,15 +43,9 @@
     - include_role:
         name: "deadlinedb"
         tasks_from: "logs"
-    # - name: fatal error will be unset if success
-    #   set_fact:
-    #     fatal_error: false
+        
   rescue:
     - include_role:
         name: "deadlinedb"
         tasks_from: "logs"
     - meta: end_play
-  # always:
-  # - meta: end_play
-  #   when: fatal_error is defined and fatal_error
-  # any_errors_fatal: yes
