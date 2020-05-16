@@ -33,11 +33,13 @@
   shell: "cat {{ secret_path }}"
   register: check_post
   connection: local
+  no_log: true
 
 - name: check post encryption result
   when: '"ANSIBLE_VAULT" not in check.stdout'
   debug:
     msg: "{{ check_post.stdout }}"
+  no_log: true
 
 - name: validate check - skipping if passed
   fail:
