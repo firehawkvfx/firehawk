@@ -15,69 +15,66 @@
   roles:
     - role: s3-bucket
     - {role: deadlinedb, tags: 'deadlinedb'}
-    # - role: deadlinercs
-    # - role: deadline-db-check # Check the db is functioning.
-    # - role: deadline-groups # Update groups for nodes.
-    # - role: deadline-ubl # Configure Usage Base Licesning.
-    # - role: deadline-db-check # Check the db is functioning after alterations.
+    - role: deadlinercs
+    - role: deadline-db-check # Check the db is functioning.
+    - role: deadline-groups # Update groups for nodes.
+    - role: deadline-ubl # Configure Usage Base Licesning.
+    - role: deadline-db-check # Check the db is functioning after alterations.
 
-# # This process archives secrets, and configures some settins.  they are copied to the repository, and encrypted by the vault id - keys/.vault-key
-# # Nothing stored in the secrets path should be unencrypted.
+# This process archives secrets, and configures some settins.  they are copied to the repository, and encrypted by the vault id - keys/.vault-key
+# Nothing stored in the secrets path should be unencrypted.
 
-# - hosts: "{{ variable_host | default('firehawkgateway') }}"
-#   remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
-#   gather_facts: "{{ variable_gather_facts | default('false') }}"
-#   become: true
-#   any_errors_fatal: true
-#   # become_user: root
+- hosts: "{{ variable_host | default('firehawkgateway') }}"
+  remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
+  become: true
+  any_errors_fatal: true
+  # become_user: root
   
-#   # secret 2 seems to occaisionally have issues and corrupts the shell output somehow.
-#   vars:
-#     ubl: true
-#     secrets:
-#       secret1:
-#         location: /opt/Thinkbox/certs/ca.crt
-#         target: "{{ secrets_archive }}/opt/Thinkbox/certs/ca.crt"
-#       secret2:
-#         location: /opt/Thinkbox/certs/Deadline10RemoteClient.pfx
-#         target: "{{ secrets_archive }}/opt/Thinkbox/certs/Deadline10RemoteClient.pfx"
-#       secret3:
-#         location: /opt/Thinkbox/certs/localhost.pfx
-#         target: "{{ secrets_archive }}/opt/Thinkbox/certs/localhost.pfx"
-#       secret4:
-#         location: /opt/Thinkbox/DeadlineDatabase10/certs/ca.crt
-#         target: "{{ secrets_archive }}/opt/Thinkbox/DeadlineDatabase10/certs/ca.crt"
-#       secret5:
-#         location: /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx
-#         target: "{{ secrets_archive }}/opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx"
-#       secret6:
-#         location: /opt/Thinkbox/DeadlineDatabase10/certs/localhost.pem
-#         target: "{{ secrets_archive }}/opt/Thinkbox/DeadlineDatabase10/certs/localhost.pem"
-#       secret7:
-#         location: /opt/Thinkbox/DeadlineDatabase10/certs/mongo_client.pem
-#         target: "{{ secrets_archive }}/opt/Thinkbox/DeadlineDatabase10/certs/mongo_client.pem"
+  # secret 2 seems to occaisionally have issues and corrupts the shell output somehow.
+  vars:
+    ubl: true
+    secrets:
+      secret1:
+        location: /opt/Thinkbox/certs/ca.crt
+        target: "{{ secrets_archive }}/opt/Thinkbox/certs/ca.crt"
+      secret2:
+        location: /opt/Thinkbox/certs/Deadline10RemoteClient.pfx
+        target: "{{ secrets_archive }}/opt/Thinkbox/certs/Deadline10RemoteClient.pfx"
+      secret3:
+        location: /opt/Thinkbox/certs/localhost.pfx
+        target: "{{ secrets_archive }}/opt/Thinkbox/certs/localhost.pfx"
+      secret4:
+        location: /opt/Thinkbox/DeadlineDatabase10/certs/ca.crt
+        target: "{{ secrets_archive }}/opt/Thinkbox/DeadlineDatabase10/certs/ca.crt"
+      secret5:
+        location: /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx
+        target: "{{ secrets_archive }}/opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx"
+      secret6:
+        location: /opt/Thinkbox/DeadlineDatabase10/certs/localhost.pem
+        target: "{{ secrets_archive }}/opt/Thinkbox/DeadlineDatabase10/certs/localhost.pem"
+      secret7:
+        location: /opt/Thinkbox/DeadlineDatabase10/certs/mongo_client.pem
+        target: "{{ secrets_archive }}/opt/Thinkbox/DeadlineDatabase10/certs/mongo_client.pem"
   
-#   pre_tasks:
-#   - name: store-secret
-#     with_items:
-#       - "{{ lookup('dict', secrets) }}"
-#     include_role:
-#       name: store-secret
+  pre_tasks:
+  - name: store-secret
+    with_items:
+      - "{{ lookup('dict', secrets) }}"
+    include_role:
+      name: store-secret
 
-#   roles:
-#     - role: deadline-db-check # Check the db is functioning after alterations.
+  roles:
+  - deadline-db-check # Check the db is functioning after alterations.
+  - deadline-groups # Update groups for nodes.
+  - deadline-ubl # Configure Usage Base Licesning.
+  - deadline-db-check # Check the db is functioning after alterations.
 
-
-
-#   - deadline-groups # Update groups for nodes.
-#   - deadline-ubl # Configure Usage Base Licesning.
-#   - deadline-db-check # Check the db is functioning after alterations.
-
-# - hosts: "{{ variable_host | default('firehawkgateway') }}"
-#   remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
-#   gather_facts: "{{ variable_gather_facts | default('false') }}"
-#   become: true
+- hosts: "{{ variable_host | default('firehawkgateway') }}"
+  remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
+  become: true
   
-#   tasks:
-#   - name: reset ssh connection to allow user changes to affect 'current login user'
-#     meta: reset_connection
+  tasks:
+  - name: reset ssh connection to allow user changes to affect 'current login user'
+    meta: reset_connection

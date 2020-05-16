@@ -287,6 +287,7 @@ resource "null_resource" "local-provisioning-complete" {
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
+      . /deployuser/scripts/exit_test.sh
       if [[ "$TF_VAR_install_deadline_db" == true ]]; then
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
       fi
