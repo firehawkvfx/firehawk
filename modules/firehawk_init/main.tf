@@ -26,11 +26,7 @@ resource "null_resource" "init_awscli" {
       # # configure routes to opposite environment for licence server to communicate if in dev environment
       # ansible-playbook -i "$TF_VAR_inventory" ansible/firehawkgateway-update-routes.yaml; exit_test
 
-      export storage_user_access_key_id=${var.storage_user_access_key_id}
-      echo "storage_user_access_key_id=$storage_user_access_key_id"
-      export storage_user_secret=${var.storage_user_secret}
-      echo "storage_user_secret= $storage_user_secret"
-      ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-install.yaml -v --extra-vars "user_deadlineuser_name=deployuser"; exit_test
+
 
       ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars "variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deadlineuser" --tags 'newuser,onsite-install'; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deadlineuser"; exit_test
@@ -42,6 +38,12 @@ resource "null_resource" "init_awscli" {
       # configure onsite NAS mounts to firehawkgateway and ansible control for sync handling
       ansible-playbook -i "$TF_VAR_inventory" ansible/linux-volume-mounts.yaml --extra-vars "variable_host=firehawkgateway variable_user=deployuser softnas_hosts=none" --tags 'local_install_onsite_mounts'; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/linux-volume-mounts.yaml --extra-vars "variable_host=localhost variable_user=deployuser softnas_hosts=none" --tags 'local_install_onsite_mounts'; exit_test
+
+      export storage_user_access_key_id=${var.storage_user_access_key_id}
+      echo "storage_user_access_key_id=$storage_user_access_key_id"
+      export storage_user_secret=${var.storage_user_secret}
+      echo "storage_user_secret= $storage_user_secret"
+      ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-install.yaml -v --extra-vars "user_deadlineuser_name=deployuser"; exit_test
 EOT
 }
 }
