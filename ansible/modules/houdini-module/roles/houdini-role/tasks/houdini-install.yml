@@ -314,6 +314,13 @@
     group: syscontrol
   become: true
 
+- name: "aws sts get-caller-identity for {{ variable_user }}"
+  shell: |
+    aws sts get-caller-identity
+  become_user: "{{ variable_user }}"
+  tags:
+    - sync_installers
+
 - name: "ensure the houdini installer exists in the s3 bucket {{ installers_bucket }} Push if it doesn't."
   shell: |
     # set -x
