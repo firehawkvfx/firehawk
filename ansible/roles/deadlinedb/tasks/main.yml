@@ -11,9 +11,22 @@
   with_items:
   - '/home/{{ user_deadlineuser_name }}/Downloads'
   - '/home/{{ user_deadlineuser_name }}/Downloads/{{ deadline_linux_basename }}'
-  - /opt/Thinkbox/certs
   - /deployuser/tmp/DeadlineRepository10/backup
   - /deployuser/tmp/DeadlineDatabase10/mongo/backup/
+
+- name: Ensure dirs exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ user_deadlineuser_name }}"
+    group: syscontrol
+    mode: u=rwX,g=rX,o-rwx
+  become_user: "{{ user_deadlineuser_name }}"
+  become: true
+  with_items:
+  - /opt/Thinkbox/
+  - /opt/Thinkbox/certs
+      
 
 - name: Find backups if present - DeadlineDatabase10
   find: paths=/opt/Thinkbox/DeadlineDatabase10/mongo/backup/ file_type=directory patterns="*"
