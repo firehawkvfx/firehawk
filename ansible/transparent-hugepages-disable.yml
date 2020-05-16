@@ -6,11 +6,6 @@
   any_errors_fatal: true
 
   pre_tasks:
-  # - name: Install hugepages for disabling transparent huge pages
-  #   package:
-  #     name: hugepages
-  #     state: latest
-
   - name: Service file # This is a service to ensure transparent huge pages is always disabled.
     copy:
       dest: "/etc/systemd/system/disable-transparent-huge-pages.service"
@@ -38,46 +33,3 @@
 
   roles:
   - role: transparent-hugepages-check
-
-  # - name: check hugepages disabled
-  #   shell: |
-  #     cat /sys/kernel/mm/transparent_hugepage/enabled
-  #   register: command_result
-  #   failed_when: "'[never]' not in command_result.stdout"
-
-  # - name: Install sysfsutils for disabling transparent huge pages
-  #   package:
-  #     name: sysfsutils
-  #     state: latest
-
-  # - name: disable transparent huge pages for mongo performance and stability - persistent change - may only work on centos, unverified
-  #   lineinfile:
-  #     path: /etc/sysfs.conf
-  #     create: true
-  #     regexp: '^kernel\/mm\/transparent\_hugepage\/enabled'
-  #     line: "kernel/mm/transparent_hugepage/enabled = never"
-      
-  # - name: disable transparent huge pages for mongo performance and stability - live change  - may only work on centos, unverified
-  #   shell: echo never {{ ">" }} /sys/kernel/mm/transparent_hugepage/enabled
-
-  # - name: disable transparent huge pages for mongo performance and stability - live change  - may only work on ubuntu, unverified
-  #   shell: |
-  #     hugeadm --thp-never
-  #   become: true
-
-
-  # - name: transparent hugepages status
-  #   shell: |
-  #     cat /sys/kernel/mm/transparent_hugepage/enabled
-  #   become: true
-
-# if test -f /sys/kernel/mm/transparent_hugepage/enabled; then
-#    echo never > /sys/kernel/mm/transparent_hugepage/enabled
-# fi
-# if test -f /sys/kernel/mm/transparent_hugepage/defrag; then
-#    echo never > /sys/kernel/mm/transparent_hugepage/defrag
-# fi
-
-
-# cat /sys/kernel/mm/transparent_hugepage/enabled
-# always madvise [never]
