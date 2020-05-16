@@ -144,3 +144,45 @@
 
 - debug: msg="{{ deadline_initd.stdout }}"
 - debug: msg="{{ deadline_initd.stderr }}"
+
+# prep permissions for worker install
+
+- name: set permissions Thinkbox dir - non recursive
+  file: 
+    path: /opt/Thinkbox/
+    state: directory
+    mode: u+rX,g+rX,o-rwx
+    owner: "{{ user_deadlineuser_name }}"
+    group: syscontrol
+  become: yes
+
+- name: set permissions Thinkbox cert dir - non recursive
+  file: 
+    path: /opt/Thinkbox/certs
+    state: directory
+    mode: u=rwX,g=rX,o-rwx
+    owner: "{{ user_deadlineuser_name }}"
+    group: syscontrol
+  become: yes
+
+- name: set permissions DeadlineRepository10 - recursive
+  file:
+    path: /opt/Thinkbox/DeadlineRepository10/
+    owner: "{{ user_deadlineuser_name }}"
+    group: syscontrol
+    mode: u=rX,g=rX,o-rwx
+    recurse: yes
+  become: true
+
+- name: set permissions DeadlineRepository10/jobs jobsArchived reports
+  file:
+    path: "{{ item }}"
+    owner: "{{ user_deadlineuser_name }}"
+    group: syscontrol
+    mode: u=rwX,g=rwX,o-rwx
+    recurse: yes
+  become: true
+  with_items:
+  - /opt/Thinkbox/DeadlineRepository10/jobs
+  - /opt/Thinkbox/DeadlineRepository10/jobsArchived
+  - /opt/Thinkbox/DeadlineRepository10/reports

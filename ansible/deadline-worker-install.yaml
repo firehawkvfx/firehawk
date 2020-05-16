@@ -4,58 +4,58 @@
 # ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml
 
 # # these permissions are now handled post install of the deadline db.
-- hosts: firehawkgateway
-  remote_user: deployuser
-  gather_facts: "{{ variable_gather_facts | default('false') }}"
-  become: true
-  any_errors_fatal: true
+# - hosts: firehawkgateway
+#   remote_user: deployuser
+#   gather_facts: "{{ variable_gather_facts | default('false') }}"
+#   become: true
+#   any_errors_fatal: true
 
-  vars:
-    deadline_db_user: deployuser
+#   vars:
+#     deadline_db_user: deployuser
 
-  tasks:
-  - include_role:
-      name: s3-bucket
+#   tasks:
+#   - include_role:
+#       name: s3-bucket
 
-  - name: set permissions Thinkbox dir - non recursive
-    file: 
-      path: /opt/Thinkbox/
-      state: directory
-      mode: u+rX,g+rX,o-rwx
-      owner: "{{ deadline_db_user }}"
-      group: syscontrol
-    become: yes
+#   - name: set permissions Thinkbox dir - non recursive
+#     file: 
+#       path: /opt/Thinkbox/
+#       state: directory
+#       mode: u+rX,g+rX,o-rwx
+#       owner: "{{ deadline_db_user }}"
+#       group: syscontrol
+#     become: yes
 
-  - name: set permissions Thinkbox cert dir - non recursive
-    file: 
-      path: /opt/Thinkbox/certs
-      state: directory
-      mode: u=rwX,g=rX,o-rwx
-      owner: "{{ deadline_db_user }}"
-      group: syscontrol
-    become: yes
+#   - name: set permissions Thinkbox cert dir - non recursive
+#     file: 
+#       path: /opt/Thinkbox/certs
+#       state: directory
+#       mode: u=rwX,g=rX,o-rwx
+#       owner: "{{ deadline_db_user }}"
+#       group: syscontrol
+#     become: yes
 
-  - name: set permissions DeadlineRepository10 - recursive
-    file:
-      path: /opt/Thinkbox/DeadlineRepository10/
-      owner: "{{ deadline_db_user }}"
-      group: syscontrol
-      mode: u=rX,g=rX,o-rwx
-      recurse: yes
-    become: true
+#   - name: set permissions DeadlineRepository10 - recursive
+#     file:
+#       path: /opt/Thinkbox/DeadlineRepository10/
+#       owner: "{{ deadline_db_user }}"
+#       group: syscontrol
+#       mode: u=rX,g=rX,o-rwx
+#       recurse: yes
+#     become: true
 
-  - name: set permissions DeadlineRepository10/jobs jobsArchived reports
-    file:
-      path: "{{ item }}"
-      owner: "{{ deadline_db_user }}"
-      group: syscontrol
-      mode: u=rwX,g=rwX,o-rwx
-      recurse: yes
-    become: true
-    with_items:
-    - /opt/Thinkbox/DeadlineRepository10/jobs
-    - /opt/Thinkbox/DeadlineRepository10/jobsArchived
-    - /opt/Thinkbox/DeadlineRepository10/reports
+#   - name: set permissions DeadlineRepository10/jobs jobsArchived reports
+#     file:
+#       path: "{{ item }}"
+#       owner: "{{ deadline_db_user }}"
+#       group: syscontrol
+#       mode: u=rwX,g=rwX,o-rwx
+#       recurse: yes
+#     become: true
+#     with_items:
+#     - /opt/Thinkbox/DeadlineRepository10/jobs
+#     - /opt/Thinkbox/DeadlineRepository10/jobsArchived
+#     - /opt/Thinkbox/DeadlineRepository10/reports
 
 - hosts: "{{ variable_host | default('workstation1') }}"
   remote_user: "{{ variable_user | default('user') }}"
