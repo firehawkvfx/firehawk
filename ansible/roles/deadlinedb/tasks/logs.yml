@@ -24,3 +24,4 @@
     validate_checksum: no # logs may have incorrect checksums, possibly since data changes rapidly after download.
   become: true
   with_items: "{{ found_files.files }}"
+  no_log: true
