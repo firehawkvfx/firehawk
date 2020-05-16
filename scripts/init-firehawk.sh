@@ -366,9 +366,9 @@ else
   # $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-110-localworkstation-cloudmounts.sh $ARGS; exit_test
 fi
 
-echo "$(date) Finished a run" | tee -a tmp/log.txt
+echo "$(date) Finished a run" | tee -a tmp/run_log.txt
 printf '\n...Show previous 5 runs\n'
-tail -n 5 tmp/log.txt
+tail -n 5 tmp/run_log.txt
 
 # only if there are tf actions do we check running instances, otherwise we can't asume the aws cli is installed yet when none
 echo "tf_action: $tf_action"
