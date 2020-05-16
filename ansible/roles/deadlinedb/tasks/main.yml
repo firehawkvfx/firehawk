@@ -144,8 +144,8 @@
 
 - name: Uninstall deadline db if already present
   shell: |
-    sudo rm -r /var/log/mongodb
-    sudo rm -r /var/lib/mongodb
+    sudo rm -fr /var/log/mongodb
+    sudo rm -fr /var/lib/mongodb
   become_user: "{{ user_deadlineuser_name }}"
   become: true
   when: stat_result.stat.exists
