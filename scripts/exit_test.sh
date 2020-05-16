@@ -35,11 +35,13 @@ exit_test () {
     if [[ "$failed" == true ]]; then
         exit 1
     fi
-    if [[ -d "/deployuser" ]] && [[ -f "/deployuser/interrupt" ]]; then
-        printf "\n${RED}Interrrupt file found.  Exiting... ${NC}\n" >&2
-        interrupt=true
-    fi
-    if [[ "$interrupt" == true ]]; then
-        exit 1
+    if [[ -z "$allow_interrupt" ]] || [[ "$allow_interrupt" == true ]]; then
+        if [[ -d "/deployuser" ]] && [[ -f "/deployuser/interrupt" ]]; then
+            printf "\n${RED}Interrrupt file found.  Exiting... ${NC}\n" >&2
+            interrupt=true
+        fi
+        if [[ "$interrupt" == true ]]; then
+            exit 1
+        fi
     fi
 }
