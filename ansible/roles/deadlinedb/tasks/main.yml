@@ -123,6 +123,20 @@
     cat /sys/kernel/mm/transparent_hugepage/enabled
   register: command_result
   failed_when: "'[never]' not in command_result.stdout"
+
+- name: Check that the somefile.conf exists
+  stat:
+    path: /opt/Thinkbox/DeadlineRepository10/uninstall
+  register: stat_result
+
+- name: Uninstall deadline db if already present
+  shell: |
+    cd /opt/Thinkbox/DeadlineRepository10
+    sudo ./uninstall --mode unattended
+  become_user: "{{ user_deadlineuser_name }}"
+  register: deadline_db_install_output_shell
+  become: true
+  when: stat_result.stat.exists
   
 - name: Install Deadline DB & pull latest log.
   block:
