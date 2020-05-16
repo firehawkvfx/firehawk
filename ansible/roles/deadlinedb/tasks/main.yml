@@ -6,7 +6,8 @@
     path: "{{ item }}"
     state: directory
     owner: "{{ user_deadlineuser_name }}"
-  become: yes
+  become_user: "{{ user_deadlineuser_name }}"
+  become: true
   with_items:
   - '/home/{{ user_deadlineuser_name }}/Downloads'
   - '/home/{{ user_deadlineuser_name }}/Downloads/{{ deadline_linux_basename }}'
@@ -17,22 +18,26 @@
 - name: Find backups if present - DeadlineDatabase10
   find: paths=/opt/Thinkbox/DeadlineDatabase10/mongo/backup/ file_type=directory patterns="*"
   register: backup_paths
-  become: yes
+  become_user: "{{ user_deadlineuser_name }}"
+  become: true
 
 - name: Move backups if present out of the vm to conserve space.
   shell: sudo rsync --inplace --no-perms --omit-dir-times --no-o --no-g /opt/Thinkbox/DeadlineDatabase10/mongo/backup/* /deployuser/tmp/DeadlineDatabase10/mongo/backup --remove-source-files
   when: backup_paths.matched|int != 0
-  become: yes
+  become_user: "{{ user_deadlineuser_name }}"
+  become: true
 
 - name: Find backups if present - DeadlineRepository10
   find: paths=/opt/Thinkbox/DeadlineRepository10/backup/ file_type=directory patterns="*"
   register: backup_paths_repo
-  become: yes
+  become_user: "{{ user_deadlineuser_name }}"
+  become: true
 
 - name: Move backups if present out of the vm to conserve space.
   shell: sudo rsync --inplace --no-perms --omit-dir-times --no-o --no-g /opt/Thinkbox/DeadlineRepository10/backup/* /deployuser/tmp/DeadlineRepository10/backup --remove-source-files
   when: backup_paths_repo.matched|int != 0
-  become: yes
+  become_user: "{{ user_deadlineuser_name }}"
+  become: true
 
 - name: diskspace-check
   include_role:
@@ -55,7 +60,8 @@
   stat:
     path: "{{ deadline_linux_installers_tar }}"
   register: deadline_linux_installers_tar_stat
-  become: yes
+  become_user: "{{ user_deadlineuser_name }}"
+  become: true
 
 - name: "Test: Fail if not existing tar."
   fail:
@@ -65,7 +71,7 @@
 - name: Get the current caller identity information
   aws_caller_info:
   register: caller_info
-  become: false
+  become_user: "{{ user_deadlineuser_name }}"
 
 - name: show aws caller info
   debug:
@@ -90,7 +96,8 @@
     dest: "/home/{{ user_deadlineuser_name }}/Downloads/{{ deadline_linux_basename }}"
     owner: "{{ user_deadlineuser_name }}"
     mode: u+x
-  become: yes
+  become_user: "{{ user_deadlineuser_name }}"
+  become: true
   tags:
   - install
 
@@ -99,6 +106,7 @@
     paths: "/home/{{ user_deadlineuser_name }}/Downloads/{{ deadline_linux_basename }}"
     patterns: "*DeadlineRepository-{{ deadline_version }}-linux-x64-installer.run"
   register: files_matched
+  become_user: "{{ user_deadlineuser_name }}"
   become: true
   tags:
   - install
@@ -109,6 +117,7 @@
     path: "{{ files_matched.files[0].path }}"
     mode: u+r,u+x,u-w
     owner: "{{ user_deadlineuser_name }}"
+  become_user: "{{ user_deadlineuser_name }}"
   become: true
   tags:
   - install
@@ -118,18 +127,22 @@
     cat /sys/kernel/mm/transparent_hugepage/enabled
   register: command_result
   failed_when: "'[never]' not in command_result.stdout"
+  become_user: "{{ user_deadlineuser_name }}"
+  become: true
 
 - name: Check that the somefile exists
   stat:
     path: /opt/Thinkbox/DeadlineRepository10/uninstall
   register: stat_result
+  become_user: "{{ user_deadlineuser_name }}"
+  become: true
 
 - name: Uninstall deadline db if already present
   shell: |
     cd /opt/Thinkbox/DeadlineRepository10
     sudo ./uninstall --mode unattended
-  become_user: "{{ user_deadlineuser_name }}"
   register: deadline_db_uninstall_output_shell
+  become_user: "{{ user_deadlineuser_name }}"
   become: true
   when: stat_result.stat.exists
   tags:
