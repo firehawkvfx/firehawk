@@ -501,7 +501,7 @@ output "ami" {
 
 resource "aws_network_interface" "nas1eth0" {
   count = var.softnas_storage ? 1 : 0
-  subnet_id       = var.private_subnets[0]
+  subnet_id     = element(concat(var.private_subnets, list("")), 0)
   private_ips     = [var.softnas1_private_ip1]
 
   tags = merge(map("Name", format("%s", "primary_network_interface_pipeid${lookup(var.common_tags, "pipelineid", "0")}")), var.common_tags, local.extra_tags)

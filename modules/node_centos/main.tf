@@ -282,8 +282,10 @@ variable "centos_v7" {
 
 resource "aws_network_interface" "eth0" {
   count = var.site_mounts ? 1 : 0
-  subnet_id       = element(var.private_subnet_ids, count.index)
-  private_ips     = [cidrhost("${data.aws_subnet.private_subnet[count.index].cidr_block}", 20)]
+  subnet_id     = element(concat(var.private_subnet_ids, list("")), count.index)
+                              
+  private_ips     = [cidrhost(element(concat(data.aws_subnet.private_subnet, list("")), count.index).cidr_block, 20)]
+  # private_ips     = [cidrhost("${data.aws_subnet.private_subnet[count.index].cidr_block}", 20)]
 
   tags = merge(map("Name", format("%s", "primary_network_interface_pipeid${lookup(var.common_tags, "pipelineid", "0")}")), var.common_tags, local.extra_tags)
 }
@@ -316,9 +318,6 @@ resource "aws_instance" "node_centos" {
   }
 
   key_name               = var.key_name
-  # subnet_id              = element(var.private_subnet_ids, count.index)
-  # private_ip             = cidrhost("${data.aws_subnet.private_subnet[count.index].cidr_block}", 20)
-  # vpc_security_group_ids = aws_security_group.node_centos.*.id
   tags = merge(map("Name", format("%s", "node_centos_pipeid${lookup(var.common_tags, "pipelineid", "0")}")), var.common_tags, local.extra_tags)
 
   # cloud init resets network delay settings if configured outside of cloud-init

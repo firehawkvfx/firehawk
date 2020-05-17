@@ -107,7 +107,7 @@ resource "aws_instance" "bastion" {
   ami           = lookup(var.centos_v7, var.region)
   instance_type = var.instance_type
   key_name      = var.key_name
-  subnet_id     = element(var.public_subnet_ids, 0)
+  subnet_id     = element(concat(var.public_subnet_ids, list("")), 0)
 
   vpc_security_group_ids = [local.security_group_id]
 
