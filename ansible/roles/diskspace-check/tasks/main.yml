@@ -13,9 +13,9 @@
 #     var: item
 #   with_items: "{{ ansible_mounts }}"
 
-- name: "Ensure that free space on {{ mountname }} is grater than 30%"
+- name: "Ensure that free space on {{ mountname }} is grater than 20%"
   assert:
-    that: item.size_available > item.size_total|float * 0.3
-    msg: 'disk space has reached 70% threshold'
+    that: item.size_available > item.size_total|float * 0.2
+    msg: 'disk space has reached 80% threshold'
   when: item.mount == mountname
   with_items: "{{ ansible_mounts }}"
