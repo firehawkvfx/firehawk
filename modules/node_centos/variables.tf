@@ -18,7 +18,7 @@ variable "remote_ip_cidr" {
 variable "remote_subnet_cidr" {
 }
 
-variable "install_deadline_db" {}
+variable "install_deadline_worker" {}
 
 variable "install_houdini" {}
 

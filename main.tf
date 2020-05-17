@@ -443,7 +443,7 @@ module "node" {
   wakeable = var.node_wakeable
 
   install_houdini = var.install_houdini
-  install_deadline_db = var.install_deadline_db
+  install_deadline_worker = var.install_deadline_worker
   houdini_license_server_address = var.houdini_license_server_address
 
   common_tags = local.common_tags

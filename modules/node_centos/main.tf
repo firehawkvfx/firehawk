@@ -348,7 +348,7 @@ resource "null_resource" "provision_node_centos" {
   
   triggers = {
     instanceid = local.instanceid
-    install_deadline_db = var.install_deadline_db
+    install_deadline_worker = var.install_deadline_worker
     install_houdini = var.install_houdini
   }
 
@@ -386,7 +386,7 @@ resource "null_resource" "provision_node_centos" {
       cd /deployuser
       ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.node_centos[0].private_ip} bastion_ip=${var.bastion_ip}"; exit_test
 
-      # if [[ "$TF_VAR_install_deadline_db" == true ]]; then
+      # if [[ "$TF_VAR_install_deadline_worker" == true ]]; then
       #   # check db
       #   echo "test db centos 1"
       #   ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
@@ -436,14 +436,14 @@ EOT
   }
 }
 
-resource "null_resource" "install_deadline_db" {
+resource "null_resource" "install_deadline_worker" {
   count = var.site_mounts ? 1 : 0
 
   depends_on = [ null_resource.provision_node_centos, null_resource.dependency_deadlinedb, aws_network_interface_sg_attachment.node_centos_sg_attachment_vpn, null_resource.install_houdini, var.vpn_private_ip ]
 
   triggers = {
     instanceid = local.instanceid
-    install_deadline_db = var.install_deadline_db
+    install_deadline_worker = var.install_deadline_worker
     install_houdini = var.install_houdini
   }
 
@@ -456,7 +456,7 @@ resource "null_resource" "install_deadline_db" {
 
       aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id} # ensure instance is started
 
-      if [[ "$TF_VAR_install_deadline_db" == true ]]; then
+      if [[ "$TF_VAR_install_deadline_worker" == true ]]; then
         # check db
         echo "test db centos 1"
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
@@ -473,7 +473,7 @@ resource "null_resource" "install_deadline_db" {
         ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v; exit_test
       fi
 
-      if [[ "$TF_VAR_install_deadline_db" == true ]]; then
+      if [[ "$TF_VAR_install_deadline_worker" == true ]]; then
         ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source" --tags "install_deadline_db"; exit_test
         echo "test db centos"
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
@@ -486,11 +486,11 @@ EOT
 resource "null_resource" "mounts_and_houdini_test" {
   count = var.site_mounts ? 1 : 0
 
-  depends_on = [ null_resource.dependency_softnas, null_resource.install_deadline_db ]
+  depends_on = [ null_resource.dependency_softnas, null_resource.install_deadline_worker ]
 
   triggers = {
     instanceid = local.instanceid
-    install_deadline_db = var.install_deadline_db
+    install_deadline_worker = var.install_deadline_worker
     install_houdini = var.install_houdini
   }
 
