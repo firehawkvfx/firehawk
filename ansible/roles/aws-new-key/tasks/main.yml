@@ -6,13 +6,6 @@
   register: key_result
   no_log: true
 
-# - name: debug
-#   debug:
-#     var: key_result
-
-# - name: debug
-#   debug:
-#     var: key_result.stat.exists
 
 - name: "Force removal of key {{ key_name }} from account if missing on disk or if destroy is true.  regenerate next step."
   ec2_key:

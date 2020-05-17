@@ -7,8 +7,6 @@
     group: syscontrol
     recurse: true
   become: true
-  # tags:
-  #   - sync_scripts
 
 - name: dir permissions on /prod/assets/openfirehawk-houdini-tools
   file:
@@ -19,15 +17,11 @@
     group: syscontrol
     recurse: true
   become: true
-  # tags:
-  #   - sync_scripts
 
 - name: ensure all mounts are present
   command: sudo mount -a
   become_user: deployuser
   connection: local
-  # tags:
-  #   - sync_scripts
 
 - name: Sync openfirehawk-houdini-tools to s3 - push
   shell: |
@@ -36,8 +30,6 @@
     aws s3 sync . s3://{{ bucket }}/openfirehawk-houdini-tools/ --include "*" --exclude ".git/*" --no-progress
   become_user: deployuser
   connection: local
-  # tags:
-  #   - sync_scripts
 
 - name: Sync openfirehawk-houdini-tools from s3
   shell: |
@@ -47,8 +39,6 @@
     cd /prod/assets/openfirehawk-houdini-tools
     aws s3 sync s3://{{ bucket }}/openfirehawk-houdini-tools/ . --include "*" --exclude ".git/*" --no-progress
   become_user: deadlineuser
-  # tags:
-  #   - sync_scripts
 
 - name: dir permissions on /prod/assets/hda.  note permissions aren't being set correctly for group for some reason.
   file:
@@ -59,5 +49,3 @@
     mode: u=wrX,g=wrX,o-rwx
     recurse: true
   become: true
-  # tags:
-  #   - sync_scripts

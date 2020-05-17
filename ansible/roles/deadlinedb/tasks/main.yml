@@ -240,8 +240,3 @@
 
 
 
-# - name: check deadline db install output
-#   debug:
-#     msg: "{{ deadline_db_install_output_shell.stdout }}"
-#   tags:
-#   - install

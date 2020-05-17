@@ -51,10 +51,10 @@
 - name: package dependencies Ubuntu
   package:
     name:
-    #- libglu1-mesa:i386
+    #- libglu1-mesa:i386 # potentially required for centos in future
     - libglu1
     - libsm6
-    #- libxmu6:i386
+    #- libxmu6:i386 # potentially required for centos in future
     - libxmu6
     state: present
   tags:
@@ -91,18 +91,6 @@
     group: syscontrol
   become: true
 
-# - name: check permissions
-#   shell: |
-#     cd "{{ download_to_dir }}"
-#     ls -ltriah
-#     cd ..
-#     ls -ltriah
-#   become: true
-#   register: check_permisions
-
-# - name: show permissions
-#   debug:
-#     var: check_permisions.stdout
 
 - name: Copy Houdini auto install script to remote host from ansible control.
   copy:

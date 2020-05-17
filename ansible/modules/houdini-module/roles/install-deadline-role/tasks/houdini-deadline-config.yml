@@ -91,19 +91,6 @@
   - cloud-install
   - onsite-install
 
-# - name: Prepare permissions
-#   file:
-#     path: "/opt/Thinkbox/DeadlineRepository10/submission/{{ item }}"
-#     owner: deadlineuser
-#     group: syscontrol
-#   become: yes
-#   with_items:
-#   - HServer
-#   - Houdini
-#   #- Nuke
-#   tags:
-#   - cloud-install
-#   - onsite-install
 
 - name: set dir permisisons /opt/Thinkbox/DeadlineRepository10/submission
   file:

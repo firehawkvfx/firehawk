@@ -51,7 +51,6 @@
   shell: |
     cd /opt/houdini_install_script/
     . /opt/houdini_install_script/exit_test.sh
-    # ls -ltriah /opt/houdini_install_script/
     python /opt/houdini_install_script/download_houdini.py -b {{ houdini_version_item.houdini_build }}; exit_test
   register: houdini_query_out
   become: true
@@ -193,17 +192,6 @@
   become: true
   when: houdini_install_type != "server"
 
-# - name: NODE/WORKSTATION INSTALL - setup licensing server ip as deadline user will write to $HOME/.sesi_licenses.pref
-#   shell: |
-#     cd /opt/hfs{{ houdini_version_item.houdini_major_version }}
-#     source ./houdini_setup
-#     hserver
-#     hserver -S {{ houdini_license_server_address }}
-#     hserver -l
-#     echo $HOME
-#   register: houdini_hserver_deadlineuser_out
-#   become_user: deadlineuser
-#   when: houdini_install_type != "server"
 
 ### SERVER INSTALL
 - name: SERVER INSTALL - check if hserver file exists
@@ -266,16 +254,6 @@
     group: syscontrol
   become: true
   when: houdini_install_type == "server"
-
-# - name: Unarchive a file with extra options # this has some problems with idempotency and its slow.
-#   unarchive:
-#     src: "{{ download_to_dir }}/{{ houdini_linux_tar_filename }}"
-#     dest: "{{ download_to_dir }}/{{ houdini_linux_tar_filename | regex_replace('.tar.gz$', '') }}"
-#     # extra_opts:
-#     # - --strip-components 1
-#   become_user: "{{ variable_user }}"
-#   become: true
-#   when: houdini_install_type == "server"
 
 # sudo ./houdini.install --auto-install --accept-EULA --install-houdini --no-license --install-hfs-symlink --make-dir /opt/houdini/18.0.221
 

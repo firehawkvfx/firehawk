@@ -73,18 +73,3 @@
     - '"File already present" not in output.stdout'
   args:
     executable: /bin/bash
-  # failed_when: output.rc != 0
-
-# - name: show output
-#   debug:
-#     var: output
-
-
-# - name: Download Houdini from SESI website - auto versions
-#   get_url:
-#     url: "{{ download_url }}"
-#     dest: "{{ basedir }}/{{ filename }}"
-#     mode: u=rw,g=rw,o=rw
-#     checksum: "md5:{{hash}}"
-#   become: true
-#   when: houdini_version_item.houdini_auto_version and not output.stdout is search("Sync S3 Bucket with local path.") # If the S3 sync does not occur, download from Side FX.
