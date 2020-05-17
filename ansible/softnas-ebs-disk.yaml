@@ -64,7 +64,7 @@
   - name: Search for existing softnas instance by tag.  If no instance id is defined via command line, then the found instance id by tag wil be used.
     ec2_instance_facts:
       filters:
-        "tag:Role": "softnas"
+        "tag:role": "softnas"
       #region: "{{ ebs_disk_region }}"
     register: existing_softnas_instance
 
@@ -87,8 +87,8 @@
   - name: search for existing volume
     ec2_vol_facts:
       filters:
-        "tag:Role": "Softnas"
-        "tag:Mount": "{{ item.path }}"
+        "tag:role": "softnas"
+        "tag:mount": "{{ item.path }}"
       region: "{{ ebs_disk_region }}"
     register: existing_volume
     with_items:
@@ -115,8 +115,8 @@
   - name: search for existing volume
     ec2_vol_facts:
       filters:
-        "tag:Role": "Softnas"
-        "tag:Mount": "{{ item.path }}"
+        "tag:role": "softnas"
+        "tag:mount": "{{ item.path }}"
       region: "{{ ebs_disk_region }}"
     register: existing_volume
     with_items:

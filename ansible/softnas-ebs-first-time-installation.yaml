@@ -12,7 +12,7 @@
     device_name: "{{ item.item.path }}"
     delete_on_termination: "{{ item.item.volatile }}"
     tags:
-      Role: Softnas
-      Mount: "{{ item.item.path }}"
-      Pool: "{{ item.item.pool_name }}"
-      Volatile: "{{ item.item.volatile }}"
+      role: Softnas
+      mount: "{{ item.item.path }}"
+      pool: "{{ item.item.pool_name }}"
+      volatile: "{{ item.item.volatile }}"
