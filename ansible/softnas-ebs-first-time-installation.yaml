@@ -14,6 +14,10 @@
   - { key: 'pool', value: '{{ item.item.pool_name }}' }
   - { key: 'volatile', value: '{{ item.item.volatile }}' }
 
+- name: show common_tags
+  debug:
+    var: common_tags
+
 - name: common_tags iterate
   debug:
     var: "{{ item }}"
@@ -28,5 +32,4 @@
     volume_type: "{{ item.item.ebs_disk_type }}"
     device_name: "{{ item.item.path }}"
     delete_on_termination: "{{ item.item.volatile }}"
-    tags:
-      - "{{ common_tags }}"
+    tags: common_tags
