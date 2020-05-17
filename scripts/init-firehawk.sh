@@ -229,8 +229,14 @@ else
     else
       echo "...First destroy attempts failed.  terraform.tfstate is likely corrupted, we will restore from backup and attempt destroy again."
       cp -fv terraform.tfstate.backup terraform.tfstate
-      echo "...Terraform destroy"
-      terraform destroy -lock=false --auto-approve
+      if terraform refresh -lock=false; then
+        echo "...Terraform destroy"
+        terraform destroy -lock=false --auto-approve
+      else
+        echo "ERROR: verify there are no orphaned resources after this run...Couldn't recover backup."
+        echo "...Removing terraform.tfstate for clean start."
+        rm -fv terraform.tfstate; exit_test
+      fi
     fi
 
     if [ -f terraform.tfstate ]; then
