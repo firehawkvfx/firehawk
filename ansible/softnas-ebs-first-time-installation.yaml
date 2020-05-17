@@ -2,6 +2,15 @@
   debug:
     msg: "create a new ebs volume {{ item.item.int }} {{ item.item.path }}"
 
+- name: show common_tags
+  debug:
+    var: common_tags
+
+- name: common_tags iterate
+  debug:
+    var: "{{ item }}"
+  with_dict: "{{ common_tags }}"
+
 - name: create ebs volume
   ec2_vol:
     region: "{{ aws_region }}"
@@ -12,7 +21,7 @@
     device_name: "{{ item.item.path }}"
     delete_on_termination: "{{ item.item.volatile }}"
     tags:
-      role: Softnas
+      role: softnas
       mount: "{{ item.item.path }}"
       pool: "{{ item.item.pool_name }}"
       volatile: "{{ item.item.volatile }}"

@@ -21,6 +21,8 @@
     # another example for idempotenccy.  good read!
     # https://medium.com/devopslinks/attaching-a-persistent-ebs-volume-to-a-self-healing-instance-with-ansible-d0140431a22a
 
+    common_tags: "{{ lookup('env', 'common_tags') | from_json }}"
+
     pool_name: "{{ envtier }}pool2"
     volume_name: "{{ envtier }}volume2"
     #instance_id: undefined
