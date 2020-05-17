@@ -24,6 +24,7 @@ sed -i 's/^TF_VAR_install_houdini=.*$/TF_VAR_install_houdini=false/' $config_ove
 sed -i 's/^TF_VAR_install_deadline_db=.*$/TF_VAR_install_deadline_db=false/' $config_override # install deadline
 sed -i 's/^TF_VAR_install_deadline_rcs=.*$/TF_VAR_install_deadline_rcs=false/' $config_override # install deadline
 sed -i 's/^TF_VAR_install_deadline_worker=.*$/TF_VAR_install_deadline_worker=false/' $config_override # install deadline
-sed -i 's/^TF_VAR_taint_single=.*$/TF_VAR_taint_single=(module.softnas.aws_instance.softnas1[0] module.softnas.aws_network_interface.nas1eth0[0])/' $config_override # taint vpn
+# sed -i 's/^TF_VAR_taint_single=.*$/TF_VAR_taint_single=(module.softnas.aws_instance.softnas1[0] module.softnas.aws_network_interface.nas1eth0[0])/' $config_override # taint 
+sed -i 's/^TF_VAR_taint_single=.*$/TF_VAR_taint_single=()/' $config_override # taint 
 sed -i 's/^TF_VAR_allow_prebuilt_softnas_ami=.*$/TF_VAR_allow_prebuilt_softnas_ami=true/' $config_override # allow use of a prebuilt ami with the update if it exists
 sed -i 's/^TF_VAR_tf_destroy_before_deploy=.*$/TF_VAR_tf_destroy_before_deploy=true/' $config_override # destroy before deploy

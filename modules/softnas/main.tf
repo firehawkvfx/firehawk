@@ -897,7 +897,7 @@ resource "null_resource" "provision_softnas_volumes" {
       # set -x
       cd /deployuser
 
-      export common_tags = "${ merge(map("Name", format("%s", local.name)), var.common_tags, local.extra_tags) }"
+      export common_tags = "${ tostring( merge(var.common_tags, local.extra_tags) ) }"
       echo "common_tags: $common_tags"
 
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init-users.yaml -v --extra-vars "variable_host=role_softnas variable_user=$TF_VAR_softnas_ssh_user set_hostname=false"; exit_test
