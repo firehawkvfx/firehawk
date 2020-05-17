@@ -507,17 +507,6 @@ resource "aws_network_interface" "nas1eth0" {
   tags = merge(map("Name", format("%s", "primary_network_interface_pipeid${lookup(var.common_tags, "pipelineid", "0")}")), var.common_tags, local.extra_tags)
 }
 
-# resource "aws_network_interface" "nas1eth1" {
-#   count = var.softnas_storage ? 1 : 0
-#   subnet_id       = var.private_subnets[0]
-#   private_ips     = [var.softnas1_private_ip2]
-#   security_groups = aws_security_group.softnas.*.id
-
-#   tags = {
-#     Name = "secondary_network_interface"
-#   }
-# }
-
 locals {
   network_interface_id = element(concat(aws_network_interface.nas1eth0.*.id, list("")), 0)
 }
@@ -907,6 +896,9 @@ resource "null_resource" "provision_softnas_volumes" {
       . /deployuser/scripts/exit_test.sh
       # set -x
       cd /deployuser
+
+      export common_tags = "${ merge(map("Name", format("%s", local.name)), var.common_tags, local.extra_tags) }"
+      echo "common_tags: $common_tags"
 
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init-users.yaml -v --extra-vars "variable_host=role_softnas variable_user=$TF_VAR_softnas_ssh_user set_hostname=false"; exit_test
       # hotfix script to speed up instance start and shutdown
