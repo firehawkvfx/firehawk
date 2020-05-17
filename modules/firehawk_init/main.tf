@@ -222,7 +222,7 @@ EOT
 
 resource "null_resource" "install_deadline_worker_local_workstation" {
   count = var.firehawk_init ? 1 : 0
-  depends_on = [null_resource.init_aws_local_workstation, null_resource.init_houdini_license_server, null_resource.init_deadlinedb_firehawk]
+  depends_on = [null_resource.init_aws_local_workstation, null_resource.init_houdini_license_server, null_resource.init_deadlinedb_firehawk, null_resource.install_houdini_local_workstation]
 
   triggers = {
     install_deadline_db = var.install_deadline_db

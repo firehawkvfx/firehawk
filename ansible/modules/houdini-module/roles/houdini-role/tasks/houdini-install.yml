@@ -119,14 +119,12 @@
     cd /opt/houdini_install_script/
     . /opt/houdini_install_script/exit_test.sh
 
-    aws sts get-caller-identity
-
     cd {{ download_to_dir }}/
 
+    aws sts get-caller-identity
     ls -ltriah
     touch .test_permissions # Test write permissions
     rm -fr .test_permissions
-
     touch "{{ houdini_linux_tar_filename }}" # test write permissions on existing file if present
     
     wordcount=`aws s3 ls s3://{{ bucket }}/|grep {{ houdini_linux_tar_filename }}|wc -c`

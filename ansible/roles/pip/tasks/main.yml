@@ -137,29 +137,29 @@
     name: wheel
   become: true
 
-- name: uninstall urllib3 because of conflict with rhel 8 packages
-  pip:
-    name: urllib3
-    state: absent
-  become: yes
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+# - name: uninstall urllib3 because of conflict with rhel 8 packages
+#   pip:
+#     name: urllib3
+#     state: absent
+#   become: yes
+#   when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
 
-# consider removing -  unpacking of archive failed on file /usr/lib/python2.7/site-packages/urllib3/packages/ssl_match_hostname
+# # consider removing -  unpacking of archive failed on file /usr/lib/python2.7/site-packages/urllib3/packages/ssl_match_hostname
 
-- name: Remove file - due to intermittent bug with urllib 3 install
-  file:
-    path: /usr/lib/python2.7/site-packages/urllib3/packages/ssl_match_hostname
-    state: absent
-  become: yes
-  changed_when: false
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+# - name: Remove file - due to intermittent bug with urllib 3 install
+#   file:
+#     path: /usr/lib/python2.7/site-packages/urllib3/packages/ssl_match_hostname
+#     state: absent
+#   become: yes
+#   changed_when: false
+#   when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
   
-- name: install python-urllib3 package - for some reason, installing, uninstalling, reinstalling fixes isues with boto3 install.
-  package:
-    name: 'python-urllib3'
-    state: present
-  become: yes
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+# - name: install python-urllib3 package - for some reason, installing, uninstalling, reinstalling fixes isues with boto3 install.
+#   package:
+#     name: 'python-urllib3'
+#     state: present
+#   become: yes
+#   when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
 
 - name: install boto
   pip: 
