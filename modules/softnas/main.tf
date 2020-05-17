@@ -978,6 +978,9 @@ resource "null_resource" "start-softnas" {
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
 
+      export common_tags='${ jsonencode( merge(var.common_tags, local.extra_tags) ) }'; exit_test
+      echo "common_tags: $common_tags"
+
       # create volatile storage
       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-ebs-disk.yaml --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]} stop_softnas_instance=true mode=attach"; exit_test
       aws ec2 start-instances --instance-ids ${aws_instance.softnas1.*.id[count.index]}; exit_test
@@ -999,6 +1002,9 @@ resource "null_resource" "shutdown-softnas" {
     #command = "aws ec2 stop-instances --instance-ids ${aws_instance.softnas1.id}"
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
+
+      export common_tags='${ jsonencode( merge(var.common_tags, local.extra_tags) ) }'; exit_test
+      echo "common_tags: $common_tags"
 
       aws ec2 stop-instances --instance-ids ${aws_instance.softnas1.*.id[count.index]}; exit_test
       # delete volatile storage
@@ -1042,6 +1048,9 @@ resource "null_resource" "attach_local_mounts_after_start" {
       . /deployuser/scripts/exit_test.sh
       # set -x
 
+      export common_tags='${ jsonencode( merge(var.common_tags, local.extra_tags) ) }'; exit_test
+      echo "common_tags: $common_tags"
+
       echo "TF_VAR_remote_mounts_on_local= $TF_VAR_remote_mounts_on_local"
       # ensure routes on workstation exist
       if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
@@ -1081,6 +1090,9 @@ resource "null_resource" "detach_local_mounts_after_stop" {
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
       # set -x
+
+      export common_tags='${ jsonencode( merge(var.common_tags, local.extra_tags) ) }'; exit_test
+      echo "common_tags: $common_tags"
 
       if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
         # unmount volumes from local site when softnas is shutdown.
