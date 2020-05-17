@@ -32,4 +32,18 @@
     volume_type: "{{ item.item.ebs_disk_type }}"
     device_name: "{{ item.item.path }}"
     delete_on_termination: "{{ item.item.volatile }}"
-    tags: common_tags
+    # tags: common_tags
+  register: new_vol
+
+- name: show new_vol
+  debug:
+    var: new_vol
+
+# - name: Ensure all volumes are tagged
+#   ec2_tag:
+#     region:  eu-west-1
+#     resource: '{{ ec2_vol.volumes[0] }}'
+#     state: present
+#     tags:
+#       Name: dbserver
+#       Env: production
