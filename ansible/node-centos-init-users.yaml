@@ -47,8 +47,7 @@
       line: 'export HOSTNAME={{ hostname }}'
     when: set_hostname
 
-# disable SELINUX - it can often cause issues with various systems like PDGMQ, licensing, and PCOIP
-  - name: Disable SELinux
+  - name: Disable SELinux # disable SELINUX - it can often cause issues with various systems like PDGMQ, licensing, and PCOIP.  May try permissive mode in future.
     selinux:
       state: disabled
 
