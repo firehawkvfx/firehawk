@@ -6,15 +6,18 @@
   debug:
     var: common_tags
 
+- name: add new key / value pairs to dict to combine dict.
+  set_fact:
+    common_tags: "{{ common_tags | combine({item.key: item.value}) }}"
+  with_items:
+  - { key: 'mount', value: '{{ item.item.path }}' }
+  - { key: 'pool', value: '{{ item.item.pool_name }}' }
+  - { key: 'volatile', value: '{{ item.item.volatile }}' }
+
 - name: common_tags iterate
   debug:
     var: "{{ item }}"
   with_dict: "{{ common_tags }}"
-
-# - name: set fact for merge tags
-#   set_fact:
-
-# "{{ my_default_values | combine(my_values) }}"
 
 - name: create ebs volume
   ec2_vol:
@@ -27,7 +30,3 @@
     delete_on_termination: "{{ item.item.volatile }}"
     tags:
       - "{{ common_tags }}"
-      role: softnas
-      mount: "{{ item.item.path }}"
-      pool: "{{ item.item.pool_name }}"
-      volatile: "{{ item.item.volatile }}"
