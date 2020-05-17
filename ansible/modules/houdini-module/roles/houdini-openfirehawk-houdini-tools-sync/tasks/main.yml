@@ -33,7 +33,6 @@
 
 - name: Sync openfirehawk-houdini-tools from s3
   shell: |
-    
     # set -x
     mount
     cat /etc/fstab
