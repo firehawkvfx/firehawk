@@ -122,6 +122,12 @@
     aws sts get-caller-identity
 
     cd {{ download_to_dir }}/
+
+    ls -ltriah
+    touch .test_permissions # Test write permissions
+    rm -fr .test_permissions
+
+    touch "{{ houdini_linux_tar_filename }}" # test write permissions on existing file if present
     
     wordcount=`aws s3 ls s3://{{ bucket }}/|grep {{ houdini_linux_tar_filename }}|wc -c`
     if [[ "${wordcount}" -eq 0 ]]; then
@@ -137,6 +143,8 @@
     fi
   register: output
   become_user: "{{ variable_user }}"
+  args:
+    executable: /bin/bash
 
 - name: Download Houdini from SESI website - auto versions
   get_url:
