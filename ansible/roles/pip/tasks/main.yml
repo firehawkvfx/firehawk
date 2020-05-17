@@ -45,10 +45,11 @@
   become: true
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
-- name: upgrade all yum packages
+- name: Upgrade all yum packages except VirtualBox - to update virtual box run 'yum update' with no VM's running.
   yum:
     name: '*'
     state: latest
+    exclude: VirtualBox # exclude virtualbox - if the entire pipe is running on a single host, it isn't possibel to update virtual box since it is being used during execution of this script.
   become: true
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
   tags:
