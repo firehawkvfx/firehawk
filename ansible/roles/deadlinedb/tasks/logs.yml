@@ -16,7 +16,7 @@
     validate_checksum: no # logs may have incorrect checksums, possibly since data changes rapidly after download.
   become: true
 
-- name: "Get all files: file {{ item.path }} copy to {{ firehawk_path }}/tmp/"
+- name: 'Get all files: file {{ item.path }} copy to {{ firehawk_path }}/tmp/'
   fetch:
     src: "{{ item.path }}"
     dest: "{{ firehawk_path }}/tmp/log/"
