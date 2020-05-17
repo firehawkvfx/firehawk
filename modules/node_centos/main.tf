@@ -283,7 +283,9 @@ variable "centos_v7" {
 resource "aws_network_interface" "eth0" {
   count = var.site_mounts ? 1 : 0
   subnet_id     = element(concat(var.private_subnet_ids, list("")), count.index)
-  private_ips     = [cidrhost("${data.aws_subnet.private_subnet[count.index].cidr_block}", 20)]
+                              
+  private_ips     = [cidrhost(element(concat(data.aws_subnet.private_subnet, list("")), count.index).cidr_block, 20)]
+  # private_ips     = [cidrhost("${data.aws_subnet.private_subnet[count.index].cidr_block}", 20)]
 
   tags = merge(map("Name", format("%s", "primary_network_interface_pipeid${lookup(var.common_tags, "pipelineid", "0")}")), var.common_tags, local.extra_tags)
 }
