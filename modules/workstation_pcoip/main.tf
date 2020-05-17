@@ -309,7 +309,7 @@ resource "aws_instance" "workstation_pcoip" {
   instance_type = var.instance_type_map[var.gateway_type]
 
   key_name  = var.key_name
-  subnet_id = element(var.private_subnet_ids, count.index)
+  subnet_id = element(concat(var.private_subnet_ids, list("")), count.index)
 
   vpc_security_group_ids = concat(aws_security_group.workstation_pcoip.*.id, aws_security_group.workstation_centos.*.id)
 
