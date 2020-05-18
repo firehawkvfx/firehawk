@@ -1,6 +1,12 @@
 ---
 # tasks file for roles/deadlinedb
 
+- name: diskspace-check
+  include_role:
+    name: diskspace-check
+  vars:
+    ignore_errors: true # allow for warnings, since we will free up space later as well.
+
 - name: Ensure dirs exist
   file:
     path: "{{ item }}"
@@ -9,22 +15,8 @@
   become_user: "{{ user_deadlineuser_name }}"
   become: true
   with_items:
-  - '/home/{{ user_deadlineuser_name }}/Downloads'
-  - '/home/{{ user_deadlineuser_name }}/Downloads/{{ deadline_linux_basename }}'
   - /deployuser/tmp/DeadlineRepository10/backup
   - /deployuser/tmp/DeadlineDatabase10/mongo/backup/
-
-- name: Ensure dirs exist
-  file:
-    path: "{{ item }}"
-    state: directory
-    owner: "{{ user_deadlineuser_name }}"
-    group: syscontrol
-    mode: u=rwX,g=rX,o-rwx
-  become: true
-  with_items:
-  - /opt/Thinkbox
-  - /opt/Thinkbox/certs
       
 
 - name: Find backups if present - DeadlineDatabase10
@@ -54,6 +46,29 @@
 - name: diskspace-check
   include_role:
     name: diskspace-check
+
+- name: Ensure dirs exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ user_deadlineuser_name }}"
+  become_user: "{{ user_deadlineuser_name }}"
+  become: true
+  with_items:
+  - '/home/{{ user_deadlineuser_name }}/Downloads'
+  - '/home/{{ user_deadlineuser_name }}/Downloads/{{ deadline_linux_basename }}'
+
+- name: Ensure dirs exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ user_deadlineuser_name }}"
+    group: syscontrol
+    mode: u=rwX,g=rX,o-rwx
+  become: true
+  with_items:
+  - /opt/Thinkbox
+  - /opt/Thinkbox/certs
 
 - name: s3-sync pull deadline installer
   include_role:
