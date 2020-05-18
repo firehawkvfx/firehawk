@@ -332,17 +332,17 @@ if [ "$test_vm" = false ] ; then
         echo "init_vm_config: $init_vm_config"
         set -o pipefail # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
         # set -o pipefail # Allow exit status of last command to fail to catch errors after pipe for ts function.
-        ssh-keygen -R $hostname -f /home/gitlab-runner/.ssh/known_hosts # clean host keys
+        ssh-keygen -R [$hostname]:$port -f /home/gitlab-runner/.ssh/known_hosts # clean host keys
         if [[ "$tf_action" == "sleep" ]]; then
-            echo "...Logging in to Vagrant host to set sleep on tf deployment"
+            echo "...Logging in to Vagrant host to set sleep on tf deployment: $hostname"
             ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --sleep --init-vm-config=false" | ts '[%H:%M:%S]'; exit_test
             echo "...End Deployment"
         elif [[ "$tf_action" == "destroy" ]]; then
-            echo "...Logging in to Vagrant host to destroy tf deployment"
+            echo "...Logging in to Vagrant host to destroy tf deployment: $hostname"
             ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --destroy --init-vm-config=false --tf-init=$tf_init" | ts '[%H:%M:%S]'; exit_test
             echo "...End Deployment"
         else
-            echo "...Logging in to Vagrant host"
+            echo "...Logging in to Vagrant host: $hostname "
             ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --init-vm-config=$init_vm_config --tf-action=$tf_action --tf-init=$tf_init" | ts '[%H:%M:%S]'; exit_test
             echo "...End Deployment"
         fi
