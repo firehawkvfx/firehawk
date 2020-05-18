@@ -118,7 +118,7 @@
     become: true
     when: pcoip
 
-  - name: setup ssh key for deadline user by generating key identifier from pem key
+  - name: setup ssh key for deadline user by generating public key identifier from existing private pem key
     shell: |
       ssh-keygen -y -f {{ local_key_path }} > /home/deployuser/{{ key_name }}_public
     connection: local
@@ -135,13 +135,11 @@
     become: yes
     become_user: deadlineuser
 
-  - name: copy key for deadlineuser
-    copy:
-      src: "/home/deployuser/{{ key_name }}_public"
-      dest: /home/deadlineuser/.ssh/authorized_keys
-      mode: '0600'
-      owner: deadlineuser
-      group: deadlineuser
+  - name: add deployuser as an authorized key on the remote host as deployuser
+    authorized_key:
+      user: deadlineuser
+      key: "{{ lookup('file', /home/deployuser/{{ key_name }}_public) }}"
+      state: present
     become: yes
 
   - name: display authorized_keys contents
