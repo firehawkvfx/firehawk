@@ -1,0 +1,129 @@
+---
+# tasks file for roles/houdini_module
+
+- name: Collect some facts only for ansible_distribution
+  setup:
+    gather_subset:
+      - '!all'
+      - 'min'
+  tags:
+  - always
+
+- name: s3 sync openfirehawk-houdini-tools push (from local filesystem) and get (from s3 to node) 
+  include_role:
+    name: houdini_openfirehawk_houdini_tools_sync
+
+- name: dir permissions on /prod/tmp
+  file:
+    path: /prod/tmp
+    state: directory
+    mode: '1777'
+    owner: root
+    group: root
+  become: yes
+
+- name: Ensure permissions are correct in BASH
+  shell: |
+    permissions=$(stat -c '%a' /prod/tmp)
+    if [[ "$permissions" != "1777" ]]; then
+      echo "FAIL: Permissions on path are incorrect: $permissions"
+      exit 1
+    fi
+  become: yes
+
+- name: ansible distro
+  debug:
+    var: ansible_distribution
+
+- name: package dependencies CentOS
+  package:
+    name:
+    - mesa-libGLw
+    - libXp
+    - libXp-devel
+    - mesa-libGLU
+    - libXScrnSaver
+    state: present
+  tags:
+    - packages
+  when: not skip_packages and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
+
+- name: package dependencies Ubuntu
+  package:
+    name:
+    #- libglu1-mesa:i386 # potentially required for centos in future
+    - libglu1
+    - libsm6
+    #- libxmu6:i386 # potentially required for centos in future
+    - libxmu6
+    state: present
+  tags:
+    - packages
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+- name: install pip
+  package:
+    name: python-pip
+    state: latest
+  when: not skip_packages
+
+- name: install nmap to open port range for tops
+  package:
+    name: nmap
+    state: present
+  become: true
+
+- name: dir permissions on /opt/houdini_install_script
+  file:
+    path: /opt/houdini_install_script
+    state: directory
+    mode: '0700'
+    owner: "{{ variable_user }}"
+    group: syscontrol
+  become: true
+
+- name: dir permissions on "{{ download_to_dir }}"
+  file:
+    path: "{{ download_to_dir }}"
+    state: directory
+    mode: u=rwX,g=rwX,o-wx
+    owner: "{{ variable_user }}"
+    group: syscontrol
+  become: true
+
+
+- name: Copy Houdini auto install script to remote host from ansible control.
+  copy:
+    src: /deployuser/modules/node_centos/modules/houdini_install_script/
+    dest: /opt/houdini_install_script/
+    mode: u=rwX,g=rwX,o-wx
+    owner: "{{ variable_user }}"
+    group: syscontrol
+    directory_mode: yes
+  become: true
+
+- name: Copy Houdini auto install script to remote host from ansible control.
+  copy:
+    src: /deployuser/scripts/exit_test.sh
+    dest: /opt/houdini_install_script/
+    mode: u=rx,g=rx,o-wx
+    owner: "{{ variable_user }}"
+    group: syscontrol
+    directory_mode: yes
+  become: true
+
+- name: set permissions on houdini_install.py
+  file:
+    path: /opt/houdini_install_script/houdini_install.py
+    mode: u=rwX,g=rwX,o-wx
+    owner: "{{ variable_user }}"
+    group: syscontrol
+  become: true
+
+- name: set permissions on download_houdini.py
+  file:
+    path: /opt/houdini_install_script/download_houdini.py
+    mode: u=rwX,g=rwX,o-wx
+    owner: "{{ variable_user }}"
+    group: syscontrol
+  become: true

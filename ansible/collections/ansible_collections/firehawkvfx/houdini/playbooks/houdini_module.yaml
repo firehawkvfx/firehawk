@@ -1,0 +1,190 @@
+# This playbook is self contained with its own default variables, but the default variables (vars.yml) can be overidden at your own /secrets/overrides/ansible/modules/houdini_module/vars.yml
+
+# This script will query the latest daily or production build with side fx and install it.
+# if the file exists in s3, it will be downloaded and installed.  aws cli must be configured with a key that has permission to access s3.
+# Do not install the cli on cloud nodes with aws account root permissions!  A seperate user / key with the minimum s3 permissions required is recommended.
+
+# If the file doesn't exist in the s3 bucket, it will be downloaded from side fx, and then pushed to the bucket after install.
+
+# Example install on an aws instance
+# ansible-playbook -i ansible/inventory ansible/collections/ansible_collections/firehawkvfx/houdini/playbooks/houdini_module.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.${var.public_domain_name}"
+# Example local install on a RHEL 7.6 / CENTOS workstation / render node.
+# ansible-playbook -i ansible/inventory ansible/collections/ansible_collections/firehawkvfx/houdini/playbooks/houdini_module.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser hostname=workstation1 ansible_become_pass=sompass"
+
+- hosts: "{{ variable_host | default('role_node_centos') }}"
+  remote_user: "{{ variable_connect_as_user | default('centos') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
+  become: true
+  vars_files:
+    - /deployuser/ansible/group_vars/all/vars
+    - vars.yml
+    - /secrets/overrides/ansible/modules/houdini_module/vars.yml
+
+  vars:
+    ansible_become_pass: "{{ user_deadlineuser_pw }}"
+
+  tasks:
+  - name: test connection
+    debug:
+      msg: "connection established"
+
+# sync installers from/to s3 bucket.  any new houdini versions will be pushed from firehawkgateway to the bucket.
+
+- hosts: firehawkgateway
+  remote_user: deployuser
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
+  become: true
+  vars_files:
+    - /deployuser/ansible/group_vars/all/vars
+    - vars.yml
+    - /secrets/overrides/ansible/modules/houdini_module/vars.yml
+
+  tasks:
+  # store deadline components required for submitter.
+  - name: Ensure tmp dir exist - HoudiniSubmitter
+    file:
+      path: /deployuser/tmp/HoudiniSubmitter/{{ item }}
+      state: directory
+      mode: u+rwX,g+rwX,o-rwx
+      owner: deployuser
+      group: deployuser
+    become: true
+    delegate_to: ansible_control
+    with_items:
+    - otls
+    - soho
+    tags: install_deadline_db
+
+  - name: Fetch from the remote recursively and save to local
+    synchronize:
+      src: /opt/Thinkbox/DeadlineRepository10/submission/Houdini/Client/{{ item }}
+      dest: /deployuser/tmp/HoudiniSubmitter/
+      mode: pull
+      recursive: true
+    become: yes
+    with_items:
+    - otls
+    - soho
+    - DeadlineHoudiniClient.py
+    - MainMenuCommon.xml
+    - CallDeadlineCommand.py
+    tags: install_deadline_db
+
+  - name: Ansible set permissions for items to be copied - /opt/Thinkbox/DeadlineRepository10/submission/... - should not be necesary since root is covered prior, but may fix issues.
+    file:
+      path: "/opt/Thinkbox/DeadlineRepository10/submission/{{ item }}"
+      state: directory
+      mode: u=rX,g=rX,o=r
+      owner: deadlineuser
+      group: syscontrol
+      recurse: yes
+    become: yes
+    with_items:
+    - HServer
+    - Houdini
+    - Nuke
+    tags: install_deadline_db
+
+  - name: Ensure tmp dirs exist - submission
+    file:
+      path: /deployuser/tmp/submission/{{ item }}
+      state: directory
+      mode: u+rwX,g+rwX,o-rwx
+      owner: deployuser
+      group: deployuser
+    become: true
+    delegate_to: ansible_control
+    with_items:
+    - HServer
+    - Houdini
+    - Nuke
+    tags: install_deadline_db
+
+  - name: Fetch submission plugins
+    synchronize:
+      src: "/opt/Thinkbox/DeadlineRepository10/submission/{{ item }}"
+      dest: "/deployuser/tmp/submission/"
+      mode: pull
+    become: yes
+    with_items:
+    - HServer
+    - Houdini
+    - Nuke
+    tags: install_deadline_db
+
+### Houdini Install
+
+- hosts: "{{ variable_host | default('role_node_centos') }}"
+  remote_user: "{{ variable_connect_as_user | default('centos') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
+  become: true
+  vars_files:
+    - /deployuser/ansible/group_vars/all/vars
+    - vars.yml
+    - /secrets/overrides/ansible/modules/houdini_module/vars.yml
+
+  tasks:
+  - name: Install Houdini
+    include_role:
+      name: houdini_role
+      apply:
+        tags:
+          - install_houdini
+    tags: always
+
+  - name: Configure Hserver
+    include_role:
+      name: set_hserver_role
+      apply:
+        tags:
+          - set_hserver
+    tags: always
+
+  - name: Install Deadline
+    include_role:
+      name: install_deadline_role
+      apply:
+        tags:
+          - install_deadline_db
+    tags: always
+
+### Houdini Deadline Plugin
+
+- hosts: firehawkgateway
+  remote_user: deployuser
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
+  become: true
+  vars_files:
+    - /deployuser/ansible/group_vars/all/vars
+    - vars.yml
+    - /secrets/overrides/ansible/modules/houdini_module/vars.yml
+
+  vars:
+    my_password: "{{ user_deadlineuser_pw }}"
+    no_extension: "{{ deadline_linux_installers_tar | splitext | first }}"
+    basename: "{{ no_extension.split('/')[-1] }}"
+    houdini_install_type: 'node'
+    
+  tasks:
+  - name: setup houdini plugin in deadline repository for each major version.  This identical role use occurs in 2 locations - after deadline install and with install of Houdini
+    include_role:
+      name: 'deadlinedb_houdini_plugins'
+      apply:
+        tags:
+          - install_deadline_db
+    tags:
+    - always
+    loop: "{{ houdini_major_version_list }}"
+    loop_control:
+      loop_var: houdini_major_version
+    when: houdini_install_type != "server"
+
+  - name: ensure db is still valid.  a corrupted db may fail at this point if entryies have not been modified correctly
+    shell: |
+      # set -x
+      cd /opt/Thinkbox/DeadlineDatabase10/mongo/application/bin/
+      ./deadline_mongo --sslPEMKeyPassword "{{ deadline_proxy_certificate_password }}" --eval 'printjson(db.getCollectionNames())'
+    no_log: true
+    become: true
+    tags: install_deadline_db
+

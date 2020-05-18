@@ -116,7 +116,7 @@ resource "null_resource" "init_houdini_license_server" {
       # login again and continue...
       if [[ "$TF_VAR_install_houdini_license_server" == true ]]; then
         # install houdini with the same procedure as on render nodes and workstations, and initialise the licence server on this system.
-        ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deployuser houdini_install_type=server" --tags "install_houdini set_hserver install_deadline_db" --skip-tags "sync_scripts"; exit_test
+        ansible-playbook -i "$TF_VAR_inventory" ansible/collections/ansible_collections/firehawkvfx/houdini/playbooks/houdini_module.yaml -v --extra-vars "variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deployuser houdini_install_type=server" --tags "install_houdini set_hserver install_deadline_db" --skip-tags "sync_scripts"; exit_test
       fi
 EOT
 }
@@ -212,8 +212,8 @@ resource "null_resource" "install_houdini_local_workstation" {
       cd /deployuser
       # install houdini on a local workstation with deadline submitters and environment vars.
       if [[ "$TF_VAR_install_houdini" == true ]]; then
-        ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser" --tags "install_houdini" --skip-tags "sync_scripts"; exit_test
-        ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/configure-hserver.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser firehawk_sync_source=$TF_VAR_firehawk_sync_source"; exit_test
+        ansible-playbook -i "$TF_VAR_inventory" ansible/collections/ansible_collections/firehawkvfx/houdini/playbooks/houdini_module.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser" --tags "install_houdini" --skip-tags "sync_scripts"; exit_test
+        ansible-playbook -i "$TF_VAR_inventory" ansible/collections/ansible_collections/firehawkvfx/houdini/playbooks/configure_hserver.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser firehawk_sync_source=$TF_VAR_firehawk_sync_source"; exit_test
         ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser"; exit_test
       fi
 EOT
@@ -270,12 +270,12 @@ resource "null_resource" "install_houdini_deadline_plugin_local_workstation" {
       fi
       # install houdini on a local workstation with deadline submitters and environment vars.
       if [[ "$TF_VAR_install_houdini" == true ]]; then
-        ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-module.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser" --tags "install_deadline_db" --skip-tags "sync_scripts"; exit_test
+        ansible-playbook -i "$TF_VAR_inventory" ansible/collections/ansible_collections/firehawkvfx/houdini/playbooks/houdini_module.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser" --tags "install_deadline_db" --skip-tags "sync_scripts"; exit_test
         ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser"; exit_test
 
         if [[ $TF_VAR_houdini_test_connection == true ]]; then
           # last step before building ami we run a unit test to ensure houdini runs
-          ansible-playbook -i "$TF_VAR_inventory" ansible/modules/houdini-module/houdini-unit-test.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser firehawk_sync_source=$TF_VAR_firehawk_sync_source execute=true"; exit_test
+          ansible-playbook -i "$TF_VAR_inventory" ansible/collections/ansible_collections/firehawkvfx/houdini/playbooks/houdini_unit_test.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser firehawk_sync_source=$TF_VAR_firehawk_sync_source execute=true"; exit_test
         fi
       fi
       # if [[ "$TF_VAR_install_deadline_worker" == true ]]; then

@@ -1,0 +1,15 @@
+### Houdini Install
+
+- hosts: "{{ variable_host | default('role_node_centos') }}"
+  remote_user: "{{ variable_connect_as_user | default('centos') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
+  become: true
+  vars_files:
+    - /deployuser/ansible/group_vars/all/vars
+    - vars.yml
+    - /secrets/overrides/ansible/modules/houdini_module/vars.yml
+
+  tasks:
+  - name: Configure Hserver
+    include_role:
+      name: set_hserver_role
