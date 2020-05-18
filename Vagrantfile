@@ -157,8 +157,9 @@ Vagrant.configure(2) do |config|
                     node.vm.provision "shell", inline: "/deployuser/scripts/init-gateway.sh --#{envtier}"
                 end
                 node.vm.provision "shell", inline: "sudo reboot"
+                node.vm.provision :reload
                 # # trigger reload
-                # node.vm.provision :reload
+                # 
                 # node.trigger.after :up do |trigger|
                 #     trigger.warn = "Taking Snapshot"
                 #     trigger.run = {inline: "'echo 'sleep'"}
