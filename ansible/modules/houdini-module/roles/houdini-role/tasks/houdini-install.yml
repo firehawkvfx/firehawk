@@ -141,6 +141,9 @@
     fi
   register: output
   become_user: "{{ variable_user }}"
+  environment: # this bucket is shared between dev and prod accounts to ensure installers are available to both accounts.
+    AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID_prod') }}"
+    AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY_prod') }}"
   args:
     executable: /bin/bash
 
