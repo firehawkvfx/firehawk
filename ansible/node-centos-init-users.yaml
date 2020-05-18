@@ -30,7 +30,11 @@
   - name: get the username
     command: whoami
     become: false
-    register: remote_user
+    register: whoami
+
+  - set_fact:
+      remote_user: "{{ whoami.stdout }}"
+      
   - debug: var=remote_user
 
   - shell: |
