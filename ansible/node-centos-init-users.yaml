@@ -135,7 +135,7 @@
     become: yes
     become_user: deadlineuser
 
-  - name: add deployuser as an authorized key on the remote host as deployuser
+  - name: add deployuser as an authorized key on the remote host to deadlineuser account
     authorized_key:
       user: deadlineuser
       key: "{{ lookup('file', /home/deployuser/{{ key_name }}_public) }}"

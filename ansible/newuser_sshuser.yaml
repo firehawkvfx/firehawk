@@ -75,9 +75,13 @@
     debug: var=item
     with_file:
       - "/home/deployuser/.ssh/authorized_keys"
-      # - "/home/{{ remote_user }}/.ssh/authorized_keys"
 
-  - name: add deployuser as an authorized key on the remote host as deployuser
+  - name: display public_key_location contents
+    debug: var=item
+    with_file:
+      - "{{ public_key_location }}"
+
+  - name: add deployuser as an authorized key on the remote host to deployuser account
     authorized_key:
       user: deployuser
       key: "{{ lookup('file', public_key_location) }}"
