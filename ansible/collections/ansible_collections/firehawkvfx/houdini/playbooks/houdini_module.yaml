@@ -1,4 +1,4 @@
-# This playbook is self contained with its own default variables, but the default variables (vars.yml) can be overidden at your own /secrets/overrides/ansible/modules/houdini_module/vars.yml
+# This playbook is self contained with its own default variables, but the default variables (vars.yml) can be overidden at your own /secrets/overrides/ansible/collections/firehawkvfx/houdini/vars.yml
 
 # This script will query the latest daily or production build with side fx and install it.
 # if the file exists in s3, it will be downloaded and installed.  aws cli must be configured with a key that has permission to access s3.
@@ -18,7 +18,7 @@
   vars_files:
     - /deployuser/ansible/group_vars/all/vars
     - vars.yml
-    - /secrets/overrides/ansible/modules/houdini_module/vars.yml
+    - /secrets/overrides/ansible/collections/firehawkvfx/houdini/vars.yml
 
   vars:
     ansible_become_pass: "{{ user_deadlineuser_pw }}"
@@ -37,7 +37,7 @@
   vars_files:
     - /deployuser/ansible/group_vars/all/vars
     - vars.yml
-    - /secrets/overrides/ansible/modules/houdini_module/vars.yml
+    - /secrets/overrides/ansible/collections/firehawkvfx/houdini/vars.yml
 
   tasks:
   # store deadline components required for submitter.
@@ -121,7 +121,7 @@
   vars_files:
     - /deployuser/ansible/group_vars/all/vars
     - vars.yml
-    - /secrets/overrides/ansible/modules/houdini_module/vars.yml
+    - /secrets/overrides/ansible/collections/firehawkvfx/houdini/vars.yml
 
   tasks:
   - name: Install Houdini
@@ -157,7 +157,7 @@
   vars_files:
     - /deployuser/ansible/group_vars/all/vars
     - vars.yml
-    - /secrets/overrides/ansible/modules/houdini_module/vars.yml
+    - /secrets/overrides/ansible/collections/firehawkvfx/houdini/vars.yml
 
   vars:
     my_password: "{{ user_deadlineuser_pw }}"

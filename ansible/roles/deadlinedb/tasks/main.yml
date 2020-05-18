@@ -157,7 +157,7 @@
   become_user: "{{ user_deadlineuser_name }}"
   become: true
 
-- name: Check that the somefile exists
+- name: Check if uninstall exists /opt/Thinkbox/DeadlineRepository10/uninstall
   stat:
     path: /opt/Thinkbox/DeadlineRepository10/uninstall
   register: stat_result
@@ -191,7 +191,7 @@
   tags:
   - install
 
-- name: Uninstall deadline db if already present
+- name: Uninstall mongo db if already present
   shell: |
     sudo rm -fr /var/log/mongodb
     sudo rm -fr /var/lib/mongodb
@@ -214,7 +214,7 @@
   
 - name: Install Deadline DB & pull latest log.
   block:
-    - name: install deadline db
+    - name: 'Install deadline db as {{ user_deadlineuser_name }}'
       shell: |
         # set -x
         cd /home/{{ user_deadlineuser_name }}/Downloads/

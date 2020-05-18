@@ -62,9 +62,9 @@
 - name: 'generate ssh key for {{ variable_user }}'
   shell: |
     df -h
-    ssh-keygen -q -t rsa -f /home/{{ variable_user }}/.ssh/id_rsa.pub -C "" -N ""
+    ssh-keygen -q -t rsa -f /home/{{ variable_user }}/.ssh/id_rsa -C "" -N ""
   args:
-    creates: '/home/{{ variable_user }}/.ssh/id_rsa.pub'
+    creates: '/home/{{ variable_user }}/.ssh/id_rsa'
   become_user: '{{ variable_user }}'
 
 - name: "insert/update block in /home/{{ variable_user }}/.bashrc and home/deployuser/.bashrc"

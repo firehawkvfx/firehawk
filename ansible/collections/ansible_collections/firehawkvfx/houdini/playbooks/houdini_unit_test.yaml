@@ -8,7 +8,7 @@
   vars_files:
     - /deployuser/ansible/group_vars/all/vars
     - vars.yml
-    - /secrets/overrides/ansible/modules/houdini_module/vars.yml
+    - /secrets/overrides/ansible/collections/firehawkvfx/houdini/vars.yml
 
   vars:
     # the become sudo pass is only relevent for local installation if required on the host specified.

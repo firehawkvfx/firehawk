@@ -59,9 +59,9 @@
   - name: generate ssh key
     shell: |
       df -h
-      ssh-keygen -q -t rsa -f /home/deployuser/.ssh/id_rsa.pub -C "" -N ""
+      ssh-keygen -q -t rsa -f /home/deployuser/.ssh/id_rsa -C "" -N ""
     args:
-      creates: /home/deployuser/.ssh/id_rsa.pub
+      creates: /home/deployuser/.ssh/id_rsa
     become_user: deployuser
 
   - name: add deployuser as an authorized key on the remote host as deployuser
