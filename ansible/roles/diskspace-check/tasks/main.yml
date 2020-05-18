@@ -18,4 +18,5 @@
     that: item.size_available > item.size_total|float * 0.2
     msg: 'disk space has reached 80% threshold'
   when: item.mount == mountname
+  ignore_errors: "{{ ignore_errors }}"
   with_items: "{{ ansible_mounts }}"
