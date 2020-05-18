@@ -222,13 +222,13 @@
       become_user: "{{ user_deadlineuser_name }}"
       register: deadline_db_install_output_shell
       become: true
-    # - name: Started service for deadlinedb # may need process to wait for process to be started
-    #   service:
-    #     name: Deadline10db
-    #     # state: started
-    #     enabled: true
-    #     # daemon_reload: true
-    #   become: true
+    - name: Started service for deadlinedb # may need process to wait for process to be started
+      service:
+        name: Deadline10db
+        state: restarted
+        enabled: true
+        daemon_reload: true
+      become: true
     # - name: Restart service for deadlinedb # may need process to wait for process to be started
     #   service:
     #     name: Deadline10db

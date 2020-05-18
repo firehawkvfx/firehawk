@@ -115,6 +115,10 @@ Vagrant.configure(2) do |config|
 
             if box_file_in.nil? || box_file_in.empty?
                 node.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive; sudo apt-get update"
+                node.vm.provision "shell", inline: "sudo mkdir -p /vagrant/tmp/apt/$(hostname)"
+                # node.vm.provision "shell", inline: "sudo cp -r /vagrant/tmp/apt/$(hostname)/* var/cache/apt/." # copy apt caches back
+                node.vm.provision "shell", inline: 'echo "Dir::Cache::Archives /vagrant/tmp/apt/$(hostname);" | sudo tee -a /etc/apt/apt.conf.d/00aptitude'
+                node.vm.provision "shell", inline: 'echo "Dir::Cache /vagrant/tmp/apt/$(hostname);" | sudo tee -a /etc/apt/apt.conf.d/00aptitude'
                 node.vm.provision "shell", inline: "echo 'source /vagrant/scripts/env.sh' > /etc/profile.d/sa-environment.sh", :run => 'always'
                 node.vm.provision "shell", inline: "echo DEBIAN_FRONTEND=$DEBIAN_FRONTEND"
                 node.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive"
