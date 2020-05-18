@@ -99,6 +99,16 @@
     become: false
     register: remote_user
   - debug: var=remote_user
+
+  - shell: |
+      ls -ltriah /home/{{ variable_user }}/.ssh/
+      cat /home/{{ variable_user }}/.ssh/authorized_keys
+
+      ls -ltriah /home/{{ remote_user }}/.ssh/
+      cat /home/{{ remote_user }}/.ssh/authorized_keys
+    become: true
+    ignore_errors: yes
+
   - name: display authorized_keys contents
     debug: var=item
     with_file:
