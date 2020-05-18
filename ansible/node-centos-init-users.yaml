@@ -27,10 +27,18 @@
       force: no
     become: true
 
+  - name: get the username
+    command: whoami
+    become: false
+    register: remote_user
+  - debug: var=remote_user
   - name: display authorized_keys contents
     debug: var=item
     with_file:
-      - "/home/deployuser/.ssh/authorized_keys"
+      - "/home/{{ remote_user }}/.ssh/authorized_keys"
+      - "/home/{{ variable_user }}/.ssh/authorized_keys"
+    become: true
+    ignore_errors: yes
 
   - name: change hostname
     hostname:

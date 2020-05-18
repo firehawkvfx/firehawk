@@ -42,12 +42,7 @@
   tasks:
   - command: echo 'connection established'
 
-  - name: get the username
-    command: whoami
-    become: false
-    register: remote_user
 
-  - debug: var=remote_user
 
   - authorized_key:
       user: "{{ variable_user }}"
@@ -59,10 +54,14 @@
       cat ~/.ssh/authorized_keys
     become: true
 
+  - name: get the username
+    command: whoami
+    become: false
+    register: remote_user
+  - debug: var=remote_user
   - name: display authorized_keys contents
     debug: var=item
     with_file:
-      - "~/.ssh/authorized_keys"
       - "/home/{{ remote_user }}/.ssh/authorized_keys"
       - "/home/{{ variable_user }}/.ssh/authorized_keys"
     become: true
