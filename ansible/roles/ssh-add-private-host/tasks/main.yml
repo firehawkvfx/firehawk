@@ -7,7 +7,7 @@
     var: known_hosts
 
 - name: clean known hosts
-  shell: "ssh-agent bash && ssh-keygen -f /home/{{ variable_user }}/.ssh/known_hosts -R {{ private_ip }}"
+  shell: "ssh-agent bash && ssh-keygen -R {{ private_ip }} -f /home/{{ variable_user }}/.ssh/known_hosts"
   become: true
   become_user: "{{ variable_user }}"
   when: known_hosts.stat.exists == true

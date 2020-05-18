@@ -10,12 +10,12 @@
   become_user: "{{ variable_user }}"
   
 - name: clean known hosts
-  shell: "ssh-keygen -f /home/{{ variable_user }}/.ssh/known_hosts -R {{ public_ip }}"
+  shell: "ssh-keygen -R {{ public_ip }} -f /home/{{ variable_user }}/.ssh/known_hosts"
   become: true
   become_user: "{{ variable_user }}"
 
 - name: clean known hosts
-  shell: "ssh-keygen -f /home/{{ variable_user }}/.ssh/known_hosts -R {{ public_address }}"
+  shell: "ssh-keygen -R {{ public_address }} -f /home/{{ variable_user }}/.ssh/known_hosts"
   become: true
   become_user: "{{ variable_user }}"
 
