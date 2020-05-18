@@ -114,6 +114,7 @@ Vagrant.configure(2) do |config|
             end
 
             if box_file_in.nil? || box_file_in.empty?
+                node.vm.provision "shell", inline: "cat /etc/apt/apt.conf" # config to store cached apt packages
                 node.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive; sudo apt-get update"
                 node.vm.provision "shell", inline: "echo 'source /vagrant/scripts/env.sh' > /etc/profile.d/sa-environment.sh", :run => 'always'
                 node.vm.provision "shell", inline: "echo DEBIAN_FRONTEND=$DEBIAN_FRONTEND"

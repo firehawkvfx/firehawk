@@ -332,6 +332,7 @@ if [ "$test_vm" = false ] ; then
         echo "init_vm_config: $init_vm_config"
         set -o pipefail # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
         # set -o pipefail # Allow exit status of last command to fail to catch errors after pipe for ts function.
+        ssh-keygen -R $hostname -f /home/gitlab-runner/.ssh/known_hosts # clean host keys
         if [[ "$tf_action" == "sleep" ]]; then
             echo "...Logging in to Vagrant host to set sleep on tf deployment"
             ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --sleep --init-vm-config=false" | ts '[%H:%M:%S]'; exit_test
