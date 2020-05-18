@@ -46,3 +46,8 @@
       user: "{{ variable_user }}"
       state: present
       key: "{{ lookup('file', ansible_ssh_public_key_file) }}"
+
+  - name: display authorized_keys contents
+    debug: var=item
+    with_file:
+      - "/home/{{ variable_user }}/.ssh/authorized_keys"

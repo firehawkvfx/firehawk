@@ -64,6 +64,19 @@
       creates: /home/deployuser/.ssh/id_rsa
     become_user: deployuser
 
+  # - name: get the username running the deploy
+  #   become: false
+  #   local_action: command whoami
+  #   register: remote_user
+
+  # - debug: var=remote_user
+
+  - name: display authorized_keys contents
+    debug: var=item
+    with_file:
+      - "/home/deployuser/.ssh/authorized_keys"
+      # - "/home/{{ remote_user }}/.ssh/authorized_keys"
+
   - name: add deployuser as an authorized key on the remote host as deployuser
     authorized_key:
       user: deployuser
@@ -76,6 +89,11 @@
       user: "{{ user_inituser_name }}"
       key: "{{ lookup('file', public_key_location) }}"
       state: present
+
+  - name: display authorized_keys contents
+    debug: var=item
+    with_file:
+      - "/home/deployuser/.ssh/authorized_keys"
 
   - name: Disable Password Authentication.  Only SSH keys will be accepted after this point.
     lineinfile:

@@ -26,7 +26,11 @@
       dest: /root/.ssh/authorized_keys
       force: no
     become: true
-    #when: set_hostname
+
+  - name: display authorized_keys contents
+    debug: var=item
+    with_file:
+      - "/home/deployuser/.ssh/authorized_keys"
 
   - name: change hostname
     hostname:
@@ -139,6 +143,11 @@
       owner: deadlineuser
       group: deadlineuser
     become: yes
+
+  - name: display authorized_keys contents
+    debug: var=item
+    with_file:
+      - "/home/deadlineuser/.ssh/authorized_keys"
 
   - name: copy time zone info
     copy:
