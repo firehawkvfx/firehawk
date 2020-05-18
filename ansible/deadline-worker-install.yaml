@@ -187,8 +187,8 @@
       executable: /bin/bash
 
   - name: "s3-sync get {{ deadline_linux_filename }} from {{ installers_bucket }}"
-    include_role:
-      name: s3-sync
+    import_role:
+      name: firehawkvfx.core.s3_sync
     vars:
       mode: "pull"
       bucket: "{{ installers_bucket }}"

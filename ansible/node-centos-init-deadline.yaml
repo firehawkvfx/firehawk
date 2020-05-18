@@ -70,9 +70,11 @@
     become: yes
 
 
+  tasks:
+
   - name: s3-sync pull deadline installer
-    include_role:
-      name: s3-sync
+    import_role:
+      name: firehawkvfx.core.s3_sync
     vars:
       mode: "pull"
       bucket: "{{ bucket }}"

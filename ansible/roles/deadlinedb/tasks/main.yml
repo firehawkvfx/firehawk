@@ -71,8 +71,8 @@
   - /opt/Thinkbox/certs
 
 - name: s3-sync pull deadline installer
-  include_role:
-    name: s3-sync
+  import_role:
+    name: firehawkvfx.core.s3_sync
   vars:
     mode: "pull"
     bucket: "{{ installers_bucket }}"
@@ -105,8 +105,8 @@
     var: caller_info
 
 - name: s3-sync push deadline installer
-  include_role:
-    name: s3-sync
+  import_role:
+    name: firehawkvfx.core.s3_sync
   vars:
     mode: "push"
     bucket: "{{ installers_bucket }}"
