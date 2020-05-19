@@ -23,6 +23,6 @@ sed -i 's/^TF_VAR_install_deadline_db=.*$/TF_VAR_install_deadline_db=true/' $con
 sed -i 's/^TF_VAR_install_deadline_rcs=.*$/TF_VAR_install_deadline_rcs=true/' $config_override # install deadline
 sed -i 's/^TF_VAR_install_deadline_worker=.*$/TF_VAR_install_deadline_worker=true/' $config_override # install deadline
 sed -i 's/^TF_VAR_install_houdini=.*$/TF_VAR_install_houdini=true/' $config_override # install houdini
-sed -i 's/^TF_VAR_taint_single=.*$/TF_VAR_taint_single=()/' $config_override # taint vpn
+sed -i 's/^TF_VAR_taint_single=.*$/TF_VAR_taint_single=(module.firehawk_init.null_resource.install_houdini_local_workstation[0])/' $config_override # taint vpn
 # sed -i 's/^TF_VAR_taint_single=.*$/TF_VAR_taint_single=(module.firehawk_init.null_resource.init_deadlinedb_firehawk[0])/' $config_override # taint vpn
 sed -i 's/^TF_VAR_tf_destroy_before_deploy=.*$/TF_VAR_tf_destroy_before_deploy=false/' $config_override # destroy before deploy
