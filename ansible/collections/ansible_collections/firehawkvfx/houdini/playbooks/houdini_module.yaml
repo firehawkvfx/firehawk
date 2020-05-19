@@ -125,8 +125,10 @@
 
   tasks:
   - name: Install Houdini
-    include_role:
-      name: houdini_role
+    import_role:
+      name: firehawkvfx.houdini.houdini_role
+    # include_role:
+    #   name: houdini_role
       apply:
         tags:
           - install_houdini
