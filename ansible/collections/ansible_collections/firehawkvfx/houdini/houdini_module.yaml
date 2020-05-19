@@ -126,9 +126,9 @@
   tasks:
   - name: Install Houdini
     # import_role:
-    #   name: firehawkvfx.houdini.houdini_role
+    #   name: houdini_role
     include_role:
-      name: firehawkvfx.houdini.houdini_role
+      name: houdini_role
       apply:
         tags:
           - install_houdini
@@ -136,7 +136,7 @@
 
   - name: Configure Hserver
     include_role:
-      name: firehawkvfx.houdini.set_hserver_role
+      name: set_hserver_role
       apply:
         tags:
           - set_hserver
@@ -144,7 +144,7 @@
 
   - name: Install Deadline
     include_role:
-      name: firehawkvfx.houdini.install_deadline_role
+      name: install_deadline_role
       apply:
         tags:
           - install_deadline_db
@@ -170,7 +170,7 @@
   tasks:
   - name: setup houdini plugin in deadline repository for each major version.  This identical role use occurs in 2 locations - after deadline install and with install of Houdini
     include_role:
-      name: 'firehawkvfx.houdini.deadlinedb_houdini_plugins'
+      name: deadlinedb_houdini_plugins
       apply:
         tags:
           - install_deadline_db
