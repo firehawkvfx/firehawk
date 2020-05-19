@@ -6,8 +6,8 @@
   become: true
   vars_files:
     - /deployuser/ansible/group_vars/all/vars
-    - vars.yml
-    - /secrets/overrides/ansible/collections/firehawkvfx/houdini/vars.yml
+    - vars/main.yml
+    - /secrets/overrides/ansible/collections/firehawkvfx/houdini/vars/main.yml
 
   tasks:
   - name: Configure Hserver

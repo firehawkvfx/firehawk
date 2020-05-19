@@ -1,4 +1,4 @@
-# This playbook is self contained with its own default variables, but the default variables (vars.yml) can be overidden at your own /secrets/overrides/ansible/collections/firehawkvfx/houdini/vars.yml
+# This playbook is self contained with its own default variables, but the default variables (vars.yml) can be overidden at your own /secrets/overrides/ansible/collections/firehawkvfx/houdini/vars/main.yml
 
 # This script will query the latest daily or production build with side fx and install it.
 # if the file exists in s3, it will be downloaded and installed.  aws cli must be configured with a key that has permission to access s3.
@@ -7,9 +7,9 @@
 # If the file doesn't exist in the s3 bucket, it will be downloaded from side fx, and then pushed to the bucket after install.
 
 # Example install on an aws instance
-# ansible-playbook -i ansible/inventory ansible/collections/ansible_collections/firehawkvfx/houdini/playbooks/houdini_module.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.${var.public_domain_name}"
+# ansible-playbook -i ansible/inventory ansible/collections/ansible_collections/firehawkvfx/houdini/houdini_module.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.${var.public_domain_name}"
 # Example local install on a RHEL 7.6 / CENTOS workstation / render node.
-# ansible-playbook -i ansible/inventory ansible/collections/ansible_collections/firehawkvfx/houdini/playbooks/houdini_module.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser hostname=workstation1 ansible_become_pass=sompass"
+# ansible-playbook -i ansible/inventory ansible/collections/ansible_collections/firehawkvfx/houdini/houdini_module.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser hostname=workstation1 ansible_become_pass=sompass"
 
 - hosts: "{{ variable_host | default('role_node_centos') }}"
   remote_user: "{{ variable_connect_as_user | default('centos') }}"
@@ -17,8 +17,8 @@
   become: true
   vars_files:
     - /deployuser/ansible/group_vars/all/vars
-    - vars.yml
-    - /secrets/overrides/ansible/collections/firehawkvfx/houdini/vars.yml
+    - vars/main.yml
+    - /secrets/overrides/ansible/collections/firehawkvfx/houdini/vars/main.yml
 
   vars:
     ansible_become_pass: "{{ user_deadlineuser_pw }}"
@@ -36,8 +36,8 @@
   become: true
   vars_files:
     - /deployuser/ansible/group_vars/all/vars
-    - vars.yml
-    - /secrets/overrides/ansible/collections/firehawkvfx/houdini/vars.yml
+    - vars/main.yml
+    - /secrets/overrides/ansible/collections/firehawkvfx/houdini/vars/main.yml
 
   tasks:
   # store deadline components required for submitter.
@@ -120,8 +120,8 @@
   become: true
   vars_files:
     - /deployuser/ansible/group_vars/all/vars
-    - vars.yml
-    - /secrets/overrides/ansible/collections/firehawkvfx/houdini/vars.yml
+    - vars/main.yml
+    - /secrets/overrides/ansible/collections/firehawkvfx/houdini/vars/main.yml
 
   tasks:
   - name: Install Houdini
@@ -158,8 +158,8 @@
   become: true
   vars_files:
     - /deployuser/ansible/group_vars/all/vars
-    - vars.yml
-    - /secrets/overrides/ansible/collections/firehawkvfx/houdini/vars.yml
+    - vars/main.yml
+    - /secrets/overrides/ansible/collections/firehawkvfx/houdini/vars/main.yml
 
   vars:
     my_password: "{{ user_deadlineuser_pw }}"
