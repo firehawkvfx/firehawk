@@ -113,16 +113,16 @@
     msg: 'no valid houdini_linux_tar_filename was defined / found'
   when: '".tar" not in houdini_linux_tar_filename'
 
-- name: 's3-sync pull deadline installer {{ bucket }}'
+- name: 's3-sync pull houdini installer {{ installers_bucket }}'
   import_role:
     name: firehawkvfx.core.s3_sync
   vars:
     mode: "pull"
-    # bucket: "{{ bucket }}"
+    bucket: "{{ installers_bucket }}"
     basedir: "{{ download_to_dir | dirname }}"
     filename: "{{ houdini_linux_tar_filename | basename }}"
     # variable_user: "deployuser" # deploy user has access to the default downloads folder.
-    variable_user: "{{ variable_user }}"
+    # variable_user: "{{ variable_user }}" # bypas since variable user should hopefully be passed through.  self referencing vars in yaml isn't supported.
 
 # Note must handle condition if auto version is false and the file doesn't exist in the s3 bucket.
 
@@ -320,19 +320,32 @@
   tags:
     - sync_installers
 
-- name: "ensure the houdini installer exists in the s3 bucket {{ installers_bucket }} Push if it doesn't."
-  shell: |
-    # set -x
-    # aws sts get-caller-identity
-    cd {{ download_to_dir }}/
-    
-    wordcount=`aws s3 ls s3://{{ bucket }}/|grep {{ houdini_linux_tar_filename }}|wc -c`
-    if [[ "${wordcount}" -eq 0 ]]; then
-      echo "File not present in S3 bucket.  Will upload"
-      aws s3 sync . s3://{{ installers_bucket }}/ --exclude "*" --include "{{ houdini_linux_tar_filename }}" --no-progress
-    else
-      echo "File present in s3 bucket.  Will not sync."
-    fi
-  become_user: "{{ variable_user }}"
+- name: 's3-sync pull houdini installer {{ installers_bucket }}'
+  import_role:
+    name: firehawkvfx.core.s3_sync
+  vars:
+    mode: "push"
+    bucket: "{{ installers_bucket }}"
+    basedir: "{{ download_to_dir | dirname }}"
+    filename: "{{ houdini_linux_tar_filename | basename }}"
+    # variable_user: "deployuser" # deploy user has access to the default downloads folder.
+    # variable_user: "{{ variable_user }}" # bypas since variable user should hopefully be passed through.  self referencing vars in yaml isn't supported.
   tags:
     - sync_installers
+
+# - name: "ensure the houdini installer exists in the s3 bucket {{ installers_bucket }} Push if it doesn't."
+#   shell: |
+#     # set -x
+#     # aws sts get-caller-identity
+#     cd {{ download_to_dir }}/
+    
+#     wordcount=`aws s3 ls s3://{{ bucket }}/|grep {{ houdini_linux_tar_filename }}|wc -c`
+#     if [[ "${wordcount}" -eq 0 ]]; then
+#       echo "File not present in S3 bucket.  Will upload"
+#       aws s3 sync . s3://{{ installers_bucket }}/ --exclude "*" --include "{{ houdini_linux_tar_filename }}" --no-progress
+#     else
+#       echo "File present in s3 bucket.  Will not sync."
+#     fi
+#   become_user: "{{ variable_user }}"
+#   tags:
+#     - sync_installers

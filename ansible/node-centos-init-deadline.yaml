@@ -77,7 +77,7 @@
       name: firehawkvfx.core.s3_sync
     vars:
       mode: "pull"
-      bucket: "{{ bucket }}"
+      bucket: "{{ installers_bucket }}"
       basedir: "/home/deadlineuser/Downloads"
       filename: "{{ deadline_linux_filename }}"
       variable_user: "deadlineuser"
