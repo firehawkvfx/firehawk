@@ -427,7 +427,7 @@ resource "null_resource" "install_houdini" {
       aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id} # ensure instance is started
 
       if [[ "$TF_VAR_install_houdini" == true ]]; then
-        ansible-playbook -i "$TF_VAR_inventory" ansible//ansible_collections/firehawkvfx/houdini/houdini_module.yaml -v --extra-vars "houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source" --tags "install_houdini"; exit_test
+        ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/houdini/houdini_module.yaml -v --extra-vars "houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source" --tags "install_houdini"; exit_test
         ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v; exit_test
       fi
 EOT
@@ -468,12 +468,12 @@ resource "null_resource" "install_deadline_worker" {
       fi
 
       if [[ "$TF_VAR_install_houdini" == true ]]; then
-        ansible-playbook -i "$TF_VAR_inventory" ansible//ansible_collections/firehawkvfx/houdini/configure_hserver.yaml -v --extra-vars "houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source"; exit_test
+        ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/houdini/configure_hserver.yaml -v --extra-vars "houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source"; exit_test
         ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v; exit_test
       fi
 
       if [[ "$TF_VAR_install_deadline_worker" == true ]]; then
-        ansible-playbook -i "$TF_VAR_inventory" ansible//ansible_collections/firehawkvfx/houdini/houdini_module.yaml -v --extra-vars "houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source" --tags "install_deadline_db"; exit_test
+        ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/houdini/houdini_module.yaml -v --extra-vars "houdini_build=$TF_VAR_houdini_build firehawk_sync_source=$TF_VAR_firehawk_sync_source" --tags "install_deadline_db"; exit_test
         echo "test db centos"
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
       fi
@@ -506,7 +506,7 @@ resource "null_resource" "mounts_and_houdini_test" {
 
       if [[ "$TF_VAR_install_houdini" == true ]] && [[ $TF_VAR_houdini_test_connection == true ]]; then
         # last step before building ami we run a unit test to ensure houdini runs.  We also cleanup any uneeded data afterwards, including tmp folders
-        ansible-playbook -i "$TF_VAR_inventory" ansible//ansible_collections/firehawkvfx/houdini/houdini_unit_test.yaml -v --extra-vars "variable_user=deadlineuser firehawk_sync_source=$TF_VAR_firehawk_sync_source execute=true"; exit_test
+        ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/houdini/houdini_unit_test.yaml -v --extra-vars "variable_user=deadlineuser firehawk_sync_source=$TF_VAR_firehawk_sync_source execute=true"; exit_test
       fi
 
       # stop the instance to ensure ami is created from a stable state
