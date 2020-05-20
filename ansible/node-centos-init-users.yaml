@@ -38,11 +38,8 @@
   - debug: var=remote_user
 
   - shell: |
-      ls -ltriah /home/{{ variable_user }}/.ssh/
-      # cat /home/{{ variable_user }}/.ssh/authorized_keys
-
       ls -ltriah /home/{{ remote_user }}/.ssh/
-      # cat /home/{{ remote_user }}/.ssh/authorized_keys
+      ls -ltriah /home/{{ variable_user }}/.ssh/
     become: true
     ignore_errors: yes
 

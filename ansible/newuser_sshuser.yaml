@@ -64,13 +64,6 @@
       creates: /home/deployuser/.ssh/id_rsa
     become_user: deployuser
 
-  # - name: get the username running the deploy
-  #   become: false
-  #   local_action: command whoami
-  #   register: remote_user
-
-  # - debug: var=remote_user
-
   - name: display authorized_keys contents
     debug: var=item
     with_file:
@@ -105,11 +98,8 @@
   - debug: var=remote_user
 
   - shell: |
-      ls -ltriah /home/{{ user_inituser_name }}/.ssh/
-      # cat /home/{{ variable_user }}/.ssh/authorized_keys
-
       ls -ltriah /home/{{ remote_user }}/.ssh/
-      # cat /home/{{ remote_user }}/.ssh/authorized_keys
+      ls -ltriah /home/{{ user_inituser_name }}/.ssh/
     become: true
     ignore_errors: yes
 
