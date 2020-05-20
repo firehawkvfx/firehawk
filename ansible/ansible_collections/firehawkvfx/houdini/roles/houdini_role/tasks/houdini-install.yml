@@ -119,7 +119,7 @@
   vars:
     mode: "pull"
     bucket: "{{ installers_bucket }}"
-    basedir: "{{ download_to_dir | dirname }}"
+    basedir: "{{ download_to_dir }}"
     filename: "{{ houdini_linux_tar_filename | basename }}"
     # variable_user: "deployuser" # deploy user has access to the default downloads folder.
     # variable_user: "{{ variable_user }}" # bypas since variable user should hopefully be passed through.  self referencing vars in yaml isn't supported.
@@ -324,7 +324,7 @@
   vars:
     mode: "push"
     bucket: "{{ installers_bucket }}"
-    basedir: "{{ download_to_dir | dirname }}"
+    basedir: "{{ download_to_dir }}"
     filename: "{{ houdini_linux_tar_filename | basename }}"
     # variable_user: "deployuser" # deploy user has access to the default downloads folder.
     # variable_user: "{{ variable_user }}" # bypas since variable user should hopefully be passed through.  self referencing vars in yaml isn't supported.
