@@ -20,6 +20,8 @@
     
     test_file () {
       local filename="$1"
+      echo "ls bucket: {{ bucket }}"
+      aws s3 ls s3://{{ bucket }}/
       wordcount=`aws s3 ls s3://{{ bucket }}/|grep {{ filename }}|wc -c`
       if [[ "${wordcount}" -eq 0 ]]; then
         file_in_bucket=true
