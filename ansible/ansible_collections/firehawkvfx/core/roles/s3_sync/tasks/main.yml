@@ -1,6 +1,10 @@
 - name: Test output
   debug:
     msg: "variable_user:{{ variable_user }}"
+    
+- name: Test output
+  debug:
+    msg: "using bucket s3://{{ bucket }}/"
 
 - name: Sync S3 # warning: there appears to be a bug with ansible that may result in variable user being defined at the include_role level not setting the variable_user var correctly.  consider this if errors should occur.
   shell: |
