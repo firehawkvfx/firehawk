@@ -113,12 +113,12 @@
     msg: 'no valid houdini_linux_tar_filename was defined / found'
   when: '".tar" not in houdini_linux_tar_filename'
 
-- name: s3-sync pull deadline installer
+- name: 's3-sync pull deadline installer {{ bucket }}'
   import_role:
     name: firehawkvfx.core.s3_sync
   vars:
     mode: "pull"
-    bucket: "{{ bucket }}"
+    # bucket: "{{ bucket }}"
     basedir: "{{ download_to_dir | dirname }}"
     filename: "{{ houdini_linux_tar_filename | basename }}"
     # variable_user: "deployuser" # deploy user has access to the default downloads folder.
