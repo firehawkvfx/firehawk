@@ -19,6 +19,7 @@
     gpgkey: "{{ epel_repo_gpg_key_url }}"
     enabled: yes
   become: true
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
   tags:
   - add-epel
 
