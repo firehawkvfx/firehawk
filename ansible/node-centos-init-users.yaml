@@ -7,9 +7,7 @@
     pcoip: False
     # this will initialise ssh and the hostname.  this is bypassed on the softnas instance which has different initialisation steps.
     set_hostname: true
-    init_users:
-      deadlineuser
-      centos
+
   tasks:
   - name: Collect some facts only for ansible_distribution
     setup:
