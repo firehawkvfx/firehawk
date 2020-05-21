@@ -29,7 +29,9 @@
   - role: 'add-user-to-group'
     vars:
       variable_group: 'syscontrol'
-    tags: ['cloud-install', 'onsite-install']
+    tags: 'always'
+    
+    # tags: ['cloud-install', 'onsite-install']
 # ADD deployuser USER TO THE GROUP AS WELL
 # after deadline install we need to ensure deployuser is part of the syscontrol group.
   
