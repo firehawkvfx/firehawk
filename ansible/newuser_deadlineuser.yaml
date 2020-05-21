@@ -23,13 +23,13 @@
 
   roles:
   - role: pip
-    tags: 'newuser'
+    # tags: 'newuser'
   - role: 'newuser'
-    tags: 'newuser'
+    # tags: 'newuser'
   - role: 'add-user-to-group'
     vars:
       variable_group: 'syscontrol'
-    tags: 'always'
+    # tags: 'always'
     
     # tags: ['cloud-install', 'onsite-install']
 # ADD deployuser USER TO THE GROUP AS WELL
