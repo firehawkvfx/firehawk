@@ -901,7 +901,7 @@ resource "null_resource" "provision_softnas_volumes" {
       echo "common_tags: $common_tags"
 
       # ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init-users.yaml -vvv --extra-vars "variable_host=role_softnas variable_user=$TF_VAR_softnas_ssh_user "; exit_test
-      ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars "variable_host=role_softnas variable_connect_as_user=$TF_VAR_softnas_ssh_user variable_user=deployuser"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars "variable_host=role_softnas variable_connect_as_user=$TF_VAR_softnas_ssh_user variable_user=deployuser variable_uid=$TF_VAR_deployuser_uid"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars "variable_host=role_softnas variable_connect_as_user=$TF_VAR_softnas_ssh_user variable_user=deadlineuser"; exit_test
 
       # ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars 'variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deployuser'; exit_test
