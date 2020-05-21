@@ -1,2 +1,4 @@
 ---
 # vars file for roles/newuser
+pcoip: false
+set_hostname: true

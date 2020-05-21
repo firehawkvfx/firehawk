@@ -8,6 +8,7 @@
   vars:
     variable_user: deadlineuser
     variable_uid: 9001
+    variable_user_gid: "{{ variable_uid }}"
     variable_gid: "{{ syscontrol_gid }}"
     my_password: "{{ user_deadlineuser_pw }}"
     no_extension: "{{ deadline_linux_installers_tar | splitext | first }}"

@@ -8,6 +8,54 @@
       - 'min'
   tags:
   - always
+
+- name: change hostname
+  hostname:
+    name: "{{ hostname }}"
+  when: set_hostname
+    
+- name: add myself to /etc/hosts
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '^127\.0\.0\.1[ \t]+localhost'
+    line: "127.0.0.1 localhost {{ hostname }}"
+    state: present
+  when: set_hostname
+
+- name: Set hostname var in bash profile
+  lineinfile:
+    path: /root/.bash_profile
+    line: 'export HOSTNAME={{ hostname }}'
+  when: set_hostname
+
+- name: Disable SELinux # disable SELINUX - it can often cause issues with various systems like PDGMQ, licensing, and PCOIP.  May try permissive mode in future.
+  selinux:
+    state: disabled
+  when: selinux == "disabled"
+
+- name: install expect
+  package:
+    name: expect
+    state: present
+    lock_timeout: 180
+
+- name: check major version
+  debug:
+    var: ansible_distribution_major_version
+    
+- name: pip configure for ubuntu and cent7
+  include_role:
+    name: pip
+  when: ansible_distribution_major_version > '6'
+  tags:
+    - pip
+
+- name: pip configure for cent6 (softnas)
+  include_role:
+    name: pip-centos6
+  when: ansible_distribution_major_version <= '6'
+  tags:
+    - pip-centos6
   
 - stat:
     path: "/home/{{ variable_user }}"
@@ -31,12 +79,18 @@
     system: no # Defaults to no
     createhome: yes # Defaults to yes
 
-- name: set user pass
-  expect:
-    command: "passwd {{ variable_user }}"
-    responses:
-      (?i)password: "{{ my_password }}"
-      (?i)Retype new password: "{{ my_password }}"
+# - name: set user pass
+#   expect:
+#     command: "passwd {{ variable_user }}"
+#     responses:
+#       (?i)password: "{{ my_password }}"
+#       (?i)Retype new password: "{{ my_password }}"
+
+- name: Ensure primary group for user exists
+  group:
+    name: "{{ variable_user }}"
+    state: present
+    gid: "{{ variable_user_gid }}"
 
 - name: adding existing user "{{ item }}" to group wheel
   user:
@@ -52,12 +106,35 @@
     append: yes
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
+- getent:
+    database: passwd
+    key: centos
+
+- name: check if centos user exists
+  debug:
+    var: centos_passwd
+
+# to do: based on existence of oether default users, ensure they have their passwords changed.
+
+# - name: set user pass centos
+#   expect:
+#     command: passwd centos
+#     responses:
+#       (?i)password: "{{ user_deadlineuser_pw }}"
+#       (?i)Retype new password: "{{ user_deadlineuser_pw }}"
+
+- name: change the default centos user passwd
+  user:
+    name: centos
+    password: "{{ my_password }}"
+    state: present
+
 - name: change the default ubuntu user passwd
   user:
     name: ubuntu
     password: "{{ my_password }}"
     state: present
-  when: result.stat.exists == false
+  # when: result.stat.exists == false
 
 - name: 'generate ssh key for {{ variable_user }}'
   shell: |
@@ -79,3 +156,9 @@
       ec2_list_running='aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId]' --filters Name=instance-state-name,Values=running --output text'
   with_items:
     - /home/{{ variable_user }}/.bashrc
+
+- name: adding a new user requires a restart of pcoip service if present
+  shell: |
+    systemctl restart pcoip
+  become: true
+  when: pcoip

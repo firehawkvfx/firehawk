@@ -37,7 +37,6 @@
 
   - shell: |
       ls -ltriah /home/{{ remote_user }}/.ssh/
-      ls -ltriah /home/{{ variable_user }}/.ssh/
     become: true
     ignore_errors: yes
 
@@ -45,7 +44,6 @@
     debug: var=item
     with_file:
       - "/home/{{ remote_user }}/.ssh/authorized_keys"
-      - "/home/{{ variable_user }}/.ssh/authorized_keys"
     become: true
     ignore_errors: yes
 
@@ -96,8 +94,6 @@
     tags:
       - pip-centos6
     
-      
-
   ### steps to creat a new user rwith password and ssh key
 
   - name: Ensure group "deadlineuser" exists
@@ -114,6 +110,14 @@
         - wheel
         - deadlineuser
       uid: 9001
+
+  - getent:
+      database: passwd
+      key: centos
+  
+  - name: check if centos user exists
+    debug:
+      var: centos_passwd
 
   - name: set user pass centos
     expect:
