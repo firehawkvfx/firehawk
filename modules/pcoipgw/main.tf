@@ -367,7 +367,10 @@ resource "null_resource" "pcoipgw" {
       # set -x
       cd /deployuser
       ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-public-host.yaml -v --extra-vars "public_ip=${aws_eip.pcoipgw_eip.public_ip} public_address=gateway.${var.public_domain_name} set_bastion=false"; exit_test
-      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init.yaml -v --extra-vars "variable_host=pcoipgw_eip.0 hostname=gateway.${var.public_domain_name} pcoip=true"; exit_test
+      # ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init.yaml -v --extra-vars "variable_host=pcoipgw_eip.0 hostname=gateway.${var.public_domain_name} pcoip=true"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars "variable_host=pcoipgw_eip.0 hostname=gateway.${var.public_domain_name} pcoip=true set_hostname=true variable_connect_as_user=centos variable_user=deployuser " --tags 'onsite-install'; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars "variable_host=pcoipgw_eip.0 pcoip=true variable_connect_as_user=$TF_VAR_softnas_ssh_user variable_user=deadlineuser " --tags 'onsite-install'; exit_test
+
       ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/houdini/houdini_module.yaml -v --extra-vars "variable_host=pcoipgw_eip.0 hostname=gateway.${var.public_domain_name} firehawk_sync_source=$TF_VAR_firehawk_sync_source" --tags "install_houdini,set_hserver,install_deadline_db"; exit_test
       # to recover from yum update breaking pcoip we reinstall the nvidia driver and dracut to fix pcoip.
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-pcoip-recover.yaml -v --extra-vars "variable_host=pcoipgw_eip.0 hostname=gateway.${var.public_domain_name}"; exit_test
