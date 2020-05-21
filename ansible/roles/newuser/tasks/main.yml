@@ -80,7 +80,8 @@
   user:
     name: "{{ variable_user }}"
     uid: "{{ variable_uid }}"
-    password: "{{ my_password }}"
+    password: "{{ my_password | password_hash('sha512') }}"
+    groups: admin append=yes
     state: present
     shell: /bin/bash # Defaults to /bin/bash
     system: no # Defaults to no
@@ -139,14 +140,12 @@
   user:
     name: centos
     password: "{{ my_password }}"
-    # state: present
   when: getent_passwd['centos'] is defined
 
 - name: change the default ubuntu user passwd
   user:
     name: ubuntu
     password: "{{ my_password }}"
-    # state: present
   when: getent_passwd['ubuntu'] is defined
 
 - name: 'generate ssh key for {{ variable_user }}'
