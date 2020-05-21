@@ -33,29 +33,29 @@
     state: "{{ set_selinux }}"
   when: set_selinux != "unchanged"
 
-- name: install expect - centos
-  package:
-    name: expect
-    state: present
-    lock_timeout: 180
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+# - name: install expect - centos
+#   package:
+#     name: expect
+#     state: present
+#     lock_timeout: 180
+#   when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
 
-- name: install expect - ubuntu
-  package:
-    name: expect
-    state: present
-  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+# - name: install expect - ubuntu
+#   package:
+#     name: expect
+#     state: present
+#   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
-- name: check major version
-  debug:
-    var: ansible_distribution_major_version
+# - name: check major version
+#   debug:
+#     var: ansible_distribution_major_version
     
-- name: pip configure for ubuntu and cent7
-  include_role:
-    name: pip
-  when: ansible_distribution_major_version > '6'
-  tags:
-    - pip
+# - name: pip configure for ubuntu and cent7
+#   include_role:
+#     name: pip
+#   when: ansible_distribution_major_version > '6'
+#   tags:
+#     - pip
 
 # - name: pip configure for cent6 (softnas)
 #   include_role:
@@ -116,7 +116,8 @@
 - getent:
     database: passwd
     key: centos
-  register: centos_passwd
+    fail_key: False
+  # register: centos_passwd
 
 - name: check if centos user exists
   debug:

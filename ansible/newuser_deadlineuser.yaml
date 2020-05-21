@@ -19,10 +19,23 @@
   - name: test connection as deployuser
     debug:
       msg: "connection established"
-    tags: ['cloud-install', 'onsite-install', 'newuser']
+
+  - name: pip configure for ubuntu and cent7
+    include_role:
+      name: pip
+    when: ansible_distribution_major_version > '6'
+    # tags:
+    #   - pip
+
+  - name: pip configure for cent6 (softnas)
+    include_role:
+      name: pip-centos6
+    when: ansible_distribution_major_version <= '6'
+    # tags:
+    #   - pip-centos6
 
   roles:
-  - role: pip
+  # - role: pip
     # tags: 'newuser'
   - role: 'newuser'
     # tags: 'newuser'
