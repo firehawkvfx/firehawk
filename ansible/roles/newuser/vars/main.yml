@@ -2,3 +2,4 @@
 # vars file for roles/newuser
 pcoip: false
 set_hostname: false
+set_selinux: 'unchanged'

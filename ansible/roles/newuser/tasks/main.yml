@@ -28,10 +28,10 @@
     line: 'export HOSTNAME={{ hostname }}'
   when: set_hostname
 
-- name: Disable SELinux # disable SELINUX - it can often cause issues with various systems like PDGMQ, licensing, and PCOIP.  May try permissive mode in future.
+- name: Disable SELinux # Disable SELINUX for some hosts not exposed to public internet - it can often cause issues with various systems like PDGMQ, licensing, and PCOIP.  May try permissive mode in future.
   selinux:
-    state: disabled
-  when: selinux == "disabled"
+    state: "{{ set_selinux }}"
+  when: set_selinux != "unchanged"
 
 - name: install expect
   package:
