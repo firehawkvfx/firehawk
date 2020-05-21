@@ -151,6 +151,16 @@
     become_user: deployuser
     become: yes
 
+  - name: get key content
+    set_fact:
+      public_key_content: "{{ lookup('file', public_key_path) }}"
+    connection: local
+    become_user: deployuser
+    become: yes
+
+  - debug:
+      var: public_key_content
+
   - name: create .ssh dir
     file: 
       path: /home/deadlineuser/.ssh/
@@ -164,7 +174,7 @@
   - name: add user as an authorized key on the remote host to deadlineuser account
     authorized_key:
       user: deadlineuser
-      key: "{{ lookup('file', public_key_path) }}"
+      key: public_key_content
       state: present
     become: yes
 
