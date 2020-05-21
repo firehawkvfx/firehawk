@@ -20,19 +20,27 @@
     debug:
       msg: "connection established"
 
+  - name: Collect some facts only for ansible_distribution
+    setup:
+      gather_subset:
+        - '!all'
+        - 'min'
+    tags:
+    - always
+
+  - name: check major version
+    debug:
+      var: ansible_distribution_major_version
+
   - name: pip configure for ubuntu and cent7
     include_role:
       name: pip
     when: ansible_distribution_major_version > '6'
-    # tags:
-    #   - pip
 
   - name: pip configure for cent6 (softnas)
     include_role:
       name: pip-centos6
     when: ansible_distribution_major_version <= '6'
-    # tags:
-    #   - pip-centos6
 
   roles:
   # - role: pip
