@@ -130,33 +130,24 @@
     database: passwd
     key: centos
     fail_key: False
-  # register: centos_passwd
 
 - name: check if centos user exists
   debug:
-    var: centos_passwd
-
-# to do: based on existence of oether default users, ensure they have their passwords changed.
-
-# - name: set user pass centos
-#   expect:
-#     command: passwd centos
-#     responses:
-#       (?i)password: "{{ user_deadlineuser_pw }}"
-#       (?i)Retype new password: "{{ user_deadlineuser_pw }}"
+    var: getent_passwd['centos']
 
 - name: change the default centos user passwd
   user:
     name: centos
     password: "{{ my_password }}"
-    state: present
+    # state: present
+  when: getent_passwd['centos'] is defined
 
 - name: change the default ubuntu user passwd
   user:
     name: ubuntu
     password: "{{ my_password }}"
-    state: present
-  # when: result.stat.exists == false
+    # state: present
+  when: getent_passwd['ubuntu'] is defined
 
 - name: 'generate ssh key for {{ variable_user }}'
   shell: |
