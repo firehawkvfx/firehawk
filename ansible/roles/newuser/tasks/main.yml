@@ -57,12 +57,12 @@
   tags:
     - pip
 
-- name: pip configure for cent6 (softnas)
-  include_role:
-    name: pip-centos6
-  when: ansible_distribution_major_version <= '6'
-  tags:
-    - pip-centos6
+# - name: pip configure for cent6 (softnas)
+#   include_role:
+#     name: pip-centos6
+#   when: ansible_distribution_major_version <= '6' and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
+#   tags:
+#     - pip-centos6
   
 - stat:
     path: "/home/{{ variable_user }}"
