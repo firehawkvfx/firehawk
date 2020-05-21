@@ -85,6 +85,19 @@
     shell: /bin/bash # Defaults to /bin/bash
     system: no # Defaults to no
     createhome: yes # Defaults to yes
+  when: result.stat.exists == false
+
+- name: "Set login user password - {{ variable_user }}"
+  user:
+    name: "{{ variable_user }}"
+    password: "{{ my_password }}"
+    # uid: "{{ variable_uid }}"
+    # state: present
+    # shell: /bin/bash # Defaults to /bin/bash
+    # system: no # Defaults to no
+    # createhome: yes # Defaults to yes
+  when: result.stat.exists == true
+  become: true
 
 # - name: set user pass
 #   expect:
