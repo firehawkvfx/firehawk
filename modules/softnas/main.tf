@@ -900,7 +900,7 @@ resource "null_resource" "provision_softnas_volumes" {
       export common_tags='${ jsonencode( merge(var.common_tags, local.extra_tags) ) }'; exit_test
       echo "common_tags: $common_tags"
 
-      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init-users.yaml -v --extra-vars "variable_host=role_softnas variable_user=$TF_VAR_softnas_ssh_user set_hostname=false"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init-users.yaml -vvv --extra-vars "variable_host=role_softnas variable_user=$TF_VAR_softnas_ssh_user set_hostname=false"; exit_test
       # hotfix script to speed up instance start and shutdown
       # ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-install-acpid.yaml -v; exit_test
 
