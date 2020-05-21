@@ -1,8 +1,7 @@
 # To configure ssh for a local workstation, read https://www.tecmint.com/ssh-passwordless-login-using-ssh-keygen-in-5-easy-steps/
 
-#then run these two commmands.  for some reason ping is required first or hang on gathering facts occurs.
+# then run these two commmands.  for some reason ping is required first or hang on gathering facts occurs.
 # ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml
-
 
 - hosts: "{{ variable_host | default('workstation1') }}"
   remote_user: "{{ variable_user | default('user') }}"

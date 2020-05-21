@@ -33,11 +33,18 @@
     state: "{{ set_selinux }}"
   when: set_selinux != "unchanged"
 
-- name: install expect
+- name: install expect - centos
   package:
     name: expect
     state: present
     lock_timeout: 180
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+
+- name: install expect - ubuntu
+  package:
+    name: expect
+    state: present
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
 - name: check major version
   debug:
