@@ -109,6 +109,7 @@
 - getent:
     database: passwd
     key: centos
+  register: centos_passwd
 
 - name: check if centos user exists
   debug:
