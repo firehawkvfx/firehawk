@@ -164,7 +164,7 @@
   - name: add user as an authorized key on the remote host to deadlineuser account
     authorized_key:
       user: deadlineuser
-      key: "{{ lookup('file', {{ public_key_path }}) }}"
+      key: "{{ lookup('file', public_key_path) }}"
       state: present
     become: yes
 
