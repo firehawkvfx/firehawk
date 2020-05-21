@@ -76,7 +76,7 @@
     msg: "{{ variable_user }} home directory doesn't exist.  Will create user and set password."
   when: result.stat.exists == false
 
-- name: "Create a login user - {{ variable_user }}"
+- name: "Create a login user - {{ variable_user }}" # See this item for further info https://stackoverflow.com/questions/19292899/creating-a-new-user-and-password-with-ansible
   user:
     name: "{{ variable_user }}"
     uid: "{{ variable_uid }}"

@@ -42,12 +42,23 @@
   tasks:
   - command: echo 'connection established'
 
-
+  - name: init authorized_keys
+    copy:
+      content: ""
+      dest: /home/{{ variable_user }}/.ssh/authorized_keys
+      force: no
 
   - authorized_key:
       user: "{{ variable_user }}"
       state: present
       key: "{{ lookup('file', ansible_ssh_public_key_file) }}"
+
+  - name: authorized keys permissions
+    file:
+      path: "/home/{{ variable_user }}/.ssh/authorized_keys"
+      mode: '0644'
+      owner: variable_user
+      state: present
 
   - name: get the username
     command: whoami
