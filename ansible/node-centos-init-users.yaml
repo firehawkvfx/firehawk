@@ -157,7 +157,7 @@
   - name: add deployuser as an authorized key on the remote host to deadlineuser account
     authorized_key:
       user: deadlineuser
-      key: "{{ lookup('file', /home/deployuser/{{ key_name }}_public) }}"
+      key: "{{ lookup('file', '/home/deployuser/{{ key_name }}_public') }}"
       state: present
     become: yes
 
