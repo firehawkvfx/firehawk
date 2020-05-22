@@ -167,7 +167,7 @@ Vagrant.configure(2) do |config|
                     trigger.warn = "Taking Snapshot"
                     trigger.run = {inline: "'echo 'sleep'"}
                     trigger.run = {inline: "sleep 20"}
-                    trigger.run = {inline: "vagrant snapshot save #{machine[:box]} checkpoint"}
+                    trigger.run = {inline: "vagrant snapshot save #{machine[:hostname]} checkpoint"}
                 end
                 node.vm.provision "shell", inline: "sudo reboot"
                 node.vm.provision :reload
