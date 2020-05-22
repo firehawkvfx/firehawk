@@ -341,6 +341,10 @@ if [ "$test_vm" = false ] ; then
             echo "...Logging in to Vagrant host to destroy tf deployment: $hostname"
             ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --destroy --init-vm-config=false --tf-init=$tf_init" | ts '[%H:%M:%S]'; exit_test
             echo "...End Deployment"
+        elif [[ "$tf_action" == "single_test" ]]; then
+            echo "...Logging in to Vagrant host to run single test: $hostname "
+            ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --init-vm-config=$init_vm_config --tf-action=$tf_action --tf-init=$tf_init" | ts '[%H:%M:%S]'; exit_test
+            echo "...End Deployment"        
         else
             echo "...Logging in to Vagrant host: $hostname "
             ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --init-vm-config=$init_vm_config --tf-action=$tf_action --tf-init=$tf_init" | ts '[%H:%M:%S]'; exit_test

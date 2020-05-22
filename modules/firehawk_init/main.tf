@@ -10,7 +10,7 @@ resource "null_resource" "init_awscli" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      # set -x
+      set -x
       cd /deployuser
       export storage_user_access_key_id=${var.storage_user_access_key_id}
       echo "storage_user_access_key_id=$storage_user_access_key_id"
@@ -135,7 +135,7 @@ resource "null_resource" "init_aws_local_workstation" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      # set -x
+      set -x
       cd /deployuser
 
       export storage_user_access_key_id=${var.storage_user_access_key_id}

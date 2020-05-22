@@ -333,20 +333,10 @@ else
 
     echo "...Terraform sleep"
     terraform apply -lock=false --auto-approve -var sleep=true
+  elif [[ "$tf_action" == "single_test" ]]; then
+    echo "test a singular one off command"
+    ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars "variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deadlineuser"
   fi
-  # elif [[ "$tf_action" == "destroy" ]]; then
-  #   # echo "...Currently running instances: scripts/aws-running-instances.sh"
-  #   # $TF_VAR_firehawk_path/scripts/aws-running-instances.sh
-  #   # printf "\n...Currently existing users in the aws account"
-  #   # aws iam list-users
-  #   # echo ""
-
-  #   # echo "...Terraform refresh"
-  #   # terraform refresh -lock=false; exit_test
-
-  #   # echo "...Terraform destroy"
-  #   # terraform destroy -lock=false --auto-approve; exit_test
-  # fi
 
 
 
@@ -358,17 +348,6 @@ else
     ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-start.yaml -v; exit_test
   fi
 
-
-  # After this point provisioning will now execute from TF.
-  # $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-030-tf-s3user-deadlinercs.sh $ARGS; exit_test
-  # $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-040-ssh-routes-nfs-houdini-license-repository.sh $ARGS; exit_test
-  # $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-050-localworkstation-s3user.sh $ARGS; exit_test
-  # $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-060-localworkstation-user-deadline.sh $ARGS; exit_test
-  # $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-070-localworkstation-houdini.sh $ARGS; exit_test
-  # $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-080-vpn.sh $ARGS; exit_test
-  # $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-090-cloudmounts.sh $ARGS; exit_test
-  # $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-100-cloudnodes-localmounts.sh $ARGS; exit_test
-  # $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-110-localworkstation-cloudmounts.sh $ARGS; exit_test
 fi
 
 echo "$(date) Finished a run" | tee -a tmp/log/run_log.txt

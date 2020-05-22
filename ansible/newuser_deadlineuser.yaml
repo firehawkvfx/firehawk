@@ -55,9 +55,12 @@
 # after deadline install we need to ensure the new user can login
 
 - hosts: "{{ variable_host | default('ansible_control') }}" # check login is possible as user
-  remote_user: "{{ variable_user | default('deadlineuser') }}"
+  remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
   gather_facts: false
   become: false
+
+  vars:
+    variable_user: deadlineuser
 
   pre_tasks:
   - name: Wait 10 seconds - Test connection for new user - no sudo
@@ -65,15 +68,17 @@
       timeout: 10
     register: result
     failed_when: result['failed']
+    become_user: "{{ variable_user }}"
 
 - hosts: "{{ variable_host | default('ansible_control') }}" # check login is possible as user
-  remote_user: "{{ variable_user | default('deadlineuser') }}"
+  remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
   gather_facts: true
   become: true
 
   vars:
     ansible_become_pass: "{{ user_deadlineuser_pw }}"
     ansible_password: "{{ user_deadlineuser_pw }}"
+    variable_user: deadlineuser
 
   pre_tasks:
   - name: Wait 10 seconds - Test connection for new user - with sudo
@@ -81,3 +86,5 @@
       timeout: 10
     register: result
     failed_when: result['failed']
+    become_user: "{{ variable_user }}"
+    become: true
