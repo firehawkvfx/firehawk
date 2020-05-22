@@ -43,19 +43,29 @@
     when: ansible_facts['distribution_version'] is version('6', '<=')
 
   roles:
-  # - role: pip
-    # tags: 'newuser'
   - role: 'newuser'
-    # tags: 'newuser'
   - role: 'add-user-to-group'
     vars:
       variable_group: 'syscontrol'
-    # tags: 'always'
-    
-    # tags: ['cloud-install', 'onsite-install']
-# ADD deployuser USER TO THE GROUP AS WELL
+
 # after deadline install we need to ensure deployuser is part of the syscontrol group.
   
   tasks:
   - name: reset ssh connection to allow user changes to affect 'current login user'
     meta: reset_connection
+
+- hosts: "{{ variable_host | default('ansible_control') }}" # check login is possible as user
+  remote_user: "{{ variable_user | default('deadlineuser') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
+  become: true
+
+  pre_tasks:
+  - name: test connection as deployuser
+    debug:
+      msg: "connection established"
+
+  - name: Collect some facts only for ansible_distribution
+    setup:
+      gather_subset:
+        - '!all'
+        - 'min'

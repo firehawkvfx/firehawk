@@ -1,6 +1,7 @@
 # ~/.bashrc
 # config override is altered by install scripts but can also be used to override configuration variables.
 
+# WARNING: CHANGES TO THIS TEMPLATE MUST OCCUR AFTER A DESTROY OPERATION AND INCREMENT THE VERSION.
 # WARNING: When editing your config file do not store any secrets / sensitive information here.
 # Secrets should only ever be stored in the encrypted secrets file..
 # This unencrypted config file is still stored in your private repository and should not be publicly available.
@@ -25,17 +26,46 @@
 defaults_config_overide_version=insertvalue
 
 # TF_VAR_CI_JOB_ID:
-# This pipeline number is used to updat the active pipeline in the working dir when a new deployment is initialised
+# This pipeline number is used to updat the active pipeline in the working dir when a new deployment is initialised.
 TF_VAR_CI_JOB_ID=insertvalue
 
 # TF_VAR_active_pipeline:
 # This pipeline number will update when a new deployment is initialised. It is used to tag the creation of assets, and potentially define subnets ranges.
 TF_VAR_active_pipeline=insertvalue
 
+# TF_VAR_vm_initialised:
+# after the vms are succesfully initialised, this is set to true.  when true, vm will not be initialised again.
+TF_VAR_vm_initialised=insertvalue
+
 # TF_VAR_fast:
 # this should always be false. in the defaults.  it can be changed by commits with [fast] in the comment to accelerate some steps for deployment testing.
 # default: TF_VAR_fast
 TF_VAR_fast=insertvalue
+
+# allow_interrupt:
+# Allows the presence of an interrupt file to force exit on current provisioning
+# default: allow_interrupt=true
+allow_interrupt=insertvalue
+
+# TF_VAR_key_name_dev:
+# The name of the key pair used in the dev environment. You will create a key pair to access your aws instances, listed here.
+# default: TF_VAR_key_name_dev=my_key_pair_dev
+TF_VAR_key_name_dev=insertvalue
+
+# TF_VAR_local_key_path_dev:
+# the path to the keypair from within the vagrant VM.
+# default: TF_VAR_local_key_path_dev=/secrets/keys/my_key_pair_dev.pem
+TF_VAR_local_key_path_dev=insertvalue
+
+# TF_VAR_key_name_prod:
+# The name of the key pair used in the prod environment. You will create a key pair to access your AWS instances, listed here.
+# default: TF_VAR_key_name_prod=my_key_pair_prod
+TF_VAR_key_name_prod=insertvalue
+
+# TF_VAR_local_key_path_prod:
+# the path to the keypair from within the vagrant VM.
+# default: TF_VAR_local_key_path_prod=/secrets/keys/my_key_pair_prod.pem
+TF_VAR_local_key_path_prod=insertvalue
 
 # TF_VAR_vagrant_destroy_before_deploy:
 # default: TF_VAR_vagrant_destroy_before_deploy=false
@@ -86,6 +116,14 @@ TF_VAR_softnas_skip_update=insertvalue
 # TF_VAR_install_deadline_db:
 # default: TF_VAR_install_deadline_db=true
 TF_VAR_install_deadline_db=insertvalue
+
+# TF_VAR_install_deadline_rcs:
+# default: TF_VAR_install_deadline_rcs=true
+TF_VAR_install_deadline_rcs=insertvalue
+
+# TF_VAR_install_deadline_worker:
+# default: TF_VAR_install_deadline_worker=true
+TF_VAR_install_deadline_worker=insertvalue
 
 # TF_VAR_taint_single:
 # default: TF_VAR_taint_single=""

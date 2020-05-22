@@ -285,26 +285,6 @@ TF_VAR_public_domain_prod=insertvalue
 # eg: TF_VAR_public_domain_dev=none
 TF_VAR_public_domain_dev=insertvalue
 
-# TF_VAR_key_name_dev:
-# The name of the key pair used in the dev environment. You will create a key pair to access your aws instances, listed here.
-# default: TF_VAR_key_name_dev=my_key_pair_dev
-TF_VAR_key_name_dev=insertvalue
-
-# TF_VAR_local_key_path_dev:
-# the path to the keypair from within the vagrant VM.
-# default: TF_VAR_local_key_path_dev=/secrets/keys/my_key_pair_dev.pem
-TF_VAR_local_key_path_dev=insertvalue
-
-# TF_VAR_key_name_prod:
-# The name of the key pair used in the prod environment. You will create a key pair to access your AWS instances, listed here.
-# default: TF_VAR_key_name_prod=my_key_pair_prod
-TF_VAR_key_name_prod=insertvalue
-
-# TF_VAR_local_key_path_prod:
-# the path to the keypair from within the vagrant VM.
-# default: TF_VAR_local_key_path_prod=/secrets/keys/my_key_pair_prod.pem
-TF_VAR_local_key_path_prod=insertvalue
-
 # TF_VAR_softnas_mailserver:
 # mailserver details for softnas notifications
 # eg: TF_VAR_softnas_mailserver="mymailserver.mydomain.com"

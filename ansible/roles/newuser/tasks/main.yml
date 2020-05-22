@@ -32,37 +32,6 @@
   selinux:
     state: "{{ set_selinux }}"
   when: set_selinux != "unchanged"
-
-# - name: install expect - centos
-#   package:
-#     name: expect
-#     state: present
-#     lock_timeout: 180
-#   when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
-
-# - name: install expect - ubuntu
-#   package:
-#     name: expect
-#     state: present
-#   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
-
-# - name: check major version
-#   debug:
-#     var: ansible_distribution_major_version
-    
-# - name: pip configure for ubuntu and cent7
-#   include_role:
-#     name: pip
-#   when: ansible_distribution_major_version > '6'
-#   tags:
-#     - pip
-
-# - name: pip configure for cent6 (softnas)
-#   include_role:
-#     name: pip-centos6
-#   when: ansible_distribution_major_version <= '6' and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
-#   tags:
-#     - pip-centos6
   
 - stat:
     path: "/home/{{ variable_user }}"
@@ -80,7 +49,7 @@
   user:
     name: "{{ variable_user }}"
     uid: "{{ variable_uid }}"
-    password: "{{ my_password | password_hash('sha512') }}"
+    password: "{{ my_password | string | password_hash('sha512') }}"
     groups: admin append=yes
     state: present
     shell: /bin/bash # Defaults to /bin/bash
@@ -91,12 +60,7 @@
 - name: "Set login user password - {{ variable_user }}"
   user:
     name: "{{ variable_user }}"
-    password: "{{ my_password }}"
-    # uid: "{{ variable_uid }}"
-    # state: present
-    # shell: /bin/bash # Defaults to /bin/bash
-    # system: no # Defaults to no
-    # createhome: yes # Defaults to yes
+    password: "{{ my_password | string | password_hash('sha512') }}"
   when: result.stat.exists == true
   become: true
 
@@ -113,14 +77,14 @@
     state: present
     gid: "{{ variable_user_gid }}"
 
-- name: adding existing user "{{ item }}" to group wheel
+- name: 'adding existing user {{ variable_user }} to group wheel'
   user:
     name: "{{ variable_user }}"
     groups: wheel
     append: yes
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
 
-- name: adding existing user "{{ item }}" to group sudo
+- name: 'adding existing user {{ variable_user }} to group sudo'
   user:
     name: "{{ variable_user }}"
     groups: sudo
