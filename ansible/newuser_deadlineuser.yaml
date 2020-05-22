@@ -56,11 +56,21 @@
 
 - hosts: "{{ variable_host | default('ansible_control') }}" # check login is possible as user
   remote_user: "{{ variable_user | default('deadlineuser') }}"
+  gather_facts: false
+  become: false
+
+  pre_tasks:
+  - name: Test connection for new user - no sudo
+    debug:
+      msg: "connection established"
+
+- hosts: "{{ variable_host | default('ansible_control') }}" # check login is possible as user
+  remote_user: "{{ variable_user | default('deadlineuser') }}"
   gather_facts: true
   become: true
 
   pre_tasks:
-  - name: Test connection for new user
+  - name: Test connection for new user - with sudo
     debug:
       msg: "connection established"
 
