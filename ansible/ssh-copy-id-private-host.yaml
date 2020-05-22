@@ -66,6 +66,7 @@
   - debug: var=remote_user
 
   - shell: |
+      set -x
       ls -ltriah /home/{{ remote_user }}/.ssh/
       cat /home/{{ remote_user }}/.ssh/authorized_keys
       ls -ltriah /home/{{ variable_user }}/.ssh/
