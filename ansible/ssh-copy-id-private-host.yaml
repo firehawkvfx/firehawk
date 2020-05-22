@@ -51,7 +51,7 @@
     file:
       path: "/home/{{ variable_user }}/.ssh/authorized_keys"
       mode: '0644'
-      owner: variable_user
+      owner: "{{ variable_user }}"
       state: file
 
   - name: get the username

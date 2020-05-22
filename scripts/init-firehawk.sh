@@ -335,7 +335,7 @@ else
     terraform apply -lock=false --auto-approve -var sleep=true
   elif [[ "$tf_action" == "single_test" ]]; then
     echo "test a singular one off command"
-    ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars "variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deadlineuser"
+    ansible-playbook -i ../secrets/dev/inventory ansible/ssh-copy-id-private-host.yaml -v --extra-vars 'variable_host=workstation1 variable_user=deadlineuser ansible_ssh_private_key_file=/secrets/keys/id_ssh_rsa_dev'
   fi
 
 
