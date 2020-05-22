@@ -30,6 +30,7 @@
     public_key_location: "{{ general_use_ssh_key }}.pub"
     disable_pass_auth: True
     disable_root: True
+    my_password: "{{ user_deployuser_pw | string | password_hash('sha512') }}"
 
   tasks:
 
@@ -48,7 +49,7 @@
     user:
       name: deployuser
       shell: /bin/bash
-      password: "{{ user_deployuser_pw }}"
+      password: "{{ my_password }}"
       uid: "{{ deployuser_uid }}"
 
   - name: Add deployuser user to the sudoers
