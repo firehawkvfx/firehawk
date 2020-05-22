@@ -10,7 +10,8 @@
     variable_uid: 9001
     variable_user_gid: "{{ variable_uid }}"
     variable_gid: "{{ syscontrol_gid }}"
-    my_password: "{{ user_deadlineuser_pw | string | password_hash('sha512') }}"
+    my_password: "{{ user_deadlineuser_pw }}"
+    # my_password: "{{ user_deadlineuser_pw | string | password_hash('sha512') }}"
     no_extension: "{{ deadline_linux_installers_tar | splitext | first }}"
     basename: "{{ no_extension.split('/')[-1] }}"
     houdini_major_version: 18.0
