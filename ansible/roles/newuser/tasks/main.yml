@@ -49,7 +49,7 @@
   user:
     name: "{{ variable_user }}"
     uid: "{{ variable_uid }}"
-    password: "{{ my_password | string | password_hash('sha512') }}"
+    password: "{{ my_password }}"
     groups: admin append=yes
     state: present
     shell: /bin/bash # Defaults to /bin/bash
@@ -60,7 +60,7 @@
 - name: "Set login user password - {{ variable_user }}"
   user:
     name: "{{ variable_user }}"
-    password: "{{ my_password | string | password_hash('sha512') }}"
+    password: "{{ my_password }}"
   when: result.stat.exists == true
   become: true
 
