@@ -48,11 +48,11 @@
     vars:
       variable_group: 'syscontrol'
 
-# after deadline install we need to ensure deployuser is part of the syscontrol group.
-  
   tasks:
   - name: reset ssh connection to allow user changes to affect 'current login user'
     meta: reset_connection
+
+# after deadline install we need to ensure the new user can login
 
 - hosts: "{{ variable_host | default('ansible_control') }}" # check login is possible as user
   remote_user: "{{ variable_user | default('deadlineuser') }}"
@@ -60,9 +60,11 @@
   become: false
 
   pre_tasks:
-  - name: Test connection for new user - no sudo
-    debug:
-      msg: "connection established"
+  - name: Wait 10 seconds - Test connection for new user - no sudo
+    wait_for_connection:
+      timeout: 10
+    register: result
+    failed_when: result['failed']
 
 - hosts: "{{ variable_host | default('ansible_control') }}" # check login is possible as user
   remote_user: "{{ variable_user | default('deadlineuser') }}"
@@ -74,19 +76,15 @@
     ansible_password: "{{ user_deadlineuser_pw }}"
 
   pre_tasks:
-  - name: Wait 10 seconds
+  - name: Wait 10 seconds - Test connection for new user - with sudo
     wait_for_connection:
       timeout: 10
     register: result
+    failed_when: result['failed']
 
-  - name: result
-    debug:
-      var: result
-
-  - name: Test connection for new user - with sudo
-    debug:
-      msg: "connection established"
-
+  # - name: result
+  #   debug:
+  #     var: result
 
   # - name: Collect some facts only for ansible_distribution
   #   setup:
