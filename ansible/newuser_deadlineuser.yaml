@@ -70,9 +70,19 @@
   become: true
 
   pre_tasks:
+  - name: Wait 10 seconds
+    wait_for_connection:
+      timeout: 10
+    register: result
+
+  - name: result
+    debug:
+      var: result
+
   - name: Test connection for new user - with sudo
     debug:
       msg: "connection established"
+
 
   # - name: Collect some facts only for ansible_distribution
   #   setup:
