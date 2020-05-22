@@ -42,12 +42,6 @@
   tasks:
   - command: echo 'connection established'
 
-  - name: init authorized_keys
-    copy:
-      content: ""
-      dest: /home/{{ variable_user }}/.ssh/authorized_keys
-      force: no
-
   - authorized_key:
       user: "{{ variable_user }}"
       state: present
@@ -58,7 +52,7 @@
       path: "/home/{{ variable_user }}/.ssh/authorized_keys"
       mode: '0644'
       owner: variable_user
-      state: present
+      state: file
 
   - name: get the username
     command: whoami
