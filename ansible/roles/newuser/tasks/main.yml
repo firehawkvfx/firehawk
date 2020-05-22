@@ -50,7 +50,7 @@
     name: "{{ variable_user }}"
     uid: "{{ variable_uid }}"
     password: "{{ my_password }}"
-    groups: admin append=yes
+    # groups: admin append=yes
     state: present
     shell: /bin/bash # Defaults to /bin/bash
     system: no # Defaults to no
