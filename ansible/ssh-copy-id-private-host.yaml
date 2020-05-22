@@ -53,6 +53,7 @@
       mode: '0644'
       owner: "{{ variable_user }}"
       state: file
+    become: true
 
   - name: get the username
     command: whoami
@@ -66,7 +67,9 @@
 
   - shell: |
       ls -ltriah /home/{{ remote_user }}/.ssh/
+      cat /home/{{ remote_user }}/.ssh/authorized_keys
       ls -ltriah /home/{{ variable_user }}/.ssh/
+      cat /home/{{ variable_user }}/.ssh/authorized_keys
     become: true
     ignore_errors: yes
 

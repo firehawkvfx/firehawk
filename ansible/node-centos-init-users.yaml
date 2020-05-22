@@ -182,6 +182,7 @@
 
   - name: display authorized_keys contents
     debug: var=item
+    become: yes
     with_file:
       - "/home/deadlineuser/.ssh/authorized_keys"
 
