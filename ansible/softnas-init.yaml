@@ -37,27 +37,27 @@
   #   when: ansible_distribution_major_version|int <= 6
 
 # these packages are required to pass an encrypted string via commandline into a user pass.
-  - name: install expect
-    package:
-      name: expect
-      state: present
-      lock_timeout: 180
+  # - name: install expect
+  #   package:
+  #     name: expect
+  #     state: present
+  #     lock_timeout: 180
 
-  - name: install pip
-    package:
-      name: python-pip
-      state: present
-      lock_timeout: 180
+  # - name: install pip
+  #   package:
+  #     name: python-pip
+  #     state: present
+  #     lock_timeout: 180
 
-  - name: install pexpect
-    pip:
-      name: pexpect
-    become: yes
+  # - name: install pexpect
+  #   pip:
+  #     name: pexpect
+  #   become: yes
     
-  - name: install passlib
-    pip:
-      name: passlib
-    become: yes
+  # - name: install passlib
+  #   pip:
+  #     name: passlib
+  #   become: yes
 
   - getent:
       database: passwd
