@@ -618,6 +618,7 @@ resource "null_resource" "wait_softnas_up" {
       "python --version",
       "if [ -f /etc/udev/rules.d/70-persistent-net.rules ]; then sudo rm -fv /etc/udev/rules.d/70-persistent-net.rules; fi", # this file may need to be removed in order to create an image that will work.
     ]
+  }
 
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
@@ -626,7 +627,6 @@ resource "null_resource" "wait_softnas_up" {
       cd /deployuser
       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init-pip.yaml -v --extra-vars "skip_packages=false"; exit_test
 EOT
-  }
   }
 }
 
