@@ -68,16 +68,24 @@
   - shell: |
       set -x
       ls -ltriah /home/{{ remote_user }}/.ssh/
-      cat /home/{{ remote_user }}/.ssh/authorized_keys
       ls -ltriah /home/{{ variable_user }}/.ssh/
-      cat /home/{{ variable_user }}/.ssh/authorized_keys
     become: true
     ignore_errors: yes
 
-  - name: display authorized_keys contents
-    debug: var=item
-    with_file:
-      - "/home/{{ remote_user }}/.ssh/authorized_keys"
-      - "/home/{{ variable_user }}/.ssh/authorized_keys"
+  - name: slurp file state
+    slurp:
+      src: "/home/{{ remote_user }}/.ssh/authorized_keys"
+    register: slurpfile
     become: true
     ignore_errors: yes
+  - name: display authorized_keys contents
+    debug: msg="{{ slurpfile['content'] | b64decode }}"
+
+  - name: slurp file state
+    slurp:
+      src: "/home/{{ variable_user }}/.ssh/authorized_keys"
+    register: slurpfile
+    become: true
+    ignore_errors: yes
+  - name: display authorized_keys contents
+    debug: msg="{{ slurpfile['content'] | b64decode }}"

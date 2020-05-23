@@ -65,10 +65,13 @@
       creates: /home/deployuser/.ssh/id_rsa
     become_user: deployuser
 
+  - name: slurp file state
+    slurp:
+      src: "/home/deployuser/.ssh/authorized_keys"
+    register: slurpfile
+    become: true
   - name: display authorized_keys contents
-    debug: var=item
-    with_file:
-      - "/home/deployuser/.ssh/authorized_keys"
+    debug: msg="{{ slurpfile['content'] | b64decode }}"
 
   - name: display public_key_location contents
     debug: var=item
@@ -104,13 +107,21 @@
     become: true
     ignore_errors: yes
 
-  - name: display authorized_keys contents
-    debug: var=item
-    with_file:
-      - "/home/{{ remote_user }}/.ssh/authorized_keys"
-      - "/home/{{ user_inituser_name }}/.ssh/authorized_keys"
+  - name: slurp file state
+    slurp:
+      src: "/home/{{ remote_user }}/.ssh/authorized_keys"
+    register: slurpfile
     become: true
-    ignore_errors: yes
+  - name: display authorized_keys contents
+    debug: msg="{{ slurpfile['content'] | b64decode }}"
+
+  - name: slurp file state
+    slurp:
+      src: "/home/{{ user_inituser_name }}/.ssh/authorized_keys"
+    register: slurpfile
+    become: true
+  - name: display authorized_keys contents
+    debug: msg="{{ slurpfile['content'] | b64decode }}"
 
   - name: Disable Password Authentication.  Only SSH keys will be accepted after this point.
     lineinfile:

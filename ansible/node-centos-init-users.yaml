@@ -40,12 +40,13 @@
     become: true
     ignore_errors: yes
 
-  - name: display authorized_keys contents
-    debug: var=item
-    with_file:
-      - "/home/{{ remote_user }}/.ssh/authorized_keys"
+  - name: slurp file state
+    slurp:
+      src: "/home/{{ remote_user }}/.ssh/authorized_keys"
+    register: slurpfile
     become: true
-    ignore_errors: yes
+  - name: display authorized_keys contents
+    debug: msg="{{ slurpfile['content'] | b64decode }}"
 
   - name: change hostname
     hostname:
@@ -179,12 +180,14 @@
       key: public_key_content
       state: present
     become: yes
-
+    
+  - name: slurp file state
+    slurp:
+      src: "/home/deadlineuser/.ssh/authorized_keys"
+    register: slurpfile
+    become: true
   - name: display authorized_keys contents
-    debug: var=item
-    become: yes
-    with_file:
-      - "/home/deadlineuser/.ssh/authorized_keys"
+    debug: msg="{{ slurpfile['content'] | b64decode }}"
 
   - name: copy time zone info
     copy:
