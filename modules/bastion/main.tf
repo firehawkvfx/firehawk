@@ -162,7 +162,7 @@ resource "null_resource" "provision_bastion" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      # set -x
+      set -x
       cd /deployuser
       echo "inventory $TF_VAR_inventory/hosts"
       cat $TF_VAR_inventory/hosts

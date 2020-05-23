@@ -381,7 +381,7 @@ resource "null_resource" "provision_node_centos" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      # set -x
+      set -x
       cd /deployuser
       ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.node_centos[0].private_ip} bastion_ip=${var.bastion_ip}"; exit_test
 
@@ -423,7 +423,7 @@ resource "null_resource" "install_houdini" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      # set -x
+      set -x
       cd /deployuser
 
       aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id} # ensure instance is started
@@ -452,7 +452,7 @@ resource "null_resource" "install_deadline_worker" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      # set -x
+      set -x
       cd /deployuser
 
       aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id} # ensure instance is started
@@ -499,7 +499,7 @@ resource "null_resource" "mounts_and_houdini_test" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      # set -x
+      set -x
       cd /deployuser
 
       aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id} # ensure instance is started

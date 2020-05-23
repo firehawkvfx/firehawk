@@ -626,7 +626,7 @@ resource "null_resource" "wait_softnas_up" {
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
-      # set -x
+      set -x
       cd /deployuser
 
       # ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.softnas1[0].private_ip} bastion_ip=${var.bastion_ip}"; exit_test
@@ -679,7 +679,7 @@ resource "null_resource" "create_ami_init" {
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
-      # set -x
+      set -x
       cd /deployuser
       # ami creation is unnecesary since softnas ami update.  will be needed in future again if softnas updates slow down deployment.
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-ami.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]} ami_name=softnas_init_${local.ami} base_ami=${local.ami} description=softnas1_${aws_instance.softnas1.*.id[count.index]}_${random_id.ami_init_unique_name[0].hex}"
@@ -736,7 +736,7 @@ resource "null_resource" "provision_softnas" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      # set -x
+      set -x
       cd /deployuser
 
       ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.softnas1[0].private_ip} bastion_ip=${var.bastion_ip}"; exit_test
@@ -744,7 +744,7 @@ resource "null_resource" "provision_softnas" {
       ansible-playbook -i "$TF_VAR_inventory" ansible/get-file.yaml -v --extra-vars "source=/var/log/cloud-init-output.log dest=$TF_VAR_firehawk_path/tmp/log/cloud-init-output-softnas.log variable_user=ec2-user variable_host=role_softnas"; exit_test
 
       # Initialise
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init-pip.yaml -v--extra-vars "skip_packages=${local.skip_packages}"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init-pip.yaml -v --extra-vars "skip_packages=${local.skip_packages}"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init.yaml -v --extra-vars "skip_packages=${local.skip_packages}"; exit_test
       
 
@@ -826,7 +826,7 @@ resource "null_resource" "create_ami" {
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
-      # set -x
+      set -x
       cd /deployuser
       # ami creation is unnecesary since softnas ami update.  will be needed in future again if softnas updates slow down deployment.
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-ami.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]} ami_name=softnas_prebuilt_${local.ami} base_ami=${local.ami} description=softnas1_${aws_instance.softnas1.*.id[count.index]}_${random_id.ami_unique_name[0].hex}"
@@ -911,7 +911,7 @@ resource "null_resource" "provision_softnas_volumes" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      # set -x
+      set -x
       cd /deployuser
 
       export common_tags='${ jsonencode( merge(var.common_tags, local.extra_tags) ) }'; exit_test
@@ -959,7 +959,7 @@ EOT
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      # set -x
+      set -x
       cd /deployuser
 
       # ensure volumes and pools exist after disks are ensured to exist.
@@ -1066,7 +1066,7 @@ resource "null_resource" "attach_local_mounts_after_start" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      # set -x
+      set -x
 
       export common_tags='${ jsonencode( merge(var.common_tags, local.extra_tags) ) }'; exit_test
       echo "common_tags: $common_tags"
@@ -1109,7 +1109,7 @@ resource "null_resource" "detach_local_mounts_after_stop" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      # set -x
+      set -x
 
       export common_tags='${ jsonencode( merge(var.common_tags, local.extra_tags) ) }'; exit_test
       echo "common_tags: $common_tags"

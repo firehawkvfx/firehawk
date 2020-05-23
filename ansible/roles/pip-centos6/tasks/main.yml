@@ -38,12 +38,12 @@
     name: passlib
   become: yes
 
-- name: install the package, force upgrade
+- name: install the package
   package: 
     name: python-boto
   become: true
 
-- name: install the package, force upgrade
+- name: install the package
   pip: 
     name: boto3
   become: true
