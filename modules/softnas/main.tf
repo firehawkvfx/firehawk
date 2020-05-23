@@ -618,8 +618,8 @@ resource "null_resource" "wait_softnas_up" {
       "python --version",
       "if [ -f /etc/udev/rules.d/70-persistent-net.rules ]; then sudo rm -fv /etc/udev/rules.d/70-persistent-net.rules; fi", # this file may need to be removed in order to create an image that will work.
       "echo 'sslverify=false' | sudo tee -a /etc/yum.conf", # TODO This must be removed once dealt with by softnas
-      "sudo yum update -y",
-      "sudo yum install python-pip -y",
+      # "sudo yum update -y",
+      # "sudo yum install python-pip -y",
     ]
   }
 
@@ -629,10 +629,10 @@ resource "null_resource" "wait_softnas_up" {
       # set -x
       cd /deployuser
 
-      ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.softnas1[0].private_ip} bastion_ip=${var.bastion_ip}"; exit_test
-      ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=softnas0 host_ip=${aws_instance.softnas1[0].private_ip} group_name=role_softnas insert_ssh_key_string=ansible_ssh_private_key_file=$TF_VAR_local_key_path"; exit_test
-      ansible-playbook -i "$TF_VAR_inventory" ansible/get-file.yaml -v --extra-vars "source=/var/log/cloud-init-output.log dest=$TF_VAR_firehawk_path/tmp/log/cloud-init-output-softnas.log variable_user=ec2-user variable_host=role_softnas"; exit_test
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init-pip.yaml -v; exit_test
+      # ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.softnas1[0].private_ip} bastion_ip=${var.bastion_ip}"; exit_test
+      # ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=softnas0 host_ip=${aws_instance.softnas1[0].private_ip} group_name=role_softnas insert_ssh_key_string=ansible_ssh_private_key_file=$TF_VAR_local_key_path"; exit_test
+      # ansible-playbook -i "$TF_VAR_inventory" ansible/get-file.yaml -v --extra-vars "source=/var/log/cloud-init-output.log dest=$TF_VAR_firehawk_path/tmp/log/cloud-init-output-softnas.log variable_user=ec2-user variable_host=role_softnas"; exit_test
+      # ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init-pip.yaml -v; exit_test
 EOT
   }
 }
@@ -744,7 +744,9 @@ resource "null_resource" "provision_softnas" {
       ansible-playbook -i "$TF_VAR_inventory" ansible/get-file.yaml -v --extra-vars "source=/var/log/cloud-init-output.log dest=$TF_VAR_firehawk_path/tmp/log/cloud-init-output-softnas.log variable_user=ec2-user variable_host=role_softnas"; exit_test
 
       # Initialise
+      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init-pip.yaml -v--extra-vars "skip_packages=${local.skip_packages}"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init.yaml -v --extra-vars "skip_packages=${local.skip_packages}"; exit_test
+      
 
       # remove any mounts on local workstation first since they will have been broken if another softnas instance was just destroyed to create this one.
       if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
@@ -915,7 +917,7 @@ resource "null_resource" "provision_softnas_volumes" {
       export common_tags='${ jsonencode( merge(var.common_tags, local.extra_tags) ) }'; exit_test
       echo "common_tags: $common_tags"
 
-      # ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init-users.yaml -vvv --extra-vars "variable_host=role_softnas variable_user=$TF_VAR_softnas_ssh_user "; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_init_pip.yaml -v --extra-vars "variable_host=role_softnas variable_connect_as_user=$TF_VAR_softnas_ssh_user"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars "variable_host=role_softnas variable_connect_as_user=$TF_VAR_softnas_ssh_user variable_user=deployuser variable_uid=$TF_VAR_deployuser_uid"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars "variable_host=role_softnas variable_connect_as_user=$TF_VAR_softnas_ssh_user variable_user=deadlineuser"; exit_test
 

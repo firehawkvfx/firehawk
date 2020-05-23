@@ -1,0 +1,41 @@
+- hosts: "{{ variable_host | default('ansible_control') }}"
+  remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
+  become: true
+
+  # vars:
+    # variable_user: deadlineuser
+    # variable_uid: 9001
+    # variable_user_gid: "{{ variable_uid }}"
+    # variable_gid: "{{ syscontrol_gid }}"
+    # my_password: "{{ user_deadlineuser_pw | string | password_hash('sha512') }}"
+    # no_extension: "{{ deadline_linux_installers_tar | splitext | first }}"
+    # basename: "{{ no_extension.split('/')[-1] }}"
+    # houdini_major_version: 18.0
+  
+  pre_tasks:
+  - name: test connection as deployuser
+    debug:
+      msg: "connection established"
+
+  - name: Collect some facts only for ansible_distribution
+    setup:
+      gather_subset:
+        - '!all'
+        - 'min'
+    tags:
+    - always
+
+  - name: check major version
+    debug:
+      var: ansible_distribution_major_version
+
+  - name: pip configure for ubuntu and cent7
+    include_role:
+      name: pip
+    when: ansible_distribution_major_version|int > 6
+
+  - name: pip configure for cent6 (softnas)
+    include_role:
+      name: pip-centos6
+    when: ansible_distribution_major_version|int <= 6
