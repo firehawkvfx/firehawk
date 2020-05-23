@@ -616,18 +616,8 @@ resource "null_resource" "wait_softnas_up" {
       "which python",
       "python --version",
       "if [ -f /etc/udev/rules.d/70-persistent-net.rules ]; then sudo rm -fv /etc/udev/rules.d/70-persistent-net.rules; fi", # this file may need to be removed in order to create an image that will work.
-      "echo 'sslverify=false' | sudo tee -a /etc/yum.conf", # TODO This must be removed once dealt with by softnas
-      # "sudo yum update -y",
-      # "sudo yum install python-pip -y",
     ]
   }
-
-#   provisioner "local-exec" {
-#     interpreter = ["/bin/bash", "-c"]
-#     command = <<EOT
-#       cd /deployuser
-# EOT
-#   }
 }
 
 resource "random_id" "ami_init_unique_name" {
