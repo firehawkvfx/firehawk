@@ -1,5 +1,16 @@
 ---
 # tasks file for ./ansible/roles/pip-centos5
+
+  - name: Add epel repository
+    yum_repository:
+      name: epel
+      description: EPEL YUM repo
+      baseurl: "{{ epel_repo_url }}"
+      gpgkey: "{{ epel_repo_gpg_key_url }}"
+      enabled: yes
+    become: true
+    when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+  
   - name: install pip
     package:
       name: python-pip

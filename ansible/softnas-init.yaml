@@ -7,11 +7,33 @@
     skip_packages: false
 
   tasks:
+  - name: Collect some facts only for ansible_distribution
+    setup:
+      gather_subset:
+        - '!all'
+        - 'min'
+    tags:
+    - always
+
   - name: ensure file exists
     copy:
       content: ""
       dest: /tmp/updatetype
       force: no
+
+  - name: check major version
+    debug:
+      var: ansible_distribution_major_version
+
+  - name: pip configure for ubuntu and cent7
+    include_role:
+      name: pip
+    when: ansible_distribution_major_version|int > 6
+
+  - name: pip configure for cent6 (softnas)
+    include_role:
+      name: pip-centos6
+    when: ansible_distribution_major_version|int <= 6
 
 # these packages are required to pass an encrypted string via commandline into a user pass.
   - name: install expect
