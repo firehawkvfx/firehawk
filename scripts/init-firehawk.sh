@@ -334,8 +334,8 @@ else
     echo "...Terraform sleep"
     terraform apply -lock=false --auto-approve -var sleep=true
   elif [[ "$tf_action" == "single_test" ]]; then
-    echo "test a singular one off command"
-    ansible-playbook -i ../secrets/dev/inventory ansible/ssh-copy-id-private-host.yaml -v --extra-vars 'variable_host=workstation1 variable_user=deadlineuser ansible_ssh_private_key_file=/secrets/keys/id_ssh_rsa_dev'
+    echo "...Test a singular one off command"
+    single-test.sh
   fi
 
 
