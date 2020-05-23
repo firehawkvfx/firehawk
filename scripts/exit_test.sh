@@ -10,6 +10,7 @@ NC='\033[0m' # No Color
 export SECONDS=0
 
 exit_test () {
+    set +x
     exit_code=$?
     interrupt=false
     failed=false
@@ -27,12 +28,10 @@ exit_test () {
             
         else
             printf "\n${RED}Failed command ...exiting${NC}\n" >&2
-            # exit will exit the shell if sourced
         fi
-            # return will exit the bash script with a return code
-            # return 1
     fi
     if [[ "$failed" == true ]]; then
+        if [[ "$SHOWCOMMANDS" == true ]]; then set -x; fi
         exit 1
     fi
     if [[ -z "$allow_interrupt" ]] || [[ "$allow_interrupt" == true ]]; then
@@ -41,7 +40,9 @@ exit_test () {
             interrupt=true
         fi
         if [[ "$interrupt" == true ]]; then
+            if [[ "$SHOWCOMMANDS" == true ]]; then set -x; fi
             exit 1
         fi
     fi
+    if [[ "$SHOWCOMMANDS" == true ]]; then set -x; fi # After finishing the script, we enable set -x to show input again.
 }

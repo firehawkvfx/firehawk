@@ -363,7 +363,7 @@ resource "null_resource" "workstation_pcoip" {
     # First we install python remotely via the bastion to bootstrap the instance.  We also need this remote-exec to ensure the host is up.
     inline = [
       "sleep 10",
-      "# set -x",
+      "set -x; export SHOWCOMMANDS=true",
       "cloud-init status --wait",
       "sudo yum install -y python",
       "while [ ! -f /etc/ssh/ssh_host_ecdsa_key.pub ]",
@@ -382,7 +382,7 @@ resource "null_resource" "workstation_pcoip" {
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
-      set -x
+      set -x; export SHOWCOMMANDS=true
       cd /deployuser
       ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.workstation_pcoip[0].private_ip} bastion_ip=${var.bastion_ip}"
       # ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "variable_host=firehawkgateway variable_user=deployuser private_ip=${aws_instance.workstation_pcoip[0].private_ip} bastion_ip=${var.bastion_ip}"
@@ -406,7 +406,7 @@ EOT
     # ensure connection is healthy
     inline = [
       "sleep 10",
-      "# set -x",
+      "set -x; export SHOWCOMMANDS=true",
       "echo 'remote connection ok'",
     ]
   }
@@ -414,7 +414,7 @@ EOT
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
-      set -x
+      set -x; export SHOWCOMMANDS=true
       cd /deployuser
       # ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init-users.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.$TF_VAR_public_domain pcoip=true"; exit_test
       # ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init-deadline.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.$TF_VAR_public_domain pcoip=true"; exit_test
