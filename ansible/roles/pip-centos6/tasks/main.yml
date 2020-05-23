@@ -10,17 +10,17 @@
     tags:
     - always
 
-  - name: Add epel repository
-    yum_repository:
-      name: epel
-      description: EPEL YUM repo
-      baseurl: "{{ epel_repo_url }}"
-      gpgkey: "{{ epel_repo_gpg_key_url }}"
-      enabled: yes
-    become: true
-    when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
-    tags:
-    - add-epel
+  # - name: Add epel repository
+  #   yum_repository:
+  #     name: epel
+  #     description: EPEL YUM repo
+  #     baseurl: "{{ epel_repo_url }}"
+  #     gpgkey: "{{ epel_repo_gpg_key_url }}"
+  #     enabled: yes
+  #   become: true
+  #   when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+  #   tags:
+  #   - add-epel
 
   - name: hold linux-image-generic on vagrant as it breaks vagrant mounts currently preventing the image from booting
     command: echo "linux-image-generic hold" | dpkg --set-selections
