@@ -36,7 +36,7 @@
     }
     test_file "$filename"
     
-    if [[ "$file_in_bucket" == true ]]; then
+    if [[ "$file_in_bucket" == false ]]; then
       if [[ {{ mode }} == 'push' ]]; then
         echo "Sync Push: File not yet present in S3 bucket, will push."
         if [ -f "{{ filename }}" ]; then
@@ -53,7 +53,6 @@
           echo "Failed: {{ filename }} does not exist on disk, won't push."
           exit 1
         fi
-        
       else
         echo "Won't pull, File not present in S3 bucket."
         exit 0
