@@ -1,6 +1,15 @@
 ---
 # tasks file for ./ansible/roles/pip-centos5
 
+  - name: Collect some facts only for ansible_distribution
+    setup:
+      gather_subset:
+        - '!all'
+        - 'min'
+      gather_timeout: 60
+    tags:
+    - always
+
   - name: Add epel repository
     yum_repository:
       name: epel
@@ -10,11 +19,59 @@
       enabled: yes
     become: true
     when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
-  
+    tags:
+    - add-epel
+
+  - name: hold linux-image-generic on vagrant as it breaks vagrant mounts currently preventing the image from booting
+    command: echo "linux-image-generic hold" | dpkg --set-selections
+    become: true
+    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+  - name: hold linux-image-generic on vagrant as it breaks vagrant mounts currently preventing the image from booting
+    command: apt-mark hold linux-image-generic
+    become: true
+    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
+  - name: Upgrade all yum packages except VirtualBox - to update virtual box run 'yum update' with no VM's running.
+    yum:
+      name: '*'
+      state: latest
+      exclude: VirtualBox # exclude virtualbox - if the entire pipe is running on a single host, it isn't possibel to update virtual box since it is being used during execution of this script.
+    become: true
+    when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+    tags:
+    - upgrade-packages
+
+  # beware if mount issues arise, this may be related - https://askubuntu.com/questions/601/the-following-packages-have-been-kept-back-why-and-how-do-i-solve-it
+  - name: Upgrade all apt packages
+    apt:
+      name: "*"
+      state: latest
+    become: true
+    when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+    tags:
+      - upgrade-packages
+
+  - name: install epel-release
+    package:
+      name: epel-release
+      state: latest
+    become: true
+    when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+
   - name: install pip
     package:
       name: python-pip
       state: latest
+    become: true
+
+  - name: upgrade pip
+    pip: 
+      name: pip
+      extra_args: --upgrade
+    become: true
+    tags:
+      - upgrade-pip
 
   - name: install expect
     package:
