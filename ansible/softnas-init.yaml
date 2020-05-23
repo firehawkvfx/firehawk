@@ -59,11 +59,16 @@
     debug:
       var: skip_packages
 
-  - name: install nmap
-    package:
-      name: nmap
-      state: present
+  - name: install nmap - for some reason package manager in ansible refuses, so we use a shell
+    shell: |
+      sudo yum install nmap -y
     when: skip_packages|bool == false
+
+  # - name: install nmap
+  #   package:
+  #     name: nmap
+  #     state: present
+  #   when: skip_packages|bool == false
 
   # tasks file for roles/init-host
   - name: change hostname
