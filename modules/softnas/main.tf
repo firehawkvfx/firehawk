@@ -623,18 +623,13 @@ resource "null_resource" "wait_softnas_up" {
     ]
   }
 
-  provisioner "local-exec" {
-    interpreter = ["/bin/bash", "-c"]
-    command = <<EOT
-      set -x
-      cd /deployuser
-
-      # ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.softnas1[0].private_ip} bastion_ip=${var.bastion_ip}"; exit_test
-      # ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=softnas0 host_ip=${aws_instance.softnas1[0].private_ip} group_name=role_softnas insert_ssh_key_string=ansible_ssh_private_key_file=$TF_VAR_local_key_path"; exit_test
-      # ansible-playbook -i "$TF_VAR_inventory" ansible/get-file.yaml -v --extra-vars "source=/var/log/cloud-init-output.log dest=$TF_VAR_firehawk_path/tmp/log/cloud-init-output-softnas.log variable_user=ec2-user variable_host=role_softnas"; exit_test
-      # ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init-pip.yaml -v; exit_test
-EOT
-  }
+#   provisioner "local-exec" {
+#     interpreter = ["/bin/bash", "-c"]
+#     command = <<EOT
+#       set -x
+#       cd /deployuser
+# EOT
+#   }
 }
 
 resource "random_id" "ami_init_unique_name" {
@@ -744,7 +739,6 @@ resource "null_resource" "provision_softnas" {
       ansible-playbook -i "$TF_VAR_inventory" ansible/get-file.yaml -v --extra-vars "source=/var/log/cloud-init-output.log dest=$TF_VAR_firehawk_path/tmp/log/cloud-init-output-softnas.log variable_user=ec2-user variable_host=role_softnas"; exit_test
 
       # Initialise
-      # ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init-pip.yaml -v --extra-vars "skip_packages=${local.skip_packages}"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_init_pip.yaml -v --extra-vars "variable_host=role_softnas variable_connect_as_user=$TF_VAR_softnas_ssh_user skip_packages=${local.skip_packages}"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init.yaml -v --extra-vars "skip_packages=${local.skip_packages}"; exit_test
 

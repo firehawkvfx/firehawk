@@ -26,39 +26,6 @@
     debug:
       var: ansible_distribution_major_version
 
-  # - name: pip configure for ubuntu and cent7
-  #   include_role:
-  #     name: pip
-  #   when: ansible_distribution_major_version|int > 6
-
-  # - name: pip configure for cent6 (softnas)
-  #   include_role:
-  #     name: pip-centos6
-  #   when: ansible_distribution_major_version|int <= 6
-
-# these packages are required to pass an encrypted string via commandline into a user pass.
-  # - name: install expect
-  #   package:
-  #     name: expect
-  #     state: present
-  #     lock_timeout: 180
-
-  # - name: install pip
-  #   package:
-  #     name: python-pip
-  #     state: present
-  #     lock_timeout: 180
-
-  # - name: install pexpect
-  #   pip:
-  #     name: pexpect
-  #   become: yes
-    
-  # - name: install passlib
-  #   pip:
-  #     name: passlib
-  #   become: yes
-
   - getent:
       database: passwd
       key: softnas
@@ -88,6 +55,16 @@
       force: no
     become: true
 
+  - name: skip packages
+    debug:
+      var: skip_packages
+
+  - name: install nmap
+    package:
+      name: nmap
+      state: present
+    when: skip_packages|bool == false
+
   # tasks file for roles/init-host
   - name: change hostname
     hostname:
@@ -104,35 +81,6 @@
     lineinfile:
       path: /root/.bash_profile
       line: 'export HOSTNAME=nas1'
-      
-  # some problems exist in here.  we get # replaced with ; for some reason
-  # - name: insert marker start
-  #   lineinfile:
-  #     path: /var/www/softnas/config/monitoring.ini
-  #     insertafter: "^#?# Valid values for SMTP_ENCRYPTION are SSLV2, SSLV3 and TLSV1"
-  #     line: "# BEGIN ANSIBLE MANAGED BLOCK"
-  #     backup: yes
-
-  # - name: insert marker end
-  #   lineinfile:
-  #     path: /var/www/softnas/config/monitoring.ini
-  #     insertafter: 'SMTP_ENCRYPTION'
-  #     line: "# END ANSIBLE MANAGED BLOCK"
-  #     create: true
- 
-  # - name: insert/update email block in /var/www/softnas/config/monitoring.ini
-  #   blockinfile:
-  #     path: /var/www/softnas/config/monitoring.ini
-  #     backup: yes
-  #     content: |
-
-  #       NOTIFICATION_EMAIL="queglay@gmail.com"
-  #       USE_EXT_SMTP="smtp-relay.gmail.com"
-  #       SMTP_MAILSERVER=""
-  #       SMTP_PORT="587"
-  #       SMTP_USERNAME=""
-  #       SMTP_PASSWORD=""
-  #       SMTP_ENCRYPTION="tlsv1"
 
   - name: check if settings file exists
     stat: 
@@ -161,18 +109,6 @@
       line: smtp_port = 587
       state: present
       create: true
-
-  - name: skip packages
-    debug:
-      var: skip_packages
-
-  - name: install nmap
-    package:
-      name: "{{ item }}"
-      state: present
-    with_items:
-      - nmap
-    when: skip_packages|bool == false
 
   - command: "nmap -p {{ item.port }} {{ item.dest }}"
     register: nmap_result
