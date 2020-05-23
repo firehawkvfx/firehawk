@@ -27,9 +27,11 @@
       wordcount=`aws s3 ls s3://{{ bucket }}/|grep {{ filename }}|wc -c`
       echo "wordcount: $wordcount"
       if [[ "${wordcount}" -eq 0 ]]; then
-        file_in_bucket=true
-      else
         file_in_bucket=false
+        echo "ls word count is 0, file_in_bucket: $file_in_bucket"
+      else
+        file_in_bucket=true
+        echo "ls word count is not 0, file_in_bucket: $file_in_bucket"
       fi
     }
     test_file "$filename"
