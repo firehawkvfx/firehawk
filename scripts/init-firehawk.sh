@@ -334,7 +334,7 @@ else
     echo "...Terraform sleep"
     terraform apply -lock=false --auto-approve -var sleep=true
   elif [[ "$tf_action" == "single_test" ]]; then
-    echo "...Test a singular one off command"
+    echo "...Test a singular one off command"; set -x
     $TF_VAR_firehawk_path/scripts/single-test.sh
   fi
 
