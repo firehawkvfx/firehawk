@@ -136,7 +136,7 @@
       state: running
       wait: True
     become_user: deployuser
-    when: stop_softnas_instance and mode == 'attach'
+    when: stop_softnas_instance|bool and mode == 'attach'
     
     # for each unique pool, in the list, if it doesn't exist, create it.
 #     # 
