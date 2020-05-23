@@ -5,6 +5,7 @@
 
   vars:
     skip_packages: false
+    my_password: "{{ user_softnas_pw | string | password_hash('sha512') }}"
 
   tasks:
   - name: Collect some facts only for ansible_distribution
@@ -58,12 +59,21 @@
       name: passlib
     become: yes
 
-  - name: set user pass
-    expect:
-      command: passwd softnas
-      responses:
-        (?i)password: "{{ user_softnas_pw }}"
-        (?i)Retype new password: "{{ user_softnas_pw }}"
+  - getent:
+      database: passwd
+      key: softnas
+      fail_key: False
+
+  - name: check if user exists
+    debug:
+      var: getent_passwd['softnas']
+
+  - name: "Set login user password - softnas"
+    user:
+      name: softnas
+      password: "{{ my_password }}"
+    when: getent_passwd['softnas'] is defined
+    no_log: true
 
   - name: ensure file exists
     copy:

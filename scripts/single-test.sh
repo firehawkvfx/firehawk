@@ -1,3 +1,3 @@
 #!/bin/bash
 
-ansible-playbook -i ../secrets/dev/inventory ansible/aws-cli-ec2-install.yaml -v --extra-vars 'variable_host=firehawkgateway variable_user=deployuser'
+ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init.yaml -v --extra-vars "skip_packages=false"

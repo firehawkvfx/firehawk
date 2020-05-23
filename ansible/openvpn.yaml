@@ -33,6 +33,7 @@
 
   vars:
     ansible_python_interpreter: "/usr/bin/python2.7"
+    my_password: "{{ openvpn_user_pw | string | password_hash('sha512') }}"
 
   # install pexpect and its dependencies to use passwd
   roles:
@@ -40,12 +41,28 @@
 
   # set user password.  this is a temporary measure as it should be handled by user data, but for some reason open vpn isn't accepting that approach as of 2.71
   post_tasks:
-    - name: "set user pass {{ openvpn_user }}"
-      expect:
-        command: passwd {{ openvpn_user }}
-        responses:
-          (?i)password: "{{ openvpn_user_pw }}"
-          (?i)Retype new password: "{{ openvpn_user_pw }}"
+    # - name: "set user pass {{ openvpn_user }}"
+    #   expect:
+    #     command: passwd {{ openvpn_user }}
+    #     responses:
+    #       (?i)password: "{{ openvpn_user_pw }}"
+    #       (?i)Retype new password: "{{ openvpn_user_pw }}"
+    #   no_log: true
+
+    - getent:
+        database: passwd
+        key: "{{ openvpn_user }}"
+        fail_key: False
+
+    - name: check if user exists
+      debug:
+        var: getent_passwd["{{ openvpn_user }}"]
+
+    - name: "Set login user password - {{ openvpn_user }}"
+      user:
+        name: "{{ openvpn_user }}"
+        password: "{{ my_password }}"
+      when: getent_passwd["{{ openvpn_user }}"] is defined
       no_log: true
 
 - hosts: "{{ variable_host | default('openvpnip_private') }}"

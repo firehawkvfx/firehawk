@@ -64,13 +64,6 @@
   when: result.stat.exists == true
   become: true
 
-# - name: set user pass
-#   expect:
-#     command: "passwd {{ variable_user }}"
-#     responses:
-#       (?i)password: "{{ my_password }}"
-#       (?i)Retype new password: "{{ my_password }}"
-
 - name: Ensure primary group for user exists
   group:
     name: "{{ variable_user }}"
