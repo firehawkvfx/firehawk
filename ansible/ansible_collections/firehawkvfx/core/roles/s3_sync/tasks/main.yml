@@ -1,12 +1,12 @@
-- name: Test output
+- name: "Sync S3 {{ mode }} user:"
   debug:
     msg: "variable_user:{{ variable_user }}"
     
-- name: Test output
+- name: "Sync S3 {{ mode }} using bucket:"
   debug:
     msg: "using bucket s3://{{ bucket }}/"
 
-- name: Sync S3 # warning: there appears to be a bug with ansible that may result in variable user being defined at the include_role level not setting the variable_user var correctly.  consider this if errors should occur.
+- name: "Sync S3 {{ mode }}" # warning: there appears to be a bug with ansible that may result in variable user being defined at the include_role level not setting the variable_user var correctly.  consider this if errors should occur.
   shell: |
     # set -x
     cd ~
@@ -22,7 +22,10 @@
       local filename="$1"
       echo "ls bucket: {{ bucket }}"
       aws s3 ls s3://{{ bucket }}/
+      aws s3 ls s3://{{ bucket }}/|grep {{ filename }}
+      aws s3 ls s3://{{ bucket }}/|grep {{ filename }}|wc -c
       wordcount=`aws s3 ls s3://{{ bucket }}/|grep {{ filename }}|wc -c`
+      echo "wordcount: $wordcount"
       if [[ "${wordcount}" -eq 0 ]]; then
         file_in_bucket=true
       else
@@ -39,7 +42,7 @@
           sleep 10 # After push, the file may not be immediately present to s3 ls.  Wait a few seconds first.
           test_file "$filename"
           if [[ "$file_in_bucket" == false ]]; then
-            echo "Failed: File not present in bucket after attempt to push."
+            echo "Failed: File not present in bucket after push: {{ filename }}."
             exit 1
           fi
           echo "Success: File is present in bucket after push."
