@@ -203,7 +203,6 @@
       mode: u+x
       remote_src: true
     become: true
-    # become_user: "{{ variable_user }}"
 
   - name: "Ansible find files in subdirectory downloads"
     find:
@@ -211,7 +210,6 @@
       patterns: "*DeadlineClient-{{ deadline_version }}-linux-x64-installer.run"
     register: files_matched
     become: true
-    # become_user: "{{ variable_user }}"
 
   - debug:
       msg: "installer path: {{ files_matched.files[0].path }}"
@@ -223,7 +221,6 @@
       owner: "{{ variable_user }}"
       group: syscontrol
     become: true
-    # become_user: "{{ variable_user }}"
 
   - name: deadline dependencies
     package:
@@ -266,7 +263,6 @@
       {{ files_matched.files[0].path }} --mode unattended --debuglevel 2 --prefix {{ deadline_prefix }} --connectiontype Remote --noguimode true --licensemode UsageBased --launcherdaemon true --slavestartup 1 --daemonuser {{ user_deadlineuser_name }} --enabletls true --tlsport 4433 --httpport 8080 --proxyrootdir {{ deadline_proxy_root_dir }} --proxycertificate {{ deadline_proxy_certificate }} --proxycertificatepassword {{ deadline_proxy_certificate_password }}
     register: deadline_client_install_output_shell
     become: true
-    # become_user: "{{ variable_user }}"
 
   - name: check deadline client install output
     debug:
@@ -289,7 +285,6 @@
       owner: "{{ variable_user }}"
       regexp: ".*alias deadlinemonitor=.*"
     become: true
-    # become_user: "{{ variable_user }}"
 
 # multislave functionality
   - copy:
@@ -299,7 +294,6 @@
       group: syscontrol
       mode: u=rx,g=rx,o-rwx
     become: true
-    # become_user: "{{ variable_user }}"
     tags:
     - multi-slave
 
@@ -311,7 +305,6 @@
       group: root
       mode: u=rx,g=rx,o=rx
     become: true
-    # become_user: "{{ variable_user }}"
     tags:
     - multi-slave
 
@@ -323,7 +316,6 @@
       group: root
       mode: '0644'
     become: true
-    # become_user: "{{ variable_user }}"
     tags:
     - multi-slave
     
@@ -334,7 +326,6 @@
       daemon_reload: true
       enabled: true
     become: true
-    # become_user: "{{ variable_user }}"
     tags:
     - multi-slave
 
@@ -350,4 +341,3 @@
       line: "deadlineuser ALL=(ALL) NOPASSWD: /sbin/poweroff, /sbin/reboot, /sbin/shutdown"
       insertafter: '^.*localhost=/sbin/shutdown.*$'
     become: true
-    # become_user: "{{ variable_user }}"
