@@ -4,26 +4,34 @@
 # ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml
 
 - hosts: "{{ variable_host | default('workstation1') }}"
-  remote_user: "{{ variable_user | default('user') }}"
+  remote_user: "{{ variable_connect_as_user | default('deadlineuser') }}"
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
 
   vars:
     ansible_become_pass: "{{ user_deadlineuser_pw }}"
     ansible_password: "{{ user_deadlineuser_pw }}"
+    variable_connect_as_user: deadlineuser
+    variable_user: deadlineuser
 
   tasks:
-  - name: establish connect test
+  - name: "establish connect test & existance of user path {{ variable_connect_as_user }}"
     stat:
-      path: "/home/deadlineuser"
+      path: "/home/{{ variable_connect_as_user }}"
+    register: result
+
+  - name: "establish connect test & existance of user path {{ variable_user }}"
+    stat:
+      path: "/home/{{ variable_user }}"
     register: result
 
 - hosts: "{{ variable_host | default('workstation1') }}"
-  remote_user: "{{ variable_user | default('deadlineuser') }}"
+  remote_user: "{{ variable_connect_as_user | default('deadlineuser') }}"
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
 
   vars:
+    variable_connect_as_user: deadlineuser
     variable_user: deadlineuser
     pcoip: False
     ansible_become_pass: "{{ user_deadlineuser_pw }}"
@@ -32,50 +40,36 @@
     - role: pip
 
   post_tasks:
-  # the syscontrol group is normally created when a host and user is first configured, but for a local install we ensure that it is created here in any case, since its possible that new users may not have this group.
-  - name: Ensure group "syscontrol" exists
-    group:
-      name: syscontrol
-      state: present
-      gid: "{{ syscontrol_gid }}"
-    become: true
-
-  - name: adding existing user "{{ item }}" to group syscontrol
-    user:
-      name: "{{ item }}"
-      groups: syscontrol
-      append: yes
-    with_items:
-    - deadlineuser
-    become: true
-
   - name: create Thinkbox dir
     file: 
       path: /opt/Thinkbox/
       state: directory
       mode: u=rwX,g=rX,o-rwx
-      owner: deadlineuser
+      owner: "{{ variable_user }}"
       group: syscontrol
-    become: yes
+    become: true
+    become_user: "{{ variable_user }}"
 
   - name: create Thinkbox cert dir
     file: 
       path: /opt/Thinkbox/certs
       state: directory
       mode: u=rwX,g=rX,o-rwx
-      owner: deadlineuser
+      owner: "{{ variable_user }}"
       group: syscontrol
-    become: yes
+    become: true
+    become_user: "{{ variable_user }}"
 
   - name: Create submission scripts dir if it doesn't exist on remote
     file: 
       path: /opt/Thinkbox/DeadlineRepository10/submission
       state: directory
       mode: u=rX,g=rX,o-rwx
-      owner: deadlineuser
+      owner: "{{ variable_user }}"
       group: syscontrol
       recurse: yes
-    become: yes
+    become: true
+    become_user: "{{ variable_user }}"
 
 - hosts: firehawkgateway
   remote_user: deployuser
@@ -88,15 +82,17 @@
       path: /opt/Thinkbox/DeadlineRepository10/submission
       state: directory
       mode: u=rX,g=rX,o=r
-      owner: deadlineuser
+      owner: "{{ variable_user }}"
       group: syscontrol
       recurse: yes
-    become: yes
+    become: true
+    become_user: "{{ variable_user }}"
 
   - name: check permissions
     shell: |
       ls -ltriah "{{ deadline_certificates_location }}"
     become: true
+    become_user: "{{ variable_user }}"
     register: check_permisions
 
   - name: show permissions
@@ -107,9 +103,10 @@
     file: 
       path: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
       mode: u=rw,g=r,o=r
-      owner: deadlineuser
+      owner: "{{ variable_user }}"
       group: syscontrol
-    become: yes
+    become: true
+    become_user: "{{ variable_user }}"
 
 - hosts: firehawkgateway
   remote_user: deployuser
@@ -122,10 +119,11 @@
       src: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
       dest: "/secrets/keys/"
       mode: '0600'
-      owner: deadlineuser
+      owner: "{{ variable_user }}"
       group: syscontrol
       flat: true
-    become: yes
+    become: true
+    become_user: "{{ variable_user }}"
     # delegate_to: firehawkgateway
 
 - hosts: "{{ variable_host | default('workstation1') }}"
@@ -150,27 +148,30 @@
       src: "/secrets/keys/Deadline10RemoteClient.pfx"
       dest: "/opt/Thinkbox/certs/"
       mode: '0600'
-      owner: deadlineuser
+      owner: "{{ variable_user }}"
       group: syscontrol
-    become: yes
+    become: true
+    become_user: "{{ variable_user }}"
 
   - name: create download dir
     file:
       path: "/home/deadlineuser/Downloads"
       state: directory
-      owner: deadlineuser
-      group: deadlineuser
+      owner: "{{ variable_user }}"
+      group: "{{ variable_user }}"
       mode: '0755'
-    become: yes
+    become: true
+    become_user: "{{ variable_user }}"
 
   - name: create deadline installer dir
     file:
       path: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
       state: directory
-      owner: deadlineuser
-      group: deadlineuser
+      owner: "{{ variable_user }}"
+      group: "{{ variable_user }}"
       mode: '0755'
-    become: yes
+    become: true
+    become_user: "{{ variable_user }}"
 
   - name: Sync S3
     shell: |
@@ -212,10 +213,11 @@
     unarchive:
       src: "/home/deadlineuser/Downloads/{{ deadline_linux_filename }}"
       dest: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
-      owner: deadlineuser
+      owner: "{{ variable_user }}"
       mode: u+x
       remote_src: true
-    become: yes
+    become: true
+    become_user: "{{ variable_user }}"
 
   - name: "Ansible find files in subdirectory downloads"
     find:
@@ -223,6 +225,7 @@
       patterns: "*DeadlineClient-{{ deadline_version }}-linux-x64-installer.run"
     register: files_matched
     become: true
+    become_user: "{{ variable_user }}"
 
   - debug:
       msg: "installer path: {{ files_matched.files[0].path }}"
@@ -231,9 +234,10 @@
     file:
       path: "{{ files_matched.files[0].path }}"
       mode: '0700'
-      owner: deadlineuser
+      owner: "{{ variable_user }}"
       group: syscontrol
-    become: yes
+    become: true
+    become_user: "{{ variable_user }}"
 
   - name: deadline dependencies
     package:
@@ -277,6 +281,7 @@
       {{ files_matched.files[0].path }} --mode unattended --debuglevel 2 --prefix {{ deadline_prefix }} --connectiontype Remote --noguimode true --licensemode UsageBased --launcherdaemon true --slavestartup 1 --daemonuser {{ user_deadlineuser_name }} --enabletls true --tlsport 4433 --httpport 8080 --proxyrootdir {{ deadline_proxy_root_dir }} --proxycertificate {{ deadline_proxy_certificate }} --proxycertificatepassword {{ deadline_proxy_certificate_password }}
     register: deadline_client_install_output_shell
     become: true
+    become_user: "{{ variable_user }}"
 
   - name: check deadline client install output
     debug:
@@ -296,18 +301,20 @@
       path: /home/deadlineuser/.bashrc
       line: "alias deadlinemonitor='cwd=\"$(pwd)\" && cd /opt/Thinkbox/Deadline10/bin && ./deadlinemonitor'"
       backup: true
-      owner: deadlineuser
+      owner: "{{ variable_user }}"
       regexp: ".*alias deadlinemonitor=.*"
-    become: yes
+    become: true
+    become_user: "{{ variable_user }}"
 
 # multislave functionality
   - copy:
       src: /deployuser/scripts/deadline-multi-slave.sh
       dest: /usr/bin/deadline-multi-slave.sh
-      owner: deadlineuser
+      owner: "{{ variable_user }}"
       group: syscontrol
       mode: u=rx,g=rx,o-rwx
-    become: yes
+    become: true
+    become_user: "{{ variable_user }}"
     tags:
     - multi-slave
 
@@ -318,7 +325,8 @@
       owner: root
       group: root
       mode: u=rx,g=rx,o=rx
-    become: yes
+    become: true
+    become_user: "{{ variable_user }}"
     tags:
     - multi-slave
 
@@ -329,7 +337,8 @@
       owner: root
       group: root
       mode: '0644'
-    become: yes
+    become: true
+    become_user: "{{ variable_user }}"
     tags:
     - multi-slave
     
@@ -339,7 +348,8 @@
       state: started
       daemon_reload: true
       enabled: true
-    become: yes
+    become: true
+    become_user: "{{ variable_user }}"
     tags:
     - multi-slave
 
@@ -355,3 +365,4 @@
       line: "deadlineuser ALL=(ALL) NOPASSWD: /sbin/poweroff, /sbin/reboot, /sbin/shutdown"
       insertafter: '^.*localhost=/sbin/shutdown.*$'
     become: true
+    become_user: "{{ variable_user }}"
