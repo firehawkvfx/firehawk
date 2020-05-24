@@ -118,6 +118,17 @@ verbose () {
 }
 verbose "$@"
 
+if [ -z "$CI_COMMIT_REF_SLUG" ]; then # Detect the environment if using CI/CD
+    echo "Launching in a non Gitlab CI environment"; export env_ci=false
+else
+    echo "Gitlab CI Environment with branch: $CI_COMMIT_REF_SLUG"; export env_ci=true
+    if [[ "$CI_COMMIT_REF_SLUG" == "stage" || "$CI_COMMIT_REF_SLUG" == "master" ]]; then
+        export TF_VAR_envtier='prod'
+    else
+        export TF_VAR_envtier='dev'
+    fi
+fi
+
 tier () {
     if [[ "$verbose" == true ]]; then
         echo "Parsing tier option: '--${opt}', value: '${val}'" >&2;

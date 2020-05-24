@@ -272,7 +272,9 @@ else
   # if [[ "$TF_VAR_taint_single"=="" ]]; then echo 'unset TF_VAR_taint_single'; unset TF_VAR_taint_single; fi
 
   if [[ "$tf_action" == "apply" ]]; then
-
+    
+    $TF_VAR_firehawk_path/scripts/detect-interupt.sh &
+    
     if [ "$TF_VAR_active_pipeline" -eq 0 ]; then
       echo "...Init new pipe based on the current JOB ID: Found active pipeline is init: $TF_VAR_active_pipeline"
       set_pipe $TF_VAR_CI_JOB_ID # initalise all new resources with this pipe id
