@@ -48,7 +48,6 @@
       owner: "{{ variable_user }}"
       group: syscontrol
     become: true
-    become_user: "{{ variable_user }}"
 
   - name: create Thinkbox cert dir
     file: 
@@ -58,7 +57,6 @@
       owner: "{{ variable_user }}"
       group: syscontrol
     become: true
-    become_user: "{{ variable_user }}"
 
   - name: Create submission scripts dir if it doesn't exist on remote
     file: 
@@ -69,7 +67,6 @@
       group: syscontrol
       recurse: yes
     become: true
-    become_user: "{{ variable_user }}"
 
 - hosts: firehawkgateway
   remote_user: deployuser
@@ -86,13 +83,11 @@
       group: syscontrol
       recurse: yes
     become: true
-    become_user: "{{ variable_user }}"
 
   - name: check permissions
     shell: |
       ls -ltriah "{{ deadline_certificates_location }}"
     become: true
-    become_user: "{{ variable_user }}"
     register: check_permisions
 
   - name: show permissions
@@ -106,7 +101,6 @@
       owner: "{{ variable_user }}"
       group: syscontrol
     become: true
-    become_user: "{{ variable_user }}"
 
 - hosts: firehawkgateway
   remote_user: deployuser
@@ -123,7 +117,6 @@
       group: syscontrol
       flat: true
     become: true
-    become_user: "{{ variable_user }}"
     # delegate_to: firehawkgateway
 
 - hosts: "{{ variable_host | default('workstation1') }}"
@@ -151,7 +144,6 @@
       owner: "{{ variable_user }}"
       group: syscontrol
     become: true
-    become_user: "{{ variable_user }}"
 
   - name: create download dir
     file:
@@ -161,7 +153,6 @@
       group: "{{ variable_user }}"
       mode: '0755'
     become: true
-    become_user: "{{ variable_user }}"
 
   - name: create deadline installer dir
     file:
@@ -173,18 +164,13 @@
     become: true
     become_user: "{{ variable_user }}"
 
-  - name: Sync S3
-    shell: |
-      # set -x
-      cd ~/
-      ls -ltriah
-      cd Downloads
-      pwd
-      ls -ltriah
-    register: output
-    become_user: "deadlineuser"
-    args:
-      executable: /bin/bash
+  - name: get the username
+    command: whoami
+    become: false
+    register: whoami
+  - set_fact:
+      remote_user: "{{ whoami.stdout }}"
+  - debug: var=remote_user
 
   - name: "s3-sync get {{ deadline_linux_filename }} from {{ installers_bucket }}"
     import_role:
@@ -194,7 +180,7 @@
       bucket: "{{ installers_bucket }}"
       basedir: "/home/deadlineuser/Downloads"
       filename: "{{ deadline_linux_filename }}"
-      variable_user: "deadlineuser"
+      # variable_user: "{{ remote_user }}" # due to a limitaiton the var provided must not be the same
 
   # - name: S3 GET deadline
   #   aws_s3:
@@ -217,7 +203,7 @@
       mode: u+x
       remote_src: true
     become: true
-    become_user: "{{ variable_user }}"
+    # become_user: "{{ variable_user }}"
 
   - name: "Ansible find files in subdirectory downloads"
     find:
@@ -225,7 +211,7 @@
       patterns: "*DeadlineClient-{{ deadline_version }}-linux-x64-installer.run"
     register: files_matched
     become: true
-    become_user: "{{ variable_user }}"
+    # become_user: "{{ variable_user }}"
 
   - debug:
       msg: "installer path: {{ files_matched.files[0].path }}"
@@ -237,7 +223,7 @@
       owner: "{{ variable_user }}"
       group: syscontrol
     become: true
-    become_user: "{{ variable_user }}"
+    # become_user: "{{ variable_user }}"
 
   - name: deadline dependencies
     package:
@@ -251,7 +237,6 @@
       - bzip2
       - nmap
       state: present
-
 
   - stat:
       path: /var/lib/Thinkbox/Deadline10/deadline.ini
@@ -304,7 +289,7 @@
       owner: "{{ variable_user }}"
       regexp: ".*alias deadlinemonitor=.*"
     become: true
-    become_user: "{{ variable_user }}"
+    # become_user: "{{ variable_user }}"
 
 # multislave functionality
   - copy:
@@ -314,7 +299,7 @@
       group: syscontrol
       mode: u=rx,g=rx,o-rwx
     become: true
-    become_user: "{{ variable_user }}"
+    # become_user: "{{ variable_user }}"
     tags:
     - multi-slave
 
@@ -326,7 +311,7 @@
       group: root
       mode: u=rx,g=rx,o=rx
     become: true
-    become_user: "{{ variable_user }}"
+    # become_user: "{{ variable_user }}"
     tags:
     - multi-slave
 
@@ -338,7 +323,7 @@
       group: root
       mode: '0644'
     become: true
-    become_user: "{{ variable_user }}"
+    # become_user: "{{ variable_user }}"
     tags:
     - multi-slave
     
@@ -349,7 +334,7 @@
       daemon_reload: true
       enabled: true
     become: true
-    become_user: "{{ variable_user }}"
+    # become_user: "{{ variable_user }}"
     tags:
     - multi-slave
 
@@ -365,4 +350,4 @@
       line: "deadlineuser ALL=(ALL) NOPASSWD: /sbin/poweroff, /sbin/reboot, /sbin/shutdown"
       insertafter: '^.*localhost=/sbin/shutdown.*$'
     become: true
-    become_user: "{{ variable_user }}"
+    # become_user: "{{ variable_user }}"
