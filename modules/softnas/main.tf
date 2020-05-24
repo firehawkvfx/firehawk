@@ -802,14 +802,16 @@ resource "null_resource" "create_ami" {
       type                = "ssh"
       timeout             = "10m"
     }
-    inline = ["echo 'booted'"]
+    inline = [
+      "echo 'booted'",
+      "if [ -f /etc/udev/rules.d/70-persistent-net.rules ]; then sudo rm -fv /etc/udev/rules.d/70-persistent-net.rules; fi", # this file may need to be removed in order to create an image that will work.
+      ]
   }
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       set -x; export SHOWCOMMANDS=true
       cd /deployuser
-      # ami creation is unnecesary since softnas ami update.  will be needed in future again if softnas updates slow down deployment.
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-ami.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]} ami_name=softnas_prebuilt_${local.ami} base_ami=${local.ami} description=softnas1_${aws_instance.softnas1.*.id[count.index]}_${random_id.ami_unique_name[0].hex}"
       aws ec2 start-instances --instance-ids ${aws_instance.softnas1.*.id[count.index]}
 EOT
