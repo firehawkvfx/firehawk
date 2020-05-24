@@ -225,7 +225,7 @@ resource "null_resource" "provision_deadline_spot" {
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
-      set -x; export SHOWCOMMANDS=true
+      export SHOWCOMMANDS=true; set -x
       cd /deployuser
       echo ${module.deadline.spot_access_key_id}
       echo ${module.deadline.spot_secret}

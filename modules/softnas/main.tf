@@ -662,7 +662,7 @@ resource "null_resource" "create_ami_init" {
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
-      set -x; export SHOWCOMMANDS=true
+      export SHOWCOMMANDS=true; set -x
       cd /deployuser
       # ami creation is unnecesary since softnas ami update.  will be needed in future again if softnas updates slow down deployment.
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-ami.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]} ami_name=softnas_init_${local.ami} base_ami=${local.ami} description=softnas1_${aws_instance.softnas1.*.id[count.index]}_${random_id.ami_init_unique_name[0].hex}"
@@ -718,7 +718,7 @@ resource "null_resource" "provision_softnas" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      set -x; export SHOWCOMMANDS=true
+      export SHOWCOMMANDS=true; set -x
       cd /deployuser
 
       ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.softnas1[0].private_ip} bastion_ip=${var.bastion_ip}"; exit_test
@@ -810,7 +810,7 @@ resource "null_resource" "create_ami" {
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
-      set -x; export SHOWCOMMANDS=true
+      export SHOWCOMMANDS=true; set -x
       cd /deployuser
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-ami.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]} ami_name=softnas_prebuilt_${local.ami} base_ami=${local.ami} description=softnas1_${aws_instance.softnas1.*.id[count.index]}_${random_id.ami_unique_name[0].hex}"
       aws ec2 start-instances --instance-ids ${aws_instance.softnas1.*.id[count.index]}
@@ -894,7 +894,7 @@ resource "null_resource" "provision_softnas_volumes" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      set -x; export SHOWCOMMANDS=true
+      export SHOWCOMMANDS=true; set -x
       cd /deployuser
 
       export common_tags='${ jsonencode( merge(var.common_tags, local.extra_tags) ) }'; exit_test
@@ -941,7 +941,7 @@ EOT
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      set -x; export SHOWCOMMANDS=true
+      export SHOWCOMMANDS=true; set -x
       cd /deployuser
 
       # ensure volumes and pools exist after disks are ensured to exist.
@@ -1040,7 +1040,7 @@ resource "null_resource" "attach_local_mounts_after_start" {
       timeout             = "10m"
     }
     inline = [
-      "set -x; export SHOWCOMMANDS=true",
+      "export SHOWCOMMANDS=true; set -x",
       "echo 'connection established'",
     ]
   }
@@ -1048,7 +1048,7 @@ resource "null_resource" "attach_local_mounts_after_start" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      set -x; export SHOWCOMMANDS=true
+      export SHOWCOMMANDS=true; set -x
 
       export common_tags='${ jsonencode( merge(var.common_tags, local.extra_tags) ) }'; exit_test
       echo "common_tags: $common_tags"
@@ -1091,7 +1091,7 @@ resource "null_resource" "detach_local_mounts_after_stop" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      set -x; export SHOWCOMMANDS=true
+      export SHOWCOMMANDS=true; set -x
 
       export common_tags='${ jsonencode( merge(var.common_tags, local.extra_tags) ) }'; exit_test
       echo "common_tags: $common_tags"

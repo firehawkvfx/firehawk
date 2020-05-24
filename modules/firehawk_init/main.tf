@@ -10,7 +10,7 @@ resource "null_resource" "init_awscli" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      set -x; export SHOWCOMMANDS=true
+      export SHOWCOMMANDS=true; set -x
       cd /deployuser
       export storage_user_access_key_id=${var.storage_user_access_key_id}
       echo "storage_user_access_key_id=$storage_user_access_key_id"
@@ -61,7 +61,7 @@ resource "null_resource" "init_deadlinedb_firehawk" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      set -x; export SHOWCOMMANDS=true
+      export SHOWCOMMANDS=true; set -x
       cd /deployuser
 
       export storage_user_access_key_id=${var.storage_user_access_key_id}
@@ -110,7 +110,7 @@ resource "null_resource" "init_houdini_license_server" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      set -x; export SHOWCOMMANDS=true
+      export SHOWCOMMANDS=true; set -x
       cd /deployuser
       
       # ssh will be killed from the previous script because users were added to a new group and this will not update unless your ssh session is restarted.
@@ -136,7 +136,7 @@ resource "null_resource" "init_aws_local_workstation" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      set -x; export SHOWCOMMANDS=true
+      export SHOWCOMMANDS=true; set -x
       cd /deployuser
 
       export storage_user_access_key_id=${var.storage_user_access_key_id}
@@ -188,7 +188,7 @@ resource "null_resource" "local_workstation_disk_space_check" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      set -x; export SHOWCOMMANDS=true
+      export SHOWCOMMANDS=true; set -x
       cd /deployuser
       if [[ "$TF_VAR_install_houdini" == true ]]; then
         ansible-playbook -i "$TF_VAR_inventory" ansible/diskspace-check.yaml -v --extra-vars "variable_host=workstation1 variable_connect_as_user=deployuser"; exit_test
@@ -210,7 +210,7 @@ resource "null_resource" "install_houdini_local_workstation" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      set -x; export SHOWCOMMANDS=true
+      export SHOWCOMMANDS=true; set -x
       cd /deployuser
       # install houdini on a local workstation with deadline submitters and environment vars.
       if [[ "$TF_VAR_install_houdini" == true ]]; then
@@ -237,7 +237,7 @@ resource "null_resource" "install_deadline_worker_local_workstation" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      set -x; export SHOWCOMMANDS=true
+      export SHOWCOMMANDS=true; set -x
       cd /deployuser
       if [[ "$TF_VAR_install_deadline_worker" == true ]]; then
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
@@ -265,7 +265,7 @@ resource "null_resource" "install_houdini_deadline_plugin_local_workstation" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
-      set -x; export SHOWCOMMANDS=true
+      export SHOWCOMMANDS=true; set -x
       cd /deployuser
       if [[ "$TF_VAR_install_deadline_worker" == true ]]; then
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test

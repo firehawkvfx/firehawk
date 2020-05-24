@@ -5,8 +5,9 @@
 # Don't store command history.
 unset HISTFILE
 
-# # This block allows you to echo a line number for a failure.
-set -eE -o functrace
+
+set -eE -o functrace # This block allows you to echo a line number for a failure.
+
 err_report() {
   local lineno=$1
   local msg=$2
@@ -144,6 +145,8 @@ parse_opts () {
     done
 }
 parse_opts "$@"
+
+set -x; SHOWCOMMANDS=true # show bash input
 
 set_pipe() {
   id=$1
