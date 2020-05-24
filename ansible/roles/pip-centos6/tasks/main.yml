@@ -29,7 +29,6 @@
   package:
     name:
     - python-pip
-    - python-apt
     - python-passlib
     state: present
   become: true

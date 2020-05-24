@@ -10,8 +10,8 @@ NC='\033[0m' # No Color
 export SECONDS=0
 
 exit_test () {
-    set +x
     exit_code=$?
+    set +x
     interrupt=false
     failed=false
     if [ "$exit_code" -eq 0 ]; then
