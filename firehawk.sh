@@ -19,6 +19,8 @@ trap 'err_report ${LINENO} "$BASH_COMMAND"' ERR
 # Abort script with correct exit code instead of continuing if non zero exit code occurs.
 set -e
 
+if [ -z "$CI_COMMIT_REF_SLUG" ]; then echo "Launching in a non Gitlab CI environment"; export env_ci=false; else echo "Gitlab CI Environment with branch: $CI_COMMIT_REF_SLUG"; export env_ci=true; fi
+
 tier () {
     if [[ "$verbose" == true ]]; then
         echo "Parsing tier option: '--${opt}', value: '${val}'" >&2;
@@ -335,11 +337,19 @@ if [ "$test_vm" = false ] ; then
         ssh-keygen -R [$hostname]:$port -f /home/gitlab-runner/.ssh/known_hosts # clean host keys
         if [[ "$tf_action" == "sleep" ]]; then
             echo "...Logging in to Vagrant host to set sleep on tf deployment: $hostname"
-            ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --sleep --init-vm-config=false" | ts '[%H:%M:%S]'; exit_test
+            if [[ "$env_ci" == true ]]; then
+                ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --sleep --init-vm-config=false" | ts '[%H:%M:%S]'; exit_test
+            else
+                ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --sleep --init-vm-config=false"; exit_test
+            fi
             echo "...End Deployment"
         elif [[ "$tf_action" == "destroy" ]]; then
             echo "...Logging in to Vagrant host to destroy tf deployment: $hostname"
-            ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --destroy --init-vm-config=$init_vm_config --tf-init=$tf_init" | ts '[%H:%M:%S]'; exit_test
+            if [[ "$env_ci" == true ]]; then
+                ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --destroy --init-vm-config=$init_vm_config --tf-init=$tf_init" | ts '[%H:%M:%S]'; exit_test
+            else
+                ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --destroy --init-vm-config=$init_vm_config --tf-init=$tf_init"; exit_test
+            fi
             echo "...End Deployment"
         elif [[ "$tf_action" == "single_test" ]]; then
             echo "...Logging in to Vagrant host to run single test: $hostname "
@@ -347,7 +357,11 @@ if [ "$test_vm" = false ] ; then
             echo "...End Deployment"        
         else
             echo "...Logging in to Vagrant host: $hostname "
-            ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --init-vm-config=$init_vm_config --tf-action=$tf_action --tf-init=$tf_init" | ts '[%H:%M:%S]'; exit_test
+            if [[ "$env_ci" == true ]]; then
+                ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --init-vm-config=$init_vm_config --tf-action=$tf_action --tf-init=$tf_init" | ts '[%H:%M:%S]'; exit_test
+            else
+                ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --init-vm-config=$init_vm_config --tf-action=$tf_action --tf-init=$tf_init"; exit_test
+            fi
             echo "...End Deployment"
         fi
     fi
