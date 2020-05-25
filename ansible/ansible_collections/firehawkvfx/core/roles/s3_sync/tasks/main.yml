@@ -1,7 +1,11 @@
 - name: "Sync S3 {{ mode }} user:"
   debug:
     msg: "variable_user:{{ variable_user }}"
-    
+
+- name: "Sync S3 {{ mode }} user:"
+  debug:
+    msg: "sync_user:{{ sync_user }}"
+
 - name: "Sync S3 {{ mode }} using bucket:"
   debug:
     msg: "using bucket s3://{{ bucket }}/"

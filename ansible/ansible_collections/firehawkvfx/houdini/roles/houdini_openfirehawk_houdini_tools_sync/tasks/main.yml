@@ -39,6 +39,7 @@
     basedir: "{{ firehawk_sync_source }}"
     filename: "*"
     variable_user: "{{ push_user }}"
+    sync_user: "{{ push_user }}"
   connection: local
 
 - name: set user for sync
