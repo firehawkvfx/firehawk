@@ -180,7 +180,7 @@
       bucket: "{{ installers_bucket }}"
       basedir: "/home/deadlineuser/Downloads"
       filename: "{{ deadline_linux_filename }}"
-      # variable_user: "{{ remote_user }}" # due to a limitaiton the var provided must not be the same
+      sync_user: "{{ remote_user }}" # due to a limitaiton the var provided must not be the same
 
   # - name: S3 GET deadline
   #   aws_s3:

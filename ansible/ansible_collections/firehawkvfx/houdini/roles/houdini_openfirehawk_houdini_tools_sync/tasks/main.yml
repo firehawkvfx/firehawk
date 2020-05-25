@@ -38,7 +38,7 @@
     mode: "push"
     basedir: "{{ firehawk_sync_source }}"
     filename: "*"
-    variable_user: "{{ push_user }}"
+    # variable_user: "{{ push_user }}"
     sync_user: "{{ push_user }}"
   connection: local
 
@@ -53,7 +53,7 @@
     mode: "pull"
     basedir: "{{ firehawk_sync_source }}"
     filename: "*"
-    variable_user: "{{ pull_user }}"
+    sync_user: "{{ pull_user }}"
   connection: local
 
 # - name: Sync openfirehawk-houdini-tools to s3 - push

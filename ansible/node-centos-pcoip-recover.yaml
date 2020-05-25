@@ -32,7 +32,7 @@
       bucket: "ec2-linux-nvidia-drivers/{{ grid_folder }}"
       basedir: "/deployuser/downloads/nvidia/{{ grid_folder }}"
       filename: "*"
-      variable_user: "deployuser"
+      sync_user: "deployuser"
     when: driver_stat.stat.exists == false
 
   # - name: get nvidia driver

@@ -1,4 +1,4 @@
 ---
 # vars file for roles/houdini_module
 
-variable_user: deadlineuser
+sync_user: deadlineuser

@@ -1,23 +1,19 @@
 - name: "Sync S3 {{ mode }} user:"
   debug:
-    msg: "variable_user:{{ variable_user }}"
-
-- name: "Sync S3 {{ mode }} user:"
-  debug:
     msg: "sync_user:{{ sync_user }}"
 
 - name: "Sync S3 {{ mode }} using bucket:"
   debug:
     msg: "using bucket s3://{{ bucket }}/"
 
-- name: "Sync S3 {{ mode }} {{ basedir }}/{{ filename }} s3://{{ bucket }}/" # warning: there appears to be a bug with ansible that may result in variable user being defined at the include_role level not setting the variable_user var correctly.  consider this if errors should occur.
+- name: "Sync S3 {{ mode }} {{ basedir }}/{{ filename }} s3://{{ bucket }}/" # warning: there appears to be a bug with ansible that may result in variable user being defined at the include_role level not setting the sync_user var correctly.  consider this if errors should occur.
   shell: |
     # set -x
     cd ~
     echo "aws sts get-caller-identity"
     aws sts get-caller-identity
     
-    echo "become user {{ variable_user }}"
+    echo "become user {{ sync_user }}"
     echo "whoami $(whoami)"
     echo "pwd: $(pwd)"
     cd {{ basedir }}
@@ -86,7 +82,7 @@
       fi
     fi
   register: output
-  become_user: "{{ variable_user }}"
+  become_user: "{{ sync_user }}"
   changed_when:
     - '"File already present" not in output.stdout'
   args:

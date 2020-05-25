@@ -121,6 +121,7 @@
     bucket: "{{ installers_bucket }}"
     basedir: "{{ download_to_dir }}"
     filename: "{{ houdini_linux_tar_filename | basename }}"
+    sync_user: "{{ variable_user }}"
     # variable_user: "{{ variable_user }}" # bypas since variable user should hopefully be passed through.  self referencing vars in yaml isn't supported.
 
 # Note must handle condition if auto version is false and the file doesn't exist in the s3 bucket.
@@ -293,6 +294,7 @@
     bucket: "{{ installers_bucket }}"
     basedir: "{{ download_to_dir }}"
     filename: "{{ houdini_linux_tar_filename | basename }}"
+    sync_user: "{{ variable_user }}"
     # variable_user: "deployuser" # deploy user has access to the default downloads folder.
     # variable_user: "{{ variable_user }}" # bypas since variable user should hopefully be passed through.  self referencing vars in yaml isn't supported.
   tags:

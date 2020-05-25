@@ -80,7 +80,7 @@
       bucket: "{{ installers_bucket }}"
       basedir: "/home/deadlineuser/Downloads"
       filename: "{{ deadline_linux_filename }}"
-      variable_user: "deadlineuser"
+      sync_user: "deadlineuser"
 
 
   - name: create deadline installer dir
