@@ -116,6 +116,9 @@ Vagrant.configure(2) do |config|
             if box_file_in.nil? || box_file_in.empty?
                 node.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive; sudo apt-get update"
                 node.vm.provision "shell", inline: "sudo mkdir -p /deployuser/tmp/apt/$(hostname)"
+                node.vm.provision "shell", inline: "sudo chmod u=rwX,g=rwX,o=rwX,g+s /deployuser/tmp/apt/$(hostname)"
+                node.vm.provision "shell", inline: "sudo mkdir -p /deployuser/tmp/apt/$(hostname)/partial"
+                node.vm.provision "shell", inline: "sudo chmod u=rwX,g=rwX,o=rwX,g+s /deployuser/tmp/apt/$(hostname)/partial"
                 # node.vm.provision "shell", inline: "sudo cp -r /deployuser/tmp/apt/$(hostname)/* var/cache/apt/." # copy apt caches back
                 node.vm.provision "shell", inline: 'echo "Dir::Cache::Archives /deployuser/tmp/apt/$(hostname);" | sudo tee -a /etc/apt/apt.conf.d/00aptitude'
                 node.vm.provision "shell", inline: 'echo "Dir::Cache /deployuser/tmp/apt/$(hostname);" | sudo tee -a /etc/apt/apt.conf.d/00aptitude'
