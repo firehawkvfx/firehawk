@@ -8,7 +8,7 @@
 
 - name: "Sync S3 {{ mode }} {{ basedir }}/{{ filename }} s3://{{ bucket }}/" # warning: there appears to be a bug with ansible that may result in variable user being defined at the include_role level not setting the sync_user var correctly.  consider this if errors should occur.
   shell: |
-    # set -x
+    set -x
     cd ~
     echo "aws sts get-caller-identity"
     aws sts get-caller-identity
@@ -38,12 +38,14 @@
       fi
     }
 
+    echo "Use filename: $filename"
     if [[ "$filename" == *"*"* ]]; then
       echo "Use of wild cards will bypass existance check and force run sync operation"
       skip_existance_check=true
       if [[ {{ mode }} == 'push' ]]; then file_in_bucket=false; fi
       if [[ {{ mode }} == 'pull' ]]; then file_in_bucket=true; fi
     else
+      echo "...Test existance of file in bucket."
       skip_existance_check=false
       test_file "$filename"
     fi
