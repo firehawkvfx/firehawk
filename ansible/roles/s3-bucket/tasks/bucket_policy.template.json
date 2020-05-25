@@ -48,9 +48,9 @@
         "arn:aws:s3:::{{ installers_bucket }}/*"
       ],
       "Condition": {
-        "StringEquals": {
-          "s3:x-amz-grant-full-control": "id={{ AWS_ACCOUNT_ID_prod }}"
-        }
+          "StringEquals": {
+              "s3:x-amz-acl": "bucket-owner-full-control"
+          }
       }
     }
   ]
