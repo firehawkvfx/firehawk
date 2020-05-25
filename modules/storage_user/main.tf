@@ -53,7 +53,10 @@ resource "aws_iam_group_policy" "s3_admin_group_policy" {
     {
       "Effect": "Allow",
       "Action": "s3:*",
-      "Resource": "*"
+      "Resource": [
+          "*",
+          "arn:aws:s3:::*"
+      ]
     }
   ]
 }

@@ -10,6 +10,9 @@
   shell: |
     # set -x
     cd ~
+    echo "aws sts get-caller-identity"
+    aws sts get-caller-identity
+    
     echo "become user {{ variable_user }}"
     echo "whoami $(whoami)"
     echo "pwd: $(pwd)"
