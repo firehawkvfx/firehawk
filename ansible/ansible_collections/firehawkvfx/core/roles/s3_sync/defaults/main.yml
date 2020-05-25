@@ -1,4 +1,5 @@
 ---
 # vars file for roles/houdini_module
 
-sync_user: deadlineuser
+sync_user: "deadlineuser"
+exclude: "*"

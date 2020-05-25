@@ -8,7 +8,7 @@
 
 - name: "Sync S3 {{ mode }} {{ basedir }}/{{ filename }} s3://{{ bucket }}/" # warning: there appears to be a bug with ansible that may result in variable user being defined at the include_role level not setting the sync_user var correctly.  consider this if errors should occur.
   shell: |
-    set -x
+    # set -x
     cd ~
     echo "aws sts get-caller-identity"
     aws sts get-caller-identity
@@ -57,7 +57,7 @@
       if [[ {{ mode }} == 'push' ]]; then
         echo "Sync Push: File not yet present in S3 bucket, will push."
         if [ -f "{{ filename }}" ] || [[ "$skip_existance_check" == true ]]; then
-          aws s3 sync . s3://{{ bucket }}/ --exclude "*" --include "{{ filename }}" --no-progress --acl bucket-owner-full-control # see https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html https://aws.amazon.com/premiumsupport/knowledge-center/s3-bucket-owner-access/
+          aws s3 sync . s3://{{ bucket }}/ --exclude "{{ exclude }}" --include "{{ filename }}" --no-progress --acl bucket-owner-full-control # see https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html https://aws.amazon.com/premiumsupport/knowledge-center/s3-bucket-owner-access/
           
           if [[ "$skip_existance_check" == true ]]; then
             echo "Skipping existance check"
@@ -92,7 +92,7 @@
           echo "{{ filename }} File already present on disk.  Won't Pull"
           exit 0
         else 
-          aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ filename }}" --no-progress
+          aws s3 sync s3://{{ bucket }}/ . --exclude "{{ exclude }}" --include "{{ filename }}" --no-progress
           if [[ "$skip_existance_check" == true ]]; then
             echo "Skipping existance check"
             exit 0
@@ -108,9 +108,9 @@
         fi
       fi
     fi
-  register: output
   become_user: "{{ sync_user }}"
-  become: true
+  become: true # this priveledge escalation shouldn't be necesary, but resolved a sync issue when pulling locally.
+  register: output
   changed_when:
     - '"File already present" not in output.stdout'
   args:

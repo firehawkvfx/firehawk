@@ -37,8 +37,8 @@
   vars:
     mode: "push"
     basedir: "{{ firehawk_sync_source }}"
+    exclude: ".git/*"
     filename: "*"
-    # variable_user: "{{ push_user }}"
     sync_user: "{{ push_user }}"
   connection: local
 
@@ -52,6 +52,7 @@
   vars:
     mode: "pull"
     basedir: "{{ firehawk_sync_source }}"
+    exclude: ".git/*"
     filename: "*"
     sync_user: "{{ pull_user }}"
 
