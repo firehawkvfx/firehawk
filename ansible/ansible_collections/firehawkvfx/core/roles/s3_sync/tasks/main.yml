@@ -37,21 +37,38 @@
         echo "ls word count is not 0, file_in_bucket: $file_in_bucket"
       fi
     }
-    test_file "$filename"
+
+    if [[ "$filename" == *"*"* ]]; then
+      echo "Use of wild cards will bypass existance check and force run sync operation"
+      skip_existance_check=true
+      if [[ {{ mode }} == 'push' ]]; then file_in_bucket=false; fi
+      if [[ {{ mode }} == 'pull' ]]; then file_in_bucket=true; fi
+    else
+      skip_existance_check=false
+      test_file "$filename"
+    fi
     
     if [[ "$file_in_bucket" == false ]]; then
       if [[ {{ mode }} == 'push' ]]; then
         echo "Sync Push: File not yet present in S3 bucket, will push."
         if [ -f "{{ filename }}" ]; then
           aws s3 sync . s3://{{ bucket }}/ --exclude "*" --include "{{ filename }}" --no-progress --acl bucket-owner-full-control # see https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html https://aws.amazon.com/premiumsupport/knowledge-center/s3-bucket-owner-access/
-          sleep 10 # After push, the file may not be immediately present to s3 ls.  Wait a few seconds first.
-          test_file "$filename"
-          if [[ "$file_in_bucket" == false ]]; then
-            echo "Failed: File not present in bucket after push: {{ filename }}."
-            exit 1
+          
+          if [[ "$skip_existance_check" == true ]]; then
+            echo "Skipping existance check"
+            exit 0
+          else
+            sleep 10 # After push, the file may not be immediately present to s3 ls.  Wait a few seconds first.
+            test_file "$filename"
+
+            if [[ "$file_in_bucket" == false ]]; then
+              echo "Failed: File not present in bucket after push: {{ filename }}."
+              exit 1
+            fi
+            echo "Success: File is present in bucket after push."
+            exit 0
           fi
-          echo "Success: File is present in bucket after push."
-          exit 0
+
         else 
           echo "Failed: {{ filename }} does not exist on disk, won't push."
           exit 1
@@ -66,17 +83,22 @@
         exit 0
       else
         echo "Sync Pull: File present in S3 bucket..."
-        if [ -f "{{ filename }}" ]; then
+        if [ -f "{{ filename }}" ] && [[ "$skip_existance_check" == false ]]; then
           echo "{{ filename }} File already present on disk.  Won't Pull"
           exit 0
         else 
           aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include "{{ filename }}" --no-progress
-          if [ -f "{{ filename }}" ]; then
-            echo "Success: File is present on disk after pull."
+          if [[ "$skip_existance_check" == true ]]; then
+            echo "Skipping existance check"
             exit 0
           else
-            echo "Failed: Pull not present on disk after attempt to pull."
-            exit 1
+            if [ -f "{{ filename }}" ]; then
+              echo "Success: File is present on disk after pull."
+              exit 0
+            else
+              echo "Failed: Pull not present on disk after attempt to pull."
+              exit 1
+            fi
           fi
         fi
       fi
