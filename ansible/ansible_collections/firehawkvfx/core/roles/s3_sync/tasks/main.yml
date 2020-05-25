@@ -6,6 +6,13 @@
   debug:
     msg: "using bucket s3://{{ bucket }}/"
 
+- name: "Test shell connections as user: {{ sync_user }}" # warning: there appears to be a bug with ansible that may result in variable user being defined at the include_role level not setting the sync_user var correctly.  consider this if errors should occur.
+  shell: |
+    echo "Test connection whoami: $(whoami)"
+  become_user: "{{ sync_user }}"
+  args:
+    executable: /bin/bash
+
 - name: "Sync S3 {{ mode }} {{ basedir }}/{{ filename }} s3://{{ bucket }}/" # warning: there appears to be a bug with ansible that may result in variable user being defined at the include_role level not setting the sync_user var correctly.  consider this if errors should occur.
   shell: |
     # set -x

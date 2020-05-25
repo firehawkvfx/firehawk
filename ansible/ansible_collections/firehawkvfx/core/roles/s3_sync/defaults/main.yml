@@ -3,3 +3,6 @@
 
 sync_user: "deadlineuser"
 exclude: "*"
+
+ansible_become_pass: "{{ user_deadlineuser_pw }}"
+ansible_password: "{{ user_deadlineuser_pw }}"
