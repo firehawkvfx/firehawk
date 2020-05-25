@@ -23,28 +23,52 @@
   become_user: deployuser
   connection: local
 
-- name: Sync openfirehawk-houdini-tools to s3 - push
-  shell: |
-    # set -x
-    cd {{ firehawk_sync_source }}
-    aws s3 sync . s3://{{ bucket }}/openfirehawk-houdini-tools/ --include "*" --exclude ".git/*" --no-progress
-  become_user: deployuser
+- name: set bucket
+  set_fact:
+  bucket: "{{ bucket }}/openfirehawk-houdini-tools"
+
+- name: s3-sync openfirehawk-houdini-tools push
+  import_role:
+    name: firehawkvfx.core.s3_sync
+  vars:
+    mode: "push"
+    basedir: "{{ firehawk_sync_source }}"
+    filename: "*"
+    variable_user: "deployuser"
   connection: local
 
-- name: Sync openfirehawk-houdini-tools from s3
-  shell: |
-    # set -x
-    mount
-    cat /etc/fstab
-    cd /prod/assets/openfirehawk-houdini-tools
+- name: s3-sync openfirehawk-houdini-tools push
+  import_role:
+    name: firehawkvfx.core.s3_sync
+  vars:
+    mode: "pull"
+    basedir: "{{ firehawk_sync_source }}"
+    filename: "*"
+    variable_user: "deadlineuser"
+  connection: local
 
-    aws sts get-caller-identity
-    ls -ltriah
-    touch .test_permissions # Test write permissions
-    rm -fr .test_permissions
+# - name: Sync openfirehawk-houdini-tools to s3 - push
+#   shell: |
+#     # set -x
+#     cd {{ firehawk_sync_source }}
+#     aws s3 sync . s3://{{ bucket }}/openfirehawk-houdini-tools/ --include "*" --exclude ".git/*" --no-progress
+#   become_user: deployuser
+#   connection: local
 
-    aws s3 sync s3://{{ bucket }}/openfirehawk-houdini-tools/ . --include "*" --exclude ".git/*" --no-progress
-  become_user: deadlineuser
+# - name: Sync openfirehawk-houdini-tools from s3
+#   shell: |
+#     # set -x
+#     mount
+#     cat /etc/fstab
+#     cd /prod/assets/openfirehawk-houdini-tools
+
+#     aws sts get-caller-identity
+#     ls -ltriah
+#     touch .test_permissions # Test write permissions
+#     rm -fr .test_permissions
+
+#     aws s3 sync s3://{{ bucket }}/openfirehawk-houdini-tools/ . --include "*" --exclude ".git/*" --no-progress
+#   become_user: deadlineuser
 
 - name: dir permissions on /prod/assets/hda.  note permissions aren't being set correctly for group for some reason.
   file:
