@@ -226,6 +226,14 @@ time_passed () {
 }
 time_passed
 
+if [[ "$TF_VAR_fast" == true ]]; then # Install Vagrant Plugins
+    echo "...Fast mode.  Bypassing plugin evaluation"
+else
+    vagrant_plugin_list="$(vagrant plugin list)"
+    if echo "$vagrant_plugin_list" | grep 'vagrant-disksize' -q; then echo 'plugin vagrant-disksize installed'; else echo '...installing'; vagrant plugin install vagrant-disksize; fi
+    if echo "$vagrant_plugin_list" | grep 'vagrant-reload' -q; then echo 'plugin vagrant-reload installed'; else echo '...installing'; vagrant plugin install vagrant-reload; fi
+    if echo "$vagrant_plugin_list" | grep 'vagrant-vbguest' -q; then echo 'plugin vagrant-vbguest installed'; else echo '...installing'; vagrant plugin install vagrant-vbguest; fi
+fi
 
 # If box file in is defined, then vagrant will use this file in place of the standard image.
 if [[ ! -z "$box_file_in" ]] ; then

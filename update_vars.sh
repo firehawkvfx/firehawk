@@ -128,7 +128,7 @@ else
         export TF_VAR_envtier='dev'
     fi
     keys_path=~/firehawk-rollout-$TF_VAR_envtier/secrets/keys/.
-    then echo "...Using $TF_VAR_envtier keys from: $keys_path to: $TF_VAR_secrets_path"
+    then echo "...Copying $TF_VAR_envtier keys from: $keys_path to: $TF_VAR_secrets_path"
     cp -r $keys_path $TF_VAR_secrets_path/keys/.
 fi
 
@@ -701,9 +701,8 @@ else
 fi
 
 echo_if_not_silent "...Current pipeline vars:"
-# echo "TF_VAR_CI_JOB_ID: $TF_VAR_CI_JOB_ID"
 echo_if_not_silent "TF_VAR_active_pipeline: $TF_VAR_active_pipeline"
-# echo "TF_VAR_key_name: $TF_VAR_key_name"
-# echo "TF_VAR_local_key_path: $TF_VAR_local_key_path"
+if [[ -z "$TF_VAR_workstation_ethernet_device" ]]; then echo "Ethernet not defined for workstation route"; exit 1; fi
+
 echo_if_not_silent "...Done."
 if [[ "$SHOWCOMMANDS" == true ]]; then set -x; fi # After finishing the script, we enable set -x to show input again.
