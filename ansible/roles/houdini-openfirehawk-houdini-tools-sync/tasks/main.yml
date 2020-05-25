@@ -51,7 +51,7 @@
     touch .test_permissions # Test write permissions
     rm -fr .test_permissions
 
-    aws s3 sync s3://{{ bucket }}/openfirehawk-houdini-tools/ . --include "*" --exclude ".git/*"
+    aws s3 sync s3://{{ bucket }}/openfirehawk-houdini-tools/ . --include "*" --exclude ".git/*" --no-progress
   become_user: deadlineuser
   tags:
     - sync_scripts

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+set +x
 # the purpose of this script is to:
 # 1) set envrionment variables as defined in the encrypted secrets/secrets-prod file
 # 2) consistently rebuild the secrets.template file based on the variable names found in the secrets-prod file.
@@ -127,6 +127,9 @@ else
     else
         export TF_VAR_envtier='dev'
     fi
+    keys_path=~/firehawk-rollout-$TF_VAR_envtier/secrets/keys/.
+    then echo "...Using $TF_VAR_envtier keys from: $keys_path to: $TF_VAR_secrets_path"
+    cp -r $keys_path $TF_VAR_secrets_path/keys/.
 fi
 
 tier () {
@@ -703,3 +706,4 @@ echo_if_not_silent "TF_VAR_active_pipeline: $TF_VAR_active_pipeline"
 # echo "TF_VAR_key_name: $TF_VAR_key_name"
 # echo "TF_VAR_local_key_path: $TF_VAR_local_key_path"
 echo_if_not_silent "...Done."
+if [[ "$SHOWCOMMANDS" == true ]]; then set -x; fi # After finishing the script, we enable set -x to show input again.
