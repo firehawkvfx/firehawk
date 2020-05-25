@@ -23,9 +23,13 @@
   become_user: deployuser
   connection: local
 
-- name: set bucket
+- name: set bucket for sync
   set_fact:
     bucket: "{{ bucket }}/openfirehawk-houdini-tools"
+
+- name: set user for sync
+  set_fact:
+    variable_user: "deployuser"
 
 - name: s3-sync openfirehawk-houdini-tools push
   import_role:
@@ -34,8 +38,12 @@
     mode: "push"
     basedir: "{{ firehawk_sync_source }}"
     filename: "*"
-    variable_user: "deployuser"
+    # variable_user: "deployuser"
   connection: local
+
+- name: set user for sync
+  set_fact:
+    variable_user: "deadlineuser"
 
 - name: s3-sync openfirehawk-houdini-tools push
   import_role:
@@ -44,7 +52,7 @@
     mode: "pull"
     basedir: "{{ firehawk_sync_source }}"
     filename: "*"
-    variable_user: "deadlineuser"
+    # variable_user: "deadlineuser"
   connection: local
 
 # - name: Sync openfirehawk-houdini-tools to s3 - push
