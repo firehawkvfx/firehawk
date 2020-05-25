@@ -109,7 +109,7 @@
       fi
     fi
   become_user: "{{ sync_user }}"
-  become: true # this priveledge escalation shouldn't be necesary, but resolved a sync issue when pulling locally.
+  # become: true # this priveledge escalation shouldn't be necesary, but resolved a sync issue when pulling locally.
   register: output
   changed_when:
     - '"File already present" not in output.stdout'
