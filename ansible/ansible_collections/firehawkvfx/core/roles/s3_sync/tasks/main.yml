@@ -6,7 +6,7 @@
   debug:
     msg: "using bucket s3://{{ bucket }}/"
 
-- name: "Sync S3 {{ mode }} {{ filename }}" # warning: there appears to be a bug with ansible that may result in variable user being defined at the include_role level not setting the variable_user var correctly.  consider this if errors should occur.
+- name: "Sync S3 {{ mode }} {{ basedir }}/{{ filename }} s3://{{ bucket }}/" # warning: there appears to be a bug with ansible that may result in variable user being defined at the include_role level not setting the variable_user var correctly.  consider this if errors should occur.
   shell: |
     # set -x
     cd ~
