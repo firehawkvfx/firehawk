@@ -46,7 +46,7 @@
   set_fact:
     pull_user: "deadlineuser"
 
-- name: s3-sync openfirehawk-houdini-tools push
+- name: s3-sync openfirehawk-houdini-tools pull
   import_role:
     name: firehawkvfx.core.s3_sync
   vars:
@@ -54,7 +54,6 @@
     basedir: "{{ firehawk_sync_source }}"
     filename: "*"
     sync_user: "{{ pull_user }}"
-  connection: local
 
 # - name: Sync openfirehawk-houdini-tools to s3 - push
 #   shell: |
