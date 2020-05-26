@@ -230,19 +230,21 @@ else
     if terraform refresh -lock=false; then
       echo "...Terraform destroy"
       if terraform destroy -lock=false --auto-approve; then success=true; fi
-    else
+    fi
+
+    if [[ "$success" == false ]]; then
       echo "...First destroy attempts failed.  terraform.tfstate is likely corrupted, we will restore from backup and attempt destroy again."
       cp -fv terraform.tfstate.backup terraform.tfstate
       if terraform refresh -lock=false; then
         echo "...Terraform destroy from terraform.tfstate.backup"
         if terraform destroy -lock=false --auto-approve; then success=true; fi
       fi
-      
-      if [[ "$success" == false ]]; then
-        echo "ERROR: verify there are no orphaned resources after this run...Couldn't recover backup."
-        echo "...Removing terraform.tfstate for clean start."
-        rm -fv terraform.tfstate; exit_test
-      fi
+    fi
+    
+    if [[ "$success" == false ]]; then
+      echo "ERROR: verify there are no orphaned resources after this run...Couldn't recover backup."
+      echo "...Removing terraform.tfstate for clean start."
+      rm -fv terraform.tfstate; exit_test
     fi
 
     if [ -f terraform.tfstate ]; then
