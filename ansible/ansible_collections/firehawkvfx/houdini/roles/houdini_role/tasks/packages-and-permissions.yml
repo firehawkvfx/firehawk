@@ -9,10 +9,6 @@
   tags:
   - always
 
-- name: s3 sync openfirehawk-houdini-tools push (from local filesystem) and get (from s3 to node) 
-  include_role:
-    name: houdini_openfirehawk_houdini_tools_sync
-
 - name: dir permissions on /prod/tmp
   file:
     path: /prod/tmp
