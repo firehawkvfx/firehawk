@@ -236,6 +236,8 @@ else
       if terraform refresh -lock=false; then
         echo "...Terraform destroy from terraform.tfstate.backup"
         if terraform destroy -lock=false --auto-approve; then success=true; fi
+      fi
+      
       if [[ "$success" == false ]]; then
         echo "ERROR: verify there are no orphaned resources after this run...Couldn't recover backup."
         echo "...Removing terraform.tfstate for clean start."
