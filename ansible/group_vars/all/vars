@@ -140,6 +140,7 @@ max_spot_capacity_engine: 7
 max_spot_capacity_mantra: 61
 
 firehawk_sync_source: "{{ lookup('env','TF_VAR_firehawk_sync_source') }}"
+firehawk_sync_target: "{{ lookup('env','TF_VAR_firehawk_sync_target') }}"
 
 # keybase user id or path to pgp public key on disk
 pgp_public_key: "{{ lookup('env','TF_VAR_pgp_public_key') }}"

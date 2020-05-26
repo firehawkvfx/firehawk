@@ -51,7 +51,7 @@
     name: firehawkvfx.core.s3_sync
   vars:
     mode: "pull"
-    basedir: "{{ firehawk_sync_source }}"
+    basedir: "{{ firehawk_sync_target }}"
     exclude: ".git/*"
     filename: "*"
     sync_user: "{{ pull_user }}"
