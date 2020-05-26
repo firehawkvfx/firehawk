@@ -226,16 +226,17 @@ else
     touch $TF_VAR_local_key_path # ensure a file is present or tf will not be able to destroy anything.
 
     echo "...Terraform refresh"
+    success=false
     if terraform refresh -lock=false; then
       echo "...Terraform destroy"
-      terraform destroy -lock=false --auto-approve
+      if terraform destroy -lock=false --auto-approve; then success=true; fi
     else
       echo "...First destroy attempts failed.  terraform.tfstate is likely corrupted, we will restore from backup and attempt destroy again."
       cp -fv terraform.tfstate.backup terraform.tfstate
       if terraform refresh -lock=false; then
-        echo "...Terraform destroy"
-        terraform destroy -lock=false --auto-approve
-      else
+        echo "...Terraform destroy from terraform.tfstate.backup"
+        if terraform destroy -lock=false --auto-approve; then success=true; fi
+      if [[ "$success" == false ]]; then
         echo "ERROR: verify there are no orphaned resources after this run...Couldn't recover backup."
         echo "...Removing terraform.tfstate for clean start."
         rm -fv terraform.tfstate; exit_test
