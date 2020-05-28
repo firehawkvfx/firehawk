@@ -3,15 +3,8 @@
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
 
-  # vars:
-    # variable_user: deadlineuser
-    # variable_uid: 9001
-    # variable_user_gid: "{{ variable_uid }}"
-    # variable_gid: "{{ syscontrol_gid }}"
-    # my_password: "{{ user_deadlineuser_pw | string | password_hash('sha512') }}"
-    # no_extension: "{{ deadline_linux_installers_tar | splitext | first }}"
-    # basename: "{{ no_extension.split('/')[-1] }}"
-    # houdini_major_version: 18.0
+  vars:
+    skip_packages: false
   
   pre_tasks:
   - name: test connection as deployuser
@@ -33,9 +26,9 @@
   - name: pip configure for ubuntu and cent7
     include_role:
       name: pip
-    when: ansible_distribution_major_version|int > 6
+    when: ansible_distribution_major_version|int > 6 and skip_packages == false
 
   - name: pip configure for cent6 (softnas)
     include_role:
       name: pip-centos6
-    when: ansible_distribution_major_version|int <= 6
+    when: ansible_distribution_major_version|int <= 6 and skip_packages == false
