@@ -4,14 +4,14 @@
 # ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml
 
 - hosts: "{{ variable_host | default('workstation1') }}"
-  remote_user: "{{ variable_connect_as_user | default('deadlineuser') }}"
+  remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
 
   vars:
     ansible_become_pass: "{{ user_deadlineuser_pw }}"
     ansible_password: "{{ user_deadlineuser_pw }}"
-    variable_connect_as_user: deadlineuser
+    variable_connect_as_user: deployuser
     variable_user: deadlineuser
 
   tasks:

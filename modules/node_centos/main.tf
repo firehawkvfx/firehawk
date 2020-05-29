@@ -462,7 +462,7 @@ resource "null_resource" "install_deadline_worker" {
         # check db
         echo "test db centos 1"
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
-
+        echo "Install deadline worker on remote node"
         ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml -v --skip-tags "multi-slave" --extra-vars "variable_host=role_node_centos variable_connect_as_user=centos variable_user=deadlineuser"; exit_test
 
         # check db
