@@ -321,7 +321,7 @@ else
       done
       if [ "$found" == false ]; then echo "No Resources were Tainted"; fi
     fi
-
+    set +x
     echo "...Currently running instances: scripts/aws-running-instances.sh"
     $TF_VAR_firehawk_path/scripts/aws-running-instances.sh
     echo ""
@@ -346,6 +346,7 @@ else
   elif [[ "$tf_action" == "single_test" ]]; then
     echo "...Test a singular one off command"; set -x
     $TF_VAR_firehawk_path/scripts/single-test.sh
+    set +x
   fi
 
 
