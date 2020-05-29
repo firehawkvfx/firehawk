@@ -456,12 +456,12 @@ resource "null_resource" "install_deadline_worker" {
       export SHOWCOMMANDS=true; set -x
       cd /deployuser
 
-      aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id} # ensure instance is started
+      # aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id} # ensure instance is started
 
       if [[ "$TF_VAR_install_deadline_worker" == true ]]; then
         # check db
         echo "test db centos 1"
-        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+        # ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
         echo "Install deadline worker on remote node"
         # ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml -v --skip-tags "multi-slave" --extra-vars "variable_host=role_node_centos variable_connect_as_user=centos variable_user=deadlineuser"; exit_test
 
