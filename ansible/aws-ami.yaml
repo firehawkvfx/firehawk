@@ -8,6 +8,7 @@
     ami_name: "softnas_ami"
     instance_id: ""
     description: ""
+    instance_type: ""
 
   roles:
     - role: aws-ami

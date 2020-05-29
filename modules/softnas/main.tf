@@ -461,6 +461,10 @@ data "aws_ami_ids" "prebuilt_softnas_ami_list" { # search for a prebuilt tagged 
     values = ["${local.base_ami}"]
   }
   filter {
+    name   = "tag:base_instance_type"
+    values = ["${local.instance_type}"] # If instance type is not the same as used to build ami there may be problems, so we tag the ami with the same instance type.
+  }
+  filter {
     name = "name"
     values = ["softnas_prebuilt_*"]
   }
@@ -473,6 +477,7 @@ locals {
   aquired_ami      = "${element( local.mod_list , 0)}" # aquired ami will use the ami in the list if found, otherwise it will default to the original ami.
   use_prebuilt_softnas_ami = var.allow_prebuilt_softnas_ami && length(local.mod_list) > 1 ? true : false
   ami = local.use_prebuilt_softnas_ami ? local.aquired_ami : local.base_ami
+  instance_type = var.instance_type[var.softnas_mode]
 }
 
 output "base_ami" {
@@ -517,7 +522,7 @@ resource "aws_instance" "softnas1" {
 
   ami   = local.ami
 
-  instance_type = var.instance_type[var.softnas_mode]
+  instance_type = local.instance_type
 
   ebs_optimized = true
 
@@ -528,16 +533,6 @@ resource "aws_instance" "softnas1" {
     network_interface_id = local.network_interface_id
     # delete_on_termination = true
   }
-
-  # network_interface {
-  #   device_index         = 1
-  #   network_interface_id = element(concat(aws_network_interface.nas1eth1.*.id, list("")), 0)
-  #   #delete_on_termination = true
-  # }
-
-  # subnet_id      = element(concat(var.private_subnets, list("")), count.index)
-  # private_ip     = var.softnas1_private_ip1
-  # vpc_security_group_ids = aws_security_group.softnas.*.id
 
   root_block_device {
     volume_size = "100"
@@ -812,7 +807,7 @@ resource "null_resource" "create_ami" {
     command = <<EOT
       export SHOWCOMMANDS=true; set -x
       cd /deployuser
-      ansible-playbook -i "$TF_VAR_inventory" ansible/aws-ami.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]} ami_name=softnas_prebuilt_${local.ami} base_ami=${local.ami} description=softnas1_${aws_instance.softnas1.*.id[count.index]}_${random_id.ami_unique_name[0].hex}"
+      ansible-playbook -i "$TF_VAR_inventory" ansible/aws-ami.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]} ami_name=softnas_prebuilt_${local.ami} base_ami=${local.ami} description=softnas1_${aws_instance.softnas1.*.id[count.index]}_${random_id.ami_unique_name[0].hex} instance_type=${local.instance_type}"
       aws ec2 start-instances --instance-ids ${aws_instance.softnas1.*.id[count.index]}
 EOT
   }

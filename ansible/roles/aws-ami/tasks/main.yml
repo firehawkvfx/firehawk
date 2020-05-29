@@ -39,5 +39,6 @@
     tags:
       base_ami: "{{ base_ami }}"
       base_instance_id: '{{ instance_id }}'
+      base_instance_type: '{{ instance_type }}'
   register: image
   become_user: deployuser
