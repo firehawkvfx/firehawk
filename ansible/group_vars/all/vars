@@ -184,7 +184,7 @@ time_zone_info_path_linux: "{{ time_zone_info_dict_linux['Australia_Sydney'] }}"
 repo_dir: "{{ playbook_dir.split('/')[0:-1]|join('/') }}"
 
 vault_key_name_general: "{{ lookup('env','TF_VAR_vault_key_name_general') }}"
-vault_key_path: "{{ repo_dir }}/../secrets/keys/{{ vault_key_name }}"
+vault_key_path: "{{ repo_dir }}/../secrets/keys/{{ vault_key_name_general }}"
 
 key_folder: "{{ repo_dir }}/../secrets/keys/"
 
