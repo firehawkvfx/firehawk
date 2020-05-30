@@ -41,7 +41,7 @@
   vars_files:
     - /deployuser/ansible/group_vars/all/vars
     - vars/main.yml
-    - vars/softnas_ebs_volumes.yaml
+#    - vars/softnas_ebs_volumes.yaml
 
   vars:
     destroy: false
@@ -57,12 +57,12 @@
 
     import_pool: true
 
-    vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/ebs-volumes/softnas_ebs_volumes.yaml", "softnas_ebs_volumes.yaml", "files/softnas_ebs_volumes.yaml", "vars/softnas_ebs_volumes.yaml" ]
+    vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/ebs-volumes/softnas_ebs_volumes.yaml", "files/softnas_ebs_volumes.yaml" ]
 
   tasks:
   - name: aquire vars from secrets path before using defaults for softnas hosts 1
     include_vars: "{{ item }}"
-    with_first_found: vars_files_locs
+    with_first_found: "{{ vars_files_locs }}"
     tags:
     - local_install
     - cloud_install
@@ -142,7 +142,7 @@
   vars_files:
     - /deployuser/ansible/group_vars/all/vars
     - vars/main.yml
-    - vars/softnas_ebs_volumes.yaml
+#    - vars/softnas_ebs_volumes.yaml
 
   vars:
     variable_user: centos
@@ -161,12 +161,12 @@
 
     import_pool: true
 
-    vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/ebs-volumes/softnas_ebs_volumes.yaml", "softnas_ebs_volumes.yaml", "files/softnas_ebs_volumes.yaml", "vars/softnas_ebs_volumes.yaml" ]
+    vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/ebs-volumes/softnas_ebs_volumes.yaml", "files/softnas_ebs_volumes.yaml" ]
 
   tasks:
   - name: aquire vars from secrets path before using defaults for other hosts 2
     include_vars: "{{ item }}"
-    with_first_found: vars_files_locs
+    with_first_found: "{{ vars_files_locs }}"
     tags:
     - local_install
     - cloud_install
@@ -508,7 +508,6 @@
   vars_files:
     - /deployuser/ansible/group_vars/all/vars
     - vars/main.yml
-    - vars/softnas_ebs_volumes.yaml
 
   vars:
     variable_user: centos
@@ -525,15 +524,15 @@
     #   bind1: "/remote_prod/"
     #   bind2: "/mycity_prod/"
     #   site_bind1:
-    vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/ebs-volumes/softnas_ebs_volumes.yaml", "softnas_ebs_volumes.yaml", "files/softnas_ebs_volumes.yaml", "vars/softnas_ebs_volumes.yaml" ]
+    vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/ebs-volumes/softnas_ebs_volumes.yaml", "files/softnas_ebs_volumes.yaml" ]
 
   tasks:
-  - name: show ansible_search_path
-    debug:
-      var: ansible_search_path
-    tags:
-    - cloud_install
-    - local_install_onsite_mounts
+  # - name: show ansible_search_path
+  #   debug:
+  #     var: ansible_search_path
+  #   tags:
+  #   - cloud_install
+  #   - local_install_onsite_mounts
 
   - name: aquire vars from secrets path before using defaults for other hosts 3
     include_vars: "{{ item }}"

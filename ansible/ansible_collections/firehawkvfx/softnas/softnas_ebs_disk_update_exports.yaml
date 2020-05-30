@@ -4,6 +4,9 @@
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become_user: root
   become: true
+  vars_files:
+    - /deployuser/ansible/group_vars/all/vars
+    - vars/main.yml
 
   vars:
     secrets_path: "{{ lookup('env','TF_VAR_secrets_path') }}"
@@ -17,28 +20,15 @@
         bind: /prod
 
     import_pool: true
+    vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/ebs-volumes/softnas_ebs_volumes.yaml", "files/softnas_ebs_volumes.yaml" ]
 
   tasks:
-  - name: "Check for existance of custom exports in {{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml and override default mounts"
-    stat:
-      path: "{{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml"
-    register: custom_ebs_list
-    connection: local
-
-  - name: set default exports
-    include_vars:
-      file:  softnas_ebs_volumes.yaml
-    when: not custom_ebs_list.stat.exists
-    connection: local
+  - name: aquire vars from secrets path before using defaults for softnas hosts 1
+    include_vars: "{{ item }}"
+    with_first_found: "{{ vars_files_locs }}"
     tags:
     - local_install
     - cloud_install
-
-  - name: Override default exports
-    include_vars:
-      file: "{{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml"
-    when: custom_ebs_list.stat.exists
-    connection: local
 
   - name: set /etc/exports to allow ro on root per red hat docs https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/5/html/deployment_guide/s1-nfs-server-config-exports
     lineinfile:
