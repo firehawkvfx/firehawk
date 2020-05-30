@@ -402,7 +402,7 @@ source_vars () {
     echo_if_not_silent "...Sourcing var_file $var_file"
     # If initialising vagrant vars, no encryption is required
     if [[ -z "$var_file" ]] || [[ "$var_file" = "secrets" ]]; then
-        var_file="secrets-$TF_VAR_envtier"
+        var_file="secrets-general"
         echo_if_not_silent "...Using vault file $var_file"
         template_path="$TF_VAR_firehawk_path/secrets.template"
     elif [[ "$var_file" = "vagrant" ]]; then
@@ -461,10 +461,10 @@ source_vars () {
         printf "\n${GREEN}Will source ${var_file_basename}. encrypt_mode = $encrypt_mode ${NC}\n"
         # set vault key location based on envtier dev/prod
         if [[ "$TF_VAR_envtier" = 'dev' ]]; then
-            export vault_key="$(to_abs_path $TF_VAR_secrets_path/keys/$TF_VAR_vault_key_name_dev)"
+            export vault_key="$(to_abs_path $TF_VAR_secrets_path/keys/$TF_VAR_vault_key_name_general)"
             echo_if_not_silent "set vault_key $vault_key"
         elif [[ "$TF_VAR_envtier" = 'prod' ]]; then
-            export vault_key="$(to_abs_path $TF_VAR_secrets_path/keys/$TF_VAR_vault_key_name_prod)"
+            export vault_key="$(to_abs_path $TF_VAR_secrets_path/keys/$TF_VAR_vault_key_name_general)"
             echo_if_not_silent "set vault_key $vault_key"
         else 
             printf "\n...${RED}WARNING: envtier evaluated to no match for dev or prod.  Inspect update_vars.sh to handle this case correctly.${NC}\n"
@@ -632,10 +632,10 @@ source_vars () {
         # lastly update the vault key path
         # set vault key location based on envtier dev/prod
         if [[ "$TF_VAR_envtier" = 'dev' ]]; then
-            export vault_key="$(to_abs_path $TF_VAR_secrets_path/keys/$TF_VAR_vault_key_name_dev)"
+            export vault_key="$(to_abs_path $TF_VAR_secrets_path/keys/$TF_VAR_vault_key_name_general)"
             echo_if_not_silent "set vault_key $vault_key"
         elif [[ "$TF_VAR_envtier" = 'prod' ]]; then
-            export vault_key="$(to_abs_path $TF_VAR_secrets_path/keys/$TF_VAR_vault_key_name_prod)"
+            export vault_key="$(to_abs_path $TF_VAR_secrets_path/keys/$TF_VAR_vault_key_name_general)"
             echo_if_not_silent "set vault_key $vault_key"
         else 
             printf "\n...${RED}WARNING: envtier evaluated to no match for dev or prod.  Inspect update_vars.sh to handle this case correctly.${NC}\n"
