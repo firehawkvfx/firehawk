@@ -61,7 +61,7 @@
 
   tasks:
   - name: aquire vars form secrets path before using defaults
-  - include_vars: "{{ item }}"
+    include_vars: "{{ item }}"
     with_first_found: vars_files_locs
     tags:
     - local_install
