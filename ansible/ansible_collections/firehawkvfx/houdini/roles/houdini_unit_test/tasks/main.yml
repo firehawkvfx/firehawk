@@ -6,8 +6,8 @@
 - name: copy hip file unit test to local ebs volume. if this fails there may be an issue with the onsite nfs mount.  check routes. Check that you did vagrant reload after provisioning vpn.  This is necesary for routes to work.
   shell: |
     # set -x
-    ls {{ firehawk_sync_source }}
-    cp -r {{ firehawk_sync_source }}/qc /var/tmp/.
+    ls {{ firehawk_sync_target }}
+    cp -r {{ firehawk_sync_target }}/qc /var/tmp/.
     ls /var/tmp/qc
   become_user: deadlineuser
 

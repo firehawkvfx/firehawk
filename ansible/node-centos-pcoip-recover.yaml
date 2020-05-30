@@ -60,7 +60,7 @@
 
   - name: ensure an s3 bucket exists to store large files / installers for faster redeployment.
   - include_role:
-      name: s3-bucket
+      name: firehawkvfx.core.s3_bucket_shared
     tags:
       - sync_installers
 

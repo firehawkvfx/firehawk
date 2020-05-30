@@ -18,9 +18,7 @@
     
     skip_packages: false
     houdini_install_type: 'node'
-    bucket: "{{ installers_bucket }}"
-    # the firehawk houdini tools can be linked to a live path on your file system with an variable instead of the default. 
-    # firehawk_sync_source: '/deployuser/modules/node_centos/modules/openfirehawk-houdini-tools'
+    # bucket: "{{ installers_bucket }}"
 
   tasks:
   - name: s3 sync openfirehawk-houdini-tools push (from local filesystem) and get (from s3 to node) 

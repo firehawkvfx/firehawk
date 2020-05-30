@@ -17,8 +17,6 @@
     variable_user: centos
     bastionip: "{{ groups['bastionip'][0] }}"
     
-    # the firehawk houdini tools can be linked to a live path on your file system with an variable instead of the default through the commandline. 
-    # firehawk_sync_source: '/deployuser/modules/node_centos/modules/openfirehawk-houdini-tools'
 
   roles:
   - role: houdini_openfirehawk_houdini_tools_sync

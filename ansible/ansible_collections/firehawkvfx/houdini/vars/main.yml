@@ -10,9 +10,6 @@ variable_user: centos
 bastionip: "{{ groups['bastionip'][0] }}"
 skip_packages: false
 houdini_install_type: 'node'
-bucket: "{{ installers_bucket }}"
-# the firehawk houdini tools can be linked to a live path on your file system with an variable instead of the default. 
-# firehawk_sync_source: '/deployuser/modules/node_centos/modules/openfirehawk-houdini-tools'
 
 # this list is used for deadline plugin compatibility
 houdini_major_version_list:

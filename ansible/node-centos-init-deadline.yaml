@@ -9,7 +9,7 @@
 
   tasks:
   - include_role:
-      name: s3-bucket
+      name: firehawkvfx.core.s3_bucket_shared
     tags:
     - sync_installers
 
