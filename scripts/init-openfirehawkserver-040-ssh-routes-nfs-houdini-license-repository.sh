@@ -63,7 +63,7 @@ ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_
 ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-repository-custom-events.yaml; exit_test
 
 # configure onsite NAS mounts to firehawkgateway
-ansible-playbook -i "$TF_VAR_inventory" ansible/linux-volume-mounts.yaml --extra-vars "variable_host=firehawkgateway variable_user=deployuser softnas_hosts=none" --tags 'local_install_onsite_mounts'; exit_test
+ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml --extra-vars "variable_host=firehawkgateway variable_user=deployuser softnas_hosts=none" --tags 'local_install_onsite_mounts'; exit_test
 
 # ssh will be killed from the previous script because users were added to a new group and this will not update unless your ssh session is restarted.
 # login again and continue...

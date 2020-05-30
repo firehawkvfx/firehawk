@@ -63,11 +63,16 @@ prod_mount_path: "/prod"
 #the ip of your onsite storage to be mounted
 localnas1_private_ip: "{{ lookup('env','TF_VAR_localnas1_private_ip') }}"
 #the mount path of your onsite storage eg "/prod"
-localnas1_mount_path: "{{ lookup('env','TF_VAR_localnas1_mount_path') }}"
+production_volume_path: "{{ lookup('env','TF_VAR_production_volume_path') }}"
+remote_production_volume_path: "{{ lookup('env','TF_VAR_remote_production_volume_path') }}"
+
 #the relative path to access the production volume remotely eg "/prod_remote"
 localnas1_remote_mount_path: "{{ lookup('env','TF_VAR_localnas1_remote_mount_path') }}"
+
 #the absolute path to access the onsite nas mount by location eg "/cairns_prod"
+localnas1_volume_name: "{{ lookup('env', 'TF_VAR_localnas1_volume_name') }}"
 localnas1_path_abs: "{{ lookup('env', 'TF_VAR_localnas1_path_abs') }}"
+localnas1_export_path: "{{ lookup('env', 'TF_VAR_localnas1_export_path') }}"
 #the absolute path to access the cloud nfs mount by location eg "/prod_sydney_aws"
 softnas1_path_abs: "{{ lookup('env', 'TF_VAR_softnas1_path_abs') }}"
 

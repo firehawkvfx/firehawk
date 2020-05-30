@@ -1,0 +1,72 @@
+# Do not directly edit this in the firehawk repository.  Instead, create a copy located at secrets/dev/ebs-volumes to override it
+
+mounts:
+# these are mounts for ebs volumes to the softnas instance.
+- path: "/dev/sdb"
+  int: "1"
+  ebs_disk_type: gp2
+  ebs_disk_size: 20
+  pool_name: "{{ envtier }}pool1"
+  volatile: yes
+- path: "/dev/sdc"
+  int: "2"
+  ebs_disk_type: gp2
+  ebs_disk_size: 20
+  pool_name: "{{ envtier }}pool1"
+  volatile: yes
+
+# example to extend the raid array
+
+# - path: "/dev/sdd"
+#   int: "3"
+#   ebs_disk_type: gp2
+#   ebs_disk_size: 20
+#   pool_name: "{{ envtier }}pool1"
+#   volatile: yes
+# - path: "/dev/sde"
+#   int: "4"
+#   ebs_disk_type: gp2
+#   ebs_disk_size: 20
+#   pool_name: "{{ envtier }}pool1"
+#   volatile: yes
+
+# if mount status is changed - eg state, or binds, then only linux-volume-mounts.yaml is needed to be executed.
+# pool names are not created by these variables.  they are only used to reference pools alread created.
+exports:
+# low performance s3 storage, archive and backup
+# - path: "/{{ envtier }}pool0/{{ envtier }}volume0/"
+#   pool_name: {{ envtier }}pool0
+#   volume_name: {{ envtier }}volume0
+#   state: present
+#   bind1: "/s3/"
+#   bind2: "/aws_sydney_s3/"
+
+# production volume - Softnas
+- path: "/{{ envtier }}pool1/{{ envtier }}volume1"
+  pool_name: "{{ envtier }}pool1"
+  volume_name: "{{ envtier }}volume1"
+  raid_level: 0
+  state: present
+  bind1: "{{ production_volume_path }}"
+  bind2: "{{ softnas1_path_abs }}"
+  site_bind1:
+
+# this volume is another medium performance production disk.
+# - path: "/{{ envtier }}pool2/{{ envtier }}volume2/"
+#   pool_name: "{{ envtier }}pool2"
+#   volume_name: "{{ envtier }}volume2"
+#   raid_level: 6
+#   state: present
+#   bind1: "/volatile/"
+#   bind2: "/aws_sydney_volatile/"
+
+# remote mounts not on cloud site.
+site_mounts:
+- path: "{{ localnas1_export_path }}" # The NFS export volume name (eg: use showmount -e 192.168.92.11 to see a list of exported volume for that ip), usually /prod
+  ip: "{{ localnas1_private_ip }}" # The IP adress of the NFS server / NAS
+  volume_name: "{{ localnas1_volume_name }}" # the name of the volume eg: prod_volume_name
+  mount_path: "{{ localnas1_path_abs }}" # eg: /mycity_prod
+  state: present
+  bind1: "{{ remote_production_volume_path }}" # eg: /remote_prod
+  bind2:
+  site_bind1: "{{ production_volume_path }}" # onsite, the nas export uses a bind to this path (default: /prod)

@@ -505,7 +505,7 @@ resource "null_resource" "mounts_and_houdini_test" {
 
       aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id} # ensure instance is started
 
-      ansible-playbook -i "$TF_VAR_inventory" ansible/linux-volume-mounts.yaml -v --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml -v --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/houdini/houdini_openfirehawk_houdini_tools_sync.yaml -v --extra-vars "variable_user=deadlineuser"; exit_test # sync houdini tools after all mounts are available
 
       if [[ "$TF_VAR_install_houdini" == true ]] && [[ $TF_VAR_houdini_test_connection == true ]]; then

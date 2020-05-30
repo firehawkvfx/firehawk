@@ -1,16 +1,16 @@
 # This playbook will validate exports on softnas and mount those with the /etc/fstab file.
 
 # to update a workstation after altering any softnas mounts for the first time use the command -
-# ansible-playbook -i ansible/inventory ansible/linux-volume-mounts.yaml --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.$TF_VAR_public_domain pcoip=true"
+# ansible-playbook -i ansible/inventory ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.$TF_VAR_public_domain pcoip=true"
 
 # to update a render node, just use -
-# ansible-playbook -i ansible/inventory ansible/linux-volume-mounts.yaml
+# ansible-playbook -i ansible/inventory ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml
 
 # to update an onsite centos workstation use-
-# ansible-playbook -i "$TF_VAR_inventory" ansible/linux-volume-mounts.yaml -v -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser hostname=workstation1 ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key" --skip-tags 'cloud_install'
+# ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml -v -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser hostname=workstation1 ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key" --skip-tags 'cloud_install'
 
 # to configure onsite mounts only on the ansible control, skipping softnas export check
-# ansible-playbook -i "$TF_VAR_inventory" ansible/linux-volume-mounts.yaml -v -v --extra-vars "variable_host=localhost variable_user=deployuser softnas_hosts=none" --tags 'local_install_onsite_mounts'
+# ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml -v -v --extra-vars "variable_host=localhost variable_user=deployuser softnas_hosts=none" --tags 'local_install_onsite_mounts'
 
 - hosts: "{{ variable_host | default('role_node_centos') }}"
   remote_user: "{{ variable_user | default('centos') }}"
@@ -39,20 +39,20 @@
   vars:
     destroy: false
     # when paths are found at these locations, they will be added to exports.
-    # these defaults can be overidden by storing a config in /secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
-    exports:
-      - path: "/{{ envtier }}pool1/{{ envtier }}volume1/"
-        pool_name: "{{ envtier }}pool1"
-        volume_name: "{{ envtier }}volume1"
-        state: present
-        bind: /prod
+    # these defaults can be overidden by storing a config in /secrets/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml
+    # exports:
+    #   - path: "/{{ envtier }}pool1/{{ envtier }}volume1/"
+    #     pool_name: "{{ envtier }}pool1"
+    #     volume_name: "{{ envtier }}volume1"
+    #     state: present
+    #     bind: /prod
 
     import_pool: true
 
   tasks:
-  - name: Check for existance of custom exports in /secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml and override default mounts
+  - name: Check for existance of custom exports in /secrets/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml and override default mounts
     stat:
-      path:  ../../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
+      path:  {{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml
     register: custom_ebs_list
     connection: local
     when: destroy == false
@@ -60,9 +60,18 @@
     - local_install
     - cloud_install
 
+  - name: set default exports
+    include_vars:
+      file:  softnas_ebs_volumes.yaml
+    when: not custom_ebs_list.stat.exists
+    connection: local
+    tags:
+    - local_install
+    - cloud_install
+
   - name: Override default exports
     include_vars:
-      file:  ../../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
+      file:  {{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml
     when: destroy == false and custom_ebs_list.stat.exists
     connection: local
     tags:
@@ -120,7 +129,7 @@
     softnas_exports: "{{ hostvars[groups['role_softnas'][0]]['presence']['results'] }}"
     pcoip: false
     destroy: false
-    # these defaults can be overidden by storing a config in /secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
+    # these defaults can be overidden by storing a config in /secrets/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml
     exports:
       - path: "/{{ envtier }}pool1/{{ envtier }}volume1/"
         pool_name: "{{ envtier }}pool1"
@@ -131,9 +140,9 @@
     import_pool: true
 
   tasks:
-  - name: Check for existance of custom exports in /secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml and override default mounts
+  - name: Check for existance of custom exports in /secrets/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml and override default mounts
     stat:
-      path:  ../../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
+      path:  {{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml
     register: custom_ebs_list
     connection: local
     when: destroy
@@ -141,9 +150,18 @@
     - local_install
     - cloud_install
 
+  - name: set default exports
+    include_vars:
+      file:  softnas_ebs_volumes.yaml
+    when: not custom_ebs_list.stat.exists
+    connection: local
+    tags:
+    - local_install
+    - cloud_install
+
   - name: Override default exports if destroying mounts.
     include_vars:
-      file:  ../../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
+      file:  {{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml
     when: destroy and custom_ebs_list.stat.exists
     connection: local
     tags:
@@ -473,18 +491,27 @@
       site_bind1:
 
   tasks:
-  - name: Check for existance of custom exports in /secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml and override default mounts
+  - name: Check for existance of custom exports in /secrets/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml and override default mounts
     stat:
-      path:  ../../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
+      path:  {{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml
     register: custom_ebs_list
     connection: local
     tags:
     - cloud_install
     - local_install_onsite_mounts
 
+  - name: set default exports
+    include_vars:
+      file:  softnas_ebs_volumes.yaml
+    when: not custom_ebs_list.stat.exists
+    connection: local
+    tags:
+    - local_install
+    - cloud_install
+
   - name: Override default exports
     include_vars:
-      file:  ../../secrets/{{ envtier }}/ebs-volumes/softnas-ebs-volumes.yaml
+      file:  {{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml
     when: custom_ebs_list.stat.exists
     connection: local
     tags:
