@@ -23,17 +23,21 @@
   become_user: deployuser
   connection: local
 
-- name: set bucket for sync
-  set_fact:
-    bucket: "{{ repositories_bucket }}/openfirehawk-houdini-tools"
-
 - name: set user for sync
   set_fact:
     push_user: "deployuser"
 
+- name: set bucket for sync
+  set_fact:
+    bucket: "{{ repositories_bucket }}"
+
 - name: ensure bucket exists
   import_role:
     name: firehawkvfx.core.s3_bucket
+
+- name: set bucket for sync
+  set_fact:
+    bucket: "{{ repositories_bucket }}/openfirehawk-houdini-tools"
 
 - name: s3-sync openfirehawk-houdini-tools push
   import_role:

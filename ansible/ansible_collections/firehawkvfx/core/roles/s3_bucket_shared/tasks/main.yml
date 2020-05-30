@@ -12,7 +12,7 @@
   debug:
     msg: "{{ lookup('file', policy_file_path) }}"
 
-- name: "Ensure an s3 bucket exists - with the aws user credentials - {{ installers_bucket }}"
+- name: "Ensure a shared s3 bucket exists for mutliple accounts - with the aws user credentials - {{ installers_bucket }}"
   s3_bucket:
     name: "{{ installers_bucket }}"
     region: "{{ aws_region }}"
