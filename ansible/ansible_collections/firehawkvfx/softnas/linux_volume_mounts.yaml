@@ -528,6 +528,10 @@
     vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/ebs-volumes/softnas_ebs_volumes.yaml", "softnas_ebs_volumes.yaml", "files/softnas_ebs_volumes.yaml", "vars/softnas_ebs_volumes.yaml" ]
 
   tasks:
+  - name: show ansible_search_path
+    debug:
+      var: ansible_search_path
+      
   - name: aquire vars from secrets path before using defaults for other hosts 3
     include_vars: "{{ item }}"
     with_first_found: vars_files_locs
