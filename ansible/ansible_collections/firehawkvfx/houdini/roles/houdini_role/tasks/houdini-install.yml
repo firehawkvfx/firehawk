@@ -145,7 +145,7 @@
   become: true
 
 - debug:
-    msg:  "{{ houdini_install_out.stdout }}"
+    msg: "{{ houdini_install_out.stdout }}"
   when: houdini_install_type != "server" and houdini_version_item.houdini_auto_version
 
 - name: NODE/WORKSTATION INSTALL - Permissions on zip file - node/workstation
@@ -167,7 +167,7 @@
   when: houdini_install_type != "server" and not houdini_version_item.houdini_auto_version
 
 - debug:
-    msg:  "{{ houdini_install_out.stdout }}"
+    msg: "{{ houdini_install_out.stdout }}"
   when: houdini_install_type != "server" and not houdini_version_item.houdini_auto_version
 
 - name: "NODE/WORKSTATION INSTALL - setup licensing mode will write to /opt/hfs{{ houdini_version_item.houdini_major_version }}/houdini/Licensing.opt"
@@ -256,7 +256,7 @@
   when: houdini_install_type == "server"
 
 - debug:
-    msg:  "{{ houdini_install_out.stdout }}"
+    msg: "{{ houdini_install_out.stdout }}"
   when: houdini_install_type == "server"
 
 - name: SERVER INSTALL - setup licensing mode

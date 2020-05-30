@@ -120,7 +120,7 @@ onsite_workstation_private_ssh_key: "{{ lookup('env','TF_VAR_onsite_workstation_
 
 user_inituser_name: "{{ lookup('env', 'TF_VAR_user_inituser_name') }}"
 user_inituser_pw: "{{ lookup('env', 'TF_VAR_user_inituser_pw') }}"
-user_deployuser_pw:  "{{ lookup('env','TF_VAR_user_deployuser_pw') }}"
+user_deployuser_pw: "{{ lookup('env','TF_VAR_user_deployuser_pw') }}"
 
 workstation_address: "{{ lookup('env', 'TF_VAR_workstation_address') }}"
 

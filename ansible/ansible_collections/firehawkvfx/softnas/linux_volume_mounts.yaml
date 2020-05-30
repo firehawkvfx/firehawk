@@ -52,7 +52,7 @@
   tasks:
   - name: "Check for existance of custom exports in {{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml and override default mounts"
     stat:
-      path:  "{{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml"
+      path: "{{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml"
     register: custom_ebs_list
     connection: local
     when: destroy == false
@@ -71,7 +71,7 @@
 
   - name: Override default exports
     include_vars:
-      file:  "{{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml"
+      file: "{{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml"
     when: destroy == false and custom_ebs_list.stat.exists
     connection: local
     tags:
@@ -142,7 +142,7 @@
   tasks:
   - name: "Check for existance of custom exports in {{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml and override default mounts"
     stat:
-      path:  "{{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml"
+      path: "{{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml"
     register: custom_ebs_list
     connection: local
     when: destroy
@@ -161,7 +161,7 @@
 
   - name: Override default exports if destroying mounts.
     include_vars:
-      file:  "{{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml"
+      file: "{{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml"
     when: destroy and custom_ebs_list.stat.exists
     connection: local
     tags:
@@ -493,7 +493,7 @@
   tasks:
   - name: "Check for existance of custom exports in {{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml and override default mounts"
     stat:
-      path:  "{{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml"
+      path: "{{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml"
     register: custom_ebs_list
     connection: local
     tags:
@@ -511,7 +511,7 @@
 
   - name: Override default exports
     include_vars:
-      file:  "{{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml"
+      file: "{{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml"
     when: custom_ebs_list.stat.exists
     connection: local
     tags:

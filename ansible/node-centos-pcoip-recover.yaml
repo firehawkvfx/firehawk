@@ -173,7 +173,7 @@
     register: recover_output
 
   - debug:
-      msg:  "{{ recover_output.stdout }}"
+      msg: "{{ recover_output.stdout }}"
 
   # - name: Wait for the reboot to complete if there was a change.
   #   wait_for_connection:
