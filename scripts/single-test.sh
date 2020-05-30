@@ -1,3 +1,3 @@
 #!/bin/bash
 
-ansible-playbook -i ../secrets/dev/inventory ansible/ansible_collections/firehawkvfx/houdini/houdini_unit_test.yaml -v --extra-vars 'variable_host=workstation1 variable_user=deadlineuser variable_connect_as_user=deployuser execute=true'
+ansible-playbook -i ../secrets/dev/inventory ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml --extra-vars 'variable_host=firehawkgateway variable_user=deployuser softnas_hosts=none' --tags local_install_onsite_mounts

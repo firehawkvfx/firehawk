@@ -18,7 +18,7 @@
   become: true
 
   vars:
-    ansible_become_pass: "{{ user_deadlineuser_pw }}"
+    # ansible_become_pass: "{{ user_deadlineuser_pw }}"
     destroy: false
 
   tasks:
@@ -125,17 +125,17 @@
 
   vars:
     variable_user: centos
-    ansible_become_pass: "{{ user_deadlineuser_pw }}"
+    # ansible_become_pass: "{{ user_deadlineuser_pw }}"
     softnas_exports: "{{ hostvars[groups['role_softnas'][0]]['presence']['results'] }}"
     pcoip: false
     destroy: false
     # these defaults can be overidden by storing a config in /secrets/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml
-    exports:
-      - path: "/{{ envtier }}pool1/{{ envtier }}volume1/"
-        pool_name: "{{ envtier }}pool1"
-        volume_name: "{{ envtier }}volume1"
-        state: present
-        bind: /prod
+    # exports:
+    #   - path: "/{{ envtier }}pool1/{{ envtier }}volume1/"
+    #     pool_name: "{{ envtier }}pool1"
+    #     volume_name: "{{ envtier }}volume1"
+    #     state: present
+    #     bind: /prod
 
     import_pool: true
 
@@ -477,18 +477,18 @@
 
   vars:
     variable_user: centos
-    ansible_become_pass: "{{ user_deadlineuser_pw }}"
+    # ansible_become_pass: "{{ user_deadlineuser_pw }}"
     softnas_exports: "{{ hostvars[groups['role_softnas'][0]]['presence']['results'] }}"
     pcoip: False
-    site_mounts:
-    # remote mounts not on cloud site- example.  Update with your own details and set state to present.
-    - path: "/prod/"
-      ip: 192.168.29.30
-      volume_name: prod
-      state: absent
-      bind1: "/remote_prod/"
-      bind2: "/mycity_prod/"
-      site_bind1:
+    # site_mounts:
+    # # remote mounts not on cloud site- example.  Update with your own details and set state to present.
+    # - path: "/prod/"
+    #   ip: 192.168.29.30
+    #   volume_name: prod
+    #   state: absent
+    #   bind1: "/remote_prod/"
+    #   bind2: "/mycity_prod/"
+    #   site_bind1:
 
   tasks:
   - name: Check for existance of custom exports in /secrets/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml and override default mounts
