@@ -18,7 +18,7 @@
     import_pool: true
 
   tasks:
-  - name: Check for existance of custom exports in /secrets/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml and override default mounts
+  - name: "Check for existance of custom exports in {{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml and override default mounts"
     stat:
       path:  "{{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml"
     register: custom_ebs_list
