@@ -8,6 +8,8 @@
 # 3) Example values for the secrets.template file are defined in secrets.example. Ensure you have placed an example key=value for any new vars in secrets.example. 
 # If any changes have resulted in a new variable name, then example values helps other understand what they should be using for their own infrastructure.
 
+set +x
+
 RED='\033[0;31m' # Red Text
 GREEN='\033[0;32m' # Green Text
 BLUE='\033[0;34m' # Blue Text
@@ -709,3 +711,5 @@ echo_if_not_silent "TF_VAR_active_pipeline: $TF_VAR_active_pipeline"
 # echo "TF_VAR_key_name: $TF_VAR_key_name"
 # echo "TF_VAR_local_key_path: $TF_VAR_local_key_path"
 echo_if_not_silent "...Done."
+
+if [[ "$SHOWCOMMANDS" == true ]]; then set -x; fi # After finishing the script, we enable set -x to show input again.
