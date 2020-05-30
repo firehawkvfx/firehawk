@@ -20,7 +20,7 @@
   tasks:
   - name: Check for existance of custom exports in /secrets/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml and override default mounts
     stat:
-      path:  {{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml
+      path:  "{{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml"
     register: custom_ebs_list
     connection: local
 
@@ -35,7 +35,7 @@
 
   - name: Override default exports
     include_vars:
-      file:  {{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml
+      file:  "{{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml"
     when: custom_ebs_list.stat.exists
     connection: local
 
