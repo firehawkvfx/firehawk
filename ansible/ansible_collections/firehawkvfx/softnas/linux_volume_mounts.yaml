@@ -62,6 +62,9 @@
   tasks:
   - include_vars: "{{ item }}"
     with_first_found: vars_files_locs
+    tags:
+    - local_install
+    - cloud_install
 
   # - name: "Check for existance of custom exports in {{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml and override default mounts"
   #   stat:
@@ -162,6 +165,9 @@
   tasks:
   - include_vars: "{{ item }}"
     with_first_found: vars_files_locs
+    tags:
+    - local_install
+    - cloud_install
 
   # - name: "Check for existance of custom exports in {{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml and override default mounts"
   #   stat:
@@ -522,6 +528,9 @@
   tasks:
   - include_vars: "{{ item }}"
     with_first_found: vars_files_locs
+    tags:
+    - cloud_install
+    - local_install_onsite_mounts
 
   # - name: "Check for existance of custom exports in {{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml and override default mounts"
   #   stat:
