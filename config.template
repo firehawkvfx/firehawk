@@ -23,7 +23,7 @@
 # BEGIN CONFIGURATION #
 
 # TF_VAR_gatewaynic:
-# The gateway used from the vm used to access the network or internet.  type 'ip a' in the vagrant shell to see a list of possible NICs.
+# The gateway used from the vm used to access the external network / internet.  Type 'ip a' in the vagrant shell to see a list of possible NICs.  This is used to configure IP routes.  
 # eg: TF_VAR_gatewaynic=eth1
 TF_VAR_gatewaynic=insertvalue
 
@@ -42,10 +42,15 @@ TF_VAR_remote_mounts_on_local=insertvalue
 # This location is pushed to S3, and when a softnas production volume is created it will be pulled to the cloud NFS share.
 # It contains TOPS S3 sync functions which Side FX PDG will require to sync assets to and from S3.
 # This should also be synced prior to rendering if any changes to assets occur.
-# You should have a production NFS share /prod, ensure you also bind an identical locaiton based mount eg: /mycity_prod
-# The data at these two paths is identical, but /mycity_prod allows access to data in another location over VPN without confusion, whereas /prod will always refer to the site based NAS for performance, and it is not garunteed to be identical to other locations.
-# eg: TF_VAR_firehawk_sync_source=/cairns_prod/assets/openfirehawk-houdini-tools
+# If you choose to use a live path on disk instead of the repository path default, you should have a production NFS share /prod, ensure you also bind an identical locaiton based mount eg: /mycity_prod
+# The data at these two paths is identical, but /mycity_prod allows access to data in another location over VPN without confusion, whereas /prod for any location will always refer to the site based NAS for performance, and it is not garunteed to be identical to the other location without syncing.
+# default: TF_VAR_firehawk_sync_source=/ansible/ansible_collections/firehawkvfx/houdini/roles/houdini_openfirehawk_houdini_tools_sync/files/openfirehawk_houdini_tools
 TF_VAR_firehawk_sync_source=insertvalue
+
+# TF_VAR_firehawk_sync_target:
+# The path to push the assets to, so they are available in cloud.
+# eg: TF_VAR_firehawk_sync_source=/prod/assets/openfirehawk-houdini-tools
+TF_VAR_firehawk_sync_target=insertvalue
 
 # TF_VAR_softnas_mode_dev:
 # The ability to switch the performance of the softnas between [low/high] to save costs in dev environment.  
