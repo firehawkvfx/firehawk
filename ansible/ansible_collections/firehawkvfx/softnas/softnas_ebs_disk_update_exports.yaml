@@ -6,6 +6,7 @@
   become: true
 
   vars:
+    secrets_path: "{{ lookup('env','TF_VAR_secrets_path') }}"
     # when paths are found at these locations, they will be added to exports. otherwise no action will occur.
     # these defaults can be overidden by storing a config in /secrets/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml
     exports:

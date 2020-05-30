@@ -38,6 +38,7 @@
 
   vars:
     destroy: false
+    secrets_path: "{{ lookup('env','TF_VAR_secrets_path') }}"
     # when paths are found at these locations, they will be added to exports.
     # these defaults can be overidden by storing a config in /secrets/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml
     # exports:
@@ -125,6 +126,7 @@
 
   vars:
     variable_user: centos
+    secrets_path: "{{ lookup('env','TF_VAR_secrets_path') }}"
     # ansible_become_pass: "{{ user_deadlineuser_pw }}"
     softnas_exports: "{{ hostvars[groups['role_softnas'][0]]['presence']['results'] }}"
     pcoip: false
@@ -477,6 +479,7 @@
 
   vars:
     variable_user: centos
+    secrets_path: "{{ lookup('env','TF_VAR_secrets_path') }}"
     # ansible_become_pass: "{{ user_deadlineuser_pw }}"
     softnas_exports: "{{ hostvars[groups['role_softnas'][0]]['presence']['results'] }}"
     pcoip: False
