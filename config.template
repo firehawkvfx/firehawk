@@ -98,6 +98,21 @@ TF_VAR_localnas1_private_ip=insertvalue
 # default: TF_VAR_production_volume_path=/prod
 TF_VAR_production_volume_path=insertvalue
 
+# TF_VAR_remote_production_volume_path:
+# The name of the production volume path for the remote volume.  onsite, this would reference the cloud nas.  For cloud nodes, this would reference the onsite NAS.
+# default: TF_VAR_remote_production_volume_path=/remote_prod
+TF_VAR_remote_production_volume_path=insertvalue
+
+# TF_VAR_localnas1_export_path:
+# The name of the production volume path for onsite workstations/nodes.  /prod is a relative path depending on location, so for cloud based nodes, this would usually refer to the softnas production path.  So far only /prod has been tested.
+# default: TF_VAR_localnas1_export_path=/prod
+TF_VAR_localnas1_export_path=insertvalue
+
+# TF_VAR_localnas1_volume_name:
+# The name of the volume
+# default: TF_VAR_localnas1_volume_name=prod
+TF_VAR_localnas1_volume_name=insertvalue
+
 # TF_VAR_localnas1_remote_mount_path:
 # The name of the offsite production path if mounted over vpn for onsite workstations/nodes
 # default: TF_VAR_localnas1_remote_mount_path=/prod_remote

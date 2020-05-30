@@ -335,21 +335,27 @@ fi
 template_path="$TF_VAR_firehawk_path/secrets.template"
 
 echo_if_not_silent '...Get secrets from env'
-# map environment secret for current env
-if [[ "$TF_VAR_envtier" = 'dev' ]]; then
-    if [[ ! -z "$firehawksecret_dev" ]]; then
-        echo "...Aquiring firehawksecret from dev"
-        export firehawksecret="$firehawksecret_dev"
-        export testsecret="$testsecret_dev"
-        echo "...Aquired firehawksecret from dev"
-    fi
-elif [[ "$TF_VAR_envtier" = 'prod' ]]; then
-    if [[ ! -z "$firehawksecret_prod" ]]; then
-        echo "...Aquiring firehawksecret from prod"
-        export firehawksecret="$firehawksecret_prod"
-        export testsecret="$testsecret_prod"
-        echo "...Aquired firehawksecret from prod"
-    fi
+# # map environment secret for current env
+# if [[ "$TF_VAR_envtier" = 'dev' ]]; then
+#     if [[ ! -z "$firehawksecret_dev" ]]; then
+#         echo "...Aquiring firehawksecret from dev"
+#         export firehawksecret="$firehawksecret_dev"
+#         export testsecret="$testsecret_dev"
+#         echo "...Aquired firehawksecret from dev"
+#     fi
+# elif [[ "$TF_VAR_envtier" = 'prod' ]]; then
+#     if [[ ! -z "$firehawksecret_prod" ]]; then
+#         echo "...Aquiring firehawksecret from prod"
+#         export firehawksecret="$firehawksecret_prod"
+#         export testsecret="$testsecret_prod"
+#         echo "...Aquired firehawksecret from prod"
+#     fi
+# fi
+if [[ ! -z "$firehawksecret" ]]; then
+    echo "...Aquiring firehawksecret"
+    export firehawksecret="$firehawksecret"
+    export testsecret="$testsecret"
+    echo "...Aquired firehawksecret"
 fi
 
 # Update the ci pipeline ID after a destroy operation.  Tagging of new resources will inherit this ID.
