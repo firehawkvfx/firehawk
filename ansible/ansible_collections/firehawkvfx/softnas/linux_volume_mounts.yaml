@@ -525,10 +525,11 @@
     #   bind1: "/remote_prod/"
     #   bind2: "/mycity_prod/"
     #   site_bind1:
-    vars_files_locs: [ "/secrets/{{ lookup('env','TF_VAR_envtier') }}/ebs-volumes/softnas_ebs_volumes.yaml", files/softnas_ebs_volumes.yaml ]
+    vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/ebs-volumes/softnas_ebs_volumes.yaml", "softnas_ebs_volumes.yaml", "files/softnas_ebs_volumes.yaml", "vars/softnas_ebs_volumes.yaml" ]
 
   tasks:
-  - include_vars: "{{ item }}"
+  - name: aquire vars from secrets path before using defaults for other hosts
+    include_vars: "{{ item }}"
     with_first_found: vars_files_locs
     tags:
     - cloud_install
