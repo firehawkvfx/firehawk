@@ -3,6 +3,9 @@
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become_user: root
   become: true
+  vars_files:
+    - /deployuser/ansible/group_vars/all/vars
+    - vars/main.yml
 
   # example to execute from commandline:
   # ansible-playbook -i ansible/inventory ansible/ansible/ansible_collections/firehawkvfx/softnas/softnas_s3_disk_delete.yaml -v --extra-vars "s3_disk_name='/dev/s3-1'"

@@ -1,6 +1,9 @@
 - hosts: ansible_control
   remote_user: deployuser
   gather_facts: "{{ variable_gather_facts | default('false') }}"
+  vars_files:
+    - /deployuser/ansible/group_vars/all/vars
+    - vars/main.yml
 
   vars:
     # if pool name and volume name match an existing bucket, then it will be imported.  creation will skip.
@@ -104,6 +107,9 @@
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become_user: root
   become: true
+  vars_files:
+    - /deployuser/ansible/group_vars/all/vars
+    - vars/main.yml
 
   vars:
     pool_name: "{{ hostvars['ansible_control']['pool_name'] }}"
@@ -154,6 +160,9 @@
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become_user: root
   become: true
+  vars_files:
+    - /deployuser/ansible/group_vars/all/vars
+    - vars/main.yml
 
   vars:
     pool_name: "{{ hostvars['ansible_control']['pool_name'] }}"

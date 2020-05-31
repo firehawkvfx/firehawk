@@ -281,7 +281,7 @@ else
 
   if [[ "$tf_action" == "apply" ]]; then
     
-    $TF_VAR_firehawk_path/scripts/detect-interupt.sh &
+    $TF_VAR_firehawk_path/scripts/detect-interrupt.sh &
     
     if [ "$TF_VAR_active_pipeline" -eq 0 ]; then
       echo "...Init new pipe based on the current JOB ID: Found active pipeline is init: $TF_VAR_active_pipeline"

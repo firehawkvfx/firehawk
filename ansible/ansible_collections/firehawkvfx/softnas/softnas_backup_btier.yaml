@@ -13,6 +13,10 @@
     restore: false
     btier_local_path: /secrets/{{ envtier }}/ebs-volumes/btier.json
 
+  vars_files:
+    - /deployuser/ansible/group_vars/all/vars
+    - vars/main.yml
+
   tasks:
   - name: backup tier - /var/www/softnas/config/btier.json
     fetch:

@@ -3,6 +3,9 @@
   become_user: root
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
+  vars_files:
+    - /deployuser/ansible/group_vars/all/vars
+    - vars/main.yml
 
   vars:
     s3_disk_name: /dev/s3-0

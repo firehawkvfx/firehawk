@@ -3,7 +3,10 @@
   remote_user: "{{ softnas_ssh_user | default('ec2-user') }}"
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
-
+  vars_files:
+    - /deployuser/ansible/group_vars/all/vars
+    - vars/main.yml
+    
   vars:
     copy: true
     file_copy_local_path: /deployuser/modules/softnas/install_acpid.sh

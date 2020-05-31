@@ -10,6 +10,10 @@
   vars:
     pool_name: "{{ envtier }}pool0"
 
+  vars_files:
+    - /deployuser/ansible/group_vars/all/vars
+    - vars/main.yml
+
   tasks:
   - name: delete pool
     shell: |
