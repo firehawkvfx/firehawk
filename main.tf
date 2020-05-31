@@ -209,8 +209,8 @@ resource "null_resource" "dependency_node_centos" {
 }
 
 locals {
-  config_template_file_path: "/deployuser/ansible/ansible_collections/firehawkvfx/deadline/roles/deadline_spot/files/config_template.json"
-  override_config_template_file_path: "/secrets/overrides/ansible/ansible_collections/firehawkvfx/deadline/roles/deadline_spot/files/config_template.json"
+  config_template_file_path = "/deployuser/ansible/ansible_collections/firehawkvfx/deadline/roles/deadline_spot/files/config_template.json"
+  override_config_template_file_path = "/secrets/overrides/ansible/ansible_collections/firehawkvfx/deadline/roles/deadline_spot/files/config_template.json"
 }
 
 resource "null_resource" "provision_deadline_spot" {
