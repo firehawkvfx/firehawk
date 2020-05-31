@@ -24,37 +24,16 @@
   become: true
 
   vars:
-    mounts:
-      - path: "/dev/sdf"
-        int: "1"
-      - path: "/dev/sdg"
-        int: "2"
-      - path: "/dev/sdh"
-        int: "3"
-      - path: "/dev/sdi"
-        int: "4"
+    vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/ebs-volumes/softnas_ebs_volumes.yaml", "files/softnas_ebs_volumes.yaml" ] # The first file found will be used, allowing the one in your secrets location to override defaults.
+  
+  vars_files:
+    - /deployuser/ansible/group_vars/all/vars
+    - vars/main.yml
 
   tasks:
-  - name: Check for existance of custom mounts in /secrets/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml and override default mounts
-    stat:
-      path: "{{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml"
-    connection: local
-    register: custom_ebs_list
-
-  - name: set default exports
-    include_vars:
-      file:  softnas_ebs_volumes.yaml
-    when: not custom_ebs_list.stat.exists
-    connection: local
-    tags:
-    - local_install
-    - cloud_install
-
-  - name: Override default mounts
-    include_vars:
-      file: "{{ secrets_path }}/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml"
-    connection: local
-    when: custom_ebs_list.stat.exists
+  - name: aquire vars from secrets path before using defaults for softnas hosts 1
+    include_vars: "{{ item }}"
+    with_first_found: "{{ vars_files_locs }}"
 
   - name: all volumes retrieved
     debug:

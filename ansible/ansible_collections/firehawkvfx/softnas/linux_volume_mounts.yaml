@@ -38,10 +38,7 @@
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become_user: root
   become: true
-  vars_files:
-    - /deployuser/ansible/group_vars/all/vars
-    - vars/main.yml
-#    - vars/softnas_ebs_volumes.yaml
+
 
   vars:
     destroy: false
@@ -57,7 +54,11 @@
 
     import_pool: true
 
-    vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/ebs-volumes/softnas_ebs_volumes.yaml", "files/softnas_ebs_volumes.yaml" ]
+    vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/ebs-volumes/softnas_ebs_volumes.yaml", "files/softnas_ebs_volumes.yaml" ] # The first file found will be used, allowing the one in your secrets location to override defaults.
+  
+  vars_files:
+    - /deployuser/ansible/group_vars/all/vars
+    - vars/main.yml
 
   tasks:
   - name: aquire vars from secrets path before using defaults for softnas hosts 1
