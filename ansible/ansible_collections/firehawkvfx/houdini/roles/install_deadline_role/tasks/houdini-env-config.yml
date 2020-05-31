@@ -5,7 +5,8 @@
     houdini_template: lookup('first_found', findme, errors='ignore')
   vars:
     findme:
-      - "/secrets/houdini{{ houdini_version_item.houdini_major_version }}/houdini_template.env"
+      - "/secrets/overrides/ansible/ansible_collections/firehawkvfx/houdini/roles/install_deadline_role/files/houdini_template.env"
+      # - "/secrets/houdini{{ houdini_version_item.houdini_major_version }}/houdini_template.env"
       - "houdini_template.env"
 
 - debug:
