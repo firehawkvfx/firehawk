@@ -5,11 +5,6 @@
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
 
-  vars_files:
-    - /deployuser/ansible/group_vars/all/vars
-    - vars/main.yml
-    - /secrets/overrides/ansible/collections/firehawkvfx/houdini/vars/main.yml
-
   vars:
     # the become sudo pass is only relevent for local installation if required on the host specified.
     ansible_become_pass: "{{ user_deadlineuser_pw }}"
@@ -26,7 +21,16 @@
     skip_packages: false
     houdini_install_type: 'node'
 
+    vars_files_locs: [ "/{{ secrets_path }}/overrides/ansible/ansible_collections/firehawkvfx/houdini/vars/main.yml", "vars/main.yml" ] # The first file found will be used, allowing the one in your secrets location to override defaults.
+
+  vars_files:
+    - /deployuser/ansible/group_vars/all/vars
+
   pre_tasks:
+  - name: aquire vars from secrets path before using defaults
+    include_vars: "{{ item }}"
+    with_first_found: "{{ vars_files_locs }}"   
+
   - name: test
     debug:
       msg: 'test a houdini submission to ensure houdini and deadline work'

@@ -4,12 +4,17 @@
   remote_user: "{{ variable_connect_as_user | default('centos') }}"
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
+
+  vars:
+    vars_files_locs: [ "/{{ secrets_path }}/overrides/ansible/ansible_collections/firehawkvfx/houdini/vars/main.yml", "vars/main.yml" ] # The first file found will be used, allowing the one in your secrets location to override defaults.
+
   vars_files:
     - /deployuser/ansible/group_vars/all/vars
-    - vars/main.yml
-    - /secrets/overrides/ansible/collections/firehawkvfx/houdini/vars/main.yml
 
   tasks:
+  - name: aquire vars from secrets path before using defaults for softnas hosts 1
+    include_vars: "{{ item }}"
+    with_first_found: "{{ vars_files_locs }}"
   - name: Configure Hserver
     include_role:
       name: set_hserver_role

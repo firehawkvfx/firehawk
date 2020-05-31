@@ -7,6 +7,7 @@ SECONDS=0
 
 printf "\nRunning ansiblecontrol with $1...\n"
 
+set +x # don't echo bash commands
 # # This block allows you to echo a line number for a failure.
 set -eE -o functrace
 err_report() {
