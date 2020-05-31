@@ -447,7 +447,7 @@ variable "softnas_ami_option" {
 locals {
   keys = ["burrst_softnas","burrst_softnas_byol"]
   empty_list = list("")
-  values = ["${element( concat(data.aws_ami_ids.burrst_softnas.*.ids, local.empty_list ), 0 )}", "${element( concat( data.aws_ami_ids.burrst_softnas_byol.*.ids, local.empty_list ), 0 )}"]
+  values = ["${element( concat(data.aws_ami_ids.burrst_softnas.ids, local.empty_list ), 0 )}", "${element( concat( data.aws_ami_ids.burrst_softnas_byol.ids, local.empty_list ), 0 )}"]
   softnas_platinum_consumption_map = zipmap( local.keys , local.values )
 }
 
