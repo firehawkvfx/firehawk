@@ -7,7 +7,7 @@
   
   pre_tasks:
   - name: Connection test without sudo- whoami
-    command: "echo connected; whoami"
+    command: "echo 'connected'; whoami"
 
 - hosts: "{{ variable_host | default('firehawkgateway') }}"
   remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
