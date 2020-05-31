@@ -7,7 +7,7 @@
 # ansible-playbook -i ansible/inventory ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml
 
 # to update an onsite centos workstation use-
-# ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml -v -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser hostname=workstation1 ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key" --skip-tags 'cloud_install'
+# ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml -v -v --extra-vars "variable_host=workstation1 variable_user=deployuser hostname=workstation1 ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key" --skip-tags 'cloud_install'
 
 # to configure onsite mounts only on the ansible control, skipping softnas export check
 # ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml -v -v --extra-vars "variable_host=localhost variable_user=deployuser softnas_hosts=none" --tags 'local_install_onsite_mounts'

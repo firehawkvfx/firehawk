@@ -904,7 +904,7 @@ resource "null_resource" "provision_softnas_volumes" {
       # ensure all old mounts onsite are removed if they exist.
       if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
         echo "CONFIGURE REMOTE MOUNTS ON LOCAL NODES"
-        ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser hostname=workstation1 ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
+        ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml -v --extra-vars "variable_host=workstation1 variable_user=deployuser hostname=workstation1 ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
       fi
       # mount all ebs disks before s3
       ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-check-able-to-stop.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]}"; exit_test
@@ -1052,7 +1052,7 @@ resource "null_resource" "attach_local_mounts_after_start" {
       # ensure routes on workstation exist
       if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
         printf "\n$BLUE CONFIGURE REMOTE ROUTES ON LOCAL NODES $NC\n"
-        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-routes.yaml -v -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser hostname=workstation1 ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key ethernet_device=$TF_VAR_workstation_ethernet_device"; exit_test
+        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-routes.yaml -v -v --extra-vars "variable_host=workstation1 variable_user=deployuser hostname=workstation1 ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key ethernet_device=$TF_VAR_workstation_ethernet_device"; exit_test
       fi
       # ensure volumes and pools exist after the disks were ensured to exist - this was done before starting instance.
       ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/softnas_ebs_pool.yaml -v; exit_test
@@ -1064,7 +1064,7 @@ resource "null_resource" "attach_local_mounts_after_start" {
         # unmount volumes from local site - same as when softnas is shutdown, we need to ensure no mounts are present since existing mounts pointed to an incorrect environment will be wrong
         ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml --extra-vars "variable_host=workstation1 variable_user=deployuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
         # now mount current volumes
-        ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml -v -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
+        ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml -v -v --extra-vars "variable_host=workstation1 variable_user=deployuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
       fi
 EOT
   }
