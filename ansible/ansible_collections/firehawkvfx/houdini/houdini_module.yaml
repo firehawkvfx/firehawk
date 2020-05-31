@@ -28,6 +28,9 @@
   - name: aquire vars from secrets path before using defaults for softnas hosts 1
     include_vars: "{{ item }}"
     with_first_found: "{{ vars_files_locs }}"
+    tags:
+    - always
+
 
   - name: test connection
     debug:
@@ -50,6 +53,9 @@
   - name: aquire vars from secrets path before using defaults for softnas hosts 1
     include_vars: "{{ item }}"
     with_first_found: "{{ vars_files_locs }}"
+    tags:
+    - always
+
 
   # store deadline components required for submitter.
   - name: Ensure tmp dir exist - HoudiniSubmitter
@@ -140,6 +146,9 @@
   - name: aquire vars from secrets path before using defaults
     include_vars: "{{ item }}"
     with_first_found: "{{ vars_files_locs }}"
+    tags:
+    - always
+
 
   - name: Install Houdini
     # import_role:
@@ -188,6 +197,9 @@
   - name: aquire vars from secrets path before using defaults
     include_vars: "{{ item }}"
     with_first_found: "{{ vars_files_locs }}"
+    tags:
+    - always
+
 
   - name: setup houdini plugin in deadline repository for each major version.  This identical role use occurs in 2 locations - after deadline install and with install of Houdini
     include_role:

@@ -15,6 +15,9 @@
   - name: aquire vars from secrets path before using defaults for softnas hosts 1
     include_vars: "{{ item }}"
     with_first_found: "{{ vars_files_locs }}"
+    tags:
+    - always
+
   - name: Configure Hserver
     include_role:
       name: set_hserver_role
