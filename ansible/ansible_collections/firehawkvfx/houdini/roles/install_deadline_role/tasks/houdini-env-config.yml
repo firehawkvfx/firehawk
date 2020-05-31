@@ -2,7 +2,7 @@
 
 - name: show first existing file or ignore if none do
   set_fact:
-    houdini_template: lookup('first_found', findme)
+    houdini_template: "{{ lookup('first_found', findme) }}"
   vars:
     findme:
       - "/secrets/overrides/ansible/ansible_collections/firehawkvfx/houdini/roles/install_deadline_role/files/houdini_template.env"

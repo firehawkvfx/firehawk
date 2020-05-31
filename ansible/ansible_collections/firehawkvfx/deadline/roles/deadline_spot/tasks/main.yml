@@ -43,7 +43,7 @@
 
 - name: show first existing file or ignore if none do
   set_fact:
-    config_template: lookup('first_found', findme)
+    config_template: "{{ lookup('first_found', findme) }}"
   vars:
     findme:
       - "/secrets/overrides/ansible/ansible_collections/firehawkvfx/deadline/roles/deadline_spot/files/config_template.json"
