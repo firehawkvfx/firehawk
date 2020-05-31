@@ -6,7 +6,7 @@
   any_errors_fatal: true
   
   pre_tasks:
-  - name: Connection test without sudo
+  - name: Connection test without sudo: whoami
     command: "echo connected; whoami"
 
 - hosts: "{{ variable_host | default('firehawkgateway') }}"
