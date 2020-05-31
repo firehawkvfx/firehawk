@@ -208,13 +208,18 @@ resource "null_resource" "dependency_node_centos" {
   }
 }
 
+locals {
+  config_template_file_path: "/deployuser/ansible/ansible_collections/firehawkvfx/deadline/roles/deadline_spot/files/config_template.json"
+  override_config_template_file_path: "/secrets/overrides/ansible/ansible_collections/firehawkvfx/deadline/roles/deadline_spot/files/config_template.json"
+}
+
 resource "null_resource" "provision_deadline_spot" {
   count      = (var.site_mounts && var.provision_deadline_spot_plugin) ? 1 : 0
   depends_on = [null_resource.dependency_deadline_spot, null_resource.dependency_node_centos, module.firehawk_init.local-provisioning-complete]
 
   triggers = {
     ami_id                  = module.node.ami_id
-    config_template_sha1    = "${sha1(file("/secrets/spot-fleet-templates/config_template.json"))}"
+    config_template_sha1    = "${sha1(file( fileexists(local.override_config_template_file_path) ? local.override_config_template_file_path : local.config_template_file_path))}"
     deadline_spot_sha1      = "${sha1(file("/deployuser/ansible/ansible_collections/firehawkvfx/deadline/deadline_spot.yaml"))}"
     deadline_spot_role_sha1 = "${sha1(file("/deployuser/ansible/ansible_collections/firehawkvfx/deadline/roles/deadline_spot/tasks/main.yml"))}"
     deadline_roles_tf_sha1  = "${sha1(file("/deployuser/modules/deadline/main.tf"))}"
