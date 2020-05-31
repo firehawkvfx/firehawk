@@ -41,9 +41,20 @@
 - debug:
     msg: "warning, multiple subnets in the json spot fleet template may cause errors"
 
+- name: show first existing file or ignore if none do
+  set_fact:
+    config_template: lookup('first_found', findme)
+  vars:
+    findme:
+      - "/secrets/overrides/ansible/ansible_collections/firehawkvfx/deadline/roles/deadline_spot/files/config_template.json"
+      - "config_template.json"
+
+- debug:
+    var: config_template
+
 - name: generate spot fleet config from template
   template:
-    src: /secrets/spot-fleet-templates/config_template.json
+    src: "{{ config_template }}"
     dest: /secrets/spot-fleet-templates/config_generated.json
 
 # to list collections-
