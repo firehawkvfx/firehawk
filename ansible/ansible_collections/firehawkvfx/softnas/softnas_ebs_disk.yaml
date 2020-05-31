@@ -99,7 +99,7 @@
     when: not item.volumes and mode == 'attach'
     with_items: "{{ existing_volume.results }}"
     
-  - include_tasks: softnas-ebs-existing-volume.yaml
+  - include_tasks: softnas_ebs_existing_volume.yaml
     when: item.volumes
     with_items: "{{ existing_volume.results }}"
     when: mode == 'attach'

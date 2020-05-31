@@ -45,7 +45,7 @@
   - name: set /etc/exports
     lineinfile:
       path: /etc/exports
-      line: "# These mounts are managed in ansible playbook softnas-ebs-disk-update-exports.yaml"
+      line: "# These mounts are managed in ansible playbook softnas_ebs_disk_update_exports.yaml"
       backup: yes
     when: import_pool
 
