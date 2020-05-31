@@ -14,7 +14,7 @@
 - name: Generate houdini.env config from template
   template:
     src: "{{ houdini_template }}"
-    dest: "/secrets/tmp/houdini{{ houdini_version_item.houdini_major_version }}_from_template.env"
+    dest: "/tmp/houdini{{ houdini_version_item.houdini_major_version }}_from_template.env"
   become: yes
   connection: local
   tags:
@@ -23,7 +23,7 @@
 
 - name: copy env
   copy:
-    src: "/secrets/tmp/houdini{{ houdini_version_item.houdini_major_version }}_from_template.env"
+    src: "/tmp/houdini{{ houdini_version_item.houdini_major_version }}_from_template.env"
     dest: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini{{ houdini_version_item.houdini_major_version }}_from_template.env"
   become: true
   tags:
@@ -51,7 +51,7 @@
 
 - name: copy houdini.env and overwrite
   copy:
-    src: /secrets/tmp/houdini{{ houdini_version_item.houdini_major_version }}_from_template.env
+    src: /tmp/houdini{{ houdini_version_item.houdini_major_version }}_from_template.env
     dest: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env"
   become: true
   tags:
