@@ -95,7 +95,7 @@
       msg: "{{ item }}"
     with_items: "{{ existing_volume.results }}"      
 
-  - include_tasks: softnas-ebs-first-time-installation.yaml
+  - include_tasks: softnas_ebs_first_time_installation.yaml
     when: not item.volumes and mode == 'attach'
     with_items: "{{ existing_volume.results }}"
     
@@ -115,7 +115,7 @@
       - "{{ mounts }}"
     when: mode == 'destroy'
     
-  - include_tasks: softnas-ebs-delete-volume.yaml
+  - include_tasks: softnas_ebs_delete_volume.yaml
     when: mode == 'destroy' and item.volumes
     with_items: "{{ existing_volume.results }}"
     

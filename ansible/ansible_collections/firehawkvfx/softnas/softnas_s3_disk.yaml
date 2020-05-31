@@ -5,24 +5,31 @@
   vars:
     # if pool name and volume name match an existing bucket, then it will be imported.  creation will skip.
     # commandline example to override defaults:
-    # ansible-playbook -i ansible/inventory ansible/softnas-s3-disk.yaml --extra-vars "pool_name=pool0 volume_name=volume0 s3_disk_size_max_value=600 disk_device=0 encrypt_s3=true"
+    # ansible-playbook -i ansible/inventory ansible/ansible_collections/firehawkvfx/softnas/softnas_s3_disk.yaml --extra-vars "pool_name=pool0 volume_name=volume0 s3_disk_size_max_value=600 disk_device=0 encrypt_s3=true"
     # all disk_device numbers should be unique for any nas name.  /dev/s3- will be prepended to the disk_device number when mounted
     # volume names pools should both existing buckets match only if you intend to use raid.
 
     pool_name: "{{ envtier }}pool0"
     volume_name: "{{ envtier }}volume0"
+    # shared pools should be enabled for DCHA if you need that.  caching is unavailable if this is used. tiering must be used insterad of caching for DCHA.
+    share_pool: off
     disk_device: 0
     nas_name: softnas
-    encrypt_s3: false
+    encrypt_s3: true
     s3_disk_size_max_value: 500
     s3_disk_size_max_units: GB
     s3_disk_region: "{{ aws_region }}"
+    import_pool: true
+
+    # this will be calculated later-
     existing_bucket: false
+    existing_volume: false
 
   tasks:
   - set_fact:
       pool_name: "{{ pool_name }}"
       volume_name: "{{ volume_name }}"
+      share_pool: "{{ share_pool }}"
       disk_device: "{{ disk_device }}"
       nas_name: "{{ nas_name }}"
       encrypt_s3: "{{ encrypt_s3 }}"
@@ -30,6 +37,7 @@
       s3_disk_size_max_units: "{{ s3_disk_size_max_units }}"
       s3_disk_region: "{{ s3_disk_region }}"
       existing_bucket: "{{ existing_bucket }}"
+      existing_volume: "{{ existing_volume }}"
 
   - name: Create s3 extender disk. Query existing buckets.
     shell: |
@@ -63,7 +71,7 @@
   - name: check existing disk_device for nas.
     fail:
       msg: |
-        disk_device name already exists for this nas name in s3 bucket: "{{ item }}"
+        disk_device name already exists for this nas name in s3 bucket- "{{ item }}"
         Choose a different disk device name or nas name target to mount
     failed_when: (search_string_domain in item) and (search_string_nas_name in item) and (search_string_device in item) and (existing_bucket == false)
     with_items:
@@ -100,6 +108,7 @@
   vars:
     pool_name: "{{ hostvars['ansible_control']['pool_name'] }}"
     volume_name: "{{ hostvars['ansible_control']['volume_name'] }}"
+    share_pool: "{{ hostvars['ansible_control']['share_pool'] }}"
     disk_device: "{{ hostvars['ansible_control']['disk_device'] }}"
     nas_name: "{{ hostvars['ansible_control']['nas_name'] }}"
     encrypt_s3: "{{ hostvars['ansible_control']['encrypt_s3'] }}"
@@ -107,6 +116,7 @@
     s3_disk_size_max_units: "{{ hostvars['ansible_control']['s3_disk_size_max_units'] }}"
     s3_disk_region: "{{ hostvars['ansible_control']['s3_disk_region'] }}"
     existing_bucket: "{{ hostvars['ansible_control']['existing_bucket'] }}"
+    existing_volume: "{{ hostvars['ansible_control']['existing_volume'] }}"
   
   # import by bucket name if bucket name exists, then import, else create.
   # if created, then also:
@@ -117,6 +127,19 @@
 
   # create ability to delete
   tasks:
+  
+    - name: Ansible check file exists example.
+      stat:
+        path: /pool_name/volume_name/
+      register: existing_volume_details
+
+    - debug:
+        msg: "volume already exists"
+      when: existing_volume_details.stat.exists
+    - set_fact:
+        existing_volume: true
+      when: existing_volume_details.stat.exists
+
     - debug:
         msg: "existing_bucket: {{ existing_bucket }}"
       when: existing_bucket == false
@@ -125,7 +148,7 @@
         name: softnas-s3-disk-create
       when: existing_bucket == false
 
-# mount / import an existing bucket if pool and volume name match
+# mount / import an existing bucket if pool and volume name match.  import pool.
 - hosts: role_softnas
   remote_user: "{{ softnas_ssh_user | default('ec2-user') }}"
   gather_facts: "{{ variable_gather_facts | default('false') }}"
@@ -135,6 +158,7 @@
   vars:
     pool_name: "{{ hostvars['ansible_control']['pool_name'] }}"
     volume_name: "{{ hostvars['ansible_control']['volume_name'] }}"
+    share_pool: "{{ hostvars['ansible_control']['share_pool'] }}"
     disk_device: "{{ hostvars['ansible_control']['disk_device'] }}"
     nas_name: "{{ hostvars['ansible_control']['nas_name'] }}"
     encrypt_s3: "{{ hostvars['ansible_control']['encrypt_s3'] }}"
@@ -143,6 +167,9 @@
     s3_disk_region: "{{ hostvars['ansible_control']['s3_disk_region'] }}"
     existing_bucket: "{{ hostvars['ansible_control']['existing_bucket'] }}"
     bucket_location: "{{ hostvars['ansible_control']['bucket_location'] }}"
+    # need to pull this data from the softnas instance, not defaults.
+    existing_volume: "{{ hostvars['ansible_control']['existing_volume'] }}"
+    import_pool: "{{ hostvars['ansible_control']['import_pool'] }}"
   
   # import by bucket name if bucket name exists, then import, else create.
   # if created, then also:
@@ -153,13 +180,13 @@
 
   # create ability to delete
   tasks:
+
     - debug:
         msg: "existing_bucket: {{ existing_bucket }}\nImporting."
-      when: existing_bucket != false
+      when: (existing_bucket != false) and (existing_volume == false)
 
     - include_role: 
         name: softnas-s3-disk-import
-      when: existing_bucket != false
+      when: (existing_bucket != false) and (existing_volume == false)
 
-
-
+      

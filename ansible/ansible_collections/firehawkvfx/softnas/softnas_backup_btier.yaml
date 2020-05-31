@@ -1,8 +1,8 @@
 # backup the data necesary to restor a tiered volume. 
-# ansible-playbook -i ansible/inventory ansible/softnas-backup-btier.yaml -v
+# ansible-playbook -i ansible/inventory ansible/ansible_collections/firehawkvfx/softnas/softnas_backup_btier.yaml -v
 
 # restore with
-# ansible-playbook -i ansible/inventory ansible/softnas-backup-btier.yaml -v --extra-vars "restore=true"
+# ansible-playbook -i ansible/inventory ansible/ansible_collections/firehawkvfx/softnas/softnas_backup_btier.yaml -v --extra-vars "restore=true"
 
 - hosts: role_softnas
   remote_user: "{{ softnas_ssh_user | default('ec2-user') }}"

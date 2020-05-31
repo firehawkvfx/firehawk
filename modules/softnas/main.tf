@@ -722,7 +722,7 @@ resource "null_resource" "provision_softnas" {
 
       # Initialise
       ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_init_pip.yaml -v --extra-vars "variable_host=role_softnas variable_connect_as_user=$TF_VAR_softnas_ssh_user skip_packages=${local.skip_packages}"; exit_test
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init.yaml -v --extra-vars "skip_packages=${local.skip_packages}"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/softnas_init.yaml -v --extra-vars "skip_packages=${local.skip_packages}"; exit_test
 
       # remove any mounts on local workstation first since they will have been broken if another softnas instance was just destroyed to create this one.
       if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
@@ -732,7 +732,7 @@ resource "null_resource" "provision_softnas" {
       if [[ "$TF_VAR_softnas_skip_update" == true ]]; then
         echo "...Skip softnas update"
       else
-        ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-update.yaml -v; exit_test
+        ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/softnas_update.yaml -v; exit_test
         echo "Finished Update"
       fi
       # cli is only needed if sync operations with s3 will be run on this instance.
@@ -899,7 +899,7 @@ resource "null_resource" "provision_softnas_volumes" {
       ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars "variable_host=role_softnas variable_connect_as_user=$TF_VAR_softnas_ssh_user variable_user=deadlineuser"; exit_test
 
       # hotfix script to speed up instance start and shutdown
-      # ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-install-acpid.yaml -v; exit_test
+      # ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/softnas_install_acpid.yaml -v; exit_test
 
       # ensure all old mounts onsite are removed if they exist.
       if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
@@ -907,7 +907,7 @@ resource "null_resource" "provision_softnas_volumes" {
         ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml -v --extra-vars "variable_host=workstation1 variable_user=deployuser hostname=workstation1 ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
       fi
       # mount all ebs disks before s3
-      ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-check-able-to-stop.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]}"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/softnas_check_able_to_stop.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]}"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/softnas_ebs_disk.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]} stop_softnas_instance=true mode=attach"; exit_test
       # Although we start the instance in ansible, the aws cli can be more reliable to ensure this.
       aws ec2 start-instances --instance-ids ${aws_instance.softnas1.*.id[count.index]}; exit_test
@@ -942,10 +942,10 @@ EOT
       # ensure volumes and pools exist after disks are ensured to exist.
       ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/softnas_ebs_pool.yaml -v; exit_test
       # ensure s3 disks exist and are mounted.  the s3 features are disabled currently in favour of migrating to using the aws cli and pdg to sync data
-      # ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-s3-disk.yaml -v --extra-vars "pool_name=$(TF_VAR_envtier)pool0 volume_name=$(TF_VAR_envtier)volume0 disk_device=0 s3_disk_size_max_value=${var.s3_disk_size} encrypt_s3=true import_pool=${local.import_pool}"; exit_test
+      # ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/softnas_s3_disk.yaml -v --extra-vars "pool_name=$(TF_VAR_envtier)pool0 volume_name=$(TF_VAR_envtier)volume0 disk_device=0 s3_disk_size_max_value=${var.s3_disk_size} encrypt_s3=true import_pool=${local.import_pool}"; exit_test
       # exports should be updated here.
       # if btier.json exists in /secrets/${var.envtier}/ebs-volumes/ then the tiers will be imported.
-      # ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-backup-btier.yaml -v --extra-vars "restore=true"; exit_test
+      # ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/softnas_backup_btier.yaml -v --extra-vars "restore=true"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/softnas_ebs_disk_update_exports.yaml -v --extra-vars "instance_id=${aws_instance.softnas1.*.id[count.index]}"; exit_test
   
 EOT

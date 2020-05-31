@@ -1,5 +1,5 @@
 # example 
-# ansible-playbook -i ansible/inventory ansible/softnas-delete-volume.yaml -v --extra-vars "volume_name=volume0 pool_name=pool0
+# ansible-playbook -i ansible/inventory ansible/ansible_collections/firehawkvfx/softnas/softnas_delete_volume.yaml -v --extra-vars "volume_name=volume0 pool_name=pool0
 
 - hosts: role_softnas
   remote_user: "{{ softnas_ssh_user | default('ec2-user') }}"
