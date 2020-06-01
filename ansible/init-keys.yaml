@@ -7,7 +7,7 @@
     repo_dir: "{{ playbook_dir.split('/')[0:-1]|join('/') }}"
     key_folder: "{{ repo_dir }}/../secrets/keys/"
     key_path: "{{ repo_dir }}/../secrets/keys/{{ key_name }}"
-    secret_path: "{{ repo_dir }}/../secrets-{{ envtier }}"
+    # secret_path: "{{ repo_dir }}/../secrets-{{ envtier }}"
 
   pre_tasks:
     - debug:

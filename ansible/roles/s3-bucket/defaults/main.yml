@@ -1,6 +1,0 @@
----
-# defaults file for roles/s3-bucket
-
-AWS_ACCOUNT_ID_dev: "{{ lookup('env','AWS_ACCOUNT_ID_dev') }}"
-AWS_ACCOUNT_ID_prod: "{{ lookup('env','AWS_ACCOUNT_ID_prod') }}"
-policy_file_path: "{{ firehawk_path }}/tmp/bucket_policy.json"

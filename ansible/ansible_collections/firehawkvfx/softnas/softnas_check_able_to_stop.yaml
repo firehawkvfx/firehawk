@@ -1,0 +1,51 @@
+- hosts: ansible_control
+  remote_user: deployuser
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
+
+  vars:
+    init: true
+
+  vars_files:
+    - /deployuser/ansible/group_vars/all/vars
+    - vars/main.yml
+
+  tasks:
+  - name: ensure the softnas instance was started before updating mounts (since after initial install it must be complete, even though we are about to stop the instance anyway, we must validate).
+    ec2:
+      instance_ids: '{{ instance_id }}'
+      region: '{{ aws_region }}'
+      state: running
+      wait: True
+    become_user: deployuser
+    when: init
+
+- hosts: role_softnas
+  remote_user: "{{ softnas_ssh_user | default('ec2-user') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
+  become: true
+  
+  vars:
+    init: false
+  
+  tasks:
+  - name: Slurp file state
+    slurp:
+      src: /tmp/softnas.boot
+    register: slurpfile
+    become: true
+    when: init
+  
+  - name: "Wait until Softnas Boot Init completes before Stopping the instance."
+    wait_for:
+      path: /tmp/softnas.boot
+      search_regex: "^SoftNAS user initialization completed.*$"
+      timeout: 3600
+    become: true
+    when: init
+
+  - name: Slurp file state post
+    slurp:
+      src: /tmp/softnas.boot
+    register: slurpfilepost
+    become: true
+    when: init

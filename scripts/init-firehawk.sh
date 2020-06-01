@@ -226,20 +226,25 @@ else
     touch $TF_VAR_local_key_path # ensure a file is present or tf will not be able to destroy anything.
 
     echo "...Terraform refresh"
+    success=false
     if terraform refresh -lock=false; then
       echo "...Terraform destroy"
-      terraform destroy -lock=false --auto-approve
-    else
+      if terraform destroy -lock=false --auto-approve; then success=true; fi
+    fi
+
+    if [[ "$success" == false ]]; then
       echo "...First destroy attempts failed.  terraform.tfstate is likely corrupted, we will restore from backup and attempt destroy again."
       cp -fv terraform.tfstate.backup terraform.tfstate
       if terraform refresh -lock=false; then
-        echo "...Terraform destroy"
-        terraform destroy -lock=false --auto-approve
-      else
-        echo "ERROR: verify there are no orphaned resources after this run...Couldn't recover backup."
-        echo "...Removing terraform.tfstate for clean start."
-        rm -fv terraform.tfstate; exit_test
+        echo "...Terraform destroy from terraform.tfstate.backup"
+        if terraform destroy -lock=false --auto-approve; then success=true; fi
       fi
+    fi
+    
+    if [[ "$success" == false ]]; then
+      echo "ERROR: verify there are no orphaned resources after this run...Couldn't recover backup."
+      echo "...Removing terraform.tfstate for clean start."
+      rm -fv terraform.tfstate; exit_test
     fi
 
     if [ -f terraform.tfstate ]; then
@@ -276,7 +281,7 @@ else
 
   if [[ "$tf_action" == "apply" ]]; then
     
-    $TF_VAR_firehawk_path/scripts/detect-interupt.sh &
+    $TF_VAR_firehawk_path/scripts/detect-interrupt.sh &
     
     if [ "$TF_VAR_active_pipeline" -eq 0 ]; then
       echo "...Init new pipe based on the current JOB ID: Found active pipeline is init: $TF_VAR_active_pipeline"
@@ -316,7 +321,7 @@ else
       done
       if [ "$found" == false ]; then echo "No Resources were Tainted"; fi
     fi
-
+    set +x
     echo "...Currently running instances: scripts/aws-running-instances.sh"
     $TF_VAR_firehawk_path/scripts/aws-running-instances.sh
     echo ""
@@ -341,6 +346,7 @@ else
   elif [[ "$tf_action" == "single_test" ]]; then
     echo "...Test a singular one off command"; set -x
     $TF_VAR_firehawk_path/scripts/single-test.sh
+    set +x
   fi
 
 

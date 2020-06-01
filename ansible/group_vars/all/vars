@@ -32,7 +32,8 @@ public_domain: "{{ lookup('env','TF_VAR_public_domain') }}"
 public_domain_prod: "{{ lookup('env','TF_VAR_public_domain_prod') }}"
 
 bucket_extension: "{{ lookup('env','TF_VAR_bucket_extension') }}"
-installers_bucket: "software.{{ lookup('env','TF_VAR_bucket_extension_prod') }}" # the production bucket is always used to store installation files.
+installers_bucket: "software.{{ lookup('env','TF_VAR_bucket_extension_prod') }}" # The production bucket is always used to store installation files to avoid duplicate downloads/uploads
+repositories_bucket: "repositories.{{ lookup('env','TF_VAR_bucket_extension') }}"
 
 private_subnet1: "{{ lookup('env', 'TF_VAR_private_subnet1') }}"
 private_subnet1_dev: "{{ lookup('env', 'TF_VAR_private_subnet1_dev') }}"
@@ -62,11 +63,16 @@ prod_mount_path: "/prod"
 #the ip of your onsite storage to be mounted
 localnas1_private_ip: "{{ lookup('env','TF_VAR_localnas1_private_ip') }}"
 #the mount path of your onsite storage eg "/prod"
-localnas1_mount_path: "{{ lookup('env','TF_VAR_localnas1_mount_path') }}"
+production_volume_path: "{{ lookup('env','TF_VAR_production_volume_path') }}"
+remote_production_volume_path: "{{ lookup('env','TF_VAR_remote_production_volume_path') }}"
+
 #the relative path to access the production volume remotely eg "/prod_remote"
 localnas1_remote_mount_path: "{{ lookup('env','TF_VAR_localnas1_remote_mount_path') }}"
+
 #the absolute path to access the onsite nas mount by location eg "/cairns_prod"
+localnas1_volume_name: "{{ lookup('env', 'TF_VAR_localnas1_volume_name') }}"
 localnas1_path_abs: "{{ lookup('env', 'TF_VAR_localnas1_path_abs') }}"
+localnas1_export_path: "{{ lookup('env', 'TF_VAR_localnas1_export_path') }}"
 #the absolute path to access the cloud nfs mount by location eg "/prod_sydney_aws"
 softnas1_path_abs: "{{ lookup('env', 'TF_VAR_softnas1_path_abs') }}"
 
@@ -114,7 +120,7 @@ onsite_workstation_private_ssh_key: "{{ lookup('env','TF_VAR_onsite_workstation_
 
 user_inituser_name: "{{ lookup('env', 'TF_VAR_user_inituser_name') }}"
 user_inituser_pw: "{{ lookup('env', 'TF_VAR_user_inituser_pw') }}"
-user_deployuser_pw:  "{{ lookup('env','TF_VAR_user_deployuser_pw') }}"
+user_deployuser_pw: "{{ lookup('env','TF_VAR_user_deployuser_pw') }}"
 
 workstation_address: "{{ lookup('env', 'TF_VAR_workstation_address') }}"
 
@@ -140,6 +146,7 @@ max_spot_capacity_engine: 7
 max_spot_capacity_mantra: 61
 
 firehawk_sync_source: "{{ lookup('env','TF_VAR_firehawk_sync_source') }}"
+firehawk_sync_target: "{{ lookup('env','TF_VAR_firehawk_sync_target') }}"
 
 # keybase user id or path to pgp public key on disk
 pgp_public_key: "{{ lookup('env','TF_VAR_pgp_public_key') }}"
@@ -176,11 +183,11 @@ time_zone_info_path_linux: "{{ time_zone_info_dict_linux['Australia_Sydney'] }}"
 
 repo_dir: "{{ playbook_dir.split('/')[0:-1]|join('/') }}"
 
-vault_key_name: "{{ lookup('env','TF_VAR_vault_key_name') }}"
-vault_key_path: "{{ repo_dir }}/../secrets/keys/{{ vault_key_name }}"
+vault_key_name_general: "{{ lookup('env','TF_VAR_vault_key_name_general') }}"
+vault_key_path: "{{ repo_dir }}/../secrets/keys/{{ vault_key_name_general }}"
 
 key_folder: "{{ repo_dir }}/../secrets/keys/"
 
 key_path: "{{ repo_dir }}/../secrets/keys/{{ key_name }}.pem"
-secret_path: "{{ repo_dir }}/../secrets/secrets-{{ envtier }}"
+secret_path: "{{ repo_dir }}/../secrets/secrets-general"
 secrets_archive: "{{ repo_dir }}/../secrets/{{ envtier }}"

@@ -1,0 +1,29 @@
+### HOUDINI UNIT TEST ###
+
+- hosts: "{{ variable_host | default('role_node_centos') }}"
+  remote_user: "{{ variable_connect_as_user | default('centos') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
+  become: true
+
+  vars:
+    # the become sudo pass is only relevent for local installation if required on the host specified.
+    ansible_become_pass: "{{ user_deadlineuser_pw }}"
+    
+    variable_user: centos
+    bastionip: "{{ groups['bastionip'][0] }}"
+
+    vars_files_locs: [ "/{{ secrets_path }}/overrides/ansible/ansible_collections/firehawkvfx/houdini/vars/main.yml", "vars/main.yml" ] # The first file found will be used, allowing the one in your secrets location to override defaults.
+
+  vars_files:
+    - /deployuser/ansible/group_vars/all/vars
+
+  pre_tasks:
+  - name: aquire vars from secrets path before using defaults
+    include_vars: "{{ item }}"
+    with_first_found: "{{ vars_files_locs }}"
+    tags:
+    - always
+    
+
+  roles:
+  - role: houdini_openfirehawk_houdini_tools_sync

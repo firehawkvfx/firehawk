@@ -78,7 +78,7 @@
     bucket: "{{ installers_bucket }}"
     basedir: "{{ deadline_linux_installers_tar | dirname }}"
     filename: "{{ deadline_linux_installers_tar | basename }}"
-    variable_user: "deployuser" # deploy user has access to the default downloads folder.
+    sync_user: "{{ user_deadlineuser_name }}"
   tags:
   - install
   - sync_installers
@@ -112,7 +112,7 @@
     bucket: "{{ installers_bucket }}"
     basedir: "{{ deadline_linux_installers_tar | dirname }}"
     filename: "{{ deadline_linux_installers_tar | basename }}"
-    variable_user: "{{ user_deadlineuser_name }}"
+    sync_user: "{{ user_deadlineuser_name }}"
   tags:
   - install
   - sync_installers

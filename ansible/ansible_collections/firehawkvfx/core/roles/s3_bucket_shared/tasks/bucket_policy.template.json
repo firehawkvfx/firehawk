@@ -1,0 +1,57 @@
+{
+  "Version": "2012-10-17",
+  "Id": "s3ProdDevSharePolicy",
+  "Statement": [
+    {
+      "Action": [
+        "s3:*"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:aws:s3:::{{ installers_bucket }}",
+        "arn:aws:s3:::{{ installers_bucket }}/*"
+      ],
+      "Principal": {
+        "AWS": [
+          "{{ AWS_ACCOUNT_ID_prod }}"
+        ]
+      }
+    },
+    {
+      "Action": [
+        "s3:GetObject",
+        "s3:ListBucket"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "arn:aws:s3:::{{ installers_bucket }}",
+        "arn:aws:s3:::{{ installers_bucket }}/*"
+      ],
+      "Principal": {
+        "AWS": [
+          "{{ AWS_ACCOUNT_ID_dev }}"
+        ]
+      }
+    },
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": [
+          "{{ AWS_ACCOUNT_ID_dev }}"
+        ]
+      },
+      "Action": [
+        "s3:PutObject",
+        "s3:PutObjectAcl"
+      ],
+      "Resource": [
+        "arn:aws:s3:::{{ installers_bucket }}/*"
+      ],
+      "Condition": {
+          "StringEquals": {
+              "s3:x-amz-acl": "bucket-owner-full-control"
+          }
+      }
+    }
+  ]
+}

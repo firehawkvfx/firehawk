@@ -4,14 +4,14 @@
 # ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml
 
 - hosts: "{{ variable_host | default('workstation1') }}"
-  remote_user: "{{ variable_connect_as_user | default('deadlineuser') }}"
+  remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
 
   vars:
     ansible_become_pass: "{{ user_deadlineuser_pw }}"
     ansible_password: "{{ user_deadlineuser_pw }}"
-    variable_connect_as_user: deadlineuser
+    variable_connect_as_user: deployuser
     variable_user: deadlineuser
 
   tasks:
@@ -147,7 +147,7 @@
 
   - name: create download dir
     file:
-      path: "/home/deadlineuser/Downloads"
+      path: "/home/{{ variable_user }}/Downloads"
       state: directory
       owner: "{{ variable_user }}"
       group: "{{ variable_user }}"
@@ -156,7 +156,7 @@
 
   - name: create deadline installer dir
     file:
-      path: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
+      path: "/home/{{ variable_user }}/Downloads/{{ deadline_linux_basename }}"
       state: directory
       owner: "{{ variable_user }}"
       group: "{{ variable_user }}"
@@ -178,15 +178,15 @@
     vars:
       mode: "pull"
       bucket: "{{ installers_bucket }}"
-      basedir: "/home/deadlineuser/Downloads"
+      basedir: "/home/{{ variable_user }}/Downloads"
       filename: "{{ deadline_linux_filename }}"
-      # variable_user: "{{ remote_user }}" # due to a limitaiton the var provided must not be the same
+      sync_user: "{{ variable_user }}" # due to a limitaiton the var provided must not be the same
 
   # - name: S3 GET deadline
   #   aws_s3:
   #     bucket: "{{ installers_bucket }}"
   #     object: "{{ deadline_linux_filename }}"
-  #     dest: "/home/deadlineuser/Downloads/{{ deadline_linux_filename }}"
+  #     dest: "/home/{{ variable_user }}/Downloads/{{ deadline_linux_filename }}"
   #     mode: get
   #     region: "{{ aws_region }}"
   #   tags:
@@ -197,8 +197,8 @@
 
   - name: Extract
     unarchive:
-      src: "/home/deadlineuser/Downloads/{{ deadline_linux_filename }}"
-      dest: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
+      src: "/home/{{ variable_user }}/Downloads/{{ deadline_linux_filename }}"
+      dest: "/home/{{ variable_user }}/Downloads/{{ deadline_linux_basename }}"
       owner: "{{ variable_user }}"
       mode: u+x
       remote_src: true
@@ -206,7 +206,7 @@
 
   - name: "Ansible find files in subdirectory downloads"
     find:
-      paths: "/home/deadlineuser/Downloads/{{ deadline_linux_basename }}"
+      paths: "/home/{{ variable_user }}/Downloads/{{ deadline_linux_basename }}"
       patterns: "*DeadlineClient-{{ deadline_version }}-linux-x64-installer.run"
     register: files_matched
     become: true
@@ -258,9 +258,9 @@
 
   - name: install deadline client
     shell: |
-      cd /home/deadlineuser/Downloads/
+      cd /home/{{ variable_user }}/Downloads/
       # set -x
-      {{ files_matched.files[0].path }} --mode unattended --debuglevel 2 --prefix {{ deadline_prefix }} --connectiontype Remote --noguimode true --licensemode UsageBased --launcherdaemon true --slavestartup 1 --daemonuser {{ user_deadlineuser_name }} --enabletls true --tlsport 4433 --httpport 8080 --proxyrootdir {{ deadline_proxy_root_dir }} --proxycertificate {{ deadline_proxy_certificate }} --proxycertificatepassword {{ deadline_proxy_certificate_password }}
+      {{ files_matched.files[0].path }} --mode unattended --debuglevel 2 --prefix {{ deadline_prefix }} --connectiontype Remote --noguimode true --licensemode UsageBased --launcherdaemon true --slavestartup 1 --daemonuser {{ variable_user }} --enabletls true --tlsport 4433 --httpport 8080 --proxyrootdir {{ deadline_proxy_root_dir }} --proxycertificate {{ deadline_proxy_certificate }} --proxycertificatepassword {{ deadline_proxy_certificate_password }}
     register: deadline_client_install_output_shell
     become: true
 
@@ -279,7 +279,7 @@
   - name: Add alias for deadlinemonitor
     lineinfile:
       state: present
-      path: /home/deadlineuser/.bashrc
+      path: "/home/{{ variable_user }}/.bashrc"
       line: "alias deadlinemonitor='cwd=\"$(pwd)\" && cd /opt/Thinkbox/Deadline10/bin && ./deadlinemonitor'"
       backup: true
       owner: "{{ variable_user }}"
@@ -338,6 +338,6 @@
     lineinfile:
       state: present
       path: /etc/sudoers
-      line: "deadlineuser ALL=(ALL) NOPASSWD: /sbin/poweroff, /sbin/reboot, /sbin/shutdown"
+      line: "{{ variable_user }} ALL=(ALL) NOPASSWD: /sbin/poweroff, /sbin/reboot, /sbin/shutdown"
       insertafter: '^.*localhost=/sbin/shutdown.*$'
     become: true

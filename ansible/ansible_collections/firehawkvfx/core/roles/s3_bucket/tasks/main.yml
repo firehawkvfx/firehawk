@@ -1,0 +1,24 @@
+# Warning: this bucket and its policies is shared by the production and dev environment.
+# changes will affect all environments simultaneusly.
+
+- name: Generate bucket policy from template
+  template:
+    src: bucket_policy.template.json
+    dest: "{{ policy_file_path }}"
+  become: yes
+  connection: local
+
+- name: output
+  debug:
+    msg: "{{ lookup('file', policy_file_path) }}"
+
+- name: "Ensure an s3 bucket exists - with the aws user credentials - {{ bucket }}"
+  s3_bucket:
+    name: "{{ bucket }}"
+    region: "{{ aws_region }}"
+    policy: "{{ lookup('file', policy_file_path) }}"
+    tags:
+      ansible_play_name: "{{ ansible_play_name }}"
+      playbook_dir: "{{ playbook_dir }}"
+  become: false
+  delegate_to: ansible_control

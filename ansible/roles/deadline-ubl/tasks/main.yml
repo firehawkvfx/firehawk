@@ -9,7 +9,7 @@
   register: deadline_ubl
 
 - debug:
-    msg:  "{{ deadline_ubl.stdout }}"
+    msg: "{{ deadline_ubl.stdout }}"
   when: ubl
 
 - name: update ubl licence info if already installed
@@ -23,5 +23,5 @@
   register: deadline_ubl
 
 - debug:
-    msg:  "{{ deadline_ubl.stdout }}"
+    msg: "{{ deadline_ubl.stdout }}"
   when: ubl

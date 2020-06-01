@@ -8,6 +8,8 @@ set +x
 # 3) Example values for the secrets.template file are defined in secrets.example. Ensure you have placed an example key=value for any new vars in secrets.example. 
 # If any changes have resulted in a new variable name, then example values helps other understand what they should be using for their own infrastructure.
 
+set +x
+
 RED='\033[0;31m' # Red Text
 GREEN='\033[0;32m' # Green Text
 BLUE='\033[0;34m' # Blue Text
@@ -338,21 +340,27 @@ fi
 template_path="$TF_VAR_firehawk_path/secrets.template"
 
 echo_if_not_silent '...Get secrets from env'
-# map environment secret for current env
-if [[ "$TF_VAR_envtier" = 'dev' ]]; then
-    if [[ ! -z "$firehawksecret_dev" ]]; then
-        echo "...Aquiring firehawksecret from dev"
-        export firehawksecret="$firehawksecret_dev"
-        export testsecret="$testsecret_dev"
-        echo "...Aquired firehawksecret from dev"
-    fi
-elif [[ "$TF_VAR_envtier" = 'prod' ]]; then
-    if [[ ! -z "$firehawksecret_prod" ]]; then
-        echo "...Aquiring firehawksecret from prod"
-        export firehawksecret="$firehawksecret_prod"
-        export testsecret="$testsecret_prod"
-        echo "...Aquired firehawksecret from prod"
-    fi
+# # map environment secret for current env
+# if [[ "$TF_VAR_envtier" = 'dev' ]]; then
+#     if [[ ! -z "$firehawksecret_dev" ]]; then
+#         echo "...Aquiring firehawksecret from dev"
+#         export firehawksecret="$firehawksecret_dev"
+#         export testsecret="$testsecret_dev"
+#         echo "...Aquired firehawksecret from dev"
+#     fi
+# elif [[ "$TF_VAR_envtier" = 'prod' ]]; then
+#     if [[ ! -z "$firehawksecret_prod" ]]; then
+#         echo "...Aquiring firehawksecret from prod"
+#         export firehawksecret="$firehawksecret_prod"
+#         export testsecret="$testsecret_prod"
+#         echo "...Aquired firehawksecret from prod"
+#     fi
+# fi
+if [[ ! -z "$firehawksecret" ]]; then
+    echo "...Aquiring firehawksecret"
+    export firehawksecret="$firehawksecret"
+    export testsecret="$testsecret"
+    echo "...Aquired firehawksecret"
 fi
 
 # Update the ci pipeline ID after a destroy operation.  Tagging of new resources will inherit this ID.
@@ -405,7 +413,7 @@ source_vars () {
     echo_if_not_silent "...Sourcing var_file $var_file"
     # If initialising vagrant vars, no encryption is required
     if [[ -z "$var_file" ]] || [[ "$var_file" = "secrets" ]]; then
-        var_file="secrets-$TF_VAR_envtier"
+        var_file="secrets-general"
         echo_if_not_silent "...Using vault file $var_file"
         template_path="$TF_VAR_firehawk_path/secrets.template"
     elif [[ "$var_file" = "vagrant" ]]; then
@@ -464,10 +472,10 @@ source_vars () {
         printf "\n${GREEN}Will source ${var_file_basename}. encrypt_mode = $encrypt_mode ${NC}\n"
         # set vault key location based on envtier dev/prod
         if [[ "$TF_VAR_envtier" = 'dev' ]]; then
-            export vault_key="$(to_abs_path $TF_VAR_secrets_path/keys/$TF_VAR_vault_key_name_dev)"
+            export vault_key="$(to_abs_path $TF_VAR_secrets_path/keys/$TF_VAR_vault_key_name_general)"
             echo_if_not_silent "set vault_key $vault_key"
         elif [[ "$TF_VAR_envtier" = 'prod' ]]; then
-            export vault_key="$(to_abs_path $TF_VAR_secrets_path/keys/$TF_VAR_vault_key_name_prod)"
+            export vault_key="$(to_abs_path $TF_VAR_secrets_path/keys/$TF_VAR_vault_key_name_general)"
             echo_if_not_silent "set vault_key $vault_key"
         else 
             printf "\n...${RED}WARNING: envtier evaluated to no match for dev or prod.  Inspect update_vars.sh to handle this case correctly.${NC}\n"
@@ -635,10 +643,10 @@ source_vars () {
         # lastly update the vault key path
         # set vault key location based on envtier dev/prod
         if [[ "$TF_VAR_envtier" = 'dev' ]]; then
-            export vault_key="$(to_abs_path $TF_VAR_secrets_path/keys/$TF_VAR_vault_key_name_dev)"
+            export vault_key="$(to_abs_path $TF_VAR_secrets_path/keys/$TF_VAR_vault_key_name_general)"
             echo_if_not_silent "set vault_key $vault_key"
         elif [[ "$TF_VAR_envtier" = 'prod' ]]; then
-            export vault_key="$(to_abs_path $TF_VAR_secrets_path/keys/$TF_VAR_vault_key_name_prod)"
+            export vault_key="$(to_abs_path $TF_VAR_secrets_path/keys/$TF_VAR_vault_key_name_general)"
             echo_if_not_silent "set vault_key $vault_key"
         else 
             printf "\n...${RED}WARNING: envtier evaluated to no match for dev or prod.  Inspect update_vars.sh to handle this case correctly.${NC}\n"
@@ -702,7 +710,8 @@ fi
 
 echo_if_not_silent "...Current pipeline vars:"
 echo_if_not_silent "TF_VAR_active_pipeline: $TF_VAR_active_pipeline"
-if [[ -z "$TF_VAR_workstation_ethernet_device" ]]; then echo "Ethernet not defined for workstation route"; exit 1; fi
-
+# echo "TF_VAR_key_name: $TF_VAR_key_name"
+# echo "TF_VAR_local_key_path: $TF_VAR_local_key_path"
 echo_if_not_silent "...Done."
+
 if [[ "$SHOWCOMMANDS" == true ]]; then set -x; fi # After finishing the script, we enable set -x to show input again.

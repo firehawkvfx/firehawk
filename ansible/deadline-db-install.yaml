@@ -13,6 +13,6 @@
     ubl: true
     
   roles:
-    - role: s3-bucket
+    - role: firehawkvfx.core.s3_bucket_shared
     - {role: deadlinedb, tags: 'deadlinedb'}
     

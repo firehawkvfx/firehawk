@@ -22,7 +22,7 @@
 
 # BEGIN CONFIGURATION #
 
-# TF_VAR_vault_key_name_dev:
+# TF_VAR_vault_key_name_general:
 # The name of the key file to generate for ansible vault to encrypt/decrypt secrets.
 # If this file doesn't exist it will be created with a key used to encrypt and decrypt secrets in combination with a password.
 # The password and this keyfile are both needed to decrypt secrets.
@@ -34,24 +34,8 @@
 # 3) Specify a new key name here (usually with todays date), and encrypt your secrets again with this new key file and password.
 # 4) This process should be applied to both dev and production environments as soon as possible.
 # Automation of key/pass rotation without destroying/rebuilding infrastructure will be possible in the future.
-# default: TF_VAR_vault_key_name_dev=.vault-key-20191208-dev
-TF_VAR_vault_key_name_dev=insertvalue
-
-# TF_VAR_vault_key_name_prod:
-# The name of the key file to generate for ansible vault to encrypt/decrypt secrets.
-# If this file doesn't exist it will be created with a key used to encrypt and decrypt secrets in combination with a password.
-# The password and this keyfile are both needed to decrypt secrets.
-# These keyfiles should not be committed to version control, but should be backed up on an encrypted volume.
-# As they are rotated over time, these keyfiles will be needed in the future if you need to decrypt previous commits of your secrets.
-# If you suspect any breach or if any accidental commits of unencrypted secret values are made, you should:
-# 1) At the very least, any cloud (AWS) secret keys must be destroyed/rotated IMMEDIATELY from your AWS console in your dev and production environments.
-# 2) Destroy all infrastructure, Decrypt all secrets variable files, change all passwords and keys contained in them to prepare for encryption with a new key.
-# 3) Specify a new key name here (usually with todays date), and encrypt your secrets again with this new key file and password.
-# 4) This process should be applied to both dev and production environments as soon as possible.
-# Automation of key/pass rotation without destroying/rebuilding infrastructure will be possible in the future.
-# default: TF_VAR_vault_key_name_prod=.vault-key-20200119-prod
-TF_VAR_vault_key_name_prod=insertvalue
-
+# default: TF_VAR_vault_key_name_general=.vault-key-20191208-general
+TF_VAR_vault_key_name_general=insertvalue
 
 # TF_VAR_bridgenic: 
 # The network interface virtual box will use to bridge its connection 

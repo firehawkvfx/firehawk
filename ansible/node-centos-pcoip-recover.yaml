@@ -32,7 +32,7 @@
       bucket: "ec2-linux-nvidia-drivers/{{ grid_folder }}"
       basedir: "/deployuser/downloads/nvidia/{{ grid_folder }}"
       filename: "*"
-      variable_user: "deployuser"
+      sync_user: "deployuser"
     when: driver_stat.stat.exists == false
 
   # - name: get nvidia driver
@@ -60,7 +60,7 @@
 
   - name: ensure an s3 bucket exists to store large files / installers for faster redeployment.
   - include_role:
-      name: s3-bucket
+      name: firehawkvfx.core.s3_bucket_shared
     tags:
       - sync_installers
 
@@ -173,7 +173,7 @@
     register: recover_output
 
   - debug:
-      msg:  "{{ recover_output.stdout }}"
+      msg: "{{ recover_output.stdout }}"
 
   # - name: Wait for the reboot to complete if there was a change.
   #   wait_for_connection:

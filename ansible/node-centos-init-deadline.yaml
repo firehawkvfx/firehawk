@@ -9,7 +9,7 @@
 
   tasks:
   - include_role:
-      name: s3-bucket
+      name: firehawkvfx.core.s3_bucket_shared
     tags:
     - sync_installers
 
@@ -80,7 +80,7 @@
       bucket: "{{ installers_bucket }}"
       basedir: "/home/deadlineuser/Downloads"
       filename: "{{ deadline_linux_filename }}"
-      variable_user: "deadlineuser"
+      sync_user: "deadlineuser"
 
 
   - name: create deadline installer dir
@@ -183,7 +183,7 @@
   #       {{ groups['role_softnas'][0] }}:{{ softnas_mount_source }} {{ softnas1_path_abs }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
   #       {{ softnas1_path_abs }} {{ prod_mount_path }} none defaults,bind,timeo=14 0 0
 
-  #       # {{ localnas1_private_ip }}:{{ localnas1_mount_path }} {{ localnas1_path_abs }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
+  #       # {{ localnas1_private_ip }}:{{ production_volume_path }} {{ localnas1_path_abs }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
   #       # {{ localnas1_path_abs }} {{ localnas1_remote_mount_path }} none defaults,bind,timeo=14 0 0
         
   # - name: mount all changes to fstab

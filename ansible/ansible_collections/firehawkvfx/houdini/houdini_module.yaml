@@ -15,15 +15,23 @@
   remote_user: "{{ variable_connect_as_user | default('centos') }}"
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
-  vars_files:
-    - /deployuser/ansible/group_vars/all/vars
-    - vars/main.yml
-    - /secrets/overrides/ansible/collections/firehawkvfx/houdini/vars/main.yml
 
   vars:
     ansible_become_pass: "{{ user_deadlineuser_pw }}"
 
+    vars_files_locs: [ "/{{ secrets_path }}/overrides/ansible/ansible_collections/firehawkvfx/houdini/vars/main.yml", "vars/main.yml" ] # The first file found will be used, allowing the one in your secrets location to override defaults.
+
+  vars_files:
+    - /deployuser/ansible/group_vars/all/vars
+
   tasks:
+  - name: aquire vars from secrets path before using defaults for softnas hosts 1
+    include_vars: "{{ item }}"
+    with_first_found: "{{ vars_files_locs }}"
+    tags:
+    - always
+
+
   - name: test connection
     debug:
       msg: "connection established"
@@ -34,12 +42,21 @@
   remote_user: deployuser
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
+  
+  vars:
+    vars_files_locs: [ "/{{ secrets_path }}/overrides/ansible/ansible_collections/firehawkvfx/houdini/vars/main.yml", "vars/main.yml" ] # The first file found will be used, allowing the one in your secrets location to override defaults.
+
   vars_files:
     - /deployuser/ansible/group_vars/all/vars
-    - vars/main.yml
-    - /secrets/overrides/ansible/collections/firehawkvfx/houdini/vars/main.yml
 
   tasks:
+  - name: aquire vars from secrets path before using defaults for softnas hosts 1
+    include_vars: "{{ item }}"
+    with_first_found: "{{ vars_files_locs }}"
+    tags:
+    - always
+
+
   # store deadline components required for submitter.
   - name: Ensure tmp dir exist - HoudiniSubmitter
     file:
@@ -118,12 +135,21 @@
   remote_user: "{{ variable_connect_as_user | default('centos') }}"
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
+  
+  vars:
+    vars_files_locs: [ "/{{ secrets_path }}/overrides/ansible/ansible_collections/firehawkvfx/houdini/vars/main.yml", "vars/main.yml" ] # The first file found will be used, allowing the one in your secrets location to override defaults.
+
   vars_files:
     - /deployuser/ansible/group_vars/all/vars
-    - vars/main.yml
-    - /secrets/overrides/ansible/collections/firehawkvfx/houdini/vars/main.yml
 
   tasks:
+  - name: aquire vars from secrets path before using defaults
+    include_vars: "{{ item }}"
+    with_first_found: "{{ vars_files_locs }}"
+    tags:
+    - always
+
+
   - name: Install Houdini
     # import_role:
     #   name: houdini_role
@@ -156,18 +182,25 @@
   remote_user: deployuser
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
-  vars_files:
-    - /deployuser/ansible/group_vars/all/vars
-    - vars/main.yml
-    - /secrets/overrides/ansible/collections/firehawkvfx/houdini/vars/main.yml
 
   vars:
     my_password: "{{ user_deadlineuser_pw }}"
     no_extension: "{{ deadline_linux_installers_tar | splitext | first }}"
     basename: "{{ no_extension.split('/')[-1] }}"
     houdini_install_type: 'node'
-    
+    vars_files_locs: [ "/{{ secrets_path }}/overrides/ansible/ansible_collections/firehawkvfx/houdini/vars/main.yml", "vars/main.yml" ] # The first file found will be used, allowing the one in your secrets location to override defaults.
+
+  vars_files:
+    - /deployuser/ansible/group_vars/all/vars
+
   tasks:
+  - name: aquire vars from secrets path before using defaults
+    include_vars: "{{ item }}"
+    with_first_found: "{{ vars_files_locs }}"
+    tags:
+    - always
+
+
   - name: setup houdini plugin in deadline repository for each major version.  This identical role use occurs in 2 locations - after deadline install and with install of Houdini
     include_role:
       name: deadlinedb_houdini_plugins

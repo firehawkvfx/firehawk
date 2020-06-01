@@ -1,0 +1,1 @@
+secrets_path: "{{ lookup('env','TF_VAR_secrets_path') }}"

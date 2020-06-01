@@ -1,0 +1,155 @@
+- hosts: role_softnas
+  remote_user: "{{ softnas_ssh_user | default('ec2-user') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
+  become: true
+  vars_files:
+    - /deployuser/ansible/group_vars/all/vars
+    - vars/main.yml
+
+  vars:
+    skip_packages: false
+    my_password: "{{ user_softnas_pw | string | password_hash('sha512') }}"
+
+  tasks:
+  - name: Collect some facts only for ansible_distribution
+    setup:
+      gather_subset:
+        - '!all'
+        - 'min'
+    tags:
+    - always
+
+  - name: ensure file exists
+    copy:
+      content: ""
+      dest: /tmp/updatetype
+      force: no
+
+  - name: check major version
+    debug:
+      var: ansible_distribution_major_version
+
+  - getent:
+      database: passwd
+      key: softnas
+      fail_key: False
+
+  - name: check if user exists
+    debug:
+      var: getent_passwd['softnas']
+
+  - name: "Set login user password - softnas"
+    user:
+      name: softnas
+      password: "{{ my_password }}"
+    when: getent_passwd['softnas'] is defined
+    no_log: true
+
+  - name: ensure file exists
+    copy:
+      content: ""
+      dest: /var/tmp/ansible_log
+      force: no
+
+  - name: init authorized_keys
+    copy:
+      content: ""
+      dest: /root/.ssh/authorized_keys
+      force: no
+    become: true
+
+  - name: skip packages
+    debug:
+      var: skip_packages
+
+  - name: install nmap - for some reason package manager in ansible refuses, so we use a shell
+    shell: |
+      yum install nmap -y
+    when: skip_packages|bool == false
+
+  # - name: install nmap
+  #   package:
+  #     name: nmap
+  #     state: present
+  #   when: skip_packages|bool == false
+
+  # tasks file for roles/init-host
+  - name: change hostname
+    hostname:
+      name: "nas1"
+      
+  - name: add myself to /etc/hosts
+    lineinfile:
+      dest: /etc/hosts
+      regexp: '^127\.0\.0\.1[ \t]+localhost'
+      line: "127.0.0.1 localhost nas1"
+      state: present
+
+  - name: Set hostname var in bash profile
+    lineinfile:
+      path: /root/.bash_profile
+      line: 'export HOSTNAME=nas1'
+
+  - name: check if settings file exists
+    stat: 
+      path: /var/www/softnas/config/general_settings.ini
+    register: general_settings
+
+  - name: copy template file
+    copy:
+      remote_src: true
+      src: /var/www/softnas/config/general_settings.ini.prototype
+      dest: /var/www/softnas/config/general_settings.ini
+    when: not general_settings.stat.exists
+
+  - name: mail settings server in /var/www/softnas/config/general_settings.ini
+    lineinfile:
+      path: /var/www/softnas/config/general_settings.ini
+      regexp: 'smtp_mailserver[ \t]+=[ \t]+'
+      line: smtp_mailserver = smtp-relay.gmail.com
+      state: present
+      create: true
+
+  - name: mail settings server in /var/www/softnas/config/general_settings.ini
+    lineinfile:
+      path: /var/www/softnas/config/general_settings.ini
+      regexp: 'smtp_port[ \t]+=[ \t]+'
+      line: smtp_port = 587
+      state: present
+      create: true
+
+  - command: "nmap -p {{ item.port }} {{ item.dest }}"
+    register: nmap_result
+    with_items:
+      - { port: '80', dest: 'softnas.com' }
+      - { port: '443', dest: 'softnas.com' }
+      - { port: '80', dest: 'www.softnas.com' }
+      - { port: '443', dest: 'www.softnas.com' }
+      - { port: '80', dest: 'mirror.softnas.com' }
+      - { port: '443', dest: 'mirror.softnas.com' }
+
+  - debug:
+      msg: "{{ item.stdout }}"
+    with_items:
+      - "{{ nmap_result.results }}"
+    when: debug > 0
+
+  - name: Uncomment line from /etc/ssh/sshd_config
+    lineinfile:
+      path: "/etc/sysconfig/nfs"
+      regexp: '^#\s*MOUNTD_PORT=892.*$'
+      line: 'MOUNTD_PORT=892'
+  
+  # # these services need to be restarted if a reboot/update wasn't occuring and changes to volummes are made
+  # - service:
+  #     name: "{{ item }}"
+  #     state: restarted
+  #   with_items:
+  #     - nfs
+  #     - softnas
+  #     - monit
+
+  - name: login and ack agreement
+    shell: |
+      softnas-cmd login softnas {{ user_softnas_pw }} && softnas-cmd ackagreement
+    no_log: true

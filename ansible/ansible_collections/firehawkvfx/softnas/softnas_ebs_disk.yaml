@@ -1,0 +1,132 @@
+- hosts: ansible_control
+  remote_user: deployuser
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
+
+  vars:
+    #  Creates ebs volumes.  example -
+    #  ansible-playbook -i ansible/inventory ansible/ansible_collections/firehawkvfx/softnas/softnas_ebs_disk.yaml -v --extra-vars "ebs_disk_size=200 instance_id=i-654654354"
+
+    # you can use a custom description to add more mounts and ovveride the defaults here of 4 drives with
+    # /secrets/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml, where envtier is "dev" or "prod" for the current environment. and contents contain a copy of the mounts var below.
+
+    # By default we start with a minimum of 4 volumes intended for a raid 6 array.
+    # Raid 6 is used because its better than raid 5 with a hot spare (same number of drives), and allows double redundancy, which scale better to large volume counts.
+    # Raid 6 is better than mirroring because it can scale, mirroring cannot.  We can append drives on the array (softnas say up to 20) to scale the volume up without interruption.
+
+    # Consider your default ebs disk size for production.  Since it is not recommended to use more than 20 ebs volumes by Softnas, calculate the maximum space you think you will need if you scale up to that number.
+    # eg, if I set the volume size to 1TB, then I will start by paying for 4 x 1TB volumes.  I can scale up to 20 x 1 TB, and considering raid 6 (-2 drives), we will have up to 18TB to scale to, and can suffer up two drive failures.
+
+    # maintin a copy of all data as a backup.  Perhaps directly to s3, or using one of the default s3 drives, or onsite.
+    
+    # another example for idempotenccy.  good read!
+    # https://medium.com/devopslinks/attaching-a-persistent-ebs-volume-to-a-self-healing-instance-with-ansible-d0140431a22a
+
+    common_tags: "{{ lookup('env', 'common_tags') | from_json }}"
+
+    pool_name: "{{ envtier }}pool2"
+    volume_name: "{{ envtier }}volume2"
+    #instance_id: undefined
+    disk_device: 2
+    nas_name: softnas
+    ebs_disk_size: 50
+    # read docs on types.  standard, gp2 etc
+    ebs_disk_type: standard
+    ebs_disk_region: "{{ aws_region }}"
+    import_pool: true
+    # stopping the softnas instance ensures that any non present ebs volume pool will be available on boot.
+    # this is not desirable if adding volumes to an existing pool that is in use.
+    stop_softnas_instance: false
+    mode: attach
+
+    # this will be calculated later-
+    existing_bucket: false
+    existing_volume: false
+
+    vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/ebs-volumes/softnas_ebs_volumes.yaml", "files/softnas_ebs_volumes.yaml" ] # The first file found will be used, allowing the one in your secrets location to override defaults.
+  
+  vars_files:
+    - /deployuser/ansible/group_vars/all/vars
+    - vars/main.yml
+
+  tasks:
+  - name: aquire vars from secrets path before using defaults for softnas hosts 1
+    include_vars: "{{ item }}"
+    with_first_found: "{{ vars_files_locs }}"
+    tags:
+    - always
+
+
+  - name: Search for existing softnas instance by tag.  If no instance id is defined via command line, then the found instance id by tag wil be used.
+    ec2_instance_facts:
+      filters:
+        "tag:role": "softnas"
+      #region: "{{ ebs_disk_region }}"
+    register: existing_softnas_instance
+
+  - debug:
+      msg: "{{ existing_softnas_instance.instances[0].instance_id }}"
+
+  - set_fact:
+      instance_id: "{{ existing_softnas_instance.instances[0].instance_id }}"
+    when: instance_id is undefined  
+
+  - name: Stop the softnas instance before updating mounts.  This may take 5 minutes.
+    ec2:
+      instance_ids: '{{ instance_id }}'
+      region: '{{ aws_region }}'
+      state: stopped
+      wait: True
+    become_user: deployuser
+    when: stop_softnas_instance
+
+  - name: search for existing volume
+    ec2_vol_facts:
+      filters:
+        "tag:role": "softnas"
+        "tag:mount": "{{ item.path }}"
+      region: "{{ ebs_disk_region }}"
+    register: existing_volume
+    with_items:
+      - "{{ mounts }}"
+
+  - name: all volumes retrieved
+    debug:
+      msg: "{{ existing_volume }}"
+
+  - name: iterate over data
+    debug:
+      msg: "{{ item }}"
+    with_items: "{{ existing_volume.results }}"      
+
+  - include_tasks: softnas_ebs_first_time_installation.yaml
+    when: not item.volumes and mode == 'attach'
+    with_items: "{{ existing_volume.results }}"
+    
+  - include_tasks: softnas_ebs_existing_volume.yaml
+    when: item.volumes
+    with_items: "{{ existing_volume.results }}"
+    when: mode == 'attach'
+
+  - name: search for existing volume
+    ec2_vol_facts:
+      filters:
+        "tag:role": "softnas"
+        "tag:mount": "{{ item.path }}"
+      region: "{{ ebs_disk_region }}"
+    register: existing_volume
+    with_items:
+      - "{{ mounts }}"
+    when: mode == 'destroy'
+    
+  - include_tasks: softnas_ebs_delete_volume.yaml
+    when: mode == 'destroy' and item.volumes
+    with_items: "{{ existing_volume.results }}"
+    
+  - name: Start the softnas instance after updating mounts
+    ec2:
+      instance_ids: '{{ instance_id }}'
+      region: '{{ aws_region }}'
+      state: running
+      wait: True
+    become_user: deployuser
+    when: stop_softnas_instance|bool and mode == 'attach'

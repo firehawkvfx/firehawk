@@ -1,9 +1,20 @@
 ### modify houdini environment vars
 
+- name: show first existing file or ignore if none do
+  set_fact:
+    houdini_template: "{{ lookup('first_found', findme) }}"
+  vars:
+    findme:
+      - "/secrets/overrides/ansible/ansible_collections/firehawkvfx/houdini/roles/install_deadline_role/files/houdini_template.env"
+      - "houdini_template.env"
+
+- debug:
+    var: houdini_template
+
 - name: Generate houdini.env config from template
   template:
-    src: /secrets/houdini{{ houdini_version_item.houdini_major_version }}/houdini_template.env
-    dest: /secrets/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env
+    src: "{{ houdini_template }}"
+    dest: "/tmp/houdini{{ houdini_version_item.houdini_major_version }}_from_template.env"
   become: yes
   connection: local
   tags:
@@ -12,15 +23,15 @@
 
 - name: copy env
   copy:
-    src: /secrets/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env
-    dest: /home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini_from_template.env
+    src: "/tmp/houdini{{ houdini_version_item.houdini_major_version }}_from_template.env"
+    dest: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini{{ houdini_version_item.houdini_major_version }}_from_template.env"
   become: true
   tags:
   - cloud-install
   - onsite-install
 
 - name: "Get difference from two houdini.env files"
-  command: diff /home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env /home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini_from_template.env
+  command: diff /home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env /home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini{{ houdini_version_item.houdini_major_version }}_from_template.env
   failed_when: "diff.rc > 1"
   register: diff
   become: yes
@@ -40,7 +51,7 @@
 
 - name: copy houdini.env and overwrite
   copy:
-    src: /secrets/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env
+    src: /tmp/houdini{{ houdini_version_item.houdini_major_version }}_from_template.env
     dest: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env"
   become: true
   tags:

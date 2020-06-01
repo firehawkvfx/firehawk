@@ -15,8 +15,6 @@
   register: Deadline10RemoteClient
   become: true
 
-
-
 - name: Ensure db is still valid.  if this fails, db is corrupted or there is a permissions issue
   block:
     - name: Fail if missing

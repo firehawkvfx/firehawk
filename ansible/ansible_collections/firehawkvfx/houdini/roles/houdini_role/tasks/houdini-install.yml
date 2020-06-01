@@ -121,42 +121,10 @@
     bucket: "{{ installers_bucket }}"
     basedir: "{{ download_to_dir }}"
     filename: "{{ houdini_linux_tar_filename | basename }}"
-    # variable_user: "deployuser" # deploy user has access to the default downloads folder.
+    sync_user: "{{ variable_user }}"
     # variable_user: "{{ variable_user }}" # bypas since variable user should hopefully be passed through.  self referencing vars in yaml isn't supported.
 
 # Note must handle condition if auto version is false and the file doesn't exist in the s3 bucket.
-
-# - name: 'Sync houdini from s3 if exist - pull - as user {{ variable_user }}'
-#   shell: |
-#     # set -x
-#     cd /opt/houdini_install_script/
-#     . /opt/houdini_install_script/exit_test.sh
-
-#     cd {{ download_to_dir }}/
-
-#     aws sts get-caller-identity
-#     ls -ltriah
-#     touch .test_permissions # Test write permissions
-#     rm -fr .test_permissions
-#     touch "{{ houdini_linux_tar_filename }}" # test write permissions on existing file if present
-    
-#     wordcount=`aws s3 ls s3://{{ bucket }}/|grep {{ houdini_linux_tar_filename }}|wc -c`
-#     if [[ "${wordcount}" -eq 0 ]]; then
-#       if [[ {{ houdini_version_item.houdini_auto_version }} ]]; then
-#         echo "File not present in S3 bucket.  Will download"
-#       else
-#         echo "Auto Version is false, but the file is not present in the S3 Bucket.  When using a specific verion of houdini, the file must exist in the S3 bucket."
-#         exit 1
-#       fi
-#     else
-#       echo "Sync S3 Bucket with local path."
-#       aws s3 sync s3://{{ bucket }}/ . --exclude "*" --include '{{ houdini_linux_tar_filename }}' --no-progress
-#     fi
-#   register: output
-#   become_user: "{{ variable_user }}"
-#   args:
-#     executable: /bin/bash
-
 - name: Download Houdini from SESI website - auto versions
   get_url:
     url: "{{ download_url }}"
@@ -177,7 +145,7 @@
   become: true
 
 - debug:
-    msg:  "{{ houdini_install_out.stdout }}"
+    msg: "{{ houdini_install_out.stdout }}"
   when: houdini_install_type != "server" and houdini_version_item.houdini_auto_version
 
 - name: NODE/WORKSTATION INSTALL - Permissions on zip file - node/workstation
@@ -199,7 +167,7 @@
   when: houdini_install_type != "server" and not houdini_version_item.houdini_auto_version
 
 - debug:
-    msg:  "{{ houdini_install_out.stdout }}"
+    msg: "{{ houdini_install_out.stdout }}"
   when: houdini_install_type != "server" and not houdini_version_item.houdini_auto_version
 
 - name: "NODE/WORKSTATION INSTALL - setup licensing mode will write to /opt/hfs{{ houdini_version_item.houdini_major_version }}/houdini/Licensing.opt"
@@ -288,7 +256,7 @@
   when: houdini_install_type == "server"
 
 - debug:
-    msg:  "{{ houdini_install_out.stdout }}"
+    msg: "{{ houdini_install_out.stdout }}"
   when: houdini_install_type == "server"
 
 - name: SERVER INSTALL - setup licensing mode
@@ -326,24 +294,8 @@
     bucket: "{{ installers_bucket }}"
     basedir: "{{ download_to_dir }}"
     filename: "{{ houdini_linux_tar_filename | basename }}"
+    sync_user: "{{ variable_user }}"
     # variable_user: "deployuser" # deploy user has access to the default downloads folder.
     # variable_user: "{{ variable_user }}" # bypas since variable user should hopefully be passed through.  self referencing vars in yaml isn't supported.
   tags:
     - sync_installers
-
-# - name: "ensure the houdini installer exists in the s3 bucket {{ installers_bucket }} Push if it doesn't."
-#   shell: |
-#     # set -x
-#     # aws sts get-caller-identity
-#     cd {{ download_to_dir }}/
-    
-#     wordcount=`aws s3 ls s3://{{ bucket }}/|grep {{ houdini_linux_tar_filename }}|wc -c`
-#     if [[ "${wordcount}" -eq 0 ]]; then
-#       echo "File not present in S3 bucket.  Will upload"
-#       aws s3 sync . s3://{{ installers_bucket }}/ --exclude "*" --include "{{ houdini_linux_tar_filename }}" --no-progress
-#     else
-#       echo "File present in s3 bucket.  Will not sync."
-#     fi
-#   become_user: "{{ variable_user }}"
-#   tags:
-#     - sync_installers

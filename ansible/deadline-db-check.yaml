@@ -2,9 +2,23 @@
 - hosts: "{{ variable_host | default('firehawkgateway') }}"
   remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
   gather_facts: "{{ variable_gather_facts | default('false') }}"
-  become_user: root
+  # become_user: root
+  any_errors_fatal: true
+  
+  pre_tasks:
+  - name: Connection test without sudo- whoami
+    command: "echo 'connected'; whoami"
+
+- hosts: "{{ variable_host | default('firehawkgateway') }}"
+  remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
+  # become_user: root
   become: true
   any_errors_fatal: true
+  
+  pre_tasks:
+  - name: Connection test without sudo
+    command: "echo connected; whoami"
 
   roles:
   - deadline-db-check

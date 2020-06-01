@@ -1,3 +1,6 @@
 #!/bin/bash
 
-ansible-playbook -i "$TF_VAR_inventory" ansible/softnas-init.yaml -vvv --extra-vars "skip_packages=false"
+echo "TF_VAR_firehawk_path: $TF_VAR_firehawk_path"
+echo "TF_VAR_secrets_path: $TF_VAR_secrets_path"
+
+ansible-playbook -i ../secrets/dev/inventory ansible/deadline-db-check.yaml -vvv

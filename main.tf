@@ -2,7 +2,7 @@ provider "aws" {
   #  if you haven't installed and configured the aws cli, you will need to provide your aws access key and secret key.
   region = var.aws_region
   # in a dev environment these version locks below can be disabled.  in production, they should be locked based on the suggested versions from terraform init.
-  version = "~> 2.24"
+  # version = "~> ${var.aws_provider_version}"
 }
 
 data "aws_caller_identity" "current" {}
@@ -36,6 +36,8 @@ provider "random" {
 variable "enable_nat_gateway" {
   default = true
 }
+
+variable "aws_provider_version" {}
 
 variable "private_subnet1" {
 }
@@ -206,15 +208,20 @@ resource "null_resource" "dependency_node_centos" {
   }
 }
 
+locals {
+  config_template_file_path = "/deployuser/ansible/ansible_collections/firehawkvfx/deadline/roles/deadline_spot/files/config_template.json"
+  override_config_template_file_path = "/secrets/overrides/ansible/ansible_collections/firehawkvfx/deadline/roles/deadline_spot/files/config_template.json"
+}
+
 resource "null_resource" "provision_deadline_spot" {
   count      = (var.site_mounts && var.provision_deadline_spot_plugin) ? 1 : 0
   depends_on = [null_resource.dependency_deadline_spot, null_resource.dependency_node_centos, module.firehawk_init.local-provisioning-complete]
 
   triggers = {
     ami_id                  = module.node.ami_id
-    config_template_sha1    = "${sha1(file("/secrets/spot-fleet-templates/config_template.json"))}"
-    deadline_spot_sha1      = "${sha1(file("/deployuser/ansible/deadline-spot.yaml"))}"
-    deadline_spot_role_sha1 = "${sha1(file("/deployuser/ansible/roles/deadline-spot/tasks/main.yml"))}"
+    config_template_sha1    = "${sha1(file( fileexists(local.override_config_template_file_path) ? local.override_config_template_file_path : local.config_template_file_path))}"
+    deadline_spot_sha1      = "${sha1(file("/deployuser/ansible/ansible_collections/firehawkvfx/deadline/deadline_spot.yaml"))}"
+    deadline_spot_role_sha1 = "${sha1(file("/deployuser/ansible/ansible_collections/firehawkvfx/deadline/roles/deadline_spot/tasks/main.yml"))}"
     deadline_roles_tf_sha1  = "${sha1(file("/deployuser/modules/deadline/main.tf"))}"
     spot_access_key_id      = module.deadline.spot_access_key_id
     spot_secret             = module.deadline.spot_secret
@@ -229,7 +236,7 @@ resource "null_resource" "provision_deadline_spot" {
       cd /deployuser
       echo ${module.deadline.spot_access_key_id}
       echo ${module.deadline.spot_secret}
-      ANSIBLE_STDOUT_CALLBACK=debug ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-spot.yaml -v --extra-vars 'volume_type=${var.node_centos_volume_type} volume_size=${var.node_centos_volume_size} ami_id=${module.node.ami_id} snapshot_id=${module.node.snapshot_id} subnet_id=${module.vpc.private_subnets[0]} spot_instance_profile_arn="${module.deadline.spot_instance_profile_arn}" security_group_id=${module.node.security_group_id} spot_access_key_id=${module.deadline.spot_access_key_id} spot_secret=${module.deadline.spot_secret} account_id=${lookup(local.common_tags, "accountid", "0")}'
+      ANSIBLE_STDOUT_CALLBACK=debug ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/deadline/deadline_spot.yaml -v --extra-vars 'volume_type=${var.node_centos_volume_type} volume_size=${var.node_centos_volume_size} ami_id=${module.node.ami_id} snapshot_id=${module.node.snapshot_id} subnet_id=${module.vpc.private_subnets[0]} spot_instance_profile_arn="${module.deadline.spot_instance_profile_arn}" security_group_id=${module.node.security_group_id} spot_access_key_id=${module.deadline.spot_access_key_id} spot_secret=${module.deadline.spot_secret} account_id=${lookup(local.common_tags, "accountid", "0")}'
 EOT
   }
 }

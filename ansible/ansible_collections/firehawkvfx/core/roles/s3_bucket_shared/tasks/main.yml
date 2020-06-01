@@ -1,0 +1,27 @@
+# Warning: this bucket and its policies is shared by the production and dev environment.
+# changes will affect all environments simultaneusly.
+
+- name: Generate bucket policy from template
+  template:
+    src: bucket_policy.template.json
+    dest: "{{ policy_file_path }}"
+  become: yes
+  connection: local
+
+- name: output
+  debug:
+    msg: "{{ lookup('file', policy_file_path) }}"
+
+- name: "Ensure a shared s3 bucket exists for mutliple accounts - with the aws user credentials - {{ installers_bucket }}"
+  s3_bucket:
+    name: "{{ installers_bucket }}"
+    region: "{{ aws_region }}"
+    policy: "{{ lookup('file', policy_file_path) }}"
+    tags:
+      ansible_play_name: "{{ ansible_play_name }}"
+      playbook_dir: "{{ playbook_dir }}"
+  become: false
+  environment: # this bucket is shared between dev and prod accounts to ensure installers are available to both accounts.
+    AWS_ACCESS_KEY_ID: "{{ lookup('env','AWS_ACCESS_KEY_ID_prod') }}"
+    AWS_SECRET_ACCESS_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY_prod') }}"
+  delegate_to: ansible_control

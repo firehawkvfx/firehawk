@@ -10,3 +10,7 @@
 [submodule "modules/node_centos/modules/openfirehawk-houdini-tools"]
 	path = modules/node_centos/modules/openfirehawk-houdini-tools
 	url = https://github.com/firehawkvfx/openfirehawk-houdini-tools.git
+[submodule "ansible/ansible_collections/firehawkvfx/houdini/roles/houdini_openfirehawk_houdini_tools_sync/files/openfirehawk_houdini_tools"]
+	path = ansible/ansible_collections/firehawkvfx/houdini/roles/houdini_openfirehawk_houdini_tools_sync/files/openfirehawk_houdini_tools
+	url = https://github.com/firehawkvfx/openfirehawk-houdini-tools.git
+
