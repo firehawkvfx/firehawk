@@ -130,7 +130,7 @@ else
         export TF_VAR_envtier='dev'
     fi
     keys_path=~/firehawk-rollout-$TF_VAR_envtier/secrets/keys/.
-    then echo "...Copying $TF_VAR_envtier keys from: $keys_path to: $TF_VAR_secrets_path"
+    echo "...Copying $TF_VAR_envtier keys from: $keys_path to: $TF_VAR_secrets_path"
     cp -r $keys_path $TF_VAR_secrets_path/keys/.
 fi
 
