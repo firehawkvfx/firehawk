@@ -573,11 +573,12 @@ locals {
   id = element(concat(aws_instance.softnas1.*.id, list("")), 0)
   provision_softnas         = local.use_prebuilt_softnas_ami ? false : true # when using an aquired ami, we will not create another ami as this would replace it.
   skip_packages = local.use_prebuilt_softnas_ami # when using an aquired ami, we will not create another ami as this would replace it.
+  private_ip = "${element(concat(aws_instance.softnas1.*.private_ip, list("")), 0)}"
 }
 
 resource "null_resource" "wait_softnas_up" {
   count      = ( !var.sleep && var.softnas_storage ) ? 1 : 0
-  depends_on = [ aws_instance.softnas1, aws_instance.softnas1[0].private_ip ]
+  depends_on = [ aws_instance.softnas1, local.private_ip ]
 
   triggers = {
     instanceid = "${join(",", aws_instance.softnas1.*.id)}",
