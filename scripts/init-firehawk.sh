@@ -274,9 +274,9 @@ else
   fi
 
   if [[ "$tf_init" == true ]]; then
-    echo "...Currently running instances: scripts/aws-running-instances.sh"
-    $TF_VAR_firehawk_path/scripts/aws-running-instances.sh
-    echo ""
+    # echo "...Currently running instances: scripts/aws-running-instances.sh" # wont work if vm isn't initialised
+    # $TF_VAR_firehawk_path/scripts/aws-running-instances.sh
+    # echo ""
     
     echo "...Terraform Init"
     terraform init; exit_test # Required to initialise any new modules
