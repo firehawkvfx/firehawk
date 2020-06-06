@@ -135,9 +135,6 @@ variable "softnas2_private_ip1" {
 variable "softnas2_private_ip2" {
 }
 
-variable "ebs_disk_size" {
-}
-
 variable "softnas_mailserver" {
 }
 
