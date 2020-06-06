@@ -673,7 +673,7 @@ locals {
 
 resource "null_resource" "provision_softnas" {
   count      = ( !var.sleep && var.softnas_storage ) ? 1 : 0
-  depends_on = [aws_instance.softnas1, null_resource.wait_softnas_up, null_resource.create_ami_init]
+  depends_on = [aws_instance.softnas1, null_resource.wait_softnas_up, null_resource.create_ami_init, var.init_aws_local_workstation]
 
   triggers = {
     instanceid = "${join(",", aws_instance.softnas1.*.id)}"

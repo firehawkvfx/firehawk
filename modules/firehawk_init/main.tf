@@ -321,3 +321,11 @@ output "local-provisioning-complete" {
   ]
 }
 
+
+
+output "init_aws_local_workstation" {
+  value = element(concat(null_resource.init_aws_local_workstation.*.id, list("")), 0)
+  depends_on = [
+    null_resource.init_aws_local_workstation
+  ]
+}

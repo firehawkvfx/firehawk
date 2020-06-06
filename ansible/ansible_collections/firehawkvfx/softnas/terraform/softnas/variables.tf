@@ -87,6 +87,8 @@ variable "softnas2_private_ip1" {
 variable "softnas2_private_ip2" {
 }
 
+variable "init_aws_local_workstation" {}
+
 #softnas provides no ability to query the ami you will need by region.  it must be added to the map manually.
 variable "instance_type" {
   type = map(string)
