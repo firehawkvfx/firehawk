@@ -263,7 +263,7 @@ module "softnas" {
   softnas_storage                = var.softnas_storage
   source                         = "./ansible/ansible_collections/firehawkvfx/softnas/terraform/softnas"
 
-  envtier = var.envtier
+  # envtier = var.envtier
 
   allow_prebuilt_softnas_ami = var.allow_prebuilt_softnas_ami
 
