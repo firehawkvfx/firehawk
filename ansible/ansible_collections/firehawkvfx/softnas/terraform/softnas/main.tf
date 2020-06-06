@@ -428,7 +428,7 @@ data "aws_ami_ids" "burrst_softnas" {
   owners = ["679593333241"] # the softnas account id
   filter {
     name   = "description"
-    values = ["SoftNAS - 4.4.1"]
+    values = ["SoftNAS - 4.4.3"]
   }
 }
 
@@ -436,7 +436,7 @@ data "aws_ami_ids" "burrst_softnas_byol" {
   owners = ["679593333241"] # the softnas account id
   filter {
     name   = "description"
-    values = ["SoftNAS BYOL - 4.4.1"]
+    values = ["SoftNAS BYOL - 4.4.3"]
   }
 }
 

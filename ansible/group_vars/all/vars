@@ -170,8 +170,6 @@ storage_user_secret: "{{ lookup('env','storage_user_secret') }}"
 s3_disk_password: "{{ lookup('env','TF_VAR_s3_disk_password') }}"
 s3_disk_size: "{{ lookup('env','TF_VAR_s3_disk_size') }}"
 
-ebs_disk_size: "{{ lookup('env','TF_VAR_ebs_disk_size') }}"
-
 key_name: "{{ lookup('env','TF_VAR_key_name') }}"
 local_key_path: "{{ lookup('env','TF_VAR_local_key_path') }}"
 

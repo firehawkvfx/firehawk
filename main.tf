@@ -261,7 +261,7 @@ variable "allow_prebuilt_softnas_ami" { # after an initial deployment a base AMI
 
 module "softnas" {  
   softnas_storage                = var.softnas_storage
-  source                         = "./modules/softnas"
+  source                         = "./ansible/ansible_collections/firehawkvfx/softnas/terraform/softnas"
 
   envtier = var.envtier
 

@@ -24,6 +24,7 @@ sed -i 's/^TF_VAR_install_houdini=.*$/TF_VAR_install_houdini=false/' $config_ove
 sed -i 's/^TF_VAR_install_deadline_db=.*$/TF_VAR_install_deadline_db=false/' $config_override # install deadline
 sed -i 's/^TF_VAR_install_deadline_rcs=.*$/TF_VAR_install_deadline_rcs=false/' $config_override # install deadline
 sed -i 's/^TF_VAR_install_deadline_worker=.*$/TF_VAR_install_deadline_worker=false/' $config_override # install deadline
+sed -i 's/^TF_VAR_workstation_enabled=.*$/TF_VAR_workstation_enabled=false/' $config_override # install deadline
 sed -i 's/^TF_VAR_tf_destroy_before_deploy=.*$/TF_VAR_tf_destroy_before_deploy=false/' $config_override # destroy before deploy
 # sed -i 's/^TF_VAR_taint_single=.*$/TF_VAR_taint_single=(module.bastion.aws_instance.bastion[0])/' $config_override # taint vpn
 sed -i 's/^TF_VAR_taint_single=.*$/TF_VAR_taint_single=(module.vpc.module.vpn.module.openvpn.aws_instance.openvpn[0])/' $config_override # taint vpn

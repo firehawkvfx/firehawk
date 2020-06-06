@@ -24,6 +24,7 @@ sed -i 's/^TF_VAR_install_houdini=.*$/TF_VAR_install_houdini=false/' $config_ove
 sed -i 's/^TF_VAR_install_deadline_db=.*$/TF_VAR_install_deadline_db=false/' $config_override # install deadline
 sed -i 's/^TF_VAR_install_deadline_rcs=.*$/TF_VAR_install_deadline_rcs=false/' $config_override # install deadline
 sed -i 's/^TF_VAR_install_deadline_worker=.*$/TF_VAR_install_deadline_worker=false/' $config_override # install deadline
+sed -i 's/^TF_VAR_workstation_enabled=.*$/TF_VAR_workstation_enabled=false/' $config_override # install deadline
 sed -i 's/^TF_VAR_taint_single=.*$/TF_VAR_taint_single=(module.softnas.aws_instance.softnas1[0] module.softnas.aws_network_interface.nas1eth0[0])/' $config_override # taint 
 # sed -i 's/^TF_VAR_taint_single=.*$/TF_VAR_taint_single=(module.softnas.null_resource.provision_softnas_volumes[0])/' $config_override # taint 
 sed -i 's/^TF_VAR_allow_prebuilt_softnas_ami=.*$/TF_VAR_allow_prebuilt_softnas_ami=true/' $config_override # allow use of a prebuilt ami with the update if it exists
