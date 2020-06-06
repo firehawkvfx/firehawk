@@ -177,14 +177,14 @@ parse_opts () {
                         echo "init_vm_config set: $init_vm_config"
                         ;;
                     softnas-destroy-volumes)
-                        init_vm_config="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+                        set_softnas_volatile="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
                         opt="${OPTARG}"
-                        echo "set_softnas_volatile set: $init_vm_config"
+                        echo "set_softnas_volatile set: $set_softnas_volatile"
                         ;;
                     softnas-destroy-volumes=*)
-                        init_vm_config=${OPTARG#*=}
+                        set_softnas_volatile=${OPTARG#*=}
                         opt=${OPTARG%=$val}
-                        echo "set_softnas_volatile set: $init_vm_config"
+                        echo "set_softnas_volatile set: $set_softnas_volatile"
                         ;;
                     fast)
                         fast="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
