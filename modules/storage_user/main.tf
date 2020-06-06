@@ -2,7 +2,7 @@
 
 
 resource "aws_iam_user_group_membership" "s3_group_membership" {
-  user = aws_iam_user.storage_user.name
+  user = "${aws_iam_user.storage_user.name}"
 
   groups = [
     "${aws_iam_group.s3_admin_group.name}",
@@ -17,7 +17,7 @@ resource "aws_iam_group" "query_instances_group" {
 
 resource "aws_iam_group_policy" "query_instances_group_policy" {
   name  = "query_instances_group_policy_pipeid${lookup(var.common_tags, "pipelineid", "0")}"
-  group = aws_iam_group.query_instances_group.id
+  group = "${aws_iam_group.query_instances_group.id}"
 
   policy = <<EOF
 {
