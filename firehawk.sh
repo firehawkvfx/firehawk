@@ -77,6 +77,7 @@ tf_init=false
 init_vm_config=true
 vagrant_halt=false
 fast=false
+set_softnas_volatile=false
 
 parse_opts () {
     local OPTIND
@@ -175,6 +176,16 @@ parse_opts () {
                         opt=${OPTARG%=$val}
                         echo "init_vm_config set: $init_vm_config"
                         ;;
+                    softnas-destroy-volumes)
+                        init_vm_config="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+                        opt="${OPTARG}"
+                        echo "set_softnas_volatile set: $init_vm_config"
+                        ;;
+                    softnas-destroy-volumes=*)
+                        init_vm_config=${OPTARG#*=}
+                        opt=${OPTARG%=$val}
+                        echo "set_softnas_volatile set: $init_vm_config"
+                        ;;
                     fast)
                         fast="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
                         opt="${OPTARG}"
@@ -206,182 +217,182 @@ parse_opts "$@"
 
 echo "opts $@"
 
-# if [[ "$fast" == true ]]; then
-#     echo "Fast start.  Disable init_vm_config"
-#     init_vm_config=false
-# fi
+if [[ "$fast" == true ]]; then
+    echo "Fast start.  Disable init_vm_config"
+    init_vm_config=false
+fi
 
 
-# # This is the directory of the current script
-# SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-# SCRIPTDIR=$(to_abs_path $SCRIPTDIR)
-# printf "\n...checking scripts directory at $SCRIPTDIR\n\n"
-# # source an exit test to bail if non zero exit code is produced.
-# . $SCRIPTDIR/scripts/exit_test.sh
+# This is the directory of the current script
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+SCRIPTDIR=$(to_abs_path $SCRIPTDIR)
+printf "\n...checking scripts directory at $SCRIPTDIR\n\n"
+# source an exit test to bail if non zero exit code is produced.
+. $SCRIPTDIR/scripts/exit_test.sh
 
-# # If not buildinging a package (.box file) and we specify a box file, then it must be the basis to start from
-# # else if we are building a package, it will be a post process .
+# If not buildinging a package (.box file) and we specify a box file, then it must be the basis to start from
+# else if we are building a package, it will be a post process .
 
-# time_passed () {
-#     duration_block=$SECONDS; printf "$(($duration_block / 60)) minutes $(($duration_block % 60)) seconds elapsed for firehawk.sh.\n"
-# }
-# time_passed
+time_passed () {
+    duration_block=$SECONDS; printf "$(($duration_block / 60)) minutes $(($duration_block % 60)) seconds elapsed for firehawk.sh.\n"
+}
+time_passed
 
-# if [[ "$TF_VAR_fast" == true ]]; then # Install Vagrant Plugins
-#     echo "...Fast mode.  Bypassing plugin evaluation"
-# else
-#     vagrant_plugin_list="$(vagrant plugin list)"
-#     if echo "$vagrant_plugin_list" | grep 'vagrant-disksize' -q; then echo 'plugin vagrant-disksize installed'; else echo '...installing'; vagrant plugin install vagrant-disksize; fi
-#     if echo "$vagrant_plugin_list" | grep 'vagrant-reload' -q; then echo 'plugin vagrant-reload installed'; else echo '...installing'; vagrant plugin install vagrant-reload; fi
-#     if echo "$vagrant_plugin_list" | grep 'vagrant-vbguest' -q; then echo 'plugin vagrant-vbguest installed'; else echo '...installing'; vagrant plugin install vagrant-vbguest; fi
-# fi
+if [[ "$TF_VAR_fast" == true ]]; then # Install Vagrant Plugins
+    echo "...Fast mode.  Bypassing plugin evaluation"
+else
+    vagrant_plugin_list="$(vagrant plugin list)"
+    if echo "$vagrant_plugin_list" | grep 'vagrant-disksize' -q; then echo 'plugin vagrant-disksize installed'; else echo '...installing'; vagrant plugin install vagrant-disksize; fi
+    if echo "$vagrant_plugin_list" | grep 'vagrant-reload' -q; then echo 'plugin vagrant-reload installed'; else echo '...installing'; vagrant plugin install vagrant-reload; fi
+    if echo "$vagrant_plugin_list" | grep 'vagrant-vbguest' -q; then echo 'plugin vagrant-vbguest installed'; else echo '...installing'; vagrant plugin install vagrant-vbguest; fi
+fi
 
-# # If box file in is defined, then vagrant will use this file in place of the standard image.
-# if [[ ! -z "$box_file_in" ]] ; then
-#     source ./update_vars.sh --$TF_VAR_envtier --box-file-in "$box_file_in" --vagrant
-# else
-#     source ./update_vars.sh --$TF_VAR_envtier --vagrant
-# fi
-# echo "...Finished sourcing"
+# If box file in is defined, then vagrant will use this file in place of the standard image.
+if [[ ! -z "$box_file_in" ]] ; then
+    source ./update_vars.sh --$TF_VAR_envtier --box-file-in "$box_file_in" --vagrant
+else
+    source ./update_vars.sh --$TF_VAR_envtier --vagrant
+fi
+echo "...Finished sourcing"
 
-# if [[ "$test_vm" = false ]] ; then # If an encrypted var is provided for the vault key, test decrypt that var before proceeding
-#     if [[ ! -z "$firehawksecret" ]]; then
-#         # To manually enter an ecnrypted variable in you configuration use:
-#         # firehawksecret=$(echo -n "test some input that will be encrypted and stored as an env var" | ansible-vault encrypt_string --vault-id $vault_key --stdin-name firehawksecret | base64 -w 0)
-#         # That encrypted variable can be extracted here if specified in your environment prior to running this script.
-#         echo "Aquire firehawksecret..."
-#         password=$(./scripts/ansible-encrypt.sh --vault-id $vault_key --decrypt $firehawksecret)
-#         if [[ -z "$password" ]]; then
-#             echo "ERROR: unable to extract password from defined firehawksecret.  Either remove the firehawksecret variable, or debugging will be required for automation to continue."
-#             exit 1
-#         fi
-#     else
-#         firehawksecret='' # Set secret to an empty string if not defined.
-#     fi
-# fi
+if [[ "$test_vm" = false ]] ; then # If an encrypted var is provided for the vault key, test decrypt that var before proceeding
+    if [[ ! -z "$firehawksecret" ]]; then
+        # To manually enter an ecnrypted variable in you configuration use:
+        # firehawksecret=$(echo -n "test some input that will be encrypted and stored as an env var" | ansible-vault encrypt_string --vault-id $vault_key --stdin-name firehawksecret | base64 -w 0)
+        # That encrypted variable can be extracted here if specified in your environment prior to running this script.
+        echo "Aquire firehawksecret..."
+        password=$(./scripts/ansible-encrypt.sh --vault-id $vault_key --decrypt $firehawksecret)
+        if [[ -z "$password" ]]; then
+            echo "ERROR: unable to extract password from defined firehawksecret.  Either remove the firehawksecret variable, or debugging will be required for automation to continue."
+            exit 1
+        fi
+    else
+        firehawksecret='' # Set secret to an empty string if not defined.
+    fi
+fi
 
-# time_passed
-
-
-# echo "Vagrant box ansiblecontrol$TF_VAR_envtier in $ansiblecontrol_box"
-# echo "Vagrant box firehawkgateway$TF_VAR_envtier in $firehawkgateway_box"
-
-# if [[ "$vagrant_halt" == true ]]; then
-#     echo "Halting vagrant"
-#     echo "Warning: Doing this deadlinedb while running (firehawkgateway) may corrupt it."
-#     vagrant halt
-# fi
+time_passed
 
 
-# printf "\nvagrant_up: $vagrant_up\n"
-# if [[ "$vagrant_up" == true ]]; then
-#     echo "vagrant status:"
-#     vagrant_status="$(vagrant status)"
-#     echo "$vagrant_status"
-#     echo "$vagrant_status" | grep -o 'running (virtualbox)' | wc -l
-#     total_running_machines=$(echo "$vagrant_status" | grep -o 'running (virtualbox)' | wc -l)
+echo "Vagrant box ansiblecontrol$TF_VAR_envtier in $ansiblecontrol_box"
+echo "Vagrant box firehawkgateway$TF_VAR_envtier in $firehawkgateway_box"
 
-#     echo "total_running_machines $total_running_machines"
-#     # total_running_machines=$(grep -cim1 'running' $vagrant_status)
-#     if [ $total_running_machines -ge 2 ]; then
-#         echo "...Both machines are already up."
-#     else
-#         echo "...Will start machines"
-#         sleep 3
-#         if [[ "$init_vm_config" == true ]]; then
-#             echo "...Starting vagrant, and provisioning."
-#             # vagrant up --provision | ts '[%H:%M:%S]'
-#             echo "pwd $(pwd)"
-#             $TF_VAR_firehawk_path/vagrant_provision.sh | ts '[%H:%M:%S]'
-#         else
-#             echo "...Starting vagrant"
-#             vagrant up | ts '[%H:%M:%S]'
-#         fi
-#     fi
-# fi
-# #; exit_test # ssh reset may cause a non zero exit code, but it must be ignored
+if [[ "$vagrant_halt" == true ]]; then
+    echo "Halting vagrant"
+    echo "Warning: Doing this deadlinedb while running (firehawkgateway) may corrupt it."
+    vagrant halt
+fi
 
-# time_passed
 
-# if [ "$test_vm" = false ] ; then
-#     # sleep 10
-#     # echo "vagrant status:"
-#     # vagrant status
-#     # sleep 10
-#     echo "Vagrant SSH config:"
-#     n=0; retries=100
-#     until [ $n -ge $retries ]
-#     do
-#     vagrant ssh-config && break  # substitute your command here
-#     n=$[$n+1]
-#     sleep 15
-#     done
-#     if [ $n -ge $retries ]; then
-#         echo "Error: timed out waiting for vagrant ssh config command - failed."
-#         exit 1
-#     fi
-#     echo "...Get vagrant key file"
-#     # AFter Vagrant Hosts are up, take the SSH keys and store them in the keys folder for general use.
-#     ansiblecontrol_config=$(vagrant ssh-config ansiblecontrol$TF_VAR_envtier)
-#     firehawkgateway_config=$(vagrant ssh-config firehawkgateway$TF_VAR_envtier)
-#     ansiblecontrol_key=$(echo "$ansiblecontrol_config" | grep -oP "^  IdentityFile \K.*")
-#     cp -f $ansiblecontrol_key $TF_VAR_secrets_path/keys/ansible_control_private_key
-#     firehawkgateway_key=$(echo "$firehawkgateway_config" | grep -oP "^  IdentityFile \K.*")
-#     cp -f $firehawkgateway_key $TF_VAR_secrets_path/keys/firehawkgateway_private_key
+printf "\nvagrant_up: $vagrant_up\n"
+if [[ "$vagrant_up" == true ]]; then
+    echo "vagrant status:"
+    vagrant_status="$(vagrant status)"
+    echo "$vagrant_status"
+    echo "$vagrant_status" | grep -o 'running (virtualbox)' | wc -l
+    total_running_machines=$(echo "$vagrant_status" | grep -o 'running (virtualbox)' | wc -l)
 
-#     hostname=$(echo $ansiblecontrol_config | grep -Po '.*HostName\ \K(\d*.\d*.\d*.\d*)')
-#     port=$(echo $ansiblecontrol_config | grep -Po '.*Port\ \K(\d*)')
+    echo "total_running_machines $total_running_machines"
+    # total_running_machines=$(grep -cim1 'running' $vagrant_status)
+    if [ $total_running_machines -ge 2 ]; then
+        echo "...Both machines are already up."
+    else
+        echo "...Will start machines"
+        sleep 3
+        if [[ "$init_vm_config" == true ]]; then
+            echo "...Starting vagrant, and provisioning."
+            # vagrant up --provision | ts '[%H:%M:%S]'
+            echo "pwd $(pwd)"
+            $TF_VAR_firehawk_path/vagrant_provision.sh | ts '[%H:%M:%S]'
+        else
+            echo "...Starting vagrant"
+            vagrant up | ts '[%H:%M:%S]'
+        fi
+    fi
+fi
+#; exit_test # ssh reset may cause a non zero exit code, but it must be ignored
+
+time_passed
+
+if [ "$test_vm" = false ] ; then
+    # sleep 10
+    # echo "vagrant status:"
+    # vagrant status
+    # sleep 10
+    echo "Vagrant SSH config:"
+    n=0; retries=100
+    until [ $n -ge $retries ]
+    do
+    vagrant ssh-config && break  # substitute your command here
+    n=$[$n+1]
+    sleep 15
+    done
+    if [ $n -ge $retries ]; then
+        echo "Error: timed out waiting for vagrant ssh config command - failed."
+        exit 1
+    fi
+    echo "...Get vagrant key file"
+    # AFter Vagrant Hosts are up, take the SSH keys and store them in the keys folder for general use.
+    ansiblecontrol_config=$(vagrant ssh-config ansiblecontrol$TF_VAR_envtier)
+    firehawkgateway_config=$(vagrant ssh-config firehawkgateway$TF_VAR_envtier)
+    ansiblecontrol_key=$(echo "$ansiblecontrol_config" | grep -oP "^  IdentityFile \K.*")
+    cp -f $ansiblecontrol_key $TF_VAR_secrets_path/keys/ansible_control_private_key
+    firehawkgateway_key=$(echo "$firehawkgateway_config" | grep -oP "^  IdentityFile \K.*")
+    cp -f $firehawkgateway_key $TF_VAR_secrets_path/keys/firehawkgateway_private_key
+
+    hostname=$(echo $ansiblecontrol_config | grep -Po '.*HostName\ \K(\d*.\d*.\d*.\d*)')
+    port=$(echo $ansiblecontrol_config | grep -Po '.*Port\ \K(\d*)')
     
-#     echo "SSH to vagrant host with..."
-#     echo "Hostname: $hostname"
-#     echo "Port: $port"
-#     echo "tier --$TF_VAR_envtier"
+    echo "SSH to vagrant host with..."
+    echo "Hostname: $hostname"
+    echo "Port: $port"
+    echo "tier --$TF_VAR_envtier"
 
-#     time_passed
+    time_passed
 
-#     if [[ ! -z "$hostname" && ! -z "$port" && ! -z "$TF_VAR_envtier" ]]; then
-#         echo "init_vm_config: $init_vm_config"
-#         set -o pipefail # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
-#         # set -o pipefail # Allow exit status of last command to fail to catch errors after pipe for ts function.
-#         ssh-keygen -R [$hostname]:$port -f /home/gitlab-runner/.ssh/known_hosts # clean host keys
-#         if [[ "$tf_action" == "sleep" ]]; then
-#             echo "...Logging in to Vagrant host to set sleep on tf deployment: $hostname"
-#             if [[ "$env_ci" == true ]]; then
-#                 ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --sleep --init-vm-config=false" | ts '[%H:%M:%S]'; exit_test
-#             else
-#                 ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --sleep --init-vm-config=false"; exit_test
-#             fi
-#             echo "...End Deployment"
-#         elif [[ "$tf_action" == "destroy" ]]; then
-#             echo "...Logging in to Vagrant host to destroy tf deployment: $hostname"
-#             if [[ "$env_ci" == true ]]; then
-#                 ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --destroy --init-vm-config=$init_vm_config --tf-init=$tf_init" | ts '[%H:%M:%S]'; exit_test
-#             else
-#                 ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --destroy --init-vm-config=$init_vm_config --tf-init=$tf_init"; exit_test
-#             fi
-#             echo "...End Deployment"
-#         elif [[ "$tf_action" == "single_test" ]]; then
-#             echo "...Logging in to Vagrant host to run single test: $hostname "
-#             ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --init-vm-config=$init_vm_config --tf-action=$tf_action --tf-init=$tf_init" | ts '[%H:%M:%S]'; exit_test
-#             echo "...End Deployment"        
-#         else
-#             echo "...Logging in to Vagrant host: $hostname "
-#             if [[ "$env_ci" == true ]]; then
-#                 ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --init-vm-config=$init_vm_config --tf-action=$tf_action --tf-init=$tf_init" | ts '[%H:%M:%S]'; exit_test
-#             else
-#                 ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --init-vm-config=$init_vm_config --tf-action=$tf_action --tf-init=$tf_init"; exit_test
-#             fi
-#             echo "...End Deployment"
-#         fi
-#     fi
-# fi
+    if [[ ! -z "$hostname" && ! -z "$port" && ! -z "$TF_VAR_envtier" ]]; then
+        echo "init_vm_config: $init_vm_config"
+        set -o pipefail # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
+        # set -o pipefail # Allow exit status of last command to fail to catch errors after pipe for ts function.
+        ssh-keygen -R [$hostname]:$port -f /home/gitlab-runner/.ssh/known_hosts # clean host keys
+        if [[ "$tf_action" == "sleep" ]]; then
+            echo "...Logging in to Vagrant host to set sleep on tf deployment: $hostname"
+            if [[ "$env_ci" == true ]]; then
+                ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --sleep --init-vm-config=false --softnas-destroy-volumes=$set_softnas_volatile" | ts '[%H:%M:%S]'; exit_test
+            else
+                ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --sleep --init-vm-config=false --softnas-destroy-volumes=$set_softnas_volatile"; exit_test
+            fi
+            echo "...End Deployment"
+        elif [[ "$tf_action" == "destroy" ]]; then
+            echo "...Logging in to Vagrant host to destroy tf deployment: $hostname"
+            if [[ "$env_ci" == true ]]; then
+                ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --destroy --init-vm-config=$init_vm_config --tf-init=$tf_init --softnas-destroy-volumes=$set_softnas_volatile" | ts '[%H:%M:%S]'; exit_test
+            else
+                ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --destroy --init-vm-config=$init_vm_config --tf-init=$tf_init --softnas-destroy-volumes=$set_softnas_volatile"; exit_test
+            fi
+            echo "...End Deployment"
+        elif [[ "$tf_action" == "single_test" ]]; then
+            echo "...Logging in to Vagrant host to run single test: $hostname "
+            ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --init-vm-config=$init_vm_config --tf-action=$tf_action --tf-init=$tf_init --softnas-destroy-volumes=$set_softnas_volatile" | ts '[%H:%M:%S]'; exit_test
+            echo "...End Deployment"        
+        else
+            echo "...Logging in to Vagrant host: $hostname "
+            if [[ "$env_ci" == true ]]; then
+                ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --init-vm-config=$init_vm_config --tf-action=$tf_action --tf-init=$tf_init --softnas-destroy-volumes=$set_softnas_volatile" | ts '[%H:%M:%S]'; exit_test
+            else
+                ssh deployuser@$hostname -p $port -i $TF_VAR_secrets_path/keys/ansible_control_private_key -o StrictHostKeyChecking=no -tt "export firehawksecret=${firehawksecret}; /deployuser/scripts/init-firehawk.sh --$TF_VAR_envtier --init-vm-config=$init_vm_config --tf-action=$tf_action --tf-init=$tf_init --softnas-destroy-volumes=$set_softnas_volatile"; exit_test
+            fi
+            echo "...End Deployment"
+        fi
+    fi
+fi
 
-# if [[ ! -z "$box_file_out" ]]; then
-#     # If a box_file_out is defined, then we package the images for each box out to files.  The vm will be stopped to eprform this step.
-#     echo "Set Vagrant box out $ansiblecontrol_box_out"
-#     echo "Set Vagrant box out $firehawkgateway_box_out"
-#     [ ! -e $ansiblecontrol_box_out ] || rm $ansiblecontrol_box_out
-#     [ ! -e $firehawkgateway_box_out ] || rm $firehawkgateway_box_out
-#     vagrant package "ansiblecontrol$TF_VAR_envtier" --output $ansiblecontrol_box_out &
-#     vagrant package "firehawkgateway$TF_VAR_envtier" --output $firehawkgateway_box_out
-# fi
+if [[ ! -z "$box_file_out" ]]; then
+    # If a box_file_out is defined, then we package the images for each box out to files.  The vm will be stopped to eprform this step.
+    echo "Set Vagrant box out $ansiblecontrol_box_out"
+    echo "Set Vagrant box out $firehawkgateway_box_out"
+    [ ! -e $ansiblecontrol_box_out ] || rm $ansiblecontrol_box_out
+    [ ! -e $firehawkgateway_box_out ] || rm $firehawkgateway_box_out
+    vagrant package "ansiblecontrol$TF_VAR_envtier" --output $ansiblecontrol_box_out &
+    vagrant package "firehawkgateway$TF_VAR_envtier" --output $firehawkgateway_box_out
+fi

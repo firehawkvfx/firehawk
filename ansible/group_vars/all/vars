@@ -57,6 +57,8 @@ softnas_mount_source: "/{{ envtier }}pool0/{{ envtier }}volume0"
 # "-m" will force a pool to import, which is usefull if drives used for a write log are missing.
 zpool_import_flags: "-m"
 
+softnas_volatile: "{{ lookup('env', 'TF_VAR_softnas_volatile') }}"
+
 #production mount path for all locations
 prod_mount_path: "/prod"
 

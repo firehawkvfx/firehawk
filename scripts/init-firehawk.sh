@@ -58,6 +58,7 @@ tf_action="apply"
 tf_init=false
 init_vm_config=true
 fast=false
+set_softnas_volatile=false
 
 optspec=":h-:"
 
@@ -117,6 +118,16 @@ parse_opts () {
                         opt=${OPTARG%=$val}
                         echo "init_vm_config set: $init_vm_config"
                         ;;
+                    softnas-destroy-volumes)
+                        init_vm_config="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+                        opt="${OPTARG}"
+                        echo "set_softnas_volatile set: $init_vm_config"
+                        ;;
+                    softnas-destroy-volumes=*)
+                        init_vm_config=${OPTARG#*=}
+                        opt=${OPTARG%=$val}
+                        echo "set_softnas_volatile set: $init_vm_config"
+                        ;;
                     fast)
                         fast="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
                         opt="${OPTARG}"
@@ -147,6 +158,9 @@ parse_opts () {
 parse_opts "$@"
 
 set -x; SHOWCOMMANDS=true # show bash input
+
+sed -i "s/^TF_VAR_softnas_volatile=.*$/TF_VAR_softnas_volatile=${set_softnas_volatile}/" $config_override # ...Set if softnas volumes will be destroyed
+source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override --force --silent
 
 set_pipe() {
   id=$1

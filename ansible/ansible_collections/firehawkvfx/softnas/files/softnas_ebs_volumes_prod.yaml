@@ -4,14 +4,26 @@ mounts:
 # these are mounts for ebs volumes to the softnas instance.
 - path: "/dev/sdb"
   int: "1"
-  ebs_disk_type: gp2
-  ebs_disk_size: 20
+  ebs_disk_type: standard
+  ebs_disk_size: 500
   pool_name: "{{ envtier }}pool1"
   volatile: "{{ softnas_volatile }}"
 - path: "/dev/sdc"
   int: "2"
-  ebs_disk_type: gp2
-  ebs_disk_size: 20
+  ebs_disk_type: standard
+  ebs_disk_size: 500
+  pool_name: "{{ envtier }}pool1"
+  volatile: "{{ softnas_volatile }}"
+- path: "/dev/sdd"
+  int: "3"
+  ebs_disk_type: standard
+  ebs_disk_size: 500
+  pool_name: "{{ envtier }}pool1"
+  volatile: "{{ softnas_volatile }}"
+- path: "/dev/sde"
+  int: "4"
+  ebs_disk_type: standard
+  ebs_disk_size: 500
   pool_name: "{{ envtier }}pool1"
   volatile: "{{ softnas_volatile }}"
 
@@ -19,7 +31,7 @@ exports:
 - path: "/{{ envtier }}pool1/{{ envtier }}volume1" # production volume - Softnas
   pool_name: "{{ envtier }}pool1"
   volume_name: "{{ envtier }}volume1"
-  raid_level: 0
+  raid_level: 6
   state: present
   bind1: "{{ production_volume_path }}"
   bind2: "{{ softnas1_path_abs }}"

@@ -20,7 +20,7 @@
         bind: /prod
 
     import_pool: true
-    vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/ebs-volumes/softnas_ebs_volumes.yaml", "files/softnas_ebs_volumes.yaml" ]
+    vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/ebs-volumes/softnas_ebs_volumes.yaml", "files/softnas_ebs_volumes_{{ lookup('env','TF_VAR_envtier') }}.yaml", "files/softnas_ebs_volumes.yaml" ]
 
   tasks:
   - name: aquire vars from secrets path before using defaults for softnas hosts 1
