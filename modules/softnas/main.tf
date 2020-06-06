@@ -832,7 +832,6 @@ resource "null_resource" "start-softnas-after-create-ami" {
 # If ebs volumes are attached, don't automatically import the pool. manual intervention may be required.
 locals {
   import_pool = true
-  #"${length(local.softnas1_volumes) > 0 ? false : true}"
 }
 
 # Once an AMI is built above, then we test the connection to the instance via a bastion below.

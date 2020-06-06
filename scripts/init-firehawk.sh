@@ -224,6 +224,7 @@ else
     $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-010-keybase.sh $ARGS; exit_test
     echo "...Provision Local VM's"
     $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-020-init.sh $ARGS; exit_test
+    set +x
     sed -i "s/^TF_VAR_vm_initialised=.*$/TF_VAR_vm_initialised=true/" $config_override # ...set the vm as having been initalised in config vars.
     source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override --force --silent
   else
