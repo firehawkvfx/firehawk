@@ -55,7 +55,7 @@ cd /deployuser
 ### Get s3 access keys from terraform ###
 
 tf_action="apply"
-tf_init=false
+tf_init=true
 init_vm_config=true
 fast=false
 set_softnas_volatile=false
