@@ -78,6 +78,7 @@ init_vm_config=true
 vagrant_halt=false
 fast=false
 set_softnas_volatile=false
+force_plugin_install=false
 
 parse_opts () {
     local OPTIND
@@ -186,6 +187,16 @@ parse_opts () {
                         opt=${OPTARG%=$val}
                         echo "set_softnas_volatile set: $set_softnas_volatile"
                         ;;
+                    force-plugin-install)
+                        force_plugin_install="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
+                        opt="${OPTARG}"
+                        echo "force_plugin_install set: $force_plugin_install"
+                        ;;
+                    force-plugin-install=*)
+                        force_plugin_install=${OPTARG#*=}
+                        opt=${OPTARG%=$val}
+                        echo "force_plugin_install set: $force_plugin_install"
+                        ;;
                     fast)
                         fast="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
                         opt="${OPTARG}"
@@ -239,7 +250,6 @@ time_passed () {
 time_passed
 
 echo "Check vagrant plugins."
-force_plugin_install=true
 if [[ "$force_plugin_install" == true ]]; then # Install Vagrant Plugins
     vagrant plugin install vagrant-vbguest
     vagrant plugin install vagrant-disksize
