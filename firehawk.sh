@@ -238,6 +238,8 @@ time_passed () {
 }
 time_passed
 
+echo "Check vagrant plugins."
+
 if [[ "$TF_VAR_fast" == true ]]; then # Install Vagrant Plugins
     echo "...Fast mode.  Bypassing plugin evaluation"
 else
