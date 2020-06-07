@@ -8,8 +8,6 @@ set +x
 # 3) Example values for the secrets.template file are defined in secrets.example. Ensure you have placed an example key=value for any new vars in secrets.example. 
 # If any changes have resulted in a new variable name, then example values helps other understand what they should be using for their own infrastructure.
 
-set +x
-
 RED='\033[0;31m' # Red Text
 GREEN='\033[0;32m' # Green Text
 BLUE='\033[0;34m' # Blue Text
@@ -17,6 +15,10 @@ NC='\033[0m' # No Color
 # the directory of the current script
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
+
+printf "\n${RED}Warning: Currently virtual box requires a version lock after installing:${NC}"
+echo "6.1.10 had problems with centos 7 and gnome 2020/07/07. Ensure you use this version, or update with care:"
+echo "yum install VirtualBox-6.1-6.1.8_137981_el7-1.x86_64 versionlock; yum versionlock add VirtualBox-6.1-6.1.8_137981_el7-1.x86_64"
 
 # This block allows you to echo a line number for a failure.
 # err_report() {

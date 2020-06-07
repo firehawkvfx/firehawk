@@ -165,15 +165,15 @@ Vagrant.configure(2) do |config|
                 end
                 node.vm.provision "shell", inline: "sudo reboot"
                 node.vm.provision :reload
-                # # trigger reload
-                node.trigger.after :up do |trigger|
-                    trigger.warn = "Taking Snapshot"
-                    trigger.run = {inline: "'echo 'sleep'"}
-                    trigger.run = {inline: "sleep 20"}
-                    trigger.run = {inline: "vagrant snapshot save #{machine[:hostname]} checkpoint --force"}
-                end
-                node.vm.provision "shell", inline: "sudo reboot"
-                node.vm.provision :reload
+                # # trigger reload.  disabled because of stability issues when running concurrently.
+                # node.trigger.after :up do |trigger|
+                #     trigger.warn = "Taking Snapshot"
+                #     trigger.run = {inline: "'echo 'sleep'"}
+                #     trigger.run = {inline: "sleep 20"}
+                #     trigger.run = {inline: "vagrant snapshot save #{machine[:hostname]} checkpoint --force"}
+                # end
+                # node.vm.provision "shell", inline: "sudo reboot"
+                # node.vm.provision :reload
             end
             node.vm.post_up_message = "You must install this plugin to set the disk size: vagrant plugin install vagrant-disksize\nEnsure you have installed the vbguest plugin with: vagrant plugin update; vagrant plugin install vagrant-vbguest; vagrant vbguest; vagrant vbguest --status"
             node.vm.post_up_message = "Machine is up IP: #{machine[:box]}"
