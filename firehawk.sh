@@ -241,6 +241,7 @@ time_passed
 echo "Check vagrant plugins."
 force_plugin_install=true
 if [[ "$force_plugin_install" == true ]]; then # Install Vagrant Plugins
+    vagrant plugin install vagrant-vbguest
     vagrant plugin install vagrant-disksize
     vagrant plugin install vagrant-reload
     vagrant plugin install vagrant-vbguest
