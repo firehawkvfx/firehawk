@@ -239,6 +239,12 @@ time_passed () {
 time_passed
 
 echo "Check vagrant plugins."
+force_plugin_install=true
+if [[ "$force_plugin_install" == true ]]; then # Install Vagrant Plugins
+    vagrant plugin install vagrant-disksize
+    vagrant plugin install vagrant-reload
+    vagrant plugin install vagrant-vbguest
+fi
 
 if [[ "$TF_VAR_fast" == true ]]; then # Install Vagrant Plugins
     echo "...Fast mode.  Bypassing plugin evaluation"
