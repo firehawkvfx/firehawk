@@ -1,53 +1,126 @@
-# openFirehawk
-openFirehawk is an environment to help VFX artists create an on demand render farm with infrastructure as code.  It uses Terraform to orchestrate resources, Ansible to configure resources, and Vagrant (with Virtualbox) as a VM container for these tools to run within.  A Linux or Mac OS host for the VM's is what is supported at this time.
-While Terraform is able to interface with many cloud providers, current implementation is with AWS.
+# Open Firehawk
+
+Open Firehawk is an environment to create an on demand render farm for VFX with infrastructure as code.  It uses Terraform to orchestrate resources, Ansible to configure resources, and Vagrant (with Virtualbox) as a VM container for these tools to run within.  A Linux or Mac OS host for the VM's is recommended at this time.  Terraform is able to interface with many cloud providers, current base implementation is with AWS.
 
 ## Intro
 
-Firehawk will become easier for people to use over time.  There is some work for replication in another environment. It’s not going to be easy yet!  Much of the current work needs to be automated further, and learning it all if you are new to it is going to be a challenge.
+There are steps you can follow for replication of Firehawk in another environment.
 
-Until we are ready for beta testing, these docs are still here for people driven to learn how things work and want to be involved as an early adopter.  I will work on these docs to give you a path to learn. contribution to these docs is welcomed!
+Some of this documentation will share what you will need to learn if you are a TD / Pipeline TD new to running cloud resources.  I’d recommend learning Terraform and Ansible.  I recommend just passively putting these tutorials on without necesarily following the steps to just expose yourself to the concepts and get an overview.  Going through the steps yourself is better.
 
-But I do want to provide a path to get started for TDs that want to contribute, learn terraform, and are not afraid to push their bash skills in a shell further and learn new tools.
+These are some good paid video courses to try which I have taken on my own learning path-
 
-So for those that are comfortable with a challenge at this early stage and want to help develop, I’d recommend learning Terraform and Ansible.  Terraform is how we will define our infrastructure. Ansible (though not implemented at this time of writing) is how openFirehawk will be able go forward provisioning / configuring systems in a more modular fashion.  Currently provisioning is done in terraform over ssh, and it has a dependency on your open vpn connection to the access server to be working before any nodes in the private subnet can be provisioned.   Ansible will be able to replace this dependency being better suited to the task.
-
-If you are totally new to this and you think its a lot to learn, I recommend just passively putting these tutorials on without necesarily following the steps to just expose yourself to the concepts and get an overview.  Going through the steps yourself is obviously better though.
-
-These are some good paid video courses to try-
 ### Pluralsight:
+
 - Terraform - Getting Started
 - Deep Dive - Terraform
 
 ### Udemy:
+
 - Mastering Ansible
 - Deploying to AWS with Ansible and Terraform - linux academy.
 
 ### Books:
+
 - Terraform up and running.
 - Ansible up and running.
 
 ## Getting Started
 
-You will want to experiment with spinning up an AWS account.  You will need to start an instance in your nearest region with this ami - (softnas platinum consumption based for lower compute requirements).  take note of the AMI.  you wont need to leave this instance running.  You can terminate it, and delete the EBS volume.
-Next startup up an open vpn access server instance from the openvpn AMI, and when started, take note of this AMI.  these will need to be added into terraform variables later, because they are unique to your region.   
+You will need two new AWS Accounts.  One for the dev environment and one for the production environment.  When operating, we always make changes to the dev branch/environment before we update the production environment.  Some exceptions may mean changes unique to the production environment have to be done on the fly, we merge those changes back to dev.
 
-Next head to keybase.io to create an account.  Later, we will use keybase to create a an encryption key (PGP encryption).  Terraform requires a form of PGP encryption when dynamically creating AWS Secrets keys to ensure that the shell output is not readable by any0ne except someone authorised with the PGP key.
+With each of those accounts:
+- Create a user by your real name, and follow the instructions AWS provides for best practice.
+- Ensure MFA is enabled, MFA is best done with a seperate device / phone. **Setup 2 factor authentication.  Do not skip this, any account with a login should have it.**
+- Give the user admin permissions to create resources, and never use the root account to create resources.
+- Use a good password manager for passwords, ensure it has MFA for its access as well.  (I decided to use 1Password in a web browser for Linux and Mac OS- I'm not endorsed by this company, just sharing some of my own choices).
+- Setup budget notifications.  Set a number you are willing to spend per month, and setup email notifications for every 20% of that budget.  The notifications are there in case you forget to do this step 
+- [Check your AWS costs](https://console.aws.amazon.com/cost-management/) for a daily breakdown of what you spend, and do it every day as you learn.  It's a good habit to do it at the start of every day.
 
-## Security
-openFirehawk is not ready for production.  There are outstanding changes that need to be done to improve security for general use.
 
-It's important that your router firmware is kept up to date.  We configure AWS to ignore all inbound communication from anywhere but your own static ip.  The greatest vulnerability between you and AWS is your router.  open vpn encrypts traffic before it goes through the router, but if the router is compromised, enough information to establish those credentials can be gained for a man in the middle attack.
+Best practices for security and best practice around secrets management are important.  Feel free to notify us if you observe security implementation that could be improved.
 
 ## Disclaimer: Running your own AWS account.
-You are going to be managing these resources from an AWS account and you are solely responsible for the costs incurred, and you should tread slowly to understand AWS charges.
+You are going to be managing these resources from an AWS account and you are solely responsible for the costs incurred, and your own education in managing these resources responsibly.  If new to AWS, tread slowly to understand AWS charges.  The information I provide here is not perfect, it is an understanding that I feel it is better to share with others to help people get started.
 
-The first thing to do is **setup 2 factor authentication.  Do not skip this**.  You'll make it easy for hackers to misuse you credit card to mine crypto.  Eye watering bills are possible!
-
-So The next thing you should do is setup budget notifications.  Set a number you are willing to spend per month, and setup email notifications for every 20% of that budget.  The notifications are there in case you forget to do this step - check your AWS costs for a daily breakdown of what you spend, and do it every day to learn.  its a good habit to do it at the start of every day.
+So The next thing you should do is 
 
 Lastly, when you create aws access and secret keys, set a policy to age those keys out after 30 days.  unlike normal access from a workstation, which can be 
 limited down to a specific static ip with security groups, these access keys allow resources to be created from anywhere, and even for security groups to be changed, guard them closely.  Personally, I dont even write them down - If I need to enter them again for some reason, I take that opportunity to cycle them and enter update them into the encrypted vault.
+
+## Permissions for the new user
+
+Firehawk automates creation of some user accounts, instances, VPN, NAS storage and others.  A primary user with appropriate permissions must be manually created for this to be possible.
+We will define the permissions for this new user (in each of the accounts).  Later we will generate secret keys that will be stored in an encrytped file to create resources with Terraform and Ansible that rely on these permissions.
+
+- Goto Identity and Access Management (IAM)
+- Create a new group ``DevAdmin``
+- Attach these policies to that group
+```
+AmazonEC2FullAccess
+IAMFullAccess
+AmazonS3FullAccess
+AmazonECS_FullAccess
+AmazonRoute53FullAccess
+```
+- Create a new policy named ``GetCostAndUsage``
+- Provide the following policy in JSON
+```
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ce:*"
+            ],
+            "Resource": [
+                "*"
+            ]
+        }
+    ]
+}
+```
+- Attach that policy as well to the ``DevAdmin`` group.
+- Make the new user a member of the ``DevAdmin`` group to inherit all of these policies.
+- Ensure you have done this in both AWS accounts.
+  
+
+## AWS Images
+
+Some images are used with a cost associated.  Firehawk is not paid to recommend these, they are used because they are at the time of writing believed to be the most economical, scalable, and automated choices available with good support.  If you can pitch better more cost effective decisions (Open Source where possible) feel free to let us know!
+
+Subscribe to these Images (AMIs), which will allow them to be used with automation after you have agreed to their terms.
+
+- [Softnas Burst](https://aws.amazon.com/marketplace/pp/B086PGVGJS?qid=1591580034153&sr=0-1&ref_=srh_res_product_title)
+- [Open VPN Access Server](https://aws.amazon.com/marketplace/pp/B00MI40CAE?qid=1591580399199&sr=0-1&ref_=srh_res_product_title)
+- [Teradici PCOIP](https://aws.amazon.com/marketplace/pp/B07CT11PCQ?qid=1591580476870&sr=0-3&ref_=srh_res_product_title#pdp-reviews)
+- [CentOS 7](https://aws.amazon.com/marketplace/pp/B00O7WM7QW?qid=1591580670593&sr=0-1&ref_=srh_res_product_title)
+
+If you are new to AWS, [experiment with launching these instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EC2_GetStarted.html), and destroying them and their security groups.
+
+## Keybase / PGP Keys
+
+Install Keybase on your phone or head to keybase.io to create an account.  Keybase is the easiest way to create a secure PGP key, allowing secrets to be encrypted using your email as a reference to a public key.  Only devices authorised with your private key that have been authorised can decrypt secrets.  It is possible to use your own key if you don't wish to use keybase.
+Terraform requires a form of PGP encryption when dynamically creating new aws users with AWS Secret keys.  PGP encryption ensures that the shell output is not readable by any0ne except someone authorised with the PGP key.  Terraform requires these abilities to create users with lesser permissions to automate a remote system to have access to S3 Cloud Storage. Those systems have ability to write, read and list contents of bucket storage.
+
+## Security
+
+Security isn't a state that you should believe you have reached, but a process that requires constant interaction.  It also results from effort that should be proportional to the value that you represent as risk and effort vs reward to an attacker.  An AWS account is quite a prize, because it can be used to mine crypto or perform other compute on.  An attacker could also just use it to do harm by racking up a massive bill for you.  So the steps taken should be proportional to the value of the work you are performing, and as much should be done as reasonably possible.
+
+The systems that use your VM's to provision with, shouldn't be exposed to bad website browsing patterns, or sitting exposed on the public internet (they should be behind a NAT gateway- normal for any system at home connected to the internet).  If possible, ensure those systems are on a different subnet to other devices you don't have control over.
+Ideally, if you wanted to step up security further, they would be entirely seperate systems (bare metal) dedicated for the unique purpose of Firehawk provisioning and the VPN alone and not for general use.  We have taken steps to make sure that ansible and terraform provisioning occurs on a unique vm to where the VPN and Deadline DB reside.  We could go further and put each of those (Deadline and VPN) on their own seperate metal.  Bare metal for a single purpose is more secuere than a VM because if a hypervisor is compromised everything else on that system can be compromised.
+
+We should be as difficult a target as reasonably possible, and we should have means to deactivate a vulnerability if actively used.
+
+For example:
+- If you were to accidentally publicly push secrets or become aware that somehow they became publicly visible, you would change / cycle every single one and change all passwords on your AWS account.
+- If an attacker were to aquire control of the user secret key used to provision resources, you would want means to be able to delete that user account (via another user or as the root account), and you would probably need to be able to do that on an uncompromised system or phone possibly.
+
+It's also important that your router firmware is kept up to date (perhaps use a regular reminder). It is a significant potential vulnerability between you and AWS- your router.  Open VPN encrypts traffic before it goes through the router, but if the router is compromised, enough information to establish those credentials can be gained for a man in the middle attack.
+
+We configure AWS to ignore all inbound communication to instances from anywhere but your own IP at the time of provisioning.  You may encounter difficulty without a static IP, although it is possible to update security groups with a change to your IP on each Terraform apply.  Your secret keys at this time if aquired could be used by an attacker to alter resources.  Provided you have a Static IP, you can alter policies to [deny access from anywhere but your own static IP](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_examples_aws_deny-ip.html).
+
 
 ## Pointers on cost awareness:
 
