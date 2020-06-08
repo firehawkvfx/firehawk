@@ -1,11 +1,10 @@
 # openFirehawk
-This is in developement and not ready for production.  Written by Andrew Graham for use with Hashicorp Terraform and Red Hat Ansible.
-
-openFirehawk is a set of modules to help VFX artists create an on demand render farm with infrastructure as code.  It is written in Terraform.  While Terraform is able to interface with many cloud providers, current implementation is with AWS.  Extension to Google Cloud Platform is planned once a good simple foundation is established with these initial modules.
+openFirehawk is an environment to help VFX artists create an on demand render farm with infrastructure as code.  It uses Terraform to orchestrate resources, Ansible to configure resources, and Vagrant (with Virtualbox) as a VM container for these tools to run within.  A Linux or Mac OS host for the VM's is what is supported at this time.
+While Terraform is able to interface with many cloud providers, current implementation is with AWS.
 
 ## Intro
 
-I'll be changing the way things work to make openFirehawk easier for people over time.  Currently it is not ready for simple replication in another environment without challenges. It’s not going to be easy yet!  Much of the current work needs to be automated further, and learning it all if you are new to it is going to be a challenge.
+Firehawk will become easier for people to use over time.  There is some work for replication in another environment. It’s not going to be easy yet!  Much of the current work needs to be automated further, and learning it all if you are new to it is going to be a challenge.
 
 Until we are ready for beta testing, these docs are still here for people driven to learn how things work and want to be involved as an early adopter.  I will work on these docs to give you a path to learn. contribution to these docs is welcomed!
 
