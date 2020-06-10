@@ -103,29 +103,35 @@ Vagrant is a tool that manages your initial VM configuration onsite.  It allows 
 
 - Install [Hashicorp Vagrant](https://www.vagrantup.com/) and Virtualbox on your system (Linux / Mac OS recommended)
 
-## Replicate a Firehawk clone to manage cloud resourcesin a private repository
+## Replicate a Firehawk clone and manage your secrets repository
 
-- Visit the [template repository](https://github.com/firehawkvfx/firehawk-template) and select ``Use This Template``
-- **Make sure the new repository is Private**.
+- Login to github and view the [template repository](https://github.com/firehawkvfx/firehawk-template)
+- Select [Use This Template](https://github.com/firehawkvfx/firehawk-template/generate)
+- Give it a name like ``firehawk-deploy``
+- **Make sure the new repository is Private. WARNING: NOT DOING THIS IS A SECURITY RISK.**
+- Clone this new private repository to your system / somewhere in your home dir.  This first deployment will be a dev test deployment.
+  ```
+  git clone --recurse-submodules -j8 https://github.com/{my user}/firehawk-deploy.git firehawk-deploy-dev
+  ```
+- Submodules are not inherited with templates.  Add the submodule
+  ```
+  cd firehawk-deploy-dev; git submodule add https://github.com/firehawkvfx/firehawk.git
+  git submodule update --init --recursive
+  ```
 
+This provides a structure for your encrypted secrets and configuration, which exist outside of the firehawk submodule.  The firehawk submodule is a public submodule, and it can exist as a fork or a clone.  This allows the code to be shared will keeping configuration and secrets seperate.
 
-This template provides a structure for your encrypted secrets and configuration, which exist outside of the firehawk repo.  The firehawk repo will be a public submodule within the structure.
-
-All these steps will get you to configure a setup in the 'dev' environment to test before you will deploy in the 'prod' environment.
+All these steps allow us to configure a setup in the 'dev' environment to test before you can deploy in the 'prod' environment, in a seperate folder.
 You will have two versions of your infrastructure, we make changes in dev branches and test them before merging and deploying to production.
 
-- Add the Firehawk repo into a folder named openfirehawk-prod.  Production operates from the master branch.
-    git clone --recurse-submodules -j8 https://github.com/firehawkvfx/openfirehawk.git openfirehawk-prod
-- You may also wish to clone with the dev branch into a seperate folder - openfirehawk-dev.  It's recommended to run dev in a seperate AWS account.  No changes to the master branch should be permitted without testing in dev first, including a full 'terrraform apply' from scratch.
-- If you already cloned the repo but forgot the submodules, you can bring them in with
-    git submodule update
-- Download the latest deadline installer tar, and place the .tar file in the local openfirehawk/downloads folder.
-- Download the latest houdini installer, and place the .tar file in the local openfirehawk/downloads folder.
-- If you are on a mac, install homebrew and ensure you have the command envsubst
-    brew install gettext
-    brew link --force gettext
+- Download the latest deadline installer tar, and place the .tar file in the local firehawk/downloads folder.
+- If you are on a Mac, install homebrew and ensure you have the command envsubst
+```
+brew install gettext
+brew link --force gettext
+```
 - Now we will setup our environment variables from a template. If you have already done this before, you will probably want to keep your old secrets instead of copying in the template.
-    cp secrets.template secrets/secrets-prod
+    cp secrets.template secrets/secrets-master
 - First step before launching vagrant is to ensure an environment var is set with a random mac (you can generate it yourself with scripts/random_mac_unicast.sh) and store it as a variable in secrets/secrets-prod.  eg,
     TF_VAR_gateway_mac_prod=0023AE327C51
 - Set the environment variables from the secrets file.  --init assumes an unencrypted file is being used.  We always must do this before running vagrant.

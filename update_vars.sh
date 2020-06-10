@@ -339,7 +339,8 @@ if [[ $failed = true ]]; then
     return 88
 fi
 
-template_path="$TF_VAR_firehawk_path/secrets.template"
+mkdir -p "$TF_VAR_firehawk_path/config/defaults"
+template_path="$TF_VAR_firehawk_path/config/defaults/secrets.template"
 
 echo_if_not_silent '...Get secrets from env'
 # # map environment secret for current env
@@ -371,15 +372,15 @@ config_override=$(to_abs_path $TF_VAR_secrets_path/config-override-$TF_VAR_envti
 echo_if_not_silent '...Check for configuration, init if not present.'
 if [ ! -f $config_override ]; then
     echo_if_not_silent "...Initialising $config_override"
-    cp "$TF_VAR_secrets_path/defaults-config-override-$TF_VAR_envtier" "$config_override"
+    cp "$TF_VAR_firehawk_path/config/defaults/defaults-config-override-$TF_VAR_envtier" "$config_override"
 fi
 
 current_version=$(cat $config_override | sed -e '/.*defaults_config_overide_version=.*/!d')
-target_version=$(cat $TF_VAR_secrets_path/defaults-config-override-$TF_VAR_envtier | sed -e '/.*defaults_config_overide_version=.*/!d')
+target_version=$(cat $TF_VAR_firehawk_path/config/defaults/defaults-config-override-$TF_VAR_envtier | sed -e '/.*defaults_config_overide_version=.*/!d')
 
 if [[ "$target_version" != "$current_version" ]]; then
     echo "...Version doesn't match config.  Initialising $config_override"
-    cp "$TF_VAR_secrets_path/defaults-config-override-$TF_VAR_envtier" "$config_override"
+    cp "$TF_VAR_firehawk_path/config/defaults/defaults-config-override-$TF_VAR_envtier" "$config_override"
 fi
 
 ### The dynamic vars here are set by the environment during dpeloyment, and commit messages for gitlab ci.
@@ -417,24 +418,24 @@ source_vars () {
     if [[ -z "$var_file" ]] || [[ "$var_file" = "secrets" ]]; then
         var_file="secrets-general"
         echo_if_not_silent "...Using vault file $var_file"
-        template_path="$TF_VAR_firehawk_path/secrets.template"
+        template_path="$TF_VAR_firehawk_path/config/defaults/secrets.template"
     elif [[ "$var_file" = "vagrant" ]]; then
         echo_if_not_silent '...Using variable file vagrant. No encryption/decryption needed for these contents.'
         encrypt_mode="none"
-        template_path="$TF_VAR_firehawk_path/vagrant.template"
+        template_path="$TF_VAR_firehawk_path/config/defaults/vagrant.template"
     elif [[ "$var_file" = "config" ]]; then
         echo_if_not_silent '...Using variable file config. No encryption/decryption needed for these contents.'
         encrypt_mode="none"
-        template_path="$TF_VAR_firehawk_path/config.template"
+        template_path="$TF_VAR_firehawk_path/config/defaults/config.template"
     elif [[ "$var_file" = "defaults" ]]; then
         echo_if_not_silent '...Using variable file defaults. No encryption/decryption needed for these contents.'
         encrypt_mode="none"
-        template_path="$TF_VAR_firehawk_path/defaults.template"
+        template_path="$TF_VAR_firehawk_path/config/defaults/defaults.template"
     elif [[ "$var_file" = "config-override" ]]; then
         var_file="config-override-$TF_VAR_envtier"
         echo_if_not_silent "...Using variable file $var_file. No encryption/decryption needed for these contents."
         encrypt_mode="none"
-        template_path="$TF_VAR_firehawk_path/config-override.template"
+        template_path="$TF_VAR_firehawk_path/config/defaults/config-override.template"
     else
         printf "\nUnrecognised vault/variable file. \n$var_file\nExiting...\n"
         failed=true

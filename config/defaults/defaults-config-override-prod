@@ -1,0 +1,146 @@
+# ~/.bashrc
+# config override is altered by install scripts but can also be used to override configuration variables.
+
+# WARNING: CHANGES TO THIS TEMPLATE MUST OCCUR AFTER A DESTROY OPERATION AND INCREMENT THE VERSION.
+# WARNING: When editing your config file do not store any secrets / sensitive information here.
+# Secrets should only ever be stored in the encrypted secrets file..
+# This unencrypted config file is still stored in your private repository and should not be publicly available.
+
+# CONFIG INITIALIZATION #
+
+# Private values must be used as values only (and not in #commented lines), since it is only the values that are kept private.
+# Only Commented lines and the variable names / keys are read from this private secrets/config file in your private repo to auto generate the public firehawk/config.template file when running 'source ./update_vars.sh'.
+
+# If these steps are followed then no private values will be or should be propogated into the public repo firehawk/config.template file.
+# Before making any commits of config.template to the public firehawk repo ensure there are no secrets / sensitive information contained in a commit.
+# Be sure to provide any new variable keys you may end up adding with a commented out description with example dummy values above your actual private value used to assist others.
+
+# Do not put real world sensitive information in the example comments / #commented out lines.
+
+# New comments should be only added in secrets/config as these lines will be propogated into the config.template schema used to initialise any new  secrets/config file for other users of the Firehawk repo.
+
+# BEGIN CONFIGURATION #
+
+# defaults_config_overide_version:
+# If the version of this file changes, the file will be replaced in any deployment.
+defaults_config_overide_version="0.0.16"
+
+# TF_VAR_CI_JOB_ID:
+# This pipeline number is used to updat the active pipeline in the working dir when a new deployment is initialised.
+TF_VAR_CI_JOB_ID=0
+
+# TF_VAR_active_pipeline:
+# This pipeline number will update when a new deployment is initialised. It is used to tag the creation of assets, and potentially define subnets ranges.
+TF_VAR_active_pipeline=0
+
+# TF_VAR_vm_initialised:
+# after the vms are succesfully initialised, this is set to true.  when true, vm will not be initialised again.
+TF_VAR_vm_initialised=false
+
+# TF_VAR_fast:
+# this should always be false. in the defaults.  it can be changed by commits with [fast] in the comment to accelerate some steps for deployment testing.
+# default: TF_VAR_fast
+TF_VAR_fast=false
+
+# allow_interrupt:
+# Allows the presence of an interrupt file to force exit on current provisioning
+# default: allow_interrupt=true
+allow_interrupt=true
+
+# TF_VAR_key_name_dev:
+# The name of the key pair used in the dev environment. You will create a key pair to access your aws instances, listed here.
+# default: TF_VAR_key_name_dev=my_key_pair_dev
+TF_VAR_key_name_dev=my_key_pair_dev
+
+# TF_VAR_local_key_path_dev:
+# the path to the keypair from within the vagrant VM.
+# default: TF_VAR_local_key_path_dev=/secrets/keys/my_key_pair_dev.pem
+TF_VAR_local_key_path_dev=/secrets/keys/my_key_pair_dev.pem
+
+# TF_VAR_key_name_prod:
+# The name of the key pair used in the prod environment. You will create a key pair to access your AWS instances, listed here.
+# default: TF_VAR_key_name_prod=my_key_pair_prod
+TF_VAR_key_name_prod=my_key_pair_prod
+
+# TF_VAR_local_key_path_prod:
+# the path to the keypair from within the vagrant VM.
+# default: TF_VAR_local_key_path_prod=/secrets/keys/my_key_pair_prod.pem
+TF_VAR_local_key_path_prod=/secrets/keys/my_key_pair_prod.pem
+
+# TF_VAR_vagrant_destroy_before_deploy:
+# default: TF_VAR_vagrant_destroy_before_deploy=false
+TF_VAR_vagrant_destroy_before_deploy=false
+
+# TF_VAR_tf_destroy_before_deploy:
+# default: TF_VAR_tf_destroy_before_deploy=false
+TF_VAR_tf_destroy_before_deploy=true
+
+# TF_VAR_destroy_after_deploy:
+# default: TF_VAR_destroy_after_deploy=false
+TF_VAR_destroy_after_deploy=false
+
+# TF_VAR_enable_vpc:
+# Enable a Virtual Private Cloud.  All infrastructure is built in a VPC.  the first stage is to provision a user that has haccess to s3 bucket storage, which doesn't require a VPC.
+# default: TF_VAR_enable_vpc=true
+TF_VAR_enable_vpc=true
+
+# TF_VAR_softnas_storage:
+# Enable softnas storage.  Softnas is used for a centralised cloud based NFS share.
+# It's licenceing cost scales with usage, and can provide RAID redundancy.
+# default: TF_VAR_softnas_storage=true
+TF_VAR_softnas_storage=true
+
+# TF_VAR_site_mounts:
+# Enable site NFS mounts to be mounted on remote nodes.  If you have an existing local NFS share from your own NAS, it can be provided as a remote mount over vpn for cloud based nodes.  Operating with a local NFS share is requried for PDG/TOPS to function.
+# default: TF_VAR_site_mounts=true
+TF_VAR_site_mounts=true
+
+# TF_VAR_remote_mounts_on_local:
+# Enable cloud NFS mounts to be mounted on local nodes.  After the VPN is connected, the remote SoftNAS NFS shares can be mounted on the local workstation.  This is necesary for PDG/TOPS to track completed work items, and allow remote deletion of data.
+# default: TF_VAR_remote_mounts_on_local=true
+TF_VAR_remote_mounts_on_local=true
+
+# TF_VAR_provision_deadline_spot_plugin:
+# If enabled, the deadline spot fleet plugin will be automatically configured.  
+# Note that because we alter the mongo db, this may not be supported with future versions of deadline.  You may need to disable it and configure the plugin manually in these circumstances.
+TF_VAR_provision_deadline_spot_plugin=true
+
+# TF_VAR_install_houdini:
+# default: TF_VAR_install_houdini=true
+TF_VAR_install_houdini=true
+
+# TF_VAR_softnas_skip_update:
+# default: TF_VAR_softnas_skip_update=false
+TF_VAR_softnas_skip_update=false
+
+# TF_VAR_softnas_volatile:
+# If softnas volumes are volatile, they will be destroyed when infrastructure is set to sleep.
+# default: TF_VAR_softnas_volatile=false
+TF_VAR_softnas_volatile=false
+
+# TF_VAR_install_deadline_db:
+# default: TF_VAR_install_deadline_db=true
+TF_VAR_install_deadline_db=true
+
+# TF_VAR_install_deadline_rcs:
+# default: TF_VAR_install_deadline_rcs=true
+TF_VAR_install_deadline_rcs=true
+
+# TF_VAR_install_deadline_worker:
+# default: TF_VAR_install_deadline_worker=true
+TF_VAR_install_deadline_worker=true
+
+# TF_VAR_workstation_enabled:
+# terraform and ansible will provision a cloud based workstation if true.
+# default: TF_VAR_workstation_enabled=false
+TF_VAR_workstation_enabled=false
+
+# TF_VAR_taint_single:
+# default: TF_VAR_taint_single=""
+TF_VAR_taint_single=""
+
+# TF_VAR_allow_prebuilt_softnas_ami:
+# If set to false, it will replace the existing prebuilt ami.
+# default: TF_VAR_allow_prebuilt_softnas_ami=true
+TF_VAR_allow_prebuilt_softnas_ami=true
+

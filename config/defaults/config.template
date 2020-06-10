@@ -148,21 +148,6 @@ TF_VAR_deadline_proxy_root_dir_dev=insertvalue
 # eg: TF_VAR_deadline_proxy_root_dir_prod=192.168.29.80:4433
 TF_VAR_deadline_proxy_root_dir_prod=insertvalue
 
-# TF_VAR_ebs_disk_size_prod:
-# The size of each EBS disk used on the softnas instance in the production environment.  multiple drives can be used to scale an array up to 20 disks if using Raid 5/6.
-# default: TF_VAR_ebs_disk_size_prod=1000
-TF_VAR_ebs_disk_size_prod=insertvalue
-
-# TF_VAR_ebs_disk_size_dev:
-# The size of each EBS disk used on the softnas instance in the dev environment.  multiple drives can be used to scale an array up to 20 disks if using Raid 5/6.
-# default: TF_VAR_ebs_disk_size_dev=200
-TF_VAR_ebs_disk_size_dev=insertvalue
-
-# TF_VAR_workstation_enabled:
-# terraform and ansible will provision a cloud based workstation if true.
-# default: TF_VAR_workstation_enabled=false
-TF_VAR_workstation_enabled=insertvalue
-
 # TF_VAR_provision_deadline_spot_plugin:
 # If enabled, the deadline spot fleet plugin will be automatically configured.  
 # Note that because we alter the mongo db, this may not be supported with future versions of deadline.  You may need to disable it and configure the plugin manually in these circumstances.
