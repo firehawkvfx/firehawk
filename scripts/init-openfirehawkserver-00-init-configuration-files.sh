@@ -32,6 +32,9 @@ function to_abs_path {
 
 # This is the directory of the current script
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+TEMPDIR="$SCRIPTDIR/../tmp"
+mkdir -p "$TEMPDIR"
+
 printf "\n...checking scripts directory at $SCRIPTDIR\n\n"
 
 configure=
