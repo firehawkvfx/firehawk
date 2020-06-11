@@ -130,12 +130,23 @@ You will have two versions of your infrastructure, we make changes in dev branch
 brew install gettext
 brew link --force gettext
 ```
-- Now we will setup our environment variables from a template. If you have already done this before, you will probably want to keep your old secrets instead of copying in the template.
-    cp secrets.template secrets/secrets-master
-- First step before launching vagrant is to ensure an environment var is set with a random mac (you can generate it yourself with scripts/random_mac_unicast.sh) and store it as a variable in secrets/secrets-prod.  eg,
-    TF_VAR_gateway_mac_prod=0023AE327C51
-- Set the environment variables from the secrets file.  --init assumes an unencrypted file is being used.  We always must do this before running vagrant.
-    source ./update_vars.sh --prod --init
+- Now we will setup our environment variables from templates. If you have already done this before, you will probably want to keep your old secrets instead of copying in the template.
+```
+cp config/defaults/secrets-general.template ../secrets/secrets-general
+cp config/defaults/config.template ../secrets/config
+cp config/defaults/defaults.template ../secrets/defaults
+cp config/defaults/vagrant.template ../secrets/vagrant
+```
+- First step before launching vagrant is to ensure an environment var is set with a random mac (you can generate it yourself with scripts/random_mac_unicast.sh) and store it as a variable in secrets/vagrant.  eg,
+```
+TF_VAR_gateway_mac_dev=0023AE327C51
+```
+- Source the environment variables from the vagrant file.  --init assumes an unencrypted file is being used.  We always do this before running vagrant.
+    source ./update_vars.sh --dev --init
+- Bring up the vm
+```
+vagrant up
+```
 - Get your router to assign/reserve a static ip using this same mac address so that the address doesn't change.  if it does, then render nodes won't find the manager.
 
 

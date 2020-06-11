@@ -36,7 +36,7 @@ printf "\n...checking scripts directory at $SCRIPTDIR\n\n"
 
 configure=
 
-PS3='Do you wish to configure the Openfirehawk server (deployuser VM) or Configure Secrets (To be done from within the Openfirehawk Server Vagrant VM only)? '
+PS3='Do you wish to configure the Ansible Control VM or configure secrets (To be done from within the Openfirehawk Server Vagrant VM only)? '
 options=("Configure Vagrant" "Configure Secrets" "Quit")
 select opt in "${options[@]}"
 do
@@ -44,17 +44,17 @@ do
         "Configure Vagrant")
             printf "\nThe OpenFirehawk Server is launched with Vagrant.  Some environment variables must be configured uniquely to your environment.\n\n"
             configure='vagrant'
-            input=$(to_abs_path $SCRIPTDIR/../deployuser.template)
-            output_tmp=$(to_abs_path $SCRIPTDIR/../../secrets/deployuser-tmp)
-            output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/deployuser)
+            input=$(to_abs_path $SCRIPTDIR/../config/defaults/vagrant.template)
+            output_tmp=$(to_abs_path $SCRIPTDIR/../tmp/vagrant-tmp)
+            output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/vagrant)
             break
             ;;
         "Configure Secrets")
             printf "\nThis should only be done within the OpenFirehawk Serrver Vagrant VM. Provisioning infrastructure requires configuration using secrets based on the secrets.template file.  These will be queried for your own unique values and should always be encrypted before you commit them in your private repository.\n\n"
             configure='secrets'
-            input=$(to_abs_path $SCRIPTDIR/../secrets.template)
-            output_tmp=$(to_abs_path $SCRIPTDIR/../../secrets/secrets-tmp)
-            output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/secrets-dev)
+            input=$(to_abs_path $SCRIPTDIR/../config/defaults/secrets-general.template)
+            output_tmp=$(to_abs_path $SCRIPTDIR/../tmp/secrets-general-tmp)
+            output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/secrets-general)
             break
             ;;
         "Quit")

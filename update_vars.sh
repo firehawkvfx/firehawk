@@ -2,10 +2,10 @@
 set +x
 # the purpose of this script is to:
 # 1) set envrionment variables as defined in the encrypted secrets/secrets-prod file
-# 2) consistently rebuild the secrets.template file based on the variable names found in the secrets-prod file.
+# 2) consistently rebuild the secrets-general.template file based on the variable names found in the secrets-prod file.
 #    This generated template will never/should never have any secrets stored in it since it is commited to version control.
 #    The purpose of this script is to ensure that the template for all users remains consistent.
-# 3) Example values for the secrets.template file are defined in secrets.example. Ensure you have placed an example key=value for any new vars in secrets.example. 
+# 3) Example values for the secrets-general.template file are defined in secrets.example. Ensure you have placed an example key=value for any new vars in secrets.example. 
 # If any changes have resulted in a new variable name, then example values helps other understand what they should be using for their own infrastructure.
 
 RED='\033[0;31m' # Red Text
@@ -54,7 +54,7 @@ mkdir -p $TF_VAR_secrets_path/keys
 
 # The template will be updated by this script
 save_template=true
-tmp_template_path=$TF_VAR_firehawk_path/tmp/secrets.template
+tmp_template_path=$TF_VAR_firehawk_path/tmp/secrets-general.template
 touch $tmp_template_path
 rm $tmp_template_path
 temp_output=$TF_VAR_firehawk_path/tmp/secrets.temp
@@ -340,7 +340,7 @@ if [[ $failed = true ]]; then
 fi
 
 mkdir -p "$TF_VAR_firehawk_path/config/defaults"
-template_path="$TF_VAR_firehawk_path/config/defaults/secrets.template"
+template_path="$TF_VAR_firehawk_path/config/defaults/secrets-general.template"
 
 echo_if_not_silent '...Get secrets from env'
 # # map environment secret for current env
@@ -418,7 +418,7 @@ source_vars () {
     if [[ -z "$var_file" ]] || [[ "$var_file" = "secrets" ]]; then
         var_file="secrets-general"
         echo_if_not_silent "...Using vault file $var_file"
-        template_path="$TF_VAR_firehawk_path/config/defaults/secrets.template"
+        template_path="$TF_VAR_firehawk_path/config/defaults/secrets-general.template"
     elif [[ "$var_file" = "vagrant" ]]; then
         echo_if_not_silent '...Using variable file vagrant. No encryption/decryption needed for these contents.'
         encrypt_mode="none"
