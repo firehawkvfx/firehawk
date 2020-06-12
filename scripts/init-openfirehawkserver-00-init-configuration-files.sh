@@ -189,7 +189,7 @@ do
             repeat_question=true
             while [ $repeat_question = true ]; do
                 use_preset_value=false
-                if [[ ! -z $current_value ]]; then
+                if [[ ! -z $current_value ]] && [[ $current_value != "insertvalue" ]]; then
                     # if a value already exists, it to be used as a default
                     use_preset_value='current'
                     printf "Enter a value or press return to use ${GREEN}current${NC} value: "
