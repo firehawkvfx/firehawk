@@ -190,15 +190,15 @@ do
                 if [[ ! -z $current_value ]]; then
                     # if a value already exists, it to be used as a default
                     use_preset_value='current'
-                    printf "Press return to use ${GREEN}current${NC} value: "
+                    printf "Enter a value or press return to use ${GREEN}current${NC} value: "
                     echo "$current_value"
                 elif [[ ! -z $default_value ]]; then
                     # else if no current value exists, try to use default value if it exists
                     use_preset_value='default'
-                    printf "Press return to use ${BLUE}default${NC} value: "
+                    printf "Enter a value or press return to use ${BLUE}default${NC} value: "
                     echo "$default_value"
                 else
-                    printf "Press return to enter a value: \n"
+                    printf "Enter a value and press return: \n"
                 fi
                 read -p "Set ${i%%=*}: "  result
                 if [[ -z $result ]]; then

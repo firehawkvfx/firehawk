@@ -129,7 +129,7 @@ workstation_address: "{{ lookup('env', 'TF_VAR_workstation_address') }}"
 openfirehawkserver: "{{ lookup('env','TF_VAR_openfirehawkserver') }}"
 openfirehawkserver_dev: "{{ lookup('env','TF_VAR_openfirehawkserver_dev') }}"
 openfirehawkserver_prod: "{{ lookup('env','TF_VAR_openfirehawkserver_prod') }}"
-openfirehawkserver_name: "{{ lookup('env', 'TF_VAR_openfirehawkserver_name') }}"
+openfirehawkserver_name: "{{ lookup('env', 'TF_VAR_openfirehawkserver') }}"
 
 gateway_hostname: "{{ lookup('env', 'TF_VAR_gateway_hostname') }}"
 control_hostname: "{{ lookup('env', 'TF_VAR_control_hostname') }}"
@@ -166,9 +166,6 @@ AWS_SECRET_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
 
 storage_user_access_key_id: "{{ lookup('env','storage_user_access_key_id') }}"
 storage_user_secret: "{{ lookup('env','storage_user_secret') }}"
-
-s3_disk_password: "{{ lookup('env','TF_VAR_s3_disk_password') }}"
-s3_disk_size: "{{ lookup('env','TF_VAR_s3_disk_size') }}"
 
 key_name: "{{ lookup('env','TF_VAR_key_name') }}"
 local_key_path: "{{ lookup('env','TF_VAR_local_key_path') }}"

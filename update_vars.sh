@@ -366,22 +366,41 @@ if [[ ! -z "$firehawksecret" ]]; then
     echo "...Aquired firehawksecret"
 fi
 
-# Update the ci pipeline ID after a destroy operation.  Tagging of new resources will inherit this ID.
-config_override=$(to_abs_path $TF_VAR_secrets_path/config-override-$TF_VAR_envtier) # ...Config Override path $config_override.
+# init config override
+config_override_file=$(to_abs_path $TF_VAR_secrets_path/config-override-$TF_VAR_envtier) # ...Config Override path $config_override_file.
 
 echo_if_not_silent '...Check for configuration, init if not present.'
-if [ ! -f $config_override ]; then
-    echo_if_not_silent "...Initialising $config_override"
-    cp "$TF_VAR_firehawk_path/config/defaults/defaults-config-override-$TF_VAR_envtier" "$config_override"
+if [ ! -f $config_override_file ]; then
+    echo_if_not_silent "...Initialising $config_override_file"
+    cp "$TF_VAR_firehawk_path/config/defaults/defaults-config-override-$TF_VAR_envtier" "$config_override_file"
 fi
 
-current_version=$(cat $config_override | sed -e '/.*defaults_config_overide_version=.*/!d')
+current_version=$(cat $config_override_file | sed -e '/.*defaults_config_overide_version=.*/!d')
 target_version=$(cat $TF_VAR_firehawk_path/config/defaults/defaults-config-override-$TF_VAR_envtier | sed -e '/.*defaults_config_overide_version=.*/!d')
 
 if [[ "$target_version" != "$current_version" ]]; then
-    echo "...Version doesn't match config.  Initialising $config_override"
-    cp "$TF_VAR_firehawk_path/config/defaults/defaults-config-override-$TF_VAR_envtier" "$config_override"
+    echo "...Version doesn't match config.  Initialising $config_override_file"
+    cp "$TF_VAR_firehawk_path/config/defaults/defaults-config-override-$TF_VAR_envtier" "$config_override_file"
 fi
+
+# init defaults
+defaults_file=$(to_abs_path $TF_VAR_secrets_path/defaults) # ...Config Override path $defaults_file.
+
+echo_if_not_silent '...Check for configuration, init if not present.'
+if [ ! -f $defaults_file ]; then
+    echo_if_not_silent "...Initialising $defaults_file"
+    cp "$TF_VAR_firehawk_path/config/defaults/defaults" "$defaults_file"
+fi
+
+current_version=$(cat $defaults_file | sed -e '/.*defaults_=.*/!d')
+target_version=$(cat $TF_VAR_firehawk_path/config/defaults/defaults | sed -e '/.*defaults=.*/!d')
+
+if [[ "$target_version" != "$current_version" ]]; then
+    echo "...Version doesn't match config.  Initialising $defaults_file"
+    cp "$TF_VAR_firehawk_path/config/defaults/defaults" "$defaults_file"
+fi
+
+
 
 ### The dynamic vars here are set by the environment during dpeloyment, and commit messages for gitlab ci.
 # x='1' 
@@ -393,20 +412,20 @@ if [ -z ${CI_JOB_ID+x} ]; then # if pipeline id is provided, set it in the file.
     echo "CI_JOB_ID is not set, will not alter config."
 else
     echo "CI_JOB_ID is set to '$CI_JOB_ID'"
-    echo "...Set CI_JOB_ID at config_override path- $config_override"
-    sed -i "s/^TF_VAR_CI_JOB_ID=.*$/TF_VAR_CI_JOB_ID=${CI_JOB_ID}/" $config_override # ...Enable the vpc.
+    echo "...Set CI_JOB_ID at config_override_file path- $config_override_file"
+    sed -i "s/^TF_VAR_CI_JOB_ID=.*$/TF_VAR_CI_JOB_ID=${CI_JOB_ID}/" $config_override_file # ...Enable the vpc.
 fi
 
-export TF_VAR_CI_JOB_ID=$(cat $config_override | sed -e '/.*TF_VAR_CI_JOB_ID=.*/!d')
+export TF_VAR_CI_JOB_ID=$(cat $config_override_file | sed -e '/.*TF_VAR_CI_JOB_ID=.*/!d')
 
 x=false
 if [ -z ${TF_VAR_fast+x} ]; then
     echo_if_not_silent "TF_VAR_fast is unset.  defaulting to $x or it will be aquired by the config override file"
 else
     echo_if_not_silent "TF_VAR_fast is set to '$TF_VAR_fast'"
-    echo_if_not_silent "...Set TF_VAR_fast at config_override path- $TF_VAR_fast"
-    sed -i "s/^TF_VAR_fast=.*$/TF_VAR_fast=${TF_VAR_fast}/" $config_override # ...Enable the vpc.
-    export TF_VAR_fast=$(cat $config_override | sed -e '/.*TF_VAR_fast=.*/!d')
+    echo_if_not_silent "...Set TF_VAR_fast at config_override_file path- $TF_VAR_fast"
+    sed -i "s/^TF_VAR_fast=.*$/TF_VAR_fast=${TF_VAR_fast}/" $config_override_file # ...Enable the vpc.
+    export TF_VAR_fast=$(cat $config_override_file | sed -e '/.*TF_VAR_fast=.*/!d')
 fi
 
 source_vars () {
@@ -430,12 +449,12 @@ source_vars () {
     elif [[ "$var_file" = "defaults" ]]; then
         echo_if_not_silent '...Using variable file defaults. No encryption/decryption needed for these contents.'
         encrypt_mode="none"
-        template_path="$TF_VAR_firehawk_path/config/defaults/defaults.template"
+        template_path="$TF_VAR_firehawk_path/config/defaults/defaults.template" # These should be removed but need alter the system to do it properly.
     elif [[ "$var_file" = "config-override" ]]; then
         var_file="config-override-$TF_VAR_envtier"
         echo_if_not_silent "...Using variable file $var_file. No encryption/decryption needed for these contents."
         encrypt_mode="none"
-        template_path="$TF_VAR_firehawk_path/config/defaults/config-override.template"
+        template_path="$TF_VAR_firehawk_path/config/defaults/config-override.template" # These should be removed but need alter the system to do it properly.
     else
         printf "\nUnrecognised vault/variable file. \n$var_file\nExiting...\n"
         failed=true
