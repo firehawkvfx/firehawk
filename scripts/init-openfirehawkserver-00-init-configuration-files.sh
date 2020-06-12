@@ -118,9 +118,11 @@ do
             break
             ;;
         "Initilise And Use External Editor To Configure")
-            printf "\nTemplate files will overwrite any existing configuration.\nTo use an external editor set-\nexport EDITOR='/usr/local/bin/code -w'\n\n"
+            printf "\nTemplate files will overwrite any existing configuration.\nTo use an external editor set-\nexport EDITOR='code -w'\n\n"
             read -p 'Press ENTER to continue'
             cp -f $input $output_complete
+            if [[ -z "$EDITOR" ]]; then EDITOR='vi'; fi
+            eval "$EDITOR $output_complete"
             exit
             ;;
         "Quit")
