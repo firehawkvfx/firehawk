@@ -25,14 +25,13 @@ exit_test () {
         failed=true
         if [ "$LIVE_TERMINAL" == true ]; then
             if [[ -z "$silent" ]] || [[ "$silent" == false ]]; then printf "\n${RED}Failed command in live terminal. ${NC}\n" >&2; fi
-            
         else
             printf "\n${RED}Failed command ...exiting${NC}\n" >&2
         fi
     fi
     if [[ "$failed" == true ]]; then
         if [[ "$SHOWCOMMANDS" == true ]]; then set -x; fi
-        exit 1
+        if [[ "$LIVE_TERMINAL" != "true" ]]; then exit 1; fi
     fi
     if [[ -z "$allow_interrupt" ]] || [[ "$allow_interrupt" == true ]]; then
         if [[ -d "/deployuser" ]] && [[ -f "/deployuser/interrupt" ]]; then
@@ -41,7 +40,7 @@ exit_test () {
         fi
         if [[ "$interrupt" == true ]]; then
             if [[ "$SHOWCOMMANDS" == true ]]; then set -x; fi
-            exit 1
+            if [[ "$LIVE_TERMINAL" != "true" ]]; then exit 1; fi
         fi
     fi
     if [[ "$SHOWCOMMANDS" == true ]]; then set -x; fi # After finishing the script, we enable set -x to show input again.

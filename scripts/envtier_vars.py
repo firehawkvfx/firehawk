@@ -5,7 +5,8 @@ envtier=os.environ["TF_VAR_envtier"]
 TF_VAR_firehawk_path=os.environ["TF_VAR_firehawk_path"]
 outdict = {}
 
-template_path = TF_VAR_firehawk_path + "/tmp/secrets.template"
+template_path = os.environ['tmp_template_path']
+# template_path = TF_VAR_firehawk_path + "/tmp/secrets.template"
 envtier_mapping_path = TF_VAR_firehawk_path + "/tmp/envtier_mapping.txt"
 
 # set values to those relevant to the current envtier in a dictionary based on the _dev or _prod appended names space on any keys.

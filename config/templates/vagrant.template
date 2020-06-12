@@ -39,11 +39,12 @@ TF_VAR_vault_key_name_general=insertvalue
 
 # TF_VAR_bridgenic: 
 # The network interface virtual box will use to bridge its connection 
+# See https://www.vagrantup.com/docs/networking/public_network.html
 # If you don't know the exact string for the bridgenic (found on 'vagrant up' eg: '1) en0: Wi-Fi (AirPort)') then leave it as 'none'
 # eg 1: TF_VAR_bridgenic=none
 # eg 2: TF_VAR_bridgenic=en0: Wi-Fi (AirPort)
 # eg 3: TF_VAR_bridgenic=en1: Thunderbolt Ethernet Slot 1
-# default: TF_VAR_bridgenic=en0: Wi-Fi (AirPort)
+# default: TF_VAR_bridgenic=none
 TF_VAR_bridgenic=insertvalue
 
 # TF_VAR_workstation_ethernet_device_dev:
@@ -52,7 +53,9 @@ TF_VAR_bridgenic=insertvalue
 TF_VAR_workstation_ethernet_device_dev=insertvalue
 
 # TF_VAR_workstation_ethernet_device_prod:
-# The network interface used on the workstation to configure routes.  static routes are applied directly to the workstation to route traffice via the vpn gateway.
+# The network interface used on the workstation to configure routes.  Static routes are applied directly to the workstation to route traffice via the vpn gateway.
+# To list the available options on the workstation execute:
+# ip a
 # default: TF_VAR_workstation_ethernet_device_prod=eth1
 TF_VAR_workstation_ethernet_device_prod=insertvalue
 
@@ -122,18 +125,3 @@ TF_VAR_openfirehawkserver_vcpus_dev=insertvalue
 # The number of VCPU's dedicated to the vagrant VM used in the prod environment.  Primarily you should consider the requirements of running mongo DB for Deadline on this host.
 # default: TF_VAR_openfirehawkserver_vcpus_prod=2
 TF_VAR_openfirehawkserver_vcpus_prod=insertvalue
-
-# TF_VAR_selected_ansible_version:
-# the version to use for ansible.  Can be 'latest', or a specific version.  due to a bug with pip and ansible we can have pip permissions and authentication issues when not using latest.
-# this is because pip installs the version instead of apt-get when using a specific version instead of latest.  Resolution by using virtualenv will be required to resolve.
-# eg: TF_VAR_selected_ansible_version=2.9.2
-# default: TF_VAR_selected_ansible_version=latest
-TF_VAR_selected_ansible_version=insertvalue
-
-# TF_VAR_syscontrol_gid:
-# the group gid for the syscontrol group
-TF_VAR_syscontrol_gid=insertvalue
-
-# TF_VAR_deployuser_uid:
-# The UID of the deployuser for all hosts.  Ansible uses this user connect to provision with.
-TF_VAR_deployuser_uid=insertvalue

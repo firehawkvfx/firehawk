@@ -16,8 +16,8 @@ NC='\033[0m' # No Color
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
 
-printf "\n${RED}Warning: Currently virtual box requires a version lock after installing:${NC}"
-echo "6.1.10 had problems with centos 7 and gnome 2020/07/07. Ensure you use this version, or update with care:"
+printf "\n${RED}Warning: Currently virtual box requires a version lock after installing:${NC}\n"
+echo "6.1.10 had problems with centos 7 and gnome 2020/07/07. Ensure you use the version below, or update with caution:"
 echo "yum install VirtualBox-6.1-6.1.8_137981_el7-1.x86_64 versionlock; yum versionlock add VirtualBox-6.1-6.1.8_137981_el7-1.x86_64"
 
 # This block allows you to echo a line number for a failure.
@@ -54,7 +54,7 @@ mkdir -p $TF_VAR_secrets_path/keys
 
 # The template will be updated by this script
 save_template=true
-tmp_template_path=$TF_VAR_firehawk_path/tmp/secrets-general.template
+export tmp_template_path=$TF_VAR_firehawk_path/tmp/secrets.template
 touch $tmp_template_path
 rm $tmp_template_path
 temp_output=$TF_VAR_firehawk_path/tmp/secrets.temp
@@ -340,7 +340,7 @@ if [[ $failed = true ]]; then
 fi
 
 mkdir -p "$TF_VAR_firehawk_path/config/defaults"
-template_path="$TF_VAR_firehawk_path/config/defaults/secrets-general.template"
+template_path="$TF_VAR_firehawk_path/config/templates/secrets-general.template"
 
 echo_if_not_silent '...Get secrets from env'
 # # map environment secret for current env
@@ -437,24 +437,24 @@ source_vars () {
     if [[ -z "$var_file" ]] || [[ "$var_file" = "secrets" ]]; then
         var_file="secrets-general"
         echo_if_not_silent "...Using vault file $var_file"
-        template_path="$TF_VAR_firehawk_path/config/defaults/secrets-general.template"
+        template_path="$TF_VAR_firehawk_path/config/templates/secrets-general.template"
     elif [[ "$var_file" = "vagrant" ]]; then
         echo_if_not_silent '...Using variable file vagrant. No encryption/decryption needed for these contents.'
         encrypt_mode="none"
-        template_path="$TF_VAR_firehawk_path/config/defaults/vagrant.template"
+        template_path="$TF_VAR_firehawk_path/config/templates/vagrant.template"
     elif [[ "$var_file" = "config" ]]; then
         echo_if_not_silent '...Using variable file config. No encryption/decryption needed for these contents.'
         encrypt_mode="none"
-        template_path="$TF_VAR_firehawk_path/config/defaults/config.template"
+        template_path="$TF_VAR_firehawk_path/config/templates/config.template"
     elif [[ "$var_file" = "defaults" ]]; then
         echo_if_not_silent '...Using variable file defaults. No encryption/decryption needed for these contents.'
         encrypt_mode="none"
-        template_path="$TF_VAR_firehawk_path/config/defaults/defaults.template" # These should be removed but need alter the system to do it properly.
+        template_path="$TF_VAR_firehawk_path/config/templates/defaults.template" # These should be removed but need alter the system to do it properly.
     elif [[ "$var_file" = "config-override" ]]; then
         var_file="config-override-$TF_VAR_envtier"
         echo_if_not_silent "...Using variable file $var_file. No encryption/decryption needed for these contents."
         encrypt_mode="none"
-        template_path="$TF_VAR_firehawk_path/config/defaults/config-override.template" # These should be removed but need alter the system to do it properly.
+        template_path="$TF_VAR_firehawk_path/config/templates/config-override.template" # These should be removed but need alter the system to do it properly.
     else
         printf "\nUnrecognised vault/variable file. \n$var_file\nExiting...\n"
         failed=true
