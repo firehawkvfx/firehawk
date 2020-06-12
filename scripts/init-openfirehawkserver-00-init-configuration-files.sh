@@ -48,7 +48,7 @@ do
         "Configure Vagrant")
             printf "\nThe OpenFirehawk Server is launched with Vagrant.  Some environment variables must be configured uniquely to your environment.\n\n"
             configure='vagrant'
-            input=$(to_abs_path $SCRIPTDIR/../config/defaults/vagrant.template)
+            input=$(to_abs_path $SCRIPTDIR/../config/templates/vagrant.template)
             output_tmp=$(to_abs_path $SCRIPTDIR/../tmp/vagrant-tmp)
             output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/vagrant)
             break
@@ -56,7 +56,7 @@ do
         "Configure Secrets")
             printf "\nThis should only be done within the OpenFirehawk Serrver Vagrant VM. Provisioning infrastructure requires configuration using secrets based on the secrets.template file.  These will be queried for your own unique values and should always be encrypted before you commit them in your private repository.\n\n"
             configure='secrets'
-            input=$(to_abs_path $SCRIPTDIR/../config/defaults/secrets-general.template)
+            input=$(to_abs_path $SCRIPTDIR/../config/templates/secrets-general.template)
             output_tmp=$(to_abs_path $SCRIPTDIR/../tmp/secrets-general-tmp)
             output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/secrets-general)
             break
@@ -262,13 +262,13 @@ clear
 
 if [[ -f "$output_complete" ]]; then
     # if an existing config exists, then prompt to overwrite
-    printf "\nYour configuration has been stored at temp path-\n$output_tmp\nTo use this configuration do you wish to overwrite any existing configuration at-\n$output_complete?\n\n"
+    printf "\nYour new initialised configuration has been stored at temp path-\n$output_tmp\nTo use this configuration do you wish to overwrite any existing configuration at-\n$output_complete?\n\n"
     PS3="Save and overwrite configuration settings?"
     options=("Yes, overwrite my old configuration" "No / Quit")
     select opt in "${options[@]}"
     do
         case $opt in
-            "Yes, overwrite my old configuration")
+            "Yes, overwrite / initialised my old configuration")
                 printf "\nMoving temp config to overwrite previous config... \n\n"
                 mv -fv $output_tmp $output_complete || echo "Failed to move temp file.  Check permissions."
                 break
