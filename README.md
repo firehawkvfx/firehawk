@@ -158,7 +158,9 @@ If you intend to use Houdini, Firehawk uses Side FX provided keys to query and d
 - Create a New App under [Manage applications authentication](https://www.sidefx.com/oauth2/applications/) to get a Client ID and secret keys.
 - Save these these into your decrypted secrets file and encrypt it.
 
-
+## Thinkbox Usage Based Licensing
+To use Deadline in AWS, instances that reside in AWS are free.  But any onsite systems that render will require a licence.  If you wish to use any other UBL licenses (eg houdini Engine) they will also 
+require your Thinkbox UBL URL and UBL activation code.  These are entered in your encrypted secrets file, and are used to configure the Deadline DB upon install automatically.
 
 
 
