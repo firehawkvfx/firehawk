@@ -4,6 +4,9 @@
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
   any_errors_fatal: true
+  
+  vars:
+    config_override: "{{ lookup('env','config_override') }}"
 
   roles:
   - role: get_host_ip
