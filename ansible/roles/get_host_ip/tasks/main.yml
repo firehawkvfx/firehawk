@@ -28,7 +28,7 @@
 - name: update TF_VAR_openfirehawkserver with ip
   lineinfile:
     state: present
-    path: "{{ config_override }}"
+    path: "{{ lookup('env','config_override') }}"
     line: "TF_VAR_openfirehawkserver={{ host_ip }}"
     regexp: "^TF_VAR_openfirehawkserver=.*"
   connection: local

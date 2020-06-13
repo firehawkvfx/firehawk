@@ -17,7 +17,6 @@
 
 # Do not put real world sensitive information in the example comments / #commented out lines.
 
-# New comments should be only added in secrets/config as these lines will be propogated into the config.template schema used to initialise any new  secrets/config file for other users of the Firehawk repo.
 
 # BEGIN CONFIGURATION #
 
@@ -46,6 +45,14 @@ TF_VAR_fast=insertvalue
 # Allows the presence of an interrupt file to force exit on current provisioning
 # default: allow_interrupt=true
 allow_interrupt=insertvalue
+
+# TF_VAR_openfirehawkserver:
+# The openfirehawk server vm uses this static ip assigned to the VM.  
+# Before Initialisation this should be set to 'auto'.  The static ip should be updated here after initialisation automatically.
+# You should also assign the current static ip in your router's settings.
+# It will cause issues for your installation if the IP changes within your network and is not static.
+# eg: TF_VAR_openfirehawkserver=auto
+TF_VAR_openfirehawkserver=insertvalue
 
 # TF_VAR_key_name_dev:
 # The name of the key pair used in the dev environment. You will create a key pair to access your aws instances, listed here.
