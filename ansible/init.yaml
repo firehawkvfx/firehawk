@@ -31,7 +31,7 @@
     - role: terraform
     - role: aws-cli
     - role: transparent-hugepages-check
-    - role: get_host_ip
+    # - role: get_host_ip
 
 - hosts: "{{ variable_host | default('ansible_control') }}"
   remote_user: "{{ variable_user | default('deployuser') }}"

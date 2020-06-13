@@ -1,0 +1,9 @@
+---
+- hosts: "{{ variable_host | default('localhost') }}"
+  remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
+  become: true
+  any_errors_fatal: true
+
+  roles:
+  - role: get_host_ip
