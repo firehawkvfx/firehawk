@@ -240,15 +240,21 @@ else
 
     touch $TF_VAR_local_key_path # ensure a file is present or tf will not be able to destroy anything.
 
-    echo "...Terraform refresh"
     success=false
-    if terraform refresh -lock=false; then
-      echo "...Terraform destroy"
-      if terraform destroy -lock=false --auto-approve; then success=true; fi
+    echo "...Terraform destroy" # first try to destroy without refresh, which may hang on missing vars.
+    if terraform destroy -lock=false --auto-approve; then success=true; fi
+    
+    if [[ "$success" == false ]]; then
+      echo "...Last destroy attempt failed."
+      echo "...Terraform refresh"
+      if terraform refresh -lock=false; then
+        echo "...Terraform destroy"
+        if terraform destroy -lock=false --auto-approve; then success=true; fi
+      fi
     fi
 
     if [[ "$success" == false ]]; then
-      echo "...First destroy attempts failed.  terraform.tfstate is likely corrupted, we will restore from backup and attempt destroy again."
+      echo "...Last destroy attempts failed.  terraform.tfstate is likely corrupted, we will restore from backup and attempt destroy again."
       cp -fv terraform.tfstate.backup terraform.tfstate
       if terraform refresh -lock=false; then
         echo "...Terraform destroy from terraform.tfstate.backup"

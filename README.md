@@ -161,7 +161,12 @@ source ./update_vars.sh --dev --init
 vagrant up
 ```
 - Get your router to assign/reserve a static ip using this same mac address so that the address doesn't change.  if it does, then render nodes won't find the manager.
-
+- From the vm, configure secrets.
+```
+vagrant ssh
+./scripts/setup.sh
+```
+- Select 'Configure Secrets'.
 
 
 ## Side Effects API OAuth2 keys
