@@ -99,9 +99,22 @@ Terraform uses PGP encryption when creating new aws users with AWS Secret keys. 
 
 ## Vagrant
 
-Vagrant is a tool that manages your initial VM configuration onsite.  It allows us to create a consistent environment to launch our infrastructure from with Ruby files that define the VM.  We create two VMS, ``ansiblecontrol`` and ``firehawkgateway``.  Ansible control is where terraform and ansible provision outwards from.  It is where the secrets and keys need to reside.  Firehawk Gateway will be configured as a VPN gateway and it will have the deadline DB and Deadline Remote Connection Server (RCS).
+Vagrant is a tool that manages your initial VM configuration onsite.  It allows us to create a consistent environment to launch our infrastructure from with Ruby files that define the VMs.  We create two VMs, ``ansiblecontrol`` and ``firehawkgateway``.  Ansible control is where terraform and ansible provision outwards from.  It is where the secrets and keys need to reside.  Firehawk Gateway will be configured as a VPN gateway and it will have the deadline DB and Deadline Remote Connection Server (RCS).
 
 - Install [Hashicorp Vagrant](https://www.vagrantup.com/) and Virtualbox on your system (Linux / Mac OS recommended)
+
+## Vagrant workstation for the dev environment
+
+When doing test deployments, we use seperate VM's from production.  This Vagrant VM creates a CentOS 7 VM with a Gnome GUI.  To isolate your workstation from testing, it is recommended that you use this VM here to simulate an isolated a workstation in a dev environment.  This protects your actual workstation from testing failed deplopyments that would affect productivity.  In the production environment, you would replace any IP adresses and ssh keys / passwords with those used for your actual workstation.  
+
+- [Clone this repository to a seperate folder](https://github.com/queglay/vagrant-centos-gui) to create a workstation VM to test deployments in a dev environment
+```
+Vagrant up
+```
+- Once the UI is up configure a user name (user) and password, this will be used to bootstrap another user for automation later.
+- Ensure you can ssh into the VM with this information from your network.
+
+This login information will be entered into your encrypted secrets file in later steps, and is only temporarily used until the login is replaced with an ssh key for the deployuser (which will also be created automatically).  Once the ssh key is configured by Firehawk the password wont be usable for ssh access anymore.  Passwords are not recommend to be allowed for continued SSH access in a firehawk deployment.
 
 ## Replicate a Firehawk clone and manage your secrets repository
 
@@ -119,9 +132,9 @@ Vagrant is a tool that manages your initial VM configuration onsite.  It allows 
   git submodule update --init --recursive
   ```
 
-This provides a structure for your encrypted secrets and configuration, which exist outside of the firehawk submodule.  The firehawk submodule is a public submodule, and it can exist as a fork or a clone.  This allows the code to be shared will keeping configuration and secrets seperate.
+This provides a structure for your encrypted secrets and configuration, which exist outside of the firehawk submodule.  The firehawk submodule is a public submodule, and it can exist as a fork or a clone.  This allows the code to be shared while keeping configuration and secrets seperate.
 
-All these steps allow us to configure a setup in the 'dev' environment to test before you can deploy in the 'prod' environment, in a seperate folder.
+These steps allow us to configure a setup in the 'dev' environment to test before you can deploy in the 'prod' environment, in a seperate folder.
 You will have two versions of your infrastructure, we make changes in dev branches and test them before merging and deploying to production.
 
 - Download the latest deadline installer tar, and place the .tar file in the local firehawk/downloads folder.
@@ -130,21 +143,21 @@ You will have two versions of your infrastructure, we make changes in dev branch
 brew install gettext
 brew link --force gettext
 ```
-- Now we will setup our environment variables from templates. If you have already done this before, you will probably want to keep your old secrets instead of copying in the template.
+- We will need 4 random mac adresses, 2 for dev and 2 for production.  Keep them somewhere temporarily for us to copy into the vagrant config later.
 ```
-cp config/defaults/secrets-general.template ../secrets/secrets-general
-cp config/defaults/config.template ../secrets/config
-cp config/defaults/defaults.template ../secrets/defaults
-cp config/defaults/vagrant.template ../secrets/vagrant
+for i in {1..4}; do ./scripts/random_mac_unicast.sh; done
 ```
-- First step before launching vagrant is to ensure an environment var is set with a random mac (you can generate it yourself with scripts/random_mac_unicast.sh) and store it as a variable in secrets/vagrant.  eg,
+- Now we will setup our environment variables with templates. If you have already done this before, you will probably want to keep your old secrets instead of initalising the template.  Otherwise, continue with the setup script.
 ```
-TF_VAR_gateway_mac_dev=0023AE327C51
+cd firehawk
+./scripts/setup.sh
 ```
-- Source the environment variables from the vagrant file.  --init assumes an unencrypted file is being used.  We always do this before running vagrant.
-    source ./update_vars.sh --dev --init
-- Bring up the vm
+- Select 'Configure Vagrant'.
+- Either proceed to setup each variable step by step or use an external editor on ``firehawk-deploy-dev/secrets/vagrant``
+- When asked about the 4 mac adresses, copy in the 4 entries generated earlier.
+- Source the environment variables from the vagrant config file for the dev environment.  --init assumes an unencrypted file is being used.  We always do this before running vagrant.
 ```
+source ./update_vars.sh --dev --init
 vagrant up
 ```
 - Get your router to assign/reserve a static ip using this same mac address so that the address doesn't change.  if it does, then render nodes won't find the manager.

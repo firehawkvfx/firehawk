@@ -943,7 +943,7 @@ EOT
       # ensure volumes and pools exist after disks are ensured to exist.
       ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/softnas_ebs_pool.yaml -v; exit_test
       # ensure s3 disks exist and are mounted.  the s3 features are disabled currently in favour of migrating to using the aws cli and pdg to sync data
-      # ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/softnas_s3_disk.yaml -v --extra-vars "pool_name=$(TF_VAR_envtier)pool0 volume_name=$(TF_VAR_envtier)volume0 disk_device=0 s3_disk_size_max_value=${var.s3_disk_size} encrypt_s3=true import_pool=${local.import_pool}"; exit_test
+      # ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/softnas_s3_disk.yaml -v --extra-vars "pool_name=$(TF_VAR_envtier)pool0 volume_name=$(TF_VAR_envtier)volume0 disk_device=0 encrypt_s3=true import_pool=${local.import_pool}"; exit_test
       # exports should be updated here.
       # if btier.json exists in /secrets/$(TF_VAR_envtier)/ebs-volumes/ then the tiers will be imported.
       # ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/softnas_backup_btier.yaml -v --extra-vars "restore=true"; exit_test

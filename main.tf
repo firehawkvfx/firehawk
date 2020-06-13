@@ -291,8 +291,6 @@ module "softnas" {
 
   remote_mounts_on_local = var.remote_mounts_on_local == true ? true : false
 
-  s3_disk_size = var.s3_disk_size
-
   #skipping os updates will allow faster rollout, but may be non functional
   skip_update = var.softnas_skip_update
 
