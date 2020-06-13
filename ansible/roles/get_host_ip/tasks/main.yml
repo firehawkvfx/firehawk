@@ -12,6 +12,5 @@
 - name: show output
   debug:
     var: host_ip
-  failed_when: host_ip is false
+  failed_when: host_ip == false
 
-  
