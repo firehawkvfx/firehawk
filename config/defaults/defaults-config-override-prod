@@ -17,13 +17,12 @@
 
 # Do not put real world sensitive information in the example comments / #commented out lines.
 
-# New comments should be only added in secrets/config as these lines will be propogated into the config.template schema used to initialise any new  secrets/config file for other users of the Firehawk repo.
 
 # BEGIN CONFIGURATION #
 
 # defaults_config_overide_version:
 # If the version of this file changes, the file will be replaced in any deployment.
-defaults_config_overide_version="0.0.16"
+defaults_config_overide_version="0.0.18"
 
 # TF_VAR_CI_JOB_ID:
 # This pipeline number is used to updat the active pipeline in the working dir when a new deployment is initialised.
@@ -46,6 +45,14 @@ TF_VAR_fast=false
 # Allows the presence of an interrupt file to force exit on current provisioning
 # default: allow_interrupt=true
 allow_interrupt=true
+
+# TF_VAR_openfirehawkserver:
+# The openfirehawk server vm uses this static ip assigned to the VM.  
+# Before Initialisation this should be set to 'auto'.  The static ip should be updated here after initialisation automatically.
+# You should also assign the current static ip in your router's settings.
+# It will cause issues for your installation if the IP changes within your network and is not static.
+# eg: TF_VAR_openfirehawkserver=auto
+TF_VAR_openfirehawkserver=auto
 
 # TF_VAR_key_name_dev:
 # The name of the key pair used in the dev environment. You will create a key pair to access your aws instances, listed here.
@@ -76,6 +83,7 @@ TF_VAR_vagrant_destroy_before_deploy=false
 TF_VAR_tf_destroy_before_deploy=true
 
 # TF_VAR_destroy_after_deploy:
+# In dev tests we may automatically destroy a deployment after completion.  In prod, we preserve the deployment.
 # default: TF_VAR_destroy_after_deploy=false
 TF_VAR_destroy_after_deploy=false
 

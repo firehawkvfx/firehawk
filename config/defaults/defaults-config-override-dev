@@ -22,7 +22,7 @@
 
 # defaults_config_overide_version:
 # If the version of this file changes, the file will be replaced in any deployment.
-defaults_config_overide_version="0.0.17"
+defaults_config_overide_version="0.0.18"
 
 # TF_VAR_CI_JOB_ID:
 # This pipeline number is used to updat the active pipeline in the working dir when a new deployment is initialised.
@@ -83,6 +83,7 @@ TF_VAR_vagrant_destroy_before_deploy=false
 TF_VAR_tf_destroy_before_deploy=true
 
 # TF_VAR_destroy_after_deploy:
+# In dev tests we may automatically destroy a deployment after completion.  In prod, we preserve the deployment.
 # default: TF_VAR_destroy_after_deploy=false
 TF_VAR_destroy_after_deploy=true
 
