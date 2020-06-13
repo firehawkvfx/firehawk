@@ -1,35 +1,28 @@
 ---
 # tasks file for ansible/roles/get_host_ip
-- name: install mkpasswd, pip, pexpect, passlib, fping
-  package:
-    name:
-    # - python-pip
-    # - python-apt
-    - python-netaddr # For jinja ip address filtering 
-    state: present
 
 - name: get host ip
   shell: |
     ifconfig eth1 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'
   register: output
-  when: update_openfirehawkserver_ip_var
+  when: update_openfirehawkserver_ip_var | bool
 
-- name: set ip
+- name: set ip.  python-netaddr must be installed on the ansible control host before running the playbook.
   set_fact:
     host_ip: "{{ output.stdout_lines[0] | ipaddr }}"
-  when: update_openfirehawkserver_ip_var
+  when: update_openfirehawkserver_ip_var | bool
 
 - name: show output
   debug:
     var: host_ip
   failed_when: host_ip == false
-  when: update_openfirehawkserver_ip_var
+  when: update_openfirehawkserver_ip_var | bool
 
-- name: update TF_VAR_openfirehawkserver with ip
+- name: "update TF_VAR_openfirehawkserver with ip in file {{ lookup('env','config_override') }}"
   lineinfile:
     state: present
     path: "{{ lookup('env','config_override') }}"
     line: "TF_VAR_openfirehawkserver={{ host_ip }}"
     regexp: "^TF_VAR_openfirehawkserver=.*"
   connection: local
-  when: update_openfirehawkserver_ip_var
+  when: update_openfirehawkserver_ip_var | bool

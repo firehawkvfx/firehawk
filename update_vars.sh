@@ -39,11 +39,11 @@ export TF_VAR_firehawk_path=$SCRIPTDIR
 function to_abs_path {
     local target="$1"
     if [ "$target" == "." ]; then
-        echo "$(pwd)"
+        echo "$(readlink -m $(pwd))"
     elif [ "$target" == ".." ]; then
-        echo "$(dirname "$(pwd)")"
+        echo "$(readlink -m $(dirname "$(pwd)"))"
     else
-        echo "$(cd "$(dirname "$1")"; pwd)/$(basename "$1")"
+        echo "$(readlink -m $(cd "$(dirname "$1")"; pwd)/$(basename "$1"))"
     fi
 }
 export TF_VAR_secrets_path="$(to_abs_path $TF_VAR_firehawk_path/../secrets)"; exit_test
