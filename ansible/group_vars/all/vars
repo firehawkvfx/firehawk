@@ -6,6 +6,8 @@ ANSIBLE_FORCE_COLOR: 'true'
 
 selected_ansible_version: "{{ lookup('env','TF_VAR_selected_ansible_version') }}"
 
+config_override: "{{ lookup('env','config_override') }}"
+
 debug: 0
 
 envtier: "{{ lookup('env','TF_VAR_envtier') }}"

@@ -14,3 +14,13 @@
     var: host_ip
   failed_when: host_ip == false
 
+- name: update TF_VAR_openfirehawkserver with ip
+  lineinfile:
+    state: present
+    path: "{{ config_override }}"
+    line: "TF_VAR_openfirehawkserver={{ host_ip }}"
+    regexp: "^TF_VAR_openfirehawkserver=.*"
+    # insertbefore: BOF
+    # create: true
+  connection: local
+  when: update_openfirehawkserver_ip_var
