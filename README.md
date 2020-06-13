@@ -43,7 +43,7 @@ Best practices for security and best practice around secrets management are impo
 
 ## Permissions for the new user
 
-Firehawk automates creation of some user accounts, instances, VPN, NAS storage and others.  A primary user with appropriate permissions must be manually created for this to be possible.
+Firehawk automates creation of some user accounts, instances, images, VPN, NAS storage and others.  An AWS user with appropriate permissions to create all these resources must be manually created for this to be possible.
 We will define the permissions for this new user (in each of the accounts).  Later we will generate secret keys that will be stored in an encrypted file to create resources with Terraform and Ansible that rely on these permissions.
 
 - Goto Identity and Access Management (IAM)
