@@ -4,15 +4,18 @@
   shell: |
     ifconfig eth1 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'
   register: output
+  when: update_openfirehawkserver_ip_var
 
 - name: set ip
   set_fact:
     host_ip: "{{ output.stdout_lines[0] | ipaddr }}"
+  when: update_openfirehawkserver_ip_var
 
 - name: show output
   debug:
     var: host_ip
   failed_when: host_ip == false
+  when: update_openfirehawkserver_ip_var
 
 - name: update TF_VAR_openfirehawkserver with ip
   lineinfile:
