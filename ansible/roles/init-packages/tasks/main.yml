@@ -30,6 +30,7 @@
     name:
     - python-pip
     - python-apt
+    - python-netaddr # For jinja ip address filtering 
     - whois
     - python-passlib
     - zip
