@@ -26,7 +26,7 @@
 
 # defaults_config_overide_version:
 # If the version of this file changes, the file will be replaced in any deployment.
-defaults_version="0.0.18"
+defaults_version="0.0.19"
 
 # TF_VAR_deadline_version:
 # The version of the deadline installer.
