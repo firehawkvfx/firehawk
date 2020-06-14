@@ -26,7 +26,12 @@
 
 # defaults_config_overide_version:
 # If the version of this file changes, the file will be replaced in any deployment.
-defaults_version="0.0.17"
+defaults_version="0.0.18"
+
+# TF_VAR_deadline_version:
+# The version of the deadline installer.
+# default: TF_VAR_deadline_version=10.1.1.3
+TF_VAR_deadline_version=10.1.1.3
 
 # TF_VAR_selected_ansible_version:
 # the version to use for ansible.  Can be 'latest', or a specific version.  due to a bug with pip and ansible we can have pip permissions and authentication issues when not using latest.
@@ -121,8 +126,18 @@ TF_VAR_public_subnet2_dev=10.0.202.0/24
 
 # TF_VAR_vpc_cidr:
 # This is the IP range (CIDR notation) of your cloud subnet that all AWS private addresses will reside in.
-# default: TF_VAR_softnas_mode_prod=10.0.0.0/16
+# default: TF_VAR_vpc_cidr=10.0.0.0/16
 TF_VAR_vpc_cidr=10.0.0.0/16
+
+# TF_VAR_softnas_mode_dev:
+# The ability to switch the performance of the softnas between [low/high] to save costs in dev environment.  
+# default: TF_VAR_softnas_mode_dev=high 
+TF_VAR_softnas_mode_dev=low
+
+# TF_VAR_softnas_mode_prod:
+# the ability to switch the performance of the softnas between [low/high] to save costs in prod environment.
+# default: TF_VAR_softnas_mode_prod=high 
+TF_VAR_softnas_mode_prod=low
 
 # TF_VAR_vpn_cidr_prod:
 #  Open VPN sets up DHCP in this range for every connection in the dev env to provide a unique ip on each side of the VPN for every system. Dont change this from the default for now. In the future it should be unique. Reference for potential ranges https://www.arin.net/reference/research/statistics/address_filters/

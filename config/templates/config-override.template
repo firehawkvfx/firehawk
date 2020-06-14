@@ -54,6 +54,11 @@ allow_interrupt=insertvalue
 # eg: TF_VAR_openfirehawkserver=auto
 TF_VAR_openfirehawkserver=insertvalue
 
+# TF_VAR_deadline_proxy_root_dir:
+# This is the address and port for clients to reach the Deadline RCS on the openfirehawk server in a dev environment.  After init, the default containing the var auto should resolve to an actual IP in this file and not be 'auto'.
+# eg: TF_VAR_deadline_proxy_root_dir=auto:4433
+TF_VAR_deadline_proxy_root_dir=insertvalue
+
 # TF_VAR_key_name_dev:
 # The name of the key pair used in the dev environment. You will create a key pair to access your aws instances, listed here.
 # default: TF_VAR_key_name_dev=my_key_pair_dev
