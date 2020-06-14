@@ -87,7 +87,7 @@ variable "vpn_cidr" {
 
 variable "vpn_private_ip" {}
 
-variable "site_mounts" {
+variable "aws_nodes_enabled" {
   default = false
 }
 

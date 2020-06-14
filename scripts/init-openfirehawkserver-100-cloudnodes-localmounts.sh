@@ -62,7 +62,7 @@ echo "...Config Override path $config_override"
 echo '...Configure Softnas instance enabled'
 sudo sed -i 's/^TF_VAR_softnas_storage=.*$/TF_VAR_softnas_storage=true/' $config_override
 echo '...Site mounts will be mounted in cloud'
-sudo sed -i 's/^TF_VAR_site_mounts=.*$/TF_VAR_site_mounts=true/' $config_override
+sudo sed -i 's/^TF_VAR_aws_nodes_enabled=.*$/TF_VAR_aws_nodes_enabled=true/' $config_override
 echo '...Softnas nfs exports will not be mounted on local site'
 sudo sed -i 's/^TF_VAR_remote_mounts_on_local=.*$/TF_VAR_remote_mounts_on_local=false/' $config_override
 echo "...Sourcing config override"

@@ -201,21 +201,14 @@ resource "null_resource" "dependency_deadline_spot" {
   }
 }
 
-resource "null_resource" "dependency_node_centos" {
-  count = var.site_mounts ? 1 : 0
-  triggers = {
-    ami_id = module.node.ami_id
-  }
-}
-
 locals {
   config_template_file_path = "/deployuser/ansible/ansible_collections/firehawkvfx/deadline/roles/deadline_spot/files/config_template.json"
   override_config_template_file_path = "/secrets/overrides/ansible/ansible_collections/firehawkvfx/deadline/roles/deadline_spot/files/config_template.json"
 }
 
 resource "null_resource" "provision_deadline_spot" {
-  count      = (var.site_mounts && var.provision_deadline_spot_plugin) ? 1 : 0
-  depends_on = [null_resource.dependency_deadline_spot, null_resource.dependency_node_centos, module.firehawk_init.local-provisioning-complete]
+  count      = (var.aws_nodes_enabled && var.provision_deadline_spot_plugin) ? 1 : 0
+  depends_on = [null_resource.dependency_deadline_spot, module.node.ami_id, module.firehawk_init.local-provisioning-complete]
 
   triggers = {
     ami_id                  = module.node.ami_id
@@ -366,7 +359,7 @@ module "workstation" {
 
   #skipping os updates will allow faster rollout for testing, but may be non functional
   skip_update = var.pcoip_skip_update
-  site_mounts = var.site_mounts
+  aws_nodes_enabled = var.aws_nodes_enabled
 
   public_domain_name = var.public_domain
 
@@ -438,7 +431,7 @@ module "node" {
   skip_update = var.node_skip_update
 
   # when a vpn is being installed, or before that point, site mounts must be disabled
-  site_mounts = var.site_mounts
+  aws_nodes_enabled = var.aws_nodes_enabled
 
   #sleep will stop instances to save cost during idle time.
   sleep = var.sleep

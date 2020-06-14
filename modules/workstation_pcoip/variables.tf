@@ -41,7 +41,7 @@ variable "gateway_type" {
   default = "pcoip"
 }
 
-variable "site_mounts" {
+variable "aws_nodes_enabled" {
   default = false
 }
 

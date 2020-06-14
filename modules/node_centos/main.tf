@@ -10,7 +10,7 @@ locals {
 }
 
 resource "aws_security_group" "node_centos" {
-  count       = var.site_mounts ? 1 : 0
+  count       = var.aws_nodes_enabled ? 1 : 0
 
   name        = var.name
   vpc_id      = var.vpc_id
@@ -100,7 +100,7 @@ resource "aws_security_group" "node_centos" {
 }
 
 resource "aws_security_group" "node_centos_vpn" {
-  count       = var.site_mounts ? 1 : 0
+  count       = var.aws_nodes_enabled ? 1 : 0
   depends_on = [var.vpn_private_ip]
 
   name        = "vpn_${var.name}"
@@ -281,7 +281,7 @@ variable "centos_v7" {
 }
 
 resource "aws_network_interface" "eth0" {
-  count = var.site_mounts ? 1 : 0
+  count = var.aws_nodes_enabled ? 1 : 0
   subnet_id     = element(concat(var.private_subnet_ids, list("")), count.index)
                               
   private_ips     = [cidrhost(element(concat(data.aws_subnet.private_subnet, list("")), count.index).cidr_block, 20)]
@@ -296,7 +296,7 @@ locals {
 }
 
 resource "aws_instance" "node_centos" {
-  count                = var.site_mounts ? 1 : 0
+  count                = var.aws_nodes_enabled ? 1 : 0
   iam_instance_profile = var.instance_profile_name
 
   #instance type and ami are determined by the gateway type variable for if you want a graphical or non graphical instance.
@@ -329,20 +329,20 @@ USERDATA
 }
 
 resource "aws_network_interface_sg_attachment" "node_centos_sg_attachment" {
-  count                = var.site_mounts ? 1 : 0
+  count                = var.aws_nodes_enabled ? 1 : 0
   security_group_id    = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
   network_interface_id = local.network_interface_id
 }
 
 resource "aws_network_interface_sg_attachment" "node_centos_sg_attachment_vpn" { # This attachment occurs only after the vpn is available.  Prior to this, the attachment would be meaningless.
-  count                = var.site_mounts ? 1 : 0
+  count                = var.aws_nodes_enabled ? 1 : 0
   depends_on = [var.vpn_private_ip]
   security_group_id    = element( concat( aws_security_group.node_centos_vpn.*.id, list("") ), 0)
   network_interface_id = local.network_interface_id
 }
 
 resource "null_resource" "provision_node_centos" {
-  count = var.site_mounts ? 1 : 0
+  count = var.aws_nodes_enabled ? 1 : 0
   depends_on = [aws_instance.node_centos, var.bastion_ip, aws_network_interface_sg_attachment.node_centos_sg_attachment ]
   
   triggers = {
@@ -411,7 +411,7 @@ EOT
 }
 
 resource "null_resource" "install_houdini" {
-  count = var.site_mounts ? 1 : 0
+  count = var.aws_nodes_enabled ? 1 : 0
 
   depends_on = [ null_resource.provision_node_centos ]
 
@@ -439,7 +439,7 @@ EOT
 }
 
 resource "null_resource" "install_deadline_worker" {
-  count = var.site_mounts ? 1 : 0
+  count = var.aws_nodes_enabled ? 1 : 0
 
   depends_on = [ null_resource.provision_node_centos, null_resource.dependency_deadlinedb, aws_network_interface_sg_attachment.node_centos_sg_attachment_vpn, null_resource.install_houdini, var.vpn_private_ip ]
 
@@ -486,7 +486,7 @@ EOT
 }
 
 resource "null_resource" "mounts_and_houdini_test" {
-  count = var.site_mounts ? 1 : 0
+  count = var.aws_nodes_enabled ? 1 : 0
 
   depends_on = [ null_resource.dependency_softnas, null_resource.install_deadline_worker ]
 
@@ -505,7 +505,7 @@ resource "null_resource" "mounts_and_houdini_test" {
 
       aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id} # ensure instance is started
 
-      ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml -v --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml -v --skip-tags "local_install local_install_onaws_nodes_enabled" --tags "cloud_install"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/houdini/houdini_openfirehawk_houdini_tools_sync.yaml -v --extra-vars "variable_user=deadlineuser"; exit_test # sync houdini tools after all mounts are available
 
       if [[ "$TF_VAR_install_houdini" == true ]] && [[ $TF_VAR_houdini_test_connection == true ]]; then
@@ -531,7 +531,7 @@ EOT
 
 
 resource "random_id" "ami_unique_name" {
-  count = var.site_mounts ? 1 : 0
+  count = var.aws_nodes_enabled ? 1 : 0
   keepers = {
     # Generate a new id each time we switch to a new instance id
     ami_id = aws_instance.node_centos[0].id
@@ -540,7 +540,7 @@ resource "random_id" "ami_unique_name" {
 }
 
 resource "aws_ami_from_instance" "node_centos" {
-  count              = var.site_mounts ? 1 : 0
+  count              = var.aws_nodes_enabled ? 1 : 0
   depends_on         = [null_resource.provision_node_centos, random_id.ami_unique_name, null_resource.mounts_and_houdini_test]
   name               = "node_centos_houdini_${local.instanceid}_${random_id.ami_unique_name[0].hex}"
   source_instance_id = local.instanceid
@@ -550,7 +550,7 @@ resource "aws_ami_from_instance" "node_centos" {
 
 #wakeup after ami
 resource "null_resource" "start-node-after-ami" {
-  count = var.site_mounts ? 1 : 0
+  count = var.aws_nodes_enabled ? 1 : 0
   triggers = {
     ami_id = aws_ami_from_instance.node_centos[0].id
   }
@@ -565,7 +565,7 @@ resource "null_resource" "start-node-after-ami" {
 
 # wakeup a node after sleep.  ensure the softnas instaqnce has finished creating its volumes otherwise mounts will not work - dependency_softnas
 resource "null_resource" "start-node" {
-  count      = ! var.sleep && var.site_mounts && var.wakeable ? 1 : 0
+  count      = ! var.sleep && var.aws_nodes_enabled && var.wakeable ? 1 : 0
   depends_on = [null_resource.dependency_softnas]
 
   provisioner "local-exec" {
@@ -575,7 +575,7 @@ resource "null_resource" "start-node" {
 }
 
 resource "null_resource" "shutdown-node" {
-  count = var.sleep && var.site_mounts ? 1 : 0
+  count = var.sleep && var.aws_nodes_enabled ? 1 : 0
 
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]

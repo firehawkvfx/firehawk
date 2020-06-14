@@ -59,7 +59,7 @@ variable "route_public_domain_name" {
 variable "openvpn_user" {
 }
 
-variable "site_mounts" {
+variable "aws_nodes_enabled" {
   default = true
 }
 

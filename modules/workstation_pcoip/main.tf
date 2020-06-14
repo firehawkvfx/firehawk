@@ -23,7 +23,7 @@ variable "remote_subnet_cidr" {
 }
 
 resource "aws_security_group" "workstation_pcoip" {
-  count         = var.site_mounts && var.workstation_enabled ? 1 : 0
+  count         = var.aws_nodes_enabled && var.workstation_enabled ? 1 : 0
 
   name        = var.name
   vpc_id      = var.vpc_id
@@ -112,7 +112,7 @@ resource "aws_security_group" "workstation_pcoip" {
 }
 
 resource "aws_security_group" "workstation_centos" {
-  count         = var.site_mounts && var.workstation_enabled ? 1 : 0
+  count         = var.aws_nodes_enabled && var.workstation_enabled ? 1 : 0
 
   name        = "gateway_centos_${var.name}"
   vpc_id      = var.vpc_id
@@ -304,7 +304,7 @@ resource "null_resource" "dependency_softnas_and_bastion" {
 resource "aws_instance" "workstation_pcoip" {
   #instance type and ami are determined by the gateway type variable for if you want a graphical or non graphical instance.
   depends_on    = [null_resource.dependency_softnas_and_bastion]
-  count         = var.site_mounts && var.workstation_enabled ? 1 : 0
+  count         = var.aws_nodes_enabled && var.workstation_enabled ? 1 : 0
   ami           = var.use_custom_ami ? var.custom_ami : var.ami_map[var.gateway_type]
   instance_type = var.instance_type_map[var.gateway_type]
 
@@ -342,7 +342,7 @@ variable "public_domain_name" {
 
 resource "null_resource" "workstation_pcoip" {
   depends_on = [aws_instance.workstation_pcoip]
-  count      = ! local.skip_update && var.site_mounts && var.workstation_enabled ? 1 : 0
+  count      = ! local.skip_update && var.aws_nodes_enabled && var.workstation_enabled ? 1 : 0
 
   triggers = {
     instanceid = aws_instance.workstation_pcoip[0].id
@@ -447,7 +447,7 @@ EOT
 }
 
 resource "null_resource" "shutdown_workstation_pcoip" {
-  count = var.sleep && var.site_mounts && var.workstation_enabled ? 1 : 0
+  count = var.sleep && var.aws_nodes_enabled && var.workstation_enabled ? 1 : 0
 
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]

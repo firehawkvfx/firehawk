@@ -103,10 +103,10 @@ TF_VAR_enable_vpc=insertvalue
 # default: TF_VAR_softnas_storage=true
 TF_VAR_softnas_storage=insertvalue
 
-# TF_VAR_site_mounts:
+# TF_VAR_aws_nodes_enabled:
 # Enable site NFS mounts to be mounted on remote nodes.  If you have an existing local NFS share from your own NAS, it can be provided as a remote mount over vpn for cloud based nodes.  Operating with a local NFS share is requried for PDG/TOPS to function.
-# default: TF_VAR_site_mounts=true
-TF_VAR_site_mounts=insertvalue
+# default: TF_VAR_aws_nodes_enabled=true
+TF_VAR_aws_nodes_enabled=insertvalue
 
 # TF_VAR_remote_mounts_on_local:
 # Enable cloud NFS mounts to be mounted on local nodes.  After the VPN is connected, the remote SoftNAS NFS shares can be mounted on the local workstation.  This is necesary for PDG/TOPS to track completed work items, and allow remote deletion of data.
