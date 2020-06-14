@@ -107,34 +107,34 @@
     state: restarted
     enabled: yes
 
-- name: configure routes to opposite dev/prod environment so that nodes in both envs can access licence server
-  shell: |
-    ip route list | grep {{ item.subnet }}
-    if [ $? -eq 0 ]; then
-      ip route del {{ item.subnet }}
-    else
-      echo "Route does not exit.  No need to delete {{ item.subnet }}"
-    fi
-    ip route add {{ item.subnet }} via {{ item.next_hop }} dev {{ vpn_nic }}
-  with_items:
-    - { subnet: "{{ private_subnet1 }}", next_hop: "{{ openfirehawkserver }}" }
-    - { subnet: "{{ public_subnet1 }}", next_hop: "{{ openfirehawkserver }}" }
-    - { subnet: "{{ vpn_cidr }}", next_hop: "{{ openfirehawkserver }}" }
-  tags:
-    - add-routes
+# - name: configure routes to opposite dev/prod environment so that nodes in both envs can access licence server
+#   shell: |
+#     ip route list | grep {{ item.subnet }}
+#     if [ $? -eq 0 ]; then
+#       ip route del {{ item.subnet }}
+#     else
+#       echo "Route does not exit.  No need to delete {{ item.subnet }}"
+#     fi
+#     ip route add {{ item.subnet }} via {{ item.next_hop }} dev {{ vpn_nic }}
+#   with_items:
+#     - { subnet: "{{ private_subnet1 }}", next_hop: "{{ openfirehawkserver }}" }
+#     - { subnet: "{{ public_subnet1 }}", next_hop: "{{ openfirehawkserver }}" }
+#     - { subnet: "{{ vpn_cidr }}", next_hop: "{{ openfirehawkserver }}" }
+#   tags:
+#     - add-routes
 
-- name: insert/update block in /etc/network/interfaces for routes. configure routes to opposite dev/prod environment so that nodes in both envs can access licence server.  Remove route if it exists and re apply it.
-  blockinfile:
-    path: /etc/network/interfaces
-    block: |
-      up route add -net {{ item.subnet }} gw {{ item.next_hop }}
-    marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.subnet }}"
-  with_items:
-    - { subnet: "{{ private_subnet1 }}", next_hop: "{{ openfirehawkserver }}" }
-    - { subnet: "{{ public_subnet1 }}", next_hop: "{{ openfirehawkserver }}" }
-    - { subnet: "{{ vpn_cidr }}", next_hop: "{{ openfirehawkserver }}" }
-  tags:
-    - add-routes
+# - name: insert/update block in /etc/network/interfaces for routes. configure routes to opposite dev/prod environment so that nodes in both envs can access licence server.  Remove route if it exists and re apply it.
+#   blockinfile:
+#     path: /etc/network/interfaces
+#     block: |
+#       up route add -net {{ item.subnet }} gw {{ item.next_hop }}
+#     marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.subnet }}"
+#   with_items:
+#     - { subnet: "{{ private_subnet1 }}", next_hop: "{{ openfirehawkserver }}" }
+#     - { subnet: "{{ public_subnet1 }}", next_hop: "{{ openfirehawkserver }}" }
+#     - { subnet: "{{ vpn_cidr }}", next_hop: "{{ openfirehawkserver }}" }
+#   tags:
+#     - add-routes
 
 # - name: configure routes to opposite dev/prod environment so that nodes in both envs can access licence server
 #   shell: |
