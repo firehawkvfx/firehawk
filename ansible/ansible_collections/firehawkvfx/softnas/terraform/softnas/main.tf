@@ -86,7 +86,6 @@ EOF
 
 locals {
   softnas_role_name = "SoftNAS_HA_IAM_pipeid${lookup(var.common_tags, "pipelineid", "0")}"
-  softnas_mode_ami = "${var.softnas_mode}_${var.aws_region}"
   name = "softnas_pipeid${lookup(var.common_tags, "pipelineid", "0")}"
   extra_tags = {
     role = "softnas"
@@ -461,10 +460,6 @@ data "aws_ami_ids" "prebuilt_softnas_ami_list" { # search for a prebuilt tagged 
     name   = "tag:base_ami"
     values = ["${local.base_ami}"]
   }
-  # filter {
-  #   name   = "tag:base_instance_type"
-  #   values = ["${local.instance_type}"] # If instance type is not the same as used to build ami there may be problems, so we tag the ami with the same instance type.
-  # }
   filter {
     name = "name"
     values = ["softnas_prebuilt_*"]
