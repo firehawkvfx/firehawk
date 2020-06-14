@@ -96,8 +96,8 @@ variable "instance_type" {
   }
 }
 
-variable "softnas_mode" {
-  default = "low"
+variable "softnas_instance_type" {
+  default = "m4.xlarge"
 }
 
 variable "aws_region" {

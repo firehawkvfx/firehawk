@@ -129,23 +129,25 @@ TF_VAR_public_subnet2_dev=10.0.202.0/24
 # default: TF_VAR_vpc_cidr=10.0.0.0/16
 TF_VAR_vpc_cidr=10.0.0.0/16
 
-# TF_VAR_softnas_mode_dev:
-# The ability to switch the performance of the softnas between [low/high] to save costs in dev environment.  
-# default: TF_VAR_softnas_mode_dev=high 
-TF_VAR_softnas_mode_dev=low
+# TF_VAR_softnas_instance_type_dev:
+# The ability to switch the performance of the softnas instance types to save costs in dev environment, and increase performance if required in production..
+# eg1: TF_VAR_softnas_instance_type_dev=m4.2xlarge
+# default: TF_VAR_softnas_instance_type_dev=m4.xlarge
+TF_VAR_softnas_instance_type_dev=m4.xlarge
 
-# TF_VAR_softnas_mode_prod:
-# the ability to switch the performance of the softnas between [low/high] to save costs in prod environment.
-# default: TF_VAR_softnas_mode_prod=high 
-TF_VAR_softnas_mode_prod=low
+# TF_VAR_softnas_instance_type_prod:
+# The ability to switch the performance of the softnas instance types to save costs in dev environment, and increase performance if required in production..
+# eg1: TF_VAR_softnas_instance_type_dev=m4.2xlarge
+# default: TF_VAR_softnas_instance_type_prod=m4.xlarge
+TF_VAR_softnas_instance_type_prod=m4.xlarge
 
 # TF_VAR_vpn_cidr_prod:
-#  Open VPN sets up DHCP in this range for every connection in the dev env to provide a unique ip on each side of the VPN for every system. Dont change this from the default for now. In the future it should be unique. Reference for potential ranges https://www.arin.net/reference/research/statistics/address_filters/
+# Open VPN sets up DHCP in this range for every connection in the dev env to provide a unique ip on each side of the VPN for every system. Dont change this from the default for now. In the future it should be unique. Reference for potential ranges https://www.arin.net/reference/research/statistics/address_filters/
 # default: TF_VAR_vpn_cidr_prod=172.27.232.0/24
 TF_VAR_vpn_cidr_prod=172.27.232.0/24
 
 # TF_VAR_vpn_cidr_dev:
-#  Open VPN sets up DHCP in this range for every connection in the dev env to provide a unique ip on each side of the VPN for every system. Dont change this from the default for now. In the future it should be unique. Reference for potential ranges https://www.arin.net/reference/research/statistics/address_filters/
+# Open VPN sets up DHCP in this range for every connection in the dev env to provide a unique ip on each side of the VPN for every system. Dont change this from the default for now. In the future it should be unique. Reference for potential ranges https://www.arin.net/reference/research/statistics/address_filters/
 # default: TF_VAR_vpn_cidr_dev=172.17.232.0/24
 TF_VAR_vpn_cidr_dev=172.17.232.0/24
 

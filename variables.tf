@@ -15,11 +15,11 @@ variable "cert_arn" {
 variable "aws_region" {
 }
 
-variable "softnas_mode" {
-  default = "low"
+variable "softnas_skip_update" {
 }
 
-variable "softnas_skip_update" {
+variable "softnas_instance_type" {
+  default = "m4.xlarge"
 }
 
 

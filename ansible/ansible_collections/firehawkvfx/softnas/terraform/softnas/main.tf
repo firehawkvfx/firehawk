@@ -473,7 +473,7 @@ locals {
   aquired_ami      = "${element( local.mod_list , 0)}" # aquired ami will use the ami in the list if found, otherwise it will default to the original ami.
   use_prebuilt_softnas_ami = var.allow_prebuilt_softnas_ami && length(local.mod_list) > 1 ? true : false
   ami = local.use_prebuilt_softnas_ami ? local.aquired_ami : local.base_ami
-  instance_type = var.instance_type[var.softnas_mode]
+  instance_type = var.softnas_instance_type
 }
 
 output "base_ami" {

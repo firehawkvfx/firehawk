@@ -268,7 +268,7 @@ module "softnas" {
   allow_prebuilt_softnas_ami = var.allow_prebuilt_softnas_ami
 
   aws_region                     = var.aws_region
-  softnas_mode                   = var.softnas_mode
+  softnas_instance_type          = var.softnas_instance_type
   vpn_private_ip                 = module.vpc.vpn_private_ip
   softnas_ssh_user               = var.softnas_ssh_user
   key_name                       = var.key_name
