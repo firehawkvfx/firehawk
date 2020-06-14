@@ -83,6 +83,7 @@ TF_VAR_vagrant_destroy_before_deploy=insertvalue
 TF_VAR_tf_destroy_before_deploy=insertvalue
 
 # TF_VAR_destroy_after_deploy:
+# In dev tests we may automatically destroy a deployment after completion.  In prod, we preserve the deployment.
 # default: TF_VAR_destroy_after_deploy=false
 TF_VAR_destroy_after_deploy=insertvalue
 

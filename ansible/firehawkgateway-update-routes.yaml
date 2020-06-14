@@ -5,20 +5,20 @@
 # ansible-playbook -i ansible/inventory ansible/ansible-control-update-routes.yaml --extra-vars "gatewaynic=eth1"
 
 
-- hosts: firehawkgateway
-  remote_user: deployuser
-  gather_facts: "{{ variable_gather_facts | default('false') }}"
-  become: true
-  vars:
-    gatewaynic: eth1
+# - hosts: firehawkgateway
+#   remote_user: deployuser
+#   gather_facts: "{{ variable_gather_facts | default('false') }}"
+#   become: true
+#   vars:
+#     gatewaynic: eth1
 
-  tasks:
-  - name: Test connection
-    debug:
-      msg: "connection established"
-    become: yes
-    tags:
-      - add-routes
+#   tasks:
+#   - name: Test connection
+#     debug:
+#       msg: "connection established"
+#     become: yes
+#     tags:
+#       - add-routes
 
   # - name: Remove route if it exists and re apply it later
   #   shell: |

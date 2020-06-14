@@ -22,54 +22,24 @@
 
 # BEGIN CONFIGURATION #
 
-# TF_VAR_gatewaynic:
-# The gateway used from the vm used to access the external network / internet.  Type 'ip a' in the vagrant shell to see a list of possible NICs.  This is used to configure IP routes.  
-# eg: TF_VAR_gatewaynic=eth1
-TF_VAR_gatewaynic=insertvalue
-
-# TF_VAR_site_mounts:
-# Enable site NFS mounts to be mounted on remote nodes.  If you have an existing local NFS share from your own NAS, it can be provided as a remote mount over vpn for cloud based nodes.  Operating with a local NFS share is requried for PDG/TOPS to function.
-# default: TF_VAR_site_mounts=true
-TF_VAR_site_mounts=insertvalue
-
-# TF_VAR_remote_mounts_on_local:
-# Enable cloud NFS mounts to be mounted on local nodes.  After the VPN is connected, the remote SoftNAS NFS shares can be mounted on the local workstation.  This is necesary for PDG/TOPS to track completed work items, and allow remote deletion of data.
-# default: TF_VAR_remote_mounts_on_local=true
-TF_VAR_remote_mounts_on_local=insertvalue
-
-# TF_VAR_firehawk_sync_source:
-# The location based path to the firehawk houdini tools repo.
-# This location is pushed to S3, and when a softnas production volume is created it will be pulled to the cloud NFS share.
-# It contains TOPS S3 sync functions which Side FX PDG will require to sync assets to and from S3.
-# This should also be synced prior to rendering if any changes to assets occur.
-# If you choose to use a live path on disk instead of the repository path default, you should have a production NFS share /prod, ensure you also bind an identical locaiton based mount eg: /mycity_prod
-# The data at these two paths is identical, but /mycity_prod allows access to data in another location over VPN without confusion, whereas /prod for any location will always refer to the site based NAS for performance, and it is not garunteed to be identical to the other location without syncing.
-# default: TF_VAR_firehawk_sync_source=/ansible/ansible_collections/firehawkvfx/houdini/roles/houdini_openfirehawk_houdini_tools_sync/files/openfirehawk_houdini_tools
-TF_VAR_firehawk_sync_source=insertvalue
-
-# TF_VAR_firehawk_sync_target:
-# The path to push the assets to, so they are available in cloud.
-# eg: TF_VAR_firehawk_sync_source=/prod/assets/openfirehawk-houdini-tools
-TF_VAR_firehawk_sync_target=insertvalue
-
-# TF_VAR_softnas_mode_dev:
-# The ability to switch the performance of the softnas between [low/high] to save costs in dev environment.  
-# default: TF_VAR_softnas_mode_dev=high 
-TF_VAR_softnas_mode_dev=insertvalue
-
-# TF_VAR_softnas_mode_prod:
-# the ability to switch the performance of the softnas between [low/high] to save costs in prod environment.
-# default: TF_VAR_softnas_mode_prod=high 
-TF_VAR_softnas_mode_prod=insertvalue
-
 # TF_VAR_remote_subnet_cidr:
 # This is the IP range (CIDR notation) of your subnet onsite that the firehawkserver vm will reside in, and that other onsite nodes reside in.
 # eg: TF_VAR_remote_subnet_cidr=192.168.29.0/24
 # This would be the ip range 192.168.29.0 - 192.168.29.255
 TF_VAR_remote_subnet_cidr=insertvalue
 
+# TF_VAR_localnas1_private_ip:
+# The IP adress of the onsite system with NFS shares to mount.  This is normally your onsite NAS ip.
+# eg: TF_VAR_localnas1_private_ip=192.168.29.11
+TF_VAR_localnas1_private_ip=insertvalue
+
+# TF_VAR_houdini_license_server_address:
+# The ip of the houdini licence server used when in a dev or prod environment.  This will normally be the same ip server used in dev and production to not waste licences. So in a dev environment, you will probably need to reference the same houdini licence server in production.  Ideally, the houdini license server should be a seperate vm to the vagrant host for stability reasons but this is currently untested.  It is recomended that the licence server ip is the vagrant production VM until otherwise tested.  A licence server should rarely need to be touched, but updates to infrastructure could disrupt it if located on the firehawkserver vm.
+# eg: TF_VAR_houdini_license_server_address=192.168.29.80
+TF_VAR_houdini_license_server_address=insertvalue
+
 # TF_VAR_workstation_address_dev:
-# The address of the workstation the artist will operate from onsite
+# The address of the workstation the artist will operate from onsite.  This is normally a VM for testing.
 # eg: TF_VAR_workstation_address_dev=192.168.92.31
 TF_VAR_workstation_address_dev=insertvalue
 
@@ -77,21 +47,6 @@ TF_VAR_workstation_address_dev=insertvalue
 # The address of the workstation the artist will operate from onsite
 # eg: TF_VAR_workstation_address_prod=192.168.92.31
 TF_VAR_workstation_address_prod=insertvalue
-
-# TF_VAR_houdini_license_server_address:
-# The ip of the houdini licence server used when in a dev or prod environment.  This will normally be the same ip server used in dev and production to not waste licences. So in a dev environment, you will probably need to reference the same houdini licence server in production.  Ideally, the houdini license server should be a seperate vm to the vagrant host for stability reasons but this is currently untested.  It is recomended that the licence server ip is the vagrant production VM until otherwise tested.  A licence server should rarely need to be touched, but updates to infrastructure could disrupt it if located on the firehawkserver vm.
-# eg: TF_VAR_houdini_license_server_address=192.168.29.80
-TF_VAR_houdini_license_server_address=insertvalue
-
-# TF_VAR_install_houdini_license_server:
-# It is recommended that you install your houdini license server in a seperate vm yourself, since firehawk currently is ephemerel and will destroy the license server when reprovisioning new versions.
-# default TF_VAR_install_houdini_license_server=false
-TF_VAR_install_houdini_license_server=insertvalue
-
-# TF_VAR_localnas1_private_ip:
-# The IP adress of the onsite system with NFS shares to mount.  This is normally your onsite NAS ip.
-# eg: TF_VAR_localnas1_private_ip=192.168.29.11
-TF_VAR_localnas1_private_ip=insertvalue
 
 # TF_VAR_production_volume_path:
 # The name of the production volume path for onsite workstations/nodes.  /prod is a relative path depending on location, so for cloud based nodes, this would usually refer to the softnas production path.  So far only /prod has been tested.
@@ -128,10 +83,25 @@ TF_VAR_localnas1_path_abs=insertvalue
 # eg: TF_VAR_softnas1_path_abs=/aws_city_prod
 TF_VAR_softnas1_path_abs=insertvalue
 
+# TF_VAR_firehawk_sync_source:
+# The location based path to the firehawk houdini tools repo.
+# This location is pushed to S3, and when a softnas production volume is created it will be pulled to the cloud NFS share.
+# It contains TOPS S3 sync functions which Side FX PDG will require to sync assets to and from S3.
+# This should also be synced prior to rendering if any changes to assets occur.
+# If you choose to use a live path on disk instead of the repository path default, you should have a production NFS share /prod, ensure you also bind an identical locaiton based mount eg: /mycity_prod
+# The data at these two paths is identical, but /mycity_prod allows access to data in another location over VPN without confusion, whereas /prod for any location will always refer to the site based NAS for performance, and it is not garunteed to be identical to the other location without syncing.
+# default: TF_VAR_firehawk_sync_source=/ansible/ansible_collections/firehawkvfx/houdini/roles/houdini_openfirehawk_houdini_tools_sync/files/openfirehawk_houdini_tools
+TF_VAR_firehawk_sync_source=insertvalue
+
 # TF_VAR_firehawk_houdini_tools:
 # The path used in produciton to reference firehawk houdini tools for all locations.  This should normally be in /prod, which is the most performant site based NFS mount for any location.
 # default: TF_VAR_firehawk_houdini_tools=/prod/assets/openfirehawk-houdini-tools
 TF_VAR_firehawk_houdini_tools=insertvalue
+
+# TF_VAR_firehawk_sync_target:
+# The path to push the assets to, so they are available in cloud.
+# eg: TF_VAR_firehawk_sync_source=/prod/assets/openfirehawk-houdini-tools
+TF_VAR_firehawk_sync_target=insertvalue
 
 # TF_VAR_deadline_version:
 # The version of the deadline installer.

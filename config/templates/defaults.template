@@ -121,8 +121,18 @@ TF_VAR_public_subnet2_dev=insertvalue
 
 # TF_VAR_vpc_cidr:
 # This is the IP range (CIDR notation) of your cloud subnet that all AWS private addresses will reside in.
-# default: TF_VAR_softnas_mode_prod=10.0.0.0/16
+# default: TF_VAR_vpc_cidr=10.0.0.0/16
 TF_VAR_vpc_cidr=insertvalue
+
+# TF_VAR_softnas_mode_dev:
+# The ability to switch the performance of the softnas between [low/high] to save costs in dev environment.  
+# default: TF_VAR_softnas_mode_dev=high 
+TF_VAR_softnas_mode_dev=insertvalue
+
+# TF_VAR_softnas_mode_prod:
+# the ability to switch the performance of the softnas between [low/high] to save costs in prod environment.
+# default: TF_VAR_softnas_mode_prod=high 
+TF_VAR_softnas_mode_prod=insertvalue
 
 # TF_VAR_vpn_cidr_prod:
 #  Open VPN sets up DHCP in this range for every connection in the dev env to provide a unique ip on each side of the VPN for every system. Dont change this from the default for now. In the future it should be unique. Reference for potential ranges https://www.arin.net/reference/research/statistics/address_filters/

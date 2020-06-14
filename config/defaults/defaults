@@ -321,3 +321,8 @@ TF_VAR_softnas_smtp_from="user@example.com"
 # mailserver details for softnas notifications
 # default: TF_VAR_smtp_encryption="none"
 TF_VAR_smtp_encryption="none"
+
+# TF_VAR_install_houdini_license_server:
+# It is recommended that you install your houdini license server in a seperate vm yourself, since firehawk currently is ephemerel and will destroy the license server when reprovisioning new versions.
+# default TF_VAR_install_houdini_license_server=false
+TF_VAR_install_houdini_license_server=false

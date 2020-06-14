@@ -41,7 +41,7 @@ printf "\n...checking scripts directory at $SCRIPTDIR\n\n"
 configure=
 
 PS3='Do you wish to configure the Ansible Control VM or configure secrets (To be done from within the Openfirehawk Server Vagrant VM only)? '
-options=("Configure Vagrant" "Configure Secrets" "Quit")
+options=("Configure Vagrant" "Configure General Config" "Configure Secrets" "Quit")
 select opt in "${options[@]}"
 do
     case $opt in
@@ -53,8 +53,16 @@ do
             output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/vagrant)
             break
             ;;
+        "Configure General Config")
+            printf "\nSome general Config like IP addresses of your hosts is needed.  Some environment variables here must be configured uniquely to your environment.\n\n"
+            configure='config'
+            input=$(to_abs_path $SCRIPTDIR/../config/templates/config.template)
+            output_tmp=$(to_abs_path $SCRIPTDIR/../tmp/config-tmp)
+            output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/config)
+            break
+            ;;
         "Configure Secrets")
-            printf "\nThis should only be done within the OpenFirehawk Serrver Vagrant VM. Provisioning infrastructure requires configuration using secrets based on the secrets.template file.  These will be queried for your own unique values and should always be encrypted before you commit them in your private repository.\n\n"
+            printf "\nThis should only be done within the Ansible Control Vagrant VM. Provisioning infrastructure requires configuration using secrets based on the secrets.template file.  These will be queried for your own unique values and should always be encrypted before you commit them in your private repository.\n\n"
             configure='secrets'
             input=$(to_abs_path $SCRIPTDIR/../config/templates/secrets-general.template)
             output_tmp=$(to_abs_path $SCRIPTDIR/../tmp/secrets-general-tmp)
