@@ -74,7 +74,7 @@ ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/
 # ensure an aws pem key exists for ssh into cloud nodes
 ansible-playbook -i "$TF_VAR_inventory" ansible/aws-new-key.yaml; exit_test
 # configure routes to opposite environment for licence server to communicate if in dev environment
-ansible-playbook -i "$TF_VAR_inventory" ansible/firehawkgateway-update-routes.yaml; exit_test
+# ansible-playbook -i "$TF_VAR_inventory" ansible/firehawkgateway-update-routes.yaml; exit_test
 
 #check db
 ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
