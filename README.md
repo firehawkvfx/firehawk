@@ -356,7 +356,9 @@ If you make changes to your infrastructure that you want to recover from, a simp
 ## S3 Bucket Cloud Storage size
 
 You can keep tabs on an S3 bucket's size with this command, 
-    aws s3 ls s3://bucket_name --recursive  | grep -v -E "(Bucket: |Prefix: |LastWriteTime|^$|--)" | awk 'BEGIN {total=0}{total+=$3}END{print total/1024/1024" MB"}'
+```
+aws s3 ls s3://bucket_name --recursive  | grep -v -E "(Bucket: |Prefix: |LastWriteTime|^$|--)" | awk 'BEGIN {total=0}{total+=$3}END{print total/1024/1024" MB"}'
+```
 
 <!--stackedit_data:
 eyJoaXN0b3J5IjpbLTEyNzAwNzg1NjUsMTkzMzQ5NTI3MCwxNz
