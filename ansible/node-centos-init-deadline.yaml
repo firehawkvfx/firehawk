@@ -136,59 +136,6 @@
       #- nfs-utils-lib
 
 # mounts are being tested in node-sentos-mounts.yaml now.
-      
-  # # mount softnas and remote nas
-  # - name: create mount directories
-  #   file: 
-  #     path: "{{ item }}"
-  #     state: directory
-  #     owner: deadlineuser
-  #     group: deadlineuser
-  #   become: yes
-  #   with_items:
-  #     - "{{ softnas1_path_abs }}"
-  #     - "{{ localnas1_path_abs }}"
-  #     - "{{ prod_mount_path }}"
-  #     - "{{ localnas1_remote_mount_path }}"
-
-  # - name: create localnas mount point based on location
-  #   file: 
-  #     path: "{{ localnas1_path_abs }}"
-  #     state: directory
-  #     owner: deadlineuser
-  #     group: deadlineuser
-  #   become: yes
-
-  # - name: insert marker start
-  #   lineinfile:
-  #     path: /etc/fstab
-  #     insertafter: "^#?UUID.*$"
-
-  #     line: "# BEGIN ANSIBLE MANAGED BLOCK"
-  #     backup: yes
-
-  # - name: insert marker end
-  #   lineinfile:
-  #     path: /etc/fstab
-  #     insertafter: "# BEGIN ANSIBLE MANAGED BLOCK"
-  #     line: "# END ANSIBLE MANAGED BLOCK"
-  #     create: true
- 
-  # - name: insert/update block in /etc/fstab
-  #   blockinfile:
-  #     path: /etc/fstab
-  #     backup: yes
-  #     content: |
-
-  #       {{ groups['role_softnas'][0] }}:{{ softnas_mount_source }} {{ softnas1_path_abs }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
-  #       {{ softnas1_path_abs }} {{ prod_mount_path }} none defaults,bind,timeo=14 0 0
-
-  #       # {{ localnas1_private_ip }}:{{ production_volume_path }} {{ localnas1_path_abs }} nfs4 rsize=8192,wsize=8192,timeo=14,intr,_netdev 0 0
-  #       # {{ localnas1_path_abs }} {{ localnas1_remote_mount_path }} none defaults,bind,timeo=14 0 0
-        
-  # - name: mount all changes to fstab
-  #   command: mount -a
-  #   become: true
 
   - stat:
       path: /var/lib/Thinkbox/Deadline10/deadline.ini

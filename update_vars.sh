@@ -368,6 +368,7 @@ fi
 
 # init config override
 export config_override=$(to_abs_path $TF_VAR_secrets_path/config-override-$TF_VAR_envtier) # ...Config Override path $config_override.
+export config_path=$(to_abs_path $TF_VAR_secrets_path/config)
 
 echo_if_not_silent '...Check for configuration, init if not present.'
 if [ ! -f $config_override ]; then
