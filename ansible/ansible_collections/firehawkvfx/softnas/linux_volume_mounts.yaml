@@ -445,13 +445,6 @@
     debug:
       var: localnas1_private_ip
     tags:
-    - cloud_install
-    - local_install_onsite_mounts
-
-  - name: aquire vars from secrets path before using defaults for other hosts 2
-    include_vars: "{{ item }}"
-    with_first_found: "{{ vars_files_locs }}"
-    tags:
     - always
 
   roles:
