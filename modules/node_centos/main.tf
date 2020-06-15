@@ -505,7 +505,10 @@ resource "null_resource" "mounts_and_houdini_test" {
       ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml -v --skip-tags "local_install local_install_onaws_nodes_enabled" --tags "cloud_install"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/houdini/houdini_openfirehawk_houdini_tools_sync.yaml -v --extra-vars "variable_user=deadlineuser"; exit_test # sync houdini tools after all mounts are available
 
-      if [[ "$TF_VAR_install_houdini" == true ]] && [[ $TF_VAR_houdini_test_connection == true ]]; then
+      echo "TF_VAR_install_houdini: $TF_VAR_install_houdini"
+      echo "TF_VAR_houdini_test_connection: $TF_VAR_houdini_test_connection"
+
+      if [[ "$TF_VAR_install_houdini" == true ]] && [[ "$TF_VAR_houdini_test_connection" == true ]]; then
         # last step before building ami we run a unit test to ensure houdini runs.  We also cleanup any uneeded data afterwards, including tmp folders
         ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/houdini/houdini_unit_test.yaml -v --extra-vars "variable_user=deadlineuser execute=true"; exit_test
       fi
