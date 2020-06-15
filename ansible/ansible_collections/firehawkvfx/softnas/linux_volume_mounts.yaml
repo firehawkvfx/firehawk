@@ -454,6 +454,6 @@
     tags:
     - always
 
-  # roles:
-  # - role: onsite_nfs_share
-  #   when: localnas1_private_ip != 'none'
+  roles:
+  - role: onsite_nfs_share
+    when: localnas1_private_ip != 'none'
