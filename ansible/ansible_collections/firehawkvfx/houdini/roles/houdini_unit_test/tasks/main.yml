@@ -11,7 +11,7 @@
     ls /var/tmp/qc
   become_user: deadlineuser
 
-- name: execute unit test
+- name: execute unit test - with license connection
   shell: |
     # set -x
     cd /opt/hfs{{ item }}/
@@ -23,8 +23,24 @@
     ls -ltriah /var/tmp/geo
   become_user: deadlineuser
   register: result
-  when: execute
+  when: execute and houdini_license_server_address != 'none'
   with_items: "{{ houdini_major_version_list }}"
+
+- name: execute unit test - without license connection # To Test a deployment without floating licenses available, we can at least check that hython loads and produces a missing license error.
+  shell: |
+    # set -x
+    cd /opt/hfs{{ item }}/
+    source ./houdini_setup
+    ls /var/tmp/
+    ls /var/tmp/qc/*.hip
+    cd /var/tmp/qc
+    hython /var/tmp/qc/hip_unit_test.py /var/tmp/qc/test_ebs_read_hip_no_deadline_rop.hip /obj/ropnet1/fetch1
+    ls -ltriah /var/tmp/geo
+  become_user: deadlineuser
+  register: result
+  when: execute and houdini_license_server_address == 'none'
+  with_items: "{{ houdini_major_version_list }}"
+  failed_when: 'No licenses could be found to run this application.' not in result.stderr 
 
 - name: Ensure unit test runs on boot.  Undesirable, but needed - See sidefx RFE100149
   copy:
