@@ -1,2 +1,4 @@
 ---
 # defaults file for ansible/roles/onsite_nfs_share
+
+vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/ebs-volumes/softnas_ebs_volumes.yaml", "files/softnas_ebs_volumes_{{ lookup('env','TF_VAR_envtier') }}.yaml", "files/softnas_ebs_volumes.yaml" ]
