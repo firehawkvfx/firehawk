@@ -108,131 +108,116 @@ resource "aws_security_group" "node_centos_vpn" {
   description = "Centos VPN security group"
 
   tags = merge(map("Name", format("%s", "vpn_${var.name}")), var.common_tags, local.extra_tags)
-
-  # todo need to tighten down ports.
-  ingress {
-    protocol    = "-1"
-    from_port   = 0
-    to_port     = 0
-    cidr_blocks = [var.remote_ip_cidr]
-    description = "all incoming traffic from remote access ip"
-  }
-
-  ingress {
-    protocol    = "-1"
-    from_port   = 0
-    to_port     = 0
-    cidr_blocks = [var.vpn_cidr]
-    description = "all incoming traffic from remote subnet range vpn dhcp"
-  }
-
-  ingress {
-    protocol    = "-1"
-    from_port   = 0
-    to_port     = 0
-    cidr_blocks = [var.remote_subnet_cidr]
-    description = "all incoming traffic from remote subnet range"
-  }
-
-  # if all incoming from the onsite subnet is allowed, the rules below aren't required.
-
-  # For OpenVPN Client Web Server & Admin Web UI
-
-  ingress {
-    protocol  = "tcp"
-    from_port = 22
-    to_port   = 22
-    # TF-UPGRADE-TODO: In Terraform v0.10 and earlier, it was sometimes necessary to
-    # force an interpolation expression to be interpreted as a list by wrapping it
-    # in an extra set of list brackets. That form was supported for compatibilty in
-    # v0.11, but is no longer supported in Terraform v0.12.
-    #
-    # If the expression in the following list itself returns a list, remove the
-    # brackets to avoid interpretation as a list of lists. If the expression
-    # returns a single list item then leave it as-is and remove this TODO comment.
-    cidr_blocks = [var.remote_subnet_cidr, var.remote_ip_cidr]
-    description = "ssh"
-  }
-  ingress {
-    protocol    = "tcp"
-    from_port   = 443
-    to_port     = 443
-    cidr_blocks = [var.remote_ip_cidr]
-    description = "https"
-  }
-  ingress {
-    protocol  = "tcp"
-    from_port = 27100
-    to_port   = 27100
-    # TF-UPGRADE-TODO: In Terraform v0.10 and earlier, it was sometimes necessary to
-    # force an interpolation expression to be interpreted as a list by wrapping it
-    # in an extra set of list brackets. That form was supported for compatibilty in
-    # v0.11, but is no longer supported in Terraform v0.12.
-    #
-    # If the expression in the following list itself returns a list, remove the
-    # brackets to avoid interpretation as a list of lists. If the expression
-    # returns a single list item then leave it as-is and remove this TODO comment.
-    cidr_blocks = [var.remote_subnet_cidr]
-    description = "DeadlineDB MongoDB"
-  }
-  ingress {
-    protocol  = "tcp"
-    from_port = 8080
-    to_port   = 8080
-    # TF-UPGRADE-TODO: In Terraform v0.10 and earlier, it was sometimes necessary to
-    # force an interpolation expression to be interpreted as a list by wrapping it
-    # in an extra set of list brackets. That form was supported for compatibilty in
-    # v0.11, but is no longer supported in Terraform v0.12.
-    #
-    # If the expression in the following list itself returns a list, remove the
-    # brackets to avoid interpretation as a list of lists. If the expression
-    # returns a single list item then leave it as-is and remove this TODO comment.
-    cidr_blocks = [var.remote_subnet_cidr]
-    description = "Deadline And Deadline RCS"
-  }
-  ingress {
-    protocol  = "tcp"
-    from_port = 4433
-    to_port   = 4433
-    # TF-UPGRADE-TODO: In Terraform v0.10 and earlier, it was sometimes necessary to
-    # force an interpolation expression to be interpreted as a list by wrapping it
-    # in an extra set of list brackets. That form was supported for compatibilty in
-    # v0.11, but is no longer supported in Terraform v0.12.
-    #
-    # If the expression in the following list itself returns a list, remove the
-    # brackets to avoid interpretation as a list of lists. If the expression
-    # returns a single list item then leave it as-is and remove this TODO comment.
-    cidr_blocks = [var.remote_subnet_cidr]
-    description = "Deadline RCS TLS HTTPS"
-  }
-  ingress {
-    protocol    = "tcp"
-    from_port   = 1714
-    to_port     = 1714
-    cidr_blocks = ["${var.houdini_license_server_address}/32"]
-    description = "Houdini license server"
-  }
-  ingress {
-    protocol    = "udp"
-    from_port   = 1714
-    to_port     = 1714
-    cidr_blocks = ["${var.houdini_license_server_address}/32"]
-    description = "Houdini license server"
-  }
-  ingress {
-    protocol    = "udp"
-    from_port   = 1194
-    to_port     = 1194
-    cidr_blocks = [var.remote_ip_cidr]
-  }
-  ingress {
-    protocol    = "icmp"
-    from_port   = 8
-    to_port     = 0
-    cidr_blocks = [var.remote_ip_cidr]
-    description = "icmp"
-  }
 }
+resource "aws_security_group_rule" "remote_ip_all_incoming" {
+  security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
+  type              = "ingress"
+  protocol    = "-1"
+  from_port   = 0
+  to_port     = 0
+  cidr_blocks = [var.remote_ip_cidr]
+  description = "all incoming traffic from remote access ip"
+}
+resource "aws_security_group_rule" "vpn_cidr_all_incoming" {
+  security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
+  type              = "ingress"
+  protocol    = "-1"
+  from_port   = 0
+  to_port     = 0
+  cidr_blocks = [var.vpn_cidr]
+  description = "all incoming traffic from remote subnet range vpn dhcp"
+}
+resource "aws_security_group_rule" "remote_subnet_all_incoming" {
+  security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
+  type              = "ingress"
+  protocol    = "-1"
+  from_port   = 0
+  to_port     = 0
+  cidr_blocks = [var.remote_subnet_cidr]
+  description = "all incoming traffic from remote subnet range"
+}
+resource "aws_security_group_rule" "ssh" {
+  security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
+  type              = "ingress"
+  protocol  = "tcp"
+  from_port = 22
+  to_port   = 22
+  cidr_blocks = [var.remote_subnet_cidr, var.remote_ip_cidr]
+  description = "ssh"
+}
+resource "aws_security_group_rule" "https" {
+  security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
+  type              = "ingress"
+  protocol    = "tcp"
+  from_port   = 443
+  to_port     = 443
+  cidr_blocks = [var.remote_ip_cidr]
+  description = "https"
+}
+resource "aws_security_group_rule" "deadline_mongo" {
+  security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
+  type              = "ingress"
+  protocol  = "tcp"
+  from_port = 27100
+  to_port   = 27100
+  cidr_blocks = [var.remote_subnet_cidr]
+  description = "DeadlineDB MongoDB"
+}
+resource "aws_security_group_rule" "deadline_rcs_tcp_http" {
+  security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
+  type              = "ingress"
+  protocol  = "tcp"
+  from_port = 8080
+  to_port   = 8080
+  cidr_blocks = [var.remote_subnet_cidr]
+  description = "Deadline And Deadline RCS"
+}
+resource "aws_security_group_rule" "deadline_rcs_tcp_https" {
+  security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
+  type              = "ingress"
+  protocol  = "tcp"
+  from_port = 4433
+  to_port   = 4433
+  cidr_blocks = [var.remote_subnet_cidr]
+  description = "Deadline RCS TLS HTTPS"
+}
+resource "aws_security_group_rule" "houdini_license_server_tcp" {
+  count = ( var.houdini_license_server_address != 'none' )
+  security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
+  protocol    = "tcp"
+  from_port   = 1714
+  to_port     = 1714
+  cidr_blocks = ["${var.houdini_license_server_address}/32"]
+  description = "Houdini license server"
+}
+resource "aws_security_group_rule" "houdini_license_server_udp" {
+  count = ( var.houdini_license_server_address != 'none' )
+  security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
+  type              = "ingress"
+  protocol    = "udp"
+  from_port   = 1714
+  to_port     = 1714
+  cidr_blocks = ["${var.houdini_license_server_address}/32"]
+  description = "Houdini license server"
+}
+resource "aws_security_group_rule" "udp" {
+  security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
+  type              = "ingress"
+  protocol    = "udp"
+  from_port   = 1194
+  to_port     = 1194
+  cidr_blocks = [var.remote_ip_cidr]
+}
+resource "aws_security_group_rule" "icmp" {
+  security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
+  type              = "ingress"
+  protocol    = "icmp"
+  from_port   = 8
+  to_port     = 0
+  cidr_blocks = [var.remote_ip_cidr]
+  description = "icmp"
+}
+
 
 resource "null_resource" "dependency_softnas" {
   triggers = {
