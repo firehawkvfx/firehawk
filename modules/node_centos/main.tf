@@ -110,6 +110,7 @@ resource "aws_security_group" "node_centos_vpn" {
   tags = merge(map("Name", format("%s", "vpn_${var.name}")), var.common_tags, local.extra_tags)
 }
 resource "aws_security_group_rule" "remote_ip_all_incoming" {
+  count       = var.aws_nodes_enabled ? 1 : 0
   security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
   type              = "ingress"
   protocol    = "-1"
@@ -119,6 +120,7 @@ resource "aws_security_group_rule" "remote_ip_all_incoming" {
   description = "all incoming traffic from remote access ip"
 }
 resource "aws_security_group_rule" "vpn_cidr_all_incoming" {
+  count       = var.aws_nodes_enabled ? 1 : 0
   security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
   type              = "ingress"
   protocol    = "-1"
@@ -128,6 +130,7 @@ resource "aws_security_group_rule" "vpn_cidr_all_incoming" {
   description = "all incoming traffic from remote subnet range vpn dhcp"
 }
 resource "aws_security_group_rule" "remote_subnet_all_incoming" {
+  count       = var.aws_nodes_enabled ? 1 : 0
   security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
   type              = "ingress"
   protocol    = "-1"
@@ -137,6 +140,7 @@ resource "aws_security_group_rule" "remote_subnet_all_incoming" {
   description = "all incoming traffic from remote subnet range"
 }
 resource "aws_security_group_rule" "ssh" {
+  count       = var.aws_nodes_enabled ? 1 : 0
   security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
   type              = "ingress"
   protocol  = "tcp"
@@ -146,6 +150,7 @@ resource "aws_security_group_rule" "ssh" {
   description = "ssh"
 }
 resource "aws_security_group_rule" "https" {
+  count       = var.aws_nodes_enabled ? 1 : 0
   security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
   type              = "ingress"
   protocol    = "tcp"
@@ -155,6 +160,7 @@ resource "aws_security_group_rule" "https" {
   description = "https"
 }
 resource "aws_security_group_rule" "deadline_mongo" {
+  count       = var.aws_nodes_enabled ? 1 : 0
   security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
   type              = "ingress"
   protocol  = "tcp"
@@ -164,6 +170,7 @@ resource "aws_security_group_rule" "deadline_mongo" {
   description = "DeadlineDB MongoDB"
 }
 resource "aws_security_group_rule" "deadline_rcs_tcp_http" {
+  count       = var.aws_nodes_enabled ? 1 : 0
   security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
   type              = "ingress"
   protocol  = "tcp"
@@ -173,6 +180,7 @@ resource "aws_security_group_rule" "deadline_rcs_tcp_http" {
   description = "Deadline And Deadline RCS"
 }
 resource "aws_security_group_rule" "deadline_rcs_tcp_https" {
+  count       = var.aws_nodes_enabled ? 1 : 0
   security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
   type              = "ingress"
   protocol  = "tcp"
@@ -182,7 +190,7 @@ resource "aws_security_group_rule" "deadline_rcs_tcp_https" {
   description = "Deadline RCS TLS HTTPS"
 }
 resource "aws_security_group_rule" "houdini_license_server_tcp" {
-  count = ( var.houdini_license_server_address == "none" ? 0 : 1  )
+  count       = var.aws_nodes_enabled && var.houdini_license_server_address != "none" ? 1 : 0
   security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
   type              = "ingress"
   protocol    = "tcp"
@@ -192,7 +200,7 @@ resource "aws_security_group_rule" "houdini_license_server_tcp" {
   description = "Houdini license server"
 }
 resource "aws_security_group_rule" "houdini_license_server_udp" {
-  count = ( var.houdini_license_server_address == "none" ? 0 : 1  )
+  count       = var.aws_nodes_enabled && var.houdini_license_server_address != "none" ? 1 : 0
   security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
   type              = "ingress"
   protocol    = "udp"
@@ -202,6 +210,7 @@ resource "aws_security_group_rule" "houdini_license_server_udp" {
   description = "Houdini license server"
 }
 resource "aws_security_group_rule" "udp" {
+  count       = var.aws_nodes_enabled ? 1 : 0
   security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
   type              = "ingress"
   protocol    = "udp"
@@ -210,6 +219,7 @@ resource "aws_security_group_rule" "udp" {
   cidr_blocks = [var.remote_ip_cidr]
 }
 resource "aws_security_group_rule" "icmp" {
+  count       = var.aws_nodes_enabled ? 1 : 0
   security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
   type              = "ingress"
   protocol    = "icmp"

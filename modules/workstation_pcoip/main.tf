@@ -122,6 +122,7 @@ resource "aws_security_group" "workstation_centos" {
 
 }
 resource "aws_security_group_rule" "vpc_all_incoming" {
+  count         = var.aws_nodes_enabled && var.workstation_enabled ? 1 : 0
   security_group_id = element( concat( aws_security_group.workstation_centos.*.id, list("") ), 0)
   type              = "ingress"
   protocol    = "-1"
@@ -131,6 +132,7 @@ resource "aws_security_group_rule" "vpc_all_incoming" {
   description = "all incoming traffic from vpc"
 }
 resource "aws_security_group_rule" "remote_ip_all_incoming" {
+  count         = var.aws_nodes_enabled && var.workstation_enabled ? 1 : 0
   security_group_id = element( concat( aws_security_group.workstation_centos.*.id, list("") ), 0)
   type              = "ingress"
   protocol    = "-1"
@@ -140,6 +142,7 @@ resource "aws_security_group_rule" "remote_ip_all_incoming" {
   description = "all incoming traffic from remote access ip"
 }
 resource "aws_security_group_rule" "vpn_cidr_all_incoming" {
+  count         = var.aws_nodes_enabled && var.workstation_enabled ? 1 : 0
   security_group_id = element( concat( aws_security_group.workstation_centos.*.id, list("") ), 0)
   type              = "ingress"
   protocol    = "-1"
@@ -149,6 +152,7 @@ resource "aws_security_group_rule" "vpn_cidr_all_incoming" {
   description = "all incoming traffic from remote subnet range"
 }
 resource "aws_security_group_rule" "deadline_db_all_incoming" {
+  count         = var.aws_nodes_enabled && var.workstation_enabled ? 1 : 0
   security_group_id = element( concat( aws_security_group.workstation_centos.*.id, list("") ), 0)
   type              = "ingress"
   protocol    = "-1"
@@ -158,6 +162,7 @@ resource "aws_security_group_rule" "deadline_db_all_incoming" {
   description = "Deadline DB"
 }
 resource "aws_security_group_rule" "ssh" {
+  count         = var.aws_nodes_enabled && var.workstation_enabled ? 1 : 0
   security_group_id = element( concat( aws_security_group.workstation_centos.*.id, list("") ), 0)
   type              = "ingress"
   protocol  = "tcp"
@@ -167,6 +172,7 @@ resource "aws_security_group_rule" "ssh" {
   description = "ssh"
 }
 resource "aws_security_group_rule" "remote_ip_https" {
+  count         = var.aws_nodes_enabled && var.workstation_enabled ? 1 : 0
   security_group_id = element( concat( aws_security_group.workstation_centos.*.id, list("") ), 0)
   type              = "ingress"
   protocol    = "tcp"
@@ -176,6 +182,7 @@ resource "aws_security_group_rule" "remote_ip_https" {
   description = "https"
 }
 resource "aws_security_group_rule" "deadline_mongo" {
+  count         = var.aws_nodes_enabled && var.workstation_enabled ? 1 : 0
   security_group_id = element( concat( aws_security_group.workstation_centos.*.id, list("") ), 0)
   type              = "ingress"
   protocol  = "tcp"
@@ -185,6 +192,7 @@ resource "aws_security_group_rule" "deadline_mongo" {
   description = "DeadlineDB MongoDB"
 }
 resource "aws_security_group_rule" "deadline_rcs_http" {
+  count         = var.aws_nodes_enabled && var.workstation_enabled ? 1 : 0
   security_group_id = element( concat( aws_security_group.workstation_centos.*.id, list("") ), 0)
   type              = "ingress"
   protocol  = "tcp"
@@ -194,6 +202,7 @@ resource "aws_security_group_rule" "deadline_rcs_http" {
   description = "Deadline And Deadline RCS"
 }
 resource "aws_security_group_rule" "deadline_rcs_https" {
+  count         = var.aws_nodes_enabled && var.workstation_enabled ? 1 : 0
   security_group_id = element( concat( aws_security_group.workstation_centos.*.id, list("") ), 0)
   type              = "ingress"
   protocol  = "tcp"
@@ -203,6 +212,7 @@ resource "aws_security_group_rule" "deadline_rcs_https" {
   description = "Deadline RCS TLS HTTPS"
 }
 resource "aws_security_group_rule" "remote_ip_udp" {
+  count         = var.aws_nodes_enabled && var.workstation_enabled ? 1 : 0
   security_group_id = element( concat( aws_security_group.workstation_centos.*.id, list("") ), 0)
   type              = "ingress"
   protocol    = "udp"
@@ -211,6 +221,7 @@ resource "aws_security_group_rule" "remote_ip_udp" {
   cidr_blocks = [var.remote_ip_cidr]
 }
 resource "aws_security_group_rule" "remote_ip_icmp" {
+  count         = var.aws_nodes_enabled && var.workstation_enabled ? 1 : 0
   security_group_id = element( concat( aws_security_group.workstation_centos.*.id, list("") ), 0)
   type              = "ingress"
   protocol    = "icmp"
@@ -220,6 +231,7 @@ resource "aws_security_group_rule" "remote_ip_icmp" {
   description = "icmp"
 }
 resource "aws_security_group_rule" "all_outgoing" {
+  count         = var.aws_nodes_enabled && var.workstation_enabled ? 1 : 0
   security_group_id = element( concat( aws_security_group.workstation_centos.*.id, list("") ), 0)
   type              = "egress"
   protocol    = "-1"
@@ -229,7 +241,7 @@ resource "aws_security_group_rule" "all_outgoing" {
   description = "all outgoing traffic"
 }
 resource "aws_security_group_rule" "houdini_lincense_server_all_incoming" {
-  count = ( var.houdini_license_server_address == "none" ? 0 : 1  )
+  count         = var.aws_nodes_enabled && var.workstation_enabled && var.houdini_license_server_address != "none" ? 1 : 0
   security_group_id = element( concat( aws_security_group.workstation_centos.*.id, list("") ), 0)
   type              = "ingress"
   protocol    = "-1"
@@ -239,7 +251,7 @@ resource "aws_security_group_rule" "houdini_lincense_server_all_incoming" {
   description = "Houdini License Server"
 }
 resource "aws_security_group_rule" "houdini_license_server_tcp" {
-  count = ( var.houdini_license_server_address == "none" ? 0 : 1  )
+  count         = var.aws_nodes_enabled && var.workstation_enabled && var.houdini_license_server_address != "none" ? 1 : 0
   security_group_id = element( concat( aws_security_group.workstation_centos.*.id, list("") ), 0)
   type              = "ingress"
   protocol    = "tcp"
@@ -249,7 +261,7 @@ resource "aws_security_group_rule" "houdini_license_server_tcp" {
   description = "Houdini license server"
 }
 resource "aws_security_group_rule" "houdini_license_server_udp" {
-  count = ( var.houdini_license_server_address == "none" ? 0 : 1  )
+  count         = var.aws_nodes_enabled && var.workstation_enabled && var.houdini_license_server_address != "none" ? 1 : 0
   security_group_id = element( concat( aws_security_group.workstation_centos.*.id, list("") ), 0)
   type              = "ingress"
   protocol    = "udp"
