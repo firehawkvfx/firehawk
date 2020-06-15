@@ -30,6 +30,17 @@
   - cloud-install
   - onsite-install
 
+- name: ensure houdini.env file exists
+  file:
+    path: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env"
+    state: touch
+    mode: '0600'
+    owner: deadlineuser
+  become: yes
+  tags:
+  - cloud-install
+  - onsite-install
+
 - name: "Get difference from two houdini.env files"
   command: diff /home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env /home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini{{ houdini_version_item.houdini_major_version }}_from_template.env
   failed_when: "diff.rc > 1"
