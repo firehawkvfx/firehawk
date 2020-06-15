@@ -40,7 +40,7 @@
   register: result
   when: execute and houdini_license_server_address == 'none'
   with_items: "{{ houdini_major_version_list }}"
-  failed_when: 'No licenses could be found to run this application.' not in result.stderr 
+  failed_when: "'No licenses could be found to run this application.' not in result.stderr"
 
 - name: Ensure unit test runs on boot.  Undesirable, but needed - See sidefx RFE100149
   copy:
