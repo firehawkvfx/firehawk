@@ -3,7 +3,7 @@
 
 - name: aquire vars from secrets path before using defaults for other hosts 3
     include_vars: "{{ item }}"
-    with_first_found: "{{ vars_files_locs }}"
+    with_first_found: vars_files_locs
     tags:
     - always
 
