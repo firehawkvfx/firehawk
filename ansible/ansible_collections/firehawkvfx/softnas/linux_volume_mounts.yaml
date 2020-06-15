@@ -440,6 +440,11 @@
     pcoip: False
     vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/ebs-volumes/softnas_ebs_volumes.yaml", "files/softnas_ebs_volumes_{{ lookup('env','TF_VAR_envtier') }}.yaml", "files/softnas_ebs_volumes.yaml" ]
 
+  pre_tasks:
+  - name: show localnas1_private_ip
+    debug:
+      var: localnas1_private_ip
+
   roles:
   - role: onsite_nfs_share
     when: localnas1_private_ip != 'none'
