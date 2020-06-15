@@ -149,10 +149,7 @@
     tags:
     - always
 
-
   - name: Install Houdini
-    # import_role:
-    #   name: houdini_role
     include_role:
       name: houdini_role
       apply:
@@ -170,7 +167,7 @@
 
   - name: Install Deadline
     include_role:
-      name: install_deadline_role
+      name: firehawkvfx.deadline.configure_deadline_houdini_role
       apply:
         tags:
           - install_deadline_db
@@ -200,10 +197,9 @@
     tags:
     - always
 
-
   - name: setup houdini plugin in deadline repository for each major version.  This identical role use occurs in 2 locations - after deadline install and with install of Houdini
     include_role:
-      name: deadlinedb_houdini_plugins
+      name: firehawkvfx.deadline.deadlinedb_houdini_plugins
       apply:
         tags:
           - install_deadline_db
