@@ -229,7 +229,7 @@ resource "aws_security_group_rule" "all_outgoing" {
   description = "all outgoing traffic"
 }
 resource "aws_security_group_rule" "houdini_lincense_server_all_incoming" {
-  count = ( var.houdini_license_server_address != "none" )
+  count = ( var.houdini_license_server_address == "none" ? 0 : 1  )
   security_group_id = element( concat( aws_security_group.workstation_centos.*.id, list("") ), 0)
   type              = "ingress"
   protocol    = "-1"
@@ -239,7 +239,7 @@ resource "aws_security_group_rule" "houdini_lincense_server_all_incoming" {
   description = "Houdini License Server"
 }
 resource "aws_security_group_rule" "houdini_license_server_tcp" {
-  count = ( var.houdini_license_server_address != "none" )
+  count = ( var.houdini_license_server_address == "none" ? 0 : 1  )
   security_group_id = element( concat( aws_security_group.workstation_centos.*.id, list("") ), 0)
   type              = "ingress"
   protocol    = "tcp"
@@ -249,7 +249,7 @@ resource "aws_security_group_rule" "houdini_license_server_tcp" {
   description = "Houdini license server"
 }
 resource "aws_security_group_rule" "houdini_license_server_udp" {
-  count = ( var.houdini_license_server_address != "none" )
+  count = ( var.houdini_license_server_address == "none" ? 0 : 1  )
   security_group_id = element( concat( aws_security_group.workstation_centos.*.id, list("") ), 0)
   type              = "ingress"
   protocol    = "udp"

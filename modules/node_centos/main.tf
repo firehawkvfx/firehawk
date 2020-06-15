@@ -182,7 +182,7 @@ resource "aws_security_group_rule" "deadline_rcs_tcp_https" {
   description = "Deadline RCS TLS HTTPS"
 }
 resource "aws_security_group_rule" "houdini_license_server_tcp" {
-  count = ( var.houdini_license_server_address != "none" )
+  count = ( var.houdini_license_server_address == "none" ? 0 : 1  )
   security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
   type              = "ingress"
   protocol    = "tcp"
@@ -192,7 +192,7 @@ resource "aws_security_group_rule" "houdini_license_server_tcp" {
   description = "Houdini license server"
 }
 resource "aws_security_group_rule" "houdini_license_server_udp" {
-  count = ( var.houdini_license_server_address != "none" )
+  count = ( var.houdini_license_server_address == "none" ? 0 : 1  )
   security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
   type              = "ingress"
   protocol    = "udp"
