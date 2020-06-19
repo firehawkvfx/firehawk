@@ -1,0 +1,4 @@
+---
+# defaults file for roles/set_hserver_role
+
+skip_set_hserver: false # for local workstations without a license server, you may wish to set this to true in host vars

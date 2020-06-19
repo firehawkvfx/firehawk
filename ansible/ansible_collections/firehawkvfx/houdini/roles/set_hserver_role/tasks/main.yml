@@ -7,4 +7,4 @@
   loop: "{{ houdini_version_list }}"
   loop_control:
     loop_var: houdini_version_item
-  when: houdini_install_type != "server" and houdini_license_server_address != "none"
+  when: houdini_install_type != "server" and skip_set_hserver != true
