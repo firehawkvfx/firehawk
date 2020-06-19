@@ -130,7 +130,7 @@
   - cloud_install
   - local_install_onsite_mounts
 
-- name: site_bind1 master mounts to named paths from local onsit nas to remote host.  bind2 references the absolute mount names such as /aws_sydney_prod.  bind1 is relative site names such as /prod, which are not pushed from cloud to onsite since those paths should exist onsite from a high performance local mount
+- name: site_bind1 master mounts to named paths from local onsit nas to remote host.  bind2 references the absolute mount names such as /cloud_prod.  bind1 is relative site names such as /prod, which are not pushed from cloud to onsite since those paths should exist onsite from a high performance local mount
   become: yes
   mount:
     fstype: none
@@ -144,7 +144,7 @@
   tags:
   - local_install_onsite_mounts
 
-- name: bind1 master mounts to named paths from local onsit nas to remote host.  bind2 references the absolute mount names such as /aws_sydney_prod.  bind1 is relative site names such as /prod, which are not pushed from cloud to onsite since those paths should exist onsite from a high performance local mount
+- name: bind1 master mounts to named paths from local onsit nas to remote host.  bind2 references the absolute mount names such as /cloud_prod.  bind1 is relative site names such as /prod, which are not pushed from cloud to onsite since those paths should exist onsite from a high performance local mount
   become: yes
   mount:
     fstype: none
@@ -158,7 +158,7 @@
   tags:
   - cloud_install
 
-- name: bind2 master mounts to named paths.  bind2 references the absolute mount names such as /aws_sydney_prod.  bind1 is relative site names such as /prod, which are not pushed from cloud to onsite since those paths should exist onsite from a high performance local mount
+- name: bind2 master mounts to named paths.  bind2 references the absolute mount names such as /cloud_prod.  bind1 is relative site names such as /prod, which are not pushed from cloud to onsite since those paths should exist onsite from a high performance local mount
   become: yes
   mount:
     fstype: none

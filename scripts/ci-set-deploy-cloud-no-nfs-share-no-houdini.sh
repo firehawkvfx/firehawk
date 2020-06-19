@@ -19,9 +19,11 @@ sed -i 's/^TF_VAR_softnas_storage=.*$/TF_VAR_softnas_storage=true/' $config_over
 sed -i 's/^TF_VAR_aws_nodes_enabled=.*$/TF_VAR_aws_nodes_enabled=true/' $config_override # ...Site mounts will not be mounted in cloud.  currently this will disable provisioning any render node or remote workstation until vpn is confirmed to function after this step.
 
 # Alter the config file directly for these tests.  Disable NAS and Houdini installs.
-sed -i 's/^TF_VAR_localnas1_private_ip=.*$/TF_VAR_localnas1_private_ip=none/' $config_path # remove the ip address of the nfs share to test
-sed -i 's/^TF_VAR_houdini_license_server_address=.*$/TF_VAR_houdini_license_server_address=none/' $config_path # remove the ip address
-sed -i 's/^TF_VAR_localnas1_path_abs=.*$/TF_VAR_localnas1_path_abs=none/' $config_path # remove the ip address
+sed -i 's/^TF_VAR_localnas1_private_ip=.*$/TF_VAR_localnas1_private_ip=none/' $config_override # remove the ip address of the nfs share to test
+sed -i 's/^TF_VAR_houdini_license_server_address=.*$/TF_VAR_houdini_license_server_address=none/' $config_override # remove the ip address
+sed -i 's/^TF_VAR_localnas1_path_abs=.*$/TF_VAR_localnas1_path_abs=none/' $config_override # remove the ip address
+sed -i 's/^TF_VAR_localnas1_export_path=.*$/TF_VAR_localnas1_export_path=none/' $config_override # remove the ip address
+sed -i 's/^TF_VAR_localnas1_volume_name=.*$/TF_VAR_localnas1_volume_name=none/' $config_override # remove the ip address
 
 sed -i 's/^TF_VAR_remote_mounts_on_local=.*$/TF_VAR_remote_mounts_on_local=true/' $config_override # ...Softnas nfs exports will not be mounted on local site
 sed -i 's/^TF_VAR_provision_deadline_spot_plugin=.*$/TF_VAR_provision_deadline_spot_plugin=true/' $config_override # Don't provision the deadline spot plugin for this stage
