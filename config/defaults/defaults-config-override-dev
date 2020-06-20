@@ -59,26 +59,6 @@ TF_VAR_openfirehawkserver=auto
 # eg: TF_VAR_deadline_proxy_root_dir=$TF_VAR_openfirehawkserver:4433
 TF_VAR_deadline_proxy_root_dir=$TF_VAR_openfirehawkserver:4433
 
-# TF_VAR_key_name_dev:
-# The name of the key pair used in the dev environment. You will create a key pair to access your aws instances, listed here.
-# default: TF_VAR_key_name_dev=my_key_pair_dev
-TF_VAR_key_name_dev=my_key_pair_dev
-
-# TF_VAR_local_key_path_dev:
-# the path to the keypair from within the vagrant VM.
-# default: TF_VAR_local_key_path_dev=/secrets/keys/my_key_pair_dev.pem
-TF_VAR_local_key_path_dev=/secrets/keys/my_key_pair_dev.pem
-
-# TF_VAR_key_name_prod:
-# The name of the key pair used in the prod environment. You will create a key pair to access your AWS instances, listed here.
-# default: TF_VAR_key_name_prod=my_key_pair_prod
-TF_VAR_key_name_prod=my_key_pair_prod
-
-# TF_VAR_local_key_path_prod:
-# the path to the keypair from within the vagrant VM.
-# default: TF_VAR_local_key_path_prod=/secrets/keys/my_key_pair_prod.pem
-TF_VAR_local_key_path_prod=/secrets/keys/my_key_pair_prod.pem
-
 # TF_VAR_vagrant_destroy_before_deploy:
 # default: TF_VAR_vagrant_destroy_before_deploy=false
 TF_VAR_vagrant_destroy_before_deploy=false
@@ -198,3 +178,13 @@ TF_VAR_localnas1_volume_name=$TF_VAR_localnas1_volume_name
 # eg: TF_VAR_localnas1_path_abs=/mycity_prod
 # eg1: TF_VAR_localnas1_path_abs=none
 TF_VAR_localnas1_path_abs=$TF_VAR_localnas1_path_abs
+
+# TF_VAR_key_name:
+# The name of the key pair used in the dev environment. You will create a key pair to access your aws instances, listed here.
+# default: TF_VAR_key_name=$TF_VAR_key_name
+TF_VAR_key_name=$TF_VAR_key_name
+
+# TF_VAR_local_key_path:
+# the path to the keypair from within the vagrant VM.
+# default: TF_VAR_local_key_path=$TF_VAR_local_key_path
+TF_VAR_local_key_path=$TF_VAR_local_key_path

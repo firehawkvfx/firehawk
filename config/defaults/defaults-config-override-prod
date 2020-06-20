@@ -59,26 +59,6 @@ TF_VAR_openfirehawkserver=auto
 # eg: TF_VAR_deadline_proxy_root_dir=$TF_VAR_openfirehawkserver:4433
 TF_VAR_deadline_proxy_root_dir=$TF_VAR_openfirehawkserver:4433
 
-# TF_VAR_key_name_dev:
-# The name of the key pair used in the dev environment. You will create a key pair to access your aws instances, listed here.
-# default: TF_VAR_key_name_dev=my_key_pair_dev
-TF_VAR_key_name_dev=my_key_pair_dev
-
-# TF_VAR_local_key_path_dev:
-# the path to the keypair from within the vagrant VM.
-# default: TF_VAR_local_key_path_dev=/secrets/keys/my_key_pair_dev.pem
-TF_VAR_local_key_path_dev=/secrets/keys/my_key_pair_dev.pem
-
-# TF_VAR_key_name_prod:
-# The name of the key pair used in the prod environment. You will create a key pair to access your AWS instances, listed here.
-# default: TF_VAR_key_name_prod=my_key_pair_prod
-TF_VAR_key_name_prod=my_key_pair_prod
-
-# TF_VAR_local_key_path_prod:
-# the path to the keypair from within the vagrant VM.
-# default: TF_VAR_local_key_path_prod=/secrets/keys/my_key_pair_prod.pem
-TF_VAR_local_key_path_prod=/secrets/keys/my_key_pair_prod.pem
-
 # TF_VAR_vagrant_destroy_before_deploy:
 # default: TF_VAR_vagrant_destroy_before_deploy=false
 TF_VAR_vagrant_destroy_before_deploy=false
@@ -122,6 +102,11 @@ TF_VAR_provision_deadline_spot_plugin=true
 # default: TF_VAR_install_houdini=true
 TF_VAR_install_houdini=true
 
+# TF_VAR_houdini_test_connection:
+# After a houdini install, execute a basic test job with hython.
+# default: TF_VAR_houdini_test_connection=true
+TF_VAR_houdini_test_connection=true
+
 # TF_VAR_softnas_skip_update:
 # default: TF_VAR_softnas_skip_update=false
 TF_VAR_softnas_skip_update=false
@@ -157,6 +142,13 @@ TF_VAR_taint_single=""
 # default: TF_VAR_allow_prebuilt_softnas_ami=true
 TF_VAR_allow_prebuilt_softnas_ami=true
 
+# TF_VAR_houdini_license_server_address:
+# The ip of the houdini licence server used when in a dev or prod environment.  This will normally be the same ip server used in dev and production to not waste licences. So in a dev environment, you will probably need to reference the same houdini licence server in production.  Ideally, the houdini license server should be a seperate vm to the vagrant host for stability reasons but this is currently untested.  It is recomended that the licence server ip is the vagrant production VM until otherwise tested.  A licence server should rarely need to be touched, but updates to infrastructure could disrupt it if located on the firehawkserver vm.
+# If you don't have a floating license server or intend to use one, set this to 'none'
+# eg1: TF_VAR_houdini_license_server_address=192.168.29.125
+# eg2: TF_VAR_houdini_license_server_address=none
+TF_VAR_houdini_license_server_address=$TF_VAR_houdini_license_server_address
+
 # TF_VAR_localnas1_private_ip:
 # If using an NFS Share / NAS - The IP address of the onsite system with NFS shared volumes to mount.  This is normally your onsite NAS IP.  It is highly recommended you configure an NFS share to simplify access to small files that are ephemeral.
 # If you intend to use Side FX PDG, an NFS share is currently required for ephemeral data to be shared.
@@ -186,3 +178,13 @@ TF_VAR_localnas1_volume_name=$TF_VAR_localnas1_volume_name
 # eg: TF_VAR_localnas1_path_abs=/mycity_prod
 # eg1: TF_VAR_localnas1_path_abs=none
 TF_VAR_localnas1_path_abs=$TF_VAR_localnas1_path_abs
+
+# TF_VAR_key_name:
+# The name of the key pair used in the dev environment. You will create a key pair to access your aws instances, listed here.
+# default: TF_VAR_key_name=$TF_VAR_key_name
+TF_VAR_key_name=$TF_VAR_key_name
+
+# TF_VAR_local_key_path:
+# the path to the keypair from within the vagrant VM.
+# default: TF_VAR_local_key_path=$TF_VAR_local_key_path
+TF_VAR_local_key_path=$TF_VAR_local_key_path
