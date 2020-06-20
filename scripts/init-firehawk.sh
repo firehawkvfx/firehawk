@@ -157,7 +157,7 @@ parse_opts () {
 }
 parse_opts "$@"
 
-set -x; SHOWCOMMANDS=true # show bash input
+# set -x; SHOWCOMMANDS=true # show bash input
 
 sed -i "s/^TF_VAR_softnas_volatile=.*$/TF_VAR_softnas_volatile=${set_softnas_volatile}/" $config_override # ...Set if softnas volumes will be destroyed
 source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override --force --silent
@@ -168,12 +168,12 @@ set_pipe() {
   sed -i "s/^TF_VAR_active_pipeline=.*$/TF_VAR_active_pipeline=${id}/" $config_override # ...Enable the vpc.
   source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override --force --silent
   echo "Get TF_VAR_active_pipeline: $TF_VAR_active_pipeline"
-  sed -i "s/^TF_VAR_key_name_${TF_VAR_envtier}=.*$/TF_VAR_key_name_${TF_VAR_envtier}=my_key_pair_pipeid${TF_VAR_active_pipeline}_${TF_VAR_envtier}/" $config_override
+  sed -i "s/^TF_VAR_key_name=.*$/TF_VAR_key_name=my_key_pair_pipeid${TF_VAR_active_pipeline}_${TF_VAR_envtier}/" $config_override
   source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override --force --silent
   echo "Get TF_VAR_key_name: $TF_VAR_key_name"
   key_path="/secrets/keys/${TF_VAR_key_name}.pem"
   echo "Get key_path: $key_path"
-  sed -i "s~^TF_VAR_local_key_path_${TF_VAR_envtier}=.*$~TF_VAR_local_key_path_${TF_VAR_envtier}=${key_path}~" $config_override
+  sed -i "s~^TF_VAR_local_key_path=.*$~TF_VAR_local_key_path=${key_path}~" $config_override
   source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override --force --silent
   echo "Get TF_VAR_local_key_path: $TF_VAR_local_key_path"
 }
