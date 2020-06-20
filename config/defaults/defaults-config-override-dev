@@ -22,7 +22,7 @@
 
 # defaults_config_overide_version:
 # If the version of this file changes, the file will be replaced in any deployment.
-defaults_config_overide_version="0.0.21"
+defaults_config_overide_version="0.0.22"
 
 # TF_VAR_CI_JOB_ID:
 # This pipeline number is used to updat the active pipeline in the working dir when a new deployment is initialised.
@@ -31,6 +31,10 @@ TF_VAR_CI_JOB_ID=0
 # TF_VAR_active_pipeline:
 # This pipeline number will update when a new deployment is initialised. It is used to tag the creation of assets, and potentially define subnets ranges.
 TF_VAR_active_pipeline=0
+
+# TF_VAR_resourcetier:
+# Deployments between dev, and prod may use different resources.  When prod is deployed it may use a green or blue resource, allowing simultaneous deployments to operate on different resources.
+TF_VAR_resourcetier=grey
 
 # TF_VAR_vm_initialised:
 # after the vms are succesfully initialised, this is set to true.  when true, vm will not be initialised again.

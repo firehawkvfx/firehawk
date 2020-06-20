@@ -456,6 +456,11 @@ source_vars () {
         echo_if_not_silent "...Using variable file $var_file. No encryption/decryption needed for these contents."
         encrypt_mode="none"
         template_path="$TF_VAR_firehawk_path/config/templates/config-override.template" # These should be removed but need alter the system to do it properly.
+    elif [[ "$var_file" = "resources" ]]; then
+        var_file="resources-$TF_VAR_resourcestier"
+        echo_if_not_silent "...Using variable file $var_file. No encryption/decryption needed for these contents."
+        encrypt_mode="none"
+        template_path="$TF_VAR_firehawk_path/config/templates/resources.template" # These should be removed but need alter the system to do it properly.
     else
         printf "\nUnrecognised vault/variable file. \n$var_file\nExiting...\n"
         failed=true
@@ -717,16 +722,18 @@ if [[ "$var_file" = "secrets" ]] || [[ -z "$var_file" ]]; then
     source_vars 'secrets' "$encrypt_mode"; exit_test
     var_file = 'config-override'; exit_test
     source_vars 'config-override' 'none'; exit_test
+    var_file = 'resources'; exit_test
+    source_vars 'resources' 'none'; exit_test
 elif [[ "$var_file" = "init" ]]; then
     # assume secrets is the var file for default behaviour
     source_vars 'vagrant' 'none'; exit_test
     source_vars 'defaults' 'none'; exit_test
     source_vars 'config' 'none'; exit_test
     # override the var_file at this point.
-    # var_file = 'secrets'; exit_test
-    # source_vars 'secrets' "$encrypt_mode"; exit_test
     var_file = 'config-override'; exit_test
     source_vars 'config-override' 'none'; exit_test
+    var_file = 'resources'; exit_test
+    source_vars 'resources' 'none'; exit_test
 else
     source_vars "$var_file" "$encrypt_mode"; exit_test
 fi
