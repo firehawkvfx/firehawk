@@ -32,6 +32,10 @@ TF_VAR_CI_JOB_ID=insertvalue
 # This pipeline number will update when a new deployment is initialised. It is used to tag the creation of assets, and potentially define subnets ranges.
 TF_VAR_active_pipeline=insertvalue
 
+# TF_VAR_resourcetier:
+# Deployments between dev, and prod may use different resources.  When prod is deployed it may use a green or blue resource, allowing simultaneous deployments to operate on different resources.
+TF_VAR_resourcetier=insertvalue
+
 # TF_VAR_vm_initialised:
 # after the vms are succesfully initialised, this is set to true.  when true, vm will not be initialised again.
 TF_VAR_vm_initialised=insertvalue
@@ -55,29 +59,9 @@ allow_interrupt=insertvalue
 TF_VAR_openfirehawkserver=insertvalue
 
 # TF_VAR_deadline_proxy_root_dir:
-# This is the address and port for clients to reach the Deadline RCS on the openfirehawk server in a dev environment.  After init, the default containing the var  should resolve to an actual IP in this file and not be 'auto'.
-# eg: TF_VAR_deadline_proxy_root_dir=:4433
+# This is the address and port for clients to reach the Deadline RCS on the openfirehawk server in a dev environment.  After init, the default containing the var auto should resolve to an actual IP in this file and not be 'auto'.
+# eg: TF_VAR_deadline_proxy_root_dir=auto:4433
 TF_VAR_deadline_proxy_root_dir=insertvalue
-
-# TF_VAR_key_name_dev:
-# The name of the key pair used in the dev environment. You will create a key pair to access your aws instances, listed here.
-# default: TF_VAR_key_name_dev=my_key_pair_dev
-TF_VAR_key_name_dev=insertvalue
-
-# TF_VAR_local_key_path_dev:
-# the path to the keypair from within the vagrant VM.
-# default: TF_VAR_local_key_path_dev=/secrets/keys/my_key_pair_dev.pem
-TF_VAR_local_key_path_dev=insertvalue
-
-# TF_VAR_key_name_prod:
-# The name of the key pair used in the prod environment. You will create a key pair to access your AWS instances, listed here.
-# default: TF_VAR_key_name_prod=my_key_pair_prod
-TF_VAR_key_name_prod=insertvalue
-
-# TF_VAR_local_key_path_prod:
-# the path to the keypair from within the vagrant VM.
-# default: TF_VAR_local_key_path_prod=/secrets/keys/my_key_pair_prod.pem
-TF_VAR_local_key_path_prod=insertvalue
 
 # TF_VAR_vagrant_destroy_before_deploy:
 # default: TF_VAR_vagrant_destroy_before_deploy=false
@@ -198,3 +182,13 @@ TF_VAR_localnas1_volume_name=insertvalue
 # eg: TF_VAR_localnas1_path_abs=/mycity_prod
 # eg1: TF_VAR_localnas1_path_abs=none
 TF_VAR_localnas1_path_abs=insertvalue
+
+# TF_VAR_key_name:
+# The name of the key pair used in the dev environment. You will create a key pair to access your aws instances, listed here.
+# default: TF_VAR_key_name=my_key_pair
+TF_VAR_key_name=insertvalue
+
+# TF_VAR_local_key_path:
+# the path to the keypair from within the vagrant VM.
+# default: TF_VAR_local_key_path=/secrets/keys/my_key_pair.pem
+TF_VAR_local_key_path=insertvalue

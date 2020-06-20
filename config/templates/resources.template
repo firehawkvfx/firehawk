@@ -1,0 +1,81 @@
+# TF_VAR_openfirehawkserver_vcpus: 
+# The number of VCPU's dedicated to the vagrant VM used in the dev environment.  Primarily you should consider the requirements of running mongo DB for Deadline on this host.
+# default: TF_VAR_openfirehawkserver_vcpus=2
+TF_VAR_openfirehawkserver_vcpus=insertvalue
+
+# TF_VAR_openfirehawkserver_ram: 
+# The amount of ram in MB dedicated to the vagrant VM in the dev environment.  Primarily you should consider the requirements of running mongo DB for Deadline on this host.
+# default: TF_VAR_openfirehawkserver_ram=6144
+TF_VAR_openfirehawkserver_ram=insertvalue
+
+# TF_VAR_workstation_address:
+# The address of the workstation the artist will operate from onsite.  This is normally a VM for testing.
+# eg: TF_VAR_workstation_address=192.168.29.31
+TF_VAR_workstation_address=insertvalue
+
+# TF_VAR_workstation_ethernet_device:
+# The network interface used on the dev workstation / vm to configure routes.  static routes are applied directly to the workstation to route traffice via the vpn gateway.
+# To list the available options on the workstation execute:
+# ip a
+# default: TF_VAR_workstation_ethernet_device=eth1
+TF_VAR_workstation_ethernet_device=insertvalue
+
+# TF_VAR_gateway_mac: 
+# A randomly generated mac address for the VM that vagrant will use for the VM's bridged network adapter. Your onsite router will assign an ip based on this mac, and you should ensure that it is static/reserved within your router for a persistent IP address. Unicast mac addresses must not have an odd second digit, and this is required. You can use the script in scripts/random_mac_unicast.sh to generate a mac adress and use it here.  Using a peristent mac addressnis useful for consistent licencing handling.  Dev and Prod VMs must have unique mac adress values or they will not function on the same network.  For this reason, we recomend authorising all licencing on the production vm only, and route all licence requests to the production vm since the production vm should run always and it will be a more stable host.
+# default: TF_VAR_gateway_mac=CE4C7CD0284F
+TF_VAR_gateway_mac=insertvalue
+
+# TF_VAR_private_subnet1:
+# The dev IP range for private subnet 1 for workers.  This subnet is accessed via VPN or bastion hosts.
+# default: TF_VAR_private_subnet1=10.0.11.0/24
+TF_VAR_private_subnet1=insertvalue
+
+# TF_VAR_private_subnet2:
+# The dev IP range for private subnet 2 for workers.  This subnet is accessed via VPN or bastion hosts.
+# default: TF_VAR_private_subnet2=10.0.12.0/24
+TF_VAR_private_subnet2=insertvalue
+
+# TF_VAR_public_subnet1:
+# The dev IP range for public subnet 1 for public facing  systems.  examples are your VPN access server instance, or bastion host for provisioning other instances in the private network.
+# default: TF_VAR_public_subnet1=10.0.201.0/24
+TF_VAR_public_subnet1=insertvalue
+
+# TF_VAR_public_subnet2:
+# The dev IP range for public subnet 2 for public facing systems.  examples are your VPN access server instance, or bastion host for provisioning other instances in the private network.
+# default: TF_VAR_public_subnet2=10.0.202.0/24
+TF_VAR_public_subnet2=insertvalue
+
+# TF_VAR_vpn_cidr:
+# Open VPN sets up DHCP in this range for every connection in the dev env to provide a unique ip on each side of the VPN for every system. Dont change this from the default for now. In the future it should be unique. Reference for potential ranges https://www.arin.net/reference/research/statistics/address_filters/
+# default: TF_VAR_vpn_cidr=172.17.232.0/24
+TF_VAR_vpn_cidr=insertvalue
+
+# TF_VAR_softnas1_private_ip1:
+# The private ip to install softnas dev with for its first interface.
+# When using softnas with high availability and failover, a 2nd interface is used for replication to a 2nd softnas instance.
+# default: TF_VAR_softnas1_private_ip1=10.0.11.11
+TF_VAR_softnas1_private_ip1=insertvalue
+
+# TF_VAR_softnas_instance_type:
+# The ability to switch the performance of the softnas instance types to save costs in dev environment, and increase performance if required in production..
+# eg1: TF_VAR_softnas_instance_type=m4.2xlarge
+# default: TF_VAR_softnas_instance_type=m4.xlarge
+TF_VAR_softnas_instance_type=insertvalue
+
+# TF_VAR_route_zone_id:
+# The route zone id for the prod domain name in your prod AWS account.  This should be unique to the dev account, but it maybe possible to avoid with further developement.  Your aws account will need a public domain name in the account (route 53) in order to assign public routes for DNS.  Once this is established in your account, insert the route zone id here for Terraform to create addresses for systems that are publicly accessible, like vpn and bastion hosts.
+# eg: TF_VAR_route_zone_id=KJ2352KJ235LJ
+# default: TF_VAR_route_zone_id=none
+TF_VAR_route_zone_id=insertvalue
+
+# TF_VAR_cert_arn:
+# The ARN for the SSL certificate of your public dev domain in the AWS dev account.  You will have an SSL certificate for any public domain in aws, and this has an ARN associated with it.
+# eg: TF_VAR_cert_arn="arn:aws:acm:ap-southeast-2:322531242314:certificate/adsfljnf3-234g-5634-3245-42kjh243kj"
+# default: TF_VAR_cert_arn=none
+TF_VAR_cert_arn=insertvalue
+
+# TF_VAR_public_domain:
+# The public dev domain name in the AWS dev account.  You can purchase a cheap domain in AWS with lesser known extensions for testing and use this here. Launched Infrastructure will switch between different domains depending on the staging environment for isolation. Some resources, like licence servers, may exist in a single domain (usually prod), since they often are not dynamic and cant be moved easily.
+# eg: TF_VAR_public_domain=devexample.com
+# eg: TF_VAR_public_domain=none
+TF_VAR_public_domain=insertvalue

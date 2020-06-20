@@ -104,6 +104,9 @@ verbose () {
                         ;;
                     vagrant)
                         ;;
+                    live-terminal)
+                        export LIVE_TERMINAL=true
+                        ;;
                     *)
                         if [ "$OPTERR" = 1 ] && [ "${optspec:0:1}" != ":" ]; then
                             echo "Unknown option --${OPTARG}" >&2
@@ -457,7 +460,7 @@ source_vars () {
         encrypt_mode="none"
         template_path="$TF_VAR_firehawk_path/config/templates/config-override.template" # These should be removed but need alter the system to do it properly.
     elif [[ "$var_file" = "resources" ]]; then
-        var_file="resources-$TF_VAR_resourcestier"
+        var_file="resources-$TF_VAR_resourcetier"
         echo_if_not_silent "...Using variable file $var_file. No encryption/decryption needed for these contents."
         encrypt_mode="none"
         template_path="$TF_VAR_firehawk_path/config/templates/resources.template" # These should be removed but need alter the system to do it properly.
