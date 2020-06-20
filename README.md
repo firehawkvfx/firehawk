@@ -121,7 +121,12 @@ To use Deadline in AWS, instances that reside in AWS are free.  But any onsite s
 require your Thinkbox UBL URL and UBL activation code.  These are entered in your encrypted secrets file, and are used to configure the Deadline DB upon install automatically.
 
 ## License servers
-License servers should be configured on your network to issue any floating licenses for software you require.  The VPN gateway and routes configured should allow a cloud based system to access the license server at the environment variable ``TF_VAR_houdini_license_server_address`` in secrets/config.  It is also possible to use deadline Usage Based Licenses for render nodes to use licenses on a per hour basis (eg. Houdini Engine, Mantra)
+License servers should be configured on your network to issue any floating licenses for software you require.  The VPN gateway and routes configured should allow a cloud based system to access the license server at the environment variable ``TF_VAR_houdini_license_server_address`` in secrets/config.  It should also be possible to use deadline Usage Based Licenses for render nodes to use licenses on a per hour basis (eg. Houdini Engine, Mantra), but this is untested.  To disable the floating license server, after you have setup your configuration files, but before deployment you can follow these steps:
+```
+source ./update_vars.sh --dev # or with your desired env.
+./scripts/ci-set-deploy-cloud-disable-license-server.sh
+source ./update_vars.sh --dev # or with your desired env.
+```
 
 ## Side Effects API OAuth2 keys
 If you intend to use Houdini, Firehawk uses Side FX provided keys to query and download the latest daily and produciton builds from sidefx.com. It will query the current version, download it, install it and also preserve that installer in S3 cloud storage enabling you to lock infrastructure to a particular installation version if needed.
@@ -129,6 +134,24 @@ If you intend to use Houdini, Firehawk uses Side FX provided keys to query and d
 - Goto [Services](https://www.sidefx.com/services/), and accept the EULA
 - Create a New App under [Manage applications authentication](https://www.sidefx.com/oauth2/applications/) to get a Client ID and secret keys.
 - You will need these later to save into your decrypted secrets file and encrypt it.
+
+## Disabling Side Effects Houdini
+If you wish to use the infrastructure without Houdini and experiment with other software, you can disable these vars in config overrides.  After you have setup your configuration files, but before deployment you can follow these steps:
+```
+source ./update_vars.sh --dev # or with your desired env.
+./scripts/ci-set-deploy-cloud-no-houdini.sh
+source ./update_vars.sh --dev # or with your desired env.
+```
+
+## NFS Shared Volumes
+An NFS shared volume in the location of your workstation is highly recommended, and not optional if you intend to use Side FX PDG.
+this is because PDG updates a lot of ephemeral data on the filesystem that all systems need access to.  Sharing SMB may also be possible with further developement and testing.
+If you wish to test without a shared volume, you will need to rely on your own processes to synchronise with S3 storage, but it can be done.  After you have setup your configuration files, but before deployment you can follow these steps:
+```
+source ./update_vars.sh --dev # or with your desired env.
+./scripts/ci-set-deploy-cloud-no-nfs-share.sh
+source ./update_vars.sh --dev # or with your desired env.
+```
 
 ## Replicate a Firehawk clone and manage your secrets repository
 

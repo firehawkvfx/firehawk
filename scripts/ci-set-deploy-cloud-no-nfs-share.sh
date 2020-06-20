@@ -20,15 +20,12 @@ sed -i 's/^TF_VAR_aws_nodes_enabled=.*$/TF_VAR_aws_nodes_enabled=true/' $config_
 
 # Alter the config file directly for these tests.  Disable NAS and Houdini installs.
 sed -i 's/^TF_VAR_localnas1_private_ip=.*$/TF_VAR_localnas1_private_ip=none/' $config_override # remove the ip address of the nfs share to test
-sed -i 's/^TF_VAR_houdini_license_server_address=.*$/TF_VAR_houdini_license_server_address=none/' $config_override # remove the ip address
 sed -i 's/^TF_VAR_localnas1_path_abs=.*$/TF_VAR_localnas1_path_abs=none/' $config_override # remove the ip address
 sed -i 's/^TF_VAR_localnas1_export_path=.*$/TF_VAR_localnas1_export_path=none/' $config_override # remove the ip address
 sed -i 's/^TF_VAR_localnas1_volume_name=.*$/TF_VAR_localnas1_volume_name=none/' $config_override # remove the ip address
 
 sed -i 's/^TF_VAR_remote_mounts_on_local=.*$/TF_VAR_remote_mounts_on_local=true/' $config_override # ...Softnas nfs exports will not be mounted on local site
 sed -i 's/^TF_VAR_provision_deadline_spot_plugin=.*$/TF_VAR_provision_deadline_spot_plugin=true/' $config_override # Don't provision the deadline spot plugin for this stage
-
-sed -i 's/^TF_VAR_install_houdini=.*$/TF_VAR_install_houdini=true/' $config_override # install houdini
 
 sed -i 's/^TF_VAR_install_deadline_db=.*$/TF_VAR_install_deadline_db=true/' $config_override # install deadline
 sed -i 's/^TF_VAR_install_deadline_rcs=.*$/TF_VAR_install_deadline_rcs=true/' $config_override # install deadline
