@@ -7,7 +7,7 @@
   
   vars:
     # hosts_file: "{{ secrets_path }}/{{ inventory }}/hosts"
-    hosts_file: "{{ inventory }}"
+    hosts_file: "{{ inventory }}/hosts"
     group_name: ''
     backup: false
   
