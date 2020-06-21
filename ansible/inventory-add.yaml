@@ -14,12 +14,24 @@
     - name: hosts file path is
       debug:
         var: hosts_file
-        
-    # - name: ensure 2 new lines exist at end of file always
-    #   shell: |
-    #     {{ firehawk_path }}/scripts/append_blank_line.sh {{ hosts_file }}
-    #   become: false
-    #   tags: init
+
+    - name: Touch a file
+      file:
+        path: "{{ hosts_file }}"
+        state: touch
+        mode: u=rw,g=r,o=r
+      tags: init
+
+    - name: display hosts file contents
+      debug: var=item
+      with_file:
+        - "{{ hosts_file }}"
+
+    - name: ensure 2 new lines exist at end of file always
+      shell: |
+        {{ firehawk_path }}/scripts/append_blank_line.sh {{ hosts_file }}
+      become: false
+      tags: init
 
     - name: update ansible_control or add if not exist
       lineinfile:
@@ -85,3 +97,8 @@
       shell: |
         {{ firehawk_path }}/scripts/append_blank_line.sh {{ hosts_file }}
       become: true
+
+    - name: display hosts file contents
+      debug: var=item
+      with_file:
+        - hosts_file
