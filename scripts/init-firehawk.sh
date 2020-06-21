@@ -164,7 +164,7 @@ source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-
 
 set_pipe() {
   id=$1
-  ### Initialisation for new resources occur after a destroy operation, since the infra is garunteed to be new after his point.
+  ### Initialisation for new resources
   sed -i "s/^TF_VAR_active_pipeline=.*$/TF_VAR_active_pipeline=${id}/" $config_override # ...Enable the vpc.
   source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override --force --silent
   echo "Get TF_VAR_active_pipeline: $TF_VAR_active_pipeline"
@@ -220,6 +220,9 @@ else
   echo "init_vm_config: $init_vm_config"
   if [[ "$TF_VAR_vm_initialised" == false ]] && [[ "$init_vm_config" == true ]]; then
     echo "...Init VM's"
+    echo "Ensure hosts file exists"
+    ansible-playbook ansible/inventory-add.yaml -v --extra-vars "variable_host=localhost" --tags 'init'; exit_test
+    # ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "variable_host=localhost" --include-tags 'init'; exit_test #--extra-vars "host_name=firehawkgateway host_ip=$TF_VAR_openfirehawkserver group_name=role_gateway insert_ssh_key_string=ansible_ssh_private_key_file=$TF_VAR_general_use_ssh_key"; exit_test
     echo "...Provision PGP / Keybase"
     $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-010-keybase.sh $ARGS; exit_test
     echo "...Provision Local VM's"
@@ -305,7 +308,7 @@ else
     $TF_VAR_firehawk_path/scripts/detect-interrupt.sh &
     
     if [ "$TF_VAR_active_pipeline" -eq 0 ]; then
-      echo "...Init new pipe based on the current JOB ID: Found active pipeline is init: $TF_VAR_active_pipeline"
+      echo "...Init new pipe based on the current JOB ID: Current active pipeline to init: $TF_VAR_active_pipeline"
       set_pipe $TF_VAR_CI_JOB_ID # initalise all new resources with this pipe id
       echo "...Ensuring aws key exists for current pipe."
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-new-key.yaml; exit_test # ensure an aws pem key exists for ssh into cloud nodes

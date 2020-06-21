@@ -1,12 +1,12 @@
 # adds hosts / updates if present.  optionally add under a group name
 
-- hosts: ansible_control
-  remote_user: deployuser
+- hosts: "{{ variable_host | default('ansible_control') }}"
+  remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
   
   vars:
-    hosts_file: "/deployuser/{{ inventory }}/hosts"
+    hosts_file: "{{ secrets_path }}/{{ inventory }}/hosts"
     group_name: ''
     backup: false
   
@@ -15,10 +15,11 @@
       debug:
         var: hosts_file
         
-    - name: ensure 2 new lines exist at end of file always
-      shell: |
-        /deployuser/scripts/append_blank_line.sh {{ hosts_file }}
-      become: true
+    # - name: ensure 2 new lines exist at end of file always
+    #   shell: |
+    #     {{ firehawk_path }}/scripts/append_blank_line.sh {{ hosts_file }}
+    #   become: false
+    #   tags: init
 
     - name: update ansible_control or add if not exist
       lineinfile:
@@ -30,12 +31,14 @@
         regexp: "^ansible_control ansible_connection=.*"
         insertbefore: BOF
         create: true
-      become: yes
+      # become: false
+      tags: init
 
     - name: ensure 2 new lines exist at end of file always
       shell: |
-        /deployuser/scripts/append_blank_line.sh {{ hosts_file }}
-      become: true
+        {{ firehawk_path }}/scripts/append_blank_line.sh {{ hosts_file }}
+      # become: false
+      tags: init
 
     - name: update group or add if not exist
       lineinfile:
@@ -50,7 +53,7 @@
 
     - name: ensure 2 new lines exist at end of file always
       shell: |
-        /deployuser/scripts/append_blank_line.sh {{ hosts_file }}
+        {{ firehawk_path }}/scripts/append_blank_line.sh {{ hosts_file }}
       become: true
       
     - name: Group add host- update host or add if not exist
@@ -80,5 +83,5 @@
 
     - name: ensure 2 new lines exist at end of file always
       shell: |
-        /deployuser/scripts/append_blank_line.sh {{ hosts_file }}
+        {{ firehawk_path }}/scripts/append_blank_line.sh {{ hosts_file }}
       become: true
