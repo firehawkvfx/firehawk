@@ -159,6 +159,7 @@ parse_opts "$@"
 
 # set -x; SHOWCOMMANDS=true # show bash input
 
+echo "set TF_VAR_softnas_volatile=$set_softnas_volatile in config override file=$config_override"
 sed -i "s/^TF_VAR_softnas_volatile=.*$/TF_VAR_softnas_volatile=${set_softnas_volatile}/" $config_override # ...Set if softnas volumes will be destroyed
 source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override --force --silent
 
