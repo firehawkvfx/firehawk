@@ -23,10 +23,15 @@
 # BEGIN CONFIGURATION #
 
 # TF_VAR_remote_subnet_cidr:
-# This is the IP range (CIDR notation) of your subnet onsite that the firehawkserver vm will reside in, and that other onsite nodes reside in.
+# This is the IP range (CIDR notation) of your subnet onsite that the firehawkserver vm will reside in, and that other onsite nodes reside in.  The below example would denote the range 192.168.29.0 - 192.168.29.255
 # eg: TF_VAR_remote_subnet_cidr=192.168.29.0/24
 # This would be the ip range 192.168.29.0 - 192.168.29.255
 TF_VAR_remote_subnet_cidr=insertvalue
+
+# TF_VAR_ssh_config_remote_subnet:
+# The mask that will be used in ssh config.  This should align with the TF_VAR_remote_subnet_cidr, but ssh config requires a different format.  The below example would denote the range 192.168.29.0 - 192.168.29.255
+# eg: TF_VAR_ssh_config_remote_subnet=192.168.29.*
+TF_VAR_ssh_config_remote_subnet=insertvalue
 
 # TF_VAR_houdini_license_server_address:
 # The ip of the houdini licence server used when in a dev or prod environment.  This will normally be the same ip server used in dev and production to not waste licences. So in a dev environment, you will probably need to reference the same houdini licence server in production.  Ideally, the houdini license server should be a seperate vm to the vagrant host for stability reasons but this is currently untested.  It is recomended that the licence server ip is the vagrant production VM until otherwise tested.  A licence server should rarely need to be touched, but updates to infrastructure could disrupt it if located on the firehawkserver vm.
