@@ -145,7 +145,7 @@ Vagrant.configure(2) do |config|
                 node.vm.provision "shell", inline: "echo 'ConnectTimeout 60' >> /etc/ssh/ssh_config"
             
                 # we define the location of the ansible hosts file in an environment variable.
-                node.vm.provision "shell", inline: "grep -qxF 'ANSIBLE_INVENTORY=/vagrant/ansible/hosts' /etc/environment || echo 'ANSIBLE_INVENTORY=/vagrant/ansible/hosts' | sudo tee -a /etc/environment"
+                node.vm.provision "shell", inline: "grep -qxF 'ANSIBLE_INVENTORY=/vagrant/ansible/inventory/hosts' /etc/environment || echo 'ANSIBLE_INVENTORY=/vagrant/ansible/inventory/hosts' | sudo tee -a /etc/environment"
                 node.vm.provision "shell", inline: "cd /vagrant; ansible-playbook ansible/transparent-hugepages-disable.yml" # mongo requires no transparent hugepages
                 # disable the update notifier.  We do not want to update to ubuntu 18, deadline installer doesn't work in 18 when last tested.
                 node.vm.provision "shell", inline: "sudo sed -i 's/Prompt=.*$/Prompt=never/' /etc/update-manager/release-upgrades"
