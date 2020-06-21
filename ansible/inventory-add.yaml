@@ -43,8 +43,13 @@
       src: "{{ hosts_file }}"
     register: slurpfile
     become: true
+    tags: init
+    become: true
+
   - name: Display "{{ hosts_file }}" contents
     debug: msg="{{ slurpfile['content'] }}"
+    tags: init
+    become: true
 
   - name: ensure 2 new lines exist at end of file always
     shell: |
@@ -122,5 +127,10 @@
       src: "{{ hosts_file }}"
     register: slurpfile
     become: true
+    tags: init
+    become: true
+
   - name: Display "{{ hosts_file }}" contents
     debug: msg="{{ slurpfile['content'] }}"
+    tags: init
+    become: true
