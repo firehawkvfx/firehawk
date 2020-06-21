@@ -26,10 +26,6 @@ secrets_path: "{{ lookup('env','TF_VAR_secrets_path') }}"
 
 # domains
 public_domain: "{{ lookup('env','TF_VAR_public_domain') }}"
-# in most cases only the above public_domain should be referenced, which can be switched between dev and prod based on the environment - envtier
-# the below public_domain_prod is used in some rare cases where multiple instances of infrastructure may not be not possible, like with a licence server.
-# eg I may need to reference houdinilicenceserver.prod.example.com in both the prod and dev environments for render nodes to be tested.
-public_domain_prod: "{{ lookup('env','TF_VAR_public_domain_prod') }}"
 
 bucket_extension: "{{ lookup('env','TF_VAR_bucket_extension') }}"
 installers_bucket: "software.{{ lookup('env','TF_VAR_bucket_extension_prod') }}" # The production bucket is always used to store installation files to avoid duplicate downloads/uploads

@@ -44,12 +44,6 @@ variable "firehawk_path" {}
 variable "public_domain" {
 }
 
-variable "public_domain_dev" {
-}
-
-variable "public_domain_prod" {
-}
-
 variable "openfirehawkserver" {
 }
 
