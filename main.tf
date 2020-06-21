@@ -278,9 +278,6 @@ module "softnas" {
   bastion_private_ip             = module.vpc.vpn_private_ip
   bastion_ip                     = module.bastion.public_ip
   softnas1_private_ip1           = var.softnas1_private_ip1
-  softnas1_private_ip2           = var.softnas1_private_ip2
-  softnas2_private_ip1           = var.softnas2_private_ip1
-  softnas2_private_ip2           = var.softnas2_private_ip2
 
   remote_mounts_on_local = var.remote_mounts_on_local == true ? true : false
 

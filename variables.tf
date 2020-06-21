@@ -120,15 +120,6 @@ variable "softnas_storage" {
 variable "softnas1_private_ip1" {
 }
 
-variable "softnas1_private_ip2" {
-}
-
-variable "softnas2_private_ip1" {
-}
-
-variable "softnas2_private_ip2" {
-}
-
 variable "softnas_mailserver" {
 }
 
