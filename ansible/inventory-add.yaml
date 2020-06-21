@@ -47,7 +47,7 @@
     become: true
 
   - name: Display "{{ hosts_file }}" contents
-    debug: msg="{{ slurpfile['content'] }}"
+    debug: msg="{{ slurpfile['content'] | b64decode }}"
     tags: init
     become: true
 
@@ -131,6 +131,6 @@
     become: true
 
   - name: Display "{{ hosts_file }}" contents
-    debug: msg="{{ slurpfile['content'] }}"
+    debug: msg="{{ slurpfile['content'] | b64decode }}"
     tags: init
     become: true
