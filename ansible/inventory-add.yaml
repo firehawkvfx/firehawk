@@ -6,8 +6,9 @@
   become: true
   
   vars:
-    # hosts_file: "{{ secrets_path }}/{{ inventory }}/hosts"
-    hosts_file: "{{ inventory }}/hosts"
+    hosts_dir: "{{ secrets_path }}/{{ inventory }}"
+    hosts_file: "{{ hosts_dir }}/hosts"
+    # hosts_file: "{{ inventory }}/hosts"
     group_name: ''
     backup: false
   
@@ -16,9 +17,9 @@
     debug:
       var: hosts_file
 
-  - name: "Ensure inventory dir exists {{ inventory }}"
+  - name: "Ensure inventory dir exists {{ hosts_dir }}"
     file:
-      name: "{{ inventory }}"
+      name: "{{ hosts_dir }}"
       state: directory
       recurse: yes
       mode: u=rwX,g=rwX,o-rwx
