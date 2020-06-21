@@ -84,7 +84,7 @@
         User deployuser
         IdentityFile  {{ general_use_ssh_key }}
 
-      Host "10.*.*.*"
+      Host "10.*"
         IdentityFile  {{ cloud_private_key_file }}
         User centos
         ProxyCommand ssh -W %h:%p centos@bastion
