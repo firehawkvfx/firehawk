@@ -22,10 +22,13 @@
         mode: u=rw,g=r,o=r
       tags: init
 
-    - name: display hosts file contents
-      debug: var=item
-      with_file:
-        - "{{ hosts_file }}"
+    - name: Slurp file state
+      slurp:
+        src: "{{ hosts_file }}"
+      register: slurpfile
+      become: true
+    - name: Display "{{ hosts_file }}" contents
+      debug: msg="{{ slurpfile['content'] }}"
 
     - name: ensure 2 new lines exist at end of file always
       shell: |
@@ -98,7 +101,10 @@
         {{ firehawk_path }}/scripts/append_blank_line.sh {{ hosts_file }}
       become: true
 
-    - name: display hosts file contents
-      debug: var=item
-      with_file:
-        - hosts_file
+    - name: Slurp file state
+      slurp:
+        src: "{{ hosts_file }}"
+      register: slurpfile
+      become: true
+    - name: Display "{{ hosts_file }}" contents
+      debug: msg="{{ slurpfile['content'] }}"
