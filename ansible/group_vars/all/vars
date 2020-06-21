@@ -75,8 +75,6 @@ softnas1_path_abs: "{{ lookup('env', 'TF_VAR_softnas1_path_abs') }}"
 firehawk_houdini_tools: "{{ lookup('env', 'TF_VAR_firehawk_houdini_tools') }}"
 
 softnas1_private_ip1: "{{ lookup('env', 'TF_VAR_softnas1_private_ip1') }}"
-softnas1_private_ip1_dev: "{{ lookup('env', 'TF_VAR_softnas1_private_ip1_dev') }}"
-softnas1_private_ip1_prod: "{{ lookup('env', 'TF_VAR_softnas1_private_ip1_prod') }}"
 
 deadline_version: "{{ lookup('env', 'TF_VAR_deadline_version') }}"
 
