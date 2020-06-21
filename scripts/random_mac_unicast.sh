@@ -8,5 +8,4 @@ awk -v a="2,6,a,e" -v r="$RANDOM" '
         split(a, b, ",");
         r=int(rand() * 4 + 1);
         printf("%s%s%s%s%s%s%s\n", substr($1, 0, 1), b[r], $2, $3, $4, $5, $6);
-    }
-'
+    }' | tr '[:lower:]' '[:upper:]'
