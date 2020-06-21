@@ -96,6 +96,8 @@ vpn_cidr: "{{ lookup('env','TF_VAR_vpn_cidr') }}"
 vpn_cidr_dev: "{{ lookup('env','TF_VAR_vpn_cidr_prod') }}"
 vpn_cidr_prod: "{{ lookup('env','TF_VAR_vpn_cidr_prod') }}"
 remote_subnet_cidr: "{{ lookup('env','TF_VAR_remote_subnet_cidr') }}"
+ssh_config_remote_subnet: "{{ lookup('env','TF_VAR_ssh_config_remote_subnet') }}"
+
 
 vpn_nic: eth1
 
