@@ -19,8 +19,11 @@
       file:
         path: "{{ hosts_file }}"
         state: touch
-        mode: u=rw,g=r,o=r
+        mode: u=rw,g=rw,o=r
+        group: syscontrol
+        owner: deployuser
       tags: init
+      become: true
 
     - name: Slurp file state
       slurp:
