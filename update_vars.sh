@@ -744,8 +744,8 @@ fi
 echo_if_not_silent "...Current pipeline vars:"
 echo_if_not_silent "TF_VAR_active_pipeline: $TF_VAR_active_pipeline"
 
-echo "Ensure inventory directory exists: $TF_VAR_inventory"
-mkdir -p $TF_VAR_inventory
+# echo "Ensure inventory directory exists: $TF_VAR_inventory"
+# mkdir -p $TF_VAR_inventory
 # echo "TF_VAR_aws_key_name: $TF_VAR_aws_key_name"
 # echo "TF_VAR_aws_private_key_path: $TF_VAR_aws_private_key_path"
 echo_if_not_silent "...Done."
