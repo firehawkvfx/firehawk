@@ -99,9 +99,9 @@ module "vpc" {
 
   #a provided route 53 zone id will be modified to have a subdomain to access vpn.  you will need to manually setup a route 53 zone for a domain with an ssl certificate.
 
-  key_name           = var.key_name
-  private_key        = file(var.local_key_path)
-  local_key_path     = var.local_key_path
+  aws_key_name           = var.aws_key_name
+  private_key        = file(var.aws_private_key_path)
+  aws_private_key_path     = var.aws_private_key_path
   route_zone_id      = var.route_zone_id
   public_domain_name = var.public_domain
   cert_arn           = var.cert_arn
@@ -142,9 +142,9 @@ module "bastion" {
   private_subnets_cidr_blocks = module.vpc.private_subnets_cidr_blocks
   remote_subnet_cidr          = var.remote_subnet_cidr
 
-  key_name       = var.key_name
-  local_key_path = var.local_key_path
-  private_key    = file(var.local_key_path)
+  aws_key_name       = var.aws_key_name
+  aws_private_key_path = var.aws_private_key_path
+  private_key    = file(var.aws_private_key_path)
 
   route_zone_id      = var.route_zone_id
   public_domain_name = var.public_domain
@@ -264,8 +264,8 @@ module "softnas" {
   softnas_instance_type          = var.softnas_instance_type
   vpn_private_ip                 = module.vpc.vpn_private_ip
   softnas_ssh_user               = var.softnas_ssh_user
-  key_name                       = var.key_name
-  private_key                    = file(var.local_key_path)
+  aws_key_name                       = var.aws_key_name
+  private_key                    = file(var.aws_private_key_path)
   vpc_id                         = module.vpc.vpc_id
   vpn_cidr                       = var.vpn_cidr
   public_domain                  = var.public_domain
@@ -317,8 +317,8 @@ variable "pcoip_skip_update" {
 
 #   bastion_ip = "${module.bastion.public_ip}"
 
-#   key_name    = "${var.key_name}"
-#   private_key = "${file("${var.local_key_path}")}"
+#   aws_key_name    = "${var.aws_key_name}"
+#   private_key = "${file("${var.aws_private_key_path}")}"
 
 #   #skipping os updates will allow faster rollout for testing, but may be non functional
 #   skip_update = "${var.pcoip_skip_update}"
@@ -354,8 +354,8 @@ module "workstation" {
   vpn_cidr       = var.vpn_cidr
   remote_ip_cidr = var.remote_ip_cidr
 
-  key_name    = var.key_name
-  private_key = file(var.local_key_path)
+  aws_key_name    = var.aws_key_name
+  private_key = file(var.aws_private_key_path)
 
   #skipping os updates will allow faster rollout for testing, but may be non functional
   skip_update = var.pcoip_skip_update
@@ -423,9 +423,9 @@ module "node" {
 
   volume_size = var.node_centos_volume_size
 
-  key_name       = var.key_name
-  local_key_path = var.local_key_path
-  private_key    = file(var.local_key_path)
+  aws_key_name       = var.aws_key_name
+  aws_private_key_path = var.aws_private_key_path
+  private_key    = file(var.aws_private_key_path)
 
   #skipping os updates will allow faster rollout for testing.
   skip_update = var.node_skip_update

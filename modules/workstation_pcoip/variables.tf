@@ -24,7 +24,7 @@ variable "private_subnet_ids" {
   default = []
 }
 
-variable "key_name" {
+variable "aws_key_name" {
 }
 
 variable "workstation_enabled" {

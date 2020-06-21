@@ -50,13 +50,13 @@ variable "remote_ip_cidr" {
 variable "route_zone_id" {
 }
 
-variable "key_name" {
+variable "aws_key_name" {
 }
 
 variable "private_key" {
 }
 
-variable "local_key_path" {
+variable "aws_private_key_path" {
 }
 
 variable "cert_arn" {

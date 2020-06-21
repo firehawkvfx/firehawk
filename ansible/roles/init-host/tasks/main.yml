@@ -19,7 +19,8 @@
               regexp="^127\.0\.0\.1.*localhost.*$"
   when: set_hostname is defined and ( ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' )
 
-- openssh_keypair:
+- name: "ensure key exists {{ general_use_ssh_key }}"
+  openssh_keypair:
     path: "{{ general_use_ssh_key }}"
     mode: '0600'
     owner: deployuser

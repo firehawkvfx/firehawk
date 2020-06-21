@@ -1,5 +1,5 @@
 ---
-cloud_private_key_file: "{{ lookup('env','TF_VAR_local_key_path') }}"
+cloud_private_key_file: "{{ lookup('env','TF_VAR_aws_private_key_path') }}"
 general_use_ssh_key: "{{ lookup('env','TF_VAR_general_use_ssh_key') }}"
 
 ANSIBLE_FORCE_COLOR: 'true'
@@ -164,8 +164,8 @@ AWS_SECRET_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
 storage_user_access_key_id: "{{ lookup('env','storage_user_access_key_id') }}"
 storage_user_secret: "{{ lookup('env','storage_user_secret') }}"
 
-key_name: "{{ lookup('env','TF_VAR_key_name') }}"
-local_key_path: "{{ lookup('env','TF_VAR_local_key_path') }}"
+aws_key_name: "{{ lookup('env','TF_VAR_aws_key_name') }}"
+aws_private_key_path: "{{ lookup('env','TF_VAR_aws_private_key_path') }}"
 
 time_zone_info_dict_linux: {
 Australia_Sydney: "/usr/share/zoneinfo/Australia/Sydney"
@@ -182,6 +182,6 @@ vault_key_path: "{{ repo_dir }}/../secrets/keys/{{ vault_key_name_general }}"
 
 key_folder: "{{ repo_dir }}/../secrets/keys/"
 
-key_path: "{{ repo_dir }}/../secrets/keys/{{ key_name }}.pem"
+key_path: "{{ repo_dir }}/../secrets/keys/{{ aws_key_name }}.pem"
 secret_path: "{{ repo_dir }}/../secrets/secrets-general"
 secrets_archive: "{{ repo_dir }}/../secrets/{{ envtier }}"

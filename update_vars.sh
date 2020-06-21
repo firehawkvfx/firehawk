@@ -743,8 +743,8 @@ fi
 
 echo_if_not_silent "...Current pipeline vars:"
 echo_if_not_silent "TF_VAR_active_pipeline: $TF_VAR_active_pipeline"
-# echo "TF_VAR_key_name: $TF_VAR_key_name"
-# echo "TF_VAR_local_key_path: $TF_VAR_local_key_path"
+# echo "TF_VAR_aws_key_name: $TF_VAR_aws_key_name"
+# echo "TF_VAR_aws_private_key_path: $TF_VAR_aws_private_key_path"
 echo_if_not_silent "...Done."
 
 if [[ "$SHOWCOMMANDS" == true ]]; then set -x; fi # After finishing the script, we enable set -x to show input again.

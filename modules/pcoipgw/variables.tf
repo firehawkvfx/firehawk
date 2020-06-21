@@ -18,7 +18,7 @@ variable "public_subnet_ids" {
   default = []
 }
 
-variable "key_name" {
+variable "aws_key_name" {
 }
 
 #contents of the my_key.pem file to connect to the instance.

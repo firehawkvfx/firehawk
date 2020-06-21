@@ -21,12 +21,12 @@
   debug:
     var: private_ip
 
-- name: ensure correct permissions on key.
-  file:
-    path: "{{ local_key_path }}"
-    mode: '0600'
-  become: true
-  connection: local
+# - name: "ensure correct permissions on key {{ aws_private_key_path }}"
+#   file:
+#     path: "{{ aws_private_key_path }}"
+#     mode: '0600'
+#   become: true
+#   connection: local
 
 - name: delegate keyscan to add keys from remote subnet via bastion host.
   command: "ssh-keyscan {{ private_ip }}"

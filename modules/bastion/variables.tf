@@ -33,7 +33,7 @@ variable "private_subnets_cidr_blocks" {
 variable "remote_subnet_cidr" {
 }
 
-variable "local_key_path" {
+variable "aws_private_key_path" {
 }
 
 # examples ["subnet-0a7554f56af4d6d0a", "subnet-0257c7f8b1d68b6e4"]
@@ -41,7 +41,7 @@ variable "public_subnet_ids" {
   default = []
 }
 
-variable "key_name" {
+variable "aws_key_name" {
 }
 
 #contents of the my_key.pem file to connect to the instance.

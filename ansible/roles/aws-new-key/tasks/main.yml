@@ -1,15 +1,15 @@
 ---
 # tasks file for ansible/roles/aws-new-key
-- name: "check if a pem key exists {{ local_key_path }}"
+- name: "check if a pem key exists {{ aws_private_key_path }}"
   stat:
-    path: "{{ local_key_path }}"
+    path: "{{ aws_private_key_path }}"
   register: key_result
   no_log: true
 
 
-- name: "Force removal of key {{ key_name }} from account if missing on disk or if destroy is true.  regenerate next step."
+- name: "Force removal of key {{ aws_key_name }} from account if missing on disk or if destroy is true.  regenerate next step."
   ec2_key:
-    name: "{{ key_name }}"
+    name: "{{ aws_key_name }}"
     aws_access_key: "{{ AWS_ACCESS_KEY }}"
     aws_secret_key: "{{ AWS_SECRET_KEY }}"
     ec2_region: "{{ aws_region }}"
@@ -17,16 +17,16 @@
   register: ec2_key_result
   when: destroy or not key_result.stat.exists
 
-- name: "remove key from disk: {{ local_key_path }}"
+- name: "remove key from disk: {{ aws_private_key_path }}"
   file:
-    path: "{{ local_key_path }}"
+    path: "{{ aws_private_key_path }}"
     state: absent
   become: true
   when: destroy
 
 - name: create a new ec2 key pair, returns generated private key
   ec2_key:
-    name: "{{ key_name }}"
+    name: "{{ aws_key_name }}"
     aws_access_key: "{{ AWS_ACCESS_KEY }}"
     aws_secret_key: "{{ AWS_SECRET_KEY }}"
     ec2_region: "{{ aws_region }}"
@@ -35,10 +35,10 @@
   when: ( not destroy ) and ( not key_result.stat.exists )
   no_log: true
 
-- name: "Save private key to file {{ local_key_path }}"
+- name: "Save private key to file {{ aws_private_key_path }}"
   copy:
     content: "{{ ec2_key_result.key.private_key }}"
-    dest: "{{ local_key_path }}"
+    dest: "{{ aws_private_key_path }}"
     mode: '0600'
   become: true
   when: ( not destroy ) and ( not key_result.stat.exists ) and ec2_key_result.changed

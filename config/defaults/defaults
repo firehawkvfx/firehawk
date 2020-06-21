@@ -169,12 +169,12 @@ TF_VAR_smtp_encryption="none"
 # default TF_VAR_install_houdini_license_server=false
 TF_VAR_install_houdini_license_server=false
 
-# TF_VAR_key_name:
+# TF_VAR_aws_key_name:
 # The name of the key pair used in the dev environment. You will create a key pair to access your aws instances, listed here.
-# default: TF_VAR_key_name=my_key_pair
-TF_VAR_key_name=my_key_pair
+# default: TF_VAR_aws_key_name=my_key_pair
+TF_VAR_aws_key_name=my_key_pair
 
-# TF_VAR_local_key_path:
+# TF_VAR_aws_private_key_path:
 # the path to the keypair from within the vagrant VM.
-# default: TF_VAR_local_key_path=/secrets/keys/my_key_pair.pem
-TF_VAR_local_key_path=/secrets/keys/my_key_pair.pem
+# default: TF_VAR_aws_private_key_path=/secrets/keys/my_key_pair.pem
+TF_VAR_aws_private_key_path=/secrets/keys/my_key_pair.pem

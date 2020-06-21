@@ -73,11 +73,11 @@ variable "openvpn_admin_pw" {
 }
 
 #generate a keypair and enter its name here.
-variable "key_name" {
+variable "aws_key_name" {
 }
 
 #the path to the key stored locally where terraform is run.
-variable "local_key_path" {
+variable "aws_private_key_path" {
 }
 
 variable "pgp_key_path" {

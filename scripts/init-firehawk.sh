@@ -168,14 +168,14 @@ set_pipe() {
   sed -i "s/^TF_VAR_active_pipeline=.*$/TF_VAR_active_pipeline=${id}/" $config_override # ...Enable the vpc.
   source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override --force --silent
   echo "Get TF_VAR_active_pipeline: $TF_VAR_active_pipeline"
-  sed -i "s/^TF_VAR_key_name=.*$/TF_VAR_key_name=my_key_pair_pipeid${TF_VAR_active_pipeline}_${TF_VAR_envtier}/" $config_override
+  sed -i "s/^TF_VAR_aws_key_name=.*$/TF_VAR_aws_key_name=my_key_pair_pipeid${TF_VAR_active_pipeline}_${TF_VAR_envtier}/" $config_override
   source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override --force --silent
-  echo "Get TF_VAR_key_name: $TF_VAR_key_name"
-  key_path="/secrets/keys/${TF_VAR_key_name}.pem"
+  echo "Get TF_VAR_aws_key_name: $TF_VAR_aws_key_name"
+  key_path="/secrets/keys/${TF_VAR_aws_key_name}.pem"
   echo "Get key_path: $key_path"
-  sed -i "s~^TF_VAR_local_key_path=.*$~TF_VAR_local_key_path=${key_path}~" $config_override
+  sed -i "s~^TF_VAR_aws_private_key_path=.*$~TF_VAR_aws_private_key_path=${key_path}~" $config_override
   source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override --force --silent
-  echo "Get TF_VAR_local_key_path: $TF_VAR_local_key_path"
+  echo "Get TF_VAR_aws_private_key_path: $TF_VAR_aws_private_key_path"
 }
 
 test_destroyed() {
@@ -238,7 +238,7 @@ else
     aws iam list-users
     echo ""
 
-    touch $TF_VAR_local_key_path # ensure a file is present or tf will not be able to destroy anything.
+    touch $TF_VAR_aws_private_key_path # ensure a file is present or tf will not be able to destroy anything.
 
     success=false
     echo "...Terraform destroy" # first try to destroy without refresh, which may hang on missing vars.

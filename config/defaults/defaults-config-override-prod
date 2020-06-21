@@ -22,7 +22,7 @@
 
 # defaults_config_overide_version:
 # If the version of this file changes, the file will be replaced in any deployment.
-defaults_config_overide_version="0.0.21"
+defaults_config_overide_version="0.0.22"
 
 # TF_VAR_CI_JOB_ID:
 # This pipeline number is used to updat the active pipeline in the working dir when a new deployment is initialised.
@@ -179,12 +179,12 @@ TF_VAR_localnas1_volume_name=$TF_VAR_localnas1_volume_name
 # eg1: TF_VAR_localnas1_path_abs=none
 TF_VAR_localnas1_path_abs=$TF_VAR_localnas1_path_abs
 
-# TF_VAR_key_name:
+# TF_VAR_aws_key_name:
 # The name of the key pair used in the dev environment. You will create a key pair to access your aws instances, listed here.
-# default: TF_VAR_key_name=$TF_VAR_key_name
-TF_VAR_key_name=$TF_VAR_key_name
+# default: TF_VAR_aws_key_name=$TF_VAR_aws_key_name
+TF_VAR_aws_key_name=$TF_VAR_aws_key_name
 
-# TF_VAR_local_key_path:
+# TF_VAR_aws_private_key_path:
 # the path to the keypair from within the vagrant VM.
-# default: TF_VAR_local_key_path=$TF_VAR_local_key_path
-TF_VAR_local_key_path=$TF_VAR_local_key_path
+# default: TF_VAR_aws_private_key_path=$TF_VAR_aws_private_key_path
+TF_VAR_aws_private_key_path=$TF_VAR_aws_private_key_path

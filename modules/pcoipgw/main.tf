@@ -286,7 +286,7 @@ resource "aws_instance" "pcoipgw" {
   ami           = var.use_custom_ami ? var.custom_ami : var.ami_map[var.gateway_type]
   instance_type = var.instance_type_map[var.gateway_type]
 
-  key_name  = var.key_name
+  key_name  = var.aws_key_name
   subnet_id     = element(concat(var.public_subnet_ids, list("")), 0)
 
   vpc_security_group_ids = [aws_security_group.pcoipgw.id, aws_security_group.gateway_centos.id]
