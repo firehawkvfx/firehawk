@@ -70,11 +70,6 @@ TF_VAR_terraform_version=insertvalue
 # The version for the aws provider plugin terraform will use
 TF_VAR_aws_provider_version=insertvalue
 
-# TF_VAR_vpc_cidr:
-# This is the IP range (CIDR notation) of your cloud subnet that all AWS private addresses will reside in.
-# default: TF_VAR_vpc_cidr=10.0.0.0/16
-TF_VAR_vpc_cidr=insertvalue
-
 # TF_VAR_node_centos_instance_type:
 # The AWS instance type for the node used to provision the spot fleet image from.
 # Note this is only used for provisioning the AMI.  The actual instance types used for rendering are controlled by the spot fleet template, and can vary.

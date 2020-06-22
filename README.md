@@ -116,6 +116,12 @@ Vagrant up
 
 This login information will be entered into your encrypted secrets file in later steps, and is only temporarily used until the login is replaced with an ssh key for the deployuser (which will also be created automatically).  Once the ssh key is configured by Firehawk the password wont be usable for ssh access anymore.  Passwords are not recommend to be allowed for continued SSH access in a firehawk deployment.
 
+## 3 Seperate Resource files for Green / Blue Deployment
+There are a minimum of 3 virtual resources that we deploy to.  Grey (Dev environment) resources are for testing.  Any deployment we use in produciton will use either Green or Blue resources.  This allows us to deploy an update to the Green or Blue resource list, what ever is not in use, allowing us to test and fallback if the update is not ready for production.
+
+- The dev environment will be tested on the resources specified in the resources-grey file.
+- resources-blue and resources-green files are used for production.
+
 ## Thinkbox Usage Based Licensing
 To use Deadline in AWS, instances that reside in AWS are free.  But any onsite systems that render will require a licence.  If you wish to use any other UBL licenses (eg houdini Engine) they will also 
 require your Thinkbox UBL URL and UBL activation code.  These are entered in your encrypted secrets file, and are used to configure the Deadline DB upon install automatically.
@@ -144,14 +150,45 @@ source ./update_vars.sh --dev # or with your desired env.
 ```
 
 ## NFS Shared Volumes
-An NFS shared volume in the location of your workstation is highly recommended, and not optional if you intend to use Side FX PDG.
+An NFS shared volume in the location of your workstation is highly recommended, and not having one is an untested configuration if you intend to use Side FX PDG.
 this is because PDG updates a lot of ephemeral data on the filesystem that all systems need access to.  Sharing SMB may also be possible with further developement and testing.
-If you wish to test without a shared volume, you will need to rely on your own processes to synchronise with S3 storage, but it can be done.  After you have setup your configuration files, but before deployment you can follow these steps:
+It may also be possible to avoid an onsite NFS share by only using the Cloud NFS share that would also be available on your local system.
+If you wish to test without any onsite shared volume, you will need to rely on your own processes to synchronise with S3 storage, or use the cloud based NFS share.  To do this, after you have setup your configuration files, but before deployment you can follow these steps:
 ```
 source ./update_vars.sh --dev # or with your desired env.
 ./scripts/ci-set-deploy-cloud-no-nfs-share.sh
 source ./update_vars.sh --dev # or with your desired env.
 ```
+This will alter the config-overrides to not use an onsite NFS Share.
+
+IMPORTANT: If you use an onsite NAS / NFS share you wish to use, static routes must be configured on your router so that device has the means to see your cloud network ranges.  Without a static route, it is not possible to send traffic to your cloud based nodes that might read data from these volumes.
+
+## Static Routes
+
+Unfortunately, everyone's router onsite is different so this is one part of the setup that we can't automate for you!  We will describe the extent to which you should have to configure static routes on your network here, and you only have to do it once thankfully!  Similar routes are configured for the cloud site subnets and VPN, but that is all automated with Terraform and Ansible.
+
+Static routes define how traffic moves, and what host any traffic has to go through.  With a VPN gateway for our network to communicate with a remote network, we need to specify the address ranges of the remote networks (subnets), and we need to say what host / IP that traffic needs to go through in order to get there.  So in our case that is a VPN tunnel.  We are interested in ensuring that any of our traffic going to address ranges are being sent through the correct VPN tunnel for that deployment resource (Blue / Green / Grey)
+
+Any static route has two parameters defined for it to work:
+- The network / subnet range of addresses that we want to set the routes for traffic destined to these locations.
+- The IP address or host that any traffic going to the above address range must travel through.
+
+If you are using only one system, and you are not using an NFS share / NAS / or any license server, you don't need to have static routes configured on your router.  Otherwise for those other mentioned scenarios, without a static route, your NAS or licesne server for example wont know how to return any information back to the host on the other network that requires it!
+
+To set this up, you will have specified a new MAC address for the Firehawk VPN Gateway in each resource file (Blue/Green/Grey), each MAC must be unique and can be generated by scripts/random_mac_unicast.sh.  On your router, you should ensure that each of these hosts defined by the MAC addresses will have a static IP address:
+- You can usually do that by specifying the MAC address of the host (defined in the secrets/resource file) on your router, and setting the ip you wish to reserve.  Some routers might require the host be up before you can set a static IP. In that case, you can reserve the static IP at the first opportunity and reload the Firehawk Gateway VM to check it actually aquired this address before you deploy any cloud resources.  If in doubt, destroy the VM and start over.  It should aquire the address correctly.
+
+Once you can ensure that these VM's are going to have a static IP, we can specify the routes to those IP's.  In a default deployment, on the router, we would setup these routes:
+- 10.1.0.0/16	sends traffic to 192.168.92.10.  It means traffic destined for the range 10.1.0.0 - 10.1.255.255 will go via 192.168.92.10 ( The /16 suffix is CIDR notation to specify a range of adresses)
+- 10.2.0.0/16	sends traffic to 192.168.92.20.  It means traffic destined for the range 10.2.0.0 - 10.2.255.255 will go via 192.168.92.20
+- 10.3.0.0/16	sends traffic to 192.168.92.30.  It means traffic destined for the range 10.3.0.0 - 10.3.255.255 will go via 192.168.92.30
+
+We also have these routes in a default configuration:
+- 172.17.232.0/24	sends traffic to 192.168.92.10
+- 172.18.232.0/24	sends traffic to 192.168.92.20
+- 172.19.232.0/24	sends traffic to 192.168.92.30
+
+These address ranges refer to the DHCP addresses that Open VPN will automaticaly generate for its own use with the encrypted tunnel.  Each source / destination address will get one of these DHCP addreses to use for the encrypted traffic through the VPN tunnel between sites.
 
 ## Replicate a Firehawk clone and manage your secrets repository
 

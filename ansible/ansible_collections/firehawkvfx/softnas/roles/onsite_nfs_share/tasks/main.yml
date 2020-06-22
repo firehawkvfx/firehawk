@@ -104,7 +104,7 @@
   tags:
   - cloud_install
 
-- name: check if path is /etc/exports
+- name: Check if path is in /etc/exports.  If not present and this fails then ensure the path exists with 'showmount -e {ip address}'.  Check you have static routes configured correctly.
   fail:
     msg: "{{ item.item.path }} to mount at {{ item.item.mount_path }} is set to be present in exports dict but was not found with showmount from softnas host"
   when: item.item.state == "present" and item.rc == 1

@@ -10,7 +10,6 @@ variable "region" {
 variable "vpc_id" {
 }
 
-#example "10.0.0.0/16"
 variable "vpc_cidr" {
 }
 

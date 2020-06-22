@@ -4,7 +4,6 @@ variable "vpc_id" {
 variable "vpc_cidr" {
 }
 
-#example 10.0.0.0/16
 variable "vpn_cidr" {
 }
 
