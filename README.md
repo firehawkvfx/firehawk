@@ -75,6 +75,31 @@ AmazonRoute53FullAccess
 }
 ```
 - Attach that policy as well to the ``DevAdmin`` group.
+- Create a new policy named ``ResourceGroupsAdmin``
+```
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "resource-groups:*",
+        "cloudformation:DescribeStacks",
+        "cloudformation:ListStackResources",
+        "tag:GetResources",
+        "tag:TagResources",
+        "tag:UntagResources",
+        "tag:getTagKeys",
+        "tag:getTagValues",
+        "resource-explorer:*"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+You can read more about the above policy here https://docs.aws.amazon.com/ARG/latest/userguide/gettingstarted-prereqs.html
+- Attach this policy to the ``DevAdmin`` group.
 - Make the new user a member of the ``DevAdmin`` group to inherit all of these policies.
 - Ensure you have done this in both AWS accounts.
 - When you create AWS access and secret keys, set a policy to age those keys out after 30 days.

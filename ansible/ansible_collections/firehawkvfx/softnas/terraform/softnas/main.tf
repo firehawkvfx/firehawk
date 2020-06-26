@@ -1,5 +1,6 @@
 resource "aws_iam_role" "softnas_role" {
   name = local.softnas_role_name
+  tags = var.common_tags
 
   assume_role_policy = <<EOF
 {

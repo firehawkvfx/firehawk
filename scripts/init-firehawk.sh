@@ -205,13 +205,13 @@ test_destroyed() {
   if [ "$user_present" -gt "0" ]; then
     echo "deadline_spot_deployment_user is present"
   else
-    echo "deadline_spot_deployment_user not present"
+    echo "deadline_spot_deployment_user not present" # this should filter for tags now to allow multiple deploys on the same account.
   fi
 
-  if [ "$user_present" -gt "0" ] && [[ "$tf_action" == "destroy" ]]; then 
-    echo "failed to destroy existing deadline_spot_deployment_user for the account"
-    exit 1
-  fi
+  # if [ "$user_present" -gt "0" ] && [[ "$tf_action" == "destroy" ]]; then 
+  #   echo "failed to destroy existing deadline_spot_deployment_user for the account"
+  #   exit 1
+  # fi
 }
 
 if [[ -z $TF_VAR_envtier ]] ; then

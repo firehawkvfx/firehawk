@@ -126,13 +126,21 @@ verbose () {
 verbose "$@"
 
 if [ -z "$CI_COMMIT_REF_SLUG" ]; then # Detect the environment if using CI/CD
-    echo "Launching in a non Gitlab CI environment"; export env_ci=false
+    echo "Launching in a non CI environment"; export env_ci=false
 else
-    echo "Gitlab CI Environment with branch: $CI_COMMIT_REF_SLUG"; export env_ci=true
-    if [[ "$CI_COMMIT_REF_SLUG" == "stage" || "$CI_COMMIT_REF_SLUG" == "master" ]]; then
+    echo "Launching in Gitlab CI Environment with branch: $CI_COMMIT_REF_SLUG"; export env_ci=true
+    if [[ "$CI_COMMIT_REF_SLUG" == "prod_blue" ]]; then
         export TF_VAR_envtier='prod'
+        export TF_VAR_resourcetier='blue'
+    elif [[ "$CI_COMMIT_REF_SLUG" == "prod_green" ]]; then
+        export TF_VAR_envtier='prod'
+        export TF_VAR_resourcetier='green'
+    elif [[ "$CI_COMMIT_REF_SLUG" == "stage" || "$CI_COMMIT_REF_SLUG" == "master" ]]; then
+        echo "stage and master branch tests are disabled.  Exiting"
+        exit 1
     else
         export TF_VAR_envtier='dev'
+        export TF_VAR_resourcetier='grey'
     fi
     keys_path=~/firehawk-rollout-$TF_VAR_envtier/secrets/keys/.
     echo "...Copying $TF_VAR_envtier keys from: $keys_path to: $TF_VAR_secrets_path"
@@ -280,6 +288,15 @@ parse_opts () {
                         opt="${OPTARG}"
                         tier
                         ;;
+                    green)
+                        export TF_VAR_resourcetier="green"
+                        ;;
+                    blue)
+                        export TF_VAR_resourcetier="blue"
+                        ;;
+                    grey)
+                        export TF_VAR_resourcetier="grey"
+                        ;;
                     force)
                         force=true
                         ;;
@@ -419,6 +436,12 @@ else
     echo "...Set CI_JOB_ID at config_override path- $config_override"
     sed -i "s/^TF_VAR_CI_JOB_ID=.*$/TF_VAR_CI_JOB_ID=${CI_JOB_ID}/" $config_override # ...Enable the vpc.
 fi
+
+if [[ ! -z "$TF_VAR_resourcetier" ]]; then
+    echo "TF_VAR_resourcetier defined. Setting in config override to: $TF_VAR_resourcetier"
+    sed -i "s/^TF_VAR_resourcetier=.*$/TF_VAR_resourcetier=${TF_VAR_resourcetier}/" $config_override # ...Set the resource tier if defined.
+fi
+
 
 export TF_VAR_CI_JOB_ID=$(cat $config_override | sed -e '/.*TF_VAR_CI_JOB_ID=.*/!d')
 
@@ -743,6 +766,11 @@ fi
 
 echo_if_not_silent "...Current pipeline vars:"
 echo_if_not_silent "TF_VAR_active_pipeline: $TF_VAR_active_pipeline"
+
+if [[ ! -z "$TF_VAR_resourcetier" ]]; then
+    echo "TF_VAR_resourcetier is defined.  using as the key to match resource conflicts: $TF_VAR_resourcetier"
+    export TF_VAR_conflictkey=$TF_VAR_resourcetier
+fi
 
 # echo "Ensure inventory directory exists: $TF_VAR_inventory"
 # mkdir -p $TF_VAR_inventory

@@ -10,12 +10,18 @@ data "aws_canonical_user_id" "current" {}
 
 variable "CI_JOB_ID" {}
 variable "active_pipeline" {}
+variable "resourcetier" {}
+variable "conflictkey" {}
 
 # if var.pgp_public_key contains keybase, then use that.  else take the contents of the var as a file on disc
 locals {
   pgp_public_key = length(regexall(".*keybase:.*", var.pgp_public_key)) > 0 ? var.pgp_public_key : filebase64("/secrets/keys/gpg_pub_key.gpg.pub")
   common_tags = {
     environment  = "${var.envtier}"
+    resourcetier = "${var.resourcetier}"
+    conflictkey  = "${var.conflictkey}" 
+    # The conflict key defines a name space where duplicate resources in different deployments sharing this name are prevented from occuring.  This is used to prevent a new deployment overwriting and existing resource unless it is destroyed first.
+    # examples might be blue, green, dev1, dev2, dev3...dev100.  This allows us to lock deployments on some resources.
     pipelineid   = "${var.active_pipeline}"
     owner        = "${data.aws_canonical_user_id.current.display_name}"
     accountid    = "${data.aws_caller_identity.current.account_id}"
