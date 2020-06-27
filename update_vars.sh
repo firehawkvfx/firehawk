@@ -129,7 +129,7 @@ if [ -z "$CI_COMMIT_REF_SLUG" ]; then # Detect the environment if using CI/CD
     echo "Launching in a non CI environment"; export env_ci=false
 else
     echo "Launching in Gitlab CI Environment with branch: $CI_COMMIT_REF_SLUG"; export env_ci=true
-    if [[ "$CI_COMMIT_REF_SLUG" == "prod-blue" ]]; then
+    if [[ "$CI_COMMIT_REF_SLUG" == "prod_blue" ]]; then
         export TF_VAR_envtier='prod'
         export TF_VAR_resourcetier='blue'
     elif [[ "$CI_COMMIT_REF_SLUG" == "prod_green" ]]; then
