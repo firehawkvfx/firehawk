@@ -6,6 +6,7 @@
 
 bridgenic = ENV['TF_VAR_bridgenic']
 envtier = ENV['TF_VAR_envtier']
+resourcetier = ENV['TF_VAR_resourcetier']
 network = ENV['TF_VAR_network']
 selected_ansible_version = ENV['TF_VAR_selected_ansible_version']
 syscontrol_gid=ENV['TF_VAR_syscontrol_gid']
@@ -163,7 +164,7 @@ Vagrant.configure(2) do |config|
                 if machine[:hostname].include? "firehawkgateway"
                     node.vm.provision "shell", inline: "/deployuser/scripts/init-gateway.sh --#{envtier}"
                     # register address for gateway
-                    node.vm.provision "shell", inline: "cd /deployuser; source ./update_vars.sh --#{envtier} --init; echo $config_override; ansible-playbook ansible/get_host_ip.yml -v --extra-vars 'update_openfirehawkserver_ip_var=true'" # config_override=#{ENV['config_override']}
+                    node.vm.provision "shell", inline: "cd /deployuser; source ./update_vars.sh --#{envtier} --#{resourcetier} --init; echo $config_override; ansible-playbook ansible/get_host_ip.yml -v --extra-vars 'update_openfirehawkserver_ip_var=true'" # config_override=#{ENV['config_override']}
                 end
                 node.vm.provision "shell", inline: "sudo reboot"
                 node.vm.provision :reload

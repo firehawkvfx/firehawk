@@ -439,7 +439,7 @@ fi
 
 if [[ ! -z "$TF_VAR_resourcetier" ]]; then
     echo "TF_VAR_resourcetier defined. Setting in config override to: $TF_VAR_resourcetier"
-    sed -i "s/^TF_VAR_resourcetier=.*$/TF_VAR_resourcetier=${TF_VAR_resourcetier}/" $config_override # ...Set the resource tier if defined.
+    sed -i "s/^TF_VAR_resourcetier_${TF_VAR_envtier}=.*$/TF_VAR_resourcetier_${TF_VAR_envtier}=${TF_VAR_resourcetier}/" $config_override # ...Set the resource tier if defined.
 fi
 
 
