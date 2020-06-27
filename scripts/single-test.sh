@@ -3,4 +3,4 @@
 echo "TF_VAR_firehawk_path: $TF_VAR_firehawk_path"
 echo "TF_VAR_secrets_path: $TF_VAR_secrets_path"
 
-ansible-playbook ansible/inventory-add.yaml -v --extra-vars "variable_host=localhost" --tags 'init'
+aws ec2 describe-instances --filter "Name=instance-state-name,Values=running" --filter "Name=tag:conflictkey,Values=$TF_VAR_conflictkey" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[],NetworkInterfaces[0].PrivateIpAddresses[0].PrivateIpAddress]" --output text
