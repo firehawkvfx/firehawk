@@ -2,4 +2,4 @@
 #aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId]' --filters Name=instance-state-name,Values=running --output text
 # private ip's
 
-aws ec2 describe-instances --filter "Name=tag:conflictkey,Values=$TF_VAR_conflictkey Name=instance-state-name,Values=running" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[],NetworkInterfaces[0].PrivateIpAddresses[0].PrivateIpAddress]" --output text
+aws ec2 describe-instances --filter "Name=tag:conflictkey,Values=$TF_VAR_conflictkey" "Name=instance-state-name,Values=running" --query "Reservations[*].Instances[*][Tags[?Key=='Name'].Value[],NetworkInterfaces[0].PrivateIpAddresses[0].PrivateIpAddress]" --output text
