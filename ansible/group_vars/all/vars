@@ -1,5 +1,5 @@
 ---
-cloud_private_key_file: "{{ lookup('env','TF_VAR_local_key_path') }}"
+cloud_private_key_file: "{{ lookup('env','TF_VAR_aws_private_key_path') }}"
 general_use_ssh_key: "{{ lookup('env','TF_VAR_general_use_ssh_key') }}"
 
 ANSIBLE_FORCE_COLOR: 'true'
@@ -26,10 +26,6 @@ secrets_path: "{{ lookup('env','TF_VAR_secrets_path') }}"
 
 # domains
 public_domain: "{{ lookup('env','TF_VAR_public_domain') }}"
-# in most cases only the above public_domain should be referenced, which can be switched between dev and prod based on the environment - envtier
-# the below public_domain_prod is used in some rare cases where multiple instances of infrastructure may not be not possible, like with a licence server.
-# eg I may need to reference houdinilicenceserver.prod.example.com in both the prod and dev environments for render nodes to be tested.
-public_domain_prod: "{{ lookup('env','TF_VAR_public_domain_prod') }}"
 
 bucket_extension: "{{ lookup('env','TF_VAR_bucket_extension') }}"
 installers_bucket: "software.{{ lookup('env','TF_VAR_bucket_extension_prod') }}" # The production bucket is always used to store installation files to avoid duplicate downloads/uploads
@@ -68,9 +64,6 @@ localnas1_private_ip: "{{ lookup('env','TF_VAR_localnas1_private_ip') }}"
 production_volume_path: "{{ lookup('env','TF_VAR_production_volume_path') }}"
 remote_production_volume_path: "{{ lookup('env','TF_VAR_remote_production_volume_path') }}"
 
-#the relative path to access the production volume remotely eg "/prod_remote"
-localnas1_remote_mount_path: "{{ lookup('env','TF_VAR_localnas1_remote_mount_path') }}"
-
 #the absolute path to access the onsite nas mount by location eg "/cairns_prod"
 localnas1_volume_name: "{{ lookup('env', 'TF_VAR_localnas1_volume_name') }}"
 localnas1_path_abs: "{{ lookup('env', 'TF_VAR_localnas1_path_abs') }}"
@@ -82,8 +75,6 @@ softnas1_path_abs: "{{ lookup('env', 'TF_VAR_softnas1_path_abs') }}"
 firehawk_houdini_tools: "{{ lookup('env', 'TF_VAR_firehawk_houdini_tools') }}"
 
 softnas1_private_ip1: "{{ lookup('env', 'TF_VAR_softnas1_private_ip1') }}"
-softnas1_private_ip1_dev: "{{ lookup('env', 'TF_VAR_softnas1_private_ip1_dev') }}"
-softnas1_private_ip1_prod: "{{ lookup('env', 'TF_VAR_softnas1_private_ip1_prod') }}"
 
 deadline_version: "{{ lookup('env', 'TF_VAR_deadline_version') }}"
 
@@ -103,6 +94,8 @@ vpn_cidr: "{{ lookup('env','TF_VAR_vpn_cidr') }}"
 vpn_cidr_dev: "{{ lookup('env','TF_VAR_vpn_cidr_prod') }}"
 vpn_cidr_prod: "{{ lookup('env','TF_VAR_vpn_cidr_prod') }}"
 remote_subnet_cidr: "{{ lookup('env','TF_VAR_remote_subnet_cidr') }}"
+ssh_config_remote_subnet: "{{ lookup('env','TF_VAR_ssh_config_remote_subnet') }}"
+
 
 vpn_nic: eth1
 
@@ -167,8 +160,8 @@ AWS_SECRET_KEY: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
 storage_user_access_key_id: "{{ lookup('env','storage_user_access_key_id') }}"
 storage_user_secret: "{{ lookup('env','storage_user_secret') }}"
 
-key_name: "{{ lookup('env','TF_VAR_key_name') }}"
-local_key_path: "{{ lookup('env','TF_VAR_local_key_path') }}"
+aws_key_name: "{{ lookup('env','TF_VAR_aws_key_name') }}"
+aws_private_key_path: "{{ lookup('env','TF_VAR_aws_private_key_path') }}"
 
 time_zone_info_dict_linux: {
 Australia_Sydney: "/usr/share/zoneinfo/Australia/Sydney"
@@ -185,6 +178,6 @@ vault_key_path: "{{ repo_dir }}/../secrets/keys/{{ vault_key_name_general }}"
 
 key_folder: "{{ repo_dir }}/../secrets/keys/"
 
-key_path: "{{ repo_dir }}/../secrets/keys/{{ key_name }}.pem"
+key_path: "{{ repo_dir }}/../secrets/keys/{{ aws_key_name }}.pem"
 secret_path: "{{ repo_dir }}/../secrets/secrets-general"
 secrets_archive: "{{ repo_dir }}/../secrets/{{ envtier }}"

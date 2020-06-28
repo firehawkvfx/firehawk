@@ -4,7 +4,6 @@ variable "vpc_id" {
 variable "vpc_cidr" {
 }
 
-#example 10.0.0.0/16
 variable "vpn_cidr" {
 }
 
@@ -23,7 +22,7 @@ variable "public_subnet_ids" {
 variable "route_zone_id" {
 }
 
-variable "key_name" {
+variable "aws_key_name" {
 }
 
 #contents of the my_key.pem file to connect to the vpn.
@@ -59,7 +58,7 @@ variable "openvpn_user_pw" {
 variable "openvpn_admin_pw" {
 }
 
-variable "local_key_path" {
+variable "aws_private_key_path" {
 }
 
 variable "sleep" {
@@ -145,9 +144,9 @@ module "openvpn" {
   public_route_table_ids = var.public_route_table_ids
 
   # EC2 Inputs
-  key_name       = var.key_name
+  aws_key_name       = var.aws_key_name
   private_key    = var.private_key
-  local_key_path = var.local_key_path
+  aws_private_key_path = var.aws_private_key_path
   ami            = lookup(var.openvpn_v2_7_5, var.aws_region)
   instance_type  = var.instance_type
 

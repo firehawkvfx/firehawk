@@ -1,4 +1,4 @@
-variable "key_name" {
+variable "aws_key_name" {
 }
 
 variable "common_tags" {}
@@ -73,15 +73,6 @@ variable "softnas_ssh_user" {
 }
 
 variable "softnas1_private_ip1" {
-}
-
-variable "softnas1_private_ip2" {
-}
-
-variable "softnas2_private_ip1" {
-}
-
-variable "softnas2_private_ip2" {
 }
 
 variable "init_aws_local_workstation" {}

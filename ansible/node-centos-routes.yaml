@@ -29,7 +29,7 @@
     houdini_build: "{{ lookup('env','TF_VAR_houdini_build') }}"
     skip_packages: false
     houdini_install_type: node
-    ethernet_device: "{{ bridgenic }}"
+    ethernet_interface: "{{ bridgenic }}"
 
 
   tasks:
@@ -55,9 +55,9 @@
     tags:
       - add-routes
 
-  - name: "add routes via vpn - prod - {{ variable_host }} - device {{ ethernet_device }}"
+  - name: "add routes via vpn - prod - {{ variable_host }} - device {{ ethernet_interface }}"
     shell: |
-      ip route add {{ item.subnet }} via {{ item.next_hop }} dev {{ ethernet_device }}
+      ip route add {{ item.subnet }} via {{ item.next_hop }} dev {{ ethernet_interface }}
     with_items:
       - { subnet: "{{ private_subnet1 }}", next_hop: "{{ openfirehawkserver }}" }
       - { subnet: "{{ public_subnet1 }}", next_hop: "{{ openfirehawkserver }}" }
@@ -68,10 +68,10 @@
 
   - name: insert/update block in /etc/network/interfaces for routes. configure routes to opposite dev/prod environment so that nodes in both envs can access licence server.  Remove route if it exists and re apply it.
     blockinfile:
-      path: "/etc/sysconfig/network-scripts/route-{{ ethernet_device }}"
+      path: "/etc/sysconfig/network-scripts/route-{{ ethernet_interface }}"
       create: true
       block: |
-        {{ item.subnet }} via {{ item.next_hop }} dev {{ ethernet_device }}
+        {{ item.subnet }} via {{ item.next_hop }} dev {{ ethernet_interface }}
       marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.subnet }}"
     with_items:
       - { subnet: "{{ private_subnet1 }}", next_hop: "{{ openfirehawkserver }}" }
@@ -98,9 +98,9 @@
   #   tags:
   #     - add-routes
 
-  # - name: "add routes via vpn - prod - {{ variable_host }} - device {{ ethernet_device }}"
+  # - name: "add routes via vpn - prod - {{ variable_host }} - device {{ ethernet_interface }}"
   #   shell: |
-  #     ip route add {{ item.subnet }} via {{ item.next_hop }} dev {{ ethernet_device }}
+  #     ip route add {{ item.subnet }} via {{ item.next_hop }} dev {{ ethernet_interface }}
   #   with_items:
   #     - { subnet: "{{ private_subnet1_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
   #     - { subnet: "{{ public_subnet1_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
@@ -112,10 +112,10 @@
 
   # - name: insert/update block in /etc/network/interfaces for routes. configure routes to opposite dev/prod environment so that nodes in both envs can access licence server.  Remove route if it exists and re apply it.
   #   blockinfile:
-  #     path: "/etc/sysconfig/network-scripts/route-{{ ethernet_device }}"
+  #     path: "/etc/sysconfig/network-scripts/route-{{ ethernet_interface }}"
   #     create: true
   #     block: |
-  #       {{ item.subnet }} via {{ item.next_hop }} dev {{ ethernet_device }}
+  #       {{ item.subnet }} via {{ item.next_hop }} dev {{ ethernet_interface }}
   #     marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.subnet }}"
   #   with_items:
   #     - { subnet: "{{ private_subnet1_prod }}", next_hop: "{{ openfirehawkserver_prod }}" }
@@ -145,9 +145,9 @@
 #     tags:
 #       - add-routes
 
-#   - name: "add routes via vpn - dev - {{ variable_host }} - device {{ ethernet_device }}"
+#   - name: "add routes via vpn - dev - {{ variable_host }} - device {{ ethernet_interface }}"
 #     shell: |
-#       ip route add {{ item.subnet }} via {{ item.next_hop }} dev {{ ethernet_device }}
+#       ip route add {{ item.subnet }} via {{ item.next_hop }} dev {{ ethernet_interface }}
 #     with_items:
 #       - { subnet: "{{ private_subnet1_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
 #       - { subnet: "{{ public_subnet1_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }
@@ -157,12 +157,12 @@
 #     tags:
 #       - add-routes
 
-#   - name: insert/update block in /etc/sysconfig/network-scripts/route-{{ ethernet_device }} for routes for persistance after reboot
+#   - name: insert/update block in /etc/sysconfig/network-scripts/route-{{ ethernet_interface }} for routes for persistance after reboot
 #     blockinfile:
-#       path: "/etc/sysconfig/network-scripts/route-{{ ethernet_device }}"
+#       path: "/etc/sysconfig/network-scripts/route-{{ ethernet_interface }}"
 #       create: true
 #       block: |
-#         {{ item.subnet }} via {{ item.next_hop }} dev {{ ethernet_device }}
+#         {{ item.subnet }} via {{ item.next_hop }} dev {{ ethernet_interface }}
 #       marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.subnet }}"
 #     with_items:
 #       - { subnet: "{{ private_subnet1_dev }}", next_hop: "{{ openfirehawkserver_dev }}" }

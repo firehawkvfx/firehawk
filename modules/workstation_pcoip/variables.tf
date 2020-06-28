@@ -24,7 +24,7 @@ variable "private_subnet_ids" {
   default = []
 }
 
-variable "key_name" {
+variable "aws_key_name" {
 }
 
 variable "workstation_enabled" {
@@ -41,7 +41,7 @@ variable "gateway_type" {
   default = "pcoip"
 }
 
-variable "site_mounts" {
+variable "aws_nodes_enabled" {
   default = false
 }
 

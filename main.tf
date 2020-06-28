@@ -10,12 +10,18 @@ data "aws_canonical_user_id" "current" {}
 
 variable "CI_JOB_ID" {}
 variable "active_pipeline" {}
+variable "resourcetier" {}
+variable "conflictkey" {}
 
 # if var.pgp_public_key contains keybase, then use that.  else take the contents of the var as a file on disc
 locals {
   pgp_public_key = length(regexall(".*keybase:.*", var.pgp_public_key)) > 0 ? var.pgp_public_key : filebase64("/secrets/keys/gpg_pub_key.gpg.pub")
   common_tags = {
     environment  = "${var.envtier}"
+    resourcetier = "${var.resourcetier}"
+    conflictkey  = "${var.conflictkey}" 
+    # The conflict key defines a name space where duplicate resources in different deployments sharing this name are prevented from occuring.  This is used to prevent a new deployment overwriting and existing resource unless it is destroyed first.
+    # examples might be blue, green, dev1, dev2, dev3...dev100.  This allows us to lock deployments on some resources.
     pipelineid   = "${var.active_pipeline}"
     owner        = "${data.aws_canonical_user_id.current.display_name}"
     accountid    = "${data.aws_caller_identity.current.account_id}"
@@ -99,9 +105,9 @@ module "vpc" {
 
   #a provided route 53 zone id will be modified to have a subdomain to access vpn.  you will need to manually setup a route 53 zone for a domain with an ssl certificate.
 
-  key_name           = var.key_name
-  private_key        = file(var.local_key_path)
-  local_key_path     = var.local_key_path
+  aws_key_name           = var.aws_key_name
+  private_key        = file(var.aws_private_key_path)
+  aws_private_key_path     = var.aws_private_key_path
   route_zone_id      = var.route_zone_id
   public_domain_name = var.public_domain
   cert_arn           = var.cert_arn
@@ -142,9 +148,9 @@ module "bastion" {
   private_subnets_cidr_blocks = module.vpc.private_subnets_cidr_blocks
   remote_subnet_cidr          = var.remote_subnet_cidr
 
-  key_name       = var.key_name
-  local_key_path = var.local_key_path
-  private_key    = file(var.local_key_path)
+  aws_key_name       = var.aws_key_name
+  aws_private_key_path = var.aws_private_key_path
+  private_key    = file(var.aws_private_key_path)
 
   route_zone_id      = var.route_zone_id
   public_domain_name = var.public_domain
@@ -201,21 +207,14 @@ resource "null_resource" "dependency_deadline_spot" {
   }
 }
 
-resource "null_resource" "dependency_node_centos" {
-  count = var.site_mounts ? 1 : 0
-  triggers = {
-    ami_id = module.node.ami_id
-  }
-}
-
 locals {
   config_template_file_path = "/deployuser/ansible/ansible_collections/firehawkvfx/deadline/roles/deadline_spot/files/config_template.json"
   override_config_template_file_path = "/secrets/overrides/ansible/ansible_collections/firehawkvfx/deadline/roles/deadline_spot/files/config_template.json"
 }
 
 resource "null_resource" "provision_deadline_spot" {
-  count      = (var.site_mounts && var.provision_deadline_spot_plugin) ? 1 : 0
-  depends_on = [null_resource.dependency_deadline_spot, null_resource.dependency_node_centos, module.firehawk_init.local-provisioning-complete]
+  count      = (var.aws_nodes_enabled && var.provision_deadline_spot_plugin) ? 1 : 0
+  depends_on = [null_resource.dependency_deadline_spot, module.node.ami_id, module.firehawk_init.local-provisioning-complete]
 
   triggers = {
     ami_id                  = module.node.ami_id
@@ -271,8 +270,8 @@ module "softnas" {
   softnas_instance_type          = var.softnas_instance_type
   vpn_private_ip                 = module.vpc.vpn_private_ip
   softnas_ssh_user               = var.softnas_ssh_user
-  key_name                       = var.key_name
-  private_key                    = file(var.local_key_path)
+  aws_key_name                       = var.aws_key_name
+  private_key                    = file(var.aws_private_key_path)
   vpc_id                         = module.vpc.vpc_id
   vpn_cidr                       = var.vpn_cidr
   public_domain                  = var.public_domain
@@ -285,9 +284,6 @@ module "softnas" {
   bastion_private_ip             = module.vpc.vpn_private_ip
   bastion_ip                     = module.bastion.public_ip
   softnas1_private_ip1           = var.softnas1_private_ip1
-  softnas1_private_ip2           = var.softnas1_private_ip2
-  softnas2_private_ip1           = var.softnas2_private_ip1
-  softnas2_private_ip2           = var.softnas2_private_ip2
 
   remote_mounts_on_local = var.remote_mounts_on_local == true ? true : false
 
@@ -324,8 +320,8 @@ variable "pcoip_skip_update" {
 
 #   bastion_ip = "${module.bastion.public_ip}"
 
-#   key_name    = "${var.key_name}"
-#   private_key = "${file("${var.local_key_path}")}"
+#   aws_key_name    = "${var.aws_key_name}"
+#   private_key = "${file("${var.aws_private_key_path}")}"
 
 #   #skipping os updates will allow faster rollout for testing, but may be non functional
 #   skip_update = "${var.pcoip_skip_update}"
@@ -361,12 +357,12 @@ module "workstation" {
   vpn_cidr       = var.vpn_cidr
   remote_ip_cidr = var.remote_ip_cidr
 
-  key_name    = var.key_name
-  private_key = file(var.local_key_path)
+  aws_key_name    = var.aws_key_name
+  private_key = file(var.aws_private_key_path)
 
   #skipping os updates will allow faster rollout for testing, but may be non functional
   skip_update = var.pcoip_skip_update
-  site_mounts = var.site_mounts
+  aws_nodes_enabled = var.aws_nodes_enabled
 
   public_domain_name = var.public_domain
 
@@ -430,15 +426,15 @@ module "node" {
 
   volume_size = var.node_centos_volume_size
 
-  key_name       = var.key_name
-  local_key_path = var.local_key_path
-  private_key    = file(var.local_key_path)
+  aws_key_name       = var.aws_key_name
+  aws_private_key_path = var.aws_private_key_path
+  private_key    = file(var.aws_private_key_path)
 
   #skipping os updates will allow faster rollout for testing.
   skip_update = var.node_skip_update
 
   # when a vpn is being installed, or before that point, site mounts must be disabled
-  site_mounts = var.site_mounts
+  aws_nodes_enabled = var.aws_nodes_enabled
 
   #sleep will stop instances to save cost during idle time.
   sleep = var.sleep

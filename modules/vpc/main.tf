@@ -85,9 +85,9 @@ module "vpn" {
 
   #a provided route 53 zone id will be modified to have a subdomain to access vpn.  you will need to manually setup a route 53 zone for a domain with an ssl certificate.
   route_zone_id      = var.route_zone_id
-  key_name           = var.key_name
-  private_key        = file(var.local_key_path)
-  local_key_path     = var.local_key_path
+  aws_key_name           = var.aws_key_name
+  private_key        = file(var.aws_private_key_path)
+  aws_private_key_path     = var.aws_private_key_path
   cert_arn           = var.cert_arn
   public_domain_name = var.public_domain_name
   openvpn_user       = var.openvpn_user

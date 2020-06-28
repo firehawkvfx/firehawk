@@ -67,7 +67,7 @@ echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 # loging into the softnas instance and setting up your volumes is necesary if this is your first time creating the volumes.
 # export TF_VAR_softnas_storage=true
 # when site mounts are true, then cloud nodes will start and use NFS site mounts.
-# export TF_VAR_site_mounts=false
+# export TF_VAR_aws_nodes_enabled=false
 # export TF_VAR_remote_mounts_on_local=false
 
 # ensure vpn is up and test
@@ -81,7 +81,7 @@ echo "...Config Override path $config_override"
 echo '...Configure softnas remote storage.'
 sudo sed -i 's/^TF_VAR_softnas_storage=.*$/TF_VAR_softnas_storage=true/' $config_override
 echo '...Site mounts will not be mounted in cloud'
-sudo sed -i 's/^TF_VAR_site_mounts=.*$/TF_VAR_site_mounts=false/' $config_override
+sudo sed -i 's/^TF_VAR_aws_nodes_enabled=.*$/TF_VAR_aws_nodes_enabled=false/' $config_override
 echo '...Softnas nfs exports will not be mounted on local site'
 sudo sed -i 's/^TF_VAR_remote_mounts_on_local=.*$/TF_VAR_remote_mounts_on_local=false/' $config_override
 

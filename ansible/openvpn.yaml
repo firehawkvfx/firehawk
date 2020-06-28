@@ -9,9 +9,22 @@
   become: true
 
   tasks:
-    - name: Test local connection.
-      debug:
-        msg: "test local connection"
+  - name: Test connection.
+    debug:
+      msg: "test connection"
+
+  - set_fact:
+      hosts_confirmed: true
+    delegate_to: localhost
+    delegate_facts: true
+
+- name: Verify hosts
+  hosts: localhost
+  gather_facts: no
+  tasks:
+
+  - assert:
+      that: hosts_confirmed | default(false) # A method that verifies the host was reached.
 
 - hosts: "{{ variable_host | default('openvpnip_private') }}"
   remote_user: openvpnas
@@ -120,3 +133,4 @@
 
   roles:
     - role: openvpn-gateway
+

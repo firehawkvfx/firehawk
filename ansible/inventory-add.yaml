@@ -1,84 +1,134 @@
 # adds hosts / updates if present.  optionally add under a group name
 
-- hosts: ansible_control
-  remote_user: deployuser
+- hosts: "{{ variable_host | default('ansible_control') }}"
+  remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
   
   vars:
-    hosts_file: "/deployuser/{{ inventory }}/hosts"
+    hosts_dir: "{{ secrets_path }}/{{ inventory }}"
+    hosts_file: "{{ hosts_dir }}/hosts"
+    # hosts_file: "{{ inventory }}/hosts"
     group_name: ''
     backup: false
   
   tasks:
-    - name: hosts file path is
-      debug:
-        var: hosts_file
-        
-    - name: ensure 2 new lines exist at end of file always
-      shell: |
-        /deployuser/scripts/append_blank_line.sh {{ hosts_file }}
-      become: true
+  - name: Hosts file path is
+    debug:
+      var: hosts_file
 
-    - name: update ansible_control or add if not exist
-      lineinfile:
-        state: present
-        path: "{{ hosts_file }}"
-        line: "ansible_control ansible_connection=local"
-        backup: "{{ backup }}"
-        owner: deployuser
-        regexp: "^ansible_control ansible_connection=.*"
-        insertbefore: BOF
-        create: true
-      become: yes
+  - name: "Ensure inventory dir exists {{ hosts_dir }}"
+    file:
+      name: "{{ hosts_dir }}"
+      state: directory
+      recurse: yes
+      mode: u=rwX,g=rwX,o-rwx
+      owner: deployuser
+      group: syscontrol
+    tags: init
+    become: true
 
-    - name: ensure 2 new lines exist at end of file always
-      shell: |
-        /deployuser/scripts/append_blank_line.sh {{ hosts_file }}
-      become: true
+  - name: "Touch a file {{ hosts_file }}"
+    file:
+      path: "{{ hosts_file }}"
+      state: touch
+      mode: u=rw,g=rw,o=r
+      group: syscontrol
+      owner: deployuser
+    tags: init
+    become: true
 
-    - name: update group or add if not exist
-      lineinfile:
-        state: present
-        path: "{{ hosts_file }}"
-        line: "[{{ group_name }}]\n"
-        backup: "{{ backup }}"
-        owner: deployuser
-        regexp: ".{{ group_name }}."
-      when: group_name != ''
-      become: yes
+  - name: Slurp file state
+    slurp:
+      src: "{{ hosts_file }}"
+    register: slurpfile
+    become: true
+    tags: init
 
-    - name: ensure 2 new lines exist at end of file always
-      shell: |
-        /deployuser/scripts/append_blank_line.sh {{ hosts_file }}
-      become: true
-      
-    - name: Group add host- update host or add if not exist
-      lineinfile:
-        state: present
-        path: "{{ hosts_file }}"
-        line: "{{ host_name }} ansible_host={{ host_ip }} {{ insert_ssh_key_string | default('') }}"
-        backup: "{{ backup }}"
-        owner: deployuser
-        regexp: "^{{ host_name }} ansible_host=.*"
-        insertafter: "^\\[{{ group_name }}\\]"
-        create: true
-      when: group_name != ''
-      become: yes
+  - name: Display "{{ hosts_file }}" contents
+    debug: msg="{{ slurpfile['content'] | b64decode }}"
+    tags: init
+    become: true
 
-    - name: Add host at start of file if not exist or update
-      lineinfile:
-        state: present
-        path: "{{ hosts_file }}"
-        line: "{{ host_name }} ansible_host={{ host_ip }} {{ insert_ssh_key_string | default('') }}"
-        backup: "{{ backup }}"
-        owner: deployuser
-        regexp: "^{{ host_name }} ansible_host=.*"
-        insertafter: "^ansible_control ansible_connection=.*"
-      when: group_name == ''
-      become: yes
+  - name: ensure 2 new lines exist at end of file always
+    shell: |
+      {{ firehawk_path }}/scripts/append_blank_line.sh {{ hosts_file }}
+    become: false
+    tags: init
 
-    - name: ensure 2 new lines exist at end of file always
-      shell: |
-        /deployuser/scripts/append_blank_line.sh {{ hosts_file }}
-      become: true
+  - name: update ansible_control or add if not exist
+    lineinfile:
+      state: present
+      path: "{{ hosts_file }}"
+      line: "ansible_control ansible_connection=local"
+      backup: "{{ backup }}"
+      owner: deployuser
+      regexp: "^ansible_control ansible_connection=.*"
+      insertbefore: BOF
+      create: true
+    # become: false
+    tags: init
+
+  - name: ensure 2 new lines exist at end of file always
+    shell: |
+      {{ firehawk_path }}/scripts/append_blank_line.sh {{ hosts_file }}
+    # become: false
+    tags: init
+
+  - name: update group or add if not exist
+    lineinfile:
+      state: present
+      path: "{{ hosts_file }}"
+      line: "[{{ group_name }}]\n"
+      backup: "{{ backup }}"
+      owner: deployuser
+      regexp: ".{{ group_name }}."
+    when: group_name != ''
+    become: yes
+
+  - name: ensure 2 new lines exist at end of file always
+    shell: |
+      {{ firehawk_path }}/scripts/append_blank_line.sh {{ hosts_file }}
+    become: true
+    
+  - name: Group add host- update host or add if not exist
+    lineinfile:
+      state: present
+      path: "{{ hosts_file }}"
+      line: "{{ host_name }} ansible_host={{ host_ip }} {{ insert_ssh_key_string | default('') }}"
+      backup: "{{ backup }}"
+      owner: deployuser
+      regexp: "^{{ host_name }} ansible_host=.*"
+      insertafter: "^\\[{{ group_name }}\\]"
+      create: true
+    when: group_name != ''
+    become: yes
+
+  - name: Add host at start of file if not exist or update
+    lineinfile:
+      state: present
+      path: "{{ hosts_file }}"
+      line: "{{ host_name }} ansible_host={{ host_ip }} {{ insert_ssh_key_string | default('') }}"
+      backup: "{{ backup }}"
+      owner: deployuser
+      regexp: "^{{ host_name }} ansible_host=.*"
+      insertafter: "^ansible_control ansible_connection=.*"
+    when: group_name == ''
+    become: yes
+
+  - name: ensure 2 new lines exist at end of file always
+    shell: |
+      {{ firehawk_path }}/scripts/append_blank_line.sh {{ hosts_file }}
+    become: true
+
+  - name: Slurp file state
+    slurp:
+      src: "{{ hosts_file }}"
+    register: slurpfile
+    become: true
+    tags: init
+
+  - name: Display "{{ hosts_file }}" contents
+    debug: msg="{{ slurpfile['content'] | b64decode }}"
+    tags: init
+    become: true

@@ -6,7 +6,7 @@ Open Firehawk is an environment to create an on demand render farm for VFX with 
 
 We document steps you can follow for replication of Firehawk in another environment.
 
-Some of this documentation will share what you will need to learn if you are a TD / Pipeline TD new to running cloud resources.  I’d recommend learning Terraform and Ansible.  I recommend passively putting these tutorials on without necesarily following the steps to just expose yourself to the concepts and get an overview.  Going through the steps yourself is better.
+Some of this documentation will share what you will need to learn if you are a TD / Pipeline TD new to running cloud resources.  I'd recommend learning Terraform and Ansible.  I recommend passively putting these tutorials on without necesarily following the steps to just expose yourself to the concepts and get an overview.  Going through the steps yourself is even better.
 
 These are some good paid video courses to try which I have taken on my own learning path-
 
@@ -18,7 +18,7 @@ These are some good paid video courses to try which I have taken on my own learn
 ### Udemy:
 
 - Mastering Ansible
-- Deploying to AWS with Ansible and Terraform - linux academy.
+- Deploying to AWS with Ansible and Terraform - Linux Academy.
 
 ### Books:
 
@@ -75,6 +75,31 @@ AmazonRoute53FullAccess
 }
 ```
 - Attach that policy as well to the ``DevAdmin`` group.
+- Create a new policy named ``ResourceGroupsAdmin``
+```
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "resource-groups:*",
+        "cloudformation:DescribeStacks",
+        "cloudformation:ListStackResources",
+        "tag:GetResources",
+        "tag:TagResources",
+        "tag:UntagResources",
+        "tag:getTagKeys",
+        "tag:getTagValues",
+        "resource-explorer:*"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+You can read more about the above policy here https://docs.aws.amazon.com/ARG/latest/userguide/gettingstarted-prereqs.html
+- Attach this policy to the ``DevAdmin`` group.
 - Make the new user a member of the ``DevAdmin`` group to inherit all of these policies.
 - Ensure you have done this in both AWS accounts.
 - When you create AWS access and secret keys, set a policy to age those keys out after 30 days.
@@ -103,9 +128,17 @@ Vagrant is a tool that manages your initial VM configuration onsite.  It allows 
 
 - Install [Hashicorp Vagrant](https://www.vagrantup.com/) and Virtualbox on your system (Linux / Mac OS recommended)
 
+## 3 Seperate Resource files for Green / Blue Deployment
+There are a minimum of 3 virtual resources that we deploy to.  Grey (Dev environment) resources are for testing.  Any deployment we use in production will use either Green or Blue resources.  This allows us to deploy an update to the Green or Blue environemnt using those resources, what ever is not currently in use.  This can allow us to test and fallback if the update is not ready for production.
+
+- The dev environment will be tested on the resources specified in the resources-grey file.
+- resources-blue and resources-green files are used for production.
+
+Currently the green blue deployment method being implemented will replace configuration on a workstation as each color is deployed.  We still need to implement Rez to be able to switch a users workstation / render nodes between these environments. The primary benefit of where this implementation is now is the reduced downtime that could be assciated with a failed deployment is much better than not having the current system.  The changes that need to be managed on a workstation are what software version you might be using for houdini, and what Deadline RCS host is being used for the monitor.
+
 ## Vagrant workstation for the dev environment
 
-When doing test deployments, we use seperate VM's from production.  This Vagrant VM creates a CentOS 7 VM with a Gnome GUI.  To isolate your workstation from testing, it is recommended that you use this VM here to simulate an isolated a workstation in a dev environment.  This protects your actual workstation from testing failed deplopyments that would affect productivity.  In the production environment, you would replace any IP adresses and ssh keys / passwords with those used for your actual workstation.  
+When doing test deployments, we can use seperate VM's from production systems to test on.  This Vagrant VM to test a workstation creates a CentOS 7 VM with a Gnome GUI.  To isolate your workstation from testing, it is recommended that you use this VM here to simulate an isolated a workstation in a dev environment.  This protects your actual workstation from testing failed deplopyments that would affect productivity.  In the production environment, you would replace any IP adresses and ssh keys / passwords with those used for your actual workstation in the resources-green and resources-blue files.  Alternatively you can allow password login and the authorization will be handled automatically with ssh keys.  After this, password use for ssh login is disabled for security reasons.
 
 - [Clone this repository to a seperate folder](https://github.com/queglay/vagrant-centos-gui) to create a workstation VM to test deployments in a dev environment
 ```
@@ -116,12 +149,19 @@ Vagrant up
 
 This login information will be entered into your encrypted secrets file in later steps, and is only temporarily used until the login is replaced with an ssh key for the deployuser (which will also be created automatically).  Once the ssh key is configured by Firehawk the password wont be usable for ssh access anymore.  Passwords are not recommend to be allowed for continued SSH access in a firehawk deployment.
 
+
+
 ## Thinkbox Usage Based Licensing
 To use Deadline in AWS, instances that reside in AWS are free.  But any onsite systems that render will require a licence.  If you wish to use any other UBL licenses (eg houdini Engine) they will also 
 require your Thinkbox UBL URL and UBL activation code.  These are entered in your encrypted secrets file, and are used to configure the Deadline DB upon install automatically.
 
 ## License servers
-License servers should be configured on your network to issue any floating licenses for software you require.  The VPN gateway and routes configured should allow a cloud based system to access the license server at the environment variable ``TF_VAR_houdini_license_server_address`` in secrets/config.  It is also possible to use deadline Usage Based Licenses for render nodes to use licenses on a per hour basis (eg. Houdini Engine, Mantra)
+License servers should be configured on your network to issue any floating licenses for software you require.  The VPN gateway and routes configured should allow a cloud based system to access the license server at the environment variable ``TF_VAR_houdini_license_server_address`` in secrets/config.  It should also be possible to use deadline Usage Based Licenses for render nodes to use licenses on a per hour basis (eg. Houdini Engine, Mantra), but this is untested.  To disable the floating license server, after you have setup your configuration files, but before deployment you can follow these steps:
+```
+source ./update_vars.sh --dev # or with your desired env.
+./scripts/ci-set-deploy-cloud-disable-license-server.sh
+source ./update_vars.sh --dev # or with your desired env.
+```
 
 ## Side Effects API OAuth2 keys
 If you intend to use Houdini, Firehawk uses Side FX provided keys to query and download the latest daily and produciton builds from sidefx.com. It will query the current version, download it, install it and also preserve that installer in S3 cloud storage enabling you to lock infrastructure to a particular installation version if needed.
@@ -129,6 +169,55 @@ If you intend to use Houdini, Firehawk uses Side FX provided keys to query and d
 - Goto [Services](https://www.sidefx.com/services/), and accept the EULA
 - Create a New App under [Manage applications authentication](https://www.sidefx.com/oauth2/applications/) to get a Client ID and secret keys.
 - You will need these later to save into your decrypted secrets file and encrypt it.
+
+## Disabling Side Effects Houdini
+If you wish to use the infrastructure without Houdini and experiment with other software, you can disable these vars in config overrides.  After you have setup your configuration files, but before deployment you can follow these steps:
+```
+source ./update_vars.sh --dev # or with your desired env.
+./scripts/ci-set-deploy-cloud-no-houdini.sh
+source ./update_vars.sh --dev # or with your desired env.
+```
+
+## NFS Shared Volumes
+An NFS shared volume in the location of your workstation is highly recommended, and not having one is an untested configuration if you intend to use Side FX PDG.
+this is because PDG updates a lot of ephemeral data on the filesystem that all systems need access to.  Sharing SMB may also be possible with further developement and testing.
+It may also be possible to avoid an onsite NFS share by only using the Cloud NFS share that would also be available on your local system.
+If you wish to test without any onsite shared volume, you will need to rely on your own processes to synchronise with S3 storage, or use the cloud based NFS share.  To do this, after you have setup your configuration files, but before deployment you can follow these steps:
+```
+source ./update_vars.sh --dev # or with your desired env.
+./scripts/ci-set-deploy-cloud-no-nfs-share.sh
+source ./update_vars.sh --dev # or with your desired env.
+```
+This will alter the config-overrides to not use an onsite NFS Share.
+
+IMPORTANT: If you use an onsite NAS / NFS share you wish to use, static routes must be configured on your router so that device has the means to see your cloud network ranges.  Without a static route, it is not possible to send traffic to your cloud based nodes that might read data from these volumes.
+
+## Static Routes
+
+Unfortunately, everyone's router onsite is different so this is one part of the setup that we can't automate for you!  We will describe the extent to which you should have to configure static routes on your network here, and you only have to do it once thankfully!  Similar routes are configured for the cloud site subnets and VPN, but that is all automated with Terraform and Ansible.
+
+Static routes define how traffic moves, and what host any traffic has to go through.  With a VPN gateway for our network to communicate with a remote network, we need to specify the address ranges of the remote networks (subnets), and we need to say what host / IP that traffic needs to go through in order to get there.  So in our case that is a VPN tunnel.  We are interested in ensuring that any of our traffic going to address ranges are being sent through the correct VPN tunnel for that deployment resource (Blue / Green / Grey)
+
+Any static route has two parameters defined for it to work:
+- The network / subnet range of addresses that we want to set the routes for traffic destined to these locations.
+- The IP address or host that any traffic going to the above address range must travel through.
+
+If you are using only one system, and you are not using an NFS share / NAS / or any license server, you don't need to have static routes configured on your router.  Otherwise for those other mentioned scenarios, without a static route, your NAS or licesne server for example wont know how to return any information back to the host on the other network that requires it!
+
+To set this up, you will have specified a new MAC address for the Firehawk VPN Gateway in each resource file (Blue/Green/Grey), each MAC must be unique and can be generated by scripts/random_mac_unicast.sh.  On your router, you should ensure that each of these hosts defined by the MAC addresses will have a static IP address:
+- You can usually do that by specifying the MAC address of the host (defined in the secrets/resource file) on your router, and setting the ip you wish to reserve.  Some routers might require the host be up before you can set a static IP. In that case, you can reserve the static IP at the first opportunity and reload the Firehawk Gateway VM to check it actually aquired this address before you deploy any cloud resources.  If in doubt, destroy the VM and start over.  It should aquire the address correctly.
+
+Once you can ensure that these VM's are going to have a static IP, we can specify the routes to those IP's.  In a default deployment, on the router, we would setup these routes:
+- 10.1.0.0/16	sends traffic to 192.168.92.10.  It means traffic destined for the range 10.1.0.0 - 10.1.255.255 will go via 192.168.92.10 ( The /16 suffix is CIDR notation to specify a range of adresses)
+- 10.2.0.0/16	sends traffic to 192.168.92.20.  It means traffic destined for the range 10.2.0.0 - 10.2.255.255 will go via 192.168.92.20
+- 10.3.0.0/16	sends traffic to 192.168.92.30.  It means traffic destined for the range 10.3.0.0 - 10.3.255.255 will go via 192.168.92.30
+
+We also have these routes in a default configuration:
+- 172.17.232.0/24	sends traffic to 192.168.92.10
+- 172.18.232.0/24	sends traffic to 192.168.92.20
+- 172.19.232.0/24	sends traffic to 192.168.92.30
+
+These address ranges refer to the DHCP addresses that Open VPN will automaticaly generate for its own use with the encrypted tunnel.  Each source / destination address will get one of these DHCP addreses to use for the encrypted traffic through the VPN tunnel between sites.
 
 ## Replicate a Firehawk clone and manage your secrets repository
 
@@ -356,7 +445,9 @@ If you make changes to your infrastructure that you want to recover from, a simp
 ## S3 Bucket Cloud Storage size
 
 You can keep tabs on an S3 bucket's size with this command, 
-    aws s3 ls s3://bucket_name --recursive  | grep -v -E "(Bucket: |Prefix: |LastWriteTime|^$|--)" | awk 'BEGIN {total=0}{total+=$3}END{print total/1024/1024" MB"}'
+```
+aws s3 ls s3://bucket_name --recursive  | grep -v -E "(Bucket: |Prefix: |LastWriteTime|^$|--)" | awk 'BEGIN {total=0}{total+=$3}END{print total/1024/1024" MB"}'
+```
 
 <!--stackedit_data:
 eyJoaXN0b3J5IjpbLTEyNzAwNzg1NjUsMTkzMzQ5NTI3MCwxNz

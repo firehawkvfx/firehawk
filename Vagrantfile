@@ -6,6 +6,7 @@
 
 bridgenic = ENV['TF_VAR_bridgenic']
 envtier = ENV['TF_VAR_envtier']
+resourcetier = ENV['TF_VAR_resourcetier']
 network = ENV['TF_VAR_network']
 selected_ansible_version = ENV['TF_VAR_selected_ansible_version']
 syscontrol_gid=ENV['TF_VAR_syscontrol_gid']
@@ -65,7 +66,7 @@ Vagrant.configure(2) do |config|
                 # node.vm.provision "shell", inline: "mkdir -p /home/deployuser/.ssh; chown -R deployuser:deployuser /home/deployuser/.ssh; chmod 700 /home/deployuser/.ssh"
                 node.vm.provision "shell", inline: "cp -fr /home/vagrant/.ssh /home/deployuser/; chown -R deployuser:deployuser /home/deployuser/.ssh; chown deployuser:deployuser /home/deployuser/.ssh/authorized_keys"
                 ### Install yq to query yaml
-                node.vm.provision "shell", inline: "sudo snap install yq"
+                node.vm.provision "shell", inline: "sudo snap install yq || echo 'Failure may indicate may have a duplicate mac/IP address on the same network.'"
             end
             # Allow deployuser to have passwordless sudo
             node.vm.synced_folder ".", "/vagrant", create: true, owner: "vagrant", group: "vagrant"
@@ -145,7 +146,7 @@ Vagrant.configure(2) do |config|
                 node.vm.provision "shell", inline: "echo 'ConnectTimeout 60' >> /etc/ssh/ssh_config"
             
                 # we define the location of the ansible hosts file in an environment variable.
-                node.vm.provision "shell", inline: "grep -qxF 'ANSIBLE_INVENTORY=/vagrant/ansible/hosts' /etc/environment || echo 'ANSIBLE_INVENTORY=/vagrant/ansible/hosts' | sudo tee -a /etc/environment"
+                node.vm.provision "shell", inline: "grep -qxF 'ANSIBLE_INVENTORY=/vagrant/ansible/inventory/hosts' /etc/environment || echo 'ANSIBLE_INVENTORY=/vagrant/ansible/inventory/hosts' | sudo tee -a /etc/environment"
                 node.vm.provision "shell", inline: "cd /vagrant; ansible-playbook ansible/transparent-hugepages-disable.yml" # mongo requires no transparent hugepages
                 # disable the update notifier.  We do not want to update to ubuntu 18, deadline installer doesn't work in 18 when last tested.
                 node.vm.provision "shell", inline: "sudo sed -i 's/Prompt=.*$/Prompt=never/' /etc/update-manager/release-upgrades"
@@ -163,7 +164,7 @@ Vagrant.configure(2) do |config|
                 if machine[:hostname].include? "firehawkgateway"
                     node.vm.provision "shell", inline: "/deployuser/scripts/init-gateway.sh --#{envtier}"
                     # register address for gateway
-                    node.vm.provision "shell", inline: "cd /deployuser; source ./update_vars.sh --#{envtier} --init; echo $config_override; ansible-playbook ansible/get_host_ip.yml -v --extra-vars 'update_openfirehawkserver_ip_var=true'" # config_override=#{ENV['config_override']}
+                    node.vm.provision "shell", inline: "cd /deployuser; source ./update_vars.sh --#{envtier} --#{resourcetier} --init; echo $config_override; ansible-playbook ansible/get_host_ip.yml -v --extra-vars 'update_openfirehawkserver_ip_var=true'" # config_override=#{ENV['config_override']}
                 end
                 node.vm.provision "shell", inline: "sudo reboot"
                 node.vm.provision :reload

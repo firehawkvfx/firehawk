@@ -48,7 +48,7 @@ variable "private_subnets_cidr_blocks" {
   default = []
 }
 
-variable "key_name" {
+variable "aws_key_name" {
 }
 
 #contents of the my_key.pem file to connect to the instance.
@@ -87,14 +87,14 @@ variable "vpn_cidr" {
 
 variable "vpn_private_ip" {}
 
-variable "site_mounts" {
+variable "aws_nodes_enabled" {
   default = false
 }
 
 variable "region" {
 }
 
-variable "local_key_path" {
+variable "aws_private_key_path" {
 }
 
 # You may wish to use a custom ami that incorporates your own configuration.  Insert the ami details below if you wish to use this.

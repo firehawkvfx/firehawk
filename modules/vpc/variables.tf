@@ -28,7 +28,6 @@ variable "create_openvpn" {
 # }
 
 variable "vpc_cidr" {
-  default = "10.0.0.0/16"
 }
 
 variable "azs" {
@@ -50,13 +49,13 @@ variable "remote_ip_cidr" {
 variable "route_zone_id" {
 }
 
-variable "key_name" {
+variable "aws_key_name" {
 }
 
 variable "private_key" {
 }
 
-variable "local_key_path" {
+variable "aws_private_key_path" {
 }
 
 variable "cert_arn" {

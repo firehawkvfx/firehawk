@@ -44,12 +44,6 @@ variable "firehawk_path" {}
 variable "public_domain" {
 }
 
-variable "public_domain_dev" {
-}
-
-variable "public_domain_prod" {
-}
-
 variable "openfirehawkserver" {
 }
 
@@ -59,7 +53,7 @@ variable "route_public_domain_name" {
 variable "openvpn_user" {
 }
 
-variable "site_mounts" {
+variable "aws_nodes_enabled" {
   default = true
 }
 
@@ -73,11 +67,11 @@ variable "openvpn_admin_pw" {
 }
 
 #generate a keypair and enter its name here.
-variable "key_name" {
+variable "aws_key_name" {
 }
 
 #the path to the key stored locally where terraform is run.
-variable "local_key_path" {
+variable "aws_private_key_path" {
 }
 
 variable "pgp_key_path" {
@@ -124,15 +118,6 @@ variable "softnas_storage" {
 }
 
 variable "softnas1_private_ip1" {
-}
-
-variable "softnas1_private_ip2" {
-}
-
-variable "softnas2_private_ip1" {
-}
-
-variable "softnas2_private_ip2" {
 }
 
 variable "softnas_mailserver" {

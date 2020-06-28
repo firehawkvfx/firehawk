@@ -66,6 +66,7 @@ EOF
 resource "aws_iam_user" "storage_user" {
   name = "storage_user_pipeid${lookup(var.common_tags, "pipelineid", "0")}"
   force_destroy = true
+  tags = var.common_tags
 }
 
 resource "aws_iam_access_key" "storage_user_access_key" {

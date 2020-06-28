@@ -157,25 +157,26 @@ parse_opts () {
 }
 parse_opts "$@"
 
-set -x; SHOWCOMMANDS=true # show bash input
+# set -x; SHOWCOMMANDS=true # show bash input
 
+echo "set TF_VAR_softnas_volatile=$set_softnas_volatile in config override file=$config_override"
 sed -i "s/^TF_VAR_softnas_volatile=.*$/TF_VAR_softnas_volatile=${set_softnas_volatile}/" $config_override # ...Set if softnas volumes will be destroyed
 source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override --force --silent
 
 set_pipe() {
   id=$1
-  ### Initialisation for new resources occur after a destroy operation, since the infra is garunteed to be new after his point.
+  ### Initialisation for new resources
   sed -i "s/^TF_VAR_active_pipeline=.*$/TF_VAR_active_pipeline=${id}/" $config_override # ...Enable the vpc.
   source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override --force --silent
   echo "Get TF_VAR_active_pipeline: $TF_VAR_active_pipeline"
-  sed -i "s/^TF_VAR_key_name_${TF_VAR_envtier}=.*$/TF_VAR_key_name_${TF_VAR_envtier}=my_key_pair_pipeid${TF_VAR_active_pipeline}_${TF_VAR_envtier}/" $config_override
+  sed -i "s/^TF_VAR_aws_key_name=.*$/TF_VAR_aws_key_name=my_key_pair_pipeid${TF_VAR_active_pipeline}_${TF_VAR_envtier}/" $config_override
   source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override --force --silent
-  echo "Get TF_VAR_key_name: $TF_VAR_key_name"
-  key_path="/secrets/keys/${TF_VAR_key_name}.pem"
+  echo "Get TF_VAR_aws_key_name: $TF_VAR_aws_key_name"
+  key_path="/secrets/keys/${TF_VAR_aws_key_name}.pem"
   echo "Get key_path: $key_path"
-  sed -i "s~^TF_VAR_local_key_path_${TF_VAR_envtier}=.*$~TF_VAR_local_key_path_${TF_VAR_envtier}=${key_path}~" $config_override
+  sed -i "s~^TF_VAR_aws_private_key_path=.*$~TF_VAR_aws_private_key_path=${key_path}~" $config_override
   source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override --force --silent
-  echo "Get TF_VAR_local_key_path: $TF_VAR_local_key_path"
+  echo "Get TF_VAR_aws_private_key_path: $TF_VAR_aws_private_key_path"
 }
 
 test_destroyed() {
@@ -204,13 +205,13 @@ test_destroyed() {
   if [ "$user_present" -gt "0" ]; then
     echo "deadline_spot_deployment_user is present"
   else
-    echo "deadline_spot_deployment_user not present"
+    echo "deadline_spot_deployment_user not present" # this should filter for tags now to allow multiple deploys on the same account.
   fi
 
-  if [ "$user_present" -gt "0" ] && [[ "$tf_action" == "destroy" ]]; then 
-    echo "failed to destroy existing deadline_spot_deployment_user for the account"
-    exit 1
-  fi
+  # if [ "$user_present" -gt "0" ] && [[ "$tf_action" == "destroy" ]]; then 
+  #   echo "failed to destroy existing deadline_spot_deployment_user for the account"
+  #   exit 1
+  # fi
 }
 
 if [[ -z $TF_VAR_envtier ]] ; then
@@ -220,6 +221,9 @@ else
   echo "init_vm_config: $init_vm_config"
   if [[ "$TF_VAR_vm_initialised" == false ]] && [[ "$init_vm_config" == true ]]; then
     echo "...Init VM's"
+    echo "Ensure hosts file exists"
+    ansible-playbook ansible/inventory-add.yaml -v --extra-vars "variable_host=localhost" --tags 'init'; exit_test
+    # ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "variable_host=localhost" --include-tags 'init'; exit_test #--extra-vars "host_name=firehawkgateway host_ip=$TF_VAR_openfirehawkserver group_name=role_gateway insert_ssh_key_string=ansible_ssh_private_key_file=$TF_VAR_general_use_ssh_key"; exit_test
     echo "...Provision PGP / Keybase"
     $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-010-keybase.sh $ARGS; exit_test
     echo "...Provision Local VM's"
@@ -238,7 +242,7 @@ else
     aws iam list-users
     echo ""
 
-    touch $TF_VAR_local_key_path # ensure a file is present or tf will not be able to destroy anything.
+    touch $TF_VAR_aws_private_key_path # ensure a file is present or tf will not be able to destroy anything.
 
     success=false
     echo "...Terraform destroy" # first try to destroy without refresh, which may hang on missing vars.
@@ -305,7 +309,7 @@ else
     $TF_VAR_firehawk_path/scripts/detect-interrupt.sh &
     
     if [ "$TF_VAR_active_pipeline" -eq 0 ]; then
-      echo "...Init new pipe based on the current JOB ID: Found active pipeline is init: $TF_VAR_active_pipeline"
+      echo "...Init new pipe based on the current JOB ID: Current active pipeline to init: $TF_VAR_active_pipeline"
       set_pipe $TF_VAR_CI_JOB_ID # initalise all new resources with this pipe id
       echo "...Ensuring aws key exists for current pipe."
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-new-key.yaml; exit_test # ensure an aws pem key exists for ssh into cloud nodes

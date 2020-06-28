@@ -113,7 +113,7 @@
 #     if [ $? -eq 0 ]; then
 #       ip route del {{ item.subnet }}
 #     else
-#       echo "Route does not exit.  No need to delete {{ item.subnet }}"
+#       echo "Route does not exist.  No need to delete {{ item.subnet }}"
 #     fi
 #     ip route add {{ item.subnet }} via {{ item.next_hop }} dev {{ vpn_nic }}
 #   with_items:

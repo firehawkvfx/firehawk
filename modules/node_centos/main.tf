@@ -10,7 +10,7 @@ locals {
 }
 
 resource "aws_security_group" "node_centos" {
-  count       = var.site_mounts ? 1 : 0
+  count       = var.aws_nodes_enabled ? 1 : 0
 
   name        = var.name
   vpc_id      = var.vpc_id
@@ -100,7 +100,7 @@ resource "aws_security_group" "node_centos" {
 }
 
 resource "aws_security_group" "node_centos_vpn" {
-  count       = var.site_mounts ? 1 : 0
+  count       = var.aws_nodes_enabled ? 1 : 0
   depends_on = [var.vpn_private_ip]
 
   name        = "vpn_${var.name}"
@@ -108,131 +108,127 @@ resource "aws_security_group" "node_centos_vpn" {
   description = "Centos VPN security group"
 
   tags = merge(map("Name", format("%s", "vpn_${var.name}")), var.common_tags, local.extra_tags)
-
-  # todo need to tighten down ports.
-  ingress {
-    protocol    = "-1"
-    from_port   = 0
-    to_port     = 0
-    cidr_blocks = [var.remote_ip_cidr]
-    description = "all incoming traffic from remote access ip"
-  }
-
-  ingress {
-    protocol    = "-1"
-    from_port   = 0
-    to_port     = 0
-    cidr_blocks = [var.vpn_cidr]
-    description = "all incoming traffic from remote subnet range vpn dhcp"
-  }
-
-  ingress {
-    protocol    = "-1"
-    from_port   = 0
-    to_port     = 0
-    cidr_blocks = [var.remote_subnet_cidr]
-    description = "all incoming traffic from remote subnet range"
-  }
-
-  # if all incoming from the onsite subnet is allowed, the rules below aren't required.
-
-  # For OpenVPN Client Web Server & Admin Web UI
-
-  ingress {
-    protocol  = "tcp"
-    from_port = 22
-    to_port   = 22
-    # TF-UPGRADE-TODO: In Terraform v0.10 and earlier, it was sometimes necessary to
-    # force an interpolation expression to be interpreted as a list by wrapping it
-    # in an extra set of list brackets. That form was supported for compatibilty in
-    # v0.11, but is no longer supported in Terraform v0.12.
-    #
-    # If the expression in the following list itself returns a list, remove the
-    # brackets to avoid interpretation as a list of lists. If the expression
-    # returns a single list item then leave it as-is and remove this TODO comment.
-    cidr_blocks = [var.remote_subnet_cidr, var.remote_ip_cidr]
-    description = "ssh"
-  }
-  ingress {
-    protocol    = "tcp"
-    from_port   = 443
-    to_port     = 443
-    cidr_blocks = [var.remote_ip_cidr]
-    description = "https"
-  }
-  ingress {
-    protocol  = "tcp"
-    from_port = 27100
-    to_port   = 27100
-    # TF-UPGRADE-TODO: In Terraform v0.10 and earlier, it was sometimes necessary to
-    # force an interpolation expression to be interpreted as a list by wrapping it
-    # in an extra set of list brackets. That form was supported for compatibilty in
-    # v0.11, but is no longer supported in Terraform v0.12.
-    #
-    # If the expression in the following list itself returns a list, remove the
-    # brackets to avoid interpretation as a list of lists. If the expression
-    # returns a single list item then leave it as-is and remove this TODO comment.
-    cidr_blocks = [var.remote_subnet_cidr]
-    description = "DeadlineDB MongoDB"
-  }
-  ingress {
-    protocol  = "tcp"
-    from_port = 8080
-    to_port   = 8080
-    # TF-UPGRADE-TODO: In Terraform v0.10 and earlier, it was sometimes necessary to
-    # force an interpolation expression to be interpreted as a list by wrapping it
-    # in an extra set of list brackets. That form was supported for compatibilty in
-    # v0.11, but is no longer supported in Terraform v0.12.
-    #
-    # If the expression in the following list itself returns a list, remove the
-    # brackets to avoid interpretation as a list of lists. If the expression
-    # returns a single list item then leave it as-is and remove this TODO comment.
-    cidr_blocks = [var.remote_subnet_cidr]
-    description = "Deadline And Deadline RCS"
-  }
-  ingress {
-    protocol  = "tcp"
-    from_port = 4433
-    to_port   = 4433
-    # TF-UPGRADE-TODO: In Terraform v0.10 and earlier, it was sometimes necessary to
-    # force an interpolation expression to be interpreted as a list by wrapping it
-    # in an extra set of list brackets. That form was supported for compatibilty in
-    # v0.11, but is no longer supported in Terraform v0.12.
-    #
-    # If the expression in the following list itself returns a list, remove the
-    # brackets to avoid interpretation as a list of lists. If the expression
-    # returns a single list item then leave it as-is and remove this TODO comment.
-    cidr_blocks = [var.remote_subnet_cidr]
-    description = "Deadline RCS TLS HTTPS"
-  }
-  ingress {
-    protocol    = "tcp"
-    from_port   = 1714
-    to_port     = 1714
-    cidr_blocks = ["${var.houdini_license_server_address}/32"]
-    description = "Houdini license server"
-  }
-  ingress {
-    protocol    = "udp"
-    from_port   = 1714
-    to_port     = 1714
-    cidr_blocks = ["${var.houdini_license_server_address}/32"]
-    description = "Houdini license server"
-  }
-  ingress {
-    protocol    = "udp"
-    from_port   = 1194
-    to_port     = 1194
-    cidr_blocks = [var.remote_ip_cidr]
-  }
-  ingress {
-    protocol    = "icmp"
-    from_port   = 8
-    to_port     = 0
-    cidr_blocks = [var.remote_ip_cidr]
-    description = "icmp"
-  }
 }
+resource "aws_security_group_rule" "remote_ip_all_incoming" {
+  count       = var.aws_nodes_enabled ? 1 : 0
+  security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
+  type              = "ingress"
+  protocol    = "-1"
+  from_port   = 0
+  to_port     = 0
+  cidr_blocks = [var.remote_ip_cidr]
+  description = "all incoming traffic from remote access ip"
+}
+resource "aws_security_group_rule" "vpn_cidr_all_incoming" {
+  count       = var.aws_nodes_enabled ? 1 : 0
+  security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
+  type              = "ingress"
+  protocol    = "-1"
+  from_port   = 0
+  to_port     = 0
+  cidr_blocks = [var.vpn_cidr]
+  description = "all incoming traffic from remote subnet range vpn dhcp"
+}
+resource "aws_security_group_rule" "remote_subnet_all_incoming" {
+  count       = var.aws_nodes_enabled ? 1 : 0
+  security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
+  type              = "ingress"
+  protocol    = "-1"
+  from_port   = 0
+  to_port     = 0
+  cidr_blocks = [var.remote_subnet_cidr]
+  description = "all incoming traffic from remote subnet range"
+}
+resource "aws_security_group_rule" "ssh" {
+  count       = var.aws_nodes_enabled ? 1 : 0
+  security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
+  type              = "ingress"
+  protocol  = "tcp"
+  from_port = 22
+  to_port   = 22
+  cidr_blocks = [var.remote_subnet_cidr, var.remote_ip_cidr]
+  description = "ssh"
+}
+resource "aws_security_group_rule" "https" {
+  count       = var.aws_nodes_enabled ? 1 : 0
+  security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
+  type              = "ingress"
+  protocol    = "tcp"
+  from_port   = 443
+  to_port     = 443
+  cidr_blocks = [var.remote_ip_cidr]
+  description = "https"
+}
+resource "aws_security_group_rule" "deadline_mongo" {
+  count       = var.aws_nodes_enabled ? 1 : 0
+  security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
+  type              = "ingress"
+  protocol  = "tcp"
+  from_port = 27100
+  to_port   = 27100
+  cidr_blocks = [var.remote_subnet_cidr]
+  description = "DeadlineDB MongoDB"
+}
+resource "aws_security_group_rule" "deadline_rcs_tcp_http" {
+  count       = var.aws_nodes_enabled ? 1 : 0
+  security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
+  type              = "ingress"
+  protocol  = "tcp"
+  from_port = 8080
+  to_port   = 8080
+  cidr_blocks = [var.remote_subnet_cidr]
+  description = "Deadline And Deadline RCS"
+}
+resource "aws_security_group_rule" "deadline_rcs_tcp_https" {
+  count       = var.aws_nodes_enabled ? 1 : 0
+  security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
+  type              = "ingress"
+  protocol  = "tcp"
+  from_port = 4433
+  to_port   = 4433
+  cidr_blocks = [var.remote_subnet_cidr]
+  description = "Deadline RCS TLS HTTPS"
+}
+resource "aws_security_group_rule" "houdini_license_server_tcp" {
+  count       = var.aws_nodes_enabled && var.houdini_license_server_address != "none" ? 1 : 0
+  security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
+  type              = "ingress"
+  protocol    = "tcp"
+  from_port   = 1714
+  to_port     = 1714
+  cidr_blocks = ["${var.houdini_license_server_address}/32"]
+  description = "Houdini license server"
+}
+resource "aws_security_group_rule" "houdini_license_server_udp" {
+  count       = var.aws_nodes_enabled && var.houdini_license_server_address != "none" ? 1 : 0
+  security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
+  type              = "ingress"
+  protocol    = "udp"
+  from_port   = 1714
+  to_port     = 1714
+  cidr_blocks = ["${var.houdini_license_server_address}/32"]
+  description = "Houdini license server"
+}
+resource "aws_security_group_rule" "udp" {
+  count       = var.aws_nodes_enabled ? 1 : 0
+  security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
+  type              = "ingress"
+  protocol    = "udp"
+  from_port   = 1194
+  to_port     = 1194
+  cidr_blocks = [var.remote_ip_cidr]
+}
+resource "aws_security_group_rule" "icmp" {
+  count       = var.aws_nodes_enabled ? 1 : 0
+  security_group_id = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
+  type              = "ingress"
+  protocol    = "icmp"
+  from_port   = 8
+  to_port     = 0
+  cidr_blocks = [var.remote_ip_cidr]
+  description = "icmp"
+}
+
 
 resource "null_resource" "dependency_softnas" {
   triggers = {
@@ -281,7 +277,7 @@ variable "centos_v7" {
 }
 
 resource "aws_network_interface" "eth0" {
-  count = var.site_mounts ? 1 : 0
+  count = var.aws_nodes_enabled ? 1 : 0
   subnet_id     = element(concat(var.private_subnet_ids, list("")), count.index)
                               
   private_ips     = [cidrhost(element(concat(data.aws_subnet.private_subnet, list("")), count.index).cidr_block, 20)]
@@ -296,7 +292,7 @@ locals {
 }
 
 resource "aws_instance" "node_centos" {
-  count                = var.site_mounts ? 1 : 0
+  count                = var.aws_nodes_enabled ? 1 : 0
   iam_instance_profile = var.instance_profile_name
 
   #instance type and ami are determined by the gateway type variable for if you want a graphical or non graphical instance.
@@ -317,7 +313,7 @@ resource "aws_instance" "node_centos" {
     # delete_on_termination = true
   }
 
-  key_name               = var.key_name
+  key_name               = var.aws_key_name
   tags = merge(map("Name", format("%s", "node_centos_pipeid${lookup(var.common_tags, "pipelineid", "0")}")), var.common_tags, local.extra_tags)
 
   # cloud init resets network delay settings if configured outside of cloud-init
@@ -329,20 +325,20 @@ USERDATA
 }
 
 resource "aws_network_interface_sg_attachment" "node_centos_sg_attachment" {
-  count                = var.site_mounts ? 1 : 0
+  count                = var.aws_nodes_enabled ? 1 : 0
   security_group_id    = element( concat( aws_security_group.node_centos.*.id, list("") ), 0)
   network_interface_id = local.network_interface_id
 }
 
 resource "aws_network_interface_sg_attachment" "node_centos_sg_attachment_vpn" { # This attachment occurs only after the vpn is available.  Prior to this, the attachment would be meaningless.
-  count                = var.site_mounts ? 1 : 0
+  count                = var.aws_nodes_enabled ? 1 : 0
   depends_on = [var.vpn_private_ip]
   security_group_id    = element( concat( aws_security_group.node_centos_vpn.*.id, list("") ), 0)
   network_interface_id = local.network_interface_id
 }
 
 resource "null_resource" "provision_node_centos" {
-  count = var.site_mounts ? 1 : 0
+  count = var.aws_nodes_enabled ? 1 : 0
   depends_on = [aws_instance.node_centos, var.bastion_ip, aws_network_interface_sg_attachment.node_centos_sg_attachment ]
   
   triggers = {
@@ -392,7 +388,7 @@ resource "null_resource" "provision_node_centos" {
       # fi
 
       # ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "variable_host=firehawkgateway variable_user=deployuser private_ip=${aws_instance.node_centos[0].private_ip} bastion_ip=${var.bastion_ip}"; exit_test
-      ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=node0 host_ip=${aws_instance.node_centos[0].private_ip} group_name=role_node_centos insert_ssh_key_string=ansible_ssh_private_key_file=$TF_VAR_local_key_path"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=node0 host_ip=${aws_instance.node_centos[0].private_ip} group_name=role_node_centos insert_ssh_key_string=ansible_ssh_private_key_file=$TF_VAR_aws_private_key_path"; exit_test
 
       # ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init-users.yaml -v --extra-vars "set_hostname=false"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_init_pip.yaml -v --extra-vars "variable_host=role_node_centos variable_connect_as_user=centos"; exit_test
@@ -411,7 +407,7 @@ EOT
 }
 
 resource "null_resource" "install_houdini" {
-  count = var.site_mounts ? 1 : 0
+  count = var.aws_nodes_enabled ? 1 : 0
 
   depends_on = [ null_resource.provision_node_centos ]
 
@@ -439,7 +435,7 @@ EOT
 }
 
 resource "null_resource" "install_deadline_worker" {
-  count = var.site_mounts ? 1 : 0
+  count = var.aws_nodes_enabled ? 1 : 0
 
   depends_on = [ null_resource.provision_node_centos, null_resource.dependency_deadlinedb, aws_network_interface_sg_attachment.node_centos_sg_attachment_vpn, null_resource.install_houdini, var.vpn_private_ip ]
 
@@ -473,20 +469,21 @@ resource "null_resource" "install_deadline_worker" {
       if [[ "$TF_VAR_install_houdini" == true ]]; then
         ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/houdini/configure_hserver.yaml -v --extra-vars "houdini_build=$TF_VAR_houdini_build"; exit_test
         ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v; exit_test
+
+        if [[ "$TF_VAR_install_deadline_worker" == true ]]; then
+          ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/houdini/houdini_module.yaml -v --extra-vars "houdini_build=$TF_VAR_houdini_build" --tags "install_deadline_db"; exit_test
+          echo "test db centos"
+          ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+        fi
       fi
 
-      if [[ "$TF_VAR_install_deadline_worker" == true ]]; then
-        ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/houdini/houdini_module.yaml -v --extra-vars "houdini_build=$TF_VAR_houdini_build" --tags "install_deadline_db"; exit_test
-        echo "test db centos"
-        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
-      fi
 EOT
 
   }
 }
 
 resource "null_resource" "mounts_and_houdini_test" {
-  count = var.site_mounts ? 1 : 0
+  count = var.aws_nodes_enabled ? 1 : 0
 
   depends_on = [ null_resource.dependency_softnas, null_resource.install_deadline_worker ]
 
@@ -505,10 +502,13 @@ resource "null_resource" "mounts_and_houdini_test" {
 
       aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id} # ensure instance is started
 
-      ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml -v --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml -v --skip-tags "local_install local_install_onaws_nodes_enabled" --tags "cloud_install"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/houdini/houdini_openfirehawk_houdini_tools_sync.yaml -v --extra-vars "variable_user=deadlineuser"; exit_test # sync houdini tools after all mounts are available
 
-      if [[ "$TF_VAR_install_houdini" == true ]] && [[ $TF_VAR_houdini_test_connection == true ]]; then
+      echo "TF_VAR_install_houdini: $TF_VAR_install_houdini"
+      echo "TF_VAR_houdini_test_connection: $TF_VAR_houdini_test_connection"
+
+      if [[ "$TF_VAR_install_houdini" == true ]] && [[ "$TF_VAR_houdini_test_connection" == true ]]; then
         # last step before building ami we run a unit test to ensure houdini runs.  We also cleanup any uneeded data afterwards, including tmp folders
         ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/houdini/houdini_unit_test.yaml -v --extra-vars "variable_user=deadlineuser execute=true"; exit_test
       fi
@@ -531,7 +531,7 @@ EOT
 
 
 resource "random_id" "ami_unique_name" {
-  count = var.site_mounts ? 1 : 0
+  count = var.aws_nodes_enabled ? 1 : 0
   keepers = {
     # Generate a new id each time we switch to a new instance id
     ami_id = aws_instance.node_centos[0].id
@@ -540,7 +540,7 @@ resource "random_id" "ami_unique_name" {
 }
 
 resource "aws_ami_from_instance" "node_centos" {
-  count              = var.site_mounts ? 1 : 0
+  count              = var.aws_nodes_enabled ? 1 : 0
   depends_on         = [null_resource.provision_node_centos, random_id.ami_unique_name, null_resource.mounts_and_houdini_test]
   name               = "node_centos_houdini_${local.instanceid}_${random_id.ami_unique_name[0].hex}"
   source_instance_id = local.instanceid
@@ -550,7 +550,7 @@ resource "aws_ami_from_instance" "node_centos" {
 
 #wakeup after ami
 resource "null_resource" "start-node-after-ami" {
-  count = var.site_mounts ? 1 : 0
+  count = var.aws_nodes_enabled ? 1 : 0
   triggers = {
     ami_id = aws_ami_from_instance.node_centos[0].id
   }
@@ -565,7 +565,7 @@ resource "null_resource" "start-node-after-ami" {
 
 # wakeup a node after sleep.  ensure the softnas instaqnce has finished creating its volumes otherwise mounts will not work - dependency_softnas
 resource "null_resource" "start-node" {
-  count      = ! var.sleep && var.site_mounts && var.wakeable ? 1 : 0
+  count      = ! var.sleep && var.aws_nodes_enabled && var.wakeable ? 1 : 0
   depends_on = [null_resource.dependency_softnas]
 
   provisioner "local-exec" {
@@ -575,7 +575,7 @@ resource "null_resource" "start-node" {
 }
 
 resource "null_resource" "shutdown-node" {
-  count = var.sleep && var.site_mounts ? 1 : 0
+  count = var.sleep && var.aws_nodes_enabled ? 1 : 0
 
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]

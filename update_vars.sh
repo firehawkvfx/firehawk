@@ -104,6 +104,9 @@ verbose () {
                         ;;
                     vagrant)
                         ;;
+                    live-terminal)
+                        export LIVE_TERMINAL=true
+                        ;;
                     *)
                         if [ "$OPTERR" = 1 ] && [ "${optspec:0:1}" != ":" ]; then
                             echo "Unknown option --${OPTARG}" >&2
@@ -123,14 +126,24 @@ verbose () {
 verbose "$@"
 
 if [ -z "$CI_COMMIT_REF_SLUG" ]; then # Detect the environment if using CI/CD
-    echo "Launching in a non Gitlab CI environment"; export env_ci=false
+    echo "Launching in a non CI environment"; export env_ci=false
 else
-    echo "Gitlab CI Environment with branch: $CI_COMMIT_REF_SLUG"; export env_ci=true
-    if [[ "$CI_COMMIT_REF_SLUG" == "stage" || "$CI_COMMIT_REF_SLUG" == "master" ]]; then
+    echo "Launching in Gitlab CI Environment with branch: $CI_COMMIT_REF_SLUG"; export env_ci=true
+    if [[ "$CI_COMMIT_REF_SLUG" == "prod-blue" ]]; then
         export TF_VAR_envtier='prod'
+        export TF_VAR_resourcetier='blue'
+    elif [[ "$CI_COMMIT_REF_SLUG" == "prod-green" ]]; then
+        export TF_VAR_envtier='prod'
+        export TF_VAR_resourcetier='green'
+    elif [[ "$CI_COMMIT_REF_SLUG" == "stage" || "$CI_COMMIT_REF_SLUG" == "master" ]]; then
+        echo "stage and master branch tests are disabled.  Exiting"
+        exit 1
     else
+        echo "Defaulting to dev environment.  branch did not match a production environment."
         export TF_VAR_envtier='dev'
+        export TF_VAR_resourcetier='grey'
     fi
+    echo "Using $TF_VAR_envtier-$TF_VAR_resourcetier resources"
     keys_path=~/firehawk-rollout-$TF_VAR_envtier/secrets/keys/.
     echo "...Copying $TF_VAR_envtier keys from: $keys_path to: $TF_VAR_secrets_path"
     cp -r $keys_path $TF_VAR_secrets_path/keys/.
@@ -277,6 +290,15 @@ parse_opts () {
                         opt="${OPTARG}"
                         tier
                         ;;
+                    green)
+                        export TF_VAR_resourcetier="green"
+                        ;;
+                    blue)
+                        export TF_VAR_resourcetier="blue"
+                        ;;
+                    grey)
+                        export TF_VAR_resourcetier="grey"
+                        ;;
                     force)
                         force=true
                         ;;
@@ -368,6 +390,7 @@ fi
 
 # init config override
 export config_override=$(to_abs_path $TF_VAR_secrets_path/config-override-$TF_VAR_envtier) # ...Config Override path $config_override.
+export config_path=$(to_abs_path $TF_VAR_secrets_path/config)
 
 echo_if_not_silent '...Check for configuration, init if not present.'
 if [ ! -f $config_override ]; then
@@ -416,6 +439,12 @@ else
     sed -i "s/^TF_VAR_CI_JOB_ID=.*$/TF_VAR_CI_JOB_ID=${CI_JOB_ID}/" $config_override # ...Enable the vpc.
 fi
 
+if [[ ! -z "$TF_VAR_resourcetier" ]]; then
+    echo "TF_VAR_resourcetier defined as: $TF_VAR_resourcetier. Setting TF_VAR_resourcetier_${TF_VAR_envtier} in $config_override to: $TF_VAR_resourcetier"
+    sed -i "s/^TF_VAR_resourcetier_${TF_VAR_envtier}=.*$/TF_VAR_resourcetier_${TF_VAR_envtier}=${TF_VAR_resourcetier}/" $config_override # ...Set the resource tier if defined.
+fi
+
+
 export TF_VAR_CI_JOB_ID=$(cat $config_override | sed -e '/.*TF_VAR_CI_JOB_ID=.*/!d')
 
 x=false
@@ -455,6 +484,11 @@ source_vars () {
         echo_if_not_silent "...Using variable file $var_file. No encryption/decryption needed for these contents."
         encrypt_mode="none"
         template_path="$TF_VAR_firehawk_path/config/templates/config-override.template" # These should be removed but need alter the system to do it properly.
+    elif [[ "$var_file" = "resources" ]]; then
+        var_file="resources-$TF_VAR_resourcetier"
+        echo_if_not_silent "...Using variable file $var_file. No encryption/decryption needed for these contents."
+        encrypt_mode="none"
+        template_path="$TF_VAR_firehawk_path/config/templates/resources.template" # These should be removed but need alter the system to do it properly.
     else
         printf "\nUnrecognised vault/variable file. \n$var_file\nExiting...\n"
         failed=true
@@ -716,24 +750,34 @@ if [[ "$var_file" = "secrets" ]] || [[ -z "$var_file" ]]; then
     source_vars 'secrets' "$encrypt_mode"; exit_test
     var_file = 'config-override'; exit_test
     source_vars 'config-override' 'none'; exit_test
+    var_file = 'resources'; exit_test
+    source_vars 'resources' 'none'; exit_test
 elif [[ "$var_file" = "init" ]]; then
     # assume secrets is the var file for default behaviour
     source_vars 'vagrant' 'none'; exit_test
     source_vars 'defaults' 'none'; exit_test
     source_vars 'config' 'none'; exit_test
     # override the var_file at this point.
-    # var_file = 'secrets'; exit_test
-    # source_vars 'secrets' "$encrypt_mode"; exit_test
     var_file = 'config-override'; exit_test
     source_vars 'config-override' 'none'; exit_test
+    var_file = 'resources'; exit_test
+    source_vars 'resources' 'none'; exit_test
 else
     source_vars "$var_file" "$encrypt_mode"; exit_test
 fi
 
 echo_if_not_silent "...Current pipeline vars:"
 echo_if_not_silent "TF_VAR_active_pipeline: $TF_VAR_active_pipeline"
-# echo "TF_VAR_key_name: $TF_VAR_key_name"
-# echo "TF_VAR_local_key_path: $TF_VAR_local_key_path"
+
+if [[ ! -z "$TF_VAR_resourcetier" ]]; then
+    echo "TF_VAR_resourcetier is defined.  using as the key to match resource conflicts: $TF_VAR_resourcetier"
+    export TF_VAR_conflictkey=$TF_VAR_resourcetier
+fi
+
+# echo "Ensure inventory directory exists: $TF_VAR_inventory"
+# mkdir -p $TF_VAR_inventory
+# echo "TF_VAR_aws_key_name: $TF_VAR_aws_key_name"
+# echo "TF_VAR_aws_private_key_path: $TF_VAR_aws_private_key_path"
 echo_if_not_silent "...Done."
 
 if [[ "$SHOWCOMMANDS" == true ]]; then set -x; fi # After finishing the script, we enable set -x to show input again.
