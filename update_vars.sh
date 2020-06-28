@@ -132,16 +132,18 @@ else
     if [[ "$CI_COMMIT_REF_SLUG" == "prod-blue" ]]; then
         export TF_VAR_envtier='prod'
         export TF_VAR_resourcetier='blue'
-    elif [[ "$CI_COMMIT_REF_SLUG" == "prod_green" ]]; then
+    elif [[ "$CI_COMMIT_REF_SLUG" == "prod-green" ]]; then
         export TF_VAR_envtier='prod'
         export TF_VAR_resourcetier='green'
     elif [[ "$CI_COMMIT_REF_SLUG" == "stage" || "$CI_COMMIT_REF_SLUG" == "master" ]]; then
         echo "stage and master branch tests are disabled.  Exiting"
         exit 1
     else
+        echo "Defaulting to dev environment.  branch did not match a production environment."
         export TF_VAR_envtier='dev'
         export TF_VAR_resourcetier='grey'
     fi
+    echo "Using $TF_VAR_envtier-$TF_VAR_resourcetier resources"
     keys_path=~/firehawk-rollout-$TF_VAR_envtier/secrets/keys/.
     echo "...Copying $TF_VAR_envtier keys from: $keys_path to: $TF_VAR_secrets_path"
     cp -r $keys_path $TF_VAR_secrets_path/keys/.
@@ -438,7 +440,7 @@ else
 fi
 
 if [[ ! -z "$TF_VAR_resourcetier" ]]; then
-    echo "TF_VAR_resourcetier defined. Setting TF_VAR_resourcetier_${TF_VAR_envtier} in $config_override to: $TF_VAR_resourcetier"
+    echo "TF_VAR_resourcetier defined as: $TF_VAR_resourcetier. Setting TF_VAR_resourcetier_${TF_VAR_envtier} in $config_override to: $TF_VAR_resourcetier"
     sed -i "s/^TF_VAR_resourcetier_${TF_VAR_envtier}=.*$/TF_VAR_resourcetier_${TF_VAR_envtier}=${TF_VAR_resourcetier}/" $config_override # ...Set the resource tier if defined.
 fi
 
