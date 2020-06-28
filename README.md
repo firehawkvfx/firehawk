@@ -6,7 +6,7 @@ Open Firehawk is an environment to create an on demand render farm for VFX with 
 
 We document steps you can follow for replication of Firehawk in another environment.
 
-Some of this documentation will share what you will need to learn if you are a TD / Pipeline TD new to running cloud resources.  I’d recommend learning Terraform and Ansible.  I recommend passively putting these tutorials on without necesarily following the steps to just expose yourself to the concepts and get an overview.  Going through the steps yourself is better.
+Some of this documentation will share what you will need to learn if you are a TD / Pipeline TD new to running cloud resources.  I'd recommend learning Terraform and Ansible.  I recommend passively putting these tutorials on without necesarily following the steps to just expose yourself to the concepts and get an overview.  Going through the steps yourself is even better.
 
 These are some good paid video courses to try which I have taken on my own learning path-
 
@@ -18,7 +18,7 @@ These are some good paid video courses to try which I have taken on my own learn
 ### Udemy:
 
 - Mastering Ansible
-- Deploying to AWS with Ansible and Terraform - linux academy.
+- Deploying to AWS with Ansible and Terraform - Linux Academy.
 
 ### Books:
 
@@ -128,9 +128,17 @@ Vagrant is a tool that manages your initial VM configuration onsite.  It allows 
 
 - Install [Hashicorp Vagrant](https://www.vagrantup.com/) and Virtualbox on your system (Linux / Mac OS recommended)
 
+## 3 Seperate Resource files for Green / Blue Deployment
+There are a minimum of 3 virtual resources that we deploy to.  Grey (Dev environment) resources are for testing.  Any deployment we use in production will use either Green or Blue resources.  This allows us to deploy an update to the Green or Blue environemnt using those resources, what ever is not currently in use.  This can allow us to test and fallback if the update is not ready for production.
+
+- The dev environment will be tested on the resources specified in the resources-grey file.
+- resources-blue and resources-green files are used for production.
+
+Currently the green blue deployment method being implemented will replace configuration on a workstation as each color is deployed.  We still need to implement Rez to be able to switch a users workstation / render nodes between these environments. The primary benefit of where this implementation is now is the reduced downtime that could be assciated with a failed deployment is much better than not having the current system.  The changes that need to be managed on a workstation are what software version you might be using for houdini, and what Deadline RCS host is being used for the monitor.
+
 ## Vagrant workstation for the dev environment
 
-When doing test deployments, we use seperate VM's from production.  This Vagrant VM creates a CentOS 7 VM with a Gnome GUI.  To isolate your workstation from testing, it is recommended that you use this VM here to simulate an isolated a workstation in a dev environment.  This protects your actual workstation from testing failed deplopyments that would affect productivity.  In the production environment, you would replace any IP adresses and ssh keys / passwords with those used for your actual workstation.  
+When doing test deployments, we can use seperate VM's from production systems to test on.  This Vagrant VM to test a workstation creates a CentOS 7 VM with a Gnome GUI.  To isolate your workstation from testing, it is recommended that you use this VM here to simulate an isolated a workstation in a dev environment.  This protects your actual workstation from testing failed deplopyments that would affect productivity.  In the production environment, you would replace any IP adresses and ssh keys / passwords with those used for your actual workstation in the resources-green and resources-blue files.  Alternatively you can allow password login and the authorization will be handled automatically with ssh keys.  After this, password use for ssh login is disabled for security reasons.
 
 - [Clone this repository to a seperate folder](https://github.com/queglay/vagrant-centos-gui) to create a workstation VM to test deployments in a dev environment
 ```
@@ -141,11 +149,7 @@ Vagrant up
 
 This login information will be entered into your encrypted secrets file in later steps, and is only temporarily used until the login is replaced with an ssh key for the deployuser (which will also be created automatically).  Once the ssh key is configured by Firehawk the password wont be usable for ssh access anymore.  Passwords are not recommend to be allowed for continued SSH access in a firehawk deployment.
 
-## 3 Seperate Resource files for Green / Blue Deployment
-There are a minimum of 3 virtual resources that we deploy to.  Grey (Dev environment) resources are for testing.  Any deployment we use in produciton will use either Green or Blue resources.  This allows us to deploy an update to the Green or Blue resource list, what ever is not in use, allowing us to test and fallback if the update is not ready for production.
 
-- The dev environment will be tested on the resources specified in the resources-grey file.
-- resources-blue and resources-green files are used for production.
 
 ## Thinkbox Usage Based Licensing
 To use Deadline in AWS, instances that reside in AWS are free.  But any onsite systems that render will require a licence.  If you wish to use any other UBL licenses (eg houdini Engine) they will also 
