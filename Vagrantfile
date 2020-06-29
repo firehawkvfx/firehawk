@@ -51,27 +51,7 @@ Vagrant.configure(2) do |config|
         # config.vm.define machine[:hostname] do |node|
             node.vm.box = machine[:box]
             node.vm.hostname = machine[:hostname]
-            if box_file_in.nil? || box_file_in.empty?
-                # versions can not be specified with direct file paths for .boxes
-                node.vm.box_version = "202005.12.0"
-                node.vm.provision "shell", inline: "echo 'create syscontrol group'"
-                node.vm.provision "shell", inline: "getent group syscontrol || sudo groupadd -g #{syscontrol_gid} syscontrol"
-                node.vm.provision "shell", inline: "sudo usermod -aG syscontrol vagrant"
-                node.vm.provision "shell", inline: "id -u deployuser &>/dev/null || sudo useradd -m -s /bin/bash -U deployuser -u #{deployuser_uid}"
-                node.vm.provision "shell", inline: "sudo usermod -aG syscontrol deployuser"
-                node.vm.provision "shell", inline: "sudo usermod -aG sudo deployuser"
-                # give deploy user initial passwordless sudo as with vagrant user.
-                node.vm.provision "shell", inline: "touch /etc/sudoers.d/98_deployuser; grep -qxF 'deployuser ALL=(ALL) NOPASSWD:ALL' /etc/sudoers.d/98_deployuser || echo 'deployuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/98_deployuser"
-                # allow ssh access as deploy user
-                # node.vm.provision "shell", inline: "mkdir -p /home/deployuser/.ssh; chown -R deployuser:deployuser /home/deployuser/.ssh; chmod 700 /home/deployuser/.ssh"
-                node.vm.provision "shell", inline: "cp -fr /home/vagrant/.ssh /home/deployuser/; chown -R deployuser:deployuser /home/deployuser/.ssh; chown deployuser:deployuser /home/deployuser/.ssh/authorized_keys"
-                ### Install yq to query yaml
-                node.vm.provision "shell", inline: "sudo snap install yq || echo 'Failure may indicate may have a duplicate mac/IP address on the same network.'"
-            end
-            # Allow deployuser to have passwordless sudo
-            node.vm.synced_folder ".", "/vagrant", create: true, owner: "vagrant", group: "vagrant"
-            node.vm.synced_folder ".", "/deployuser", owner: deployuser_uid, group: deployuser_uid, mount_options: ["uid=#{deployuser_uid}", "gid=#{deployuser_uid}"]
-            node.vm.synced_folder "../secrets", "/secrets", create: true, owner: "deployuser", group: "deployuser", mount_options: ["uid=#{deployuser_uid}", "gid=#{deployuser_uid}"]
+
             node.vm.define machine[:hostname]
             node.vagrant.plugins = ['vagrant-vbguest', 'vagrant-disksize', 'vagrant-reload']
             node.disksize.size = disk
@@ -99,6 +79,7 @@ Vagrant.configure(2) do |config|
                     node.vm.network "private_network", ip: machine[:ip], mac: mac_string, use_dhcp_assigned_default_route: true
                 end
             end
+
             
             node.vm.provider "virtualbox" do |vb|
                 vb.customize [ "guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-set-threshold", 1000 ]
@@ -115,7 +96,29 @@ Vagrant.configure(2) do |config|
             end
 
             if box_file_in.nil? || box_file_in.empty?
-                node.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive; sudo apt-get update"
+                # versions can not be specified with direct file paths for .boxes
+                node.vm.box_version = "202005.12.0"
+                node.vm.provision "shell", inline: "echo 'create syscontrol group'"
+                node.vm.provision "shell", inline: "getent group syscontrol || sudo groupadd -g #{syscontrol_gid} syscontrol"
+                node.vm.provision "shell", inline: "sudo usermod -aG syscontrol vagrant"
+                node.vm.provision "shell", inline: "id -u deployuser &>/dev/null || sudo useradd -m -s /bin/bash -U deployuser -u #{deployuser_uid}"
+                node.vm.provision "shell", inline: "sudo usermod -aG syscontrol deployuser"
+                node.vm.provision "shell", inline: "sudo usermod -aG sudo deployuser"
+                # give deploy user initial passwordless sudo as with vagrant user.
+                node.vm.provision "shell", inline: "touch /etc/sudoers.d/98_deployuser; grep -qxF 'deployuser ALL=(ALL) NOPASSWD:ALL' /etc/sudoers.d/98_deployuser || echo 'deployuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers.d/98_deployuser"
+                # allow ssh access as deploy user
+                # node.vm.provision "shell", inline: "mkdir -p /home/deployuser/.ssh; chown -R deployuser:deployuser /home/deployuser/.ssh; chmod 700 /home/deployuser/.ssh"
+                node.vm.provision "shell", inline: "cp -fr /home/vagrant/.ssh /home/deployuser/; chown -R deployuser:deployuser /home/deployuser/.ssh; chown deployuser:deployuser /home/deployuser/.ssh/authorized_keys"
+                ### Install yq to query yaml
+                node.vm.provision "shell", inline: "ip a; sudo snap install yq || echo 'Failure may indicate may have a duplicate mac/IP address on the same network.'"
+            end
+            # Allow deployuser to have passwordless sudo
+            node.vm.synced_folder ".", "/vagrant", create: true, owner: "vagrant", group: "vagrant"
+            node.vm.synced_folder ".", "/deployuser", owner: deployuser_uid, group: deployuser_uid, mount_options: ["uid=#{deployuser_uid}", "gid=#{deployuser_uid}"]
+            node.vm.synced_folder "../secrets", "/secrets", create: true, owner: "deployuser", group: "deployuser", mount_options: ["uid=#{deployuser_uid}", "gid=#{deployuser_uid}"]
+
+            if box_file_in.nil? || box_file_in.empty?
+                node.vm.provision "shell", inline: "ip a; export DEBIAN_FRONTEND=noninteractive; sudo apt-get update"
                 node.vm.provision "shell", inline: "sudo mkdir -p /deployuser/tmp/apt/$(hostname)"
                 node.vm.provision "shell", inline: "sudo chmod u=rwX,g=rwX,o=rwX,g+s /deployuser/tmp/apt/$(hostname)"
                 node.vm.provision "shell", inline: "sudo mkdir -p /deployuser/tmp/apt/$(hostname)/partial"
