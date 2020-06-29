@@ -63,7 +63,7 @@ allow_interrupt=insertvalue
 TF_VAR_openfirehawkserver=insertvalue
 
 # TF_VAR_deadline_proxy_root_dir:
-# This is the address and port for clients to reach the Deadline RCS on the openfirehawk server in a dev environment.  After init, the default containing the var auto should resolve to an actual IP in this file and not be 'auto'.
+# This is the address and port for clients to reach the Deadline RCS on the openfirehawk server in a dev environment.  After init, the default containing the var  should resolve to an actual IP in this file and not be 'auto'.
 # eg: TF_VAR_deadline_proxy_root_dir=auto:4433
 TF_VAR_deadline_proxy_root_dir=insertvalue
 

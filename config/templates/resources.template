@@ -21,28 +21,37 @@ TF_VAR_workstation_address=insertvalue
 TF_VAR_workstation_ethernet_interface=insertvalue
 
 # TF_VAR_gateway_mac: 
-# A randomly generated mac address for the VM that vagrant will use for the VM's bridged network adapter. Your onsite router will assign an ip based on this mac, and you should ensure that it is static/reserved within your router for a persistent IP address. Unicast mac addresses must not have an odd second digit, and this is required. You can use the script in scripts/random_mac_unicast.sh to generate a mac adress and use it here.  Using a peristent mac addressnis useful for consistent licencing handling.  Dev and Prod VMs must have unique mac adress values or they will not function on the same network.  For this reason, we recomend authorising all licencing on the production vm only, and route all licence requests to the production vm since the production vm should run always and it will be a more stable host.
+# A randomly generated mac address for the VM that vagrant will use for the VM's bridged network adapter. Your onsite router will assign an ip based on this mac.
+# You can use the script in scripts/random_mac_unicast.sh to generate a mac adress.
+# You should ensure that it is static/reserved within your router for a persistent IP address. Unicast mac addresses must not have an odd second digit - this is required and handled by the random_mac_unicast.sh script.
+# When using an NFS Share / onsite NAS, you will have to configure static routes on your router so that the NAS can reach the cloud subnets through the firehawk gateway vm.
+# No two systems can function with the same mac address values on the same network.
 # default: TF_VAR_gateway_mac=CE4C7CD0284F
 TF_VAR_gateway_mac=insertvalue
 
+# TF_VAR_vpc_cidr:
+# This is the IP range (CIDR notation) of your cloud subnet that all AWS private addresses will reside in.
+# default: TF_VAR_vpc_cidr=10.1.0.0/16
+TF_VAR_vpc_cidr=insertvalue
+
 # TF_VAR_private_subnet1:
 # The dev IP range for private subnet 1 for workers.  This subnet is accessed via VPN or bastion hosts.
-# default: TF_VAR_private_subnet1=10.0.11.0/24
+# default: TF_VAR_private_subnet1=10.1.1.0/24
 TF_VAR_private_subnet1=insertvalue
 
 # TF_VAR_private_subnet2:
 # The dev IP range for private subnet 2 for workers.  This subnet is accessed via VPN or bastion hosts.
-# default: TF_VAR_private_subnet2=10.0.12.0/24
+# default: TF_VAR_private_subnet2=10.1.2.0/24
 TF_VAR_private_subnet2=insertvalue
 
 # TF_VAR_public_subnet1:
 # The dev IP range for public subnet 1 for public facing  systems.  examples are your VPN access server instance, or bastion host for provisioning other instances in the private network.
-# default: TF_VAR_public_subnet1=10.0.201.0/24
+# default: TF_VAR_public_subnet1=10.1.101.0/24
 TF_VAR_public_subnet1=insertvalue
 
 # TF_VAR_public_subnet2:
 # The dev IP range for public subnet 2 for public facing systems.  examples are your VPN access server instance, or bastion host for provisioning other instances in the private network.
-# default: TF_VAR_public_subnet2=10.0.202.0/24
+# default: TF_VAR_public_subnet2=10.1.102.0/24
 TF_VAR_public_subnet2=insertvalue
 
 # TF_VAR_vpn_cidr:
@@ -53,7 +62,7 @@ TF_VAR_vpn_cidr=insertvalue
 # TF_VAR_softnas1_private_ip1:
 # The private ip to install softnas dev with for its first interface.
 # When using softnas with high availability and failover, a 2nd interface is used for replication to a 2nd softnas instance.
-# default: TF_VAR_softnas1_private_ip1=10.0.11.11
+# default: TF_VAR_softnas1_private_ip1=10.1.1.11
 TF_VAR_softnas1_private_ip1=insertvalue
 
 # TF_VAR_softnas_instance_type:
