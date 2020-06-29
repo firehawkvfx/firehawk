@@ -466,29 +466,29 @@ source_vars () {
     if [[ -z "$var_file" ]] || [[ "$var_file" = "secrets" ]]; then
         var_file="secrets-general"
         echo_if_not_silent "...Using vault file $var_file"
-        template_path="$TF_VAR_firehawk_path/config/templates/secrets-general.template"
+        template_path="$TF_VAR_firehawk_path/config/templates/$var_file.template"
     elif [[ "$var_file" = "vagrant" ]]; then
         echo_if_not_silent '...Using variable file vagrant. No encryption/decryption needed for these contents.'
         encrypt_mode="none"
-        template_path="$TF_VAR_firehawk_path/config/templates/vagrant.template"
+        template_path="$TF_VAR_firehawk_path/config/templates/$var_file.template"
     elif [[ "$var_file" = "config" ]]; then
         echo_if_not_silent '...Using variable file config. No encryption/decryption needed for these contents.'
         encrypt_mode="none"
-        template_path="$TF_VAR_firehawk_path/config/templates/config.template"
+        template_path="$TF_VAR_firehawk_path/config/templates/$var_file.template"
     elif [[ "$var_file" = "defaults" ]]; then
         echo_if_not_silent '...Using variable file defaults. No encryption/decryption needed for these contents.'
         encrypt_mode="none"
-        template_path="$TF_VAR_firehawk_path/config/templates/defaults.template" # These should be removed but need alter the system to do it properly.
+        template_path="$TF_VAR_firehawk_path/config/templates/$var_file.template" # These should be removed but need alter the system to do it properly.
     elif [[ "$var_file" = "config-override" ]]; then
         var_file="config-override-$TF_VAR_envtier"
         echo_if_not_silent "...Using variable file $var_file. No encryption/decryption needed for these contents."
         encrypt_mode="none"
-        template_path="$TF_VAR_firehawk_path/config/templates/config-override.template" # These should be removed but need alter the system to do it properly.
+        template_path="$TF_VAR_firehawk_path/config/templates/$var_file.template" # These should be removed but need alter the system to do it properly.
     elif [[ "$var_file" = "resources" ]]; then
         var_file="resources-$TF_VAR_resourcetier"
         echo_if_not_silent "...Using variable file $var_file. No encryption/decryption needed for these contents."
         encrypt_mode="none"
-        template_path="$TF_VAR_firehawk_path/config/templates/resources.template" # These should be removed but need alter the system to do it properly.
+        template_path="$TF_VAR_firehawk_path/config/templates/$var_file.template" # These should be removed but need alter the system to do it properly.
     else
         printf "\nUnrecognised vault/variable file. \n$var_file\nExiting...\n"
         failed=true
