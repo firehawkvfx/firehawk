@@ -221,24 +221,20 @@ These address ranges refer to the DHCP addresses that Open VPN will automaticaly
 
 ## Replicate a Firehawk clone and manage your secrets repository
 
-- Login to github and view the [template repository](https://github.com/firehawkvfx/firehawk-template)
-- Select [Use This Template](https://github.com/firehawkvfx/firehawk-template/generate)
-- Give it a name like ``firehawk-deploy``
-
-**WARNING: NOT MAKING THE REPOSITORY PRIVATE IS A SECURITY RISK.**
-- **Make sure the new repository is Private**
-
-- Clone this new private repository to your system / somewhere in your home dir.  This first deployment will be a dev test deployment.
+- Clone this repository to your system / somewhere in your home dir.  This first deployment will be a dev test deployment.
   ```
-  git clone --recurse-submodules -j8 https://github.com/{my user}/firehawk-deploy.git firehawk-deploy-dev
+  git clone https://github.com/firehawkvfx/firehawk-template.git firehawk-deploy-dev
   ```
-- Submodules are not inherited with templates.  Add the submodule
+- Update the repository and start a new dev branch for your secrets.
   ```
-  cd firehawk-deploy-dev; git submodule add https://github.com/firehawkvfx/firehawk.git
-  git submodule update --init --recursive
+  cd firehawk-deploy-dev; ./firehawk-clone.sh
   ```
 
-This provides a structure for your encrypted secrets and configuration, which exist outside of the firehawk submodule.  The firehawk submodule is a public submodule, and it can exist as a fork or a clone.  This allows the code to be shared while keeping configuration and secrets seperate.
+- Optional: You may wish to push to another private repository which you can create on github. **Make sure this Github repository is Private** 
+
+**WARNING: NOT MAKING THE REMOTE REPOSITORY PRIVATE IS A SECURITY RISK.**
+
+This provides a structure for your encrypted secrets and configuration, which exist outside of the firehawk submodule.  The firehawk submodule is public, and it can exist as a fork or a clone.  This allows the code to be shared while keeping configuration and secrets seperate.
 
 ## Configuration
 
