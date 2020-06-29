@@ -7,10 +7,10 @@
 
 clear
 
-RED='\033[0;31m' # Red Text
-GREEN='\033[0;32m' # Green Text
-BLUE='\033[0;34m' # Blue Text
-NC='\033[0m' # No Color
+export RED='\033[0;31m' # Red Text
+export GREEN='\033[0;32m' # Green Text
+export BLUE='\033[0;34m' # Blue Text
+export NC='\033[0m' # No Color
 
 
 if [ ! -z $HISTFILE ]; then
@@ -31,14 +31,14 @@ function to_abs_path {
 }
 
 # This is the directory of the current script
-SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-TEMPDIR="$SCRIPTDIR/../tmp"
+export SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+export TEMPDIR="$SCRIPTDIR/../tmp"
 
 mkdir -p "$TEMPDIR"
 
 printf "\n...checking scripts directory at $SCRIPTDIR\n\n"
 
-configure=
+export configure=
 
 PS3='Do you wish to configure the Ansible Control VM or configure secrets (To be done from within the Openfirehawk Server Vagrant VM only)? '
 options=("Configure Vagrant" "Configure General Config" "Configure Secrets" "Quit")
@@ -47,26 +47,26 @@ do
     case $opt in
         "Configure Vagrant")
             printf "\nThe OpenFirehawk Server is launched with Vagrant.  Some environment variables must be configured uniquely to your environment.\n\n"
-            configure='vagrant'
-            input=$(to_abs_path $SCRIPTDIR/../config/templates/vagrant.template)
-            output_tmp=$(to_abs_path $SCRIPTDIR/../tmp/vagrant-tmp)
-            output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/vagrant)
+            export configure='vagrant'
+            export input=$(to_abs_path $SCRIPTDIR/../config/templates/vagrant.template)
+            export output_tmp=$(to_abs_path $SCRIPTDIR/../tmp/vagrant-tmp)
+            export output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/vagrant)
             break
             ;;
         "Configure General Config")
             printf "\nSome general Config like IP addresses of your hosts is needed.  Some environment variables here must be configured uniquely to your environment.\n\n"
-            configure='config'
-            input=$(to_abs_path $SCRIPTDIR/../config/templates/config.template)
-            output_tmp=$(to_abs_path $SCRIPTDIR/../tmp/config-tmp)
-            output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/config)
+            export configure='config'
+            export input=$(to_abs_path $SCRIPTDIR/../config/templates/config.template)
+            export output_tmp=$(to_abs_path $SCRIPTDIR/../tmp/config-tmp)
+            export output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/config)
             break
             ;;
         "Configure Secrets")
             printf "\nThis should only be done within the Ansible Control Vagrant VM. Provisioning infrastructure requires configuration using secrets based on the secrets.template file.  These will be queried for your own unique values and should always be encrypted before you commit them in your private repository.\n\n"
-            configure='secrets'
-            input=$(to_abs_path $SCRIPTDIR/../config/templates/secrets-general.template)
-            output_tmp=$(to_abs_path $SCRIPTDIR/../tmp/secrets-general-tmp)
-            output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/secrets-general)
+            export configure='secrets'
+            export input=$(to_abs_path $SCRIPTDIR/../config/templates/secrets-general.template)
+            export output_tmp=$(to_abs_path $SCRIPTDIR/../tmp/secrets-general-tmp)
+            export output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/secrets-general)
             break
             ;;
         "Quit")

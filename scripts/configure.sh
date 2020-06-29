@@ -46,6 +46,7 @@ if [[ -f "$output_complete" ]]; then
 fi
 
 #clear output_tmp
+echo "Test write permissions for path: $output_tmp"
 touch $output_tmp
 rm $output_tmp
 

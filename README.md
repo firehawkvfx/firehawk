@@ -241,7 +241,7 @@ This provides a structure for your encrypted secrets and configuration, which ex
 These steps allow us to configure a setup in the 'dev' environment to test before you can deploy in the 'prod' environment, in a seperate folder.
 You will have two versions of your infrastructure, we make changes in dev branches and test them before merging and deploying to production.
 
-- Download the deadline installer tar.  Use the version specified in ``firehawk/config/templates/config.template``
+- Download the right version of the AWS Deadline Installer tar.  Use the version specified in ``firehawk/config/templates/config.template``
 - Place the .tar file in the local firehawk/downloads folder.  Do not use later versions of deadline until you have a stable deployment.
 - If you are on Mac OS, install homebrew and ensure you have the command envsubst
   ```
