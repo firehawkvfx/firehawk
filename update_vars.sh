@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 set +x
 # the purpose of this script is to:
 # 1) set envrionment variables as defined in the encrypted secrets/secrets-prod file
@@ -14,6 +15,8 @@ BLUE='\033[0;34m' # Blue Text
 NC='\033[0m' # No Color        
 # the directory of the current script
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+
 
 printf "\n${RED}Warning: Currently virtual box requires a version lock after installing:${NC}\n"
 echo "6.1.10 had problems with centos 7 and gnome 2020/07/07. Ensure you use the version below, or update with caution:"
@@ -306,28 +309,32 @@ parse_opts () {
                         export TF_VAR_resourcetier="grey"
                         ;;
                     force)
+                        OPTIND=$(( $OPTIND + 1 ))
                         force=true
                         ;;
                     silent)
                         silent=true
                         ;;
                     vagrant)
-                        val="vagrant"; OPTIND=$(( $OPTIND + 1 ))
+                        val="vagrant"
+                        #; OPTIND=$(( $OPTIND + 1 ))
                         opt="${OPTARG}"
                         var_file
                         ;;
                     secrets)
-                        val="secrets"; OPTIND=$(( $OPTIND + 1 ))
+                        val="secrets"
+                        #; OPTIND=$(( $OPTIND + 1 ))
                         opt="${OPTARG}"
                         var_file
                         ;;
                     init)
-                        val="init"; OPTIND=$(( $OPTIND + 1 ))
+                        val="init"
                         opt="${OPTARG}"
                         var_file
+                        force=true # init must be safe across platforms and mac os must use force to avoid env var substitution errors.
                         ;;
                     decrypt)
-                        val="decrypt"; OPTIND=$(( $OPTIND + 1 ))
+                        val="decrypt"
                         opt="vault"
                         vault
                         ;;
@@ -356,6 +363,8 @@ parse_opts () {
     done
 }
 parse_opts "$@"
+
+if [[ "$verbose" == true ]]; then echo "force: $force"; fi
 
 # if any parsing failed this is the correct method to parse an exit code of 1 whether executed or sourced
 if [[ "$verbose" == true ]]; then echo 'Detect being sourced...'; fi
@@ -434,7 +443,7 @@ else
 fi
 
 if [[ ! -z "$TF_VAR_resourcetier" ]]; then
-    echo "TF_VAR_resourcetier defined as: $TF_VAR_resourcetier. Setting TF_VAR_resourcetier_${TF_VAR_envtier} in $config_override to: $TF_VAR_resourcetier"
+    echo "TF_VAR_resourcetier defined as: $TF_VAR_resourcetier. Updating TF_VAR_resourcetier_${TF_VAR_envtier} in $config_override to: $TF_VAR_resourcetier"
     sed -i "s/^TF_VAR_resourcetier_${TF_VAR_envtier}=.*$/TF_VAR_resourcetier_${TF_VAR_envtier}=${TF_VAR_resourcetier}/" $config_override # ...Set the resource tier if defined.
 fi
 
@@ -496,34 +505,20 @@ source_vars () {
 
     # After a var file is source we also store the modified date of that file as a dynamic variable name.  if the modified date of the file on the next run is identical to the environment variable, then it doesn't need to be sourced again.  This allows detection of the contents being changed and sourcing the file if true.
 
-    if [[ "$verbose" == true ]]; then echo 'check varfile...'; fi
     var_file_basename="$(echo $var_file | tr '-' '_')"
-    if [[ "$verbose" == true ]]; then echo "check var_file_basename: $var_file_basename"; fi
-    
     var_file="$(to_abs_path $TF_VAR_secrets_path/$var_file)"; exit_test
-    if [[ "$verbose" == true ]]; then echo "check varfile: $var_file"; fi
-    set -x
-    if [[ "$verbose" == true ]]; then echo 'Check modified date...'; fi
-    # echo "...Test modified date"
-
-    bluevar='345'
-    varname='bluevar'
-    echo ${!varname}
-
     file_modified_date=$(date -r $var_file)
-    
     var_modified_date_name="modified_date_${var_file_basename}"
-    # declare var_modified_date_name=modified_date_${var_file_basename}
     
-    if [[ "$verbose" == true ]]; then echo "var_modified_date_name: $var_modified_date_name"; fi
-    if [ -z "${!var_modified_date_name}" ]; then
-        declare modified_date_${var_file_basename}='None'
+    if [[ "$verbose" == true ]]; then echo "skip if force true. force: $force"; fi
+
+    var_modified_date='none'
+    if [[ "$force" == "false" ]]; then
+        var_modified_date="${!var_modified_date_name}"
     fi
 
-    var_modified_date=${!var_modified_date_name}
-    if [[ "$verbose" == true ]]; then echo "var_modified_date: $var_modified_date"; fi
-    # echo "existing modified date variable= ${var_modified_date}"
-    # echo "compare with file modified date= ${file_modified_date}"
+
+    if [[ "$verbose" == true ]]; then echo "Check if encryption required."; fi
 
     encrypt_required=false
     if [[ $encrypt_mode = "encrypt" ]]; then
@@ -537,7 +532,20 @@ source_vars () {
         fi
     fi
 
-    if [ "$var_modified_date" == "$file_modified_date" ] && [ ! -z "$var_modified_date" ] && [[ "$encrypt_mode" != "decrypt" ]] && [[ $encrypt_required == false ]] && [[ $force == false ]]; then
+    if [[ "$verbose" == true ]]; then
+        echo "Compare modified."
+        echo "var_modified_date: $var_modified_date"
+        echo "file_modified_date: $file_modified_date"
+        echo "$encrypt_mode"
+        echo $encrypt_required
+        echo $force
+        if [ ! -z "$var_modified_date" ]; then echo 'pass var_modified_date'; fi
+        if [ "$var_modified_date"=="$file_modified_date" ]; then echo 'pass file_modified_date'; fi
+        if [[ "$encrypt_mode" != "decrypt" ]]; then echo 'pass'; fi
+        if [[ "$encrypt_required" == false ]]; then echo 'pass'; fi
+        if [[ "$force" == false ]]; then echo 'pass'; fi
+    fi
+    if [ ! -z "$var_modified_date" ] && [ "$var_modified_date"=="$file_modified_date" ] && [[ "$encrypt_mode" != "decrypt" ]] && [[ "$encrypt_required" == false ]] && [[ "$force" == false ]]; then
         printf "\n${BLUE}Skipping source ${var_file_basename}: last time this var file was sourced the modified date matches the current file.  No need to source the file again.${NC}\n"
     else
         printf "\n${GREEN}Will source ${var_file_basename}. encrypt_mode = $encrypt_mode ${NC}\n"
@@ -700,7 +708,7 @@ source_vars () {
         # # this python script generates mappings based on the current environment.
         # # any var ending in _prod or _dev will be stripped and mapped based on the envtier
         python $TF_VAR_firehawk_path/scripts/envtier_vars.py; exit_test
-        envsubst < "$TF_VAR_firehawk_path/tmp/envtier_mapping.txt" > "$TF_VAR_firehawk_path/tmp/envtier_exports.txt"
+        envsubst < "$TF_VAR_firehawk_path/tmp/envtier_mapping.txt" > "$TF_VAR_firehawk_path/tmp/envtier_exports.txt"; exit_test
 
         # Next- using the current envtier environment, evaluate the variables for the that envrionment.  
         # variables ending in _dev or _prod will take precedence based on the envtier, and be set to keys stripped of the appended _dev or _prod namespace
@@ -778,6 +786,7 @@ elif [[ "$var_file" = "init" ]]; then
     # override the var_file at this point.
     var_file = 'config-override'; exit_test
     source_vars 'config-override' 'none'; exit_test
+    if [ -z "$TF_VAR_resourcetier" ]; then { echo "Error: TF_VAR_resourcetier not defined"; exit 0; }; fi
     var_file = 'resources'; exit_test
     source_vars 'resources' 'none'; exit_test
 else
