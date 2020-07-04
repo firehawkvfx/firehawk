@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-set +x
 # the purpose of this script is to:
 # 1) set envrionment variables as defined in the encrypted secrets/secrets-prod file
 # 2) consistently rebuild the secrets-general.template file based on the variable names found in the secrets-prod file.
