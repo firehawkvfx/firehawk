@@ -1,11 +1,12 @@
-#!/bin/bash
+#!/usr/bin/env bash
+
 # This script is a first stage install that takes a password and uses it to handle encryption in future stages
 # echo "Enter Secrets Decryption Password..."
 unset HISTFILE
 
 SECONDS=0
 
-printf "\nRunning ansiblecontrol with $1...\n"
+printf "\nRunning env $1...\n"
 
 set +x # don't echo bash commands
 # # This block allows you to echo a line number for a failure.
@@ -269,9 +270,11 @@ fi
 
 # If box file in is defined, then vagrant will use this file in place of the standard image.
 if [[ ! -z "$box_file_in" ]] ; then
-    source ./update_vars.sh --$TF_VAR_envtier --box-file-in "$box_file_in" --vagrant
+    echo "Source env vars with box file."
+    source ./update_vars.sh --$TF_VAR_envtier --box-file-in "$box_file_in" --init
 else
-    source ./update_vars.sh --$TF_VAR_envtier --vagrant
+    echo "Source env vars"
+    source ./update_vars.sh --$TF_VAR_envtier --init
 fi
 echo "...Finished sourcing"
 

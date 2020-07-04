@@ -35,6 +35,7 @@ echo_if_not_silent "Running ansiblecontrol with $1..."
 
 # These paths and vars are necesary to locating other scripts.
 export TF_VAR_firehawk_path=$SCRIPTDIR
+echo_if_not_silent "TF_VAR_firehawk_path: $TF_VAR_firehawk_path"
 # source an exit test to bail if non zero exit code is produced.
 . $TF_VAR_firehawk_path/scripts/exit_test.sh
 
