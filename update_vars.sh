@@ -15,7 +15,6 @@ NC='\033[0m' # No Color
 # the directory of the current script
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-
 printf "\n${RED}Warning: Currently virtual box requires a version lock after installing:${NC}\n"
 echo "6.1.10 had problems with centos 7 and gnome 2020/07/07. Ensure you use the version below, or update with caution:"
 echo "yum install VirtualBox-6.1-6.1.8_137981_el7-1.x86_64 versionlock; yum versionlock add VirtualBox-6.1-6.1.8_137981_el7-1.x86_64"
@@ -36,16 +35,20 @@ echo_if_not_silent "Running ansiblecontrol with $1..."
 export TF_VAR_firehawk_path=$SCRIPTDIR
 # source an exit test to bail if non zero exit code is produced.
 . $TF_VAR_firehawk_path/scripts/exit_test.sh
-function to_abs_path {
-    local target="$1"
-    if [ "$target" == "." ]; then
-        echo "$(readlink -m $(pwd))"
-    elif [ "$target" == ".." ]; then
-        echo "$(readlink -m $(dirname "$(pwd)"))"
-    else
-        echo "$(readlink -m $(cd "$(dirname "$1")"; pwd)/$(basename "$1"))"
-    fi
+
+to_abs_path() {
+  OURPWD=$PWD
+  cd "$(dirname "$1")"
+  LINK=$(readlink "$(basename "$1")")
+  while [ "$LINK" ]; do
+    cd "$(dirname "$LINK")"
+    LINK=$(readlink "$(basename "$1")")
+  done
+  REALPATH="$PWD/$(basename "$1")"
+  cd "$OURPWD"
+  echo "$REALPATH"
 }
+
 export TF_VAR_secrets_path="$(to_abs_path $TF_VAR_firehawk_path/../secrets)"; exit_test
 
 mkdir -p $TF_VAR_firehawk_path/tmp/
@@ -118,6 +121,7 @@ verbose () {
             v)
                 echo "Parsing option: '-${optchar}'" >&2
                 echo "verbose mode"
+                set -x
                 verbose=true
                 ;;
         esac
@@ -219,6 +223,8 @@ function help {
 
 force=false
 silent=false
+
+if [[ "$verbose" == true ]]; then echo 'Parse opts'; fi
 
 parse_opts () {
     local OPTIND
@@ -352,35 +358,23 @@ parse_opts () {
 parse_opts "$@"
 
 # if any parsing failed this is the correct method to parse an exit code of 1 whether executed or sourced
+if [[ "$verbose" == true ]]; then echo 'Detect being sourced...'; fi
 
-[ "$BASH_SOURCE" == "$0" ] &&
-    echo "This file is meant to be sourced, not executed" && 
-        exit 30
+(return 0 2>/dev/null) || { echo "Error: Script ${BASH_SOURCE[0]} is meant to be sourced, not executed"; exit $ERRCODE; }
+
+if [[ "$verbose" == true ]]; then echo 'Detect if failed.'; fi
 
 if [[ $failed = true ]]; then    
     return 88
 fi
 
+if [[ "$verbose" == true ]]; then echo 'mkdir defaults'; fi
+
 mkdir -p "$TF_VAR_firehawk_path/config/defaults"
 template_path="$TF_VAR_firehawk_path/config/templates/secrets-general.template"
 
 echo_if_not_silent '...Get secrets from env'
-# # map environment secret for current env
-# if [[ "$TF_VAR_envtier" = 'dev' ]]; then
-#     if [[ ! -z "$firehawksecret_dev" ]]; then
-#         echo "...Aquiring firehawksecret from dev"
-#         export firehawksecret="$firehawksecret_dev"
-#         export testsecret="$testsecret_dev"
-#         echo "...Aquired firehawksecret from dev"
-#     fi
-# elif [[ "$TF_VAR_envtier" = 'prod' ]]; then
-#     if [[ ! -z "$firehawksecret_prod" ]]; then
-#         echo "...Aquiring firehawksecret from prod"
-#         export firehawksecret="$firehawksecret_prod"
-#         export testsecret="$testsecret_prod"
-#         echo "...Aquired firehawksecret from prod"
-#     fi
-# fi
+
 if [[ ! -z "$firehawksecret" ]]; then
     echo "...Aquiring firehawksecret"
     export firehawksecret="$firehawksecret"
@@ -494,19 +488,40 @@ source_vars () {
         failed=true
     fi
 
+    
+    if [[ "$verbose" == true ]]; then echo 'Check if failed...'; fi
     if [[ $failed = true ]]; then
         return 88
     fi
 
     # After a var file is source we also store the modified date of that file as a dynamic variable name.  if the modified date of the file on the next run is identical to the environment variable, then it doesn't need to be sourced again.  This allows detection of the contents being changed and sourcing the file if true.
 
+    if [[ "$verbose" == true ]]; then echo 'check varfile...'; fi
     var_file_basename="$(echo $var_file | tr '-' '_')"
+    if [[ "$verbose" == true ]]; then echo "check var_file_basename: $var_file_basename"; fi
+    
     var_file="$(to_abs_path $TF_VAR_secrets_path/$var_file)"; exit_test
-
+    if [[ "$verbose" == true ]]; then echo "check varfile: $var_file"; fi
+    set -x
+    if [[ "$verbose" == true ]]; then echo 'Check modified date...'; fi
     # echo "...Test modified date"
+
+    bluevar='345'
+    varname='bluevar'
+    echo ${!varname}
+
     file_modified_date=$(date -r $var_file)
+    
     var_modified_date_name="modified_date_${var_file_basename}"
-    var_modified_date="${!var_modified_date_name}"
+    # declare var_modified_date_name=modified_date_${var_file_basename}
+    
+    if [[ "$verbose" == true ]]; then echo "var_modified_date_name: $var_modified_date_name"; fi
+    if [ -z "${!var_modified_date_name}" ]; then
+        declare modified_date_${var_file_basename}='None'
+    fi
+
+    var_modified_date=${!var_modified_date_name}
+    if [[ "$verbose" == true ]]; then echo "var_modified_date: $var_modified_date"; fi
     # echo "existing modified date variable= ${var_modified_date}"
     # echo "compare with file modified date= ${file_modified_date}"
 
@@ -594,6 +609,7 @@ source_vars () {
             return 88
         fi
 
+        if [[ "$verbose" == true ]]; then echo 'Check if encrypt...'; fi
         # vault arg will set encryption mode
         if [[ $encrypt_mode = "encrypt" ]]; then
             echo "Encrypting Vault..."
@@ -731,6 +747,7 @@ source_vars () {
     fi
 }
 
+if [[ "$verbose" == true ]]; then echo 'Detect env'; fi
 if [[ "$TF_VAR_envtier" = 'dev' ]] || [[ "$TF_VAR_envtier" = 'prod' ]]; then
     # check for valid environment
     echo_if_not_silent "...Using environment $TF_VAR_envtier"
@@ -754,6 +771,7 @@ if [[ "$var_file" = "secrets" ]] || [[ -z "$var_file" ]]; then
     source_vars 'resources' 'none'; exit_test
 elif [[ "$var_file" = "init" ]]; then
     # assume secrets is the var file for default behaviour
+    if [[ "$verbose" == true ]]; then echo 'source vagrant'; fi
     source_vars 'vagrant' 'none'; exit_test
     source_vars 'defaults' 'none'; exit_test
     source_vars 'config' 'none'; exit_test
