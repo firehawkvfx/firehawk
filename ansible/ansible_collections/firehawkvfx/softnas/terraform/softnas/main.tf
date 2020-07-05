@@ -828,21 +828,6 @@ EOT
   }
 }
 
-# Start instance so that s3 disks can be attached
-resource "null_resource" "start-softnas-after-create-ami" {
-  count = local.create_ami && var.softnas_storage ? 1 : 0
-
-  #depends_on         = ["aws_volume_attachment.softnas1_ebs_att"]
-  depends_on = [
-    null_resource.provision_softnas,
-    null_resource.create_ami,
-  ]
-  provisioner "local-exec" {
-    interpreter = ["/bin/bash", "-c"]
-    command = "aws ec2 start-instances --instance-ids ${aws_instance.softnas1.*.id[count.index]}"
-  }
-}
-
 # If ebs volumes are attached, don't automatically import the pool. manual intervention may be required.
 locals {
   import_pool = true
@@ -869,19 +854,21 @@ output "softnas1_private_ip" {
   value = aws_instance.softnas1.*.private_ip
 }
 
-# there is currently too much activity here, but due to the way dependencies work in tf 0.11 its better to keep it in one block.
-# in tf .12 we should split these up and handle dependencies properly.
+# This is the first time volumes get provsisioned.  in future events after sleep / destroy volumes, the process is different to here.
 resource "null_resource" "provision_softnas_volumes" {
-  count      = ( !var.sleep && var.softnas_storage ) ? 1 : 0
+  count      = ( var.softnas_storage ) ? 1 : 0
   depends_on = [
     null_resource.provision_softnas,
-    null_resource.start-softnas-after-create-ami,
     null_resource.create_ami,
   ]
 
-  # "null_resource.start-softnas-after-ebs-attach"
   triggers = {
     instanceid = "${join(",", aws_instance.softnas1.*.id)}"
+  }
+
+  provisioner "local-exec" { # ensure instance is started
+    interpreter = ["/bin/bash", "-c"]
+    command = "aws ec2 start-instances --instance-ids ${aws_instance.softnas1.*.id[count.index]}"
   }
 
   provisioner "remote-exec" {
