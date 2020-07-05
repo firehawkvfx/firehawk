@@ -243,10 +243,11 @@ You will have two versions of your infrastructure, we make changes in dev branch
 
 - Download the right version of the AWS Deadline Installer tar.  Use the version specified in ``firehawk/config/templates/config.template``
 - Place the .tar file in the local firehawk/downloads folder.  Do not use later versions of deadline until you have a stable deployment.
-- If you are on Mac OS, install homebrew and ensure you have the command envsubst
+- If you are on Mac OS, install homebrew and ensure you have the commands ``envsubst`` and ``ts``
   ```
   brew install gettext
   brew link --force gettext
+  brew install moreutils
   ```
 - We will need 4 random mac adresses, 2 for dev and 2 for production.  Keep them somewhere temporarily for us to copy into the vagrant config later.
   ```
@@ -322,7 +323,7 @@ You will have two versions of your infrastructure, we make changes in dev branch
 
 ## Saving costs with sleep
 When we deploy to cloud above, we specify if we want to keep the Storage EBS volumes or not.  Specify this to be explicit with what you want to happen to those volumes when you put the deployment to sleep.
-- Once succesful, put the deployument to sleep to save costs.
+- Once succesful, put the deployment to sleep to save costs.
   ```
   source ./update_vars.sh --dev --init
   ./firehawk.sh --sleep --softnas-destroy-volumes true
@@ -334,7 +335,7 @@ When we deploy to cloud above, we specify if we want to keep the Storage EBS vol
   ```
 
 ## Destroying the deployment
-- The terraform deployment can be destroyed, leaving no resources or users in the AWS account.  If at any point a vm or config is unrecoverable, you can either try to reuse the terraform state file or you may wish to destroy and start over.  If you are unsuccesful, you may need to destroy all the resource manually to prevent unwanted costs from orphaned resources.
+- The terraform deployment can be destroyed, leaving no resources or users in the AWS account.  You can do this when the deployment is no longer needed at all, or if you have only succesfully partially deployed.  It is important to destroy infrastructure before destroying the Vagrant VM.  If at any point a vm or config is unrecoverable, you can either try to reuse the terraform state file or you may wish to destroy and start over.  If you are unsuccesful, you may need to destroy all the resource manually to prevent unwanted costs from orphaned resources.
   ```
   source ./update_vars.sh --init
   ./firehawk.sh --destroy --softnas-destroy-volumes true
