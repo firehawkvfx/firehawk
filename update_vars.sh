@@ -39,21 +39,18 @@ echo_if_not_silent "TF_VAR_firehawk_path: $TF_VAR_firehawk_path"
 # source an exit test to bail if non zero exit code is produced.
 . $TF_VAR_firehawk_path/scripts/exit_test.sh
 
+echo_if_not_silent "Imported exit test."
+
 to_abs_path() {
-  OURPWD=$PWD
-  cd "$(dirname "$1")"
-  LINK=$(readlink "$(basename "$1")")
-  while [ "$LINK" ]; do
-    cd "$(dirname "$LINK")"
-    LINK=$(readlink "$(basename "$1")")
-  done
-  REALPATH="$PWD/$(basename "$1")"
-  cd "$OURPWD"
-  echo "$REALPATH"
+  python -c "import os; print os.path.abspath('$1')"
 }
+
+echo_if_not_silent "Define secrets path"
+to_abs_path "$TF_VAR_firehawk_path/../secrets"
 
 export TF_VAR_secrets_path="$(to_abs_path $TF_VAR_firehawk_path/../secrets)"; exit_test
 
+echo_if_not_silent "Create directories in TF_VAR_firehawk_path: $TF_VAR_firehawk_path"
 mkdir -p $TF_VAR_firehawk_path/tmp/
 mkdir -p $TF_VAR_firehawk_path/tmp/log
 mkdir -p $TF_VAR_secrets_path/keys
@@ -382,7 +379,7 @@ if [[ "$verbose" == true ]]; then echo 'mkdir defaults'; fi
 mkdir -p "$TF_VAR_firehawk_path/config/defaults"
 template_path="$TF_VAR_firehawk_path/config/templates/secrets-general.template"
 
-echo_if_not_silent '...Get secrets from env'
+echo_if_not_silent '...Check secrets in env'
 
 if [[ ! -z "$firehawksecret" ]]; then
     echo "...Aquiring firehawksecret"
@@ -395,7 +392,7 @@ fi
 export config_override=$(to_abs_path $TF_VAR_secrets_path/config-override-$TF_VAR_envtier) # ...Config Override path $config_override.
 export config_path=$(to_abs_path $TF_VAR_secrets_path/config)
 
-echo_if_not_silent '...Check for configuration, init if not present.'
+echo_if_not_silent '...Check for config override, init if not present.'
 if [ ! -f $config_override ]; then
     echo_if_not_silent "...Initialising $config_override"
     cp "$TF_VAR_firehawk_path/config/defaults/defaults-config-override-$TF_VAR_envtier" "$config_override"
@@ -412,7 +409,7 @@ fi
 # init defaults
 defaults_file=$(to_abs_path $TF_VAR_secrets_path/defaults) # ...Config Override path $defaults_file.
 
-echo_if_not_silent '...Check for configuration, init if not present.'
+echo_if_not_silent '...Check for defaults, init if not present.'
 if [ ! -f $defaults_file ]; then
     echo_if_not_silent "...Initialising $defaults_file"
     cp "$TF_VAR_firehawk_path/config/defaults/defaults" "$defaults_file"
@@ -439,12 +436,14 @@ if [ -z ${CI_JOB_ID+x} ]; then # if pipeline id is provided, set it in the file.
 else
     echo "CI_JOB_ID is set to '$CI_JOB_ID'"
     echo "...Set CI_JOB_ID at config_override path- $config_override"
-    sed -i "s/^TF_VAR_CI_JOB_ID=.*$/TF_VAR_CI_JOB_ID=${CI_JOB_ID}/" $config_override # ...Enable the vpc.
+    # sed -i "s/^TF_VAR_CI_JOB_ID=.*$/TF_VAR_CI_JOB_ID=${CI_JOB_ID}/" $config_override # ...Enable the vpc.
+    python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override "TF_VAR_CI_JOB_ID=" "${CI_JOB_ID}"
 fi
 
 if [[ ! -z "$TF_VAR_resourcetier" ]]; then
     echo "TF_VAR_resourcetier defined as: $TF_VAR_resourcetier. Updating TF_VAR_resourcetier_${TF_VAR_envtier} in $config_override to: $TF_VAR_resourcetier"
-    sed -i "s/^TF_VAR_resourcetier_${TF_VAR_envtier}=.*$/TF_VAR_resourcetier_${TF_VAR_envtier}=${TF_VAR_resourcetier}/" $config_override # ...Set the resource tier if defined.
+    python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override "TF_VAR_resourcetier_${TF_VAR_envtier}=" "${TF_VAR_resourcetier}"
+    # sed -i '' -e "s/^TF_VAR_resourcetier_${TF_VAR_envtier}=.*$/TF_VAR_resourcetier_${TF_VAR_envtier}=${TF_VAR_resourcetier}/" $config_override # ...Set the resource tier if defined.
 fi
 
 
@@ -456,7 +455,8 @@ if [ -z ${TF_VAR_fast+x} ]; then
 else
     echo_if_not_silent "TF_VAR_fast is set to '$TF_VAR_fast'"
     echo_if_not_silent "...Set TF_VAR_fast at config_override path- $TF_VAR_fast"
-    sed -i "s/^TF_VAR_fast=.*$/TF_VAR_fast=${TF_VAR_fast}/" $config_override # ...Enable the vpc.
+    # sed -i '' -e "s/^TF_VAR_fast=.*$/TF_VAR_fast=${TF_VAR_fast}/" $config_override # ...Enable the vpc.
+    python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override "TF_VAR_fast=" "${TF_VAR_fast}"
     export TF_VAR_fast=$(cat $config_override | sed -e '/.*TF_VAR_fast=.*/!d')
 fi
 
@@ -667,7 +667,7 @@ source_vars () {
         fi
 
         local multiline; multiline=$(eval $vault_command); exit_test
-        for i in $(echo "$multiline" | sed 's/^$/###/')
+        for i in $(echo "$multiline" | sed -e 's/^$/###/')
         do
             if [[ "$i" =~ ^#.*$ ]]
             then
