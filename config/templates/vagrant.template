@@ -39,12 +39,14 @@
 TF_VAR_vault_key_name_general=insertvalue
 
 # TF_VAR_bridgenic: 
-# The network interface virtual box will use to bridge its connection 
+# The network interface that virtual box will use to bridge it's connection 
 # See https://www.vagrantup.com/docs/networking/public_network.html
-# If you don't know the exact string for the bridgenic (found with 'ifconfig -a' ) then leave it as 'none'
+# You can find the string to enter here by running the command:
+# VBoxManage list bridgedifs | grep ^Name
 # eg 1: TF_VAR_bridgenic=eth1
 # eg 2: TF_VAR_bridgenic=eno1
-# eg 3: TF_VAR_bridgenic=enp9s0f0
+# eg 3: TF_VAR_bridgenic=enp9s0f1
+# eg 4: TF_VAR_bridgenic='en0: Wi-Fi (Wireless)'
 # default: TF_VAR_bridgenic=none
 TF_VAR_bridgenic=insertvalue
 
