@@ -1,16 +1,25 @@
-- debug:
+- name: get volume id
+  debug:
     var: item.volumes[0].id
+
+- name: get volatile state of volume.
+  debug:
+    var: item.item.volatile
+
+- name: get volatile state of volume bool
+  debug:
+    msg: item.item.volatile | bool
 
 - name: detach ebs volume
   ec2_vol:
     region: "{{ ebs_disk_region }}"
     id: "{{ item.volumes[0].id }}"
     instance: None
-  when: item.item.volatile
+  when: item.item.volatile | bool
 
 - name: delete ebs volume
   ec2_vol:
     region: "{{ ebs_disk_region }}"
     id: "{{ item.volumes[0].id }}"
     state: absent
-  when: item.item.volatile
+  when: item.item.volatile | bool

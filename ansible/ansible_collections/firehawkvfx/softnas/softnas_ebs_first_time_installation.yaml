@@ -12,7 +12,6 @@
   with_items:
   - { key: 'mount', value: '{{ item.item.path }}' }
   - { key: 'pool', value: '{{ item.item.pool_name }}' }
-  - { key: 'volatile', value: '{{ item.item.volatile }}' }
 
 - name: show common_tags
   debug:
@@ -31,7 +30,7 @@
     volume_size: "{{ item.item.ebs_disk_size }}"
     volume_type: "{{ item.item.ebs_disk_type }}"
     device_name: "{{ item.item.path }}"
-    delete_on_termination: "{{ item.item.volatile }}"
+    delete_on_termination: false # destruciton of volumes is handled conditionally by the 'volatile' tag during terraform destroy or sleep.
   register: new_vol
 
 - name: show new_vol

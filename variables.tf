@@ -166,3 +166,5 @@ variable "install_deadline_worker" {}
 variable "install_deadline_rcs" {}
 
 variable "install_houdini" {}
+
+variable "softnas_volatile" {}

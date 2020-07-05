@@ -57,10 +57,9 @@
 
 
   - name: Search for existing softnas instance by tag.  If no instance id is defined via command line, then the found instance id by tag wil be used.
-    ec2_instance_facts:
+    ec2_instance_info:
       filters:
         "tag:role": "softnas"
-      #region: "{{ ebs_disk_region }}"
     register: existing_softnas_instance
 
   - debug:
@@ -77,7 +76,7 @@
       state: stopped
       wait: True
     become_user: deployuser
-    when: stop_softnas_instance
+    when: stop_softnas_instance | bool
 
   - name: search for existing volume
     ec2_vol_facts:
@@ -95,7 +94,7 @@
 
   - name: iterate over data
     debug:
-      msg: "{{ item }}"
+      var: item
     with_items: "{{ existing_volume.results }}"      
 
   - include_tasks: softnas_ebs_first_time_installation.yaml
@@ -103,7 +102,6 @@
     with_items: "{{ existing_volume.results }}"
     
   - include_tasks: softnas_ebs_existing_volume.yaml
-    when: item.volumes
     with_items: "{{ existing_volume.results }}"
     when: mode == 'attach'
 
@@ -116,7 +114,32 @@
     register: existing_volume
     with_items:
       - "{{ mounts }}"
+
+  - name: Iterate over data after volume id's exist.
+    debug:
+      var: item
+    with_items: "{{ existing_volume.results }}"  
+
+  - name: Ensure tag data is set correctly for volatile - always
+    shell: |
+      aws ec2 create-tags --resources {{ item.volumes[0].id }} --tags Key=volatile,Value={{ item.item.volatile }}
+    with_items: "{{ existing_volume.results }}"  
+
+  - name: search for existing volume, and get tag data
+    ec2_vol_facts:
+      filters:
+        "tag:role": "softnas"
+        "tag:mount": "{{ item.path }}"
+      region: "{{ ebs_disk_region }}"
+    register: existing_volume
+    with_items:
+      - "{{ mounts }}"
     when: mode == 'destroy'
+
+  - name: Iterate over data after tag update.
+    debug:
+      var: item
+    with_items: "{{ existing_volume.results }}"   
     
   - include_tasks: softnas_ebs_delete_volume.yaml
     when: mode == 'destroy' and item.volumes
@@ -129,4 +152,4 @@
       state: running
       wait: True
     become_user: deployuser
-    when: stop_softnas_instance|bool and mode == 'attach'
+    when: stop_softnas_instance | bool and mode == 'attach'

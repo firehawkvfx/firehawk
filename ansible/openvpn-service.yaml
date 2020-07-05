@@ -7,8 +7,7 @@
     state: restarted
 
   tasks:
-
-  - name: restart openvpn
+  - name: restart openvpn.  If there is a connection failure on this task ensure ssh keys for the host are setup correctly.
     service: 
       name: openvpn
       state: restarted

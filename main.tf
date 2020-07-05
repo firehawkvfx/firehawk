@@ -270,7 +270,7 @@ module "softnas" {
   softnas_instance_type          = var.softnas_instance_type
   vpn_private_ip                 = module.vpc.vpn_private_ip
   softnas_ssh_user               = var.softnas_ssh_user
-  aws_key_name                       = var.aws_key_name
+  aws_key_name                   = var.aws_key_name
   private_key                    = file(var.aws_private_key_path)
   vpc_id                         = module.vpc.vpc_id
   vpn_cidr                       = var.vpn_cidr
@@ -284,7 +284,8 @@ module "softnas" {
   bastion_private_ip             = module.vpc.vpn_private_ip
   bastion_ip                     = module.bastion.public_ip
   softnas1_private_ip1           = var.softnas1_private_ip1
-
+  softnas_volatile               = var.softnas_volatile
+  envtier                        = var.envtier
   remote_mounts_on_local = var.remote_mounts_on_local == true ? true : false
 
   #skipping os updates will allow faster rollout, but may be non functional

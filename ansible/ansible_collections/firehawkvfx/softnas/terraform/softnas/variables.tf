@@ -96,3 +96,6 @@ variable "selected_ami" {
   }
 }
 
+variable "softnas_volatile" {}
+
+variable "envtier" {}

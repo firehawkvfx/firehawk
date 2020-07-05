@@ -67,6 +67,27 @@
     when: item.stat.exists and item.stat.isdir and import_pool
     with_items: "{{ volume_mount.results }}"
 
+  - stat:
+      path: "/{{ item.item.pool_name }}/{{ item.item.volume_name }}/init"
+    register: init
+    when: item.stat.exists and item.stat.isdir and import_pool
+    with_items:
+      - "{{ volume_mount.results }}"
+
+  - name: inspect dict of results
+    debug:
+      var: "{{ item }}"
+    with_items: "{{ init.results }}"
+
+  - name: Ensure initialisation date is written to volume root to track the age of a volume
+    copy:
+      dest: "/{{ item.item.item.pool_name }}/{{ item.item.item.volume_name }}/init"
+      content: "{{ lookup('pipe','date +%Y-%m-%d-%H-%M-%S') }}"
+    become: true
+    when:  import_pool and item.stat.exists == false
+    with_items:
+      - "{{ init.results }}"
+
   - name: create mount directories in /export for bind
     file:
       path: "/export/{{ item.item.pool_name }}/{{ item.item.volume_name }}"
