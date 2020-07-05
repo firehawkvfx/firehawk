@@ -4,7 +4,6 @@
   set_fact:
     device_list: []
 
-
 - name: follow symlink for devices to mount points
   shell: |
     readlink -f {{ item.path }}
@@ -16,7 +15,6 @@
 - name:
   debug:
     var: device_links
-
 
 - name: register device list for pool
   set_fact:
