@@ -27,6 +27,8 @@ mounts:
   pool_name: "{{ envtier }}pool1"
   volatile: "{{ softnas_volatile }}"
 
+# If extending these disks after the volume has already been created the pool must be expanded through the softnas ui at https://{softnas private ip adress}
+
 exports:
 - path: "/{{ envtier }}pool1/{{ envtier }}volume1" # production volume - Softnas
   pool_name: "{{ envtier }}pool1"

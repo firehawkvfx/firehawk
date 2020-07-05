@@ -25,7 +25,7 @@
 
     pool_name: "{{ envtier }}pool2"
     volume_name: "{{ envtier }}volume2"
-    #instance_id: undefined
+    instance_id: "None"
     disk_device: 2
     nas_name: softnas
     ebs_disk_size: 50
@@ -55,19 +55,18 @@
     tags:
     - always
 
+  # - name: Search for existing softnas instance by tag.  If no instance id is defined via command line, then the found instance id by tag wil be used.
+  #   ec2_instance_info:
+  #     filters:
+  #       "tag:role": "softnas"
+  #   register: existing_softnas_instance
 
-  - name: Search for existing softnas instance by tag.  If no instance id is defined via command line, then the found instance id by tag wil be used.
-    ec2_instance_info:
-      filters:
-        "tag:role": "softnas"
-    register: existing_softnas_instance
+  # - debug:
+  #     msg: "{{ existing_softnas_instance.instances[0].instance_id }}"
 
-  - debug:
-      msg: "{{ existing_softnas_instance.instances[0].instance_id }}"
-
-  - set_fact:
-      instance_id: "{{ existing_softnas_instance.instances[0].instance_id }}"
-    when: instance_id is undefined  
+  # - set_fact:
+  #     instance_id: "{{ existing_softnas_instance.instances[0].instance_id }}"
+  #   when: instance_id == "None"
 
   - name: Stop the softnas instance before updating mounts.  This may take 5 minutes.
     ec2:
@@ -76,7 +75,7 @@
       state: stopped
       wait: True
     become_user: deployuser
-    when: stop_softnas_instance | bool
+    when: stop_softnas_instance | bool and instance_id != "None"
 
   - name: search for existing volume
     ec2_vol_facts:
@@ -123,6 +122,7 @@
   - name: Ensure tag data is set correctly for volatile - always
     shell: |
       aws ec2 create-tags --resources {{ item.volumes[0].id }} --tags Key=volatile,Value={{ item.item.volatile }}
+    when: item.volumes
     with_items: "{{ existing_volume.results }}"  
 
   - name: search for existing volume, and get tag data
@@ -152,4 +152,4 @@
       state: running
       wait: True
     become_user: deployuser
-    when: stop_softnas_instance | bool and mode == 'attach'
+    when: stop_softnas_instance | bool and mode == 'attach' and instance_id != "None"

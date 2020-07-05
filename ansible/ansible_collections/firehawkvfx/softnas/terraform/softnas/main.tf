@@ -765,10 +765,17 @@ resource "null_resource" "remove-mounts-on-destroy" {
     when  = destroy
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
+      . /deployuser/scripts/exit_test.sh
+      export SHOWCOMMANDS=true; set -x
+      cd /deployuser
+
       if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
         echo "ENSURE REMOTE MOUNTS ON LOCAL NODES ARE REMOVED WHEN DESTROYING."
         ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml --extra-vars "variable_host=workstation1 variable_user=deployuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
       fi
+
+      # if tag matches, then volumes will be destroyed.
+      ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/softnas_ebs_disk.yaml --extra-vars "stop_softnas_instance=true mode=destroy"; exit_test
 EOT
   }
 }
