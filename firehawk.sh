@@ -11,7 +11,8 @@ printf "\nRunning env $1...\n"
 set +x # don't echo bash commands
 # # This block allows you to echo a line number for a failure.
 set -eE -o functrace
-err_report() {
+
+err_report() { # This funciton may not port to mac os.
   local lineno=$1
   local msg=$2
   echo "$0 script Failed at $lineno: $msg"
@@ -48,16 +49,8 @@ box_file_out () {
     export firehawkgateway_box_out="firehawkgateway-${val}.box"
 }
 
-
-function to_abs_path {
-    local target="$1"
-    if [ "$target" == "." ]; then
-        echo "$(pwd)"
-    elif [ "$target" == ".." ]; then
-        echo "$(dirname "$(pwd)")"
-    else
-        echo "$(cd "$(dirname "$1")"; pwd)/$(basename "$1")"
-    fi
+to_abs_path() {
+  python -c "import os; print os.path.abspath('$1')"
 }
 
 function help {
@@ -358,13 +351,13 @@ if [ "$test_vm" = false ] ; then
     # AFter Vagrant Hosts are up, take the SSH keys and store them in the keys folder for general use.
     ansiblecontrol_config=$(vagrant ssh-config ansiblecontrol$TF_VAR_envtier)
     firehawkgateway_config=$(vagrant ssh-config firehawkgateway$TF_VAR_envtier)
-    ansiblecontrol_key=$(echo "$ansiblecontrol_config" | grep -oP "^  IdentityFile \K.*")
+    ansiblecontrol_key=$(echo "$ansiblecontrol_config" | awk '{if($1=="IdentityFile") print $2}')
     cp -f $ansiblecontrol_key $TF_VAR_secrets_path/keys/ansible_control_private_key
-    firehawkgateway_key=$(echo "$firehawkgateway_config" | grep -oP "^  IdentityFile \K.*")
+    firehawkgateway_key=$(echo "$firehawkgateway_config" | awk '{if($1=="IdentityFile") print $2}')
     cp -f $firehawkgateway_key $TF_VAR_secrets_path/keys/firehawkgateway_private_key
-
-    hostname=$(echo $ansiblecontrol_config | grep -Po '.*HostName\ \K(\d*.\d*.\d*.\d*)')
-    port=$(echo $ansiblecontrol_config | grep -Po '.*Port\ \K(\d*)')
+    
+    hostname="$(echo "$ansiblecontrol_config" | awk '{if($1=="HostName") print $2}')"
+    port="$(echo "$ansiblecontrol_config" | awk '{if($1=="Port") print $2}')"
     
     echo "SSH to vagrant host with..."
     echo "Hostname: $hostname"
@@ -377,7 +370,7 @@ if [ "$test_vm" = false ] ; then
         echo "init_vm_config: $init_vm_config"
         set -o pipefail # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
         # set -o pipefail # Allow exit status of last command to fail to catch errors after pipe for ts function.
-        ssh-keygen -R [$hostname]:$port -f /home/gitlab-runner/.ssh/known_hosts # clean host keys
+        ssh-keygen -R [$hostname]:$port -f ~/.ssh/known_hosts # clean host keys
         if [[ "$tf_action" == "sleep" ]]; then
             echo "...Logging in to Vagrant host to set sleep on tf deployment: $hostname"
             if [[ "$env_ci" == true ]]; then
