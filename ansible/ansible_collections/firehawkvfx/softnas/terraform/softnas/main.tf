@@ -755,6 +755,23 @@ EOT
   }
 }
 
+resource "null_resource" "remove-mounts-on-destroy" {
+  count = var.softnas_storage ? 1 : 0
+  when  = "destroy"
+  depends_on = [
+    null_resource.provision_softnas
+  ]
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    command = <<EOT
+      if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
+        echo "ENSURE REMOTE MOUNTS ON LOCAL NODES ARE REMOVED WHEN DESTROYING."
+        ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml --extra-vars "variable_host=workstation1 variable_user=deployuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
+      fi
+EOT
+  }
+}
+
 # when testing, the local can be set to disable ami creation in a dev environment only - for faster iteration.
 locals {
   create_ami         = local.use_prebuilt_softnas_ami ? false : true # when using an aquired ami, we will not create another ami as this would replace it.
