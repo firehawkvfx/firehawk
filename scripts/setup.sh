@@ -113,4 +113,4 @@ function ctrl_c() {
 $SCRIPTDIR/configure.sh
 
 echo "Source vars for dev and ensuring they are encrypted..."
-source ./update_vars --dev --init
+source ./update_vars.sh --dev --init
