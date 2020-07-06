@@ -84,3 +84,15 @@
       - "{{ existing_volumes.results }}"
     loop_control:
       loop_var: outer_item
+
+# example commands that can be used to extend a pool with ZFS.
+# ec2-user@nas1:~$ sudo zpool add devpool1 /dev/xvdf
+# ec2-user@nas1:~$ df -h
+# Filesystem           Size  Used Avail Use% Mounted on
+# /dev/xvda1            30G   14G   15G  48% /
+# tmpfs                7.9G     0  7.9G   0% /dev/shm
+# devpool1              71G  128K   71G   1% /devpool1
+# devpool1/devvolume1   71G  128K   71G   1% /devpool1/devvolume1
+# ec2-user@nas1:~$ zfs set quota=none devpool1
+# cannot set property for 'devpool1': permission denied
+# ec2-user@nas1:~$ sudo zfs set quota=none devpool1
