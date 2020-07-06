@@ -136,4 +136,4 @@ $SCRIPTDIR/configure.sh
 write_output
 
 echo "Source vars for dev and ensuring they are encrypted..."
-source ./update_vars.sh --dev --var-file=$configure --force
+source ./update_vars.sh --dev --var-file=$configure --force --save-template=false
