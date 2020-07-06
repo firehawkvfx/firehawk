@@ -110,7 +110,8 @@ Vagrant.configure(2) do |config|
                 # node.vm.provision "shell", inline: "mkdir -p /home/deployuser/.ssh; chown -R deployuser:deployuser /home/deployuser/.ssh; chmod 700 /home/deployuser/.ssh"
                 node.vm.provision "shell", inline: "cp -fr /home/vagrant/.ssh /home/deployuser/; chown -R deployuser:deployuser /home/deployuser/.ssh; chown deployuser:deployuser /home/deployuser/.ssh/authorized_keys"
                 ### Install yq to query yaml
-                node.vm.provision "shell", inline: "ip a; sudo snap install yq || echo 'Failure may indicate may have a duplicate mac/IP address on the same network.'"
+                node.vm.provision "shell", inline: "ip a"
+                node.vm.provision "shell", inline: "sudo snap install yq || echo 'Failure may indicate may have a duplicate mac/IP address on the same network.'"
             end
             # Allow deployuser to have passwordless sudo
             node.vm.synced_folder ".", "/vagrant", create: true, owner: "vagrant", group: "vagrant"

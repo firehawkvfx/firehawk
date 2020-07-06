@@ -257,13 +257,14 @@ You will have two versions of your infrastructure, we make changes in dev branch
   ```
 - Select 'Configure Vagrant'.
 - Either proceed to setup each variable step by step or use an external editor on ``firehawk-deploy-dev/secrets/vagrant``
+- Continue to configure all the files except secrets (This will be done later in the VM).
 - When asked about the 4 mac adresses, copy in the 4 entries generated earlier.
 - Source the environment variables from the vagrant config file for the dev environment.  --init assumes an unencrypted file is being used.  We always do this before running vagrant.
   ```
   source ./update_vars.sh --dev --init
   vagrant up
   ```
-- You will be asked which adaptor to bridge to. Select the primary adapter for your internet connection.  This should be in the 192.168.x.x range.  You can also copy the exact text of this adaptor and place it in the /secrets/vagrant config file eg: ``TF_VAR_bridgenic=en0: Wi-Fi (AirPort)``
+- You may be asked which adaptor to bridge to if you didn't configure this correctly during setup. Select the primary adapter for your internet connection.  This should be in the 192.168.x.x range.  You can also copy the exact text of this adaptor and place it in the /secrets/vagrant config file eg: ``TF_VAR_bridgenic=en0: Wi-Fi (AirPort)``
 
 - Get your router to assign/reserve a static ip using this same mac address so that the address doesn't change.  if it does, then render nodes won't find the manager.
 
