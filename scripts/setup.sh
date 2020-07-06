@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # this wizard will reuse existing encrypted settings if they exist as environment vars.
 # it will regenerate an encrypted settings file based on the secrets.template file.

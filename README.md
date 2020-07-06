@@ -223,12 +223,9 @@ These address ranges refer to the DHCP addresses that Open VPN will automaticaly
 
 - Clone this repository to your system / somewhere in your home dir.  This first deployment will be a dev test deployment.
   ```
-  git clone https://github.com/firehawkvfx/firehawk-template.git firehawk-deploy-dev
+  git clone https://github.com/firehawkvfx/firehawk-template.git firehawk-deploy-dev; cd firehawk-deploy-dev; ./firehawk-clone.sh
   ```
-- Update the repository and start a new dev branch for your secrets with this command:
-  ```
-  cd firehawk-deploy-dev; ./firehawk-clone.sh
-  ```
+The repository is built from a template.  This new repo you have made contains a secrets folder that is not part of the public repository, and a submodule that is a clone of the public repository.
 
 - Optional: You may wish to push to another private repository which you can create on github. **Make sure this Github repository is Private** 
 
@@ -242,7 +239,7 @@ These steps allow us to configure a setup in the 'dev' environment to test befor
 You will have two versions of your infrastructure, we make changes in dev branches and test them before merging and deploying to production.
 
 - Download the right version of the AWS Deadline Installer tar.  Use the version specified in ``firehawk/config/templates/config.template``
-- Place the .tar file in the local firehawk/downloads folder.  Do not use later versions of deadline until you have a stable deployment.
+- Place the .tar file in the local firehawk/downloads folder.  Do not test later versions of deadline until you have a stable deployment.
 - If you are on Mac OS, install homebrew and ensure you have the commands ``envsubst`` and ``ts``
   ```
   brew install gettext
