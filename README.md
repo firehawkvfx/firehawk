@@ -225,7 +225,7 @@ These address ranges refer to the DHCP addresses that Open VPN will automaticaly
   ```
   git clone https://github.com/firehawkvfx/firehawk-template.git firehawk-deploy-dev
   ```
-- Update the repository and start a new dev branch for your secrets.
+- Update the repository and start a new dev branch for your secrets with this command:
   ```
   cd firehawk-deploy-dev; ./firehawk-clone.sh
   ```
