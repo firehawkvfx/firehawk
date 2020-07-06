@@ -109,9 +109,6 @@ Vagrant.configure(2) do |config|
                 # allow ssh access as deploy user
                 # node.vm.provision "shell", inline: "mkdir -p /home/deployuser/.ssh; chown -R deployuser:deployuser /home/deployuser/.ssh; chmod 700 /home/deployuser/.ssh"
                 node.vm.provision "shell", inline: "cp -fr /home/vagrant/.ssh /home/deployuser/; chown -R deployuser:deployuser /home/deployuser/.ssh; chown deployuser:deployuser /home/deployuser/.ssh/authorized_keys"
-                ### Install yq to query yaml
-                node.vm.provision "shell", inline: "ip a"
-                node.vm.provision "shell", inline: "sudo snap install yq || echo 'Failure may indicate may have a duplicate mac/IP address on the same network.'"
             end
             # Allow deployuser to have passwordless sudo
             node.vm.synced_folder ".", "/vagrant", create: true, owner: "vagrant", group: "vagrant"
@@ -119,7 +116,7 @@ Vagrant.configure(2) do |config|
             node.vm.synced_folder "../secrets", "/secrets", create: true, owner: "deployuser", group: "deployuser", mount_options: ["uid=#{deployuser_uid}", "gid=#{deployuser_uid}"]
 
             if box_file_in.nil? || box_file_in.empty?
-                node.vm.provision "shell", inline: "ip a; export DEBIAN_FRONTEND=noninteractive; sudo apt-get update"
+
                 node.vm.provision "shell", inline: "sudo mkdir -p /deployuser/tmp/apt/$(hostname)"
                 node.vm.provision "shell", inline: "sudo chmod u=rwX,g=rwX,o=rwX,g+s /deployuser/tmp/apt/$(hostname)"
                 node.vm.provision "shell", inline: "sudo mkdir -p /deployuser/tmp/apt/$(hostname)/partial"
@@ -128,6 +125,11 @@ Vagrant.configure(2) do |config|
                 node.vm.provision "shell", inline: 'echo "Dir::Cache::Archives /deployuser/tmp/apt/$(hostname);" | sudo tee -a /etc/apt/apt.conf.d/00aptitude'
                 node.vm.provision "shell", inline: 'echo "Dir::Cache /deployuser/tmp/apt/$(hostname);" | sudo tee -a /etc/apt/apt.conf.d/00aptitude'
                 node.vm.provision "shell", inline: "echo 'source /vagrant/scripts/env.sh' > /etc/profile.d/sa-environment.sh", :run => 'always'
+                ### Install yq to query yaml
+                node.vm.provision "shell", inline: "ip a; echo 'Updating packages...'"
+                node.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive; sudo apt-get update"
+                node.vm.provision "shell", inline: "sudo snap install yq || echo 'Failure may indicate may have a duplicate mac/IP address on the same network.'"
+                # Check env
                 node.vm.provision "shell", inline: "echo DEBIAN_FRONTEND=$DEBIAN_FRONTEND"
                 node.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive"
                 node.vm.provision "shell", inline: "sudo rm /etc/localtime && sudo ln -s #{ENV['TF_VAR_timezone_localpath']} /etc/localtime", run: "always"
