@@ -87,11 +87,11 @@ function write_output() {
         # if an existing config exists, then prompt to overwrite
         printf "\nYour new initialised configuration has been stored at temp path-\n$output_tmp\nTo use this configuration do you wish to overwrite any existing configuration at-\n$output_complete?\n\n"
         PS3="Save and overwrite configuration settings?"
-        options=("Yes, overwrite / initialise my configuration" "No / Quit")
+        options=("Yes, save my configuration and continue or exit from main menu" "No / Quit")
         select opt in "${options[@]}"
         do
             case $opt in
-                "Yes, save my configuration and continue or exit from main menu. ")
+                "Yes, save my configuration and continue or exit from main menu")
                     printf "\nMoving temp config to overwrite previous config... \n\n"
                     mv -fv $output_tmp $output_complete || echo "Failed to move temp file.  Check permissions."
                     define_config_settings
