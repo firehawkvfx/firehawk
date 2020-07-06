@@ -55,7 +55,7 @@ TF_VAR_gateway_mac=insertvalue
 
 # TF_VAR_vpc_cidr:
 # This is the IP range (CIDR notation) of your cloud subnet that all AWS private addresses will reside in.
-# default: TF_VAR_vpc_cidr=10.0.0.0/16
+# default: TF_VAR_vpc_cidr=10.3.0.0/16
 TF_VAR_vpc_cidr=insertvalue
 
 # TF_VAR_private_subnet1:

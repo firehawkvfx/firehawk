@@ -36,7 +36,7 @@ export configure=
 function define_config_settings() {
     clear
     PS3='Configure each of these options without secrets.  If you are running in the VM, configure secrets (To be done from within the Openfirehawk Server Vagrant VM when available): '
-    options=("Configure Vagrant" "Configure General Config" "Configure Resources - Grey" "Configure Resources - Green" "Configure Resources - Blue" "Configure Secrets (Only from within Vagrant VM)" "Quit")
+    options=("Configure Vagrant" "Configure General Config" "Configure Resources - Grey" "Configure Resources - Blue" "Configure Resources - Green" "Configure Secrets (Only from within Vagrant VM)" "Quit")
     select opt in "${options[@]}"
     do
         case $opt in
@@ -65,8 +65,8 @@ function define_config_settings() {
                 export output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/resources-$TF_VAR_resourcetier)
                 break
                 ;;
-            "Configure Resources - Green")
-                export TF_VAR_resourcetier='green'
+            "Configure Resources - Blue")
+                export TF_VAR_resourcetier='blue'
                 printf "\nThe $TF_VAR_resourcetier resource file uses resources generally unique to your production $TF_VAR_resourcetier environment.\n\n"
                 export configure='resources'
                 export input=$(to_abs_path $SCRIPTDIR/../config/templates/resources-$TF_VAR_resourcetier.template)
@@ -74,8 +74,8 @@ function define_config_settings() {
                 export output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/resources-$TF_VAR_resourcetier)
                 break
                 ;;
-            "Configure Resources - Blue")
-                export TF_VAR_resourcetier='blue'
+            "Configure Resources - Green")
+                export TF_VAR_resourcetier='green'
                 printf "\nThe $TF_VAR_resourcetier resource file uses resources generally unique to your production $TF_VAR_resourcetier environment.\n\n"
                 export configure='resources'
                 export input=$(to_abs_path $SCRIPTDIR/../config/templates/resources-$TF_VAR_resourcetier.template)
