@@ -80,8 +80,12 @@ function define_config_settings() {
             *) echo "invalid option $REPLY";;
         esac
     done
+    $SCRIPTDIR/configure.sh
+    write_output
+
+    echo "Source vars for dev and ensuring they are encrypted..."
+    source ./update_vars.sh --dev --var-file=$configure --force --save-template=false
 }
-define_config_settings
 
 function write_output() {
     if [[ -f "$output_complete" ]]; then
@@ -145,9 +149,4 @@ function ctrl_c() {
         # exit
 }
 
-$SCRIPTDIR/configure.sh
-
-write_output
-
-echo "Source vars for dev and ensuring they are encrypted..."
-source ./update_vars.sh --dev --var-file=$configure --force --save-template=false
+define_config_settings
