@@ -64,8 +64,8 @@ TF_VAR_openfirehawkserver=auto
 
 # TF_VAR_deadline_proxy_root_dir:
 # This is the address and port for clients to reach the Deadline RCS on the openfirehawk server in a dev environment.  After init, the default containing the var $TF_VAR_openfirehawkserver should resolve to an actual IP in this file and not be 'auto'.
-# eg: TF_VAR_deadline_proxy_root_dir=$TF_VAR_openfirehawkserver:4433
-TF_VAR_deadline_proxy_root_dir=$TF_VAR_openfirehawkserver:4433
+# eg: TF_VAR_deadline_proxy_root_dir=auto:4433
+TF_VAR_deadline_proxy_root_dir=auto:4433
 
 # TF_VAR_vagrant_destroy_before_deploy:
 # default: TF_VAR_vagrant_destroy_before_deploy=false

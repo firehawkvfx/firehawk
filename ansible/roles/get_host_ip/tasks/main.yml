@@ -31,3 +31,13 @@
     regexp: "^TF_VAR_openfirehawkserver=.*"
   connection: local
   when: update_openfirehawkserver_ip_var | bool
+
+- name: "update TF_VAR_deadline_proxy_root_dir with ip in file {{ config_override }}"
+  lineinfile:
+    state: present
+    path: "{{ config_override }}"
+    line: "TF_VAR_deadline_proxy_root_dir={{ host_ip }}:4433"
+    regexp: "^TF_VAR_deadline_proxy_root_dir=.*"
+  connection: local
+  when: update_openfirehawkserver_ip_var | bool
+

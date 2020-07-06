@@ -96,11 +96,12 @@ TF_VAR_softnas1_path_abs=insertvalue
 TF_VAR_firehawk_sync_source=insertvalue
 
 # TF_VAR_firehawk_sync_target:
-# The path to push the assets to, so they are available in cloud.
-# eg: TF_VAR_firehawk_sync_source=/assets/openfirehawk-houdini-tools
+# The path on the production volume to push the assets to, so they are available in cloud.
+# eg: TF_VAR_firehawk_sync_source=/prod/assets/openfirehawk-houdini-tools
 TF_VAR_firehawk_sync_target=insertvalue
 
 # TF_VAR_firehawk_houdini_tools:
-# The path used in production to reference firehawk houdini tools for all locations.  This should normally be in /prod, which is the most performant site based NFS mount for any location.
-# default: TF_VAR_firehawk_houdini_tools=/assets/openfirehawk-houdini-tools
+# The path used in production to read and use firehawk houdini tools for all locations.  This should normally be in /prod, which is the most performant site based NFS mount for any location.
+# By default, it can be identical to the path above, but is also possible to use an alternate live path.
+# default: TF_VAR_firehawk_houdini_tools=/prod/assets/openfirehawk-houdini-tools
 TF_VAR_firehawk_houdini_tools=insertvalue
