@@ -14,15 +14,8 @@ function ctrl_c() {
         printf "\n** CTRL-C ** EXITING...\n"
         exit
 }
-function to_abs_path {
-    local target="$1"
-    if [ "$target" == "." ]; then
-        echo "$(pwd)"
-    elif [ "$target" == ".." ]; then
-        echo "$(dirname "$(pwd)")"
-    else
-        echo "$(cd "$(dirname "$1")"; pwd)/$(basename "$1")"
-    fi
+to_abs_path() {
+  python -c "import os; print os.path.abspath('$1')"
 }
 # This is the directory of the current script
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
