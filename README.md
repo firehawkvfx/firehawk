@@ -126,7 +126,7 @@ Terraform uses PGP encryption when creating new aws users with AWS Secret keys. 
 
 Vagrant is a tool that manages your initial VM configuration onsite.  It allows us to create a consistent environment to launch our infrastructure from with Ruby files that define the VMs.  We create two VMs, ``ansiblecontrol`` and ``firehawkgateway``.  Ansible control is where terraform and ansible provision outwards from.  It is where the secrets and keys need to reside.  Firehawk Gateway will be configured as a VPN gateway and it will have the deadline DB and Deadline Remote Connection Server (RCS).
 
-- Install [Hashicorp Vagrant](https://www.vagrantup.com/) and Virtualbox on your system (Linux / Mac OS recommended)
+- Install [Hashicorp Vagrant](https://www.vagrantup.com/) and Virtualbox on your system (Linux / Mac OS recommended). Mac OS users may choose to use the homebrew package mager to do this.
 
 ## 3 Seperate Resource files for Green / Blue Deployment
 There are a minimum of 3 virtual resources that we deploy to.  Grey (Dev environment) resources are for testing.  Any deployment we use in production will use either Green or Blue resources.  This allows us to deploy an update to the Green or Blue environemnt using those resources, what ever is not currently in use.  This can allow us to test and fallback if the update is not ready for production.
