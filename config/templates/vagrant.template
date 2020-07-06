@@ -1,4 +1,4 @@
-# ~/.bashrc
+#!/usr/bin/env bash
 
 # The contents of vagrant.template are modified by update_vars.sh.
 # Editing these contents should only be done in secrets/vagrant, and then propogated with source ./update_vars.sh --dev

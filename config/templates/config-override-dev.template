@@ -1,4 +1,4 @@
-# ~/.bashrc
+#!/usr/bin/env bash
 # config override is altered by install scripts but can also be used to override configuration variables.
 
 # WARNING: CHANGES TO THIS TEMPLATE MUST OCCUR AFTER A DESTROY OPERATION AND INCREMENT THE VERSION.
