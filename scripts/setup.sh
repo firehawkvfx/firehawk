@@ -5,7 +5,7 @@
 # if values dont exist, the user will be prompted to initialise a value.
 # if values are already defined in the encrypted settings they will be skipped.
 
-clear
+
 
 export RED='\033[0;31m' # Red Text
 export GREEN='\033[0;32m' # Green Text
@@ -34,7 +34,8 @@ printf "\n...checking scripts directory at $SCRIPTDIR\n\n"
 export configure=
 
 function define_config_settings() {
-    PS3='Do you wish to configure the Ansible Control VM or configure secrets (To be done from within the Openfirehawk Server Vagrant VM only)? '
+    clear
+    PS3='Configure each of these options without secrets.  If you are running in the VM, configure secrets (To be done from within the Openfirehawk Server Vagrant VM when available.)? '
     options=("Configure Vagrant" "Configure General Config" "Configure Resources - Grey" "Configure Secrets (Only from within Vagrant VM)" "Quit")
     select opt in "${options[@]}"
     do
