@@ -159,28 +159,3 @@ done
 
 clear
 
-if [[ -f "$output_complete" ]]; then
-    # if an existing config exists, then prompt to overwrite
-    printf "\nYour new initialised configuration has been stored at temp path-\n$output_tmp\nTo use this configuration do you wish to overwrite any existing configuration at-\n$output_complete?\n\n"
-    PS3="Save and overwrite configuration settings?"
-    options=("Yes, overwrite / initialise my configuration" "No / Quit")
-    select opt in "${options[@]}"
-    do
-        case $opt in
-            "Yes, overwrite / initialise my configuration")
-                printf "\nMoving temp config to overwrite previous config... \n\n"
-                mv -fv $output_tmp $output_complete || echo "Failed to move temp file.  Check permissions."
-                break
-                ;;
-            "No / Quit")
-                printf "\nIf you wish to later you can manually move \n$output_tmp \nto \n$output_complete\nto apply the configuration\n\nExiting... \n\n"
-                exit
-                ;;
-            *) echo "invalid option $REPLY";;
-        esac
-    done
-else
-    printf '\n...Saving configuration\n'
-    mv -fv $output_tmp $output_complete || echo "Failed to move temp file.  Check permissions."
-fi
-
