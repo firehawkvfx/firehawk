@@ -33,51 +33,54 @@ printf "\n...checking scripts directory at $SCRIPTDIR\n\n"
 
 export configure=
 
-PS3='Do you wish to configure the Ansible Control VM or configure secrets (To be done from within the Openfirehawk Server Vagrant VM only)? '
-options=("Configure Vagrant" "Configure General Config" "Configure Resources - Grey" "Configure Secrets (Only from within Vagrant VM)" "Quit")
-select opt in "${options[@]}"
-do
-    case $opt in
-        "Configure Vagrant")
-            printf "\nThe OpenFirehawk Server is launched with Vagrant.  Some environment variables must be configured uniquely to your environment.\n\n"
-            export configure='vagrant'
-            export input=$(to_abs_path $SCRIPTDIR/../config/templates/vagrant.template)
-            export output_tmp=$(to_abs_path $SCRIPTDIR/../tmp/vagrant-tmp)
-            export output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/vagrant)
-            break
-            ;;
-        "Configure General Config")
-            printf "\nSome general Config like IP addresses of your hosts is needed.  Some environment variables here must be configured uniquely to your environment.\n\n"
-            export configure='config'
-            export input=$(to_abs_path $SCRIPTDIR/../config/templates/config.template)
-            export output_tmp=$(to_abs_path $SCRIPTDIR/../tmp/config-tmp)
-            export output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/config)
-            break
-            ;;
-        "Configure Resources - Grey")
-            printf "\nSome general Config like IP addresses of your hosts is needed.  Some environment variables here must be configured uniquely to your environment.\n\n"
-            export configure='resources'
-            export TF_VAR_resourcetier='grey'
-            export input=$(to_abs_path $SCRIPTDIR/../config/templates/resources-grey.template)
-            export output_tmp=$(to_abs_path $SCRIPTDIR/../tmp/resources-grey-tmp)
-            export output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/resources-grey)
-            break
-            ;;
-        "Configure Secrets (Only from within Vagrant VM)")
-            printf "\nThis should only be done within the Ansible Control Vagrant VM. Provisioning infrastructure requires configuration using secrets based on the secrets.template file.  These will be queried for your own unique values and should always be encrypted before you commit them in your private repository.\n\n"
-            export configure='secrets'
-            export input=$(to_abs_path $SCRIPTDIR/../config/templates/secrets-general.template)
-            export output_tmp=$(to_abs_path $SCRIPTDIR/../tmp/secrets-general-tmp)
-            export output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/secrets-general)
-            break
-            ;;
-        "Quit")
-            echo "You selected $REPLY to $opt"
-            exit
-            ;;
-        *) echo "invalid option $REPLY";;
-    esac
-done
+function define_config_settings() {
+    PS3='Do you wish to configure the Ansible Control VM or configure secrets (To be done from within the Openfirehawk Server Vagrant VM only)? '
+    options=("Configure Vagrant" "Configure General Config" "Configure Resources - Grey" "Configure Secrets (Only from within Vagrant VM)" "Quit")
+    select opt in "${options[@]}"
+    do
+        case $opt in
+            "Configure Vagrant")
+                printf "\nThe OpenFirehawk Server is launched with Vagrant.  Some environment variables must be configured uniquely to your environment.\n\n"
+                export configure='vagrant'
+                export input=$(to_abs_path $SCRIPTDIR/../config/templates/vagrant.template)
+                export output_tmp=$(to_abs_path $SCRIPTDIR/../tmp/vagrant-tmp)
+                export output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/vagrant)
+                break
+                ;;
+            "Configure General Config")
+                printf "\nSome general Config like IP addresses of your hosts is needed.  Some environment variables here must be configured uniquely to your environment.\n\n"
+                export configure='config'
+                export input=$(to_abs_path $SCRIPTDIR/../config/templates/config.template)
+                export output_tmp=$(to_abs_path $SCRIPTDIR/../tmp/config-tmp)
+                export output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/config)
+                break
+                ;;
+            "Configure Resources - Grey")
+                printf "\nSome general Config like IP addresses of your hosts is needed.  Some environment variables here must be configured uniquely to your environment.\n\n"
+                export configure='resources'
+                export TF_VAR_resourcetier='grey'
+                export input=$(to_abs_path $SCRIPTDIR/../config/templates/resources-grey.template)
+                export output_tmp=$(to_abs_path $SCRIPTDIR/../tmp/resources-grey-tmp)
+                export output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/resources-grey)
+                break
+                ;;
+            "Configure Secrets (Only from within Vagrant VM)")
+                printf "\nThis should only be done within the Ansible Control Vagrant VM. Provisioning infrastructure requires configuration using secrets based on the secrets.template file.  These will be queried for your own unique values and should always be encrypted before you commit them in your private repository.\n\n"
+                export configure='secrets'
+                export input=$(to_abs_path $SCRIPTDIR/../config/templates/secrets-general.template)
+                export output_tmp=$(to_abs_path $SCRIPTDIR/../tmp/secrets-general-tmp)
+                export output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/secrets-general)
+                break
+                ;;
+            "Quit")
+                echo "You selected $REPLY to $opt"
+                exit
+                ;;
+            *) echo "invalid option $REPLY";;
+        esac
+    done
+}
+define_config_settings
 
 function write_output() {
     if [[ -f "$output_complete" ]]; then
@@ -88,10 +91,11 @@ function write_output() {
         select opt in "${options[@]}"
         do
             case $opt in
-                "Yes, overwrite / initialise my configuration")
+                "Yes, save my configuration and continue or exit from main menu. ")
                     printf "\nMoving temp config to overwrite previous config... \n\n"
                     mv -fv $output_tmp $output_complete || echo "Failed to move temp file.  Check permissions."
-                    break
+                    define_config_settings
+                    break # this shouldn't occur unless above command fails.
                     ;;
                 "No / Quit")
                     printf "\nIf you wish to later you can manually move \n$output_tmp \nto \n$output_complete\nto apply the configuration\n\nExiting... \n\n"
