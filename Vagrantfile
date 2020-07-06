@@ -126,7 +126,9 @@ Vagrant.configure(2) do |config|
                 node.vm.provision "shell", inline: 'echo "Dir::Cache /deployuser/tmp/apt/$(hostname);" | sudo tee -a /etc/apt/apt.conf.d/00aptitude'
                 node.vm.provision "shell", inline: "echo 'source /vagrant/scripts/env.sh' > /etc/profile.d/sa-environment.sh", :run => 'always'
                 ### Install yq to query yaml
-                node.vm.provision "shell", inline: "ip a; echo 'Updating packages...'"
+                node.vm.provision "shell", inline: "ip a"
+                node.vm.provision :reload
+                node.vm.provision "shell", inline: "echo 'Updating packages...'"
                 node.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive; sudo apt-get update"
                 node.vm.provision "shell", inline: "sudo snap install yq || echo 'Failure may indicate may have a duplicate mac/IP address on the same network.'"
                 # Check env
