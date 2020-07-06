@@ -19,15 +19,8 @@ if [ ! -z $HISTFILE ]; then
     exit
 fi
 
-function to_abs_path {
-    local target="$1"
-    if [ "$target" == "." ]; then
-        echo "$(pwd)"
-    elif [ "$target" == ".." ]; then
-        echo "$(dirname "$(pwd)")"
-    else
-        echo "$(cd "$(dirname "$1")"; pwd)/$(basename "$1")"
-    fi
+to_abs_path() {
+  python -c "import os; print os.path.abspath('$1')"
 }
 
 # This is the directory of the current script
@@ -113,4 +106,4 @@ function ctrl_c() {
 $SCRIPTDIR/configure.sh
 
 echo "Source vars for dev and ensuring they are encrypted..."
-source ./update_vars.sh --dev --init
+source ./update_vars.sh --dev --var-file=$output_complete

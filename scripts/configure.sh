@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 
 PS3='Do you wish configure all settings or only update and set new settings that need to be initialised? '
 options=("Configure All Settings" "Update" "Initilise And Use External Editor To Configure" "Quit")
