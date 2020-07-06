@@ -36,7 +36,7 @@ export configure=
 function define_config_settings() {
     clear
     PS3='Configure each of these options without secrets.  If you are running in the VM, configure secrets (To be done from within the Openfirehawk Server Vagrant VM when available): '
-    options=("Configure Vagrant" "Configure General Config" "Configure Resources - Grey" "Configure Secrets (Only from within Vagrant VM)" "Quit")
+    options=("Configure Vagrant" "Configure General Config" "Configure Resources - Grey" "Configure Resources - Green" "Configure Resources - Blue" "Configure Secrets (Only from within Vagrant VM)" "Quit")
     select opt in "${options[@]}"
     do
         case $opt in
