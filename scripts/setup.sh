@@ -75,7 +75,7 @@ trap ctrl_c INT
 
 function ctrl_c() {
         printf "\n** CTRL-C ** EXITING...\n"
-        if [[ "$configure" != 'secrets' ]]; then
+        if [[ "$configure" == 'secrets' ]]; then
             printf "\nWARNING: PARTIALLY COMPLETED INSTALLATIONS MAY LEAVE UNENCRYPTED SECRETS.\n"
             PS3='Do you want to Encrypt, Remove, or Leave the resulting temp file on disk? '
             options=("Encrypt And Quit" "Remove And Quit" "Leave And Quit (NOT RECOMMENDED)")
