@@ -57,12 +57,30 @@ function define_config_settings() {
                 break
                 ;;
             "Configure Resources - Grey")
-                printf "\nSome general Config like IP addresses of your hosts is needed.  Some environment variables here must be configured uniquely to your environment.\n\n"
-                export configure='resources'
                 export TF_VAR_resourcetier='grey'
-                export input=$(to_abs_path $SCRIPTDIR/../config/templates/resources-grey.template)
-                export output_tmp=$(to_abs_path $SCRIPTDIR/../tmp/resources-grey-tmp)
-                export output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/resources-grey)
+                printf "\nThe $TF_VAR_resourcetier resource file uses resources generally unique to your dev environment.\n\n"
+                export configure='resources'
+                export input=$(to_abs_path $SCRIPTDIR/../config/templates/resources-$TF_VAR_resourcetier.template)
+                export output_tmp=$(to_abs_path $SCRIPTDIR/../tmp/resources-$TF_VAR_resourcetier-tmp)
+                export output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/resources-$TF_VAR_resourcetier)
+                break
+                ;;
+            "Configure Resources - Green")
+                export TF_VAR_resourcetier='green'
+                printf "\nThe $TF_VAR_resourcetier resource file uses resources generally unique to your production $TF_VAR_resourcetier environment.\n\n"
+                export configure='resources'
+                export input=$(to_abs_path $SCRIPTDIR/../config/templates/resources-$TF_VAR_resourcetier.template)
+                export output_tmp=$(to_abs_path $SCRIPTDIR/../tmp/resources-$TF_VAR_resourcetier-tmp)
+                export output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/resources-$TF_VAR_resourcetier)
+                break
+                ;;
+            "Configure Resources - Blue")
+                export TF_VAR_resourcetier='blue'
+                printf "\nThe $TF_VAR_resourcetier resource file uses resources generally unique to your production $TF_VAR_resourcetier environment.\n\n"
+                export configure='resources'
+                export input=$(to_abs_path $SCRIPTDIR/../config/templates/resources-$TF_VAR_resourcetier.template)
+                export output_tmp=$(to_abs_path $SCRIPTDIR/../tmp/resources-$TF_VAR_resourcetier-tmp)
+                export output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/resources-$TF_VAR_resourcetier)
                 break
                 ;;
             "Configure Secrets (Only from within Vagrant VM)")

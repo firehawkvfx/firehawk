@@ -22,7 +22,7 @@
 
 # defaults_config_overide_version:
 # If the version of this file changes, the file will be replaced in any deployment.
-defaults_config_overide_version="0.0.24"
+defaults_config_overide_version="0.0.25"
 
 # TF_VAR_CI_JOB_ID:
 # This pipeline number is used to updat the active pipeline in the working dir when a new deployment is initialised.
@@ -64,8 +64,8 @@ TF_VAR_openfirehawkserver=auto
 
 # TF_VAR_deadline_proxy_root_dir:
 # This is the address and port for clients to reach the Deadline RCS on the openfirehawk server in a dev environment.  After init, the default containing the var $TF_VAR_openfirehawkserver should resolve to an actual IP in this file and not be 'auto'.
-# eg: TF_VAR_deadline_proxy_root_dir=$TF_VAR_openfirehawkserver:4433
-TF_VAR_deadline_proxy_root_dir=$TF_VAR_openfirehawkserver:4433
+# eg: TF_VAR_deadline_proxy_root_dir=auto:4433
+TF_VAR_deadline_proxy_root_dir=auto:4433
 
 # TF_VAR_vagrant_destroy_before_deploy:
 # default: TF_VAR_vagrant_destroy_before_deploy=false
