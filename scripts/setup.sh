@@ -56,7 +56,8 @@ do
             ;;
         "Configure Resources - Grey")
             printf "\nSome general Config like IP addresses of your hosts is needed.  Some environment variables here must be configured uniquely to your environment.\n\n"
-            export configure='resources-grey'
+            export configure='resources'
+            export TF_VAR_resourcetier='grey'
             export input=$(to_abs_path $SCRIPTDIR/../config/templates/resources-grey.template)
             export output_tmp=$(to_abs_path $SCRIPTDIR/../tmp/resources-grey-tmp)
             export output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/resources-grey)
