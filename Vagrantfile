@@ -11,7 +11,7 @@ network = ENV['TF_VAR_network']
 selected_ansible_version = ENV['TF_VAR_selected_ansible_version']
 syscontrol_gid=ENV['TF_VAR_syscontrol_gid']
 deployuser_uid=ENV['TF_VAR_deployuser_uid']
-cache_apt=false
+cache_apt=true
 
 # If box file in is not defined, we will use the bento base image and provision as normal.  Box file in is not the full box name, but numeric, usually marking a stage for CI
 box_file_in=ENV['box_file_in']
@@ -131,8 +131,11 @@ Vagrant.configure(2) do |config|
                 node.vm.provision "shell", inline: "ip a"
                 node.vm.provision :reload
                 node.vm.provision "shell", inline: "echo 'Updating packages...'"
-                node.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive; sudo apt-get update"
-                node.vm.provision "shell", inline: "sudo snap install yq || echo 'Failure may indicate may have a duplicate mac/IP address on the same network.'"
+                node.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive; sudo apt-get update -y"
+                node.vm.provision "shell", inline: "sudo add-apt-repository ppa:rmescandon/yq -y"
+                node.vm.provision "shell", inline: "sudo apt-get update -y"
+                node.vm.provision "shell", inline: "sudo apt-get install yq -y || echo 'Failure may indicate may have a duplicate mac/IP address on the same network."
+                # node.vm.provision "shell", inline: "sudo snap install yq || echo 'Failure may indicate may have a duplicate mac/IP address on the same network.'"
                 # Check env
                 node.vm.provision "shell", inline: "echo DEBIAN_FRONTEND=$DEBIAN_FRONTEND"
                 node.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive"
