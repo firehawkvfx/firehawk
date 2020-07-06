@@ -34,7 +34,7 @@ printf "\n...checking scripts directory at $SCRIPTDIR\n\n"
 export configure=
 
 PS3='Do you wish to configure the Ansible Control VM or configure secrets (To be done from within the Openfirehawk Server Vagrant VM only)? '
-options=("Configure Vagrant" "Configure General Config" "Configure Secrets (Only from within Vagrant VM)" "Quit")
+options=("Configure Vagrant" "Configure General Config" "Configure Resources - Grey" "Configure Secrets (Only from within Vagrant VM)" "Quit")
 select opt in "${options[@]}"
 do
     case $opt in
