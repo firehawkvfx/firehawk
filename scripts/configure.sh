@@ -43,7 +43,7 @@ display=false
 if [[ -f "$output_complete" ]]; then
     printf "\n\n...Attempting to source environment variables from existing config file $configure\n"
     printf "\nThis configuration script always sources from and writes to the dev configuration file.  Once evaluated and tested the configuration can be replicated across to your production file. \n"
-    source $SCRIPTDIR/../update_vars.sh --var-file $configure --tier dev --save-template false
+    source $SCRIPTDIR/../update_vars.sh --var-file $configure --tier dev --save-template false --force
 fi
 
 #clear output_tmp

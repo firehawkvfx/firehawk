@@ -25,7 +25,6 @@
 # TF_VAR_remote_subnet_cidr:
 # This is the IP range (CIDR notation) of your subnet onsite that the firehawkserver vm will reside in, and that other onsite nodes reside in.  The below example would denote the range 192.168.29.0 - 192.168.29.255
 # eg: TF_VAR_remote_subnet_cidr=192.168.29.0/24
-# This would be the ip range 192.168.29.0 - 192.168.29.255
 TF_VAR_remote_subnet_cidr=insertvalue
 
 # TF_VAR_ssh_config_remote_subnet:
