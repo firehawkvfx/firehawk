@@ -11,6 +11,7 @@ network = ENV['TF_VAR_network']
 selected_ansible_version = ENV['TF_VAR_selected_ansible_version']
 syscontrol_gid=ENV['TF_VAR_syscontrol_gid']
 deployuser_uid=ENV['TF_VAR_deployuser_uid']
+cache_apt=false
 
 # If box file in is not defined, we will use the bento base image and provision as normal.  Box file in is not the full box name, but numeric, usually marking a stage for CI
 box_file_in=ENV['box_file_in']
@@ -116,14 +117,15 @@ Vagrant.configure(2) do |config|
             node.vm.synced_folder "../secrets", "/secrets", create: true, owner: "deployuser", group: "deployuser", mount_options: ["uid=#{deployuser_uid}", "gid=#{deployuser_uid}"]
 
             if box_file_in.nil? || box_file_in.empty?
-
-                node.vm.provision "shell", inline: "sudo mkdir -p /deployuser/tmp/apt/$(hostname)"
-                node.vm.provision "shell", inline: "sudo chmod u=rwX,g=rwX,o=rwX,g+s /deployuser/tmp/apt/$(hostname)"
-                node.vm.provision "shell", inline: "sudo mkdir -p /deployuser/tmp/apt/$(hostname)/partial"
-                node.vm.provision "shell", inline: "sudo chmod u=rwX,g=rwX,o=rwX,g+s /deployuser/tmp/apt/$(hostname)/partial"
-                # node.vm.provision "shell", inline: "sudo cp -r /deployuser/tmp/apt/$(hostname)/* var/cache/apt/." # copy apt caches back
-                node.vm.provision "shell", inline: 'echo "Dir::Cache::Archives /deployuser/tmp/apt/$(hostname);" | sudo tee -a /etc/apt/apt.conf.d/00aptitude'
-                node.vm.provision "shell", inline: 'echo "Dir::Cache /deployuser/tmp/apt/$(hostname);" | sudo tee -a /etc/apt/apt.conf.d/00aptitude'
+                if cache_apt = true
+                    node.vm.provision "shell", inline: "sudo mkdir -p /deployuser/tmp/apt/$(hostname)"
+                    node.vm.provision "shell", inline: "sudo chmod u=rwX,g=rwX,o=rwX,g+s /deployuser/tmp/apt/$(hostname)"
+                    node.vm.provision "shell", inline: "sudo mkdir -p /deployuser/tmp/apt/$(hostname)/partial"
+                    node.vm.provision "shell", inline: "sudo chmod u=rwX,g=rwX,o=rwX,g+s /deployuser/tmp/apt/$(hostname)/partial"
+                    node.vm.provision "shell", inline: 'echo "Dir::Cache::Archives /deployuser/tmp/apt/$(hostname);" | sudo tee -a /etc/apt/apt.conf.d/00aptitude'
+                    node.vm.provision "shell", inline: 'echo "Dir::Cache /deployuser/tmp/apt/$(hostname);" | sudo tee -a /etc/apt/apt.conf.d/00aptitude'
+                end
+                # env run always
                 node.vm.provision "shell", inline: "echo 'source /vagrant/scripts/env.sh' > /etc/profile.d/sa-environment.sh", :run => 'always'
                 ### Install yq to query yaml
                 node.vm.provision "shell", inline: "ip a"
