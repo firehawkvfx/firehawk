@@ -77,11 +77,6 @@ TF_VAR_aws_provider_version=insertvalue
 # https://aws.amazon.com/ec2/pricing/on-demand/
 TF_VAR_node_centos_instance_type=insertvalue
 
-# TF_LOG_PATH:
-# The path used to log terraform output.
-# default: TF_LOG_PATH=/deployuser/tmp/terraform.log
-TF_LOG_PATH=insertvalue
-
 # ANSIBLE_FORCE_COLOR:
 # When ansible is run via terraform local exec, colour is not normally visible.  This setting enforces color.
 # default: ANSIBLE_FORCE_COLOR=1
