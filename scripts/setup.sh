@@ -113,6 +113,7 @@ function write_output() {
             case $opt in
                 "Yes, save my configuration and continue or exit from main menu")
                     printf "\nMoving temp config to overwrite previous config... \n\n"
+                    break
                     ;;
                 "No / Quit")
                     printf "\nIf you wish to later you can manually move \n$output_tmp \nto \n$output_complete\nto apply the configuration\n\nExiting... \n\n"
