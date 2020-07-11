@@ -6,27 +6,27 @@ to_abs_path() {
 
 config_override=$(to_abs_path $TF_VAR_firehawk_path/../secrets/config-override-$TF_VAR_envtier) # ...Config Override path $config_override.
 echo "config_override path- $config_override"
-sed -i 's/^allow_interrupt=.*$/allow_interrupt=true/' $config_override # destroy before deploy
-sed -i 's/^TF_VAR_enable_vpc=.*$/TF_VAR_enable_vpc=true/' $config_override # ...Enable the vpc.
-sed -i 's/^TF_VAR_softnas_storage=.*$/TF_VAR_softnas_storage=false/' $config_override # ...On first apply, don't create softnas instance until vpn is working.
-sed -i 's/^TF_VAR_aws_nodes_enabled=.*$/TF_VAR_aws_nodes_enabled=false/' $config_override # ...Site mounts will not be mounted in cloud.  currently this will disable provisioning any render node or remote workstation until vpn is confirmed to function after this step.
+python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'allow_interrupt=' 'true' # destroy before deploy
+python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_enable_vpc=' 'true' # ...Enable the vpc.
+python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_softnas_storage=' 'false' # ...On first apply, don't create softnas instance until vpn is working.
+python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_aws_nodes_enabled=' 'false' # ...Site mounts will not be mounted in cloud.  currently this will disable provisioning any render node or remote workstation until vpn is confirmed to function after this step.
 
 # Alter the config file directly for these tests.  Revert to defaults in config.  config override will not disable if the var is set to itself
-sed -i 's/^TF_VAR_houdini_license_server_address=.*$/TF_VAR_houdini_license_server_address=$TF_VAR_houdini_license_server_address/' $config_override # inherit default
-sed -i 's/^TF_VAR_localnas1_private_ip=.*$/TF_VAR_localnas1_private_ip=$TF_VAR_localnas1_private_ip/' $config_override # inherit default
-sed -i 's/^TF_VAR_localnas1_path_abs=.*$/TF_VAR_localnas1_path_abs=$TF_VAR_localnas1_path_abs/' $config_override # inherit default
-sed -i 's/^TF_VAR_localnas1_export_path=.*$/TF_VAR_localnas1_export_path=$TF_VAR_localnas1_export_path/' $config_override # inherit default
-sed -i 's/^TF_VAR_localnas1_volume_name=.*$/TF_VAR_localnas1_volume_name=$TF_VAR_localnas1_volume_name/' $config_override # inherit default
+python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_houdini_license_server_address=' '$TF_VAR_houdini_license_server_address' # inherit default
+python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_localnas1_private_ip=' '$TF_VAR_localnas1_private_ip' # inherit default
+python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_localnas1_path_abs=' '$TF_VAR_localnas1_path_abs' # inherit default
+python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_localnas1_export_path=' '$TF_VAR_localnas1_export_path' # inherit default
+python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_localnas1_volume_name=' '$TF_VAR_localnas1_volume_name' # inherit default
 
-sed -i 's/^TF_VAR_remote_mounts_on_local=.*$/TF_VAR_remote_mounts_on_local=false/' $config_override # ...Softnas nfs exports will not be mounted on local site
+python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_remote_mounts_on_local=' 'false' # ...Softnas nfs exports will not be mounted on local site
 sed -i 's/^TF_VAR_softnas_skip_update=.*$/TF_VAR_softnas_skip_update=false/' $config_override
-sed -i 's/^TF_VAR_provision_deadline_spot_plugin=.*$/TF_VAR_provision_deadline_spot_plugin=false/' $config_override # Don't provision the deadline spot plugin for this stage
-sed -i 's/^TF_VAR_install_houdini=.*$/TF_VAR_install_houdini=false/' $config_override # install houdini
-sed -i 's/^TF_VAR_install_deadline_db=.*$/TF_VAR_install_deadline_db=false/' $config_override # install deadline
-sed -i 's/^TF_VAR_install_deadline_rcs=.*$/TF_VAR_install_deadline_rcs=false/' $config_override # install deadline
-sed -i 's/^TF_VAR_install_deadline_worker=.*$/TF_VAR_install_deadline_worker=false/' $config_override # install deadline
-sed -i 's/^TF_VAR_workstation_enabled=.*$/TF_VAR_workstation_enabled=false/' $config_override # install deadline
-sed -i 's/^TF_VAR_tf_destroy_before_deploy=.*$/TF_VAR_tf_destroy_before_deploy=false/' $config_override # destroy before deploy
-sed -i 's/^TF_VAR_taint_single=.*$/TF_VAR_taint_single=()/' $config_override # taint vpn
-# sed -i 's/^TF_VAR_taint_single=.*$/TF_VAR_taint_single=(module.vpc.module.vpn.module.openvpn.aws_instance.openvpn[0])/' $config_override # taint vpn
+python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_provision_deadline_spot_plugin=' 'false' # Don't provision the deadline spot plugin for this stage
+python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_install_houdini=' 'false' # install houdini
+python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_install_deadline_db=' 'false' # install deadline
+python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_install_deadline_rcs=' 'false' # install deadline
+python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_install_deadline_worker=' 'false' # install deadline
+python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_workstation_enabled=' 'false' # install deadline
+python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_tf_destroy_before_deploy=' 'false' # destroy before deploy
+python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_taint_single=' '()' # taint vpn
+# python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_taint_single=' '(module.vpc.module.vpn.module.openvpn.aws_instance.openvpn[0])' # taint vpn
 
