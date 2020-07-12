@@ -801,6 +801,7 @@ fi
 
 if [[ ! -z "$warning" ]]; then
     printf $warning
+    unset warning
 fi
 
 echo_if_not_silent "...Done."
