@@ -671,7 +671,7 @@ source_vars () {
             [[ "$i" =~ ^#.*$ ]] && continue
             key=${i%=*}
             value=${i#*=}
-            eval value=$value # This method should eval strings withhout quotes remaining in the var
+            eval value="$value" # This method should eval strings withhout quotes remaining in the var
             # echo "$key : $value"
             export "$key=$value" # Export the environment var
         done
