@@ -138,18 +138,27 @@ Currently the green blue deployment method being implemented will replace config
 
 ## Vagrant workstation for the dev environment
 
-When doing test deployments, we can use seperate VM's from production systems to test on.  This Vagrant VM to test a workstation creates a CentOS 7 VM with a Gnome GUI.  To isolate your workstation from testing, it is recommended that you use this VM here to simulate an isolated a workstation in a dev environment.  This protects your actual workstation from testing failed deplopyments that would affect productivity.  In the production environment, you would replace any IP adresses and ssh keys / passwords with those used for your actual workstation in the resources-green and resources-blue files.  Alternatively you can allow password login and the authorization will be handled automatically with ssh keys.  After this, password use for ssh login is disabled for security reasons.
+When doing test deployments, we can use seperate VM's from production systems to test on.  This Vagrant VM to test a workstation creates a CentOS 7 VM with a Gnome GUI.  Even if you want to experiment with another OS for your workstation, it is recommended that you use a Centos machine/VM to test and diagnose problems.  To isolate your workstation from testing, it is recommended that you use this VM here to simulate an isolated a workstation in a dev environment.  This protects your actual workstation from testing failed deplopyments that would affect productivity.  In the production environment, you would replace any IP adresses and ssh keys / passwords with those used for your actual workstation in the resources-green and resources-blue files.  Alternatively you can allow password login and the authorization will be handled automatically with ssh keys.  After this, password use for ssh login is disabled for security reasons.
 
 - [Clone this repository to a seperate folder](https://github.com/queglay/vagrant-centos-gui) to create a workstation VM to test deployments in a dev environment
 ```
 Vagrant up
 ```
-- Once the UI is up configure a user name (user) and password, this will be used to bootstrap another user for automation later.
-- Ensure you can ssh into the VM with this information from your network.
+- Once the UI is up configure a new user name (user) and password, this will be used to bootstrap another user for automation later.
+```
+sudo useradd user # Add a new user
+passwd user # Set a password
+sudo vi /etc/ssh/sshd_config # Find the line PasswordAuthentication no, and change it to yes
+sudo systemctl restart sshd.service # Restart the ssh service
+ip a # Find the mac adress for this system on your network (usually 192.168.? )
+```
+- Ensure you can ssh into the VM with this information from your network on another machine.
+```
+ssh user@machine_ip # where machine_ip is the IP address found above
+```
+- If you are using an existing machine that has password access disabled, you should also enable password access in /etc/sshd_config
 
-This login information will be entered into your encrypted secrets file in later steps, and is only temporarily used until the login is replaced with an ssh key for the deployuser (which will also be created automatically).  Once the ssh key is configured by Firehawk the password wont be usable for ssh access anymore.  Passwords are not recommend to be allowed for continued SSH access in a firehawk deployment.
-
-
+This login information should be entered into your encrypted secrets file in later steps, and is only temporarily used until the login is replaced with an ssh key for the deployuser (which will also be created automatically).  Once the ssh key is configured by Firehawk the password wont be usable for ssh access anymore.  Passwords are not recommend to be allowed for continued SSH access in a firehawk deployment.
 
 ## Thinkbox Usage Based Licensing
 To use Deadline in AWS, instances that reside in AWS are free.  But any onsite systems that render will require a licence.  If you wish to use any other UBL licenses (eg houdini Engine) they will also 
