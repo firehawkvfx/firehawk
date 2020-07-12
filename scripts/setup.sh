@@ -122,6 +122,7 @@ function write_output() {
                 "No / Quit")
                     printf "\nIf you wish to later you can manually move \n$output_tmp \nto \n$output_complete\nto apply the configuration\n\nExiting... \n\n"
                     echo "Sourcing vars..."
+                    source ./update_vars.sh --dev --var-file='vagrant' --force --save-template=false # always source vagrant file since it has the vault key
                     source ./update_vars.sh --dev --var-file=$configure --force --save-template=false
                     exit
                     ;;
