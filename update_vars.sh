@@ -569,40 +569,22 @@ source_vars () {
                 echo "FILE NOT FOUND: scripts/ansible-encrypt.sh"
                 echo "Check existance of $TF_VAR_firehawk_path/scripts/ansible-encrypt.sh"
             fi
-            vault_command="ansible-vault view --vault-id $vault_key --vault-id $vault_key@scripts/ansible-encrypt.sh $var_file"
+            vault_command() {
+                ansible-vault view --vault-id $vault_key --vault-id $vault_key@scripts/ansible-encrypt.sh $var_file
+            }
         else
             echo "Prompt user for password:"
-            vault_command="ansible-vault view --vault-id $vault_key --vault-id $vault_key@prompt $var_file"
+            vault_command() {
+                ansible-vault view --vault-id $vault_key --vault-id $vault_key@prompt $var_file
+            }
         fi
         
         # always check if a vault key exists, setup requires it.  if it does, then install can continue automatically.
         if [ -e $vault_key ]; then
             if [[ $verbose ]]; then
-                path=$(to_abs_path $vault_key)
                 printf "\n$vault_key exists. vagrant up will automatically provision.\n\n"
             fi
         else
-            # printf "\n$vault_key doesn't exist.\n\n"
-            # printf "\nNo vault key has been initialised at this location.\n\n"
-            # PS3='Do you wish to initialise a new vault key?'
-            # options=("Initialise A New Key" "Quit")
-            # select opt in "${options[@]}"
-            # do
-            #     case $opt in
-            #         "Initialise A New Key")
-            #             printf "\n${RED}WARNING: DO NOT COMMIT THESE KEYS TO VERSION CONTROL.${NC}\n"
-            #             openssl rand -base64 64 > $vault_key || failed=true
-            #             break
-            #             ;;
-            #         "Quit")
-            #             echo "You selected $REPLY to $opt"
-            #             quit=true
-            #             break
-            #             ;;
-            #         *) echo "invalid option $REPLY";;
-            #     esac
-            # done
-
             printf "\n$vault_key doesn't exist.\n\n"
             printf "\nNo vault key has been initialised at this location.\n\n"
             PS3="Do you wish to initialise a new vault key?"
@@ -615,7 +597,7 @@ source_vars () {
                         openssl rand -base64 64 > $vault_key || failed=true
                         break
                         ;;
-                    "No / Quit")
+                    "Quit")
                         echo "You selected $REPLY to $opt"
                         quit=true
                         break
@@ -623,8 +605,8 @@ source_vars () {
                     *) echo "invalid option $REPLY";;
                 esac
             done
-
         fi
+
 
         if [[ $failed = true ]]; then    
             echo "${RED}WARNING: Failed to create key.${NC}"
@@ -659,10 +641,14 @@ source_vars () {
             printf "\n${RED}WARNING: Never commit unencrypted secrets to a repository/version control. run this command again without --decrypt before commiting any secrets to version control.${NC}"
             printf "\nIf you accidentally do commit unencrypted secrets, ensure there is no trace of the data in the repo, and invalidate the secrets / replace them.\n"
                 
-            export vault_command="cat $var_file"
+            vault_command() {
+                cat $var_file
+            }
         elif [[ $encrypt_mode = "none" ]]; then
             echo_if_not_silent "Assuming variables are not encrypted to set environment vars"
-            export vault_command="cat $var_file"
+            vault_command() {
+                cat $var_file
+            }
         fi
 
         if [[ $verbose = true ]]; then
@@ -673,18 +659,15 @@ source_vars () {
             echo "encrypt_mode=$encrypt_mode"
         fi
 
-        export vault_examples_command="cat $TF_VAR_firehawk_path/secrets.example"
-
         ### Use the vault command to iterate over variables and export them without values to the template
 
         if [[ $encrypt_mode = "none" ]]; then
             echo_if_not_silent "...Parsing unencrypted file to template.  No decryption necesary."
         else
             echo_if_not_silent "...Parsing vault file to template.  Decrypting."
-            echo "vault_command=$vault_command"
         fi
 
-        local multiline; multiline=$(eval $vault_command); exit_test
+        local multiline; multiline=$(vault_command); exit_test
         for i in $(echo "$multiline" | sed -e 's/^$/###/')
         do
             if [[ "$i" =~ ^#.*$ ]]

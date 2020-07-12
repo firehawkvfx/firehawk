@@ -63,7 +63,7 @@ allow_interrupt=insertvalue
 TF_VAR_openfirehawkserver=insertvalue
 
 # TF_VAR_deadline_proxy_root_dir:
-# This is the address and port for clients to reach the Deadline RCS on the openfirehawk server in a dev environment.  After init, the default containing the var '$TF_VAR_openfirehawkserver' should resolve to an actual IP in this file and not be 'auto'.
+# This is the address and port for clients to reach the Deadline RCS on the openfirehawk server in a dev environment.  After init, the default containing the var 'TF_VAR_openfirehawkserver' should resolve to an actual IP in this file and not be 'auto'.
 # eg: TF_VAR_deadline_proxy_root_dir=auto:4433
 TF_VAR_deadline_proxy_root_dir=insertvalue
 
@@ -189,10 +189,10 @@ TF_VAR_localnas1_path_abs=insertvalue
 
 # TF_VAR_aws_key_name:
 # The name of the key pair used in the dev environment. You will create a key pair to access your aws instances, listed here.
-# default: TF_VAR_aws_key_name=my_key_pair_pipeid0_dev
+# default: TF_VAR_aws_key_name=my_key_pair
 TF_VAR_aws_key_name=insertvalue
 
 # TF_VAR_aws_private_key_path:
 # the path to the keypair from within the vagrant VM.
-# default: TF_VAR_aws_private_key_path=/secrets/keys/my_key_pair_pipeid0_dev.pem
+# default: TF_VAR_aws_private_key_path=/secrets/keys/my_key_pair.pem
 TF_VAR_aws_private_key_path=insertvalue
