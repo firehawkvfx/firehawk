@@ -582,9 +582,30 @@ source_vars () {
                 printf "\n$vault_key exists. vagrant up will automatically provision.\n\n"
             fi
         else
+            # printf "\n$vault_key doesn't exist.\n\n"
+            # printf "\nNo vault key has been initialised at this location.\n\n"
+            # PS3='Do you wish to initialise a new vault key?'
+            # options=("Initialise A New Key" "Quit")
+            # select opt in "${options[@]}"
+            # do
+            #     case $opt in
+            #         "Initialise A New Key")
+            #             printf "\n${RED}WARNING: DO NOT COMMIT THESE KEYS TO VERSION CONTROL.${NC}\n"
+            #             openssl rand -base64 64 > $vault_key || failed=true
+            #             break
+            #             ;;
+            #         "Quit")
+            #             echo "You selected $REPLY to $opt"
+            #             quit=true
+            #             break
+            #             ;;
+            #         *) echo "invalid option $REPLY";;
+            #     esac
+            # done
+
             printf "\n$vault_key doesn't exist.\n\n"
             printf "\nNo vault key has been initialised at this location.\n\n"
-            PS3='Do you wish to initialise a new vault key?'
+            PS3="Do you wish to initialise a new vault key?"
             options=("Initialise A New Key" "Quit")
             select opt in "${options[@]}"
             do
@@ -594,7 +615,7 @@ source_vars () {
                         openssl rand -base64 64 > $vault_key || failed=true
                         break
                         ;;
-                    "Quit")
+                    "No / Quit")
                         echo "You selected $REPLY to $opt"
                         quit=true
                         break
@@ -602,6 +623,7 @@ source_vars () {
                     *) echo "invalid option $REPLY";;
                 esac
             done
+
         fi
 
         if [[ $failed = true ]]; then    
