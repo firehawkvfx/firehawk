@@ -732,7 +732,8 @@ source_vars () {
                 # fi
             else
                 printf "\nCreating new vault key since not present: $vault_key"
-                printf "\n${RED}WARNING: DO NOT COMMIT THESE KEYS TO VERSION CONTROL: $vault_key ${NC}\n"
+                warning="\n${RED}WARNING: DO NOT COMMIT THESE KEYS TO VERSION CONTROL: $vault_key ${NC}\n"
+                printf $warning
                 openssl rand -base64 64 > $vault_key || failed=true
             fi
         fi
@@ -797,6 +798,11 @@ fi
 # mkdir -p $TF_VAR_inventory
 # echo "TF_VAR_aws_key_name: $TF_VAR_aws_key_name"
 # echo "TF_VAR_aws_private_key_path: $TF_VAR_aws_private_key_path"
+
+if [[ ! -z "$warning" ]]; then
+    printf $warning
+fi
+
 echo_if_not_silent "...Done."
 
 if [[ "$SHOWCOMMANDS" == true ]]; then set -x; fi # After finishing the script, we enable set -x to show input again.
