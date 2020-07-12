@@ -575,37 +575,33 @@ source_vars () {
             vault_command="ansible-vault view --vault-id $vault_key --vault-id $vault_key@prompt $var_file"
         fi
         
-
-        if [[ $encrypt_mode != "none" ]]; then
-            #check if a vault key exists.  if it does, then install can continue automatically.
-            if [ -e $vault_key ]; then
-                if [[ $verbose ]]; then
-                    path=$(to_abs_path $vault_key)
-                    printf "\n$vault_key exists. vagrant up will automatically provision.\n\n"
-                fi
-            else
-                printf "\n$vault_key doesn't exist.\n\n"
-                printf "\nNo vault key has been initialised at this location.\n\n"
-                PS3='Do you wish to initialise a new vault key?'
-                options=("Initialise A New Key" "Quit")
-                select opt in "${options[@]}"
-                do
-                    case $opt in
-                        "Initialise A New Key")
-                            printf "\n${RED}WARNING: DO NOT COMMIT THESE KEYS TO VERSION CONTROL.${NC}\n"
-                            openssl rand -base64 64 > $vault_key || failed=true
-                            break
-                            ;;
-                        "Quit")
-                            echo "You selected $REPLY to $opt"
-                            quit=true
-                            break
-                            ;;
-                        *) echo "invalid option $REPLY";;
-                    esac
-                done
-                
+        # always check if a vault key exists, setup requires it.  if it does, then install can continue automatically.
+        if [ -e $vault_key ]; then
+            if [[ $verbose ]]; then
+                path=$(to_abs_path $vault_key)
+                printf "\n$vault_key exists. vagrant up will automatically provision.\n\n"
             fi
+        else
+            printf "\n$vault_key doesn't exist.\n\n"
+            printf "\nNo vault key has been initialised at this location.\n\n"
+            PS3='Do you wish to initialise a new vault key?'
+            options=("Initialise A New Key" "Quit")
+            select opt in "${options[@]}"
+            do
+                case $opt in
+                    "Initialise A New Key")
+                        printf "\n${RED}WARNING: DO NOT COMMIT THESE KEYS TO VERSION CONTROL.${NC}\n"
+                        openssl rand -base64 64 > $vault_key || failed=true
+                        break
+                        ;;
+                    "Quit")
+                        echo "You selected $REPLY to $opt"
+                        quit=true
+                        break
+                        ;;
+                    *) echo "invalid option $REPLY";;
+                esac
+            done
         fi
 
         if [[ $failed = true ]]; then    

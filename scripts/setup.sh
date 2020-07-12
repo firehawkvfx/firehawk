@@ -150,7 +150,7 @@ function ctrl_c() {
                 case $opt in
                     "Encrypt And Quit")
                         printf "\nEncrypting temp configuration file.\n\n"
-                        ansible-vault encrypt $output_tmp
+                        ansible-vault encrypt --vault-id $vault_key@prompt $output_tmp
                         exit
                         ;;
                     "Remove And Quit")
