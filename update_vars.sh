@@ -579,22 +579,6 @@ source_vars () {
             }
         fi
         
-        # always check if a vault key exists, setup requires it.  if it does, then install can continue automatically.
-        if [ -f $vault_key ]; then
-            if [[ $verbose ]]; then
-                printf "\n$vault_key exists. vagrant up will automatically provision.\n\n"
-            fi
-        else
-            printf "\nCreating new vault key since not present: $vault_key"
-            printf "\n${RED}WARNING: DO NOT COMMIT THESE KEYS TO VERSION CONTROL: $vault_key ${NC}\n"
-            openssl rand -base64 64 > $vault_key || failed=true
-        fi
-
-
-        if [[ $failed = true ]]; then    
-            echo "${RED}WARNING: Failed to create key.${NC}"
-            return 88
-        fi
 
         # if [[ $quit = true ]]; then    
         #     return 88
@@ -602,6 +586,13 @@ source_vars () {
 
         if [[ "$verbose" == true ]]; then echo 'Check if encrypt...'; fi
         # vault arg will set encryption mode
+        if [[ $encrypt_mode = "encrypt" ]] || [[ $encrypt_mode = "decrypt" ]]; then
+            if [ ! -f $vault_key ]; then
+                printf "\nFailed: vault key not present.\nThis file should have been created during source ./update_vars.sh --dev --init: $vault_key\n\n"
+                exit
+            fi
+        fi
+
         if [[ $encrypt_mode = "encrypt" ]]; then
             echo "Encrypting Vault..."
             line=$(head -n 1 $var_file)
@@ -730,6 +721,23 @@ source_vars () {
             echo_if_not_silent "...Skipping saving of template"
         else 
             printf "\n...${RED}WARNING: envtier evaluated to no match for dev or prod.  Inspect update_vars.sh to handle this case correctly.${NC}\n"
+            return 88
+        fi
+
+        # always check if a vault key exists, setup requires it.  if it does, then install can continue automatically.
+        if [[ "$var_file" == "vagrant" ]]; then
+            if [ -f $vault_key ]; then
+                if [[ $verbose ]]; then
+                    printf "\n$vault_key exists. vagrant up will automatically provision.\n\n"
+                fi
+            else
+                printf "\nCreating new vault key since not present: $vault_key"
+                printf "\n${RED}WARNING: DO NOT COMMIT THESE KEYS TO VERSION CONTROL: $vault_key ${NC}\n"
+                openssl rand -base64 64 > $vault_key || failed=true
+            fi
+        fi
+        if [[ $failed = true ]]; then    
+            echo "${RED}WARNING: Failed to create key.${NC}"
             return 88
         fi
 
