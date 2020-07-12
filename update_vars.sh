@@ -580,7 +580,7 @@ source_vars () {
         fi
         
         # always check if a vault key exists, setup requires it.  if it does, then install can continue automatically.
-        if [ -e $vault_key ]; then
+        if [ -f $vault_key ]; then
             if [[ $verbose ]]; then
                 printf "\n$vault_key exists. vagrant up will automatically provision.\n\n"
             fi

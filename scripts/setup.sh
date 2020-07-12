@@ -151,7 +151,7 @@ function ctrl_c() {
                     "Encrypt And Quit")
                         source ./update_vars.sh --dev --var-file='vagrant' --force --save-template=false
                         printf "\nEncrypting temp configuration file with key: $vault_key.\n\n"
-                        if [ -e $vault_key ]; then
+                        if [ ! -f $vault_key ]; then
                             printf "\nFailed: vault key not present.\nThis file should have been created during source ./update_vars.sh --dev --init: $vault_key\n\n"
                             exit
                         fi
