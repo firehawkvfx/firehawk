@@ -149,7 +149,12 @@ function ctrl_c() {
             do
                 case $opt in
                     "Encrypt And Quit")
-                        printf "\nEncrypting temp configuration file.\n\n"
+                        source ./update_vars.sh --dev --var-file='vagrant' --force --save-template=false
+                        printf "\nEncrypting temp configuration file with key: $vault_key.\n\n"
+                        if [ -e $vault_key ]; then
+                            printf "\nFailed: vault key not present.\nThis file should have been created during source ./update_vars.sh --dev --init: $vault_key\n\n"
+                            exit
+                        fi
                         ansible-vault encrypt --vault-id $vault_key@prompt $output_tmp
                         exit
                         ;;

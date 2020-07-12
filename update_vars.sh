@@ -588,31 +588,6 @@ source_vars () {
             printf "\nCreating new vault key since not present: $vault_key"
             printf "\n${RED}WARNING: DO NOT COMMIT THESE KEYS TO VERSION CONTROL: $vault_key ${NC}\n"
             openssl rand -base64 64 > $vault_key || failed=true
-
-            # printf "\n$vault_key doesn't exist.\n\n"
-            # printf "\nNo vault key has been initialised at this location.\n\n"
-            # PS3="Do you wish to initialise a new vault key?"
-            # options=("Initialise A New Key" "Quit")
-            # select opt in "${options[@]}"
-            # do
-            #     case $opt in
-            #         "Initialise A New Key")
-            #             printf "\n${RED}WARNING: DO NOT COMMIT THESE KEYS TO VERSION CONTROL.${NC}\n"
-            #             openssl rand -base64 64 > $vault_key || failed=true
-            #             break
-            #             ;;
-            #         "Quit")
-            #             echo "You selected $REPLY to $opt"
-            #             quit=true
-            #             break
-            #             ;;
-            #         *)
-            #             echo "invalid option $REPLY"
-            #             quit=true
-            #             break
-            #             ;;
-            #     esac
-            # done
         fi
 
 
