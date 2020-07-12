@@ -96,11 +96,11 @@ if [[ "$encrypt" = true ]]; then
     unset REPLY
     echo $secret
 elif [[ "$decrypt" = true ]]; then
-    result=$(echo $encrypted_secret | base64 -d | /snap/bin/yq r - "$secret_name" | ansible-vault decrypt --vault-id $vault_key)
+    result=$(echo $encrypted_secret | base64 -d | yq r - "$secret_name" | ansible-vault decrypt --vault-id $vault_key)
     echo $result
 else
     # if no arg is passed to encrypt or decrypt, then we a ssume the function will decrypt the firehawksecret env var
     encrypted_secret="${firehawksecret}"
-    result=$(echo $encrypted_secret | base64 -d | /snap/bin/yq r - "$secret_name" | ansible-vault decrypt --vault-id $vault_key)
+    result=$(echo $encrypted_secret | base64 -d | yq r - "$secret_name" | ansible-vault decrypt --vault-id $vault_key)
     echo $result
 fi
