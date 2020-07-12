@@ -725,11 +725,11 @@ source_vars () {
         fi
 
         # always check if a vault key exists, setup requires it.  if it does, then install can continue automatically.
-        if [[ "$var_file" == "vagrant" ]]; then
+        if [[ ! -z "$vault_key" ]]; then
             if [ -f $vault_key ]; then
-                if [[ $verbose ]]; then
-                    printf "\n$vault_key exists. vagrant up will automatically provision.\n\n"
-                fi
+                # if [[ $verbose ]]; then
+                printf "\n$vault_key exists. vagrant up will automatically provision.\n\n"
+                # fi
             else
                 printf "\nCreating new vault key since not present: $vault_key"
                 printf "\n${RED}WARNING: DO NOT COMMIT THESE KEYS TO VERSION CONTROL: $vault_key ${NC}\n"
