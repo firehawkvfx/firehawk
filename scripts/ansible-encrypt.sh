@@ -90,6 +90,7 @@ parse_opts () {
 }
 parse_opts "$@"
 
+# If you encounter errors running yq on centos with snap, try: sudo ln -s /var/lib/snapd/snap/bin/yq /bin/yq
 if [[ "$encrypt" = true ]]; then
     read -s -p "Enter the string to encrypt: `echo $'\n> '`";
     secret=$(echo -n "$REPLY" | ansible-vault encrypt_string --vault-id $vault_key --stdin-name $secret_name | base64 -w 0)
