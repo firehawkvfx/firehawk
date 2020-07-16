@@ -116,7 +116,7 @@ function write_output() {
     select opt in "${options[@]}"
     do
         case $opt in
-            "Yes, save my configuration and return to main menu")
+            "Yes, save my configuration and continue or exit from main menu")
                 printf "\nMoving temp config to overwrite previous config... \n\n"
                 mv -fv $output_tmp $output_complete || echo "Failed to move temp file.  Check permissions."
                 define_config_settings
