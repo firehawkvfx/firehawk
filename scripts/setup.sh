@@ -104,76 +104,80 @@ function define_config_settings() {
     write_output
 }
 
-function write_output() {
-    if [[ -f "$output_complete" ]]; then
-        # if an existing config exists, then prompt to overwrite
-        printf "\nYour new initialised configuration has been stored at temp path-\n$output_tmp\nTo use this configuration do you wish to overwrite any existing configuration at-\n$output_complete?\n\n"
-        PS3="Save and overwrite configuration settings?"
-        options=("Yes, save my configuration and continue or exit from main menu" "No / Quit")
-        select opt in "${options[@]}"
-        do
-            case $opt in
-                "Yes, save my configuration and continue or exit from main menu")
-                    printf "\nMoving temp config to overwrite previous config... \n\n"
-                    mv -fv $output_tmp $output_complete || echo "Failed to move temp file.  Check permissions."
-                    define_config_settings
-                    break
-                    ;;
-                "No / Quit")
-                    printf "\nIf you wish to later you can manually move \n$output_tmp \nto \n$output_complete\nto apply the configuration\n\nExiting... \n\n"
-                    echo "Sourcing vars..."
-                    source ./update_vars.sh --dev --var-file='vagrant' --force --save-template=false # always source vagrant file since it has the vault key
-                    source ./update_vars.sh --dev --var-file=$configure --force --save-template=false
-                    exit
-                    ;;
-                *) echo "invalid option $REPLY";;
-            esac
-        done
-    else
-        printf '\n...Saving configuration\n'
-        mv -fv $output_tmp $output_complete || echo "Failed to move temp file.  Check permissions."
-        define_config_settings
-    fi
-
-}
-
 # trap ctrl-c and call ctrl_c()
-trap ctrl_c INT
+trap write_output INT
 
-function ctrl_c() {
-        printf "\n** CTRL-C ** EXITING...\n"
-        if [[ "$configure" == 'secrets' ]]; then
-            printf "\nWARNING: PARTIALLY COMPLETED INSTALLATIONS MAY LEAVE UNENCRYPTED SECRETS.\n"
-            PS3='Do you want to Encrypt, Remove, or Leave the resulting temp file on disk? '
-            options=("Encrypt And Quit" "Remove And Quit" "Leave And Quit (NOT RECOMMENDED)")
-            select opt in "${options[@]}"
-            do
-                case $opt in
-                    "Encrypt And Quit")
-                        source ./update_vars.sh --dev --var-file='vagrant' --force --save-template=false
-                        printf "\nEncrypting temp configuration file with key: $vault_key.\n\n"
-                        if [ ! -f $vault_key ]; then
-                            printf "\nFailed: vault key not present.\nThis file should have been created during source ./update_vars.sh --dev --init: $vault_key\n\n"
-                            exit
-                        fi
-                        ansible-vault encrypt --vault-id $vault_key@prompt $output_tmp
-                        exit
-                        ;;
-                    "Remove And Quit")
-                        printf "\nRemoving temp configuration file\n\n"
-                        rm -v $output_tmp || echo "ERROR / WARNING: couldn't remove the temp file, probably due to permissions.  Do this immediately."
-                        exit
-                        ;;
-                    "Leave And Quit (NOT RECOMMENDED)")
-                        echo "You selected $REPLY to $opt"
-                        exit
-                        ;;
-                    *) echo "invalid option $REPLY";;
-                esac
-            done
-        fi
-        write_output
-        # exit
+function write_output() {
+    # if [[ -f "$output_complete" ]]; then
+    # if an existing config exists, then prompt to overwrite
+    printf "\nYour new initialised configuration has been stored at temp path-\n$output_tmp\nTo use this configuration do you wish to overwrite any existing configuration at-\n$output_complete?\n\n"
+    PS3="Save and overwrite configuration settings?"
+    options=("Yes, save my configuration and continue or exit from main menu" "No / Quit")
+    select opt in "${options[@]}"
+    do
+        case $opt in
+            "Yes, save my configuration and return to main menu")
+                printf "\nMoving temp config to overwrite previous config... \n\n"
+                mv -fv $output_tmp $output_complete || echo "Failed to move temp file.  Check permissions."
+                define_config_settings
+                break
+                ;;
+            "No / Quit without saving")
+                # printf "\nIf you wish to later you can manually move \n$output_tmp \nto \n$output_complete\nto apply the configuration\n\nExiting... \n\n"
+                echo "Removing temp file"
+                rm -f $output_tmp
+                echo "Sourcing vagrant vars..."
+                source ./update_vars.sh --dev --var-file='vagrant' --force --save-template=false # always source vagrant file since it has the vault key
+                if [ -f $output_complete ]; then
+                    echo "Sourcing $configure vars..."
+                    source ./update_vars.sh --dev --var-file=$configure --force --save-template=false
+                exit
+                ;;
+            *) echo "invalid option $REPLY";;
+        esac
+    done
+    # else
+    #     printf '\n...Saving configuration\n'
+    #     mv -fv $output_tmp $output_complete || echo "Failed to move temp file.  Check permissions."
+    #     define_config_settings
+    # fi
+
 }
+
+# function ctrl_c() {
+#         printf "\n** CTRL-C ** EXITING...\n"
+#         if [[ "$configure" == 'secrets' ]]; then
+#             printf "\nWARNING: PARTIALLY COMPLETED INSTALLATIONS MAY LEAVE UNENCRYPTED SECRETS.\n"
+#             PS3='Do you want to Encrypt, Remove, or Leave the resulting temp file on disk? '
+#             options=("Encrypt And Quit" "Remove And Quit" "Leave And Quit (NOT RECOMMENDED)")
+#             select opt in "${options[@]}"
+#             do
+#                 case $opt in
+#                     "Encrypt And Quit")
+#                         source ./update_vars.sh --dev --var-file='vagrant' --force --save-template=false
+#                         printf "\nEncrypting temp configuration file with key: $vault_key.\n\n"
+#                         if [ ! -f $vault_key ]; then
+#                             printf "\nFailed: vault key not present.\nThis file should have been created during source ./update_vars.sh --dev --init: $vault_key\n\n"
+#                             exit
+#                         fi
+#                         ansible-vault encrypt --vault-id $vault_key@prompt $output_tmp
+#                         exit
+#                         ;;
+#                     "Remove And Quit")
+#                         printf "\nRemoving temp configuration file\n\n"
+#                         rm -v $output_tmp || echo "ERROR / WARNING: couldn't remove the temp file, probably due to permissions.  Do this immediately."
+#                         exit
+#                         ;;
+#                     "Leave And Quit (NOT RECOMMENDED)")
+#                         echo "You selected $REPLY to $opt"
+#                         exit
+#                         ;;
+#                     *) echo "invalid option $REPLY";;
+#                 esac
+#             done
+#         fi
+#         write_output
+#         # exit
+# }
 
 define_config_settings

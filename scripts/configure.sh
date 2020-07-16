@@ -47,9 +47,15 @@ if [[ -f "$output_complete" ]]; then
 fi
 
 #clear output_tmp
-echo "Test write permissions for path: $output_tmp"
-touch $output_tmp
-rm $output_tmp
+
+if [[ ! -f "$output_tmp" ]]; then
+    printf "\n\n....Initialising temp file for settings"
+    cp $input $output_tmp
+fi
+
+# echo "Test write permissions for path: $output_tmp"
+# touch $output_tmp
+# rm $output_tmp
 
 if [[ ! $TF_VAR_envtier ]]; then
     echo "No Environment has been initialised.  Assuming first time installation.  if this is incorrect, initialise variables first with:"
@@ -80,7 +86,7 @@ do
         # if insertvalue is in line from template, then prompt user for value. 
         # compare with current env var. if initialised, use env var and dont ask user.
         command="echo \$${i%%=*}"
-        current_value=`eval $command`
+        current_value=`eval $command` # TODO remove eval. 
         
         printf "%*s\n" $columns "Progess $progress / $entries "
 
@@ -133,7 +139,9 @@ do
             fi
         fi
         echo "${i%%=*}=$result"
-        echo "${i%%=*}=$result" >> $output_tmp
+        # echo "${i%%=*}=$result" >> $output_tmp
+        # Set the value in the file matching the line that starts with the key.
+        python $TF_VAR_firehawk_path/scripts/replace_value.py -f $output_tmp "${i%%=*}=" "$result"
         printf "${NC}"
         #march progress forward
         progress=$((progress + 1))
@@ -143,17 +151,13 @@ do
         if [[ "$i" =~ ^\#\ BEGIN\ CONFIGURATION\ \#$ ]]
         then
             display=true
-            #clear
         fi
 
-        # when begin config line is found, begin deisplay of contents
+        # when begin config line is found, begin display of contents
         if [[ "$display" = true ]]; then
             # strip comment char # and replace_all ### blank line placeholder for user readable output.
             printf "${i#"# "}\n" | sed 's/^###$/ /'
         fi
-
-        # always output original line to file
-        printf "${i#"###"}\n" >> $output_tmp
     fi
 done
 
