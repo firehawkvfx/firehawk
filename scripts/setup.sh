@@ -112,7 +112,7 @@ function write_output() {
     # if an existing config exists, then prompt to overwrite
     printf "\nYour new initialised configuration has been stored at temp path-\n$output_tmp\nTo use this configuration do you wish to overwrite any existing configuration at-\n$output_complete?\n\n"
     PS3="Save and overwrite configuration settings?"
-    options=("Yes, save my configuration and continue or exit from main menu" "No / Quit")
+    options=("Yes, save my configuration and continue or exit from main menu" "No / Quit without saving")
     select opt in "${options[@]}"
     do
         case $opt in
