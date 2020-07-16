@@ -131,6 +131,7 @@ function write_output() {
                 if [ -f $output_complete ]; then
                     echo "Sourcing $configure vars..."
                     source ./update_vars.sh --dev --var-file=$configure --force --save-template=false
+                fi
                 exit
                 ;;
             *) echo "invalid option $REPLY";;
