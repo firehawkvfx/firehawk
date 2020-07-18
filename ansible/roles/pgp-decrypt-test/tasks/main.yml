@@ -3,9 +3,17 @@
     name: expect
   become: true
 
+# - name: "Keybase: encrypt test secrets"
+#   shell:
+#     keybase pgp encrypt -m "this is a decrypted test secret" | base64
+#   become_user: "{{ variable_user }}"
+#   register: pgp_secret_encrypted
+#   ignore_errors: True
+#   when: "'keybase:' in pgp_public_key"
+
 - name: "Keybase: encrypt test secrets"
   shell:
-    keybase pgp encrypt -m "this is a decrypted test secret" | base64
+    echo "test"
   become_user: "{{ variable_user }}"
   register: pgp_secret_encrypted
   ignore_errors: True
