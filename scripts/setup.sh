@@ -104,6 +104,15 @@ function define_config_settings() {
     write_output
 }
 
+function ensure_encryption() {
+    echo "Sourcing vagrant vars for vault key..."
+    source ./update_vars.sh --dev --var-file='vagrant' --force --save-template=false # always source vagrant file since it has the vault key
+    if [ -f $output_complete ]; then
+        echo "Sourcing $configure vars and ensuring encryption if necesary..."
+        source ./update_vars.sh --dev --var-file=$configure --force --save-template=false
+    fi
+}
+
 # trap ctrl-c and call ctrl_c()
 trap write_output INT
 
@@ -117,8 +126,9 @@ function write_output() {
     do
         case $opt in
             "Yes, save my configuration and continue or exit from main menu")
-                printf "\nMoving temp config to overwrite previous config... \n\n"
-                mv -fv $output_tmp $output_complete || echo "Failed to move temp file.  Check permissions."
+                printf "\Saving config... \n\n"
+                mv -fv $output_tmp $output_complete || echo "ERROR: Save failed.  Check permissions."
+                ensure_encryption
                 define_config_settings
                 break
                 ;;
@@ -126,12 +136,7 @@ function write_output() {
                 # printf "\nIf you wish to later you can manually move \n$output_tmp \nto \n$output_complete\nto apply the configuration\n\nExiting... \n\n"
                 echo "Removing temp file"
                 rm -f $output_tmp
-                echo "Sourcing vagrant vars..."
-                source ./update_vars.sh --dev --var-file='vagrant' --force --save-template=false # always source vagrant file since it has the vault key
-                if [ -f $output_complete ]; then
-                    echo "Sourcing $configure vars..."
-                    source ./update_vars.sh --dev --var-file=$configure --force --save-template=false
-                fi
+                ensure_encryption
                 exit
                 ;;
             *) echo "invalid option $REPLY";;

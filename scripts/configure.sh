@@ -40,22 +40,17 @@ IFS='
 columns=$(tput cols)
 display=false
 
-if [[ -f "$output_complete" ]]; then
+if [[ -f "$output_complete" ]]; then # if a config file already exists, then source vars and replicate file for tmp settings.
     printf "\n\n...Attempting to source environment variables from existing config file $configure\n"
     printf "\nThis configuration script always sources from and writes to the dev configuration file.  Once evaluated and tested the configuration can be replicated across to your production file. \n"
-    source $SCRIPTDIR/../update_vars.sh --var-file $configure --tier dev --save-template false --force
+    source $SCRIPTDIR/../update_vars.sh --var-file $configure --tier dev --save-template false --force --decrypt
+    cp $output_complete $output_tmp
 fi
-
-#clear output_tmp
 
 if [[ ! -f "$output_tmp" ]]; then
-    printf "\n\n....Initialising temp file for settings"
+    printf "\n\n....Initialising a new config temp file for settings\n\n"
     cp $input $output_tmp
 fi
-
-# echo "Test write permissions for path: $output_tmp"
-# touch $output_tmp
-# rm $output_tmp
 
 if [[ ! $TF_VAR_envtier ]]; then
     echo "No Environment has been initialised.  Assuming first time installation.  if this is incorrect, initialise variables first with:"

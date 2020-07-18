@@ -15,8 +15,6 @@ NC='\033[0m' # No Color
 # the directory of the current script
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-
-
 printf "\n${RED}Warning: Currently virtual box on linux may require a version lock after installing:${NC}\n"
 echo "6.1.10 had problems with centos 7 and gnome 2020/06/07. Ensure you use the version below, or update with caution:"
 echo "yum install VirtualBox-6.1-6.1.8_137981_el7-1.x86_64 versionlock; yum versionlock add VirtualBox-6.1-6.1.8_137981_el7-1.x86_64"
@@ -460,6 +458,21 @@ else
     export TF_VAR_fast=$(cat $config_override | sed -e '/.*TF_VAR_fast=.*/!d')
 fi
 
+intialised=()
+
+ensure_initialised () {
+    if [ ! -f "$var_file"]; then
+        var_file_basename="$(echo $var_file | tr '-' '_')"
+        var_file="$(to_abs_path $TF_VAR_secrets_path/$var_file)"; exit_test
+        echo_if_not_silent "Initialising var_file: $var_file from template. You should edit this file with your own configuration."
+        cp $template_path $var_file 
+        intialised+=($var_file)
+        if [[ $var_file = "vagrant" ]]; then # ensure a default key path is set for encryption.
+            python $TF_VAR_firehawk_path/scripts/replace_value.py -f $var_file "TF_VAR_vault_key_name_general=" ".vault-key-20191208-general"
+        fi
+    fi
+}
+
 source_vars () {
     local var_file=$1
     local encrypt_mode=$2
@@ -470,24 +483,38 @@ source_vars () {
         var_file="secrets-general"
         echo_if_not_silent "...Using vault file $var_file"
         template_path="$TF_VAR_firehawk_path/config/templates/$var_file.template"
+        ensure_initialised
     elif [[ "$var_file" = "vagrant" ]]; then
         echo_if_not_silent '...Using variable file vagrant. No encryption/decryption needed for these contents.'
         encrypt_mode="none"
         template_path="$TF_VAR_firehawk_path/config/templates/$var_file.template"
+        ensure_initialised
     elif [[ "$var_file" = "config" ]]; then
         echo_if_not_silent '...Using variable file config. No encryption/decryption needed for these contents.'
         encrypt_mode="none"
         template_path="$TF_VAR_firehawk_path/config/templates/$var_file.template"
+        ensure_initialised
     elif [[ "$var_file" = "defaults" ]]; then
         echo_if_not_silent '...Using variable file defaults. No encryption/decryption needed for these contents.'
         encrypt_mode="none"
         template_path="$TF_VAR_firehawk_path/config/templates/$var_file.template" # These should be removed but need alter the system to do it properly.
+        # these files are intialised above by version
     elif [[ "$var_file" = "config-override" ]]; then
         var_file="config-override-$TF_VAR_envtier"
         echo_if_not_silent "...Using variable file $var_file. No encryption/decryption needed for these contents."
         encrypt_mode="none"
         template_path="$TF_VAR_firehawk_path/config/templates/$var_file.template" # These should be removed but need alter the system to do it properly.
+        # these files are intialised above by version
     elif [[ "$var_file" = "resources" ]]; then
+        # ensure all resources are intialised
+        array=( 'green' 'blue' 'grey' )
+        for TF_VAR_resourcetier in "${array[@]}"
+        do
+            var_file="resources-$TF_VAR_resourcetier"
+            template_path="$TF_VAR_firehawk_path/config/templates/$var_file.template"
+            ensure_initialised
+        done
+
         var_file="resources-$TF_VAR_resourcetier"
         echo_if_not_silent "...Using variable file $var_file. No encryption/decryption needed for these contents."
         encrypt_mode="none"
@@ -805,5 +832,10 @@ if [[ ! -z "$warning" ]]; then
 fi
 
 echo_if_not_silent "...Done."
+
+for new_file in "${intialised[@]}"
+do
+    echo_if_not_silent "A new file was initialised, ensure you configure it: $new_file"
+done
 
 if [[ "$SHOWCOMMANDS" == true ]]; then set -x; fi # After finishing the script, we enable set -x to show input again.
