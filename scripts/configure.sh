@@ -44,7 +44,7 @@ if [[ -f "$output_complete" ]]; then # if a config file already exists, then sou
     printf "\n\n...Attempting to source environment variables from existing config file $configure\n"
     printf "\nThis configuration script always sources from and writes to the dev configuration file.  Once evaluated and tested the configuration can be replicated across to your production file. \n"
     cp $output_complete $TF_VAR_firehawk_path/tmp/original.tmp # stash original encrypted version of file if encrypted. 
-    source $SCRIPTDIR/../update_vars.sh --var-file $configure --tier dev --save-template false --force --decrypt
+    source $TF_VAR_firehawk_path/update_vars.sh --var-file $configure --tier dev --save-template false --force --decrypt
     cp $output_complete $output_tmp # copy for editing of temp version
     mv -f $TF_VAR_firehawk_path/tmp/original.tmp $output_complete # overwrite unencrypted original.
 fi

@@ -23,7 +23,7 @@ to_abs_path() {
   python -c "import os; print os.path.abspath('$1')"
 }
 
-# This is the directory of the current script
+# This is the directory of the current script, it should not be relied upon as a global.
 export SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 printf "\n...Checking scripts directory at $SCRIPTDIR\n\n"
 
@@ -31,7 +31,7 @@ printf "\n...Checking scripts directory at $SCRIPTDIR\n\n"
 export TF_VAR_firehawk_path=$(to_abs_path "$SCRIPTDIR/../")
 echo_if_not_silent "TF_VAR_firehawk_path: $TF_VAR_firehawk_path"
 
-export TEMPDIR="$SCRIPTDIR/../tmp"
+export TEMPDIR="$TF_VAR_firehawk_path/tmp"
 mkdir -p "$TEMPDIR"
 
 export configure=
@@ -46,52 +46,52 @@ function define_config_settings() {
             "Configure Vagrant")
                 printf "\nThe OpenFirehawk Server is launched with Vagrant.  Some environment variables must be configured uniquely to your environment.\n\n"
                 export configure='vagrant'
-                export input=$(to_abs_path $SCRIPTDIR/../config/templates/vagrant.template)
-                export output_tmp=$(to_abs_path $SCRIPTDIR/../tmp/vagrant-tmp)
-                export output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/vagrant)
+                export input=$(to_abs_path $TF_VAR_firehawk_path/config/templates/vagrant.template)
+                export output_tmp=$(to_abs_path $TF_VAR_firehawk_path/tmp/vagrant-tmp)
+                export output_complete=$(to_abs_path $TF_VAR_firehawk_path/../secrets/vagrant)
                 break
                 ;;
             "Configure General Config")
                 printf "\nSome general Config like IP addresses of your hosts is needed.  Some environment variables here must be configured uniquely to your environment.\n\n"
                 export configure='config'
-                export input=$(to_abs_path $SCRIPTDIR/../config/templates/config.template)
-                export output_tmp=$(to_abs_path $SCRIPTDIR/../tmp/config-tmp)
-                export output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/config)
+                export input=$(to_abs_path $TF_VAR_firehawk_path/config/templates/config.template)
+                export output_tmp=$(to_abs_path $TF_VAR_firehawk_path/tmp/config-tmp)
+                export output_complete=$(to_abs_path $TF_VAR_firehawk_path/../secrets/config)
                 break
                 ;;
             "Configure Resources - Grey")
                 export TF_VAR_resourcetier='grey'
                 printf "\nThe $TF_VAR_resourcetier resource file uses resources generally unique to your dev environment.\n\n"
                 export configure='resources'
-                export input=$(to_abs_path $SCRIPTDIR/../config/templates/resources-$TF_VAR_resourcetier.template)
-                export output_tmp=$(to_abs_path $SCRIPTDIR/../tmp/resources-$TF_VAR_resourcetier-tmp)
-                export output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/resources-$TF_VAR_resourcetier)
+                export input=$(to_abs_path $TF_VAR_firehawk_path/config/templates/resources-$TF_VAR_resourcetier.template)
+                export output_tmp=$(to_abs_path $TF_VAR_firehawk_path/tmp/resources-$TF_VAR_resourcetier-tmp)
+                export output_complete=$(to_abs_path $TF_VAR_firehawk_path/../secrets/resources-$TF_VAR_resourcetier)
                 break
                 ;;
             "Configure Resources - Blue")
                 export TF_VAR_resourcetier='blue'
                 printf "\nThe $TF_VAR_resourcetier resource file uses resources generally unique to your production $TF_VAR_resourcetier environment.\n\n"
                 export configure='resources'
-                export input=$(to_abs_path $SCRIPTDIR/../config/templates/resources-$TF_VAR_resourcetier.template)
-                export output_tmp=$(to_abs_path $SCRIPTDIR/../tmp/resources-$TF_VAR_resourcetier-tmp)
-                export output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/resources-$TF_VAR_resourcetier)
+                export input=$(to_abs_path $TF_VAR_firehawk_path/config/templates/resources-$TF_VAR_resourcetier.template)
+                export output_tmp=$(to_abs_path $TF_VAR_firehawk_path/tmp/resources-$TF_VAR_resourcetier-tmp)
+                export output_complete=$(to_abs_path $TF_VAR_firehawk_path/../secrets/resources-$TF_VAR_resourcetier)
                 break
                 ;;
             "Configure Resources - Green")
                 export TF_VAR_resourcetier='green'
                 printf "\nThe $TF_VAR_resourcetier resource file uses resources generally unique to your production $TF_VAR_resourcetier environment.\n\n"
                 export configure='resources'
-                export input=$(to_abs_path $SCRIPTDIR/../config/templates/resources-$TF_VAR_resourcetier.template)
-                export output_tmp=$(to_abs_path $SCRIPTDIR/../tmp/resources-$TF_VAR_resourcetier-tmp)
-                export output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/resources-$TF_VAR_resourcetier)
+                export input=$(to_abs_path $TF_VAR_firehawk_path/config/templates/resources-$TF_VAR_resourcetier.template)
+                export output_tmp=$(to_abs_path $TF_VAR_firehawk_path/tmp/resources-$TF_VAR_resourcetier-tmp)
+                export output_complete=$(to_abs_path $TF_VAR_firehawk_path/../secrets/resources-$TF_VAR_resourcetier)
                 break
                 ;;
             "Configure Secrets (Only from within Vagrant VM)")
                 printf "\nThis should only be done within the Ansible Control Vagrant VM. Provisioning infrastructure requires configuration using secrets based on the secrets.template file.  These will be queried for your own unique values and should always be encrypted before you commit them in your private repository.\n\n"
                 export configure='secrets'
-                export input=$(to_abs_path $SCRIPTDIR/../config/templates/secrets-general.template)
-                export output_tmp=$(to_abs_path $SCRIPTDIR/../tmp/secrets-general-tmp)
-                export output_complete=$(to_abs_path $SCRIPTDIR/../../secrets/secrets-general)
+                export input=$(to_abs_path $TF_VAR_firehawk_path/config/templates/secrets-general.template)
+                export output_tmp=$(to_abs_path $TF_VAR_firehawk_path/tmp/secrets-general-tmp)
+                export output_complete=$(to_abs_path $TF_VAR_firehawk_path/../secrets/secrets-general)
                 break
                 ;;
             "Quit")
@@ -103,7 +103,7 @@ function define_config_settings() {
             *) echo "invalid option $REPLY";;
         esac
     done
-    $SCRIPTDIR/configure.sh
+    $TF_VAR_firehawk_path/scripts/configure.sh
     write_output
 }
 
