@@ -3,43 +3,27 @@
     name: expect
   become: true
 
-- name: "Keybase: encrypt test secrets"
-  shell:
-    keybase pgp encrypt -m "this is a decrypted test secret" | base64
-  become_user: "{{ variable_user }}"
-  register: pgp_secret_encrypted
-  ignore_errors: True
+- block:
+  - name: "Keybase: encrypt test secrets"
+    shell:
+      keybase pgp encrypt -m "this is a decrypted test secret" | base64
+    become_user: "{{ variable_user }}"
+    register: pgp_secret_encrypted
+    ignore_errors: True
   when: "'keybase:' in pgp_public_key"
 
-# - name: "Keybase: encrypt test secrets"
-#   shell:
-#     echo "test"
-#   become_user: "{{ variable_user }}"
-#   register: pgp_secret_encrypted
-#   ignore_errors: True
-#   when: "'keybase:' in pgp_public_key"
 
-# - name: "GPG: encrypt test secrets"
-#   shell:
-#     echo "this is a decrypted test secret" | gpg -r "{{ pgp_email }}" --encrypt | base64
-#   become_user: "{{ variable_user }}"
-#   register: pgp_secret_encrypted
-#   when: "'keybase:' not in pgp_public_key"
-
-- name: "debug pgp_secret_encrypted"
-  debug:
-    var: pgp_secret_encrypted
-  when: "'keybase:' in pgp_public_key"
+- block:
+  - name: "GPG: encrypt test secrets"
+    shell:
+      echo "this is a decrypted test secret" | gpg -r "{{ pgp_email }}" --encrypt | base64
+    become_user: "{{ variable_user }}"
+    register: pgp_secret_encrypted
+  when: "'keybase:' not in pgp_public_key"
 
 - name: "debug pgp_secret_encrypted.stdout"
   debug:
     msg: "{{ pgp_secret_encrypted.stdout }}"
-  when: "'keybase:' in pgp_public_key"
-
-- name: "debug pgp_secret_encrypted.stdout | regex_escape"
-  debug:
-    msg: "{{ pgp_secret_encrypted.stdout | regex_escape() }}"
-  when: "'keybase:' in pgp_public_key"
 
 - name: Run expect to wait for a keybase pass and decrypt - first time is dirty output.
   shell: |
@@ -50,27 +34,29 @@
   no_log: false
   when: "'keybase:' in pgp_public_key"
 
-- name: Run expect to wait for a keybase pass and decrypt - collect output.
-  shell: |
-    test=$(keybase pgp encrypt -m "this is a decrypted test secret" | base64)
-    /deployuser/scripts/pgp-expect-keybase.sh {{ keybase_secret | regex_escape() }} {{ pgp_secret_encrypted.stdout | regex_escape() }}
-  become_user: "{{ variable_user }}"
-  connection: local
-  register: pgp_secret_output
-  no_log: false
+- block:
+  - name: Run expect to wait for a keybase pass and decrypt - collect output.
+    shell: |
+      test=$(keybase pgp encrypt -m "this is a decrypted test secret" | base64)
+      /deployuser/scripts/pgp-expect-keybase.sh {{ keybase_secret | regex_escape() }} {{ pgp_secret_encrypted.stdout | regex_escape() }}
+    become_user: "{{ variable_user }}"
+    connection: local
+    register: pgp_secret_output
+    no_log: false
   when: "'keybase:' in pgp_public_key"
 
-- name: "GPG: decrypt inline - collect output."
-  shell: |
-    echo {{ pgp_secret_encrypted.stdout | regex_escape() }} | base64 --decode | gpg -dq --no-tty --passphrase {{ pgp_secret | regex_escape() }} --no-use-agent
-  become_user: "{{ variable_user }}"
-  connection: local
-  register: pgp_secret_output
-  no_log: false
+- block:
+  - name: "GPG: decrypt inline - collect output."
+    shell: |
+      echo {{ pgp_secret_encrypted.stdout | regex_escape() }} | base64 --decode | gpg -dq --no-tty --passphrase {{ pgp_secret | regex_escape() }} --no-use-agent
+    become_user: "{{ variable_user }}"
+    connection: local
+    register: pgp_secret_output
+    no_log: false
+    failed_when: >
+      ("base64: invalid input" in pgp_secret_output.stderr) or
+      (pgp_secret_output.stderr != '')
   when: "'keybase:' not in pgp_public_key"
-  failed_when: >
-    ("base64: invalid input" in pgp_secret_output.stderr) or
-    (pgp_secret_output.stderr != '')
 
 - name: Test debug
   debug:
