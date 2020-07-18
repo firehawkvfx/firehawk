@@ -455,7 +455,7 @@ else
     echo_if_not_silent "...Set TF_VAR_fast at config_override path- $TF_VAR_fast"
     # sed -i '' -e "s/^TF_VAR_fast=.*$/TF_VAR_fast=${TF_VAR_fast}/" $config_override # ...Enable the vpc.
     python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override "TF_VAR_fast=" "${TF_VAR_fast}"
-    export TF_VAR_fast=$(cat $config_override | sed -e '/.*TF_VAR_fast=.*/!d')
+    export TF_VAR_fast="${TF_VAR_fast}"
 fi
 
 intialised=()

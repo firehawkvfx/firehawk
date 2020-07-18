@@ -25,11 +25,10 @@ to_abs_path() {
 
 # This is the directory of the current script
 export SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+printf "\n...Checking scripts directory at $SCRIPTDIR\n\n"
+
 export TEMPDIR="$SCRIPTDIR/../tmp"
-
 mkdir -p "$TEMPDIR"
-
-printf "\n...checking scripts directory at $SCRIPTDIR\n\n"
 
 export configure=
 
