@@ -469,9 +469,10 @@ fi
 intialised=()
 
 ensure_initialised () {
-    if [[ "$verbose" == true ]]; then echo 'Check existence of $var_file'; fi
     local local_var_file="$(to_abs_path $TF_VAR_secrets_path/$var_file)"; exit_test
-
+    
+    if [[ "$verbose" == true ]]; then echo "Check existence of $var_file: $local_var_file"; fi
+    
     if [ ! -f "$local_var_file" ]; then
         # if [[ "$verbose" == true ]]; then echo 'Set basename'; fi
         local local_var_file_basename="$(echo $local_var_file | tr '-' '_')"
@@ -523,9 +524,9 @@ source_vars () {
     elif [[ "$var_file" = "resources" ]]; then
         # ensure all resources are intialised
         array=( 'green' 'blue' 'grey' )
-        for TF_VAR_resourcetier in "${array[@]}"
+        for colour in "${array[@]}"
         do
-            var_file="resources-$TF_VAR_resourcetier"
+            var_file="resources-$colour"
             template_path="$TF_VAR_firehawk_path/config/templates/$var_file.template"
             ensure_initialised
         done
