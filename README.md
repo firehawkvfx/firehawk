@@ -317,7 +317,19 @@ You will have two versions of your infrastructure, we make changes in dev branch
   source ./update_vars.sh --dev --init # env vars have changed, so we source again
   ./firehawk.sh
   ```
-- Once succesful, we can test deploy the cloud resource.  if you ran any cusotm scripts to disable functions, you should run them again after ci-set-deploy-cloud.sh
+- Once the local deployment test runs successfully you may want to test destroying the [terraform resource, and destroying the VM's](#destroying-the-deployment) to get familiar with that process, though its not required.
+
+- The next stage of the deployment we will test a vpn.
+  ```
+  source ./update_vars.sh --dev --init
+  ./scripts/ci-set-deploy-cloud-vpn.sh
+  # Run any other custom scripts to alter funcitonality here. 
+  source ./update_vars.sh --dev --init # env vars have changed, so we source again
+  ./firehawk.sh
+  ```
+  You should be able to ping the VPN from within the Firehawk VM, and from the dev workstation vm.  If not, check that you have configured [static routes](#static-routes) correctly.  Don't proceed until this is verified.  When you no longer want to use the resource you should put the resources to sleep, or if there a problem preventing this step from succeeding you will need to destroy the deployment when you are finished to not incur unwanted costs.
+
+- Once succesful, we can test deploy all the cloud resources.  if you ran any cusotm scripts to disable functions, you should run them again after ci-set-deploy-cloud.sh
   ```
   source ./update_vars.sh --dev --init
   ./scripts/ci-set-deploy-cloud.sh # set config overrides to allow deployment
