@@ -23,7 +23,7 @@
     /deployuser/scripts/pgp-expect-keybase.sh {{ keybase_secret | regex_escape() }} {{ pgp_secret_encrypted.stdout | regex_escape() }}
   become_user: "{{ variable_user }}"
   connection: local
-  no_log: true
+  no_log: false
   when: "'keybase:' in pgp_public_key"
 
 - name: Run expect to wait for a keybase pass and decrypt - collect output.
@@ -33,7 +33,7 @@
   become_user: "{{ variable_user }}"
   connection: local
   register: pgp_secret_output
-  no_log: true
+  no_log: false
   when: "'keybase:' in pgp_public_key"
 
 - name: "GPG: decrypt inline - collect output."
@@ -42,7 +42,7 @@
   become_user: "{{ variable_user }}"
   connection: local
   register: pgp_secret_output
-  no_log: true
+  no_log: false
   when: "'keybase:' not in pgp_public_key"
   failed_when: >
     ("base64: invalid input" in pgp_secret_output.stderr) or
