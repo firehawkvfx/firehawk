@@ -49,7 +49,8 @@ if [[ -f "$output_complete" ]]; then # if a config file already exists, then sou
     else
         resource_arg=
     fi
-    source $TF_VAR_firehawk_path/update_vars.sh --var-file $configure --tier dev --save-template false --force --decrypt $resource_arg
+    echo "Using resource_arg: $resource_arg"
+    source $TF_VAR_firehawk_path/update_vars.sh --var-file $configure --tier dev --save-template false --force --decrypt $resource_arg -v
     cp $output_complete $output_tmp # copy for editing of temp version
     mv -f $TF_VAR_firehawk_path/tmp/original.tmp $output_complete # overwrite unencrypted original.
 fi
