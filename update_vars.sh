@@ -713,10 +713,15 @@ source_vars () {
         # # Now set environment variables to the actual values defined in the user's secrets-prod file
         for i in $(echo "$multiline")
         do
+            if [[ $verbose = true ]]; then echo "Split var"; fi
             [[ "$i" =~ ^#.*$ ]] && continue
+            if [[ $verbose = true ]]; then echo "Get key"; fi
             key=${i%=*}
+            if [[ $verbose = true ]]; then echo "key: $key"; fi
             value=${i#*=}
+            if [[ $verbose = true ]]; then echo "value: $value"; fi
             eval value="$value" # This method should eval strings withhout quotes remaining in the var
+            if [[ $verbose = true ]]; then echo "eval value: $value"; fi
             # echo "$key : $value"
             export "$key=$value" # Export the environment var
         done
