@@ -20,10 +20,12 @@
 - name: debug pgp_secret_encrypted
   debug:
     var: pgp_secret_encrypted
+  when: always
 
 - name: debug pgp_secret_encrypted.stdout
   debug:
     msg: "{{ pgp_secret_encrypted.stdout | regex_escape() }}"
+  when: always
 
 - name: Run expect to wait for a keybase pass and decrypt - first time is dirty output.
   shell: |
