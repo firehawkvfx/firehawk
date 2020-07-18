@@ -15,7 +15,7 @@
   - cloud_install
   - local_install_onsite_mounts
 
-- name: Check showmount to see whether /etc/exports contains the mount
+- name: "Check showmount to see whether /etc/exports on {{ localnas1_private_ip }} contains the mount {{ item.volume_name }}"
   shell: showmount -e {{ localnas1_private_ip }} | grep -E "^\/{{ item.volume_name }}.*"
   register: site_presence
   check_mode: no
