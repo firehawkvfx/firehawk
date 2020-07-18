@@ -17,15 +17,23 @@
   register: pgp_secret_encrypted
   when: "'keybase:' not in pgp_public_key"
 
-- name: debug pgp_secret_encrypted
+- name: "debug pgp_secret_encrypted"
   debug:
     var: pgp_secret_encrypted
-  when: always
+  tags:
+  - always
 
-- name: debug pgp_secret_encrypted.stdout
+- name: "debug pgp_secret_encrypted.stdout"
+  debug:
+    msg: "{{ pgp_secret_encrypted.stdout }}"
+  tags:
+  - always
+
+- name: "debug pgp_secret_encrypted.stdout | regex_escape"
   debug:
     msg: "{{ pgp_secret_encrypted.stdout | regex_escape() }}"
-  when: always
+  tags:
+  - always
 
 - name: Run expect to wait for a keybase pass and decrypt - first time is dirty output.
   shell: |
