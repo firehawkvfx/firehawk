@@ -170,7 +170,7 @@ License servers should be configured on your network to issue any floating licen
 - To disable the floating license server, after you have setup your configuration files, but before deployment you can follow these steps:
 ```
 source ./update_vars.sh --dev # or with your desired env.
-./scripts/ci-set-deploy-cloud-disable-license-server.sh
+./scripts/ci-set-disable-license-server.sh
 source ./update_vars.sh --dev # or with your desired env.
 ```
 
@@ -185,7 +185,7 @@ If you intend to use Houdini, Firehawk uses Side FX provided keys to query and d
 If you wish to use the infrastructure without Houdini and experiment with other software, you can disable these vars in config overrides.  After you have setup your configuration files, but before deployment you can follow these steps:
 ```
 source ./update_vars.sh --dev # or with your desired env.
-./scripts/ci-set-deploy-cloud-no-houdini.sh
+./scripts/ci-set-no-houdini.sh
 source ./update_vars.sh --dev # or with your desired env.
 ```
 
@@ -196,7 +196,7 @@ It may also be possible to avoid an onsite NFS share by only using the Cloud NFS
 If you wish to test without any onsite shared volume, you will need to rely on your own processes to synchronise with S3 storage, or use the cloud based NFS share.  To do this, after you have setup your configuration files, but before deployment you can follow these steps:
 ```
 source ./update_vars.sh --dev # or with your desired env.
-./scripts/ci-set-deploy-cloud-no-nfs-share.sh
+./scripts/ci-set-no-nfs-share.sh
 source ./update_vars.sh --dev # or with your desired env.
 ```
 This will alter the config-overrides to not use an onsite NFS Share.
@@ -309,14 +309,15 @@ You will have two versions of your infrastructure, we make changes in dev branch
   Note that the original snapshot is still in the list.
 
 
-- We will test configure a local deployment before we use cloud resources.  This will still create an AWS user and s3 bucket to store software installations.
+- We will test configure a local deployment before we use cloud resources.  This will still create an AWS user and s3 bucket to store software installations.  If you need to ensure [houdini is not installed](#disabling-side-effects-houdini), [you don't have an NFS share](#nfs-shared-volumes), or a [houdini license server](#license-servers), you may also want to run those scripts and disable the relevent variables to ensure they are not used.
   ```
   source ./update_vars.sh --dev --init
   ./scripts/ci-set-init-local-deploy.sh # Set config overrides to prevent cloud deployment.  Only local tests run for this job.
+  # Run any other custom scripts to alter funcitonality here. 
   source ./update_vars.sh --init # env vars have changed, so we source again
   ./firehawk.sh
   ```
-- Once succesful, we can test deploy the cloud resource.
+- Once succesful, we can test deploy the cloud resource.  if you ran any cusotm scripts to disable functions, you should run them again after ci-set-deploy-cloud.sh
   ```
   source ./update_vars.sh --dev --init
   ./scripts/ci-set-deploy-cloud.sh # set config overrides to allow deployment
