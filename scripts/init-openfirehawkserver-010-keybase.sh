@@ -57,8 +57,8 @@ else
   esac
 fi
 
-if [[ $keybase_disabled != true ]]; then
-  if [[ "$TF_VAR_pgp_public_key" == keybase:* ]]; then
+if [[ "$keybase_disabled" != "true" ]]; then
+  if [[ "$TF_VAR_pgp_public_key" == "keybase:"* ]]; then
     echo "Installing keybase since pgp_public key starts with keybase:"
     # install keybase, used for aquiring keys for deadline spot plugin.
     echo "...Downloading/installing keybase for PGP encryption"

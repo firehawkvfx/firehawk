@@ -58,7 +58,7 @@ else
 fi
 
 
-if [[ $keybase_disabled != true ]]; then
+if [[ "$keybase_disabled" != "true" ]]; then
   run_keybase
   echo $(keybase --version)
 
