@@ -61,9 +61,9 @@
   connection: local
   register: pgp_secret_output_temp
   no_log: false
-  # failed_when: >
-  #   ("base64: invalid input" in pgp_secret_output.stderr) or
-  #   (pgp_secret_output.stderr != '')
+  failed_when: >
+    ("base64: invalid input" in pgp_secret_output_temp.stderr) or
+    (pgp_secret_output_temp.stderr != '')
   when: "'keybase:' not in pgp_public_key"
 
 - set_fact:
