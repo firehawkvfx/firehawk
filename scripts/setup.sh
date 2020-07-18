@@ -96,8 +96,8 @@ function define_config_settings() {
                 ;;
             "Quit")
                 echo "You selected $REPLY to $opt"
-                echo "Sourcing vars..."
-                source ./update_vars.sh --dev --var-file=$configure --force --save-template=false
+                # echo "Sourcing vars..."
+                # source ./update_vars.sh --dev --var-file=$configure --force --save-template=false
                 exit
                 ;;
             *) echo "invalid option $REPLY";;
