@@ -351,6 +351,19 @@ When we deploy to cloud above, we specify if we want to keep the Storage EBS vol
   source ./update_vars.sh --init
   ./firehawk.sh --destroy --softnas-destroy-volumes true
   ```
+- Alternatively, you may wish to use terraform directly.
+  ```
+  source ./update_vars.sh --init
+  vagrant ssh
+  source ./update_vars.sh --dev # you will be asked for your password to your encrypted secrets file
+  terraform destroy --auto-approve
+  exit
+  ```
+- After the cloud resources are removed, you can safely destroy the vagrant VM.  do not do this unless you are sure the resources are gone.  otherwise you will have to delete all those resources manually through the console.
+  ```
+  vagrant destroy
+  ```
+
 
 ## Destroying resources manually
 In your AWS console you should check regularly for any resources that are running that shouldn't be.  If you need to destroy resources manually here are particular area to pay attention to-
