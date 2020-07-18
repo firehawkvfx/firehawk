@@ -314,14 +314,14 @@ You will have two versions of your infrastructure, we make changes in dev branch
   source ./update_vars.sh --dev --init
   ./scripts/ci-set-init-local-deploy.sh # Set config overrides to prevent cloud deployment.  Only local tests run for this job.
   # Run any other custom scripts to alter funcitonality here. 
-  source ./update_vars.sh --init # env vars have changed, so we source again
+  source ./update_vars.sh --dev --init # env vars have changed, so we source again
   ./firehawk.sh
   ```
 - Once succesful, we can test deploy the cloud resource.  if you ran any cusotm scripts to disable functions, you should run them again after ci-set-deploy-cloud.sh
   ```
   source ./update_vars.sh --dev --init
   ./scripts/ci-set-deploy-cloud.sh # set config overrides to allow deployment
-  source ./update_vars.sh  --init
+  source ./update_vars.sh --dev --init
   ./firehawk.sh --softnas-destroy-volumes true
   ```
 

@@ -267,7 +267,7 @@ if [[ ! -z "$box_file_in" ]] ; then
     source ./update_vars.sh --$TF_VAR_envtier --box-file-in "$box_file_in" --init
 else
     echo "Source env vars"
-    source ./update_vars.sh --$TF_VAR_envtier --init
+    source ./update_vars.sh --$TF_VAR_envtier --init -v
 fi
 echo "...Finished sourcing"
 
