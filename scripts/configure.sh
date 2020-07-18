@@ -41,6 +41,10 @@ columns=$(tput cols)
 display=false
 
 if [[ -f "$output_complete" ]]; then # if a config file already exists, then source vars and replicate file for tmp settings.
+    
+    echo "Sourcing vagrant vars for vault key..."
+    source ./update_vars.sh --dev --var-file='vagrant' --force --save-template=false # always source vagrant file since it has the vault key
+
     printf "\n\n...Attempting to source environment variables from existing config file $configure\n"
     printf "\nThis configuration script always sources from and writes to the dev configuration file.  Once evaluated and tested the configuration can be replicated across to your production file. \n"
     cp $output_complete $TF_VAR_firehawk_path/tmp/original.tmp # stash original encrypted version of file if encrypted.
