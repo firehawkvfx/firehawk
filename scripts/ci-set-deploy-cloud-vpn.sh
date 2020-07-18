@@ -19,7 +19,7 @@ python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VA
 python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_localnas1_volume_name=' '$TF_VAR_localnas1_volume_name' # inherit default
 
 python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_remote_mounts_on_local=' 'false' # ...Softnas nfs exports will not be mounted on local site
-sed -i 's/^TF_VAR_softnas_skip_update=.*$/TF_VAR_softnas_skip_update=false/' $config_override
+python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_softnas_skip_update=' 'false'
 python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_provision_deadline_spot_plugin=' 'false' # Don't provision the deadline spot plugin for this stage
 python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_install_houdini=' 'false' # install houdini
 python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_install_deadline_db=' 'false' # install deadline
