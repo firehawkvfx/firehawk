@@ -13,7 +13,7 @@
 
 # It's not a bug, its a feature. https://stackoverflow.com/questions/34621799/ansible-how-do-i-avoid-registering-a-variable-when-a-when-condition-is-not
 - set_fact:
-    pgp_secret_encrypted: "{{pgp_secret_encrypted_temp}}"
+    pgp_secret_encrypted: "{{pgp_secret_encrypted_temp.stdout | regex_escape() }}"
   when: pgp_secret_encrypted_temp.changed
 
 - name: "GPG: encrypt test secrets"
@@ -24,7 +24,7 @@
   when: "'keybase:' not in pgp_public_key"
 
 - set_fact:
-    pgp_secret_encrypted: "{{pgp_secret_encrypted_temp}}"
+    pgp_secret_encrypted: "{{pgp_secret_encrypted_temp.stdout | regex_escape()}}"
   when: pgp_secret_encrypted_temp.changed
 
 - name: "debug pgp_secret_encrypted"
@@ -34,7 +34,7 @@
 - name: Run expect to wait for a keybase pass and decrypt - first time is dirty output.
   shell: |
     test=$(keybase pgp encrypt -m "this is a decrypted test secret" | base64)
-    /deployuser/scripts/pgp-expect-keybase.sh {{ keybase_secret | regex_escape() }} {{ pgp_secret_encrypted | regex_escape() }}
+    /deployuser/scripts/pgp-expect-keybase.sh {{ keybase_secret | regex_escape() }} {{ pgp_secret_encrypted }}
   become_user: "{{ variable_user }}"
   connection: local
   no_log: false
@@ -43,7 +43,7 @@
 - name: Run expect to wait for a keybase pass and decrypt - collect output.
   shell: |
     test=$(keybase pgp encrypt -m "this is a decrypted test secret" | base64)
-    /deployuser/scripts/pgp-expect-keybase.sh {{ keybase_secret | regex_escape() }} {{ pgp_secret_encrypted | regex_escape() }}
+    /deployuser/scripts/pgp-expect-keybase.sh {{ keybase_secret | regex_escape() }} {{ pgp_secret_encrypted }}
   become_user: "{{ variable_user }}"
   connection: local
   register: pgp_secret_output_temp
@@ -51,23 +51,23 @@
   when: "'keybase:' in pgp_public_key"
 
 - set_fact:
-    pgp_secret_output: "{{pgp_secret_output_temp}}"
+    pgp_secret_output: "{{pgp_secret_output_temp.stdout }}"
   when: pgp_secret_output_temp.changed
 
 - name: "GPG: decrypt inline - collect output."
   shell: |
-    echo {{ pgp_secret_encrypted | regex_escape() }} | base64 --decode | gpg -dq --no-tty --passphrase {{ pgp_secret | regex_escape() }} --no-use-agent
+    echo {{ pgp_secret_encrypted }} | base64 --decode | gpg -dq --no-tty --passphrase {{ pgp_secret | regex_escape() }} --no-use-agent
   become_user: "{{ variable_user }}"
   connection: local
   register: pgp_secret_output_temp
   no_log: false
-  failed_when: >
-    ("base64: invalid input" in pgp_secret_output.stderr) or
-    (pgp_secret_output.stderr != '')
+  # failed_when: >
+  #   ("base64: invalid input" in pgp_secret_output.stderr) or
+  #   (pgp_secret_output.stderr != '')
   when: "'keybase:' not in pgp_public_key"
 
 - set_fact:
-    pgp_secret_output: "{{pgp_secret_output_temp}}"
+    pgp_secret_output: "{{pgp_secret_output_temp.stdout}}"
   when: pgp_secret_output_temp.changed
 
 - name: Test debug
