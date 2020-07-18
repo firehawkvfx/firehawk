@@ -41,8 +41,6 @@ columns=$(tput cols)
 display=false
 
 if [[ -f "$output_complete" ]]; then # if a config file already exists, then source vars and replicate file for tmp settings.
-    
-
     printf "\n\n...Attempting to source environment variables from existing config file $configure\n"
     printf "\nThis configuration script always sources from and writes to the dev configuration file.  Once evaluated and tested the configuration can be replicated across to your production file. \n"
     cp $output_complete $TF_VAR_firehawk_path/tmp/original.tmp # stash original encrypted version of file if encrypted.
@@ -56,8 +54,7 @@ if [[ -f "$output_complete" ]]; then # if a config file already exists, then sou
     echo "Using resource_arg: $resource_arg"
     echo "Sourcing vagrant vars for vault key..."
     source ./update_vars.sh --$tier --var-file='vagrant' --force --save-template=false # always source vagrant file since it has the vault key
-
-    source $TF_VAR_firehawk_path/update_vars.sh --var-file=$configure --$tier $resource_arg --save-template=false --force --decrypt -v
+    source $TF_VAR_firehawk_path/update_vars.sh --var-file=$configure --$tier $resource_arg --save-template=false --force --decrypt
     cp $output_complete $output_tmp # copy for editing of temp version
     mv -f $TF_VAR_firehawk_path/tmp/original.tmp $output_complete # overwrite unencrypted original.
 fi

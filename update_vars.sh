@@ -134,6 +134,8 @@ verbose () {
 verbose "$@"
 echo_if_not_silent "...Parsed"
 
+export TF_VAR_resourcetier="grey" # default is grey unless otherwise specified or inherited.
+
 if [ -z "$CI_COMMIT_REF_SLUG" ]; then # Detect the environment if using CI/CD
     echo "Launching in a non CI environment"; export env_ci=false
 else
