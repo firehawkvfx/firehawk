@@ -13,7 +13,7 @@
 
 # It's not a bug, its a feature. https://stackoverflow.com/questions/34621799/ansible-how-do-i-avoid-registering-a-variable-when-a-when-condition-is-not
 - set_fact:
-    mypwd: pgp_secret_encrypted
+    pgp_secret_encrypted: pgp_secret_encrypted_temp
   when: pgp_secret_encrypted_temp.changed
 
 - name: "GPG: encrypt test secrets"
@@ -24,7 +24,7 @@
   when: "'keybase:' not in pgp_public_key"
 
 - set_fact:
-    mypwd: pgp_secret_encrypted
+    pgp_secret_encrypted: pgp_secret_encrypted_temp
   when: pgp_secret_encrypted_temp.changed
 
 - name: "debug pgp_secret_encrypted.stdout"
@@ -51,7 +51,7 @@
   when: "'keybase:' in pgp_public_key"
 
 - set_fact:
-    mypwd: pgp_secret_output
+    pgp_secret_output: pgp_secret_output_temp
   when: pgp_secret_output_temp.changed
 
 - name: "GPG: decrypt inline - collect output."
@@ -67,7 +67,7 @@
   when: "'keybase:' not in pgp_public_key"
 
 - set_fact:
-    mypwd: pgp_secret_output
+    pgp_secret_output: pgp_secret_output_temp
   when: pgp_secret_output_temp.changed
 
 - name: Test debug
