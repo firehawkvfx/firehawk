@@ -93,6 +93,8 @@ verbose () {
                         ;;
                     var-file)
                         echo_if_not_silent "...${OPTARG}"
+                        echo_if_not_silent "${!OPTIND}"
+                        
                         val="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
                         opt="${OPTARG}"
                         ;;
