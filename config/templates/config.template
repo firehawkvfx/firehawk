@@ -97,7 +97,7 @@ TF_VAR_firehawk_sync_source=insertvalue
 
 # TF_VAR_firehawk_sync_target:
 # The path on the production volume to push the assets to, so they are available in cloud.
-# eg: TF_VAR_firehawk_sync_source=/prod/assets/openfirehawk-houdini-tools
+# default: TF_VAR_firehawk_sync_source=/prod/assets/openfirehawk-houdini-tools
 TF_VAR_firehawk_sync_target=insertvalue
 
 # TF_VAR_firehawk_houdini_tools:

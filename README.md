@@ -147,7 +147,7 @@ Vagrant up
 - Once the UI is up configure a new user name (user) and password, this will be used to bootstrap another user for automation later.
 ```
 sudo useradd user # Add a new user
-passwd user # Set a password
+sudo passwd user # Set a password
 sudo vi /etc/ssh/sshd_config # Find the line PasswordAuthentication no, and change it to yes
 sudo systemctl restart sshd.service # Restart the ssh service
 ip a # Find the mac adress for this system on your network (usually 192.168.? )
@@ -165,7 +165,9 @@ To use Deadline in AWS, instances that reside in AWS are free.  But any onsite s
 require your Thinkbox UBL URL and UBL activation code.  These are entered in your encrypted secrets file, and are used to configure the Deadline DB upon install automatically.
 
 ## License servers
-License servers should be configured on your network to issue any floating licenses for software you require.  The VPN gateway and routes configured should allow a cloud based system to access the license server at the environment variable ``TF_VAR_houdini_license_server_address`` in secrets/config.  It should also be possible to use deadline Usage Based Licenses for render nodes to use licenses on a per hour basis (eg. Houdini Engine, Mantra), but this is untested.  To disable the floating license server, after you have setup your configuration files, but before deployment you can follow these steps:
+License servers should be configured on your network to issue any floating licenses for software you require.  The VPN gateway and routes configured should allow a cloud based system to access the license server at the environment variable ``TF_VAR_houdini_license_server_address`` in secrets/config.  It should also be possible to use deadline Usage Based Licenses for render nodes to use licenses on a per hour basis (eg. Houdini Engine, Mantra), but this is untested.  
+
+- To disable the floating license server, after you have setup your configuration files, but before deployment you can follow these steps:
 ```
 source ./update_vars.sh --dev # or with your desired env.
 ./scripts/ci-set-deploy-cloud-disable-license-server.sh
@@ -232,7 +234,7 @@ These address ranges refer to the DHCP addresses that Open VPN will automaticaly
 
 - Clone this repository to your system / somewhere in your home dir.  This first deployment will be a dev test deployment.
   ```
-  git clone https://github.com/firehawkvfx/firehawk-template.git firehawk-deploy-dev; cd firehawk-deploy-dev; ./firehawk-clone.sh
+  git clone https://github.com/firehawkvfx/firehawk-template.git firehawk-deploy-dev; cd firehawk-deploy-dev; ./firehawk-clone.sh master
   ```
 The repository is built from a template.  This new repo you have made contains a secrets folder that is not part of the public repository, and a submodule that is a clone of the public repository.
 
@@ -247,8 +249,8 @@ This provides a structure for your encrypted secrets and configuration, which ex
 These steps allow us to configure a setup in the 'dev' environment to test before you can deploy in the 'prod' environment, in a seperate folder.
 You will have two versions of your infrastructure, we make changes in dev branches and test them before merging and deploying to production.
 
-- Download the right version of the AWS Deadline Installer tar.  Use the version specified in ``firehawk/config/templates/config.template``
-- Place the .tar file in the local firehawk/downloads folder.  Do not test later versions of deadline until you have a stable deployment.
+- Download the right version of the AWS Deadline Installer tar.  Use the version specified in ``firehawk/config/defaults/defaults`` for the variable ``$TF_VAR_deadline_version``
+- Place the .tar file in firehawk/downloads.  Do not test later versions of deadline until you have a stable deployment that is working.
 - If you are on Mac OS, install homebrew and ensure you have the commands ``envsubst`` and ``ts``
   ```
   brew install gettext
@@ -317,7 +319,7 @@ You will have two versions of your infrastructure, we make changes in dev branch
 - Once succesful, we can test deploy the cloud resource.
   ```
   source ./update_vars.sh --dev --init
-  ./scripts/ci-set-deploy-cloud.sh; exit_test # set config overrides to allow deployment
+  ./scripts/ci-set-deploy-cloud.sh # set config overrides to allow deployment
   source ./update_vars.sh  --init
   ./firehawk.sh --softnas-destroy-volumes true
   ```

@@ -5,8 +5,6 @@
 # if values dont exist, the user will be prompted to initialise a value.
 # if values are already defined in the encrypted settings they will be skipped.
 
-
-
 export RED='\033[0;31m' # Red Text
 export GREEN='\033[0;32m' # Green Text
 export BLUE='\033[0;34m' # Blue Text
@@ -44,6 +42,7 @@ function define_config_settings() {
     do
         case $opt in
             "Configure Vagrant")
+                export TF_VAR_resourcetier=
                 printf "\nThe OpenFirehawk Server is launched with Vagrant.  Some environment variables must be configured uniquely to your environment.\n\n"
                 export configure='vagrant'
                 export input=$(to_abs_path $TF_VAR_firehawk_path/config/templates/vagrant.template)
@@ -52,6 +51,7 @@ function define_config_settings() {
                 break
                 ;;
             "Configure General Config")
+                export TF_VAR_resourcetier=
                 printf "\nSome general Config like IP addresses of your hosts is needed.  Some environment variables here must be configured uniquely to your environment.\n\n"
                 export configure='config'
                 export input=$(to_abs_path $TF_VAR_firehawk_path/config/templates/config.template)
@@ -87,6 +87,7 @@ function define_config_settings() {
                 break
                 ;;
             "Configure Secrets (Only from within Vagrant VM)")
+                export TF_VAR_resourcetier=
                 printf "\nThis should only be done within the Ansible Control Vagrant VM. Provisioning infrastructure requires configuration using secrets based on the secrets.template file.  These will be queried for your own unique values and should always be encrypted before you commit them in your private repository.\n\n"
                 export configure='secrets'
                 export input=$(to_abs_path $TF_VAR_firehawk_path/config/templates/secrets-general.template)

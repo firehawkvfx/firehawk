@@ -56,9 +56,11 @@ mkdir -p $TF_VAR_secrets_path/keys
 # The template will be updated by this script
 save_template=true
 export tmp_template_path=$TF_VAR_firehawk_path/tmp/secrets.template
+echo "Ensure permissions to create and remove: $tmp_template_path"
 touch $tmp_template_path
 rm $tmp_template_path
 temp_output=$TF_VAR_firehawk_path/tmp/secrets.temp
+echo "Ensure permissions to create and remove: $temp_output"
 touch $temp_output
 rm $temp_output
 
