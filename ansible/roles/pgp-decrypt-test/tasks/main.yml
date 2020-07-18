@@ -37,7 +37,7 @@
     /deployuser/scripts/pgp-expect-keybase.sh {{ keybase_secret | regex_escape() }} {{ pgp_secret_encrypted }}
   become_user: "{{ variable_user }}"
   connection: local
-  no_log: false
+  no_log: true
   when: "'keybase:' in pgp_public_key"
 
 - name: Run expect to wait for a keybase pass and decrypt - collect output.
@@ -47,7 +47,7 @@
   become_user: "{{ variable_user }}"
   connection: local
   register: pgp_secret_output_temp
-  no_log: false
+  no_log: true
   when: "'keybase:' in pgp_public_key"
 
 - set_fact:
@@ -60,7 +60,7 @@
   become_user: "{{ variable_user }}"
   connection: local
   register: pgp_secret_output_temp
-  no_log: false
+  no_log: true
   failed_when: >
     ("base64: invalid input" in pgp_secret_output_temp.stderr) or
     (pgp_secret_output_temp.stderr != '')
