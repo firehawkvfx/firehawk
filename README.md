@@ -266,7 +266,7 @@ You will have two versions of your infrastructure, we make changes in dev branch
   ```
 - Select 'Configure Vagrant'.
 - Either proceed to setup each variable step by step or use an external editor on ``firehawk-deploy-dev/secrets/vagrant``
-- Continue to configure all the files except secrets (This will be done later in the VM).
+- Continue to configure all the files EXCEPT secrets (This will be done later in the VM).
 - When asked about the 4 mac adresses, copy in the 4 entries generated earlier.
 - Source the environment variables from the vagrant config file for the dev environment.  --init assumes an unencrypted file is being used.  We always do this before running vagrant.
   ```
@@ -283,11 +283,12 @@ You will have two versions of your infrastructure, we make changes in dev branch
   ./scripts/setup.sh
   ```
 - Select 'Configure Secrets'.
-- Either proceed to setup each variable step by step or use an external editor on ``firehawk-deploy-dev/secrets/secrets-general``
+- You always have the option to setup each variable step by step or use an external editor on ``firehawk-deploy-dev/secrets/secrets-general``, or any other config file.  You can decrypt the secrets file for editing with ``source ./update_vars.sh --dev --decrypt``. When done do not forget to encrypt the file again ``source ./update_vars.sh --dev``.
+- Later you may wish to copy and manually edit any --dev files for --prod when the time comes to run a prod environment, as setup.sh is only intended to initialise the dev environment.
 
 **WARNING: Never commit unencrypted secrets into a repository.** You can also [read here](https://help.github.com/en/articles/removing-sensitive-data-from-a-repository) to remove data from a repository.
 
-- Ensure the secrets file is encrypted by sourceing the env vars.
+- Ensure the secrets file is encrypted by sourcing the env vars.
   ```
   source ./update_vars.sh --dev
   ```
