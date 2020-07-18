@@ -96,6 +96,7 @@ function define_config_settings() {
                 ;;
             "Quit")
                 echo "You selected $REPLY to $opt"
+                configure=
                 # echo "Sourcing vars..."
                 # source ./update_vars.sh --dev --var-file=$configure --force --save-template=false
                 exit
@@ -103,8 +104,14 @@ function define_config_settings() {
             *) echo "invalid option $REPLY";;
         esac
     done
-    $TF_VAR_firehawk_path/scripts/configure.sh
-    write_output
+    if [[ ! -z "$configure" ]]; then
+        echo "...Configuring $configure"
+        $TF_VAR_firehawk_path/scripts/configure.sh
+        write_output
+    else
+        echo "...Exiting"
+        exit
+    fi
 }
 
 function ensure_encryption() {
