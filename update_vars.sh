@@ -444,18 +444,19 @@ if [[ ! -z "$TF_VAR_resourcetier" ]]; then
     # sed -i '' -e "s/^TF_VAR_resourcetier_${TF_VAR_envtier}=.*$/TF_VAR_resourcetier_${TF_VAR_envtier}=${TF_VAR_resourcetier}/" $config_override # ...Set the resource tier if defined.
 fi
 
-
 export TF_VAR_CI_JOB_ID=$(cat $config_override | sed -e '/.*TF_VAR_CI_JOB_ID=.*/!d')
 
 x=false
-if [ -z ${TF_VAR_fast+x} ]; then
-    echo_if_not_silent "TF_VAR_fast is unset.  defaulting to $x or it will be aquired by the config override file"
+if [ -z "$TF_VAR_fast" ]; then
+    echo_if_not_silent "TF_VAR_fast is unset.  defaulting to $x and saving ion $config_override"
+    python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override "TF_VAR_fast=" "$x"
+    export TF_VAR_fast="${TF_VAR_fast}"
 else
     echo_if_not_silent "TF_VAR_fast is set to '$TF_VAR_fast'"
     echo_if_not_silent "...Set TF_VAR_fast at config_override path- $TF_VAR_fast"
     # sed -i '' -e "s/^TF_VAR_fast=.*$/TF_VAR_fast=${TF_VAR_fast}/" $config_override # ...Enable the vpc.
-    python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override "TF_VAR_fast=" "${TF_VAR_fast}"
-    export TF_VAR_fast="${TF_VAR_fast}"
+    python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override "TF_VAR_fast=" "$TF_VAR_fast"
+    export TF_VAR_fast="$TF_VAR_fast"
 fi
 
 intialised=()
