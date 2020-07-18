@@ -56,11 +56,11 @@ mkdir -p $TF_VAR_secrets_path/keys
 # The template will be updated by this script
 save_template=true
 export tmp_template_path=$TF_VAR_firehawk_path/tmp/secrets.template
-echo "Ensure permissions to create and remove: $tmp_template_path"
+echo "Ensure permissions to create and remove template: $tmp_template_path"
 touch $tmp_template_path
 rm $tmp_template_path
 temp_output=$TF_VAR_firehawk_path/tmp/secrets.temp
-echo "Ensure permissions to create and remove: $temp_output"
+echo "Ensure permissions to create and remove temp_output: $temp_output"
 touch $temp_output
 rm $temp_output
 
@@ -73,6 +73,8 @@ encrypt_mode="encrypt"
 IFS='
 '
 optspec=":hv-:t:"
+
+echo_if_not_silent "Parse opts" 
 
 verbose () {
     local OPTIND
@@ -128,6 +130,7 @@ verbose () {
     done
 }
 verbose "$@"
+echo_if_not_silent "...Parsed"
 
 if [ -z "$CI_COMMIT_REF_SLUG" ]; then # Detect the environment if using CI/CD
     echo "Launching in a non CI environment"; export env_ci=false
