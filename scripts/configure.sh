@@ -49,11 +49,12 @@ if [[ -f "$output_complete" ]]; then # if a config file already exists, then sou
     printf "\nThis configuration script always sources from and writes to the dev configuration file.  Once evaluated and tested the configuration can be replicated across to your production file. \n"
     cp $output_complete $TF_VAR_firehawk_path/tmp/original.tmp # stash original encrypted version of file if encrypted.
     if [[ ! -z "$TF_VAR_resourcetier" ]] && [[ "$TF_VAR_resourcetier" != "grey" ]]; then
-        resource_arg="--tier prod --$TF_VAR_resourcetier"
+        resource_arg="--prod --$TF_VAR_resourcetier"
     else
-        resource_arg="--tier dev --$TF_VAR_resourcetier"
+        resource_arg="--dev --$TF_VAR_resourcetier"
     fi
     echo "Using resource_arg: $resource_arg"
+    echo "Source command: source $TF_VAR_firehawk_path/update_vars.sh --var-file $configure $resource_arg --save-template false --force --decrypt -v"
     source $TF_VAR_firehawk_path/update_vars.sh --var-file $configure $resource_arg --save-template false --force --decrypt -v
     cp $output_complete $output_tmp # copy for editing of temp version
     mv -f $TF_VAR_firehawk_path/tmp/original.tmp $output_complete # overwrite unencrypted original.
