@@ -720,8 +720,8 @@ source_vars () {
             if [[ $verbose = true ]]; then echo "key: $key"; fi
             value=${i#*=}
             if [[ $verbose = true ]]; then echo "value: $value"; fi
-            # value=$(echo "$value") # this method has issues with passing $vars as literal strings in config-override
-            eval value="$value" # This method should eval strings withhout quotes remaining in the var, but had some issues with setup on zsh.
+            # value=$(echo "$value") # this method has issues with passing $vars as literal string variable names (with $ prefix) in config-override
+            eval value="$value" # This method should eval strings withhout quotes remaining in the var, but had some issues with setup on zsh and whitespace
             if [[ $verbose = true ]]; then echo "eval value: $value"; fi
             # echo "$key : $value"
             export "$key=$value" # Export the environment var
