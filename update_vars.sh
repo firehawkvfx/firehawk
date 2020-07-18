@@ -709,7 +709,7 @@ source_vars () {
         envsubst < "$temp_output" > "$tmp_template_path"
         rm $temp_output # remove temp so as to not accumulate results
 
-        echo_if_not_silent "...Exporting variables to environment"
+        echo_if_not_silent "...Exporting variables to environment for var_file: $var_file"
         # # Now set environment variables to the actual values defined in the user's secrets-prod file
         for i in $(echo "$multiline")
         do
@@ -720,6 +720,8 @@ source_vars () {
             # echo "$key : $value"
             export "$key=$value" # Export the environment var
         done
+
+        echo_if_not_silent "Exported."
 
         # # Determine your current public ip for security groups.
 
