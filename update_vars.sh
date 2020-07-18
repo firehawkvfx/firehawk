@@ -84,48 +84,35 @@ verbose () {
             -)
                 case "${OPTARG}" in
                     tier)
-                        echo_if_not_silent "...${OPTARG}"
                         val="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
                         opt="${OPTARG}"
                         ;;
                     tier=*)
-                        echo_if_not_silent "...${OPTARG}"
                         ;;
                     var-file)
-                        echo_if_not_silent "...${OPTARG}"
-                        echo_if_not_silent "${!OPTIND}"
-                        
                         val="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
                         opt="${OPTARG}"
                         ;;
                     var-file=*)
-                        echo_if_not_silent "...${OPTARG}"
                         ;;
                     box-file-in)
-                        echo_if_not_silent "...${OPTARG}"
                         val="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
                         opt="${OPTARG}"
                         ;;
                     box-file-in=*)
-                        echo_if_not_silent "...${OPTARG}"
                         ;;
                     vault)
-                        echo_if_not_silent "...${OPTARG}"
                         val="${!OPTIND}"; OPTIND=$(( $OPTIND + 1 ))
                         opt="${OPTARG}"
                         ;;
                     vault=*)
-                        echo_if_not_silent "...${OPTARG}"
                         ;;
                     vagrant)
-                        echo_if_not_silent "...${OPTARG}"
                         ;;
                     live-terminal)
-                        echo_if_not_silent "...${OPTARG}"
                         export LIVE_TERMINAL=true
                         ;;
                     *)
-                        echo_if_not_silent "...${OPTARG}"
                         if [ "$OPTERR" = 1 ] && [ "${optspec:0:1}" != ":" ]; then
                             echo "Unknown option --${OPTARG}" >&2
                         fi
