@@ -27,6 +27,10 @@ to_abs_path() {
 export SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 printf "\n...Checking scripts directory at $SCRIPTDIR\n\n"
 
+# These paths and vars are necesary to locating other scripts.
+export TF_VAR_firehawk_path=$(to_abs_path "$SCRIPTDIR/../")
+echo_if_not_silent "TF_VAR_firehawk_path: $TF_VAR_firehawk_path"
+
 export TEMPDIR="$SCRIPTDIR/../tmp"
 mkdir -p "$TEMPDIR"
 
