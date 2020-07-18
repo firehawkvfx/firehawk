@@ -8,6 +8,7 @@
     keybase pgp encrypt -m "this is a decrypted test secret" | base64
   become_user: "{{ variable_user }}"
   register: pgp_secret_encrypted
+  ignore_errors: True
   when: "'keybase:' in pgp_public_key"
 
 - name: "GPG: encrypt test secrets"
@@ -20,20 +21,17 @@
 - name: "debug pgp_secret_encrypted"
   debug:
     var: pgp_secret_encrypted
-  tags:
-  - always
+  when: "'keybase:' in pgp_public_key"
 
 - name: "debug pgp_secret_encrypted.stdout"
   debug:
     msg: "{{ pgp_secret_encrypted.stdout }}"
-  tags:
-  - always
+  when: "'keybase:' in pgp_public_key"
 
 - name: "debug pgp_secret_encrypted.stdout | regex_escape"
   debug:
     msg: "{{ pgp_secret_encrypted.stdout | regex_escape() }}"
-  tags:
-  - always
+  when: "'keybase:' in pgp_public_key"
 
 - name: Run expect to wait for a keybase pass and decrypt - first time is dirty output.
   shell: |
