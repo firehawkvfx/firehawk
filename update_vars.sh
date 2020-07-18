@@ -721,7 +721,6 @@ source_vars () {
             value=${i#*=}
             if [[ $verbose = true ]]; then echo "value: $value"; fi
             value=$(echo "$value")
-            # eval value="$value" # This method should eval strings withhout quotes remaining in the var
             if [[ $verbose = true ]]; then echo "eval value: $value"; fi
             # echo "$key : $value"
             export "$key=$value" # Export the environment var
