@@ -461,13 +461,19 @@ fi
 intialised=()
 
 ensure_initialised () {
-    if [ ! -f "$var_file"]; then
+    if [[ "$verbose" == true ]]; then echo 'Check existence of $var_file'; fi
+    if [ ! -f "$var_file" ]; then
+        if [[ "$verbose" == true ]]; then echo 'Set bsaename'; fi
         var_file_basename="$(echo $var_file | tr '-' '_')"
+        if [[ "$verbose" == true ]]; then echo 'Set abs path'; fi
         var_file="$(to_abs_path $TF_VAR_secrets_path/$var_file)"; exit_test
         echo_if_not_silent "Initialising var_file: $var_file from template. You should edit this file with your own configuration."
+        if [[ "$verbose" == true ]]; then echo 'Copying'; fi
         cp $template_path $var_file 
+        if [[ "$verbose" == true ]]; then echo 'Append to array'; fi
         intialised+=($var_file)
-        if [[ $var_file = "vagrant" ]]; then # ensure a default key path is set for encryption.
+        if [[ $var_file_basename = "vagrant" ]]; then # ensure a default key path is set for encryption.
+            if [[ "$verbose" == true ]]; then echo 'ensure key is set'; fi
             python $TF_VAR_firehawk_path/scripts/replace_value.py -f $var_file "TF_VAR_vault_key_name_general=" ".vault-key-20191208-general"
         fi
     fi
