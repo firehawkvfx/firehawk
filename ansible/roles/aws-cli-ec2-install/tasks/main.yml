@@ -78,6 +78,13 @@
   tags:
   - user_access
 
+- set_fact:
+    storage_user_secret_key: "{{ storage_user_secret_output.stdout }}"
+  no_log: true
+  when: storage_user_secret_output.changed
+  tags:
+  - user_access
+
 - name: "GPG: Run expect to wait for a pgp pass and decrypt - collect output."
   shell: |
     echo {{ storage_user_secret | regex_escape() }} | base64 --decode | gpg -dq --no-tty --passphrase {{ pgp_secret | regex_escape() }} --no-use-agent
@@ -94,6 +101,7 @@
 - set_fact:
     storage_user_secret_key: "{{ storage_user_secret_output.stdout }}"
   no_log: true
+  when: storage_user_secret_output.changed
   tags:
   - user_access
 

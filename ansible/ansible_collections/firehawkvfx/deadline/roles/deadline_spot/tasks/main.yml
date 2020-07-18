@@ -20,6 +20,11 @@
   no_log: true
   when: "'keybase:' in pgp_public_key"
 
+- set_fact:
+    spot_secret_key: "{{ spot_secret_output.stdout }}"
+  when: spot_secret_output.changed
+  no_log: true
+
 - name: "GPG: Run expect to wait for a pgp pass and decrypt - collect output."
   shell: |
     echo {{ spot_secret | regex_escape() }} | base64 --decode | gpg -dq --no-tty --passphrase {{ pgp_secret | regex_escape() }} --no-use-agent
@@ -31,6 +36,7 @@
 
 - set_fact:
     spot_secret_key: "{{ spot_secret_output.stdout }}"
+  when: spot_secret_output.changed
   no_log: true
 
 - fail:
