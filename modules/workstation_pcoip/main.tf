@@ -421,6 +421,8 @@ EOT
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command = <<EOT
+      . /deployuser/scripts/exit_test.sh
+
       export SHOWCOMMANDS=true; set -x
       cd /deployuser
       # ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init-users.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.$TF_VAR_public_domain pcoip=true"; exit_test
