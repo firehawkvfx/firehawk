@@ -312,6 +312,7 @@ resource "aws_instance" "workstation_pcoip" {
   depends_on    = [null_resource.dependency_softnas_and_bastion]
   count         = var.aws_nodes_enabled && var.workstation_enabled ? 1 : 0
   ami           = var.use_custom_ami ? var.custom_ami : var.ami_map[var.gateway_type]
+  iam_instance_profile = var.instance_profile_name
   instance_type = var.instance_type_map[var.gateway_type]
 
   key_name  = var.aws_key_name

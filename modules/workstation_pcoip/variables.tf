@@ -86,3 +86,5 @@ variable "bastion_ip" {
 variable "pcoip_sleep_after_creation" {
   default = false
 }
+
+variable "instance_profile_name" {}
