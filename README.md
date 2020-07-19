@@ -413,7 +413,6 @@ Note: All commands are designed to be run relative to the firehawk directory (or
   vagrant destroy
   ```
 
-
 ## Destroying resources manually
 In your AWS console you should check regularly for any resources that are running that shouldn't be.  If you need to destroy resources manually here are particular area to pay attention to-
 - EC2 Instances
@@ -470,6 +469,43 @@ Initially run small tests and get an understanding of costs that never use more 
 
 - The NAT gateway is a cost visible in your AWS VPC console, usually around $5/day when infrastructure is active.  It allows your private network (systems in the private subnet) outbound access to the internet.  Security groups can lock down any internet access to the minimum adresses required for licencing - things like softnas or other software, but that is not handled currently.  Licensing configuration with most software you would use makes it possible to not need any NAT gateway but that is beyond the scope of Firehawk at this point in time.
 
+## Remote Workstation
+
+Work In Progress: Not currently a heavily tested feature, but a remote Teradici PCOIP workstation can be done!
+You should ensure your static routes are configured correctly on your router.  Alternatively for a quick test, you can also add the routes manually to the system to intend to connect from.  Adding static routes varies between operating systems, but for example on Mac OS
+
+- Only do this step if you haven't added static routes on your router, and the system running Teradici PCOIP cannot ping the VPN server yet.  On a Mac:
+``` 
+sudo route add 10.1.1.0/24 192.168.92.55 # Add a route to the private subnet via whatever IP your firehawk gateway has on your network. 
+sudo route add 10.1.101.0/24 192.168.92.55 # Add a route to the public subnet
+sudo route add 172.17.232.0/24 192.168.92.55 # Add a route to the DHCP range the Firehawk Gateway is using for open vpn.  This can be found also by logging into the firehawk gateway or ansible control if verified to be connected through the vpn and running ``ip route list``
+```
+
+- Make sure you can ping the remote VPN Access server through its private IP.
+```
+ping 10.1.101.56
+PING 10.1.101.56 (10.1.101.56): 56 data bytes
+64 bytes from 10.1.101.56: icmp_seq=0 ttl=63 time=31.469 ms
+64 bytes from 10.1.101.56: icmp_seq=1 ttl=63 time=30.117 ms
+64 bytes from 10.1.101.56: icmp_seq=2 ttl=63 time=29.702 ms
+```
+A 30 ms round trip here is a decent amount of latency to run Teradici PCOIP. over 45ms starts to not be great.  16-24 Mbit download rates are recommended for a good experience at acceptable resolutions.
+
+- Enable the environment variable to deploy the workstation.
+```
+source ./update_vars.sh --dev --init
+./scripts/ci-set-deploy-enable-remote-workstation.sh
+```
+- Log in to the vm and run teraforma apply
+```
+source ./update_vars.sh --dev --init
+vagrant ssh
+source ./update_vars.sh --dev
+terraform apply --auto-approve
+```
+This will take some time to provision the remote workstation.  
+
+- Once up, ping the workstation ip from the system you intend to run PCOIP from and you should be able to run the PCOIP application and connect to the host with the password you specified in the encrypted /secrets/secrets-general file.
 
 ## How To Create a Hosted Zone
 
