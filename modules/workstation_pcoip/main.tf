@@ -307,6 +307,16 @@ resource "null_resource" "dependency_softnas_and_bastion" {
   }
 }
 
+variable "dependency" {
+}
+
+resource "null_resource" "dependency_deadlinedb" {
+  triggers = {
+    dependency = var.dependency
+  }
+}
+
+
 resource "aws_instance" "workstation_pcoip" {
   #instance type and ami are determined by the gateway type variable for if you want a graphical or non graphical instance.
   depends_on    = [null_resource.dependency_softnas_and_bastion]

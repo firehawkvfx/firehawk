@@ -355,6 +355,7 @@ module "workstation" {
 
   instance_profile_name = module.deadline.spot_instance_profile_name # The permisions for the instance defined by this profile.
 
+  dependency = module.firehawk_init.local-provisioning-complete
   #options for gateway type are centos7 and pcoip
   gateway_type   = var.gateway_type
   vpc_id         = module.vpc.vpc_id
