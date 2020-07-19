@@ -184,11 +184,11 @@ test_destroyed() {
     echo "instances are not running"
   fi
 
-  # test if the destroy command worked
-  if [ "$lines" -gt "0" ] && [[ "$tf_action" == "destroy" ]]; then 
-    echo "failed to destroy all running instances for the account"
-    exit 1
-  fi
+  # # test if the destroy command worked
+  # if [ "$lines" -gt "0" ] && [[ "$tf_action" == "destroy" ]]; then 
+  #   echo "failed to destroy all running instances for the account"
+  #   exit 1
+  # fi
 
   printf "\n...Currently existing users in the aws account"
   aws iam list-users
