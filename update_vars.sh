@@ -867,3 +867,4 @@ do
 done
 
 if [[ "$SHOWCOMMANDS" == true ]]; then set -x; fi # After finishing the script, we enable set -x to show input again.
+set +e # don't exist subsequent shells on error.
