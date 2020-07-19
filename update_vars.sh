@@ -136,7 +136,7 @@ verbose () {
 verbose "$@"
 echo_if_not_silent "...Parsed"
 
-export TF_VAR_resourcetier="grey" # default is grey unless otherwise specified or inherited.
+# export TF_VAR_resourcetier="grey" # default is grey unless otherwise specified or inherited. disabled.  otherwise it isn't inherited in ci.
 
 if [ -z "$CI_COMMIT_REF_SLUG" ]; then # Detect the environment if using CI/CD
     echo "Launching in a non CI environment"; export env_ci=false
@@ -445,17 +445,22 @@ if [ -z ${CI_JOB_ID+x} ]; then # if pipeline id is provided, set it in the file.
 else
     echo "CI_JOB_ID is set to '$CI_JOB_ID'"
     echo "...Set CI_JOB_ID at config_override path- $config_override"
-    # sed -i "s/^TF_VAR_CI_JOB_ID=.*$/TF_VAR_CI_JOB_ID=${CI_JOB_ID}/" $config_override # ...Enable the vpc.
+    
     python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override "TF_VAR_CI_JOB_ID=" "${CI_JOB_ID}"
 fi
+export TF_VAR_CI_JOB_ID=$(cat $config_override | sed -e '/.*TF_VAR_CI_JOB_ID=.*/!d')
+echo "CI_JOB_ID inherited as '$CI_JOB_ID'"
 
 if [[ ! -z "$TF_VAR_resourcetier" ]]; then
     echo "TF_VAR_resourcetier defined as: $TF_VAR_resourcetier. Updating TF_VAR_resourcetier_${TF_VAR_envtier} in $config_override to: $TF_VAR_resourcetier"
     python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override "TF_VAR_resourcetier_${TF_VAR_envtier}=" "${TF_VAR_resourcetier}"
-    # sed -i '' -e "s/^TF_VAR_resourcetier_${TF_VAR_envtier}=.*$/TF_VAR_resourcetier_${TF_VAR_envtier}=${TF_VAR_resourcetier}/" $config_override # ...Set the resource tier if defined.
+else
+    echo "TF_VAR_resourcetier is not set,  will not alter config"
 fi
+export TF_VAR_resourcetier_${TF_VAR_envtier}=$(cat $config_override | sed -e "/.*TF_VAR_resourcetier_${TF_VAR_envtier}=.*/!d")
+export TF_VAR_resourcetier=$(cat $config_override | sed -e "/.*TF_VAR_resourcetier_${TF_VAR_envtier}=.*/!d")
+echo "TF_VAR_resourcetier inherited as '$TF_VAR_resourcetier'"
 
-export TF_VAR_CI_JOB_ID=$(cat $config_override | sed -e '/.*TF_VAR_CI_JOB_ID=.*/!d')
 
 x=false
 if [ -z "$TF_VAR_fast" ]; then
