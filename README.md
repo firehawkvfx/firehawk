@@ -324,6 +324,12 @@ You will have two versions of your infrastructure, we make changes in dev branch
   ```
   Note that the original snapshot is still in the list.
 
+## Deployment
+Once configured and environment vars are sourced, a deployment can run with one command - ``firehawk.sh``  
+For the first run though we will proceed in stages to ensure you have working configuration files.  Each stage depends on the previous being verified to function.
+- Local Deployment (Local onsite resources and a cloud storage bucket are used)
+- Deploy VPN ( AWS EC2 instances: 1 bastion ssh jump box, and 1 access server with Open VPN )
+- Deploy all Infrastructure
 
 - We will test configure a local deployment before we use cloud resources.  This will still create an AWS user and s3 bucket to store software installations.  If you need to ensure [houdini is not installed](#disabling-side-effects-houdini), [you don't have an NFS share](#nfs-shared-volumes), or a [houdini license server](#license-servers), you may also want to run those scripts and disable the relevent variables to ensure they are not used.
   ```
@@ -345,7 +351,7 @@ You will have two versions of your infrastructure, we make changes in dev branch
   ```
   You should be able to ping the VPN from within the Firehawk VM, and from the dev workstation vm.  If not, check that you have configured [static routes](#static-routes) correctly.  Don't proceed until this is verified.  When you no longer want to use the resource you should put the resources to sleep, or if there a problem preventing this step from succeeding you will need to destroy the deployment when you are finished to not incur unwanted costs.
 
-- Once succesful, we can test deploy all the cloud resources.  if you ran any cusotm scripts to disable functions, you should run them again after ci-set-deploy-cloud.sh
+- Once the VPN connection works, we can test deploy all the cloud resources.  if you ran any cusotm scripts to disable functions, you should run them again after ci-set-deploy-cloud.sh
   ```
   source ./update_vars.sh --dev --init
   ./scripts/ci-set-deploy-cloud.sh # set config overrides to allow deployment
@@ -371,6 +377,19 @@ When we deploy to cloud above, we specify if we want to keep the Storage EBS vol
   ```
   source ./update_vars.sh  --init
   ./firehawk.sh --softnas-destroy-volumes true
+  ```
+
+## Diagnosing problems
+Provided the Vagrant VM's are running and initialised (terraform is installed and available), when diagnosing problems it may be useful to avoid using firehawk.sh (which runs outside the vm).  Instead you can try running commmands with the ansiblecontrol vm.
+- Operate within the ansiblecontrol vm with 
+  ```
+  source ./update_vars.sh --dev --init
+  vagrant ssh
+  ```
+- run terraform operations after env vars are sourced with secrets.
+  ```
+  source ./update_vars.sh --dev # You will be asked for your password
+  terraform apply --auto-approve
   ```
 
 ## Destroying the deployment
