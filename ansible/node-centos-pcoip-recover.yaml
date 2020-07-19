@@ -73,6 +73,17 @@
     tags:
       - sync_installers
 
+  - name: s3-sync openfirehawk-houdini-tools push
+    import_role:
+      name: firehawkvfx.core.s3_sync
+    vars:
+      mode: "push"
+      basedir: "/deployuser/downloads/nvidia/{{ grid_folder }}"
+      # exclude: ".git/*"
+      filename: "{{ files_matched.files[0].path | basename }}"
+      sync_user: "centos"
+    # connection: local
+
 - hosts: "{{ variable_host | default('role_node_centos') }}"
   remote_user: centos
   gather_facts: "{{ variable_gather_facts | default('false') }}"
