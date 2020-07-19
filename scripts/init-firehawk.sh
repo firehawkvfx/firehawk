@@ -173,7 +173,7 @@ set_pipe() {
 }
 
 test_destroyed() {
-  echo "...Currently running instances: scripts/aws-running-instances.sh"
+  echo "...Currently running instances with TF_VAR_conflictkey: $TF_VAR_conflictkey: scripts/aws-running-instances.sh"
   $TF_VAR_firehawk_path/scripts/aws-running-instances.sh
   echo ""
 
