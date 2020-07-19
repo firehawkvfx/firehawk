@@ -262,7 +262,6 @@ data "aws_ami_ids" "centos_v7" {
   }
 }
 
-
 variable "allow_prebuilt_node_centos_ami" {
   default = false
 }
