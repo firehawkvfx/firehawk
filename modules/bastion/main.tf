@@ -80,31 +80,82 @@ resource "aws_eip" "bastionip" {
   tags = merge(map("Name", format("%s", var.name)), var.common_tags, local.extra_tags)
 }
 
-variable "centos_v7" {
-  type = map(string)
-  default = {
-        "eu-north-1": "ami-5ee66f20",
-        "ap-south-1": "ami-02e60be79e78fef21",
-        "eu-west-3": "ami-0e1ab783dc9489f34",
-        "eu-west-2": "ami-0eab3a90fc693af19",
-        "eu-west-1": "ami-0ff760d16d9497662",
-        "ap-northeast-2": "ami-06cf2a72dadf92410",
-        "ap-northeast-1": "ami-045f38c93733dd48d",
-        "sa-east-1": "ami-0b8d86d4bf91850af",
-        "ca-central-1": "ami-033e6106180a626d0",
-        "ap-southeast-1": "ami-0b4dd9d65556cac22",
-        "ap-southeast-2": "ami-08bd00d7713a39e7d",
-        "eu-central-1": "ami-04cf43aca3e6f3de3",
-        "us-east-1": "ami-02eac2c0129f6376b",
-        "us-east-2": "ami-0f2b4fc905b0bd1f1",
-        "us-west-1": "ami-074e2d6769f445be5",
-        "us-west-2": "ami-01ed306a12b7d1c96"
-    }
+
+data "aws_ami_ids" "centos_v7" {
+  owners = ["679593333241"] # the softnas account id
+  filter {
+    name   = "description"
+    values = ["CentOS Linux 7 x86_64 HVM EBS ENA 2002_01"]
+  }
+}
+
+variable "allow_prebuilt_bastion_centos_ami" {
+  default = false
+}
+
+variable "bastion_centos_ami_option" { # Where multiple data aws_ami_ids queries are available, this allows us to select one.
+  default = "centos_v7"
+}
+
+locals {
+  keys = ["centos_v7"] # Where multiple data aws_ami_ids queries are available, this is the full list of options.
+  empty_list = list("")
+  values = ["${element( concat(data.aws_ami_ids.centos_v7.ids, local.empty_list ), 0 )}"] # the list of ami id's
+  bastion_centos_consumption_map = zipmap( local.keys , local.values )
+}
+
+locals { # select the found ami to use based on the map lookup
+  base_ami = lookup(local.bastion_centos_consumption_map, var.bastion_centos_ami_option)
+}
+
+data "aws_ami_ids" "prebuilt_bastion_centos_ami_list" { # search for a prebuilt tagged ami with the same base image.  if there is a match, it can be used instead, allowing us to skip provisioning.
+  owners = ["self"]
+  filter {
+    name   = "tag:base_ami"
+    values = ["${local.base_ami}"]
+  }
+  filter {
+    name = "name"
+    values = ["bastion_centos_prebuilt_*"]
+  }
+}
+
+locals {
+  prebuilt_bastion_centos_ami_list = data.aws_ami_ids.prebuilt_bastion_centos_ami_list.ids
+  first_element = element( data.aws_ami_ids.prebuilt_bastion_centos_ami_list.*.ids, 0)
+  mod_list = concat( local.prebuilt_bastion_centos_ami_list , list("") )
+  aquired_ami      = "${element( local.mod_list , 0)}" # aquired ami will use the ami in the list if found, otherwise it will default to the original ami.
+  use_prebuilt_bastion_centos_ami = var.allow_prebuilt_bastion_centos_ami && length(local.mod_list) > 1 ? true : false
+  ami = local.use_prebuilt_bastion_centos_ami ? local.aquired_ami : local.base_ami
+}
+
+output "base_ami" {
+  value = local.base_ami
+}
+
+output "prebuilt_bastion_centos_ami_list" {
+  value = local.prebuilt_bastion_centos_ami_list
+}
+
+output "first_element" {
+  value = local.first_element
+}
+
+output "aquired_ami" {
+  value = local.aquired_ami
+}
+
+output "use_prebuilt_bastion_centos_ami" {
+  value = local.use_prebuilt_bastion_centos_ami
+}
+
+output "ami" {
+  value = local.ami
 }
 
 resource "aws_instance" "bastion" {
   count         = var.create_vpc ? 1 : 0
-  ami           = lookup(var.centos_v7, var.region)
+  ami           = local.ami
   instance_type = var.instance_type
   key_name      = var.aws_key_name
   subnet_id     = element(concat(var.public_subnet_ids, list("")), 0)
