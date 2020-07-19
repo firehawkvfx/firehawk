@@ -845,12 +845,14 @@ echo_if_not_silent "...Current pipeline vars:"
 echo_if_not_silent "TF_VAR_active_pipeline: $TF_VAR_active_pipeline"
 
 if [[ ! -z "$TF_VAR_resourcetier" ]]; then
-    echo "TF_VAR_resourcetier is defined.  using as the key to match resource conflicts: $TF_VAR_resourcetier"
-    if [[ "$TF_VAR_resourcetier" = "grey"]]; then
+    
+    if [[ "$TF_VAR_resourcetier" = "grey" ]]; then
         export TF_VAR_conflictkey="${TF_VAR_resourcetier}_${TF_VAR_active_pipeline}" # multiple deploymenst allowed in dev.
     else
-        export TF_VAR_conflictkey=$TF_VAR_resourcetier # only allow one blue or green deployment in produciton.
+        export TF_VAR_conflictkey="${TF_VAR_resourcetier}" # only allow one blue or green deployment in produciton.
     fi
+
+    echo "TF_VAR_conflictkey is defined.  using as the key to match resource conflicts: $TF_VAR_conflictkey"
 fi
 
 # echo "Ensure inventory directory exists: $TF_VAR_inventory"
