@@ -58,11 +58,11 @@
   - debug:
       msg: "installer path: {{ files_matched.files[0].path }}"
 
-  - name: ensure an s3 bucket exists to store large files / installers for faster redeployment.
-  - include_role:
-      name: firehawkvfx.core.s3_bucket_shared
-    tags:
-      - sync_installers
+  # - name: ensure an s3 bucket exists to store large files / installers for faster redeployment.
+  # - include_role:
+  #     name: firehawkvfx.core.s3_bucket_shared
+  #   tags:
+  #     - sync_installers
 
   - name: ensure the nvidia installer is syncronised with the bucket
     s3_sync:
