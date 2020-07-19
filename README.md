@@ -392,6 +392,8 @@ Provided the Vagrant VM's are running and initialised (terraform is installed an
   terraform apply --auto-approve
   ```
 
+Note: All commands are designed to be run relative to the firehawk directory (or if in a vm, ``/deployuser``).  you should generally change to this directory, and source env vars before running any other scripts.
+
 ## Destroying the deployment
 - The terraform deployment can be destroyed, leaving no resources or users in the AWS account.  You can do this when the deployment is no longer needed at all, or if you have only succesfully partially deployed.  It is important to destroy infrastructure before destroying the Vagrant VM.  If at any point a vm or config is unrecoverable, you can either try to reuse the terraform state file or you may wish to destroy and start over.  If you are unsuccesful, you may need to destroy all the resource manually to prevent unwanted costs from orphaned resources.
   ```
