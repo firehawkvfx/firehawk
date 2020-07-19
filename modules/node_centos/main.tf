@@ -258,7 +258,7 @@ data "aws_ami_ids" "centos_v7" {
   owners = ["679593333241"] # the softnas account id
   filter {
     name   = "description"
-    values = ["CentOS Linux 7 x86_64 HVM EBS ENA 1901_01"]
+    values = ["CentOS Linux 7 x86_64 HVM EBS ENA 2002_01"]
   }
 }
 
