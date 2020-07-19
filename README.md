@@ -28,6 +28,15 @@ These are some good paid video courses to try which I have taken on my own learn
 ## Disclaimer: Running your own AWS account.
 You are going to be managing these resources from an AWS account and you are solely responsible for the costs incurred, and for your own education in managing these resources responsibly.  If new to AWS, tread slowly to understand AWS charges.  The information I provide here is not perfect, but shared in a best effort to help others get started.
 
+## Requirements
+- 2 aws accounts.
+- NFS / NAS for sharing a file system. (Optional but recommended)
+- An AWS Thinkbox account
+- A houdini license server with 1 floating houdini engine license (Optional, it is possible to use Firehawk without Houdini)
+- A system with at least 16 GB RAM and 8 threads to run up to 4 VM's. Linux or MacOS recommended.  Windows is untested but PR's encouraged.
+- If intended for production 2+ seperate physical machines with 4 cores and 8 GB ram is recommended for a Green/Blue deployment (redundancy).
+- A keybase account and app setup on your phone for PGP encryption
+
 ## Getting Started
 
 You will need two AWS Accounts.  One for the dev environment and one for the production environment.  When operating, we make changes to the dev branch/environment and test before we update the production environment.  Some exceptions during a deployment may mean changes unique to the production environment have to be done on the fly, and when they occur we merge those changes back to dev.
@@ -148,6 +157,7 @@ Vagrant up
 ```
 sudo useradd user # Add a new user
 sudo passwd user # Set a password
+usermod -aG wheel user # Give user sudo priveledges
 sudo vi /etc/ssh/sshd_config # Find the line PasswordAuthentication no, and change it to yes
 sudo systemctl restart sshd.service # Restart the ssh service
 ip a # Find the mac adress for this system on your network (usually 192.168.? )
@@ -156,6 +166,12 @@ ip a # Find the mac adress for this system on your network (usually 192.168.? )
 ```
 ssh user@machine_ip # where machine_ip is the IP address found above
 ```
+- Ensure you have sudo access
+```
+sudo touch ./test
+sudo rm ./test
+```
+
 - If you are using an existing machine that has password access disabled, you should also enable password access in /etc/sshd_config
 
 This login information should be entered into your encrypted secrets file in later steps, and is only temporarily used until the login is replaced with an ssh key for the deployuser (which will also be created automatically).  Once the ssh key is configured by Firehawk the password wont be usable for ssh access anymore.  Passwords are not recommend to be allowed for continued SSH access in a firehawk deployment.
