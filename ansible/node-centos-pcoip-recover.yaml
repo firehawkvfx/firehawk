@@ -64,14 +64,14 @@
   #   tags:
   #     - sync_installers
 
-  - name: ensure the nvidia installer is syncronised with the bucket
-    s3_sync:
-      bucket: "{{ installers_bucket }}"
-      file_root: /deployuser/downloads/nvidia/{{ grid_folder }}
-      include: "{{ files_matched.files[0].path | basename }}"
-      region: "{{ aws_region }}"
-    tags:
-      - sync_installers
+  # - name: ensure the nvidia installer is syncronised with the bucket
+  #   s3_sync:
+  #     bucket: "{{ installers_bucket }}"
+  #     file_root: /deployuser/downloads/nvidia/{{ grid_folder }}
+  #     include: "{{ files_matched.files[0].path | basename }}"
+  #     region: "{{ aws_region }}"
+  #   tags:
+  #     - sync_installers
 
   - name: s3-sync openfirehawk-houdini-tools push
     import_role:
@@ -81,7 +81,9 @@
       basedir: "/deployuser/downloads/nvidia/{{ grid_folder }}"
       # exclude: ".git/*"
       filename: "{{ files_matched.files[0].path | basename }}"
-      sync_user: "centos"
+      sync_user: "deployuser"
+    tags:
+      - sync_installers
     # connection: local
 
 - hosts: "{{ variable_host | default('role_node_centos') }}"
