@@ -350,6 +350,8 @@ module "workstation" {
   name   = "workstation_pcoip_pipeid${lookup(local.common_tags, "pipelineid", "0")}"
 
   workstation_enabled = var.workstation_enabled
+  install_deadline_worker = var.install_deadline_worker
+  install_houdini = var.install_houdini
 
   instance_profile_name = module.deadline.spot_instance_profile_name # The permisions for the instance defined by this profile.
 

@@ -438,29 +438,108 @@ EOT
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_workstation_centos variable_user=centos variable_become_user=deadlineuser" --skip-tags "user_access"; exit_test
 
       ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.$TF_VAR_public_domain pcoip=true" --skip-tags "local_install local_install_onsite_mounts"; exit_test
-      # to configure deadline scripts-
-      ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml -v --extra-vars "variable_host=role_workstation_centos variable_user=centos variable_connect_as_user=centos"; exit_test
-      echo "Finished installing deadline"
-      
-      if [[ "$TF_VAR_install_houdini" = "true" ]]; then
-        # configure houdini and submission scripts
-        ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/houdini/houdini_module.yaml -v --extra-vars "variable_host=role_workstation_centos houdini_build=$TF_VAR_houdini_build --tags "install_houdini,set_hserver,install_deadline_db"; exit_test
-      fi
-      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v --extra-vars "variable_host=role_workstation_centos"; exit_test
+      # # to configure deadline scripts-
+      # ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml -v --extra-vars "variable_host=role_workstation_centos variable_user=centos variable_connect_as_user=centos"; exit_test
+      # echo "Finished installing deadline"
+
+      # if [[ "$TF_VAR_install_houdini" == true ]]; then
+      #   # configure houdini and submission scripts
+      #   ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/houdini/houdini_module.yaml -v --extra-vars "variable_host=role_workstation_centos houdini_build=$TF_VAR_houdini_build" --tags "install_houdini,set_hserver,install_deadline_db"; exit_test
+      # fi
+
+      # ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v --extra-vars "variable_host=role_workstation_centos"; exit_test
       # to recover from yum update breaking pcoip we reinstall the nvidia driver and dracut to fix pcoip.
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-pcoip-recover.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.$TF_VAR_public_domain pcoip=true"; exit_test
 
 EOT
 
   }
-
-  #after dracut, we reboot the instance locally.  A reboot command will otherwise cause a terraform error.
-  #after dracut, we reboot the instance locally.  A reboot command will otherwise cause a terraform error.
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
-    command = var.pcoip_sleep_after_creation ? "aws ec2 stop-instances --instance-ids ${aws_instance.workstation_pcoip[0].id}" : "aws ec2 reboot-instances --instance-ids ${aws_instance.workstation_pcoip[0].id}"
+    command = "aws ec2 reboot-instances --instance-ids ${aws_instance.workstation_pcoip[0].id}"
+  }
+  #after dracut, we reboot the instance locally.  A reboot command will otherwise cause a terraform error.
+  #after dracut, we reboot the instance locally.  A reboot command will otherwise cause a terraform error.
+  # provisioner "local-exec" {
+  #   interpreter = ["/bin/bash", "-c"]
+  #   command = var.pcoip_sleep_after_creation ? "aws ec2 stop-instances --instance-ids ${aws_instance.workstation_pcoip[0].id}" : "aws ec2 reboot-instances --instance-ids ${aws_instance.workstation_pcoip[0].id}"
+  # }
+}
+
+resource "null_resource" "install_houdini" {
+  count      = var.aws_nodes_enabled && var.workstation_enabled ? 1 : 0
+
+  depends_on = [ null_resource.workstation_pcoip ]
+
+  triggers = {
+    instanceid = aws_instance.workstation_pcoip[0].id
+    install_houdini = var.install_houdini
+  }
+
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    command = <<EOT
+      . /deployuser/scripts/exit_test.sh
+      export SHOWCOMMANDS=true; set -x
+      cd /deployuser
+
+      aws ec2 start-instances --instance-ids ${aws_instance.workstation_pcoip[0].id} # ensure instance is started
+
+      if [[ "$TF_VAR_install_houdini" == true ]]; then
+        ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/houdini/houdini_module.yaml -v --extra-vars "variable_host=role_workstation_centos houdini_build=$TF_VAR_houdini_build" --tags "install_houdini"; exit_test
+        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v --extra-vars "variable_host=role_workstation_centos"; exit_test
+      fi
+EOT
+
   }
 }
+
+resource "null_resource" "install_deadline_worker" {
+  count      = var.aws_nodes_enabled && var.workstation_enabled ? 1 : 0
+  # will need to mirror node centos aws_network_interface_sg_attachment.node_centos_sg_attachment_vpn if provisioning immediately asynchronously.
+  depends_on = [ null_resource.workstation_pcoip, null_resource.dependency_deadlinedb, null_resource.install_houdini, var.vpn_private_ip ]
+
+  triggers = {
+    instanceid = aws_instance.workstation_pcoip[0].id
+    install_deadline_worker = var.install_deadline_worker
+    install_houdini = var.install_houdini
+  }
+
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    command = <<EOT
+      . /deployuser/scripts/exit_test.sh
+      export SHOWCOMMANDS=true; set -x
+      cd /deployuser
+
+      aws ec2 start-instances --instance-ids ${aws_instance.workstation_pcoip[0].id} # ensure instance is started
+
+      if [[ "$TF_VAR_install_deadline_worker" == true ]]; then
+        # check db
+        echo "test db centos 1"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+        echo "Install deadline worker on remote node"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml -v --skip-tags "multi-slave" --extra-vars "variable_host=role_workstation_centos variable_connect_as_user=centos variable_user=deadlineuser"; exit_test
+
+        # check db
+        echo "test db centos 6"
+        ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+      fi
+
+      if [[ "$TF_VAR_install_houdini" == true ]]; then
+        ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/houdini/configure_hserver.yaml -v --extra-vars "variable_host=role_workstation_centos houdini_build=$TF_VAR_houdini_build"; exit_test
+        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v; exit_test
+
+        if [[ "$TF_VAR_install_deadline_worker" == true ]]; then
+          ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/houdini/houdini_module.yaml -v --extra-vars "variable_host=role_workstation_centos houdini_build=$TF_VAR_houdini_build" --tags "install_deadline_db"; exit_test
+          echo "test db centos"
+          ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-db-check.yaml -v; exit_test
+        fi
+      fi
+EOT
+  }
+}
+
 
 resource "null_resource" "shutdown_workstation_pcoip" {
   count = var.sleep && var.aws_nodes_enabled && var.workstation_enabled ? 1 : 0

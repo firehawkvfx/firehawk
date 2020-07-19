@@ -88,3 +88,7 @@ variable "pcoip_sleep_after_creation" {
 }
 
 variable "instance_profile_name" {}
+
+variable "install_houdini" {}
+
+variable "install_deadline_worker" {}
