@@ -301,7 +301,6 @@ locals {
   aquired_ami      = "${element( local.mod_list , 0)}" # aquired ami will use the ami in the list if found, otherwise it will default to the original ami.
   use_prebuilt_node_centos_ami = var.allow_prebuilt_node_centos_ami && length(local.mod_list) > 1 ? true : false
   ami = local.use_prebuilt_node_centos_ami ? local.aquired_ami : local.base_ami
-  instance_type = var.softnas_instance_type
 }
 
 output "base_ami" {
