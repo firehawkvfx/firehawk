@@ -148,7 +148,7 @@ do
         echo "${i%%=*}=$result"
         # echo "${i%%=*}=$result" >> $output_tmp
         # Set the value in the file matching the line that starts with the key.
-        python $TF_VAR_firehawk_path/scripts/replace_value.py -f $output_tmp "${i%%=*}=" "$result"
+        python $TF_VAR_firehawk_path/scripts/replace_value.py -f $output_tmp "${i%%=*}=" "\"$result\"" # if encoding everything as a string doesn't work, may need to be conditional on quotes existing.
         printf "${NC}"
         #march progress forward
         progress=$((progress + 1))
