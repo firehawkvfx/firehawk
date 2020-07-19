@@ -65,6 +65,13 @@
       creates: /home/deployuser/.ssh/id_rsa
     become_user: deployuser
 
+  - name: init empty authorized_keys if it doesn't exist
+    copy:
+      content: ""
+      dest: "/home/deployuser/.ssh/authorized_keys"
+      force: no
+    become: true
+
   - name: slurp file state
     slurp:
       src: "/home/deployuser/.ssh/authorized_keys"
