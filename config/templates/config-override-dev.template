@@ -101,6 +101,11 @@ TF_VAR_aws_nodes_enabled=insertvalue
 # default: TF_VAR_remote_mounts_on_local=true
 TF_VAR_remote_mounts_on_local=insertvalue
 
+# TF_VAR_set_routes_on_workstation:
+# For Dev / CI use only. In scenarios where multiple parrallel deployments occur, each deployment will have its own subnet.  It's not possible to automatically configure the routes for so many subnets on routers in a generic fashion.
+# default: TF_VAR_set_routes_on_workstation:false
+TF_VAR_set_routes_on_workstation=insertvalue
+
 # TF_VAR_provision_deadline_spot_plugin:
 # If enabled, the deadline spot fleet plugin will be automatically configured.  
 # Note that because we alter the mongo db, this may not be supported with future versions of deadline.  You may need to disable it and configure the plugin manually in these circumstances.
