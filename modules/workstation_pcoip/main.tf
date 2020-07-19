@@ -431,10 +431,12 @@ EOT
       ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_init_pip.yaml -v --extra-vars "variable_host=role_workstation_centos variable_connect_as_user=centos"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars "variable_host=role_workstation_centos variable_connect_as_user=centos hostname=cloud_workstation1.$TF_VAR_public_domain pcoip=true set_hostname=true variable_user=deployuser variable_uid=$TF_VAR_deployuser_uid set_selinux=disabled"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars "variable_host=role_workstation_centos variable_connect_as_user=centos variable_user=deadlineuser pcoip=true set_selinux=disabled"; exit_test
-      # ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars "variable_host=role_workstation_centos pcoip=true variable_connect_as_user=$TF_VAR_softnas_ssh_user variable_user=deadlineuser set_selinux=disabled"; exit_test
+      
+      # install cli for centos user
+      ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_workstation_centos variable_user=centos" --skip-tags "user_access"; exit_test
+      # install cli for deadlineuser
+      ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_workstation_centos variable_user=centos variable_become_user=deadlineuser" --skip-tags "user_access"; exit_test
 
-      ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_workstation_centos variable_user=deadlineuser"; exit_test
-      ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_workstation_centos variable_user=centos"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.$TF_VAR_public_domain pcoip=true" --skip-tags "local_install local_install_onsite_mounts"; exit_test
       # to configure deadline scripts-
       ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml -v --extra-vars "variable_host=role_workstation_centos variable_user=centos variable_connect_as_user=centos"; exit_test
