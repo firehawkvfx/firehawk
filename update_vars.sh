@@ -407,8 +407,8 @@ if [ ! -f $config_override ]; then
     cp "$TF_VAR_firehawk_path/config/defaults/defaults-config-override-$TF_VAR_envtier" "$config_override"
 fi
 
-current_version=$(cat $config_override | sed -e '/.*defaults_config_overide_version=.*/!d')
-target_version=$(cat $TF_VAR_firehawk_path/config/defaults/defaults-config-override-$TF_VAR_envtier | sed -e '/.*defaults_config_overide_version=.*/!d')
+current_version=$(cat $config_override | awk -F"=" '{if($1=="defaults_config_overide_version") print $2}')
+target_version=$(cat $TF_VAR_firehawk_path/config/defaults/defaults-config-override-$TF_VAR_envtier | awk -F"=" '{if($1=="defaults_config_overide_version") print $2}')
 
 if [[ "$target_version" != "$current_version" ]]; then
     echo "...Version doesn't match config.  Initialising $config_override"
@@ -424,8 +424,8 @@ if [ ! -f $defaults_file ]; then
     cp "$TF_VAR_firehawk_path/config/defaults/defaults" "$defaults_file"
 fi
 
-current_version=$(cat $defaults_file | sed -e '/.*defaults_=.*/!d')
-target_version=$(cat $TF_VAR_firehawk_path/config/defaults/defaults | sed -e '/.*defaults=.*/!d')
+current_version=$(cat $defaults_file | awk -F"=" '{if($1=="defaults_version") print $2}')
+target_version=$(cat $TF_VAR_firehawk_path/config/defaults/defaults | awk -F"=" '{if($1=="defaults_version") print $2}')
 
 if [[ "$target_version" != "$current_version" ]]; then
     echo "...Version doesn't match config.  Initialising $defaults_file"
@@ -445,8 +445,8 @@ else
     
     python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override "TF_VAR_CI_JOB_ID=" "${CI_JOB_ID}"
 fi
-export TF_VAR_CI_JOB_ID=$(cat $config_override | sed -e '/.*TF_VAR_CI_JOB_ID=.*/!d')
-echo "TF_VAR_CI_JOB_ID inherited as '$TF_VAR_CI_JOB_ID'"
+export TF_VAR_CI_JOB_ID=$(cat $config_override | awk -F"=" '{if($1=="TF_VAR_CI_JOB_ID") print $2}')
+echo "TF_VAR_CI_JOB_ID inherited as TF_VAR_CI_JOB_ID:$TF_VAR_CI_JOB_ID"
 
 if [[ ! -z "$TF_VAR_resourcetier" ]]; then
     echo "TF_VAR_resourcetier defined as: $TF_VAR_resourcetier. Updating TF_VAR_resourcetier_${TF_VAR_envtier} in $config_override to: $TF_VAR_resourcetier"
@@ -454,9 +454,11 @@ if [[ ! -z "$TF_VAR_resourcetier" ]]; then
 else
     echo "TF_VAR_resourcetier is not set,  will not alter config"
 fi
-export TF_VAR_resourcetier_${TF_VAR_envtier}=$(cat $config_override | sed -e "/.*TF_VAR_resourcetier_${TF_VAR_envtier}=.*/!d")
-export TF_VAR_resourcetier=$(cat $config_override | sed -e "/.*TF_VAR_resourcetier_${TF_VAR_envtier}=.*/!d")
-echo "TF_VAR_resourcetier inherited as '$TF_VAR_resourcetier'"
+# export TF_VAR_resourcetier_${TF_VAR_envtier}=$(cat $config_override | sed -e "/.*TF_VAR_resourcetier_${TF_VAR_envtier}=.*/!d")
+export TF_VAR_resourcetier_${TF_VAR_envtier}=$( cat $config_override | awk -F"=" '{if($1=="TF_VAR_resourcetier_"ENVIRON["TF_VAR_envtier"]) print $2}' )
+
+export TF_VAR_resourcetier=$( cat $config_override | awk -F"=" '{if($1=="TF_VAR_resourcetier_"ENVIRON["TF_VAR_envtier"]) print $2}' )
+echo "TF_VAR_resourcetier inherited as TF_VAR_resourcetier:$TF_VAR_resourcetier"
 
 
 x=false
