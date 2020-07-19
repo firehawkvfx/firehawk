@@ -437,9 +437,6 @@ fi
 ### The dynamic vars here are set by the environment during dpeloyment, and commit messages for gitlab ci.
 # x='1' 
 
-# if [ -z ${CI_JOB_ID+x} ]; then
-#     echo "CI_JOB_ID is not set.  defaulting to $x or it will be aquired by the config override file"
-
 if [ -z ${CI_JOB_ID+x} ]; then # if pipeline id is provided, set it in the file.  note this is not always the pipeline id that should be used for tags, since we preserve the id used during an init step.  That pipeline id becomes the tag until the next destroy/init step.
     echo "CI_JOB_ID is not set, will not alter config."
 else
@@ -449,7 +446,7 @@ else
     python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override "TF_VAR_CI_JOB_ID=" "${CI_JOB_ID}"
 fi
 export TF_VAR_CI_JOB_ID=$(cat $config_override | sed -e '/.*TF_VAR_CI_JOB_ID=.*/!d')
-echo "CI_JOB_ID inherited as '$CI_JOB_ID'"
+echo "TF_VAR_CI_JOB_ID inherited as '$TF_VAR_CI_JOB_ID'"
 
 if [[ ! -z "$TF_VAR_resourcetier" ]]; then
     echo "TF_VAR_resourcetier defined as: $TF_VAR_resourcetier. Updating TF_VAR_resourcetier_${TF_VAR_envtier} in $config_override to: $TF_VAR_resourcetier"
