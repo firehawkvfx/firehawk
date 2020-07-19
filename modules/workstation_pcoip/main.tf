@@ -381,7 +381,7 @@ resource "null_resource" "workstation_pcoip" {
     inline = [
       "sleep 10",
       "export SHOWCOMMANDS=true; set -x",
-      "cloud-init status --wait",
+      "sudo cloud-init status --wait",
       "sudo yum install -y python",
       "while [ ! -f /etc/ssh/ssh_host_ecdsa_key.pub ]",
       "do",
@@ -403,7 +403,7 @@ resource "null_resource" "workstation_pcoip" {
       cd /deployuser
       ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.workstation_pcoip[0].private_ip} bastion_ip=${var.bastion_ip}"
       # ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "variable_host=firehawkgateway variable_user=deployuser private_ip=${aws_instance.workstation_pcoip[0].private_ip} bastion_ip=${var.bastion_ip}"
-      ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=cloud_workstation1.$TF_VAR_public_domain host_ip=${aws_instance.workstation_pcoip[0].private_ip} group_name=role_workstation_centos insert_ssh_key_string=ansible_ssh_private_key_file=$TF_VAR_aws_private_key_path"
+      ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=cloud_workstation1 host_ip=${aws_instance.workstation_pcoip[0].private_ip} group_name=role_workstation_centos insert_ssh_key_string=ansible_ssh_private_key_file=$TF_VAR_aws_private_key_path"
 
 EOT
 
@@ -435,11 +435,9 @@ EOT
 
       export SHOWCOMMANDS=true; set -x
       cd /deployuser
-      # ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init-users.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.$TF_VAR_public_domain pcoip=true"; exit_test
-      # ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-init-deadline.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.$TF_VAR_public_domain pcoip=true"; exit_test
-      
+
       ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_init_pip.yaml -v --extra-vars "variable_host=role_workstation_centos variable_connect_as_user=centos"; exit_test
-      ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars "variable_host=role_workstation_centos variable_connect_as_user=centos hostname=cloud_workstation1.$TF_VAR_public_domain pcoip=true set_hostname=true variable_user=deployuser variable_uid=$TF_VAR_deployuser_uid set_selinux=disabled"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars "variable_host=role_workstation_centos variable_connect_as_user=centos hostname=cloud_workstation1 pcoip=true set_hostname=true variable_user=deployuser variable_uid=$TF_VAR_deployuser_uid set_selinux=disabled"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars "variable_host=role_workstation_centos variable_connect_as_user=centos variable_user=deadlineuser pcoip=true set_selinux=disabled"; exit_test
       
       # install cli for centos user
@@ -447,23 +445,12 @@ EOT
       # install cli for deadlineuser
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_workstation_centos variable_user=centos variable_become_user=deadlineuser" --skip-tags "user_access"; exit_test
 
-      ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.$TF_VAR_public_domain pcoip=true" --skip-tags "local_install local_install_onsite_mounts"; exit_test
-      # # to configure deadline scripts-
-      # ansible-playbook -i "$TF_VAR_inventory" ansible/deadline-worker-install.yaml -v --extra-vars "variable_host=role_workstation_centos variable_user=centos variable_connect_as_user=centos"; exit_test
-      # echo "Finished installing deadline"
+      ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1 pcoip=true" --skip-tags "local_install local_install_onsite_mounts"; exit_test
 
-      # if [[ "$TF_VAR_install_houdini" == true ]]; then
-      #   # configure houdini and submission scripts
-      #   ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/houdini/houdini_module.yaml -v --extra-vars "variable_host=role_workstation_centos houdini_build=$TF_VAR_houdini_build" --tags "install_houdini,set_hserver,install_deadline_db"; exit_test
-      # fi
-
-      # ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v --extra-vars "variable_host=role_workstation_centos"; exit_test
-      # to recover from yum update breaking pcoip we reinstall the nvidia driver and dracut to fix pcoip.
-      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-pcoip-recover.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.$TF_VAR_public_domain pcoip=true"; exit_test
-
+      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-pcoip-recover.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1 pcoip=true"; exit_test
 EOT
-
   }
+
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command = "aws ec2 reboot-instances --instance-ids ${aws_instance.workstation_pcoip[0].id}"
@@ -500,7 +487,6 @@ resource "null_resource" "install_houdini" {
         ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v --extra-vars "variable_host=role_workstation_centos"; exit_test
       fi
 EOT
-
   }
 }
 
