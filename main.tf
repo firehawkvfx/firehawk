@@ -355,7 +355,7 @@ module "workstation" {
 
   instance_profile_name = module.deadline.spot_instance_profile_name # The permisions for the instance defined by this profile.
 
-  dependency = module.firehawk_init.local-provisioning-complete
+  
   #options for gateway type are centos7 and pcoip
   gateway_type   = var.gateway_type
   vpc_id         = module.vpc.vpc_id
@@ -373,6 +373,8 @@ module "workstation" {
   public_domain_name = var.public_domain
 
   # dependencies
+  dependency = module.firehawk_init.local-provisioning-complete
+  vpn_private_ip                 = module.vpc.vpn_private_ip
   softnas_private_ip1             = module.softnas.softnas1_private_ip
   provision_softnas_volumes       = module.softnas.provision_softnas_volumes
   attach_local_mounts_after_start = module.softnas.attach_local_mounts_after_start
