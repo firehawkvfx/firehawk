@@ -23,7 +23,7 @@ exit_test () {
         failed=false
     else
         failed=true
-        if [ "$LIVE_TERMINAL" == true ]; then
+        if [[ "$LIVE_TERMINAL" == "true" ]]; then
             if [[ -z "$silent" ]] || [[ "$silent" == false ]]; then printf "\n${RED}Failed command in live terminal. ${NC}\n" >&2; fi
         else
             printf "\n${RED}Failed command ...exiting${NC}\n" >&2
