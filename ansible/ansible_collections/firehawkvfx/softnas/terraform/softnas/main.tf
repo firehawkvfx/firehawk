@@ -421,8 +421,7 @@ resource "aws_security_group" "softnas_vpn" {
   }
 }
 
-variable "allow_prebuilt_softnas_ami" {
-}
+
 
 data "aws_ami_ids" "burrst_softnas" {
   owners = ["679593333241"] # the softnas account id
@@ -438,6 +437,9 @@ data "aws_ami_ids" "burrst_softnas_byol" {
     name   = "description"
     values = ["SoftNAS BYOL - 4.4.3"]
   }
+}
+
+variable "allow_prebuilt_softnas_ami" {
 }
 
 variable "softnas_ami_option" {
