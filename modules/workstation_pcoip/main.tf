@@ -403,7 +403,7 @@ resource "null_resource" "workstation_pcoip" {
       cd /deployuser
       ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.workstation_pcoip[0].private_ip} bastion_ip=${var.bastion_ip}"
       # ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "variable_host=firehawkgateway variable_user=deployuser private_ip=${aws_instance.workstation_pcoip[0].private_ip} bastion_ip=${var.bastion_ip}"
-      ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=cloud_workstation1 host_ip=${aws_instance.workstation_pcoip[0].private_ip} group_name=role_workstation_centos insert_ssh_key_string=ansible_ssh_private_key_file=$TF_VAR_aws_private_key_path"
+      ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=cloud_workstation1.firehawkvfx.com.firehawkvfx.com host_ip=${aws_instance.workstation_pcoip[0].private_ip} group_name=role_workstation_centos insert_ssh_key_string=ansible_ssh_private_key_file=$TF_VAR_aws_private_key_path"
 
 EOT
 
@@ -437,7 +437,7 @@ EOT
       cd /deployuser
 
       ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_init_pip.yaml -v --extra-vars "variable_host=role_workstation_centos variable_connect_as_user=centos"; exit_test
-      ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars "variable_host=role_workstation_centos variable_connect_as_user=centos hostname=cloud_workstation1 pcoip=true set_hostname=true variable_user=deployuser variable_uid=$TF_VAR_deployuser_uid set_selinux=disabled"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars "variable_host=role_workstation_centos variable_connect_as_user=centos hostname=cloud_workstation1.firehawkvfx.com pcoip=true set_hostname=true variable_user=deployuser variable_uid=$TF_VAR_deployuser_uid set_selinux=disabled"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars "variable_host=role_workstation_centos variable_connect_as_user=centos variable_user=deadlineuser pcoip=true set_selinux=disabled"; exit_test
       
       # install cli for centos user
@@ -445,9 +445,9 @@ EOT
       # install cli for deadlineuser
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_workstation_centos variable_user=centos variable_become_user=deadlineuser" --skip-tags "user_access"; exit_test
 
-      ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1 pcoip=true" --skip-tags "local_install local_install_onsite_mounts"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.firehawkvfx.com pcoip=true" --skip-tags "local_install local_install_onsite_mounts"; exit_test
 
-      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-pcoip-recover.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1 pcoip=true"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-pcoip-recover.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.firehawkvfx.com pcoip=true"; exit_test
 EOT
   }
 

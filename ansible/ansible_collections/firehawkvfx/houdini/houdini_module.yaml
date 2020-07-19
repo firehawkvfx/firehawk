@@ -7,7 +7,7 @@
 # If the file doesn't exist in the s3 bucket, it will be downloaded from side fx, and then pushed to the bucket after install.
 
 # Example install on an aws instance
-# ansible-playbook -i ansible/inventory ansible/ansible_collections/firehawkvfx/houdini/houdini_module.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1"
+# ansible-playbook -i ansible/inventory ansible/ansible_collections/firehawkvfx/houdini/houdini_module.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.firehawkvfx.com"
 # Example local install on a RHEL 7.6 / CENTOS workstation / render node.
 # ansible-playbook -i ansible/inventory ansible/ansible_collections/firehawkvfx/houdini/houdini_module.yaml -v --extra-vars "variable_host=workstation1 variable_user=deadlineuser hostname=workstation1 ansible_become_pass=sompass"
 
