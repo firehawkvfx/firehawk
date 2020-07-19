@@ -24,7 +24,7 @@
       path: "/deployuser/downloads/nvidia/{{ grid_folder }}/{{ driver_file }}"
     register: driver_stat
 
-  - name: s3-sync pull nvidia driver
+  - name: s3-sync pull nvidia driver - all available
     import_role:
       name: firehawkvfx.core.s3_sync
     vars:
@@ -47,7 +47,6 @@
   - name: "Ansible find files in subdirectory downloads /deployuser/downloads/nvidia/{{ grid_folder }}/"
     find:
       paths: "/deployuser/downloads/nvidia/{{ grid_folder }}/"
-      #patterns: ".*{{ nvidia_driver }}.*.run"
       patterns: "*{{ nvidia_driver }}*.run"
     register: files_matched
     become: true
@@ -73,18 +72,16 @@
   #   tags:
   #     - sync_installers
 
-  - name: s3-sync openfirehawk-houdini-tools push
+  - name: s3-sync push to installers bucket
     import_role:
       name: firehawkvfx.core.s3_sync
     vars:
       mode: "push"
       basedir: "/deployuser/downloads/nvidia/{{ grid_folder }}"
-      # exclude: ".git/*"
       filename: "{{ files_matched.files[0].path | basename }}"
       sync_user: "deployuser"
     tags:
       - sync_installers
-    # connection: local
 
 - hosts: "{{ variable_host | default('role_node_centos') }}"
   remote_user: centos
@@ -147,15 +144,27 @@
       owner: centos
       state: directory
 
-  - name: S3 GET nvidia driver
-    aws_s3:
+  # - name: S3 GET nvidia driver
+  #   aws_s3:
+  #     bucket: "{{ installers_bucket }}"
+  #     object: "{{ driver_file }}"
+  #     dest: "/home/centos/Downloads/{{ driver_file }}"
+  #     mode: get
+  #     AWS_ACCESS_KEY: "{{ AWS_ACCESS_KEY }}"
+  #     AWS_SECRET_KEY: "{{ AWS_SECRET_KEY }}"
+  #     region: "{{ aws_region }}"
+
+  - name: s3-sync pull for install.
+    import_role:
+      name: firehawkvfx.core.s3_sync
+    vars:
+      mode: "pull"
       bucket: "{{ installers_bucket }}"
-      object: "{{ driver_file }}"
-      dest: "/home/centos/Downloads/{{ driver_file }}"
-      mode: get
-      AWS_ACCESS_KEY: "{{ AWS_ACCESS_KEY }}"
-      AWS_SECRET_KEY: "{{ AWS_SECRET_KEY }}"
-      region: "{{ aws_region }}"
+      basedir: "/home/centos/Downloads/"
+      filename: "{{ driver_file }}"
+      sync_user: "centos"
+    # tags:
+    #   - sync_installers
 
   - name: check if epel rpm exists
     stat: 
