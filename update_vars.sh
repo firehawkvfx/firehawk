@@ -446,7 +446,7 @@ else
     python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override "TF_VAR_CI_JOB_ID=" "${CI_JOB_ID}"
 fi
 export TF_VAR_CI_JOB_ID=$(cat $config_override | sed -e '/.*TF_VAR_CI_JOB_ID=.*/!d')
-echo "TF_VAR_CI_JOB_ID inherited as '$TF_VAR_CI_JOB_ID'"
+echo "TF_VAR_CI_JOB_ID inherited as TF_VAR_CI_JOB_ID:$TF_VAR_CI_JOB_ID"
 
 if [[ ! -z "$TF_VAR_resourcetier" ]]; then
     echo "TF_VAR_resourcetier defined as: $TF_VAR_resourcetier. Updating TF_VAR_resourcetier_${TF_VAR_envtier} in $config_override to: $TF_VAR_resourcetier"
@@ -456,7 +456,7 @@ else
 fi
 export TF_VAR_resourcetier_${TF_VAR_envtier}=$(cat $config_override | sed -e "/.*TF_VAR_resourcetier_${TF_VAR_envtier}=.*/!d")
 export TF_VAR_resourcetier=$(cat $config_override | sed -e "/.*TF_VAR_resourcetier_${TF_VAR_envtier}=.*/!d")
-echo "TF_VAR_resourcetier inherited as '$TF_VAR_resourcetier'"
+echo "TF_VAR_resourcetier inherited as TF_VAR_resourcetier:$TF_VAR_resourcetier"
 
 
 x=false
