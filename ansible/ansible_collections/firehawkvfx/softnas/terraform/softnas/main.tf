@@ -1066,7 +1066,7 @@ resource "null_resource" "attach_local_mounts_after_start" {
 
       echo "TF_VAR_remote_mounts_on_local= $TF_VAR_remote_mounts_on_local"
       # ensure routes on workstation exist
-      if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
+      if [[ $TF_VAR_remote_mounts_on_local == true ]] && [[ "$TF_VAR_set_routes_on_workstation" = "true" ]]; then
         printf "\n$BLUE CONFIGURE REMOTE ROUTES ON LOCAL NODES $NC\n"
         ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-routes.yaml -v -v --extra-vars "variable_host=workstation1 variable_user=deployuser hostname=workstation1 ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key ethernet_interface=$TF_VAR_workstation_ethernet_interface"; exit_test
       fi
