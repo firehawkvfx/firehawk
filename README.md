@@ -410,7 +410,8 @@ Note: All commands are designed to be run relative to the firehawk directory (or
   ```
 - After the cloud resources are removed, you can safely destroy the vagrant VM.  do not do this unless you are sure the resources are gone.  otherwise you will have to delete all those resources manually through the console.
   ```
-  vagrant destroy
+  source ./update_vars.sh --dev --init
+  ./scripts/vagrant-destroy.sh
   ```
 
 ## Destroying resources manually
