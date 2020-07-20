@@ -365,7 +365,7 @@ data "aws_ami_ids" "prebuilt_teradici_pcoip_ami_list" { # search for a prebuilt 
 
 locals {
   prebuilt_teradici_pcoip_ami_list = data.aws_ami_ids.prebuilt_teradici_pcoip_ami_list.ids
-  first_element = element( data.aws_ami_ids.prebuilt_teradici_pcoip_ami_list.ids, 0)
+  first_element = element( data.aws_ami_ids.prebuilt_teradici_pcoip_ami_list.*.ids, 0)
   mod_list = concat( local.prebuilt_teradici_pcoip_ami_list , list("") )
   aquired_ami      = "${element( local.mod_list , 0)}" # aquired ami will use the ami in the list if found, otherwise it will default to the original ami.
   use_prebuilt_teradici_pcoip_ami = var.allow_prebuilt_teradici_pcoip_ami && length(local.mod_list) > 1 ? true : false
