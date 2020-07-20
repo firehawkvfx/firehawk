@@ -45,16 +45,6 @@ variable "aws_nodes_enabled" {
   default = false
 }
 
-#CentOS Linux 7 x86_64 HVM EBS ENA 1805_01-b7ee8a69-ee97-4a49-9e68-afaee216db2e-ami-77ec9308.4 (ami-d8c21dba)
-variable "ami_map" {
-  type = map(string)
-
-  default = {
-    pcoip   = "ami-03d2725a19593c9e6"
-    centos7 = "ami-d8c21dba"
-  }
-}
-
 variable "instance_type_map" {
   type = map(string)
 

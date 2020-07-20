@@ -255,6 +255,7 @@ data "aws_subnet" "private_subnet" {
 variable "volume_size" {}
 
 data "aws_ami_ids" "centos_v7" {
+  most_recent      = true
   owners = ["679593333241"] # the softnas account id
   filter {
     name   = "description"

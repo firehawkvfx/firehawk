@@ -424,6 +424,7 @@ resource "aws_security_group" "softnas_vpn" {
 
 
 data "aws_ami_ids" "burrst_softnas" {
+  most_recent      = true
   owners = ["679593333241"] # the softnas account id
   filter {
     name   = "description"
@@ -432,6 +433,7 @@ data "aws_ami_ids" "burrst_softnas" {
 }
 
 data "aws_ami_ids" "burrst_softnas_byol" {
+  most_recent      = true
   owners = ["679593333241"] # the softnas account id
   filter {
     name   = "description"

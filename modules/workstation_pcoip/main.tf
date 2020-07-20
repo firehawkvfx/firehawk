@@ -316,12 +316,91 @@ resource "null_resource" "dependency_deadlinedb" {
   }
 }
 
+# These filters below aquire the ami for your region.  If they are not working in your region try running:
+# aws ec2 describe-images --image-ids {image id}
+# and then progress to filtering from that information instead of the image id:
+# aws ec2 describe-images --filters "Name=name,Values=OpenVPN Access Server 2.7.5-*"
+# ... and update the filters appropriately
+# We dont use image id's directly because they dont work in multiple regions.
+data "aws_ami_ids" "pcoip_ami" {
+  most_recent      = true
+  owners = ["679593333241"] # the account id
+  filter {
+    name   = "name"
+    values = ["graphics-agent-centos-7-aws-market-*-b1758282-066c-42d6-820c-0ddfe8d07132-*"] # the * replaces part of the serial that varies by region.
+  }
+}
+
+variable "allow_prebuilt_teradici_pcoip_ami" {
+  default = false
+}
+
+variable "teradici_pcoip_ami_option" { # Where multiple data aws_ami_ids queries are available, this allows us to select one.
+  default = "pcoip_ami"
+}
+
+locals {
+  keys = ["pcoip_ami"] # Where multiple data aws_ami_ids queries are available, this is the full list of options.
+  empty_list = list("")
+  values = ["${element( concat(data.aws_ami_ids.pcoip_ami.ids, local.empty_list ), 0 )}"] # the list of ami id's
+  teradici_pcoip_consumption_map = zipmap( local.keys , local.values )
+}
+
+locals { # select the found ami to use based on the map lookup
+  base_ami = lookup(local.teradici_pcoip_consumption_map, var.teradici_pcoip_ami_option)
+}
+
+data "aws_ami_ids" "prebuilt_teradici_pcoip_ami_list" { # search for a prebuilt tagged ami with the same base image.  if there is a match, it can be used instead, allowing us to skip provisioning.
+  owners = ["self"]
+  filter {
+    name   = "tag:base_ami"
+    values = ["${local.base_ami}"]
+  }
+  filter {
+    name = "name"
+    values = ["teradici_pcoip_prebuilt_*"]
+  }
+}
+
+locals {
+  prebuilt_teradici_pcoip_ami_list = data.aws_ami_ids.prebuilt_teradici_pcoip_ami_list.ids
+  first_element = element( data.aws_ami_ids.prebuilt_teradici_pcoip_ami_list.*.ids, 0)
+  mod_list = concat( local.prebuilt_teradici_pcoip_ami_list , list("") )
+  aquired_ami      = "${element( local.mod_list , 0)}" # aquired ami will use the ami in the list if found, otherwise it will default to the original ami.
+  use_prebuilt_teradici_pcoip_ami = var.allow_prebuilt_teradici_pcoip_ami && length(local.mod_list) > 1 ? true : false
+  ami = local.use_prebuilt_teradici_pcoip_ami ? local.aquired_ami : local.base_ami
+}
+
+output "base_ami" {
+  value = local.base_ami
+}
+
+output "prebuilt_teradici_pcoip_ami_list" {
+  value = local.prebuilt_teradici_pcoip_ami_list
+}
+
+output "first_element" {
+  value = local.first_element
+}
+
+output "aquired_ami" {
+  value = local.aquired_ami
+}
+
+output "use_prebuilt_teradici_pcoip_ami" {
+  value = local.use_prebuilt_teradici_pcoip_ami
+}
+
+output "ami" {
+  value = local.ami
+}
+
 
 resource "aws_instance" "workstation_pcoip" {
   #instance type and ami are determined by the gateway type variable for if you want a graphical or non graphical instance.
   depends_on    = [null_resource.dependency_softnas_and_bastion]
   count         = var.aws_nodes_enabled && var.workstation_enabled ? 1 : 0
-  ami           = var.use_custom_ami ? var.custom_ami : var.ami_map[var.gateway_type]
+  ami           = var.use_custom_ami ? var.custom_ami : local.ami
   iam_instance_profile = var.instance_profile_name
   instance_type = var.instance_type_map[var.gateway_type]
 
