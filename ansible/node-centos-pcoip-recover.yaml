@@ -16,7 +16,7 @@
   tasks:
   - name: ensure dir exists nvidia
     file:
-      path: "/deployuser/Downloads/nvidia"
+      path: "/deployuser/downloads/nvidia"
       state: directory
       owner: "deployuser"
       group: "deployuser"
@@ -25,7 +25,7 @@
 
   - name: ensure dir exists grid folder
     file:
-      path: "/deployuser/Downloads/nvidia/{{ grid_folder }}"
+      path: "/deployuser/downloads/nvidia/{{ grid_folder }}"
       state: directory
       owner: "deployuser"
       group: "deployuser"
