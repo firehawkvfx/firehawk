@@ -16,8 +16,14 @@
   tasks:
   - name: ensure dir exists
     file:
-      path: /deployuser/Downloads/nvidia/{{ grid_folder }}/
+      path: "/deployuser/Downloads/nvidia/{{ grid_folder }}"
       state: directory
+
+  - name: check dir
+    shell: |
+      # set -x
+      cd /deployuser/downloads/nvidia/{{ grid_folder }}
+    become_user: deployuser
 
   - name: check if driver version exists
     stat: 
