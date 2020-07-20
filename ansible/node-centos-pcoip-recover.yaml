@@ -14,10 +14,23 @@
     driver_url: http://us.download.nvidia.com/XFree86/Linux-x86_64/{{ driver_file }}
   
   tasks:
-  - name: ensure dir exists
+  - name: ensure dir exists nvidia
+    file:
+      path: "/deployuser/Downloads/nvidia"
+      state: directory
+      owner: "deployuser"
+      group: "deployuser"
+      mode: '0755'
+    become: true
+
+  - name: ensure dir exists grid folder
     file:
       path: "/deployuser/Downloads/nvidia/{{ grid_folder }}"
       state: directory
+      owner: "deployuser"
+      group: "deployuser"
+      mode: '0755'
+    become: true
 
   - name: check dir
     shell: |
