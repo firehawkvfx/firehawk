@@ -351,8 +351,7 @@ locals { # select the found ami to use based on the map lookup
   base_ami = lookup(local.teradici_pcoip_consumption_map, var.teradici_pcoip_ami_option)
 }
 
-data "aws_ami" "prebuilt_teradici_pcoip_ami_list" { # search for a prebuilt tagged ami with the same base image.  if there is a match, it can be used instead, allowing us to skip provisioning.
-  count = 1
+data "aws_ami_ids" "prebuilt_teradici_pcoip_ami_list" { # search for a prebuilt tagged ami with the same base image.  if there is a match, it can be used instead, allowing us to skip provisioning.
   owners = ["self"]
   filter {
     name   = "tag:base_ami"
@@ -365,8 +364,8 @@ data "aws_ami" "prebuilt_teradici_pcoip_ami_list" { # search for a prebuilt tagg
 }
 
 locals {
-  prebuilt_teradici_pcoip_ami_list = data.aws_ami.prebuilt_teradici_pcoip_ami_list.*.id
-  first_element = element( data.aws_ami.prebuilt_teradici_pcoip_ami_list.*.id, 0)
+  prebuilt_teradici_pcoip_ami_list = data.aws_ami_ids.prebuilt_teradici_pcoip_ami_list.ids
+  first_element = element( data.aws_ami_ids.prebuilt_teradici_pcoip_ami_list.ids, 0)
   mod_list = concat( local.prebuilt_teradici_pcoip_ami_list , list("") )
   aquired_ami      = "${element( local.mod_list , 0)}" # aquired ami will use the ami in the list if found, otherwise it will default to the original ami.
   use_prebuilt_teradici_pcoip_ami = var.allow_prebuilt_teradici_pcoip_ami && length(local.mod_list) > 1 ? true : false
