@@ -49,7 +49,7 @@ variable "instance_type_map" {
   type = map(string)
 
   default = {
-    pcoip   = "g3.4xlarge"
+    pcoip   = "g4dn.xlarge"
     centos7 = "t2.micro"
   }
 }

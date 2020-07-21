@@ -6,13 +6,14 @@
   vars:
     # if true, teradici pcoip service will be restarted
     pcoip: true
+    # see aws docs about this https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/install-nvidia-driver.html#nvidia-GRID-driver
     # run this command to select a version and grid folder
     # aws s3 ls --recursive s3://ec2-linux-nvidia-drivers/
-    nvidia_driver: 430.30
-    grid_folder: grid-9.0
-    driver_file: NVIDIA-Linux-x86_64-{{ nvidia_driver }}-grid.run
-    driver_url: http://us.download.nvidia.com/XFree86/Linux-x86_64/{{ driver_file }}
-  
+    nvidia_driver: 450.51.05
+    grid_folder: g4/grid-11.0
+    #  g4/grid-11.0/NVIDIA-Linux-x86_64-450.51.05-grid-aws.run
+    driver_file: NVIDIA-Linux-x86_64-{{ nvidia_driver }}-grid-aws.run
+    
   tasks:
   - name: ensure dir exists nvidia
     file:
@@ -108,9 +109,9 @@
   become: true
   
   vars:
-    nvidia_driver: 410.92
-    driver_file: NVIDIA-Linux-x86_64-{{ nvidia_driver }}-grid.run
-    driver_url: http://us.download.nvidia.com/XFree86/Linux-x86_64/{{ driver_file }}
+    nvidia_driver: 450.51.05
+    #  g4/grid-11.0/NVIDIA-Linux-x86_64-450.51.05-grid-aws.run
+    driver_file: NVIDIA-Linux-x86_64-{{ nvidia_driver }}-grid-aws.run
     epel_url: https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
     epel_dest: /var/tmp/epel-release-latest-7.noarch.rpm
     grub_mod: "rd.driver.blacklist=nouveau nouveau.modeset=0"
