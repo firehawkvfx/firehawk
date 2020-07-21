@@ -55,7 +55,7 @@ variable "instance_type_map" {
 }
 
 variable "instance_type" {
-  default = "g3.4xlarge"
+  default = "g4dn.xlarge"
 }
 
 variable "user" {

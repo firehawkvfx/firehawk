@@ -398,6 +398,9 @@ output "ami" {
 
 
 resource "aws_instance" "workstation_pcoip" {
+  triggers = {
+    instance_type = var.instance_type_map[var.gateway_type]
+  }
   #instance type and ami are determined by the gateway type variable for if you want a graphical or non graphical instance.
   depends_on    = [null_resource.dependency_softnas_and_bastion]
   count         = var.aws_nodes_enabled && var.workstation_enabled ? 1 : 0
