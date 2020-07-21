@@ -529,18 +529,12 @@ EOT
 
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-pcoip-recover.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.firehawkvfx.com pcoip=true"; exit_test
 EOT
-  }
+  } # If possible to test ui connection, it should be done here.
 
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
     command = "aws ec2 reboot-instances --instance-ids ${aws_instance.workstation_pcoip[0].id}"
   }
-  #after dracut, we reboot the instance locally.  A reboot command will otherwise cause a terraform error.
-  #after dracut, we reboot the instance locally.  A reboot command will otherwise cause a terraform error.
-  # provisioner "local-exec" {
-  #   interpreter = ["/bin/bash", "-c"]
-  #   command = var.pcoip_sleep_after_creation ? "aws ec2 stop-instances --instance-ids ${aws_instance.workstation_pcoip[0].id}" : "aws ec2 reboot-instances --instance-ids ${aws_instance.workstation_pcoip[0].id}"
-  # }
 }
 
 resource "null_resource" "install_houdini" {
@@ -604,7 +598,7 @@ resource "null_resource" "install_deadline_worker" {
 
       if [[ "$TF_VAR_install_houdini" == true ]]; then
         ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/houdini/configure_hserver.yaml -v --extra-vars "variable_host=role_workstation_centos houdini_build=$TF_VAR_houdini_build"; exit_test
-        ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v; exit_test
+        # ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-ffmpeg.yaml -v; exit_test
 
         if [[ "$TF_VAR_install_deadline_worker" == true ]]; then
           ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/houdini/houdini_module.yaml -v --extra-vars "variable_host=role_workstation_centos houdini_build=$TF_VAR_houdini_build" --tags "install_deadline_db"; exit_test
