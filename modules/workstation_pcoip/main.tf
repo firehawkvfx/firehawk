@@ -529,7 +529,7 @@ EOT
 
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-pcoip-recover.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.firehawkvfx.com pcoip=true"; exit_test
 EOT
-  } # If possible to test ui connection, it should be done here.
+  } # If possible to test ui connection, it should be done here, and if not working, also before this provisioning step, since a yum update will break PCOIP.
 
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
