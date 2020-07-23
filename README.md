@@ -155,12 +155,12 @@ Vagrant up
 ```
 - Once the UI is up configure a new user name (user) and password, this will be used to bootstrap another user for automation later.
 ```
-sudo useradd user # Add a new user
-sudo passwd user # Set a password
-usermod -aG wheel user # Give user sudo priveledges
+sudo useradd user # Add a new user.  This should be the same as an initial user that must exist on your actual workstation.
+sudo passwd user # Set a password, it should be the same as for the user on your workstation.
+usermod -aG wheel user # Give user sudo privelidges
 sudo vi /etc/ssh/sshd_config # Find the line PasswordAuthentication no, and change it to yes
 sudo systemctl restart sshd.service # Restart the ssh service
-ip a # Find the mac adress for this system on your network (usually 192.168.? )
+ip a # Find the IP adress for this system on your network (usually 192.168.? )
 ```
 - Ensure you can ssh into the VM with this information from your network on another machine.
 ```
@@ -302,7 +302,7 @@ You will have two versions of your infrastructure, we make changes in dev branch
   ```
 - Select 'Configure Secrets'.
 - You always have the option to setup each variable step by step or use an external editor on ``firehawk-deploy-dev/secrets/secrets-general``, or any other config file.  You can decrypt the secrets file for editing with ``source ./update_vars.sh --dev --decrypt``. When done do not forget to encrypt the file again ``source ./update_vars.sh --dev``.
-- Later you may wish to copy and manually edit any --dev files for --prod when the time comes to run a prod environment, as setup.sh is only intended to initialise the dev environment.
+- Later you may wish to copy and manually edit any --dev resource files (eg resource-grey ) for --prod (resource-green/ble) when the time comes to run a prod environment.
 
 **WARNING: Never commit unencrypted secrets into a repository.** You can also [read here](https://help.github.com/en/articles/removing-sensitive-data-from-a-repository) to remove data from a repository.
 
@@ -466,7 +466,7 @@ Initially run small tests and get an understanding of costs that never use more 
 
 - Turn off nodes (or destroy the deployment if necesary) when not using the resources.  See [Saving costs with sleep](#saving-costs-with-sleep)
 
-- When you run commands to sleep, you should always verify through the AWS console that this actually happenned, and that all nodes, and NAT gateway are off.  Check again in a day to ensure nothing wasn't caught.
+- When you run commands to sleep, you should always verify through the AWS console that this actually happened, and that all nodes, and NAT gateway are off.  Check again in a day to ensure nothing wasn't caught.
 
 - The NAT gateway is a cost visible in your AWS VPC console, usually around $5/day when infrastructure is active.  It allows your private network (systems in the private subnet) outbound access to the internet.  Security groups can lock down any internet access to the minimum adresses required for licencing - things like softnas or other software, but that is not handled currently.  Licensing configuration with most software you would use makes it possible to not need any NAT gateway but that is beyond the scope of Firehawk at this point in time.
 
