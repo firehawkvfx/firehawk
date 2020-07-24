@@ -12,6 +12,8 @@ debug: 0
 
 envtier: "{{ lookup('env','TF_VAR_envtier') }}"
 
+resourcetier: "{{ lookup('env','TF_VAR_resourcetier') }}"
+
 show: "{{ lookup('env','TF_VAR_SHOW') }}"
 seq: "{{ lookup('env','TF_VAR_SEQ') }}"
 shot: "{{ lookup('env','TF_VAR_SHOT') }}"

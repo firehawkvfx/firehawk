@@ -6,19 +6,19 @@ mounts:
   int: "1"
   ebs_disk_type: gp2
   ebs_disk_size: 20
-  pool_name: "{{ envtier }}pool1"
+  pool_name: "{{ resourcetier }}pool1"
   volatile: "{{ softnas_volatile }}"
 - path: "/dev/sdc"
   int: "2"
   ebs_disk_type: gp2
   ebs_disk_size: 20
-  pool_name: "{{ envtier }}pool1"
+  pool_name: "{{ resourcetier }}pool1"
   volatile: "{{ softnas_volatile }}"
 
 exports:
-- path: "/{{ envtier }}pool1/{{ envtier }}volume1" # production volume - Softnas
-  pool_name: "{{ envtier }}pool1"
-  volume_name: "{{ envtier }}volume1"
+- path: "/{{ resourcetier }}pool1/{{ resourcetier }}volume1" # production volume - Softnas
+  pool_name: "{{ resourcetier }}pool1"
+  volume_name: "{{ resourcetier }}volume1"
   raid_level: 0
   state: present
   bind1: "{{ production_volume_path }}"

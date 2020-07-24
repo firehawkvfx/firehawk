@@ -13,9 +13,9 @@
     # when paths are found at these locations, they will be added to exports. otherwise no action will occur.
     # these defaults can be overidden by storing a config in /secrets/{{ envtier }}/ebs-volumes/softnas_ebs_volumes.yaml
     exports:
-      - path: "/{{ envtier }}pool1/{{ envtier }}volume1/"
-        pool_name: "{{ envtier }}pool1"
-        volume_name: "{{ envtier }}volume1"
+      - path: "/{{ resourcetier }}pool1/{{ resourcetier }}volume1/"
+        pool_name: "{{ resourcetier }}pool1"
+        volume_name: "{{ resourcetier }}volume1"
         state: present
         bind: /prod
 
