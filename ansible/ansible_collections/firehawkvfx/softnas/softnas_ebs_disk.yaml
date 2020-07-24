@@ -82,6 +82,7 @@
       filters:
         "tag:role": "softnas"
         "tag:mount": "{{ item.path }}"
+        "tag:resourcetier": "{{ resourcetier }}"
       region: "{{ ebs_disk_region }}"
     register: existing_volume
     with_items:
@@ -109,6 +110,7 @@
       filters:
         "tag:role": "softnas"
         "tag:mount": "{{ item.path }}"
+        "tag:resourcetier": "{{ resourcetier }}"
       region: "{{ ebs_disk_region }}"
     register: existing_volume
     with_items:
@@ -130,6 +132,7 @@
       filters:
         "tag:role": "softnas"
         "tag:mount": "{{ item.path }}"
+        "tag:resourcetier": "{{ resourcetier }}"
       region: "{{ ebs_disk_region }}"
     register: existing_volume
     with_items:
