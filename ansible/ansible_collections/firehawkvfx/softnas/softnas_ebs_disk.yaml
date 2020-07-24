@@ -81,8 +81,8 @@
     ec2_vol_facts:
       filters:
         "tag:role": "softnas"
-        "tag:mount": "{{ item.path }}"
         "tag:resourcetier": "{{ resourcetier }}"
+        "tag:mount": "{{ item.path }}"
       region: "{{ ebs_disk_region }}"
     register: existing_volume
     with_items:
@@ -97,20 +97,20 @@
       var: item
     with_items: "{{ existing_volume.results }}"      
 
-  - include_tasks: softnas_ebs_first_time_installation.yaml
+  - include_tasks: softnas_ebs_first_time_installation.yaml # create the volumes if not present with correct tags
     when: not item.volumes and mode == 'attach'
     with_items: "{{ existing_volume.results }}"
     
-  - include_tasks: softnas_ebs_existing_volume.yaml
+  - include_tasks: softnas_ebs_existing_volume.yaml # attach the volumes
     with_items: "{{ existing_volume.results }}"
     when: mode == 'attach'
 
-  - name: search for existing volume
+  - name: search for existing volume to update tags
     ec2_vol_facts:
       filters:
         "tag:role": "softnas"
-        "tag:mount": "{{ item.path }}"
         "tag:resourcetier": "{{ resourcetier }}"
+        "tag:mount": "{{ item.path }}"
       region: "{{ ebs_disk_region }}"
     register: existing_volume
     with_items:
@@ -127,12 +127,12 @@
     when: item.volumes
     with_items: "{{ existing_volume.results }}"  
 
-  - name: search for existing volume, and get tag data
+  - name: search for existing volume, and get current tag data
     ec2_vol_facts:
       filters:
         "tag:role": "softnas"
-        "tag:mount": "{{ item.path }}"
         "tag:resourcetier": "{{ resourcetier }}"
+        "tag:mount": "{{ item.path }}"
       region: "{{ ebs_disk_region }}"
     register: existing_volume
     with_items:
@@ -144,7 +144,7 @@
       var: item
     with_items: "{{ existing_volume.results }}"   
     
-  - include_tasks: softnas_ebs_delete_volume.yaml
+  - include_tasks: softnas_ebs_delete_volume.yaml # delete the volumes if specified.
     when: mode == 'destroy' and item.volumes
     with_items: "{{ existing_volume.results }}"
     
