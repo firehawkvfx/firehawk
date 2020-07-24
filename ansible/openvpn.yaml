@@ -61,13 +61,13 @@
 
     - name: check if user exists
       debug:
-        var: getent_passwd["{{ openvpn_user }}"]
+        var: getent_passwd[ openvpn_user ]
 
     - name: "Set login user password - {{ openvpn_user }}"
       user:
         name: "{{ openvpn_user }}"
         password: "{{ my_password }}"
-      when: getent_passwd["{{ openvpn_user }}"] is defined
+      when: getent_passwd[ openvpn_user ] is defined
       no_log: true
 
 - hosts: "{{ variable_host | default('openvpnip_private') }}"
