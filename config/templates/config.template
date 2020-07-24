@@ -35,8 +35,8 @@ TF_VAR_ssh_config_remote_subnet=insertvalue
 # TF_VAR_houdini_license_server_address:
 # The ip of the houdini licence server used when in a dev or prod environment.  This will normally be the same ip server used in dev and production to not waste licences. So in a dev environment, you will probably need to reference the same houdini licence server in production.  Ideally, the houdini license server should be a seperate vm to the vagrant host for stability reasons but this is currently untested.  It is recomended that the licence server ip is the vagrant production VM until otherwise tested.  A licence server should rarely need to be touched, but updates to infrastructure could disrupt it if located on the firehawkserver vm.
 # If you don't have a floating license server or intend to use one, set this to 'none'
+# default: TF_VAR_houdini_license_server_address=none
 # eg1: TF_VAR_houdini_license_server_address=192.168.29.125
-# eg2: TF_VAR_houdini_license_server_address=none
 TF_VAR_houdini_license_server_address=insertvalue
 
 # TF_VAR_localnas1_private_ip:
