@@ -126,7 +126,7 @@
     debug:
       var: item
     with_items: "{{ exports }}"
-    when: destroy
+    when: destroy | bool
     tags:
     - local_install
     - cloud_install
@@ -228,7 +228,7 @@
     debug:
       var: item.bind2
     with_items: "{{ exports }}"
-    when: destroy
+    when: destroy | bool
     tags:
     - local_install
     - cloud_install
@@ -250,7 +250,7 @@
 ### Force removal of bind2 mounts when destroy is true.  currently the ansible command to unmount will hang if the connetion has been broken.
   - debug:
       var: item
-    when: destroy
+    when: destroy | bool
     with_items: "{{ exports }}"
     tags:
     - local_install
@@ -261,14 +261,14 @@
     register: volume_stat_bind2
     failed_when: False
     changed_when: False
-    when: destroy
+    when: destroy | bool
     with_items: "{{ exports }}"
     tags:
     - local_install
 
   - debug:
       var: item
-    when: destroy
+    when: destroy | bool
     with_items: "{{ volume_stat_bind2.results }}"
     tags:
     - local_install
@@ -276,7 +276,7 @@
   - name: report mount points
     debug:
       msg: "This is a mountpoint that will be removed"
-    when: destroy and ( item.rc == 0 or item.rc == 124 )
+    when: destroy | bool and ( item.rc == 0 or item.rc == 124 )
     with_items: "{{ volume_stat_bind2.results }}"
     tags:
     - local_install
@@ -297,7 +297,7 @@
     mount:
       path: "{{ item.bind2 }}"
       state: unmounted
-    when: destroy
+    when: destroy | bool
     with_items: "{{ exports }}"
     tags:
     - local_install
@@ -307,7 +307,7 @@
     mount:
       path: "{{ item.bind2 }}"
       state: absent
-    when: destroy
+    when: destroy | bool
     with_items: "{{ exports }}"
     tags:
     - local_install
@@ -320,14 +320,14 @@
     register: volume_stat_path
     failed_when: False
     changed_when: False
-    when: destroy
+    when: destroy | bool
     with_items: "{{ exports }}"
     tags:
     - local_install
 
   - debug:
       var: item
-    when: destroy
+    when: destroy | bool
     with_items: "{{ volume_stat_path.results }}"
     tags:
     - local_install
@@ -356,7 +356,7 @@
     mount:
       path: "{{ item.path }}"
       state: unmounted
-    when: destroy
+    when: destroy | bool
     with_items: "{{ exports }}"
     tags:
     - local_install
@@ -366,7 +366,7 @@
     mount:
       path: "{{ item.path }}"
       state: absent
-    when: destroy
+    when: destroy | bool
     with_items: "{{ exports }}"
     tags:
     - local_install
