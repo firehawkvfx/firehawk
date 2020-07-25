@@ -96,7 +96,7 @@
 
   - name: set deadline remote client certificate permissions locally - deadline-worker-install.yaml
     file: 
-      path: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
+      path: "{{ deadline_certificates_location }}/{{ deadline_proxy_certificate }}"
       mode: u=rw,g=r,o=r
       owner: "{{ variable_user }}"
       group: syscontrol
@@ -110,7 +110,7 @@
   tasks:
   - name: Fetch deadline remote client certificate and store on ansible_control
     fetch: 
-      src: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
+      src: "{{ deadline_certificates_location }}/{{ deadline_proxy_certificate }}"
       dest: "/secrets/keys/"
       mode: '0600'
       owner: "{{ variable_user }}"
@@ -138,7 +138,7 @@
 
   - name: Copy deadline remote client certificate
     copy: 
-      src: "/secrets/keys/Deadline10RemoteClient.pfx"
+      src: "/secrets/keys/{{ deadline_proxy_certificate }}"
       dest: "/opt/Thinkbox/certs/"
       mode: '0600'
       owner: "{{ variable_user }}"

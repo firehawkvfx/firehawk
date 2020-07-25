@@ -36,7 +36,7 @@
 
   - name: set deadline remote client certificate permissions locally
     file: 
-      path: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
+      path: "{{ deadline_certificates_location }}/{{ deadline_proxy_certificate }}"
       mode: '0644'
       owner: deadlineuser
       group: syscontrol
@@ -45,7 +45,7 @@
 
   - name: Copy deadline remote client certificate
     copy: 
-      src: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
+      src: "{{ deadline_certificates_location }}/{{ deadline_proxy_certificate }}"
       dest: "/opt/Thinkbox/certs/"
       mode: '0600'
       owner: deadlineuser
@@ -54,7 +54,7 @@
 
   - name: Strange requirement here.  For some reason read permissions needed for everyone to be set above or the ansible copy doesn't work.  So we set it back to normal here.
     file: 
-      path: "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx"
+      path: "{{ deadline_certificates_location }}/{{ deadline_proxy_certificate }}"
       mode: '0640'
       owner: deadlineuser
       group: syscontrol

@@ -81,6 +81,8 @@ softnas1_private_ip1: "{{ lookup('env', 'TF_VAR_softnas1_private_ip1') }}"
 deadline_version: "{{ lookup('env', 'TF_VAR_deadline_version') }}"
 
 deadline_certificates_location: "/opt/Thinkbox/certs"
+deadline_proxy_certificate: "{{ resourcetier }}Deadline10RemoteClient.pfx"
+
 deadline_linux_installers_tar: "/deployuser/downloads/Deadline-{{ deadline_version }}-linux-installers.tar"
 deadline_prefix: "/opt/Thinkbox/Deadline10"
 
