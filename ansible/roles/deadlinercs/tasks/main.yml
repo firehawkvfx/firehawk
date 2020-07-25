@@ -83,6 +83,7 @@
     ls -ltriah {{ deadline_certificates_location }}
     if [[ -f "{{ deadline_certificates_location }}/Deadline10RemoteClient.pfx" ]]; then
       sudo mv -f {{ deadline_certificates_location }}/Deadline10RemoteClient.pfx {{ deadline_certificates_location }}/{{ deadline_proxy_certificate }} # Temp: ensure unique name for cert based on resource color
+      ls -ltriah {{ deadline_certificates_location }}
     fi
   register: deadline_rcs_install_output_shell
   args:
