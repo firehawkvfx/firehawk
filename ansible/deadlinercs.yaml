@@ -46,8 +46,8 @@
         location: /opt/Thinkbox/DeadlineDatabase10/certs/ca.crt
         target: "{{ secrets_archive }}/opt/Thinkbox/DeadlineDatabase10/certs/ca.crt"
       secret5:
-        location: /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx
-        target: "{{ secrets_archive }}/opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx"
+        location: "/opt/Thinkbox/DeadlineDatabase10/certs/{{ deadline_client_certificate }}"
+        target: "{{ secrets_archive }}/opt/Thinkbox/DeadlineDatabase10/certs/{{ deadline_client_certificate }}"
       secret6:
         location: /opt/Thinkbox/DeadlineDatabase10/certs/localhost.pem
         target: "{{ secrets_archive }}/opt/Thinkbox/DeadlineDatabase10/certs/localhost.pem"
