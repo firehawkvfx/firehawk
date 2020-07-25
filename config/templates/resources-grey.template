@@ -34,7 +34,7 @@ TF_VAR_openfirehawkserver_ram=insertvalue
 
 # TF_VAR_workstation_address:
 # The address of the workstation the artist will operate from onsite.  This is normally a VM for testing.
-# eg: TF_VAR_workstation_address=192.168.29.31
+# eg: TF_VAR_workstation_address=192.168.29.56
 TF_VAR_workstation_address=insertvalue
 
 # TF_VAR_workstation_ethernet_interface:
