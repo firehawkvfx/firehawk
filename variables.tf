@@ -138,9 +138,6 @@ variable "softnas_smtp_from" {
 variable "smtp_encryption" {
 }
 
-variable "deadline_proxy_certificate" {
-}
-
 variable "deadline_proxy_root_dir" {
 }
 
