@@ -1,6 +1,8 @@
-- name: attach existing ebs volume
+- name: Attach existing ebs volume
   ec2_vol:
     region: "{{ ebs_disk_region }}"
     instance: "{{ instance_id }}"
     name: "softnas_volume_{{ resourcetier }}_{{ item.item.int }}"
     device_name: "{{ item.item.path }}"
+    
+# If volume names change then you will be asked for size, but this should never happen.  The name of the volume should not be changed.
