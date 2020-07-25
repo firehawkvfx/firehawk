@@ -34,13 +34,13 @@
     ubl: true
     secrets:
       secret1:
-        location: /opt/Thinkbox/certs/ca.crt
+        location: "{{ deadline_certificates_location }}/ca.crt"
         target: "{{ secrets_archive }}/opt/Thinkbox/certs/ca.crt"
       secret2:
-        location: /opt/Thinkbox/certs/Deadline10RemoteClient.pfx
-        target: "{{ secrets_archive }}/opt/Thinkbox/certs/Deadline10RemoteClient.pfx"
+        location: "{{ deadline_certificates_location }}/{{ deadline_proxy_certificate }}"
+        target: "{{ secrets_archive }}/opt/Thinkbox/certs/{{ deadline_proxy_certificate }}"
       secret3:
-        location: /opt/Thinkbox/certs/localhost.pfx
+        location: "{{ deadline_certificates_location }}/localhost.pfx"
         target: "{{ secrets_archive }}/opt/Thinkbox/certs/localhost.pfx"
       secret4:
         location: /opt/Thinkbox/DeadlineDatabase10/certs/ca.crt

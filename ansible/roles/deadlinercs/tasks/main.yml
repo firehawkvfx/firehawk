@@ -79,7 +79,7 @@
 - name: install deadline rcs
   shell: |
     # set -x
-    {{ files_matched.files[0].path }} --mode unattended --launcherdaemon true --enable-components proxyconfig --servercert /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --debuglevel 2 --prefix /opt/Thinkbox/Deadline10 --connectiontype Repository --repositorydir /opt/Thinkbox/DeadlineRepository10/ --dbsslcertificate /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --dbsslpassword {{ deadline_proxy_certificate_password }} --licensemode UsageBased --daemonuser deadlineuser --connserveruser deadlineuser --httpport 8080 --tlsport 4433 --enabletls true --tlscertificates generate  --generatedcertdir /opt/Thinkbox/certs/ --clientcert_pass {{ deadline_proxy_certificate_password }} --slavestartup false --proxycertificatepassword 684HeftyPlanes --proxyrootdir {{ deadline_proxy_root_dir }} --proxycertificate /opt/Thinkbox/certs/Deadline10RemoteClient.pfx
+    {{ files_matched.files[0].path }} --mode unattended --launcherdaemon true --enable-components proxyconfig --servercert /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --debuglevel 2 --prefix /opt/Thinkbox/Deadline10 --connectiontype Repository --repositorydir /opt/Thinkbox/DeadlineRepository10/ --dbsslcertificate /opt/Thinkbox/DeadlineDatabase10/certs/Deadline10Client.pfx --dbsslpassword {{ deadline_proxy_certificate_password }} --licensemode UsageBased --daemonuser deadlineuser --connserveruser deadlineuser --httpport 8080 --tlsport 4433 --enabletls true --tlscertificates generate  --generatedcertdir /opt/Thinkbox/certs/ --clientcert_pass {{ deadline_proxy_certificate_password }} --slavestartup false --proxycertificatepassword 684HeftyPlanes --proxyrootdir {{ deadline_proxy_root_dir }} --proxycertificate {{ deadline_certificates_location }}/{{ deadline_proxy_certificate }}
   register: deadline_rcs_install_output_shell
   become: true
     
@@ -96,7 +96,7 @@
 
 - name: set permissions, deadline installer may be interfering.
   file:
-    path: /opt/Thinkbox/certs/Deadline10RemoteClient.pfx
+    path: "{{ deadline_certificates_location }}/{{ deadline_proxy_certificate }}"
     mode: u=r,g=r,o=r
     owner: "{{ user_deadlineuser_name }}"
   become: yes
@@ -112,8 +112,8 @@
     - "LaunchRemoteConnectionServerAtStartup=True"
     - "ProxyRoot={{ deadline_proxy_root_dir }}"
     - "ProxyUseSSL=True"
-    - "ProxySSLCertificate=/opt/Thinkbox/certs/Deadline10RemoteClient.pfx"
-    - "ProxyRoot0={{ deadline_proxy_root_dir }};/opt/Thinkbox/certs/Deadline10RemoteClient.pfx"
+    - "ProxySSLCertificate={{ deadline_certificates_location }}/{{ deadline_proxy_certificate }}"
+    - "ProxyRoot0={{ deadline_proxy_root_dir }};{{ deadline_certificates_location }}/{{ deadline_proxy_certificate }}"
 
 - name: Restart service for deadlinedb
   service:

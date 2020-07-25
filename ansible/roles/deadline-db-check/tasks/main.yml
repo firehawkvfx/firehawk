@@ -10,15 +10,15 @@
     var: certsdir.stdout
   become: true
 
-- name: check for /opt/Thinkbox/certs/Deadline10RemoteClient.pfx
-  stat: path=/opt/Thinkbox/certs/Deadline10RemoteClient.pfx
+- name: "Check for {{ deadline_certificates_location }}/{{ deadline_proxy_certificate }}"
+  stat: path="{{ deadline_certificates_location }}/{{ deadline_proxy_certificate }}"
   register: Deadline10RemoteClient
   become: true
 
 - name: Ensure db is still valid.  if this fails, db is corrupted or there is a permissions issue
   block:
     - name: Fail if missing
-      fail: msg="/opt/Thinkbox/certs/Deadline10RemoteClient.pfx is missing"
+      fail: msg="{{ deadline_certificates_location }}/{{ deadline_proxy_certificate }} is missing"
       when: Deadline10RemoteClient.stat.exists == False
       become: true
 
