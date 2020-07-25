@@ -82,6 +82,9 @@ deadline_version: "{{ lookup('env', 'TF_VAR_deadline_version') }}"
 
 deadline_certificates_location: "/opt/Thinkbox/certs"
 deadline_proxy_certificate: "{{ resourcetier }}Deadline10RemoteClient.pfx"
+deadline_proxy_certificate_password: "{{ lookup('env','TF_VAR_deadline_proxy_certificate_password') }}"
+
+deadline_proxy_root_dir: "{{ lookup('env','TF_VAR_deadline_proxy_root_dir') }}"
 
 deadline_linux_installers_tar: "/deployuser/downloads/Deadline-{{ deadline_version }}-linux-installers.tar"
 deadline_prefix: "/opt/Thinkbox/Deadline10"
@@ -133,10 +136,6 @@ control_hostname: "{{ lookup('env', 'TF_VAR_control_hostname') }}"
 
 usage_based_url: "{{ lookup('env', 'TF_VAR_usage_based_url') }}"
 usage_based_activation_code: "{{ lookup('env', 'TF_VAR_usage_based_activation_code') }}"
-
-deadline_proxy_root_dir: "{{ lookup('env','TF_VAR_deadline_proxy_root_dir') }}"
-deadline_proxy_certificate: "{{ lookup('env','TF_VAR_deadline_proxy_certificate') }}"
-deadline_proxy_certificate_password: "{{ lookup('env','TF_VAR_deadline_proxy_certificate_password') }}"
 
 houdini_license_server_address: "{{ lookup('env','TF_VAR_houdini_license_server_address') }}"
 
