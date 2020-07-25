@@ -2,5 +2,5 @@
   ec2_vol:
     region: "{{ ebs_disk_region }}"
     instance: "{{ instance_id }}"
-    name: "softnas_volume_{{ item.item.int }}"
+    name: "softnas_volume_{{ resourcetier }}_{{ item.item.int }}"
     device_name: "{{ item.item.path }}"
