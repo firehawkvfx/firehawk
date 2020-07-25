@@ -80,6 +80,7 @@
   shell: |
     # set -x
     {{ files_matched.files[0].path }} --mode unattended --launcherdaemon true --enable-components proxyconfig --servercert /opt/Thinkbox/DeadlineDatabase10/certs/{{ deadline_client_certificate }} --debuglevel 2 --prefix /opt/Thinkbox/Deadline10 --connectiontype Repository --repositorydir /opt/Thinkbox/DeadlineRepository10/ --dbsslcertificate /opt/Thinkbox/DeadlineDatabase10/certs/{{ deadline_client_certificate }} --dbsslpassword {{ deadline_proxy_certificate_password }} --licensemode UsageBased --daemonuser deadlineuser --connserveruser deadlineuser --httpport 8080 --tlsport 4433 --enabletls true --tlscertificates generate  --generatedcertdir /opt/Thinkbox/certs/ --clientcert_pass {{ deadline_proxy_certificate_password }} --slavestartup false --proxycertificatepassword 684HeftyPlanes --proxyrootdir {{ deadline_proxy_root_dir }} --proxycertificate {{ deadline_certificates_location }}/{{ deadline_proxy_certificate }}
+    ls {{ deadline_certificates_location }}
   register: deadline_rcs_install_output_shell
   become: true
     
