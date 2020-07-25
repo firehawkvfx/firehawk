@@ -126,6 +126,14 @@ Subscribe to these Images (AMIs), which will allow them to be used with automati
 
 If you are new to AWS, [experiment with launching these instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EC2_GetStarted.html), and destroying them and their security groups.
 
+## Limits
+In the AWS console for your dev and prod accounts, you will need to ensure the limits (Services/EC2/Limits) for any resources can be provided.  Request the following for each account:
+
+Elastic IP Addresses: 8
+
+If at any point a dpeloyment fails due to limits not being high enough you will need to request an increase for the relevent resource.
+
+
 ## Keybase / PGP Keys
 
 Install Keybase on your phone or PC - head to keybase.io to create an account.  Keybase is the easiest way to create a secure PGP key, allowing secrets to be encrypted using your email as a reference to a public key.  Only devices authorised with your private key that have been authorised can decrypt secrets, and you can easily initialise new devices from your phone.  It is possible to use your own key if you don't wish to use keybase.
