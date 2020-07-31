@@ -88,7 +88,7 @@ TF_VAR_enable_vpc=insertvalue
 # TF_VAR_softnas_storage:
 # Enable softnas storage.  Softnas is used for a centralised cloud based NFS share.
 # It's licenceing cost scales with usage, and can provide RAID redundancy.
-# default: TF_VAR_softnas_storage=true
+# default: TF_VAR_softnas_storage=false
 TF_VAR_softnas_storage=insertvalue
 
 # TF_VAR_aws_nodes_enabled:

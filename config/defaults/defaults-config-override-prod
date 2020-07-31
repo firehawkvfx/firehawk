@@ -88,8 +88,8 @@ TF_VAR_enable_vpc=true
 # TF_VAR_softnas_storage:
 # Enable softnas storage.  Softnas is used for a centralised cloud based NFS share.
 # It's licenceing cost scales with usage, and can provide RAID redundancy.
-# default: TF_VAR_softnas_storage=true
-TF_VAR_softnas_storage=true
+# default: TF_VAR_softnas_storage=false
+TF_VAR_softnas_storage=false
 
 # TF_VAR_aws_nodes_enabled:
 # Enable cloud nodes and site NFS mounts to be mounted on remote nodes.  If you have an existing local NFS share from your own NAS, it can be provided as a remote mount over vpn for cloud based nodes.  Operating with a local NFS share is requried for PDG/TOPS to function.

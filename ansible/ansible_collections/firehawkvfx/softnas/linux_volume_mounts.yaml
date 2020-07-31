@@ -1,7 +1,7 @@
 # This playbook will validate exports on softnas and mount those with the /etc/fstab file.
 
 # to update a workstation after altering any softnas mounts for the first time use the command -
-# ansible-playbook -i ansible/inventory ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.firehawkvfx.com.firehawkvfx.com.firehawkvfx.com.firehawkvfx.com.firehawkvfx.com.firehawkvfx.com.firehawkvfx.com.firehawkvfx.com"
+# ansible-playbook -i ansible/inventory ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.firehawkvfx.com"
 
 # to update a render node, just use -
 # ansible-playbook -i ansible/inventory ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml
