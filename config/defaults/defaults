@@ -26,12 +26,12 @@
 
 # defaults_config_overide_version:
 # If the version of this file changes, the file will be replaced in any deployment.
-defaults_version="0.0.19"
+defaults_version="0.0.20"
 
 # TF_VAR_deadline_version:
 # The version of the deadline installer.
-# default: TF_VAR_deadline_version=10.1.1.3
-TF_VAR_deadline_version=10.1.1.3
+# default: TF_VAR_deadline_version=10.1.9.2
+TF_VAR_deadline_version=10.1.9.2
 
 # TF_VAR_selected_ansible_version:
 # the version to use for ansible.  Can be 'latest', or a specific version.  due to a bug with pip and ansible we can have pip permissions and authentication issues when not using latest.
