@@ -64,7 +64,7 @@ TF_VAR_inventory=../secrets/$TF_VAR_envtier/inventory
 
 # TF_VAR_terraform_version:
 # The version of terraform that will be used
-TF_VAR_terraform_version=0.12.26
+TF_VAR_terraform_version=0.12.29
 
 # TF_VAR_aws_provider_version:
 # The version for the aws provider plugin terraform will use
