@@ -788,16 +788,18 @@ source_vars () {
             if [ -f $vault_key ]; then
                 # if [[ $verbose ]]; then
                 printf "\n$vault_key exists. vagrant up will automatically provision.\n\n"
+                chmod 600 $vault_key || failed=true
                 # fi
             else
                 printf "\nCreating new vault key since not present: $vault_key"
                 warning="\n${RED}WARNING: DO NOT COMMIT THESE KEYS TO VERSION CONTROL: $vault_key ${NC}\n"
                 printf $warning
                 openssl rand -base64 64 > $vault_key || failed=true
+                chmod 600 $vault_key || failed=true
             fi
         fi
         if [[ $failed = true ]]; then    
-            echo "${RED}WARNING: Failed to create key.${NC}"
+            echo "${RED}WARNING: Failed to create key and set valid 600 permissions.${NC}"
             return 88
         fi
 
