@@ -20,7 +20,7 @@ resource "aws_fsx_lustre_file_system" "fsx_storage" {
   import_path      = "s3://prod.${var.bucket_extension}"
   storage_capacity = 1200
   subnet_ids       = var.subnet_ids
-  deployment_type  = SCRATCH_2
+  # deployment_type  = "SCRATCH_2" # aws provider v3.0 only
 
   tags = var.common_tags
 }
@@ -38,5 +38,8 @@ output "network_interface_ids" {
 }
 
 output "aws_network_interface" {
-  value = aws_network_interface.fsx_network_interface.private_ip
+  value = data.aws_network_interface.fsx_network_interface.private_ip
 }
+
+# to mount https://docs.aws.amazon.com/fsx/latest/LustreGuide/mount-fs-auto-mount-onreboot.html
+# file_system_dns_name@tcp:/mountname /fsx lustre defaults,noatime,flock,_netdev 0 0
