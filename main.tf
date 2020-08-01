@@ -267,6 +267,7 @@ module "fsx" {
   bucket_extension = var.bucket_extension
   subnet_ids = [ module.vpc.private_subnets[0] ]
 
+  vpn_private_ip                 = module.vpc.vpn_private_ip
   vpc_id                         = module.vpc.vpc_id
   vpn_cidr                       = var.vpn_cidr
   private_subnets_cidr_blocks    = module.vpc.private_subnets_cidr_blocks
@@ -305,12 +306,13 @@ module "softnas" {
 
   aws_region                     = var.aws_region
   softnas_instance_type          = var.softnas_instance_type
-  vpn_private_ip                 = module.vpc.vpn_private_ip
+  
   softnas_ssh_user               = var.softnas_ssh_user
   aws_key_name                   = var.aws_key_name
   private_key                    = file(var.aws_private_key_path)
   public_domain                  = var.public_domain
 
+  vpn_private_ip                 = module.vpc.vpn_private_ip
   vpc_id                         = module.vpc.vpc_id
   vpn_cidr                       = var.vpn_cidr
   private_subnets                = module.vpc.private_subnets
