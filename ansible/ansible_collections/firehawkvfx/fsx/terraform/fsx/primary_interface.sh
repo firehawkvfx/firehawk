@@ -11,7 +11,7 @@ eval "$(jq -r '@sh "id=\(.id)"')"
 
 # Placeholder for whatever data-fetching logic your script implements
 
-primary_interface="$(aws fsx describe-file-systems | jq '.FileSystems[] | select(.FileSystemId == "$id") | .NetworkInterfaceIds[0]')"
+primary_interface=$(aws fsx describe-file-systems | jq ".FileSystems[] | select(.FileSystemId == \"$id\") | .NetworkInterfaceIds[0]")
 
 # FOOBAZ="$FOO $BAZ"
 

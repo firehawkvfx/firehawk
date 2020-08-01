@@ -39,7 +39,8 @@ resource "aws_fsx_lustre_file_system" "fsx_storage" {
 # }
 
 output "id" {
-  value = aws_fsx_lustre_file_system.fsx_storage.*.id
+  # value = aws_fsx_lustre_file_system.fsx_storage.*.id
+  value = element( concat( aws_fsx_lustre_file_system.fsx_storage.*.id, list("") ), 0)
 }
 
 output "network_interface_ids" {
@@ -52,7 +53,7 @@ data "external" "primary_interface" { # Terraform provider API does list the pri
   query = {
     # arbitrary map from strings to strings, passed
     # to the external program as the data query.
-    id = element( concat( aws_fsx_lustre_file_system.fsx_storage.*.id, list("") ), 0)
+    id = "${element( concat( aws_fsx_lustre_file_system.fsx_storage.*.id, list("") ), 0)}"
   }
 }
 
