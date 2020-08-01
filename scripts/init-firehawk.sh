@@ -277,14 +277,10 @@ else
     # terraform init; exit_test # Required to initialise any new modules
   fi
 
-  if [[ "$tf_init" == true ]]; then
-    # echo "...Currently running instances: scripts/aws-running-instances.sh" # wont work if vm isn't initialised
-    # $TF_VAR_firehawk_path/scripts/aws-running-instances.sh
-    # echo ""
-    
-    echo "...Terraform Init"
-    terraform init; exit_test # Required to initialise any new modules
-  fi
+  # if [[ "$tf_init" == true ]]; then
+  echo "...Terraform Init" # required if aws provider version changes.
+  terraform init; exit_test # Required to initialise any new modules
+  # fi
 
   echo "TF_VAR_taint_single: ${TF_VAR_taint_single[*]}"
   cat $TF_VAR_secrets_path/config-override-$TF_VAR_envtier
