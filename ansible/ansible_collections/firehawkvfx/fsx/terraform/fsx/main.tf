@@ -46,19 +46,18 @@ output "network_interface_ids" {
   value = aws_fsx_lustre_file_system.fsx_storage.*.network_interface_ids
 }
 
-data "external" "example" {
+data "external" "primary_interface" { # Terraform provider API does list the primary interface in the correct order to obtain it.  so we use a custom data source to aquire the primary interface
   program = ["/bin/bash", "${path.module}/primary_interface.sh"]
 
   query = {
     # arbitrary map from strings to strings, passed
     # to the external program as the data query.
-    foo = "test1"
-    baz = "test2"
+    id = element( concat( aws_fsx_lustre_file_system.fsx_storage.*.id, list("") ), 0)
   }
 }
 
 output "primary_interface" {
-  value = data.external.example.result
+  value = data.external.primary_interface.result
 }
 
 # This command will return the primary network interface
