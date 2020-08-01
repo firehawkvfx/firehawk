@@ -52,8 +52,8 @@ data "external" "example" {
   query = {
     # arbitrary map from strings to strings, passed
     # to the external program as the data query.
-    foo = 'test1'
-    baz = 'test2'
+    foo = "test1"
+    baz = "test2"
   }
 }
 
