@@ -75,7 +75,8 @@ data "aws_network_interface" "fsx_primary_interface" {
 # aws fsx describe-file-systems | jq '.FileSystems[] | select(.FileSystemId == "fs-003bfeff0d38c8ce6") | .NetworkInterfaceIds[0]'
 
 output "fsx_private_ip" {
-  value = element( concat( data.aws_network_interface.fsx_network_interface.*.private_ip, list("") ), 0 )
+  value = element( concat( data.aws_network_interface.fsx_primary_interface.*.private_ip, list("") ), 0 )
+  # value = data.aws_network_interface.fsx_primary_interface.*.private_ip
 }
 
 # to mount https://docs.aws.amazon.com/fsx/latest/LustreGuide/mount-fs-auto-mount-onreboot.html

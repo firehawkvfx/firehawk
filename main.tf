@@ -278,7 +278,7 @@ output "fsx_interface_ids" {
   value = module.fsx.network_interface_ids
 }
 
-output "primary_interface" {
+output "fsx_primary_interface" {
   value = module.fsx.primary_interface
 }
 
