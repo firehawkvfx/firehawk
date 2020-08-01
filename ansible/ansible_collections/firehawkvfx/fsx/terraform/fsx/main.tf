@@ -20,9 +20,13 @@ resource "aws_fsx_lustre_file_system" "fsx_storage" {
   import_path      = "s3://prod.${var.bucket_extension}"
   storage_capacity = 1200
   subnet_ids       = var.subnet_ids
-  deployment_type  = "SCRATCH_2"
+  deployment_type  = SCRATCH_2
 
   tags = var.common_tags
+}
+
+data "aws_network_interface" "fsx_network_interface" {
+  id = aws_fsx_lustre_file_system.fsx_storage.network_interface_ids
 }
 
 output "id" {
@@ -31,4 +35,8 @@ output "id" {
 
 output "network_interface_ids" {
   value = aws_fsx_lustre_file_system.fsx_storage.network_interface_ids
+}
+
+output "aws_network_interface" {
+  value = aws_network_interface.fsx_network_interface.private_ip
 }
