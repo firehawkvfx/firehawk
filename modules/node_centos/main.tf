@@ -230,13 +230,7 @@ resource "aws_security_group_rule" "icmp" {
 }
 
 
-resource "null_resource" "dependency_softnas" {
-  triggers = {
-    softnas_private_ip1             = join(",", var.softnas_private_ip1)
-    provision_softnas_volumes       = join(",", var.provision_softnas_volumes)
-    attach_local_mounts_after_start = join(",", var.attach_local_mounts_after_start)
-  }
-}
+
 
 variable "dependency" {
 }
@@ -531,8 +525,19 @@ EOT
   }
 }
 
+resource "null_resource" "dependency_softnas" {
+  
+  count = var.softnas_storage ? 1 : 0
+
+  triggers = {
+    softnas_private_ip1             = join(",", var.softnas_private_ip1)
+    provision_softnas_volumes       = join(",", var.provision_softnas_volumes)
+    attach_local_mounts_after_start = join(",", var.attach_local_mounts_after_start)
+  }
+}
+
 resource "null_resource" "mounts_and_houdini_test" {
-  count = var.aws_nodes_enabled ? 1 : 0
+  count = var.aws_nodes_enabled && var.softnas_storage ? 1 : 0
 
   depends_on = [ null_resource.dependency_softnas, null_resource.install_deadline_worker ]
 
