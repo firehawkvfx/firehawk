@@ -313,11 +313,11 @@ if [[ "$vagrant_up" == true ]]; then
     if [ $total_running_machines -ge 2 ]; then
         echo "...Both machines are already up."
     else
-        echo "...Will start machines"
+        echo "...Will start machines.  TF_VAR_vm_initialised: $TF_VAR_vm_initialised init_vm_config: $init_vm_config"
         sleep 3
-        if [[ "$init_vm_config" == true ]]; then
+        if [[ "$init_vm_config" == true ]] || [[ "$TF_VAR_vm_initialised" == false ]]; then
             echo "...Starting vagrant, and provisioning."
-            # vagrant up --provision | ts '[%H:%M:%S]'
+            # vagrant up --provision | ts '[%H:%M:%S]' # 
             echo "pwd $(pwd)"
             $TF_VAR_firehawk_path/vagrant_provision.sh | ts '[%H:%M:%S]'
         else
