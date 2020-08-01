@@ -266,6 +266,8 @@ module "fsx" {
 
   bucket_extension = var.bucket_extension
   subnet_ids = [ module.vpc.private_subnets[0] ]
+  
+  common_tags = local.common_tags
 }
 
 # A single softnas instance that resides in a private subnet for high performance nfs storage

@@ -19,4 +19,5 @@ resource "aws_fsx_lustre_file_system" "fsx_storage" {
   import_path      = "s3://prod.${var.bucket_extension}"
   storage_capacity = 1200
   subnet_ids       = var.subnet_ids
+  tags = var.common_tags
 }

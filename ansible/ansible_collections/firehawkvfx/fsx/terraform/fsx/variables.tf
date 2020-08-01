@@ -6,3 +6,5 @@ variable "fsx_storage" {
 variable "subnet_ids" {
     default = []
 }
+
+variable "common_tags" {}

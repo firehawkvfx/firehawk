@@ -56,6 +56,13 @@ Firehawk automates creation of some user accounts, instances, images, VPN, NAS s
 We will define the permissions for this new user (in each of the accounts).  Later we will generate secret keys that will be stored in an encrypted file to create resources with Terraform and Ansible that rely on these permissions.
 
 - Goto Identity and Access Management (IAM)
+- Create a new group ``StorageAdmin``
+- Attach these policies to that group
+```
+AmazonS3FullAccess
+AmazonFSxConsoleFullAccess
+AmazonFSxFullAccess
+```
 - Create a new group ``DevAdmin``
 - Attach these policies to that group
 ```
@@ -109,7 +116,7 @@ AmazonRoute53FullAccess
 ```
 You can read more about the above policy here https://docs.aws.amazon.com/ARG/latest/userguide/gettingstarted-prereqs.html
 - Attach this policy to the ``DevAdmin`` group.
-- Make the new user a member of the ``DevAdmin`` group to inherit all of these policies.
+- Make the new user a member of both the ``StorageAdmin`` and ``DevAdmin`` groups to inherit all of these policies.
 - Ensure you have done this in both AWS accounts.
 - When you create AWS access and secret keys, set a policy to age those keys out after 30 days.
 
