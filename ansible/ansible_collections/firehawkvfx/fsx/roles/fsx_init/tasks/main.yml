@@ -1,0 +1,14 @@
+---
+# tasks file for roles/fsx_init
+
+- name: set user for bucket creation.  usually deployuser
+  set_fact:
+    push_user: "{{ variable_connect_as_user }}"
+
+- name: set bucket name for persistant store
+  set_fact:
+    bucket: "{{ production_bucket }}"
+
+- name: ensure bucket exists
+  import_role:
+    name: firehawkvfx.core.s3_bucket

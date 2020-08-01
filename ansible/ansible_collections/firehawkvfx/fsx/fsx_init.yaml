@@ -1,0 +1,23 @@
+- hosts: "{{ variable_host | default('ansible_control') }}"
+  remote_user: "{{ variable_connect_as_user | default('deployuser') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
+  become: true
+
+  vars:
+    variable_connect_as_user: deployuser
+  
+  pre_tasks:
+  - name: test connection as deployuser
+    debug:
+      msg: "connection established"
+
+  - name: Collect some facts only for ansible_distribution
+    setup:
+      gather_subset:
+        - '!all'
+        - 'min'
+    tags:
+    - always
+
+  roles:
+  - fsx_init

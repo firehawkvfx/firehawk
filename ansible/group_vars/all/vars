@@ -30,8 +30,9 @@ secrets_path: "{{ lookup('env','TF_VAR_secrets_path') }}"
 public_domain: "{{ lookup('env','TF_VAR_public_domain') }}"
 
 bucket_extension: "{{ lookup('env','TF_VAR_bucket_extension') }}"
-installers_bucket: "software.{{ lookup('env','TF_VAR_bucket_extension_prod') }}" # The production bucket is always used to store installation files to avoid duplicate downloads/uploads
+installers_bucket: "software.{{ lookup('env','TF_VAR_bucket_extension_prod') }}" # The installers s3 bucket is always used to store installation files to avoid multiple downloads/uploads from 3rd parties
 repositories_bucket: "repositories.{{ lookup('env','TF_VAR_bucket_extension') }}"
+production_bucket: "prod.{{ lookup('env','TF_VAR_bucket_extension') }}"
 
 private_subnet1: "{{ lookup('env', 'TF_VAR_private_subnet1') }}"
 private_subnet1_dev: "{{ lookup('env', 'TF_VAR_private_subnet1_dev') }}"

@@ -15,6 +15,20 @@ variable "cert_arn" {
 variable "aws_region" {
 }
 
+### FSx ###
+
+variable "bucket_extension" {}
+
+variable "fsx_storage" {
+    default = false
+}
+
+variable "subnet_ids" {
+    default = []
+}
+
+### Softnas
+
 variable "softnas_skip_update" {
 }
 

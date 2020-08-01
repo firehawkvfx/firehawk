@@ -255,9 +255,15 @@ variable "allow_prebuilt_softnas_ami" { # after an initial deployment a base AMI
   default = true
 }
 
+module "fsx" {
+  fsx_storage = var.fsx_storage
+  source                         = "./ansible/ansible_collections/firehawkvfx/fsx/terraform/fsx"
+
+  bucket_extension = var.bucket_extension
+  subnet_ids = module.vpc.private_subnets
+}
 
 # A single softnas instance that resides in a private subnet for high performance nfs storage
-
 module "softnas" {  
   softnas_storage                = var.softnas_storage
   source                         = "./ansible/ansible_collections/firehawkvfx/softnas/terraform/softnas"
