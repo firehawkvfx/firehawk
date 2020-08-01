@@ -66,10 +66,6 @@ TF_VAR_inventory=insertvalue
 # The version of terraform that will be used
 TF_VAR_terraform_version=insertvalue
 
-# TF_VAR_aws_provider_version:
-# The version for the aws provider plugin terraform will use
-TF_VAR_aws_provider_version=insertvalue
-
 # TF_VAR_node_centos_instance_type:
 # The AWS instance type for the node used to provision the spot fleet image from.
 # Note this is only used for provisioning the AMI.  The actual instance types used for rendering are controlled by the spot fleet template, and can vary.

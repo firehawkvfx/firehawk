@@ -2,7 +2,7 @@ provider "aws" {
   #  if you haven't installed and configured the aws cli, you will need to provide your aws access key and secret key.
   region = var.aws_region
   # in a dev environment these version locks below can be disabled.  in production, they should be locked based on the suggested versions from terraform init.
-  version = "~> ${var.aws_provider_version}"
+  version = "~> 3.00"
 }
 
 data "aws_caller_identity" "current" {}
@@ -42,8 +42,6 @@ provider "random" {
 variable "enable_nat_gateway" {
   default = true
 }
-
-variable "aws_provider_version" {}
 
 variable "private_subnet1" {
 }
@@ -260,7 +258,7 @@ module "fsx" {
   source                         = "./ansible/ansible_collections/firehawkvfx/fsx/terraform/fsx"
 
   bucket_extension = var.bucket_extension
-  subnet_ids = module.vpc.private_subnets
+  subnet_ids = module.vpc.private_subnets[0]
 }
 
 # A single softnas instance that resides in a private subnet for high performance nfs storage
