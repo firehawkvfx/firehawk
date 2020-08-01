@@ -298,6 +298,7 @@ output "fsx_private_ip" {
 # A single softnas instance that resides in a private subnet for high performance nfs storage
 module "softnas" {  
   softnas_storage                = var.softnas_storage
+  
   source                         = "./ansible/ansible_collections/firehawkvfx/softnas/terraform/softnas"
 
   init_aws_local_workstation = module.firehawk_init.init_aws_local_workstation
@@ -462,6 +463,8 @@ module "node" {
   remote_subnet_cidr          = var.remote_subnet_cidr
 
   # dependencies
+  softnas_storage                = var.softnas_storage
+  
   vpn_private_ip                 = module.vpc.vpn_private_ip
   dependency = module.firehawk_init.local-provisioning-complete
   softnas_private_ip1             = module.softnas.softnas1_private_ip

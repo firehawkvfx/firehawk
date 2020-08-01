@@ -127,3 +127,4 @@ variable "softnas_mount_path" {
   default = "/mnt/softnas/nasvol2"
 }
 
+variable "softnas_storage" {}
