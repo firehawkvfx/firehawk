@@ -278,6 +278,10 @@ output "fsx_interface_ids" {
   value = module.fsx.network_interface_ids
 }
 
+output "primary_interface" {
+  value = module.fsx.primary_interface
+}
+
 # A single softnas instance that resides in a private subnet for high performance nfs storage
 module "softnas" {  
   softnas_storage                = var.softnas_storage

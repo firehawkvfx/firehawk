@@ -46,6 +46,24 @@ output "network_interface_ids" {
   value = aws_fsx_lustre_file_system.fsx_storage.*.network_interface_ids
 }
 
+data "external" "example" {
+  program = ["/bin/bash", "${path.module}/primary_interface.sh"]
+
+  query = {
+    # arbitrary map from strings to strings, passed
+    # to the external program as the data query.
+    foo = 'test1'
+    baz = 'test2'
+  }
+}
+
+output "primary_interface" {
+  value = data.external.example.result
+}
+
+# This command will return the primary network interface
+# aws fsx describe-file-systems | jq '.FileSystems[] | select(.FileSystemId == "fs-003bfeff0d38c8ce6") | .NetworkInterfaceIds[0]'
+
 # output "aws_network_interface" {
 #   value = data.aws_network_interface.fsx_network_interface.*.private_ip
 # }
