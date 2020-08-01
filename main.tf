@@ -270,6 +270,14 @@ module "fsx" {
   common_tags = local.common_tags
 }
 
+output "fsx_id" {
+  value = module.fsx.id
+}
+
+output "fsx_interface_ids" {
+  value = module.fsx.network_interface_ids
+}
+
 # A single softnas instance that resides in a private subnet for high performance nfs storage
 module "softnas" {  
   softnas_storage                = var.softnas_storage
