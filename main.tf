@@ -282,6 +282,10 @@ output "primary_interface" {
   value = module.fsx.primary_interface
 }
 
+output "fsx_private_ip" {
+  value = module.fsx.fsx_private_ip
+}
+
 # A single softnas instance that resides in a private subnet for high performance nfs storage
 module "softnas" {  
   softnas_storage                = var.softnas_storage

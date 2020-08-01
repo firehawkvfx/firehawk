@@ -74,9 +74,9 @@ data "aws_network_interface" "fsx_primary_interface" {
 # This command will return the primary network interface
 # aws fsx describe-file-systems | jq '.FileSystems[] | select(.FileSystemId == "fs-003bfeff0d38c8ce6") | .NetworkInterfaceIds[0]'
 
-# output "aws_network_interface" {
-#   value = data.aws_network_interface.fsx_network_interface.*.private_ip
-# }
+output "fsx_private_ip" {
+  value = element( concat( data.aws_network_interface.fsx_network_interface.*.private_ip, list("") ), 0 )
+}
 
 # to mount https://docs.aws.amazon.com/fsx/latest/LustreGuide/mount-fs-auto-mount-onreboot.html
 # file_system_dns_name@tcp:/mountname /fsx lustre defaults,noatime,flock,_netdev 0 0
