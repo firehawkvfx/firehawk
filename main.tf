@@ -1,14 +1,14 @@
-terraform {
-  required_providers {
-    aws = "~> 3.0"
-  }
-}
+# terraform {
+#   required_providers {
+#     aws = "~> 3.0"
+#   }
+# }
 
 provider "aws" {
   #  if you haven't installed and configured the aws cli, you will need to provide your aws access key and secret key.
   region = var.aws_region
   # in a dev environment these version locks below can be disabled.  in production, they should be locked based on the suggested versions from terraform init.
-  version = "~> 3.0"
+  # version = "~> 3.0"
 }
 
 
@@ -39,11 +39,11 @@ locals {
 
 
 provider "null" {
-  version = "~> 2.0"
+  # version = "~> 2.0"
 }
 
 provider "random" {
-  version = "~> 2.0"
+  # version = "~> 2.0"
 }
 
 variable "enable_nat_gateway" {
