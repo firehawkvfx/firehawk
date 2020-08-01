@@ -266,6 +266,14 @@ module "fsx" {
 
   bucket_extension = var.bucket_extension
   subnet_ids = [ module.vpc.private_subnets[0] ]
+
+  vpc_id                         = module.vpc.vpc_id
+  vpn_cidr                       = var.vpn_cidr
+  private_subnets_cidr_blocks    = module.vpc.private_subnets_cidr_blocks
+  vpc_cidr                       = var.vpc_cidr
+  public_subnets_cidr_blocks     = module.vpc.public_subnets_cidr_blocks
+  remote_subnet_cidr             = var.remote_subnet_cidr
+  remote_ip_cidr                 = var.remote_ip_cidr
   
   common_tags = local.common_tags
 }
@@ -301,15 +309,17 @@ module "softnas" {
   softnas_ssh_user               = var.softnas_ssh_user
   aws_key_name                   = var.aws_key_name
   private_key                    = file(var.aws_private_key_path)
+  public_domain                  = var.public_domain
+
   vpc_id                         = module.vpc.vpc_id
   vpn_cidr                       = var.vpn_cidr
-  public_domain                  = var.public_domain
   private_subnets                = module.vpc.private_subnets
   private_subnets_cidr_blocks    = module.vpc.private_subnets_cidr_blocks
-  vpc_cidr = var.vpc_cidr
+  vpc_cidr                       = var.vpc_cidr
   public_subnets_cidr_blocks     = module.vpc.public_subnets_cidr_blocks
   remote_subnet_cidr             = var.remote_subnet_cidr
   remote_ip_cidr                 = var.remote_ip_cidr
+
   bastion_private_ip             = module.vpc.vpn_private_ip
   bastion_ip                     = module.bastion.public_ip
   softnas1_private_ip1           = var.softnas1_private_ip1
