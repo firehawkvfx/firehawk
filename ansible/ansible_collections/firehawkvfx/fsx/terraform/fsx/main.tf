@@ -34,7 +34,8 @@ resource "aws_fsx_lustre_file_system" "fsx_storage" {
 data "aws_network_interface" "fsx_network_interface" {
   count = var.fsx_storage ? 1 : 0
 
-  id = aws_fsx_lustre_file_system.fsx_storage[count.index].network_interface_ids
+  # id = aws_fsx_lustre_file_system.fsx_storage.*.network_interface_ids
+  id = element( concat( aws_fsx_lustre_file_system.fsx_storage.*.network_interface_ids, list("") ), 0)
 }
 
 output "id" {
