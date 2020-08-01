@@ -277,10 +277,10 @@ else
     # terraform init; exit_test # Required to initialise any new modules
   fi
 
-  # if [[ "$tf_init" == true ]]; then
-  echo "...Terraform Init" # required if aws provider version changes.
-  terraform init; exit_test # Required to initialise any new modules
-  # fi
+  if [[ "$tf_init" == true ]]; then
+    echo "...Terraform Init" # required if aws provider version changes.
+    terraform init; exit_test # Required to initialise any new modules
+  fi
 
   echo "TF_VAR_taint_single: ${TF_VAR_taint_single[*]}"
   cat $TF_VAR_secrets_path/config-override-$TF_VAR_envtier
@@ -310,6 +310,10 @@ else
       echo "Fast start.  Skip refresh"
     else
       echo "TF_VAR_fast: $TF_VAR_fast"
+
+      echo "...Terraform Init" # required if aws provider version changes.
+      terraform init; exit_test # Required to initialise any new modules
+      
       echo "...Terraform refresh"
       terraform refresh -lock=false; exit_test
     fi
