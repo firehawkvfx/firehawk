@@ -1,3 +1,9 @@
+# terraform {
+#   required_providers {
+#     aws = "~> 3.0"
+#   }
+# }
+
 resource "null_resource" "init_fsx" {
   count = var.fsx_storage ? 1 : 0
   
@@ -26,19 +32,21 @@ resource "aws_fsx_lustre_file_system" "fsx_storage" {
 }
 
 data "aws_network_interface" "fsx_network_interface" {
-  id = aws_fsx_lustre_file_system.fsx_storage.network_interface_ids
+  count = var.fsx_storage ? 1 : 0
+
+  id = aws_fsx_lustre_file_system.fsx_storage[count.index].network_interface_ids
 }
 
 output "id" {
-  value = aws_fsx_lustre_file_system.fsx_storage.id
+  value = aws_fsx_lustre_file_system.fsx_storage.*.id
 }
 
 output "network_interface_ids" {
-  value = aws_fsx_lustre_file_system.fsx_storage.network_interface_ids
+  value = aws_fsx_lustre_file_system.fsx_storage.*.network_interface_ids
 }
 
 output "aws_network_interface" {
-  value = data.aws_network_interface.fsx_network_interface.private_ip
+  value = data.aws_network_interface.fsx_network_interface.*.private_ip
 }
 
 # to mount https://docs.aws.amazon.com/fsx/latest/LustreGuide/mount-fs-auto-mount-onreboot.html
