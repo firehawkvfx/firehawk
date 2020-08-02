@@ -64,15 +64,15 @@ prod_mount_path: "/prod"
 #the ip of your onsite storage to be mounted
 localnas1_private_ip: "{{ lookup('env','TF_VAR_localnas1_private_ip') }}"
 #the mount path of your onsite storage eg "/prod"
-production_volume_path: "{{ lookup('env','TF_VAR_production_volume_path') }}"
-remote_production_volume_path: "{{ lookup('env','TF_VAR_remote_production_volume_path') }}"
+prod_path_generic: "{{ lookup('env','TF_VAR_prod_path_generic') }}"
+prod_path_remote: "{{ lookup('env','TF_VAR_prod_path_remote') }}"
 
 #the absolute path to access the onsite nas mount by location eg "/cairns_prod"
 localnas1_volume_name: "{{ lookup('env', 'TF_VAR_localnas1_volume_name') }}"
 localnas1_path_abs: "{{ lookup('env', 'TF_VAR_localnas1_path_abs') }}"
 localnas1_export_path: "{{ lookup('env', 'TF_VAR_localnas1_export_path') }}"
 #the absolute path to access the cloud nfs mount by location eg "/prod_sydney_aws"
-softnas1_path_abs: "{{ lookup('env', 'TF_VAR_softnas1_path_abs') }}"
+prod_path_abs_cloud: "{{ lookup('env', 'TF_VAR_prod_path_abs_cloud') }}"
 
 #the path to the firehawk houdinitools repository eg "/prod/assets/openfirehawk-houdini-tools"
 firehawk_houdini_tools: "{{ lookup('env', 'TF_VAR_firehawk_houdini_tools') }}"

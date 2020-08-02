@@ -25,7 +25,8 @@ echo "yum install VirtualBox-6.1-6.1.8_137981_el7-1.x86_64 versionlock; yum vers
 # }
 # trap 'err_report $0 $LINENO' ERR
 
-set -e # exit script immediately upon error
+if [[ -z "$LIVE_TERMINAL" ]]; then export LIVE_TERMINAL=true; fi
+if [ "$LIVE_TERMINAL" != "true" ]; then echo "Will exit on error..."; set -e; fi
 
 echo_if_not_silent() {
     if [[ -z "$silent" ]] || [[ "$silent" == false ]]; then echo $1; fi
@@ -432,8 +433,6 @@ if [[ "$target_version" != "$current_version" ]]; then
     cp "$TF_VAR_firehawk_path/config/defaults/defaults" "$defaults_file"
 fi
 
-
-
 ### The dynamic vars here are set by the environment during dpeloyment, and commit messages for gitlab ci.
 # x='1' 
 
@@ -786,10 +785,7 @@ source_vars () {
         # always check if a vault key exists, setup requires it.  if it does, then install can continue automatically.
         if [[ ! -z "$vault_key" ]]; then
             if [ -f $vault_key ]; then
-                # if [[ $verbose ]]; then
                 printf "\n$vault_key exists. vagrant up will automatically provision.\n\n"
-                chmod 600 $vault_key || failed=true
-                # fi
             else
                 printf "\nCreating new vault key since not present: $vault_key"
                 warning="\n${RED}WARNING: DO NOT COMMIT THESE KEYS TO VERSION CONTROL: $vault_key ${NC}\n"
@@ -797,9 +793,19 @@ source_vars () {
                 openssl rand -base64 64 > $vault_key || failed=true
                 chmod 600 $vault_key || failed=true
             fi
+            if [ -O "$vault_key" ]; then
+                octal_permissions=$(stat -c '%a' "$vault_key")
+                if [[ "$octal_permissions" != "600" ]]; then
+                    printf "\n${RED}ERROR: $vault_key not using valid permissions ($octal_permissions). Set to 600.${NC}\n"
+                    return 88
+                fi
+            else
+                printf "\n${RED}ERROR: The current user it not the owner of $vault_key.  Change the owner permssions and try again.${NC}\n"
+                return 88
+            fi
         fi
         if [[ $failed = true ]]; then    
-            echo "${RED}WARNING: Failed to create key and set valid 600 permissions.${NC}"
+            printf "\n${RED}WARNING: Failed to create key and set valid 600 permissions.${NC}\n"
             return 88
         fi
 
@@ -879,4 +885,4 @@ do
 done
 
 if [[ "$SHOWCOMMANDS" == true ]]; then set -x; fi # After finishing the script, we enable set -x to show input again.
-set +e # don't exist subsequent shells on error.
+set +e # don't exit subsequent shells on error.

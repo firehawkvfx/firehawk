@@ -69,21 +69,21 @@ TF_VAR_localnas1_volume_name=insertvalue
 # eg1: TF_VAR_localnas1_path_abs=none
 TF_VAR_localnas1_path_abs=insertvalue
 
-# TF_VAR_production_volume_path:
+# TF_VAR_prod_path_generic:
 # The name of the production volume path for onsite and cloud.  /prod is a mount depending on location, so for cloud based nodes, this would usually refer to the softnas production path, and onsite it would be your NFS share.  So far only /prod has been tested.
-# default: TF_VAR_production_volume_path=/prod
-TF_VAR_production_volume_path=insertvalue
+# default: TF_VAR_prod_path_generic=/prod
+TF_VAR_prod_path_generic=insertvalue
 
-# TF_VAR_remote_production_volume_path:
+# TF_VAR_prod_path_remote:
 # The name of the production volume path for the remote volume.  onsite, this would reference the cloud nas.  For cloud nodes, this would reference the onsite NAS.
-# default: TF_VAR_remote_production_volume_path=/remote_prod
-TF_VAR_remote_production_volume_path=insertvalue
+# default: TF_VAR_prod_path_remote=/remote_prod
+TF_VAR_prod_path_remote=insertvalue
 
-# TF_VAR_softnas1_path_abs:
+# TF_VAR_prod_path_abs_cloud:
 # This is the absolute path for the cloud NFS mount at all locations. For example, /aws_city_prod should be the same mount path for all locations over VPN.
-# default: TF_VAR_softnas1_path_abs=/cloud_prod
-# eg: TF_VAR_softnas1_path_abs=/aws_city_prod
-TF_VAR_softnas1_path_abs=insertvalue
+# default: TF_VAR_prod_path_abs_cloud=/cloud_prod
+# eg: TF_VAR_prod_path_abs_cloud=/aws_city_prod
+TF_VAR_prod_path_abs_cloud=insertvalue
 
 # TF_VAR_firehawk_sync_source:
 # The location based path to the firehawk houdini tools repo.

@@ -4,6 +4,15 @@
 #   }
 # }
 
+# TODO
+# install lustre on nodes, packages, fstab.
+# test if export back to identical path works?  why is it a different path by default?  danger? https://docs.aws.amazon.com/fsx/latest/LustreGuide/create-fs-linked-data-repo.html
+# change sync pull mode via cli.
+# enable sync push events, check completion before destroy.
+# tighten security groups.
+# set a reasonable size for distribution over cluster.  100MB?
+
+
 # fsx for lustre security group rules https://docs.aws.amazon.com/fsx/latest/LustreGuide/limit-access-security-groups.html
 
 locals {

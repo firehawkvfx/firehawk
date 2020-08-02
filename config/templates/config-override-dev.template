@@ -85,9 +85,15 @@ TF_VAR_destroy_after_deploy=insertvalue
 # default: TF_VAR_enable_vpc=true
 TF_VAR_enable_vpc=insertvalue
 
+# TF_VAR_fsx_storage:
+# Enable AWS FSx storage.  It cannot be combined with softnas, one must be selected presently.  FSx for Lustre is cluster based storage.
+# It's licensing cost scales with usage, volume size and IO, and can provide high availaility when using persistant volumes.  By default we use it as a scratch volume to cache S3 storage.
+# default: TF_VAR_fsx_storage=false
+TF_VAR_fsx_storage=insertvalue
+
 # TF_VAR_softnas_storage:
 # Enable softnas storage.  Softnas is used for a centralised cloud based NFS share.
-# It's licenceing cost scales with usage, and can provide RAID redundancy.
+# It's licensing cost scales with usage and IO, and can provide RAID redundancy.
 # default: TF_VAR_softnas_storage=false
 TF_VAR_softnas_storage=insertvalue
 

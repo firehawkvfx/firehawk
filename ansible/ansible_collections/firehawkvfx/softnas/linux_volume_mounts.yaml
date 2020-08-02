@@ -39,7 +39,6 @@
   become_user: root
   become: true
 
-
   vars:
     destroy: false
     import_pool: true

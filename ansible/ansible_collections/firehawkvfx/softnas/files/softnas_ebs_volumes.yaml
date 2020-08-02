@@ -21,8 +21,8 @@ exports:
   volume_name: "{{ resourcetier }}volume1"
   raid_level: 0
   state: present
-  bind1: "{{ production_volume_path }}"
-  bind2: "{{ softnas1_path_abs }}"
+  bind1: "{{ prod_path_generic }}"
+  bind2: "{{ prod_path_abs_cloud }}"
   site_bind1:
 
 # this volume is another medium performance production disk. if used, you must also define mounts/disks above
@@ -41,6 +41,6 @@ site_mounts:
   volume_name: "{{ localnas1_volume_name }}" # the name of the volume eg: prod_volume_name
   mount_path: "{{ localnas1_path_abs }}" # eg: /mycity_prod
   state: present
-  bind1: "{{ remote_production_volume_path }}" # eg: /remote_prod
+  bind1: "{{ prod_path_remote }}" # eg: /remote_prod
   bind2:
-  site_bind1: "{{ production_volume_path }}" # onsite, the nas export uses a bind to this path (default: /prod)
+  site_bind1: "{{ prod_path_generic }}" # onsite, the nas export uses a bind to this path (default: /prod)
