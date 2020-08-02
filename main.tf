@@ -267,6 +267,9 @@ module "fsx" {
   bucket_extension = var.bucket_extension
   subnet_ids = [ module.vpc.private_subnets[0] ]
 
+  fsx_storage_capacity = var.fsx_storage_capacity
+  fsx_import_path = var.fsx_import_path
+
   vpn_private_ip                 = module.vpc.vpn_private_ip
   vpc_id                         = module.vpc.vpc_id
   vpn_cidr                       = var.vpn_cidr
