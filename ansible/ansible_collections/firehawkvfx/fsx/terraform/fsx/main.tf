@@ -192,8 +192,8 @@ resource "aws_fsx_lustre_file_system" "fsx_storage" {
   count = var.fsx_storage ? 1 : 0
   depends_on = [ null_resource.init_fsx ]
   
-  import_path      = "s3://prod.${var.bucket_extension}"
-  storage_capacity = 1200
+  import_path      = var.fsx_import_path
+  storage_capacity = var.fsx_storage_capacity
   subnet_ids       = var.subnet_ids
   security_group_ids = concat( aws_security_group.fsx_vpc.*.id, aws_security_group.fsx_vpn.*.id, list("") )
   # deployment_type  = "SCRATCH_2" # aws provider v3.0 only

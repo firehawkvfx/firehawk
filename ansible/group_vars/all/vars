@@ -30,6 +30,10 @@ secrets_path: "{{ lookup('env','TF_VAR_secrets_path') }}"
 public_domain: "{{ lookup('env','TF_VAR_public_domain') }}"
 
 bucket_extension: "{{ lookup('env','TF_VAR_bucket_extension') }}"
+fsx_bucket_prefix: "{{ lookup('env','TF_VAR_fsx_bucket_prefix') }}"
+fsx_import_path: "{{ lookup('env','TF_VAR_fsx_import_path') }}"
+fsx_storage_capacity: "{{ lookup('env','TF_VAR_fsx_storage_capacity') }}"
+
 installers_bucket: "software.{{ lookup('env','TF_VAR_bucket_extension_prod') }}" # The installers s3 bucket is always used to store installation files to avoid multiple downloads/uploads from 3rd parties
 repositories_bucket: "repositories.{{ lookup('env','TF_VAR_bucket_extension') }}"
 production_bucket: "prod.{{ lookup('env','TF_VAR_bucket_extension') }}"

@@ -3,10 +3,10 @@
 exports:
 - path: "/fsx" # production volume export path
   volume_name: "fsx"
-  import_path: "s3://prod.{{ bucket_extension }}"
-  export_path: "s3://prod.{{ bucket_extension }}"
+  import_path: "{{ fsx_import_path }}"
+  export_path: "{{ fsx_import_path }}"
   state: present
-  storage_capacity: 1200 # https://docs.aws.amazon.com/fsx/latest/APIReference/API_CreateFileSystemLustreConfiguration.html
+  storage_capacity: "{{ fsx_storage_capacity }}" # https://docs.aws.amazon.com/fsx/latest/APIReference/API_CreateFileSystemLustreConfiguration.html
   deployment_type: 'SCRATCH_2' # SCRATCH_1, SCRATCH_2, PERSISTENT1
   per_unit_storage_throughput: 200 # when using PERSISTENT_1 deployment type. https://docs.aws.amazon.com/fsx/latest/APIReference/API_CreateFileSystemLustreConfiguration.html
   auto_import_policy: 'NEW_CHANGED' # https://docs.aws.amazon.com/fsx/latest/APIReference/API_CreateFileSystemLustreConfiguration.html
