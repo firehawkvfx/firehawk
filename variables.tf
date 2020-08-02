@@ -2,18 +2,14 @@ variable "sleep" {
   default = false
 }
 
-variable "enable_vpc" {
-}
+variable "enable_vpc" {}
 
-variable "vpc_cidr" {
-}
+variable "vpc_cidr" {}
 
 #you can get an ssl certificate arn by verifying your domain with aws certificate manager.
-variable "cert_arn" {
-}
+variable "cert_arn" {}
 
-variable "aws_region" {
-}
+variable "aws_region" {}
 
 ### FSx ###
 
@@ -25,8 +21,6 @@ variable "fsx_storage" {
 variable "fsx_storage_capacity" {}
 
 variable "fsx_bucket_prefix" {}
-
-variable "fsx_import_path" {}
 
 variable "subnet_ids" {
     default = []
