@@ -24,7 +24,7 @@ variable "fsx_storage" {
 
 variable "fsx_storage_capacity" {}
 
-variable "bucket_prefix" {}
+variable "fsx_bucket_prefix" {}
 
 variable "fsx_import_path" {}
 

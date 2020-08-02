@@ -2,7 +2,7 @@ variable "fsx_storage" {}
 
 variable "fsx_storage_capacity" {}
 
-variable "bucket_prefix" {}
+variable "fsx_bucket_prefix" {}
 variable "bucket_extension" {}
 
 variable "subnet_ids" {

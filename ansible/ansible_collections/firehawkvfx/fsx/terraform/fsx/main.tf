@@ -189,7 +189,7 @@ EOT
 }
 
 locals {
-  fsx_import_path = "s3://${var.bucket_prefix}.${var.bucket_extension}"
+  fsx_import_path = "s3://${var.fsx_bucket_prefix}.${var.bucket_extension}"
 }
 
 resource "aws_fsx_lustre_file_system" "fsx_storage" {
