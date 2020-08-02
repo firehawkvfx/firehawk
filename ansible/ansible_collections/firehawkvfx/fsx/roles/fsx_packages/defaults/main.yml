@@ -1,2 +1,4 @@
 ---
 # defaults file for fsx_packages
+
+skip_packages: false

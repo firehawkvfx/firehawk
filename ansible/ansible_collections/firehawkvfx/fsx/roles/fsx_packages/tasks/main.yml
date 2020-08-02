@@ -9,7 +9,8 @@
   tags:
   - always
 
-- get_url:
+- name: get key - centos
+  get_url:
     url: https://fsx-lustre-client-repo-public-keys.s3.amazonaws.com/fsx-rpm-public-key.asc
     dest: /tmp/fsx-rpm-public-key.asc
   when: not skip_packages and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
@@ -31,3 +32,9 @@
     - lustre-client
     state: present
   when: not skip_packages and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
+
+- name: get key - ubuntu
+  get_url:
+    url: https://fsx-lustre-client-repo-public-keys.s3.amazonaws.com/fsx-ubuntu-public-key.asc 
+    dest: /tmp/fsx-rpm-public-key.asc
+  when: not skip_packages and ( ansible_distribution == 'Ubuntu' )
