@@ -5,6 +5,7 @@
 # Don't store command history.
 unset HISTFILE
 
+export LIVE_TERMINAL=false
 
 set -eE -o functrace # This block allows you to echo a line number for a failure.
 
@@ -154,21 +155,21 @@ parse_opts "$@"
 
 echo "set TF_VAR_softnas_volatile=$set_softnas_volatile in config override file=$config_override"
 sed -i "s/^TF_VAR_softnas_volatile=.*$/TF_VAR_softnas_volatile=${set_softnas_volatile}/" $config_override # ...Set if softnas volumes will be destroyed
-source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override --force --silent
+source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override --force --silent; exit_test
 
 set_pipe() {
   id=$1
   ### Initialisation for new resources
   sed -i "s/^TF_VAR_active_pipeline=.*$/TF_VAR_active_pipeline=${id}/" $config_override # ...Enable the vpc.
-  source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override --force --silent
+  source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override --force --silent; exit_test
   echo "Get TF_VAR_active_pipeline: $TF_VAR_active_pipeline"
   sed -i "s/^TF_VAR_aws_key_name=.*$/TF_VAR_aws_key_name=my_key_pair_pipeid${TF_VAR_active_pipeline}_${TF_VAR_envtier}/" $config_override
-  source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override --force --silent
+  source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override --force --silent; exit_test
   echo "Get TF_VAR_aws_key_name: $TF_VAR_aws_key_name"
   key_path="/secrets/keys/${TF_VAR_aws_key_name}.pem"
   echo "Get key_path: $key_path"
   sed -i "s~^TF_VAR_aws_private_key_path=.*$~TF_VAR_aws_private_key_path=${key_path}~" $config_override
-  source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override --force --silent
+  source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override --force --silent; exit_test
   echo "Get TF_VAR_aws_private_key_path: $TF_VAR_aws_private_key_path"
 }
 
@@ -223,7 +224,7 @@ else
     $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-020-init.sh $ARGS; exit_test
     set +x
     sed -i "s/^TF_VAR_vm_initialised=.*$/TF_VAR_vm_initialised=true/" $config_override # ...set the vm as having been initalised in config vars.
-    source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override --force --silent
+    source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override --force --silent; exit_test
   else
     echo "...Bypassing Init VM's"
   fi
