@@ -35,6 +35,7 @@ exit_test () {
         if [[ "$LIVE_TERMINAL" != "true" ]]; then
             printf "\n${RED}Exiting... ${NC}\n" >&2; exit 1
         else
+            echo "LIVE_TERMINAL: $LIVE_TERMINAL"
             printf "\n${RED}Exiting Live Terminal... ${NC}\n" >&2; return 88
         fi
     fi
