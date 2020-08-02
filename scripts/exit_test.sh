@@ -15,7 +15,7 @@ exit_test () {
     interrupt=false
     failed=false
     if [ "$exit_code" -eq 0 ]; then
-        if [[ -z "$silent" ]] || [[ "$silent" == false ]]; then printf "\n${GREEN}Command Succeeded${NC} : "; fi
+        if [[ -z "$silent" ]] || [[ "$silent" == false ]]; then printf "\n${GREEN}Command Succeeded ($exit_code)${NC} : "; fi
         duration_block=$SECONDS
         h=$(printf "%02d" $(($duration_block / 60)))
         m=$(printf "%02d" $(($duration_block % 60)))
@@ -24,6 +24,7 @@ exit_test () {
     else
         failed=true
         if [[ "$LIVE_TERMINAL" == "true" ]]; then
+            # direct output to stderr with >&2 https://unix.stackexchange.com/questions/443823/what-is-the-difference-between-2-and-2
             if [[ -z "$silent" ]] || [[ "$silent" == false ]]; then printf "\n${RED}Failed command in live terminal. ${NC}\n" >&2; fi
         else
             printf "\n${RED}Failed command ...exiting${NC}\n" >&2
@@ -31,7 +32,7 @@ exit_test () {
     fi
     if [[ "$failed" == true ]]; then
         if [[ "$SHOWCOMMANDS" == true ]]; then set -x; fi
-        if [[ "$LIVE_TERMINAL" != "true" ]]; then exit 1; fi
+        if [[ "$LIVE_TERMINAL" != "true" ]]; then printf "\n${RED}Exiting... ${NC}\n" >&2; exit 1; fi
     fi
     if [[ -z "$allow_interrupt" ]] || [[ "$allow_interrupt" == true ]]; then
         if [[ -d "/deployuser" ]] && [[ -f "/deployuser/interrupt" ]]; then
@@ -40,7 +41,7 @@ exit_test () {
         fi
         if [[ "$interrupt" == true ]]; then
             if [[ "$SHOWCOMMANDS" == true ]]; then set -x; fi
-            if [[ "$LIVE_TERMINAL" != "true" ]]; then exit 1; fi
+            if [[ "$LIVE_TERMINAL" != "true" ]]; then printf "\n${RED}Exiting... ${NC}\n" >&2; exit 1; fi
         fi
     fi
     if [[ "$SHOWCOMMANDS" == true ]]; then set -x; fi # After finishing the script, we enable set -x to show input again.
