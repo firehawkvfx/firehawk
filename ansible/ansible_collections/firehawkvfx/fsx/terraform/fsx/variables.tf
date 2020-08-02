@@ -1,7 +1,4 @@
-variable "bucket_extension" {}
-
-variable "fsx_storage" {
-}
+variable "fsx_storage" {}
 
 variable "fsx_storage_capacity" {}
 
