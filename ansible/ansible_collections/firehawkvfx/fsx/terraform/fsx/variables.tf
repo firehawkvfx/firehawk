@@ -5,7 +5,8 @@ variable "fsx_storage" {
 
 variable "fsx_storage_capacity" {}
 
-variable "fsx_import_path" {}
+variable "bucket_prefix" {}
+variable "bucket_extension" {}
 
 variable "subnet_ids" {
     default = []

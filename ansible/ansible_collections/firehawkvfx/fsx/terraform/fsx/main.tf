@@ -188,11 +188,15 @@ EOT
   }
 }
 
+locals {
+  fsx_import_path = "s3://${var.bucket_prefix}.${var.bucket_extension}"
+}
+
 resource "aws_fsx_lustre_file_system" "fsx_storage" {
   count = var.fsx_storage ? 1 : 0
   depends_on = [ null_resource.init_fsx ]
   
-  import_path      = var.fsx_import_path
+  import_path      = local.fsx_import_path
   storage_capacity = var.fsx_storage_capacity
   subnet_ids       = var.subnet_ids
   security_group_ids = concat( aws_security_group.fsx_vpc.*.id, aws_security_group.fsx_vpn.*.id, list("") )

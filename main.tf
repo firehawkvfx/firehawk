@@ -264,11 +264,11 @@ module "fsx" {
   fsx_storage = var.fsx_storage
   source                         = "./ansible/ansible_collections/firehawkvfx/fsx/terraform/fsx"
 
+  bucket_prefix = var.bucket_prefix
   bucket_extension = var.bucket_extension
   subnet_ids = [ module.vpc.private_subnets[0] ]
 
   fsx_storage_capacity = var.fsx_storage_capacity
-  fsx_import_path = var.fsx_import_path
 
   vpn_private_ip                 = module.vpc.vpn_private_ip
   vpc_id                         = module.vpc.vpc_id

@@ -24,6 +24,8 @@ variable "fsx_storage" {
 
 variable "fsx_storage_capacity" {}
 
+variable "bucket_prefix" {}
+
 variable "fsx_import_path" {}
 
 variable "subnet_ids" {

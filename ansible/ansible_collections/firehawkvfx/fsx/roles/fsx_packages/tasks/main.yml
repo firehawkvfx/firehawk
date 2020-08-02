@@ -2,16 +2,16 @@
 # tasks file for fsx_packages
 
 - get_url:
-    dest: https://fsx-lustre-client-repo-public-keys.s3.amazonaws.com/fsx-rpm-public-key.asc
-    url: /tmp/fsx-rpm-public-key.asc
+    url: https://fsx-lustre-client-repo-public-keys.s3.amazonaws.com/fsx-rpm-public-key.asc
+    dest: /tmp/fsx-rpm-public-key.asc
 
 - rpm_key:
     state: present
     key: /tmp/fsx-rpm-public-key.asc
 
 - get_url:
-    dest: https://fsx-lustre-client-repo.s3.amazonaws.com/el/7/fsx-lustre-client.repo
-    url: /etc/yum.repos.d/aws-fsx.repo
+    url: https://fsx-lustre-client-repo.s3.amazonaws.com/el/7/fsx-lustre-client.repo
+    dest: /etc/yum.repos.d/aws-fsx.repo
 
 - name: Lustre packages
   package:
