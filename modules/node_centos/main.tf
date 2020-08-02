@@ -442,7 +442,6 @@ resource "null_resource" "provision_node_centos" {
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_node_centos variable_user=centos" --skip-tags "user_access"; exit_test
 
       # install cli for deadlineuser
-
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_node_centos variable_user=centos variable_become_user=deadlineuser" --skip-tags "user_access"; exit_test
 EOT
 
@@ -556,7 +555,7 @@ resource "null_resource" "mounts_and_houdini_test" {
 
       aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id} # ensure instance is started
 
-      ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml -v --skip-tags "local_install local_install_onaws_nodes_enabled" --tags "cloud_install"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/softnas_volume_mounts.yaml -v --skip-tags "local_install local_install_onaws_nodes_enabled" --tags "cloud_install"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/houdini/houdini_openfirehawk_houdini_tools_sync.yaml -v --extra-vars "variable_user=deadlineuser"; exit_test # sync houdini tools after all mounts are available
 
       echo "TF_VAR_install_houdini: $TF_VAR_install_houdini"

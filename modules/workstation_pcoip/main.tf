@@ -525,7 +525,7 @@ EOT
       # install cli for deadlineuser
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_workstation_centos variable_user=centos variable_become_user=deadlineuser" --skip-tags "user_access"; exit_test
 
-      ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/linux_volume_mounts.yaml --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.firehawkvfx.com pcoip=true" --skip-tags "local_install local_install_onsite_mounts"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/softnas_volume_mounts.yaml --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.firehawkvfx.com pcoip=true" --skip-tags "local_install local_install_onsite_mounts"; exit_test
 
       ansible-playbook -i "$TF_VAR_inventory" ansible/node-centos-pcoip-recover.yaml -v --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.firehawkvfx.com pcoip=true"; exit_test
 EOT

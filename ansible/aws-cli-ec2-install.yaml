@@ -21,6 +21,7 @@
   roles:
     - role: pip
     - role: aws-cli-ec2-install
+    - role: firehawkvfx.fsx.fsx_packages
 
 # example:
 # ansible-playbook -i ansible/inventory ansible/aws-cli-ec2.yaml -v --extra-vars "variable_user=centos variable_host=role_softnas"

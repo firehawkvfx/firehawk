@@ -26,7 +26,8 @@ echo "yum install VirtualBox-6.1-6.1.8_137981_el7-1.x86_64 versionlock; yum vers
 # trap 'err_report $0 $LINENO' ERR
 
 if [[ -z "$LIVE_TERMINAL" ]]; then export LIVE_TERMINAL=true; fi
-if [ "$LIVE_TERMINAL" != "true" ]; then echo "Will exit on error..."; set -e; fi # we still need a method for this to use return 88 instead of exit which currently terminates the shell.
+set -e
+# if [ "$LIVE_TERMINAL" != "true" ]; then echo "Will exit on error..."; set -e; fi # we still need a method for this to use return 88 instead of exit which currently terminates the shell.
 
 echo_if_not_silent() {
     if [[ -z "$silent" ]] || [[ "$silent" == false ]]; then echo $1; fi
@@ -798,6 +799,8 @@ source_vars () {
                 if [[ "$octal_permissions" != "600" ]]; then
                     printf "\n${RED}ERROR: $vault_key not using valid permissions ($octal_permissions). Set to 600.${NC}\n"
                     return 88
+                    # (return 88) && true # for consideration https://stackoverflow.com/questions/6112540/return-an-exit-code-without-closing-shell/53454039?noredirect=1#comment111779181_53454039
+                    # (exit 33) && true
                 fi
             else
                 printf "\n${RED}ERROR: The current user it not the owner of $vault_key.  Change the owner permssions and try again.${NC}\n"

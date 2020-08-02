@@ -32,7 +32,11 @@ exit_test () {
     fi
     if [[ "$failed" == true ]]; then
         if [[ "$SHOWCOMMANDS" == true ]]; then set -x; fi
-        if [[ "$LIVE_TERMINAL" != "true" ]]; then printf "\n${RED}Exiting... ${NC}\n" >&2; exit 1; fi
+        if [[ "$LIVE_TERMINAL" != "true" ]]; then
+            printf "\n${RED}Exiting... ${NC}\n" >&2; exit 1
+        else
+            printf "\n${RED}Exiting Live Terminal... ${NC}\n" >&2; (exit 33) && true
+        fi
     fi
     if [[ -z "$allow_interrupt" ]] || [[ "$allow_interrupt" == true ]]; then
         if [[ -d "/deployuser" ]] && [[ -f "/deployuser/interrupt" ]]; then

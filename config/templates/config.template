@@ -85,6 +85,11 @@ TF_VAR_prod_path_remote=insertvalue
 # eg: TF_VAR_prod_path_abs_cloud=/aws_city_prod
 TF_VAR_prod_path_abs_cloud=insertvalue
 
+# TF_VAR_fsx_storage_capacity:
+# the capacity of the FSx for Lustre storage in GB
+# default: TF_VAR_fsx_storage_capacity="1200"
+TF_VAR_fsx_storage_capacity=insertvalue
+
 # TF_VAR_firehawk_sync_source:
 # The location based path to the firehawk houdini tools repo.
 # This location is pushed to S3, and when a softnas production volume is created it will be pulled to the cloud NFS share.
