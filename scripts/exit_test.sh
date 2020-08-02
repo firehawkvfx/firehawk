@@ -25,9 +25,9 @@ exit_test () {
         failed=true
         if [[ "$LIVE_TERMINAL" == "true" ]]; then
             # direct output to stderr with >&2 https://unix.stackexchange.com/questions/443823/what-is-the-difference-between-2-and-2
-            if [[ -z "$silent" ]] || [[ "$silent" == false ]]; then printf "\n${RED}Failed command in live terminal. ${NC}\n" >&2; fi
+            if [[ -z "$silent" ]] || [[ "$silent" == false ]]; then printf "\n${RED}Failed command in live terminal ($exit_code). ${NC}\n" >&2; fi
         else
-            printf "\n${RED}Failed command ...exiting${NC}\n" >&2
+            printf "\n${RED}Failed command ($exit_code)...exiting${NC}\n" >&2
         fi
     fi
     if [[ "$failed" == true ]]; then
@@ -35,7 +35,7 @@ exit_test () {
         if [[ "$LIVE_TERMINAL" != "true" ]]; then
             printf "\n${RED}Exiting... ${NC}\n" >&2; exit 1
         else
-            printf "\n${RED}Exiting Live Terminal... ${NC}\n" >&2; (exit 33) && true
+            printf "\n${RED}Exiting Live Terminal... ${NC}\n" >&2; return 88
         fi
     fi
     if [[ -z "$allow_interrupt" ]] || [[ "$allow_interrupt" == true ]]; then
