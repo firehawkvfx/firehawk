@@ -19,16 +19,16 @@ resource "null_resource" "init_awscli" {
       # Test keybase / pgp decryption options
       ./scripts/keybase-pgp-test.sh; exit_test
       # Install aws cli for user with s3 credentials.  root user only needs s3 access.  in future consider provisining a replacement access key for vagrant with less permissions, and remove the root account keys?
-      ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=ansible_control variable_user=root"; exit_test
-      ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=ansible_control variable_user=deployuser"; exit_test
-      ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=firehawkgateway variable_user=deployuser"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/aws_cli_ec2_install.yaml -v --extra-vars "variable_host=ansible_control variable_user=root"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/aws_cli_ec2_install.yaml -v --extra-vars "variable_host=ansible_control variable_user=deployuser"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/aws_cli_ec2_install.yaml -v --extra-vars "variable_host=firehawkgateway variable_user=deployuser"; exit_test
 
       # # configure routes to opposite environment for licence server to communicate if in dev environment
       # ansible-playbook -i "$TF_VAR_inventory" ansible/firehawkgateway-update-routes.yaml; exit_test # deprecated
 
       ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_init_pip.yaml -v --extra-vars "variable_host=firehawkgateway"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars "variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deadlineuser"; exit_test
-      ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deadlineuser"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/aws_cli_ec2_install.yaml -v --extra-vars "variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deadlineuser"; exit_test
       # Add deployuser user to group syscontrol.   this is local and wont apply until after reboot, so try to avoid since we dont want to reboot the ansible control.
       ansible-playbook -i "$TF_VAR_inventory" ansible/add_user_to_group.yaml -v --extra-vars "variable_user=deployuser variable_uid=$TF_VAR_deployuser_uid"; exit_test
       # Add user to syscontrol without the new user tag, it will just add a user to the syscontrol group
@@ -167,9 +167,9 @@ resource "null_resource" "init_aws_local_workstation" {
       ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-copy-id-private-host.yaml -v --extra-vars "variable_host=workstation1 variable_user=$TF_VAR_user_inituser_name ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key"; exit_test
 
       # configure aws for all users
-      ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -vv --extra-vars "variable_host=workstation1 variable_user=deployuser aws_cli_root=true ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/aws_cli_ec2_install.yaml -vv --extra-vars "variable_host=workstation1 variable_user=deployuser aws_cli_root=true ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key"; exit_test
 
-      ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -vv --extra-vars "variable_host=workstation1 variable_user=deadlineuser aws_cli_root=true ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/aws_cli_ec2_install.yaml -vv --extra-vars "variable_host=workstation1 variable_user=deadlineuser aws_cli_root=true ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key"; exit_test
       
       # configure mounts
       ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/softnas_volume_mounts.yaml --extra-vars "variable_host=workstation1 variable_user=deployuser softnas_hosts=none" --tags 'local_install_onsite_mounts'; exit_test

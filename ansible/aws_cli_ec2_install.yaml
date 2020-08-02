@@ -20,7 +20,7 @@
 
   roles:
     - role: pip
-    - role: aws-cli-ec2-install
+    - role: aws_cli_ec2_install
     - role: firehawkvfx.fsx.fsx_packages
 
 # example:

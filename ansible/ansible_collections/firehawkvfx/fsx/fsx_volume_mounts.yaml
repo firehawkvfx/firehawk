@@ -21,8 +21,10 @@
     - vars/main.yml
 
   vars:
-    # ansible_become_pass: "{{ user_deadlineuser_pw }}"
     destroy: false
+    import_pool: true
+
+    vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/fsx_volumes/fsx_volumes.yaml", "files/fsx_volumes_{{ lookup('env','TF_VAR_envtier') }}.yaml", "files/fsx_volumes.yaml" ] # The first file found will be used, allowing the one in your secrets location to override defaults.
 
   tasks:
   - name: test connection and permissions
@@ -32,24 +34,6 @@
     - local_install
     - cloud_install
 
-# check exports on softnas.
-- hosts: "{{ softnas_hosts | default('role_softnas') }}"
-  remote_user: "{{ softnas_ssh_user | default('ec2-user') }}"
-  gather_facts: "{{ variable_gather_facts | default('false') }}"
-  become_user: root
-  become: true
-
-  vars:
-    destroy: false
-    import_pool: true
-
-    vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/fsx_volumes/fsx_volumes.yaml", "files/fsx_volumes_{{ lookup('env','TF_VAR_envtier') }}.yaml", "files/fsx_volumes.yaml" ] # The first file found will be used, allowing the one in your secrets location to override defaults.
-  
-  vars_files:
-    - /deployuser/ansible/group_vars/all/vars
-    - vars/main.yml
-
-  tasks:
   - name: aquire vars from secrets path before using defaults for softnas hosts 1
     include_vars: "{{ item }}"
     with_first_found: "{{ vars_files_locs }}"

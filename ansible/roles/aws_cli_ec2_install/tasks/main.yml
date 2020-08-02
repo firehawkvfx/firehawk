@@ -187,4 +187,4 @@
 
 
 # example usage:
-# ansible-playbook -i ansible/inventory ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=role_node_centos"
+# ansible-playbook -i ansible/inventory ansible/aws_cli_ec2_install.yaml -v --extra-vars "variable_host=role_node_centos"

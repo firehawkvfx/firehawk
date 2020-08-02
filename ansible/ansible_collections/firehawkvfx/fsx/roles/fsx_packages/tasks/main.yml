@@ -25,7 +25,7 @@
     dest: /etc/yum.repos.d/aws-fsx.repo
   when: not skip_packages and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
 
-- name: Lustre packages
+- name: Lustre packages - centos
   package:
     name:
     - kmod-lustre-client
@@ -33,8 +33,25 @@
     state: present
   when: not skip_packages and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
 
-- name: get key - ubuntu
-  get_url:
+- name: Add an apt signing key - ubuntu
+  apt_key:
     url: https://fsx-lustre-client-repo-public-keys.s3.amazonaws.com/fsx-ubuntu-public-key.asc 
-    dest: /tmp/fsx-rpm-public-key.asc
+    state: present
   when: not skip_packages and ( ansible_distribution == 'Ubuntu' )
+
+- name: Add apt repo - ubuntu
+  apt_repository:
+    repo: deb https://fsx-lustre-client-repo.s3.amazonaws.com/ubuntu xenial main
+    filename: fsxlustreclientrepo
+    state: present
+  when: not skip_packages and ( ansible_distribution == 'Ubuntu' )
+
+- name: Lustre packages - ubuntu
+  package:
+    name:
+    - linux-aws
+    - lustre-client-modules-aws
+    state: present
+  when: not skip_packages and ( ansible_distribution == 'Ubuntu' )
+
+   

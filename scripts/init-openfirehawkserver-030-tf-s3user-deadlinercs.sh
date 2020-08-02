@@ -101,13 +101,13 @@ elif [[ "$tf_action" == "apply" ]]; then
   echo "openfirehawkserver ip: $TF_VAR_openfirehawkserver"
 
   # install aws cli for user with s3 credentials.  root user only needs s3 access.  in future consider provisining a replacement access key for vagrant with less permissions, and remove the root account keys?
-  ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=ansible_control variable_user=root"; exit_test
-  ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=ansible_control variable_user=deployuser"; exit_test
-  ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=firehawkgateway variable_user=deployuser"; exit_test
+  ansible-playbook -i "$TF_VAR_inventory" ansible/aws_cli_ec2_install.yaml -v --extra-vars "variable_host=ansible_control variable_user=root"; exit_test
+  ansible-playbook -i "$TF_VAR_inventory" ansible/aws_cli_ec2_install.yaml -v --extra-vars "variable_host=ansible_control variable_user=deployuser"; exit_test
+  ansible-playbook -i "$TF_VAR_inventory" ansible/aws_cli_ec2_install.yaml -v --extra-vars "variable_host=firehawkgateway variable_user=deployuser"; exit_test
 
   ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars "variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deadlineuser"; exit_test
 
-  ansible-playbook -i "$TF_VAR_inventory" ansible/aws-cli-ec2-install.yaml -v --extra-vars "variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deadlineuser"; exit_test
+  ansible-playbook -i "$TF_VAR_inventory" ansible/aws_cli_ec2_install.yaml -v --extra-vars "variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deadlineuser"; exit_test
   # add deployuser user to group syscontrol.   this is local and wont apply until after reboot, so try to avoid since we dont want to reboot the ansible control.
   # ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars "variable_user=deployuser variable_uid=$TF_VAR_deployuser_uid"; exit_test
   # add user to syscontrol without the new user tag, it will just add a user to the syscontrol group
