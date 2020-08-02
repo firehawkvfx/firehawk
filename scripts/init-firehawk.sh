@@ -318,6 +318,8 @@ else
       echo "...Terraform Init" # required if aws provider version changes.
       terraform init; exit_test # Required to initialise any new modules
       
+      echo "LIVE_TERMINAL: $LIVE_TERMINAL"
+      
       echo "...Terraform refresh"
       terraform refresh -lock=false; exit_test
     fi
