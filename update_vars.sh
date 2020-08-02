@@ -26,7 +26,7 @@ echo "yum install VirtualBox-6.1-6.1.8_137981_el7-1.x86_64 versionlock; yum vers
 # trap 'err_report $0 $LINENO' ERR
 
 if [[ -z "$LIVE_TERMINAL" ]]; then export LIVE_TERMINAL=true; fi
-if [ "$LIVE_TERMINAL" != "true" ]; then echo "Will exit on error..."; set -e; fi
+if [ "$LIVE_TERMINAL" != "true" ]; then echo "Will exit on error..."; set -e; fi # we still need a method for this to use return 88 instead of exit which currently terminates the shell.
 
 echo_if_not_silent() {
     if [[ -z "$silent" ]] || [[ "$silent" == false ]]; then echo $1; fi
