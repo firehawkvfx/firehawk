@@ -233,7 +233,9 @@ data "external" "primary_interface_id" {
 }
 
 locals {
-  primary_interface = data.external.primary_interface_id.result["primary_interface"]
+  # primary_interface = data.external.primary_interface_id.result["primary_interface"]
+  primary_interface = element( data.external.primary_interface_id.*.result, 0 )["primary_interface"]
+  # primary_interface = element( concat( data.aws_network_interface.fsx_primary_interface.*.private_ip, list("") ), 0 )
 }
 
 output "primary_interface" {
