@@ -24,7 +24,7 @@ locals {
 }
 
 resource "aws_security_group" "fsx_vpc" {
-  count = var.fsx_storage ? 1 : 0
+  count = local.fsx_enabled
 
   name        = "fsx_vpc_pipeid${lookup(var.common_tags, "pipelineid", "0")}"
   vpc_id      = var.vpc_id
@@ -97,7 +97,7 @@ resource "aws_security_group" "fsx_vpc" {
 }
 
 resource "aws_security_group" "fsx_vpn" {
-  count = var.fsx_storage ? 1 : 0
+  count = local.fsx_enabled
   depends_on = [var.vpn_private_ip]
 
   name        = "fsx_vpn_pipeid${lookup(var.common_tags, "pipelineid", "0")}"
@@ -172,7 +172,7 @@ resource "aws_security_group" "fsx_vpn" {
 }
 
 resource "null_resource" "init_fsx" {
-  count = var.fsx_storage ? 1 : 0
+  count = local.fsx_enabled
   
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
@@ -187,11 +187,12 @@ EOT
 }
 
 locals {
+  fsx_enabled = ( var.sleep && var.fsx_storage ) ? 1 : 0
   fsx_import_path = "s3://${var.fsx_bucket_prefix}.${var.bucket_extension}"
 }
 
 resource "aws_fsx_lustre_file_system" "fsx_storage" {
-  count = var.fsx_storage ? 1 : 0
+  count      = local.fsx_enabled
   depends_on = [ null_resource.init_fsx ]
   
   import_path      = local.fsx_import_path
@@ -228,7 +229,7 @@ output "primary_interface" {
 }
 
 data "aws_network_interface" "fsx_primary_interface" {
-  count = var.fsx_storage ? 1 : 0
+  count = local.fsx_enabled
 
   id = local.primary_interface
 }

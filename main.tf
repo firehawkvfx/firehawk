@@ -262,6 +262,9 @@ variable "allow_prebuilt_softnas_ami" { # after an initial deployment a base AMI
 
 module "fsx" {
   fsx_storage = var.fsx_storage
+  # sleep will save cost during idle time.
+  sleep = var.sleep
+
   source                         = "./ansible/ansible_collections/firehawkvfx/fsx/terraform/fsx"
 
   fsx_bucket_prefix = var.fsx_bucket_prefix

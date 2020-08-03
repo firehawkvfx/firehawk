@@ -30,3 +30,5 @@ variable "remote_subnet_cidr" {}
 variable "remote_ip_cidr" {}
 
 variable "vpn_private_ip" {}
+
+variable "sleep" {}
