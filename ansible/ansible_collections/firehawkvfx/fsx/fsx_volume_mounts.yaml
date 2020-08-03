@@ -63,7 +63,7 @@
     - always
 
   - name: Check whether /etc/exports contains the mount
-    command: grep -E "^\/export\/{{ item.pool_name }}\/{{ item.volume_name }}.*" /etc/exports
+    # command: grep -E "^\/export\/{{ item.pool_name }}\/{{ item.volume_name }}.*" /etc/exports
     command: aws fsx describe-file-systems | jq ".FileSystems[] | select(.LustreConfiguration.MountName == \"{{ item.volume_name }}\")"
     register: presence
     check_mode: no
@@ -209,8 +209,8 @@
     mount:
       fstype: none
       path: "{{ item.item.bind2 }}"
-      opts: "x-systemd.requires=/{{ item.item.pool_name }}/{{ item.item.volume_name }},x-systemd.automount,bind,_netdev"
-      src: "/{{ item.item.pool_name }}/{{ item.item.volume_name }}"
+      opts: "x-systemd.requires=/{{ item.item.volume_name }},x-systemd.automount,bind,_netdev"
+      src: "/{{ item.item.volume_name }}"
       # if the path exists, and it was found in the exports, then set to mounted, else remove.
       state: "{{ ( destroy == false and item.item.path and item.item.bind2 and item.rc == 0 and item.item.state == 'present' ) | ternary( 'mounted' , 'absent' ) }}"
     when: destroy == false
@@ -371,8 +371,8 @@
     mount:
       fstype: none
       path: "{{ item.item.bind1 }}"
-      opts: "x-systemd.requires=/{{ item.item.pool_name }}/{{ item.item.volume_name }},x-systemd.automount,bind,_netdev"
-      src: "/{{ item.item.pool_name }}/{{ item.item.volume_name }}"
+      opts: "x-systemd.requires=/{{ item.item.volume_name }},x-systemd.automount,bind,_netdev"
+      src: "/{{ item.item.volume_name }}"
       # if the path exists, and it was found in the exports, then set to mounted, else remove.
       state: "{{ ( item.item.path and item.item.bind1 and item.rc == 0 and item.item.state == 'present' ) | ternary( 'mounted' , 'absent' ) }}"
     when: destroy == false
@@ -385,8 +385,8 @@
     mount:
       fstype: none
       path: "{{ item.item.bind2 }}"
-      opts: "x-systemd.requires=/{{ item.item.pool_name }}/{{ item.item.volume_name }},x-systemd.automount,bind,_netdev"
-      src: "/{{ item.item.pool_name }}/{{ item.item.volume_name }}"
+      opts: "x-systemd.requires=/{{ item.item.volume_name }},x-systemd.automount,bind,_netdev"
+      src: "/{{ item.item.volume_name }}"
       # if the path exists, and it was found in the exports, then set to mounted, else remove.
       state: "{{ ( item.item.path and item.item.bind2 and item.rc == 0 and item.item.state == 'present' ) | ternary( 'mounted' , 'absent' ) }}"
     when: destroy == false
