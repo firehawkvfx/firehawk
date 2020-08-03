@@ -62,11 +62,29 @@
     tags:
     - always
 
+  - name: Check aws sts get-caller-identity
+    shell: |
+      aws sts get-caller-identity
+    become_user: deployuser
+    args:
+      executable: /bin/bash
+    register: current_user
+    # check_mode: no
+    connection: local
+    # ignore_errors: yes
+    # changed_when: no
+    # with_items: "{{ exports }}"
+    when: destroy == false
+    tags:
+    - local_install
+    - cloud_install
+
   - name: Check whether /etc/exports contains the mount
     # command: grep -E "^\/export\/{{ item.pool_name }}\/{{ item.volume_name }}.*" /etc/exports
     shell: |
       # aws fsx describe-file-systems | jq ".FileSystems[] | select(.LustreConfiguration.MountName == \"{{ item.volume_name }}\")"
       aws fsx describe-file-systems | jq --slurp ".[0].FileSystems[] | select(.LustreConfiguration.MountName == \"{{ item.volume_name }}\")"
+    become_user: deployuser
     args:
       executable: /bin/bash
     register: presence
