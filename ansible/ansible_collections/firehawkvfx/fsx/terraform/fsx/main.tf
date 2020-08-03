@@ -204,19 +204,30 @@ resource "aws_fsx_lustre_file_system" "fsx_storage" {
   tags = var.common_tags
 }
 
+locals {
+  # id = element( concat( aws_fsx_lustre_file_system.fsx_storage.*.id, list("") ), 0)
+  id = element( aws_fsx_lustre_file_system.fsx_storage.*.id, 0 )
+}
+
 output "id" {
-  value = element( concat( aws_fsx_lustre_file_system.fsx_storage.*.id, list("") ), 0)
+  depends_on = [
+    aws_fsx_lustre_file_system.fsx_storage,
+  ]
+  value = local.id
 }
 
 output "network_interface_ids" {
   value = aws_fsx_lustre_file_system.fsx_storage.*.network_interface_ids
 }
 
-data "external" "primary_interface_id" { # Terraform provider API does list the primary interface in the correct order to obtain it.  so we use a custom data source to aquire the primary interface
-  program = ["/bin/bash", "${path.module}/primary_interface.sh"]
+# Terraform provider API does list the primary interface in the correct order to obtain it.  so we use a custom data source to aquire the primary interface
 
-  query = { # arbitrary map from strings to strings, passed to the external program as the data query.
-    id = "${element( concat( aws_fsx_lustre_file_system.fsx_storage.*.id, list("") ), 0)}"
+data "external" "primary_interface_id" { 
+  program = ["/bin/bash", "${path.module}/primary_interface.sh"]
+  
+  # Arbitrary map from strings to strings, passed to the external program as the data query.
+  query = { 
+    id = "${local.id}"
   }
 }
 
