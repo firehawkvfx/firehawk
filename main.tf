@@ -466,11 +466,14 @@ module "node" {
   remote_subnet_cidr          = var.remote_subnet_cidr
 
   # dependencies
+  fsx_storage                 = var.fsx_storage
+  fsx_private_ip                  = module.fsx.fsx_private_ip
+
   softnas_storage                = var.softnas_storage
   
   vpn_private_ip                 = module.vpc.vpn_private_ip
   dependency = module.firehawk_init.local-provisioning-complete
-  fsx_private_ip                  = module.fsx.fsx_private_ip
+
   softnas_private_ip1             = module.softnas.softnas1_private_ip
   provision_softnas_volumes       = module.softnas.provision_softnas_volumes
   attach_local_mounts_after_start = module.softnas.attach_local_mounts_after_start
