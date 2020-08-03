@@ -230,10 +230,15 @@ output "primary_interface" {
 
 data "aws_network_interface" "fsx_primary_interface" {
   count = local.fsx_enabled
-
   id = local.primary_interface
 }
 
 output "fsx_private_ip" {
-  value = element( concat( data.aws_network_interface.fsx_primary_interface.*.private_ip, list("") ), 0 )
+  depends_on = [
+    aws_fsx_lustre_file_system.fsx_storage,
+    data.external.primary_interface_id,
+    data.aws_network_interface.fsx_primary_interface
+  ]
+  # value = element( concat( data.aws_network_interface.fsx_primary_interface.*.private_ip, list("") ), 0 )
+  value = element( data.aws_network_interface.fsx_primary_interface.*.private_ip, 0 )
 }
