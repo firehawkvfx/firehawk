@@ -64,7 +64,10 @@
 
   - name: Check whether /etc/exports contains the mount
     # command: grep -E "^\/export\/{{ item.pool_name }}\/{{ item.volume_name }}.*" /etc/exports
-    command: aws fsx describe-file-systems | jq ".FileSystems[] | select(.LustreConfiguration.MountName == \"{{ item.volume_name }}\")"
+    shell: |
+      aws fsx describe-file-systems | jq ".FileSystems[] | select(.LustreConfiguration.MountName == \"{{ item.volume_name }}\")"
+    args:
+      executable: /bin/bash
     register: presence
     check_mode: no
     ignore_errors: yes
