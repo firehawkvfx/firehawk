@@ -33,7 +33,7 @@
     import_pool: true
     vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/fsx_volumes/fsx_volumes.yaml", "files/fsx_volumes_{{ lookup('env','TF_VAR_envtier') }}.yaml", "files/fsx_volumes.yaml" ] # The first file found will be used, allowing the one in your secrets location to override defaults.
 
-  tasks:
+  pre_tasks:
   - name: test connection and permissions
     debug:
       msg: "connection established"
@@ -55,6 +55,12 @@
     tags:
     - local_install
     - cloud_install
+
+  - name: exports
+    package:
+      name: jq
+    tags:
+    - always
 
   - name: Check whether /etc/exports contains the mount
     command: grep -E "^\/export\/{{ item.pool_name }}\/{{ item.volume_name }}.*" /etc/exports
