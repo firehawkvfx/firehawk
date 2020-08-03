@@ -29,7 +29,7 @@ python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VA
 python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_install_deadline_rcs=' 'false' # install deadline
 python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_install_deadline_worker=' 'false' # install deadline
 python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_workstation_enabled=' 'false' # install deadline
-python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_taint_single=' '()' # taint 
+python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_taint_single=' '(module.fsx.null_resource.init_fsx[0])' # taint 
 
 python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_allow_prebuilt_softnas_ami=' 'false' # allow use of a prebuilt ami with the update if it exists
 python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_tf_destroy_before_deploy=' 'false' # destroy before deploye
