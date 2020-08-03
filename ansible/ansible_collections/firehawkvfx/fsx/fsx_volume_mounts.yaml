@@ -71,7 +71,8 @@
       executable: /bin/bash
     register: presence
     check_mode: no
-    ignore_errors: yes
+    connection: local
+    # ignore_errors: yes
     changed_when: no
     with_items: "{{ exports }}"
     when: destroy == false
