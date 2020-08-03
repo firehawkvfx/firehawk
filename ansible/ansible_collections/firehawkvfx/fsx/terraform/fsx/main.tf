@@ -171,8 +171,6 @@ resource "aws_security_group" "fsx_vpn" {
   }
 }
 
-
-
 resource "null_resource" "init_fsx" {
   count = var.fsx_storage ? 1 : 0
   
@@ -183,7 +181,7 @@ resource "null_resource" "init_fsx" {
       export SHOWCOMMANDS=true; set -x
       cd /deployuser
 
-      ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/fsx/fsx_init.yaml; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/fsx/fsx_init.yaml; exit_test # Ensure the bucket used to archive the fsx cluster exists
 EOT
   }
 }
