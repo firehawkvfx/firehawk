@@ -127,6 +127,8 @@ variable "softnas_mount_path" {
   default = "/mnt/softnas/nasvol2"
 }
 
+variable "fsx_storage" {}
+
 variable "softnas_storage" {}
 
 variable "fsx_private_ip" {}
