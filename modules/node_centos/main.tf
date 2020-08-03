@@ -524,6 +524,33 @@ EOT
   }
 }
 
+resource "null_resource" "fsx_mounts" {
+  count = var.aws_nodes_enabled && var.fsx_storage ? 1 : 0
+
+  depends_on = [ var.fsx_private_ip, null_resource.install_deadline_worker ]
+
+  triggers = {
+    instanceid = local.instanceid
+    install_deadline_worker = var.install_deadline_worker
+    install_houdini = var.install_houdini
+    fsx_private_ip = var.fsx_private_ip
+  }
+
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    command = <<EOT
+      . /deployuser/scripts/exit_test.sh
+      export SHOWCOMMANDS=true; set -x
+      cd /deployuser
+
+      aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id} # ensure instance is started
+
+      ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/fsx/fsx_volume_mounts.yaml -v --extra-vars "fsx_ip=${var.fsx_private_ip}" --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"; exit_test
+EOT
+
+  }
+}
+
 resource "null_resource" "dependency_softnas" {
   
   count = var.softnas_storage ? 1 : 0
@@ -535,7 +562,7 @@ resource "null_resource" "dependency_softnas" {
   }
 }
 
-resource "null_resource" "mounts_and_houdini_test" {
+resource "null_resource" "softnas_mounts_and_houdini_test" {
   count = var.aws_nodes_enabled && var.softnas_storage ? 1 : 0
 
   depends_on = [ null_resource.dependency_softnas, null_resource.install_deadline_worker ]
@@ -555,7 +582,7 @@ resource "null_resource" "mounts_and_houdini_test" {
 
       aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id} # ensure instance is started
 
-      ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/softnas_volume_mounts.yaml -v --skip-tags "local_install local_install_onaws_nodes_enabled" --tags "cloud_install"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/softnas_volume_mounts.yaml -v --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/houdini/houdini_openfirehawk_houdini_tools_sync.yaml -v --extra-vars "variable_user=deadlineuser"; exit_test # sync houdini tools after all mounts are available
 
       echo "TF_VAR_install_houdini: $TF_VAR_install_houdini"
@@ -594,7 +621,7 @@ resource "random_id" "ami_unique_name" {
 
 resource "aws_ami_from_instance" "node_centos" {
   count              = var.aws_nodes_enabled ? 1 : 0
-  depends_on         = [null_resource.provision_node_centos, random_id.ami_unique_name, null_resource.mounts_and_houdini_test]
+  depends_on         = [null_resource.provision_node_centos, random_id.ami_unique_name, null_resource.fsx_mounts, null_resource.softnas_mounts_and_houdini_test]
   name               = "node_centos_houdini_${local.instanceid}_${random_id.ami_unique_name[0].hex}"
   source_instance_id = local.instanceid
   tags = merge(map("Name", format("%s", var.name)), var.common_tags, local.extra_tags)

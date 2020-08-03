@@ -128,3 +128,5 @@ variable "softnas_mount_path" {
 }
 
 variable "softnas_storage" {}
+
+variable "fsx_private_ip" {}

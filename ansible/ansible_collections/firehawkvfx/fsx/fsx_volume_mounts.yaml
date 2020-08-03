@@ -1,16 +1,16 @@
-# This playbook will validate exports on softnas and mount those with the /etc/fstab file.
+# This playbook will validate exports on fsx and mount those with the /etc/fstab file.
 
-# to update a workstation after altering any softnas mounts for the first time use the command -
-# ansible-playbook -i ansible/inventory ansible/ansible_collections/firehawkvfx/softnas/softnas_volume_mounts.yaml --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.firehawkvfx.com"
+# to update a workstation after altering any fsx mounts for the first time use the command -
+# ansible-playbook -i ansible/inventory ansible/ansible_collections/firehawkvfx/fsx/fsx_volume_mounts.yaml --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.firehawkvfx.com"
 
 # to update a render node, just use -
-# ansible-playbook -i ansible/inventory ansible/ansible_collections/firehawkvfx/softnas/softnas_volume_mounts.yaml
+# ansible-playbook -i ansible/inventory ansible/ansible_collections/firehawkvfx/fsx/fsx_volume_mounts.yaml
 
 # to update an onsite centos workstation use-
-# ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/softnas_volume_mounts.yaml -v -v --extra-vars "variable_host=workstation1 variable_user=deployuser hostname=workstation1 ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key" --skip-tags 'cloud_install'
+# ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/fsx/fsx_volume_mounts.yaml -v -v --extra-vars "variable_host=workstation1 variable_user=deployuser hostname=workstation1 ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key" --skip-tags 'cloud_install'
 
-# to configure onsite mounts only on the ansible control, skipping softnas export check
-# ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/softnas_volume_mounts.yaml -v -v --extra-vars "variable_host=localhost variable_user=deployuser softnas_hosts=none" --tags 'local_install_onsite_mounts'
+# to configure onsite mounts only on the ansible control, skipping fsx export check
+# ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/fsx/fsx_volume_mounts.yaml -v -v --extra-vars "variable_host=localhost variable_user=deployuser fsx_hosts=none" --tags 'local_install_onsite_mounts'
 
 - hosts: "{{ variable_host | default('role_node_centos') }}"
   remote_user: "{{ variable_user | default('centos') }}"
@@ -23,7 +23,14 @@
   vars:
     destroy: false
     import_pool: true
-
+    variable_user: centos
+    secrets_path: "{{ lookup('env','TF_VAR_secrets_path') }}"
+    fsx_ip: # this should be provided inline since it is unique on each tf apply
+    # ansible_become_pass: "{{ user_deadlineuser_pw }}"
+    # fsx_exports: "{{ hostvars[groups['role_node_centos'][0]]['presence']['results'] }}"
+    pcoip: false
+    destroy: false
+    import_pool: true
     vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/fsx_volumes/fsx_volumes.yaml", "files/fsx_volumes_{{ lookup('env','TF_VAR_envtier') }}.yaml", "files/fsx_volumes.yaml" ] # The first file found will be used, allowing the one in your secrets location to override defaults.
 
   tasks:
@@ -34,7 +41,7 @@
     - local_install
     - cloud_install
 
-  - name: aquire vars from secrets path before using defaults for softnas hosts 1
+  - name: aquire vars from secrets path before using defaults for fsx mounts
     include_vars: "{{ item }}"
     with_first_found: "{{ vars_files_locs }}"
     tags:
@@ -51,6 +58,7 @@
 
   - name: Check whether /etc/exports contains the mount
     command: grep -E "^\/export\/{{ item.pool_name }}\/{{ item.volume_name }}.*" /etc/exports
+    command: aws fsx describe-file-systems | jq ".FileSystems[] | select(.LustreConfiguration.MountName == \"{{ item.volume_name }}\")"
     register: presence
     check_mode: no
     ignore_errors: yes
@@ -71,39 +79,29 @@
     - cloud_install
 
   - name: export output always
-    set_fact: exported_softnas_mounts="{{item}}"
-    with_items: "{{ presence.results }}"
+    set_fact: fsx_exports="{{ presence.results }}"
     when: destroy == false
     tags:
     - local_install
     - cloud_install
 
-# update fstab with valid mounts
+  # - name: export output always
+  #   set_fact: exported_fsx_mounts="{{item}}"
+  #   with_items: "{{ presence.results }}"
+  #   when: destroy == false
+  #   tags:
+  #   - local_install
+  #   - cloud_install
 
-- hosts: "{{ variable_host | default('role_node_centos') }}"
-  remote_user: "{{ variable_user | default('centos') }}"
-  gather_facts: "{{ variable_gather_facts | default('false') }}"
-  become: true
-  vars_files:
-    - /deployuser/ansible/group_vars/all/vars
-    - vars/main.yml
+# # update fstab with valid mounts
 
-  vars:
-    variable_user: centos
-    secrets_path: "{{ lookup('env','TF_VAR_secrets_path') }}"
-    # ansible_become_pass: "{{ user_deadlineuser_pw }}"
-    softnas_exports: "{{ hostvars[groups['role_softnas'][0]]['presence']['results'] }}"
-    pcoip: false
-    destroy: false
-    import_pool: true
-    vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/ebs-volumes/fsx_volumes.yaml", "files/fsx_volumes_{{ lookup('env','TF_VAR_envtier') }}.yaml", "files/fsx_volumes.yaml" ]
-
-  tasks:
-  - name: aquire vars from secrets path before using defaults for other hosts 2
-    include_vars: "{{ item }}"
-    with_first_found: "{{ vars_files_locs }}"
-    tags:
-    - always
+# - hosts: "{{ variable_host | default('role_node_centos') }}"
+#   remote_user: "{{ variable_user | default('centos') }}"
+#   gather_facts: "{{ variable_gather_facts | default('false') }}"
+#   become: true
+#   vars_files:
+#     - /deployuser/ansible/group_vars/all/vars
+#     - vars/main.yml
 
   - name: exports
     debug:
@@ -114,11 +112,11 @@
     - local_install
     - cloud_install
 
-  - name: softnas exports to mount to this instance
+  - name: fsx exports to mount to this instance
     debug:
       var: item
     with_items: 
-    - "{{ softnas_exports }}"
+    - "{{ fsx_exports }}"
     tags:
     - local_install
     - cloud_install
@@ -132,7 +130,7 @@
     become: true
     when: destroy == false and item.rc == 0
     with_items: 
-    - "{{ softnas_exports }}"
+    - "{{ fsx_exports }}"
     tags:
     - local_install
     - cloud_install
@@ -145,7 +143,7 @@
       group: "{{ variable_user }}"
     when: destroy == false and item.item.bind1 and item.rc == 0
     with_items: 
-    - "{{ softnas_exports }}"
+    - "{{ fsx_exports }}"
     tags:
     - local_install
     - cloud_install
@@ -158,7 +156,7 @@
       group: "{{ variable_user }}"
     when: destroy == false and item.item.bind2 and item.rc == 0
     with_items: 
-    - "{{ softnas_exports }}"
+    - "{{ fsx_exports }}"
     tags:
     - local_install
     - cloud_install
@@ -167,7 +165,7 @@
       msg: "{{ item.item.path }} is set to be present in exports dict but doesn't exist in /etc/exports"
     when: destroy == false and item.item.state == "present" and item.rc == 1
     with_items:
-    - "{{ softnas_exports }}"
+    - "{{ fsx_exports }}"
     tags:
     - local_install
     - cloud_install
@@ -177,33 +175,17 @@
     tags:
     - local_install
 
-  # - name: "Check showmount to see whether /etc/exports contains the mount on {{ groups['role_softnas'] | map('extract', hostvars, ['ansible_host']) | first }}"
-  #   shell: "showmount -e {{ groups['role_softnas'] | map('extract', hostvars, ['ansible_host']) | first }}"
-  #   register: softnas_showmount
-  #   check_mode: no
-  #   ignore_errors: yes
-  #   changed_when: no
-  #   tags:
-  #   - local_install
-
-  # - name: "Export showmount for {{ groups['role_softnas'] | map('extract', hostvars, ['ansible_host']) | first }}: If this fails check the vpn is working and ports are open."
-  #   debug:
-  #     var: item
-  #   when: item.rc == 0
-  #   with_items: "{{ softnas_showmount.results }}"
-  #   tags:
-  #   - local_install
-
-  - name: mount softnas NFS volume from export on local site based workstation/render nodes using original unique pool and volume names - master
+  - name: mount fsx Lustre volume from export  - master
     become: yes
     mount:
-      fstype: nfs4
-      path: "/{{ item.item.pool_name }}/{{ item.item.volume_name }}"
-      opts: nfsvers=4.1,rsize=8192,wsize=8192,timeo=14,intr,_netdev
-      src: "{{ groups['role_softnas'] | map('extract', hostvars, ['ansible_host']) | first }}:/{{ item.item.pool_name }}/{{ item.item.volume_name }}"
+      fstype: lustre
+      path: "/{{ item.item.volume_name }}"
+      opts: defaults,noatime,flock,_netdev 0 0
+      # source must pull the ip from the fsx primary interface
+      src: "{{ fsx_ip }}:tcp/{{ item.item.volume_name }}"
       state: "{{ ( destroy == false and item.item.path and item.rc == 0 and item.item.state == 'present') | ternary( 'mounted' , 'absent' ) }}"
     when: destroy == false
-    with_items: "{{ softnas_exports }}"
+    with_items: "{{ fsx_exports }}"
     tags:
     - local_install
 
@@ -226,7 +208,7 @@
       # if the path exists, and it was found in the exports, then set to mounted, else remove.
       state: "{{ ( destroy == false and item.item.path and item.item.bind2 and item.rc == 0 and item.item.state == 'present' ) | ternary( 'mounted' , 'absent' ) }}"
     when: destroy == false
-    with_items: "{{ softnas_exports }}"
+    with_items: "{{ fsx_exports }}"
     tags:
     - local_install
 
@@ -334,7 +316,7 @@
 
 ### End force removal of mounts
 
-  - name: unmount when destroy is true for NFS softnas master on workstation.  this will not check the softnas instance, and use the mounts originally defined in your ebs settings in secrets
+  - name: unmount when destroy is true for Lustre fsx master on workstation.  this will not check the fsx instance, and use the mounts originally defined in your ebs settings in secrets
     become: yes
     mount:
       path: "{{ item.path }}"
@@ -344,7 +326,7 @@
     tags:
     - local_install
 
-  - name: remove mounts from fstab when destroy is true for NFS softnas master on workstation.  this will not check the softnas instance, and use the mounts originally defined in your ebs settings in secrets
+  - name: remove mounts from fstab when destroy is true for Lustre fsx master on workstation.  this will not check the fsx instance, and use the mounts originally defined in your ebs settings in secrets
     become: yes
     mount:
       path: "{{ item.path }}"
@@ -357,9 +339,9 @@
 
 ### cloud based mounts with ansible mount command
 
-  - name: softnas ip
+  - name: fsx ip
     debug:
-      msg: "{{ groups['role_softnas'] | map('extract', hostvars, ['ansible_host']) | first }}"
+      msg: "{{ fsx_ip }}"
     when: destroy == false
     tags:
     - cloud_install
@@ -367,14 +349,14 @@
   - name: insert/update block in in /etc/fstab on remote host for found exports using original unique pool and volume names - master
     become: yes
     mount:
-      fstype: nfs4
-      path: "/{{ item.item.pool_name }}/{{ item.item.volume_name }}"
-      opts: nfsvers=4.1,rsize=8192,wsize=8192,timeo=14,intr,_netdev
-      # source must pull the ip from the softnas hostname
-      src: "{{ groups['role_softnas'] | map('extract', hostvars, ['ansible_host']) | first }}:/{{ item.item.pool_name }}/{{ item.item.volume_name }}"
+      fstype: lustre
+      path: "/{{ item.item.volume_name }}"
+      opts: defaults,noatime,flock,_netdev 0 0
+      # source must pull the ip from the fsx primary interface
+      src: "{{ fsx_ip }}:tcp/{{ item.item.volume_name }}"
       state: "{{ ( item.item.path and item.rc == 0 and item.item.state == 'present') | ternary( 'mounted' , 'absent' ) }}"
     when: destroy == false
-    with_items: "{{ softnas_exports }}"
+    with_items: "{{ fsx_exports }}"
     tags:
     - cloud_install
 
@@ -388,7 +370,7 @@
       # if the path exists, and it was found in the exports, then set to mounted, else remove.
       state: "{{ ( item.item.path and item.item.bind1 and item.rc == 0 and item.item.state == 'present' ) | ternary( 'mounted' , 'absent' ) }}"
     when: destroy == false
-    with_items: "{{ softnas_exports }}"
+    with_items: "{{ fsx_exports }}"
     tags:
     - cloud_install
 
@@ -402,33 +384,33 @@
       # if the path exists, and it was found in the exports, then set to mounted, else remove.
       state: "{{ ( item.item.path and item.item.bind2 and item.rc == 0 and item.item.state == 'present' ) | ternary( 'mounted' , 'absent' ) }}"
     when: destroy == false
-    with_items: "{{ softnas_exports }}"
+    with_items: "{{ fsx_exports }}"
     tags:
     - cloud_install
 
 ### check exports of onsite nas are available on cloud based host.  site mounts are never destroyed, since acces to onsite nas is assumed to exist at all times.
-- hosts: "{{ variable_host | default('role_node_centos') }}"
-  remote_user: "{{ variable_user | default('centos') }}"
-  gather_facts: "{{ variable_gather_facts | default('false') }}"
-  become: true
-  vars_files:
-    - /deployuser/ansible/group_vars/all/vars
-    - vars/main.yml
+# - hosts: "{{ variable_host | default('role_node_centos') }}"
+#   remote_user: "{{ variable_user | default('centos') }}"
+#   gather_facts: "{{ variable_gather_facts | default('false') }}"
+#   become: true
+#   vars_files:
+#     - /deployuser/ansible/group_vars/all/vars
+#     - vars/main.yml
 
-  vars:
-    variable_user: centos
-    secrets_path: "{{ lookup('env','TF_VAR_secrets_path') }}"
-    # ansible_become_pass: "{{ user_deadlineuser_pw }}"
-    softnas_exports: "{{ hostvars[groups['role_softnas'][0]]['presence']['results'] }}"
-    pcoip: False
-    vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/ebs-volumes/fsx_volumes.yaml", "files/fsx_volumes_{{ lookup('env','TF_VAR_envtier') }}.yaml", "files/fsx_volumes.yaml" ]
+  # vars:
+  #   variable_user: centos
+  #   secrets_path: "{{ lookup('env','TF_VAR_secrets_path') }}"
+  #   # ansible_become_pass: "{{ user_deadlineuser_pw }}"
+  #   fsx_exports: "{{ hostvars[groups['role_fsx'][0]]['presence']['results'] }}"
+  #   pcoip: False
+  #   vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/ebs-volumes/fsx_volumes.yaml", "files/fsx_volumes_{{ lookup('env','TF_VAR_envtier') }}.yaml", "files/fsx_volumes.yaml" ]
 
-  pre_tasks:
-  - name: show localnas1_private_ip
-    debug:
-      var: localnas1_private_ip
-    tags:
-    - always
+  # pre_tasks:
+  # - name: show localnas1_private_ip
+  #   debug:
+  #     var: localnas1_private_ip
+  #   tags:
+  #   - always
 
   roles:
   - role: onsite_nfs_share
