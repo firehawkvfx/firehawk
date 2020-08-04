@@ -1,7 +1,7 @@
 provider "aws" {
   #  if you haven't installed and configured the aws cli, you will need to provide your aws access key and secret key.
   region = var.region
-  version = "~> 3.0"
+  # version = "~> 3.0"
 }
 
 variable "firehawk_init_dependency" {
@@ -24,7 +24,7 @@ locals {
 
 module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
-  # version = "~> 3.0"
+  version = "~> 2.44.0"
 
   create_vpc = var.create_vpc
 
