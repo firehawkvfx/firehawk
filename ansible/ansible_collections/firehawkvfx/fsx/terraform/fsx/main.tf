@@ -235,7 +235,7 @@ data "external" "primary_interface_id" {
 locals {
   # primary_interface = data.external.primary_interface_id.result["primary_interface"]
   # primary_interface = element( concat( data.external.primary_interface_id.*.result, map( "primary_interface", "" ), 0 ))["primary_interface"]
-  primary_interface = lookup( element( concat( data.external.primary_interface_id.*.result, list("") ), 0), "primary_interface", "" )
+  primary_interface = lookup( element( concat( data.external.primary_interface_id.*.result, list( map( "primary_interface", "" ) ) ), 0), "primary_interface", "" )
   # lookup(map, key, default)
   # primary_interface = element( concat( data.aws_network_interface.fsx_primary_interface.*.private_ip, list("") ), 0 )
 }
