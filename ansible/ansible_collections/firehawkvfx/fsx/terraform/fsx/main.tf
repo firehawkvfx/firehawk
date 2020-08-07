@@ -256,5 +256,5 @@ output "fsx_private_ip" {
     data.aws_network_interface.fsx_primary_interface
   ]
   # value = element( concat( data.aws_network_interface.fsx_primary_interface.*.private_ip, list("") ), 0 )
-  value = element( data.aws_network_interface.fsx_primary_interface.*.private_ip, 0 )
+  value = element( concat( data.aws_network_interface.fsx_primary_interface.*.private_ip, list("")), 0 )
 }
