@@ -269,7 +269,7 @@ module "fsx" {
 
   fsx_bucket_prefix = var.fsx_bucket_prefix
   bucket_extension = var.bucket_extension
-  subnet_ids = [ module.vpc.private_subnets[0] ]
+  subnet_ids = module.vpc.private_subnets
 
   fsx_storage_capacity = var.fsx_storage_capacity
 
