@@ -205,8 +205,8 @@ resource "aws_fsx_lustre_file_system" "fsx_storage" {
 }
 
 locals {
-  # id = element( concat( aws_fsx_lustre_file_system.fsx_storage.*.id, list("") ), 0)
-  id = element( aws_fsx_lustre_file_system.fsx_storage.*.id, 0 )
+  id = element( concat( aws_fsx_lustre_file_system.fsx_storage.*.id, list("") ), 0)
+  # id = element( aws_fsx_lustre_file_system.fsx_storage.*.id, 0 )
 }
 
 output "id" {
