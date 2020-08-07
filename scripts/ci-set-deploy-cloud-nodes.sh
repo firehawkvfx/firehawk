@@ -8,8 +8,9 @@ config_override=$(to_abs_path $TF_VAR_firehawk_path/../secrets/config-override-$
 echo "config_override path- $config_override"
 python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'allow_interrupt=' 'true' # destroy before deploy
 python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_enable_vpc=' 'true' # ...Enable the vpc.
-# python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_softnas_storage=' 'true' # ...On first apply, don't create softnas instance until vpn is working.
+python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_softnas_storage=' 'false' # ...On first apply, don't create softnas instance until vpn is working.
 python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_aws_nodes_enabled=' 'true' # ...Site mounts will not be mounted in cloud.  currently this will disable provisioning any render node or remote workstation until vpn is confirmed to function after this step.
+python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_fsx_storage=' 'true' # ...On first apply, don't create softnas instance until vpn is working.
 
 # Alter the config file directly for these tests.  Revert to defaults in config.  config override will not disable if the var is set to itself
 python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_houdini_license_server_address=' '$TF_VAR_houdini_license_server_address' # inherit default
