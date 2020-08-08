@@ -521,7 +521,7 @@ EOT
       ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars "variable_host=role_workstation_centos variable_connect_as_user=centos variable_user=deadlineuser pcoip=true set_selinux=disabled"; exit_test
       
       # install cli for centos user
-      ansible-playbook -i "$TF_VAR_inventory" ansible/aws_cli_ec2_install.yaml -v --extra-vars "variable_host=role_workstation_centos variable_user=centos" --skip-tags "user_access"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/aws_cli_ec2_install.yaml -v --extra-vars "variable_host=role_workstation_centos variable_user=centos reboot_after_lustre_install=true" --skip-tags "user_access"; exit_test
       # install cli for deadlineuser
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws_cli_ec2_install.yaml -v --extra-vars "variable_host=role_workstation_centos variable_user=centos variable_become_user=deadlineuser" --skip-tags "user_access"; exit_test
 

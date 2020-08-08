@@ -438,8 +438,8 @@ resource "null_resource" "provision_node_centos" {
       ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars "variable_host=role_node_centos variable_connect_as_user=centos variable_user=deployuser variable_uid=$TF_VAR_deployuser_uid set_selinux=disabled"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/newuser_deadlineuser.yaml -v --extra-vars "variable_host=role_node_centos variable_connect_as_user=centos variable_user=deadlineuser set_selinux=disabled"; exit_test
 
-      # install cli for centos user
-      ansible-playbook -i "$TF_VAR_inventory" ansible/aws_cli_ec2_install.yaml -v --extra-vars "variable_host=role_node_centos variable_user=centos" --skip-tags "user_access"; exit_test
+      # install cli for centos user, and lustre packages
+      ansible-playbook -i "$TF_VAR_inventory" ansible/aws_cli_ec2_install.yaml -v --extra-vars "variable_host=role_node_centos variable_user=centos reboot_after_lustre_install=true" --skip-tags "user_access"; exit_test
 
       # install cli for deadlineuser
       ansible-playbook -i "$TF_VAR_inventory" ansible/aws_cli_ec2_install.yaml -v --extra-vars "variable_host=role_node_centos variable_user=centos variable_become_user=deadlineuser" --skip-tags "user_access"; exit_test
@@ -531,8 +531,6 @@ resource "null_resource" "fsx_mounts" {
 
   triggers = {
     instanceid = local.instanceid
-    install_deadline_worker = var.install_deadline_worker
-    install_houdini = var.install_houdini
     fsx_private_ip = var.fsx_private_ip
   }
 
@@ -562,10 +560,34 @@ resource "null_resource" "dependency_softnas" {
   }
 }
 
-resource "null_resource" "softnas_mounts_and_houdini_test" {
+resource "null_resource" "softnas_mounts" {
   count = var.aws_nodes_enabled && var.softnas_storage ? 1 : 0
 
   depends_on = [ null_resource.dependency_softnas, null_resource.install_deadline_worker ]
+
+  triggers = {
+    instanceid = local.instanceid
+  }
+
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    command = <<EOT
+      . /deployuser/scripts/exit_test.sh
+      export SHOWCOMMANDS=true; set -x
+      cd /deployuser
+
+      aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id} # ensure instance is started
+
+      ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/softnas_volume_mounts.yaml -v --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"; exit_test
+EOT
+
+  }
+}
+
+resource "null_resource" "houdini_test" {
+  count = var.aws_nodes_enabled && ( var.softnas_storage || var.fsx_storage ) ? 1 : 0
+
+  depends_on = [ null_resource.fsx_mounts, null_resource.softnas_mounts, null_resource.install_deadline_worker ]
 
   triggers = {
     instanceid = local.instanceid
@@ -582,7 +604,6 @@ resource "null_resource" "softnas_mounts_and_houdini_test" {
 
       aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id} # ensure instance is started
 
-      ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/softnas/softnas_volume_mounts.yaml -v --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/houdini/houdini_openfirehawk_houdini_tools_sync.yaml -v --extra-vars "variable_user=deadlineuser"; exit_test # sync houdini tools after all mounts are available
 
       echo "TF_VAR_install_houdini: $TF_VAR_install_houdini"
@@ -621,7 +642,7 @@ resource "random_id" "ami_unique_name" {
 
 resource "aws_ami_from_instance" "node_centos" {
   count              = var.aws_nodes_enabled ? 1 : 0
-  depends_on         = [null_resource.provision_node_centos, random_id.ami_unique_name, null_resource.fsx_mounts, null_resource.softnas_mounts_and_houdini_test]
+  depends_on         = [null_resource.provision_node_centos, random_id.ami_unique_name, null_resource.fsx_mounts, null_resource.softnas_mounts, null_resource.houdini_test]
   name               = "node_centos_houdini_${local.instanceid}_${random_id.ami_unique_name[0].hex}"
   source_instance_id = local.instanceid
   tags = merge(map("Name", format("%s", var.name)), var.common_tags, local.extra_tags)

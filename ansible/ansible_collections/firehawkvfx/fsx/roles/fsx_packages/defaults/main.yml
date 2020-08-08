@@ -2,3 +2,4 @@
 # defaults file for fsx_packages
 
 skip_packages: false
+reboot_after_lustre_install: false

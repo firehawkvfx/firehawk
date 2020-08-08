@@ -3,4 +3,5 @@
 echo "TF_VAR_firehawk_path: $TF_VAR_firehawk_path"
 echo "TF_VAR_secrets_path: $TF_VAR_secrets_path"
 
-ansible-playbook -i ../secrets/dev/inventory ansible/ansible_collections/firehawkvfx/fsx/fsx_volume_mounts.yaml -vvv --extra-vars fsx_ip=10.1.1.248 --skip-tags 'local_install local_install_onsite_mounts' --tags cloud_install; exit_test
+# ansible-playbook -i ../secrets/dev/inventory ansible/ansible_collections/firehawkvfx/fsx/fsx_volume_mounts.yaml -vvv --extra-vars fsx_ip=10.1.1.248 --skip-tags 'local_install local_install_onsite_mounts' --tags cloud_install; exit_test
+cd /deployuser; source ./update_vars.sh --#{envtier} --#{resourcetier} --init --save-template=false; echo $config_override; ansible/ansible_collections/firehawkvfx/fsx/fsx_packages.yaml --extra-vars 'variable_host=localhost variable_user=deployuser'
