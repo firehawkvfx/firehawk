@@ -18,7 +18,6 @@
     destroy: false
     import_pool: true
     variable_user: centos
-    secrets_path: "{{ lookup('env','TF_VAR_secrets_path') }}"
     pcoip: false
     destroy: false
     import_pool: true

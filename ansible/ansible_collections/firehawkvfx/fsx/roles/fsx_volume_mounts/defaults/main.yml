@@ -1,0 +1,5 @@
+---
+# defaults file for fsx_volume_mounts
+
+secrets_path: "{{ lookup('env','TF_VAR_secrets_path') }}"
+fsx_vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/fsx_volumes/fsx_volumes.yaml", "files/fsx_volumes_{{ lookup('env','TF_VAR_envtier') }}.yaml", "files/fsx_volumes.yaml" ] # The first file found will be used, allowing the one in your secrets location to override defaults.

@@ -311,12 +311,12 @@ if [[ "$vagrant_up" == true ]]; then
 
     echo "total_running_machines $total_running_machines"
     # total_running_machines=$(grep -cim1 'running' $vagrant_status)
-    if [ $total_running_machines -ge 2 ] && [[ "$TF_VAR_vm_initialised" == true ]]; then
+    if [[ $total_running_machines -ge 2 && "$TF_VAR_vm_initialised" == true ]]; then
         echo "...Both machines are already up."
     else
         echo "...Will start machines.  TF_VAR_vm_initialised: $TF_VAR_vm_initialised init_vm_config: $init_vm_config"
         sleep 3
-        if [[ "$init_vm_config" == true ]] || [[ "$TF_VAR_vm_initialised" == false ]]; then
+        if [[ "$init_vm_config" == true || "$TF_VAR_vm_initialised" == false ]]; then
             echo "...Starting vagrant, and provisioning."
             # vagrant up --provision | ts '[%H:%M:%S]' # 
             echo "pwd $(pwd)"
