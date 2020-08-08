@@ -50,13 +50,9 @@ output "init_awscli_complete" {
 }
 
 resource "null_resource" "init_deadlinedb_firehawk" {
-  count = var.firehawk_init ? 1 : 0
+  count = ( var.firehawk_init && var.install_deadline_db ) ? 1 : 0
 
   depends_on = [ null_resource.init_awscli ]
-
-  triggers = {
-    install_deadline_db = var.install_deadline_db
-  }
 
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
@@ -97,32 +93,32 @@ output "deadlinedb_complete" {
 
 # Consider placing a dependency on cloud nodes on the deadline install.  Not likely to occur but would be better practice.
 
-resource "null_resource" "init_houdini_license_server" {
-  count = var.firehawk_init ? 1 : 0
-  depends_on = [null_resource.init_deadlinedb_firehawk]
+# resource "null_resource" "init_houdini_license_server" {
+#   count = var.firehawk_init ? 1 : 0
+#   depends_on = [null_resource.init_deadlinedb_firehawk]
 
-  triggers = {
-    install_deadline_db = var.install_deadline_db
-    install_houdini = var.install_houdini
-    deadlinedb = local.deadlinedb_complete
-  }
+#   triggers = {
+#     install_deadline_db = var.install_deadline_db
+#     install_houdini = var.install_houdini
+#     deadlinedb = local.deadlinedb_complete
+#   }
 
-  provisioner "local-exec" {
-    interpreter = ["/bin/bash", "-c"]
-    command = <<EOT
-      . /deployuser/scripts/exit_test.sh
-      export SHOWCOMMANDS=true; set -x
-      cd /deployuser
+#   provisioner "local-exec" {
+#     interpreter = ["/bin/bash", "-c"]
+#     command = <<EOT
+#       . /deployuser/scripts/exit_test.sh
+#       export SHOWCOMMANDS=true; set -x
+#       cd /deployuser
       
-      # ssh will be killed from the previous script because users were added to a new group and this will not update unless your ssh session is restarted.
-      # login again and continue...
-      if [[ "$TF_VAR_install_houdini_license_server" == true ]]; then
-        # install houdini with the same procedure as on render nodes and workstations, and initialise the licence server on this system.
-        ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/houdini/houdini_module.yaml -v --extra-vars "variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deployuser houdini_install_type=server" --tags "install_houdini set_hserver install_deadline_db" --skip-tags "sync_scripts"; exit_test
-      fi
-EOT
-}
-}
+#       # ssh will be killed from the previous script because users were added to a new group and this will not update unless your ssh session is restarted.
+#       # login again and continue...
+#       if [[ "$TF_VAR_install_houdini_license_server" == true ]]; then
+#         # install houdini with the same procedure as on render nodes and workstations, and initialise the licence server on this system.
+#         ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/houdini/houdini_module.yaml -v --extra-vars "variable_host=firehawkgateway variable_connect_as_user=deployuser variable_user=deployuser houdini_install_type=server" --tags "install_houdini set_hserver install_deadline_db" --skip-tags "sync_scripts"; exit_test
+#       fi
+# EOT
+# }
+# }
 
 resource "null_resource" "init_aws_local_workstation" {
   count = var.firehawk_init ? 1 : 0
@@ -200,7 +196,7 @@ EOT
 
 resource "null_resource" "install_houdini_local_workstation" {
   count = var.firehawk_init ? 1 : 0
-  depends_on = [null_resource.init_awscli, null_resource.init_aws_local_workstation, null_resource.local_workstation_disk_space_check, null_resource.init_houdini_license_server]
+  depends_on = [null_resource.init_awscli, null_resource.init_aws_local_workstation, null_resource.local_workstation_disk_space_check ]
 
   triggers = {
     install_houdini = var.install_houdini
@@ -225,7 +221,7 @@ EOT
 
 resource "null_resource" "install_deadline_worker_local_workstation" {
   count = var.firehawk_init ? 1 : 0
-  depends_on = [null_resource.init_aws_local_workstation, null_resource.init_houdini_license_server, null_resource.init_deadlinedb_firehawk, null_resource.install_houdini_local_workstation]
+  depends_on = [null_resource.init_aws_local_workstation, null_resource.init_deadlinedb_firehawk, null_resource.install_houdini_local_workstation]
 
   triggers = {
     install_deadline_db = var.install_deadline_db
@@ -253,7 +249,7 @@ EOT
 
 resource "null_resource" "install_houdini_deadline_plugin_local_workstation" {
   count = var.firehawk_init ? 1 : 0
-  depends_on = [null_resource.install_deadline_worker_local_workstation, null_resource.init_aws_local_workstation, null_resource.init_houdini_license_server, null_resource.init_deadlinedb_firehawk, null_resource.install_houdini_local_workstation]
+  depends_on = [null_resource.install_deadline_worker_local_workstation, null_resource.init_aws_local_workstation, null_resource.init_deadlinedb_firehawk, null_resource.install_houdini_local_workstation]
 
   triggers = {
     install_deadline_db = var.install_deadline_db
@@ -290,7 +286,7 @@ EOT
 
 resource "null_resource" "local-provisioning-complete" {
   count = var.firehawk_init ? 1 : 0
-  depends_on = [null_resource.install_houdini_deadline_plugin_local_workstation, null_resource.install_deadline_worker_local_workstation, null_resource.init_aws_local_workstation, null_resource.init_houdini_license_server, null_resource.init_deadlinedb_firehawk]
+  depends_on = [null_resource.install_houdini_deadline_plugin_local_workstation, null_resource.install_deadline_worker_local_workstation, null_resource.init_aws_local_workstation, null_resource.init_deadlinedb_firehawk]
 
   triggers = {
     install_deadline_db = var.install_deadline_db

@@ -263,17 +263,23 @@ These address ranges refer to the DHCP addresses that Open VPN will automaticaly
 
 ## FSX for Lustre
 
-With the 0.1 release we are now using a FSx for Lustre as our default remote file system in place of SoftNAS.  FSx for Lustre has some interesting ablities:
+With the 0.1 release we are now using a FSx for Lustre storage solution as our default remote file system in place of SoftNAS.  FSx for Lustre has some interesting ablities:
 
-- An S3 bucket's objects are visible through to the file system mount.  Shese objects are seamlessly streamed on demand.  The file system will only consume space when these objects are read or manually requested.
-- Objects can be offloaded back to S3.
+- An S3 bucket's objects are visible through to the file system directory structure.  These objects are seamlessly streamed on demand when read.  The file system will only consume space when these objects are read or manually requested from S3.
+- Anything written to the filesystem like render output or simulation can be offloaded back to S3 storage.  This is the most cost efficient means of storing data, since it does not need to be over provisioned (unlike a disk/ebs volume)
 - The S3 bucket doesn't use any vendor lockin specific formatting, keeping it available for other purposes if required.
-- cluster based storage
+- Cluster based storage like FSx is more conducive to scaling and maintaining performance with redundancy.
 - Can scale in 1.2-2.4 TB increments, scaling the throughput with size linearly.
 - Persistent mode is self healing and able to replace node failures automatically (scratch is the default, self healing disabled)
+- Initial tests are cost efficient.  The file system can also be disabled safely when not in use- provided objects are written back to cloud storage.
+- This allows users to save on cost, and more easily persist their data even after infrastructure is destroyed.
 
-In order for this to function on any workstations nodes, you must have the AWS lustre client installed.
+In order for this to function on any workstations/onsite nodes, you must have the AWS lustre client installed, and you should reboot after installing any lustre packages for them to work.
 https://docs.aws.amazon.com/fsx/latest/LustreGuide/install-lustre-client.html
+
+If you have problems mounting FSx for lustre to your workstation's linux OS, it is likely that the system has not been rebooted or the packages were not installed correctly.  If this has been done, ensure the VPN is up and that you can ping another hosts private IP (like the VPN private IP or preferrably the render node instance used to build an AMI).
+
+If you intend to directly mount cloud storage to Mac OS, you should opt to use Softnas in your variables and config in place of FSx.  It is possible for FSx for Windows to be mounted to a Mac but it this is currently untested and not provisioned automatically at this stage.
 
 ## Replicate a Firehawk clone and manage your secrets repository
 
