@@ -249,14 +249,17 @@ data "aws_network_interface" "fsx_primary_interface" {
   id = local.primary_interface
 }
 
+locals {
+  fsx_private_ip = element( concat( data.aws_network_interface.fsx_primary_interface.*.private_ip, list("")), 0 )
+}
+
 output "fsx_private_ip" {
   depends_on = [
     aws_fsx_lustre_file_system.fsx_storage,
     data.external.primary_interface_id,
     data.aws_network_interface.fsx_primary_interface
   ]
-  # value = element( concat( data.aws_network_interface.fsx_primary_interface.*.private_ip, list("") ), 0 )
-  value = element( concat( data.aws_network_interface.fsx_primary_interface.*.private_ip, list("")), 0 )
+  value = local.fsx_private_ip
 }
 
 ### attach mounts onsite if fsx is available
@@ -274,6 +277,7 @@ resource "null_resource" "attach_local_mounts_after_start" {
     data.aws_network_interface.fsx_primary_interface
   ]
   triggers = {
+    fsx_private_ip = local.fsx_private_ip
     remote_mounts_on_local = var.remote_mounts_on_local
     ebs_template_sha1    = "${sha1( file( fileexists( local.fsx_volumes_user_path ) ? local.fsx_volumes_user_path : local.fsx_volumes_default_path ))}" # file contents can trigger volume attachment 
     fsx_enabled = local.fsx_enabled
