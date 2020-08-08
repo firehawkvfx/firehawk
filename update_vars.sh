@@ -795,7 +795,7 @@ source_vars () {
                 openssl rand -base64 64 > $vault_key || failed=true
                 chmod 600 $vault_key || failed=true
             fi
-            if [[ -O "$vault_key" || $EUID -ne 0 ]]; then # If we are the owner of the file, or we are root, continue.
+            if [[ -O "$vault_key" || $EUID = 0 ]]; then # If we are the owner of the file, or we are root, continue.
                 octal_permissions=$(stat -c '%a' "$vault_key")
                 if [[ "$octal_permissions" != "600" ]]; then
                     printf "\n${RED}ERROR: $vault_key not using valid permissions ($octal_permissions). Set to 600.${NC}\n"
