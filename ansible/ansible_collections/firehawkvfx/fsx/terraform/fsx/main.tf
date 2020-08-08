@@ -264,7 +264,6 @@ output "fsx_private_ip" {
 locals {
   fsx_volumes_user_path = "/secrets/${ var.envtier }/fsx_volumes/fsx_volumes.yaml"
   fsx_volumes_default_path = "/deployuser/ansible/ansible_collections/firehawkvfx/fsx/roles/fsx_volume_mounts/files/fsx_volumes.yaml"
-  fsx_volumes_prod_path = "/deployuser/ansible/ansible_collections/firehawkvfx/fsx/roles/fsx_volume_mounts/files/fsx_volumes_prod.yaml"
 }
 
 resource "null_resource" "attach_local_mounts_after_start" {
@@ -277,7 +276,6 @@ resource "null_resource" "attach_local_mounts_after_start" {
   triggers = {
     remote_mounts_on_local = var.remote_mounts_on_local
     ebs_template_sha1    = "${sha1( file( fileexists( local.fsx_volumes_user_path ) ? local.fsx_volumes_user_path : local.fsx_volumes_default_path ))}" # file contents can trigger volume attachment 
-    fsx_volumes_prod_path        = "${sha1( file( local.fsx_volumes_prod_path ))}"
     fsx_enabled = local.fsx_enabled
     sleep = var.sleep
   }

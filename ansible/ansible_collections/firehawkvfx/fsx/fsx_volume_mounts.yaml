@@ -25,8 +25,6 @@
     destroy: false
     import_pool: true
 
-    # onsite_nfs_vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/onsite_nfs_volumes/fsx_volumes.yaml", "files/onsite_nfs_volumes_{{ lookup('env','TF_VAR_envtier') }}.yaml", "files/onsite_nfs_volumes.yaml" ] # The first file found will be used, allowing the one in your secrets location to override defaults.
-
   roles:
   - role: firehawkvfx.fsx.fsx_volume_mounts
   - role: firehawkvfx.onsite_nfs.onsite_nfs_share
