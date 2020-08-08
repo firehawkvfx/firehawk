@@ -2,5 +2,6 @@
 # defaults file for ansible/roles/onsite_nfs_share
 
 # vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/ebs-volumes/softnas_ebs_volumes.yaml", "files/softnas_ebs_volumes_{{ lookup('env','TF_VAR_envtier') }}.yaml", "files/softnas_ebs_volumes.yaml" ]
+destroy: false
 secrets_path: "{{ lookup('env','TF_VAR_secrets_path') }}"
 onsite_nfs_vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/onsite_nfs_volumes/onsite_nfs_volumes.yaml", "files/onsite_nfs_volumes_{{ lookup('env','TF_VAR_envtier') }}.yaml", "files/onsite_nfs_volumes.yaml" ] # The first file found will be used, allowing the one in your secrets location to override defaults.

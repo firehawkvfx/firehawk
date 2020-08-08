@@ -15,15 +15,12 @@
     - vars/main.yml
 
   vars:
-    destroy: false
     import_pool: true
     variable_user: centos
     
     fsx_ip: # this should be provided inline since it is unique on each tf apply
     # ansible_become_pass: "{{ user_deadlineuser_pw }}"
     pcoip: false
-    destroy: false
-    import_pool: true
 
   roles:
   - role: firehawkvfx.fsx.fsx_volume_mounts
