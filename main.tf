@@ -265,6 +265,7 @@ module "fsx" {
   # sleep will save cost during idle time.
   sleep = var.sleep
   remote_mounts_on_local = var.remote_mounts_on_local
+  envtier = var.envtier
 
   source                         = "./ansible/ansible_collections/firehawkvfx/fsx/terraform/fsx"
 

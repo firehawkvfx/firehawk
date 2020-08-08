@@ -268,7 +268,7 @@ locals {
 }
 
 resource "null_resource" "attach_local_mounts_after_start" {
-  count      = ( !var.sleep && local.fsx_enabled ) ? 1 : 0
+  count      = ( !var.sleep && local.fsx_enabled == 1 ) ? 1 : 0
   depends_on = [
     aws_fsx_lustre_file_system.fsx_storage,
     data.external.primary_interface_id,
@@ -316,7 +316,7 @@ output "attach_local_mounts_after_start" {
 }
 
 resource "null_resource" "detach_local_mounts_after_stop" {
-  count      = ( var.sleep && local.fsx_enabled ) ? 1 : 0
+  count      = ( var.sleep && local.fsx_enabled == 1 ) ? 1 : 0
   depends_on = [
     aws_fsx_lustre_file_system.fsx_storage,
     data.external.primary_interface_id,

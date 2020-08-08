@@ -34,3 +34,5 @@ variable "vpn_private_ip" {}
 variable "sleep" {}
 
 variable "remote_mounts_on_local" {}
+
+variable "envtier" {}
