@@ -1,0 +1,12 @@
+# Do not directly edit this in the firehawk repository.  Instead, create a copy located at secrets/dev/onsite_nfs_volumes to override it
+
+# onsite nfs / remote mounts not on cloud site.
+site_mounts:
+- path: "{{ localnas1_export_path }}" # The NFS export volume name (eg: use showmount -e 192.168.92.11 to see a list of exported volume for that ip), usually /prod
+  ip: "{{ localnas1_private_ip }}" # The IP adress of the NFS server / NAS
+  volume_name: "{{ localnas1_volume_name }}" # the name of the volume eg: prod_volume_name
+  mount_path: "{{ localnas1_path_abs }}" # eg: /mycity_prod
+  state: present
+  bind1: "{{ prod_path_remote }}" # eg: /remote_prod
+  bind2:
+  site_bind1: "{{ prod_path_generic }}" # onsite, the nas export uses a bind to this path (default: /prod)

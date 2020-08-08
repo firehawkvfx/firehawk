@@ -1,0 +1,36 @@
+# This playbook will validate exports on fsx and mount those with the /etc/fstab file.
+
+# to update a workstation after altering any fsx mounts for the first time use the command -
+# ansible-playbook -i ansible/inventory ansible/ansible_collections/firehawkvfx/fsx/fsx_volume_mounts.yaml --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.firehawkvfx.com"
+
+# to update an onsite centos workstation use-
+# ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/fsx/fsx_volume_mounts.yaml -v -v --extra-vars "variable_host=workstation1 variable_user=deployuser hostname=workstation1 ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key" --skip-tags 'cloud_install'
+
+- hosts: "{{ variable_host | default('role_node_centos') }}"
+  remote_user: "{{ variable_user | default('centos') }}"
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
+  become: true
+  vars_files:
+    - /deployuser/ansible/group_vars/all/vars
+    - vars/main.yml
+
+  vars:
+    destroy: false
+    import_pool: true
+    variable_user: centos
+    secrets_path: "{{ lookup('env','TF_VAR_secrets_path') }}"
+    pcoip: false
+    destroy: false
+    import_pool: true
+
+  pre_tasks:
+  - name: test connection and permissions
+    debug:
+      msg: "connection established"
+    tags:
+    - local_install
+    - cloud_install
+
+  roles:
+  - role: firehawkvfx.onsite_nfs.onsite_nfs_share
+    when: localnas1_private_ip != 'none'

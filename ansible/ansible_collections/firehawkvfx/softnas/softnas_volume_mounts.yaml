@@ -437,7 +437,7 @@
     # ansible_become_pass: "{{ user_deadlineuser_pw }}"
     softnas_exports: "{{ hostvars[groups['role_softnas'][0]]['presence']['results'] }}"
     pcoip: False
-    vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/ebs-volumes/softnas_ebs_volumes.yaml", "files/softnas_ebs_volumes_{{ lookup('env','TF_VAR_envtier') }}.yaml", "files/softnas_ebs_volumes.yaml" ]
+    onsite_nfs_vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/onsite_nfs_volumes/onsite_nfs_volumes.yaml", "files/onsite_nfs_volumes_{{ lookup('env','TF_VAR_envtier') }}.yaml", "files/onsite_nfs_volumes.yaml" ] # The first file found will be used, allowing the one in your secrets location to override defaults.
 
   pre_tasks:
   - name: show localnas1_private_ip
@@ -446,6 +446,12 @@
     tags:
     - always
 
+  - name: aquire vars from secrets path before using defaults for onsite nfs mounts
+    include_vars: "{{ item }}"
+    with_first_found: "{{ onsite_nfs_vars_files_locs }}"
+    tags:
+    - always
+
   roles:
-  - role: firehawkvfx.core.onsite_nfs_share
+  - role: firehawkvfx.onsite_nfs.onsite_nfs_share
     when: localnas1_private_ip != 'none'

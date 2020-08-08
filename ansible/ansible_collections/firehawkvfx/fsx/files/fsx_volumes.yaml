@@ -8,20 +8,9 @@ exports:
   state: present
   storage_capacity: "{{ fsx_storage_capacity }}" # https://docs.aws.amazon.com/fsx/latest/APIReference/API_CreateFileSystemLustreConfiguration.html
   deployment_type: 'SCRATCH_2' # SCRATCH_1, SCRATCH_2, PERSISTENT1
-  mount_opts: "defaults,noatime,flock,_netdev"
+  mount_opts: "defaults,noatime,flock,_netdev" #
   per_unit_storage_throughput: 200 # when using PERSISTENT_1 deployment type. https://docs.aws.amazon.com/fsx/latest/APIReference/API_CreateFileSystemLustreConfiguration.html
   auto_import_policy: 'NEW_CHANGED' # https://docs.aws.amazon.com/fsx/latest/APIReference/API_CreateFileSystemLustreConfiguration.html
   bind1: "{{ prod_path_generic }}"
   bind2: "{{ prod_path_abs_cloud }}"
   site_bind1:
-
-# onsite nfs / remote mounts not on cloud site.
-site_mounts:
-- path: "{{ localnas1_export_path }}" # The NFS export volume name (eg: use showmount -e 192.168.92.11 to see a list of exported volume for that ip), usually /prod
-  ip: "{{ localnas1_private_ip }}" # The IP adress of the NFS server / NAS
-  volume_name: "{{ localnas1_volume_name }}" # the name of the volume eg: prod_volume_name
-  mount_path: "{{ localnas1_path_abs }}" # eg: /mycity_prod
-  state: present
-  bind1: "{{ prod_path_remote }}" # eg: /remote_prod
-  bind2:
-  site_bind1: "{{ prod_path_generic }}" # onsite, the nas export uses a bind to this path (default: /prod)

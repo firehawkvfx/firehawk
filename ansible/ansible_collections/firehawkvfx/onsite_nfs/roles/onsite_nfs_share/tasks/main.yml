@@ -1,9 +1,9 @@
 ---
 # tasks file for ansible/roles/onsite_nfs_share
 
-- name: aquire vars from secrets path before using defaults for other hosts 2
+- name: aquire vars from secrets path before using defaults for onsite nfs mounts
   include_vars: "{{ item }}"
-  with_first_found: "{{ vars_files_locs }}"
+  with_first_found: "{{ onsite_nfs_vars_files_locs }}"
   tags:
   - always
 
