@@ -38,17 +38,17 @@ else
     -d|--dev)
       ARGS='--dev'
       echo "using dev environment"
-      source ./update_vars.sh --dev --init; exit_test
+      source ./update_vars.sh --dev --init --save-template=false; exit_test
       ;;
     -p|--prod)
       ARGS='--prod'
       echo "using prod environment"
-      source ./update_vars.sh --prod --init; exit_test
+      source ./update_vars.sh --prod --init --save-template=false; exit_test
       ;;
     -p|--plan)
       tf_action="plan"
       echo "using prod environment"
-      source ./update_vars.sh --prod --init; exit_test
+      source ./update_vars.sh --prod --init --save-template=false; exit_test
       ;;
     *)
       raise_error "Unknown argument: ${argument}"
