@@ -172,7 +172,7 @@
   tags:
   - local_install
 
-- name: mount fsx Lustre volume from export  - master
+- name: Mount fsx Lustre volume from export - If this fails, verify the lustre packages are installed and the system has been rebooted at least once after installation of packages.
   become: yes
   mount:
     fstype: lustre

@@ -261,6 +261,20 @@ We also have these routes in a default configuration:
 
 These address ranges refer to the DHCP addresses that Open VPN will automaticaly generate for its own use with the encrypted tunnel.  Each source / destination address will get one of these DHCP addreses to use for the encrypted traffic through the VPN tunnel between sites.
 
+## FSX for Lustre
+
+With the 0.1 release we are now using a FSx for Lustre as our default remote file system in place of SoftNAS.  FSx for Lustre has some interesting ablities:
+
+- An S3 bucket's objects are visible through to the file system mount.  Shese objects are seamlessly streamed on demand.  The file system will only consume space when these objects are read or manually requested.
+- Objects can be offloaded back to S3.
+- The S3 bucket doesn't use any vendor lockin specific formatting, keeping it available for other purposes if required.
+- cluster based storage
+- Can scale in 1.2-2.4 TB increments, scaling the throughput with size linearly.
+- Persistent mode is self healing and able to replace node failures automatically (scratch is the default, self healing disabled)
+
+In order for this to function on any workstations nodes, you must have the AWS lustre client installed.
+https://docs.aws.amazon.com/fsx/latest/LustreGuide/install-lustre-client.html
+
 ## Replicate a Firehawk clone and manage your secrets repository
 
 - Clone this repository to your system / somewhere in your home dir.  This first deployment will be a dev test deployment.

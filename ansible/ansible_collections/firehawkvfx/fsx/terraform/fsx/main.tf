@@ -192,7 +192,7 @@ locals {
 }
 
 resource "aws_fsx_lustre_file_system" "fsx_storage" {
-  count      = local.fsx_enabled
+  count      = ( !var.sleep && ( local.fsx_enabled == 1 ) ) ? 1 : 0
   depends_on = [ null_resource.init_fsx ]
   
   import_path      = local.fsx_import_path
@@ -270,7 +270,7 @@ locals {
 }
 
 resource "null_resource" "attach_local_mounts_after_start" {
-  count      = ( !var.sleep && local.fsx_enabled == 1 ) ? 1 : 0
+  count      = ( !var.sleep && ( local.fsx_enabled == 1 ) ) ? 1 : 0
   depends_on = [
     aws_fsx_lustre_file_system.fsx_storage,
     data.external.primary_interface_id,
