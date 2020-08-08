@@ -318,9 +318,6 @@ EOT
       . /deployuser/scripts/exit_test.sh
       export SHOWCOMMANDS=true; set -x
 
-      export common_tags='${ jsonencode( merge(var.common_tags, local.extra_tags) ) }'; exit_test
-      echo "common_tags: $common_tags"
-
       if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
         # unmount volumes from local site when fsx is shutdown.
         ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/fsx/fsx_volume_mounts.yaml --extra-vars "variable_host=workstation1 variable_user=deployuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
