@@ -799,12 +799,14 @@ source_vars () {
                 octal_permissions=$(stat -c '%a' "$vault_key")
                 if [[ "$octal_permissions" != "600" ]]; then
                     printf "\n${RED}ERROR: $vault_key not using valid permissions ($octal_permissions). Set to 600.${NC}\n"
+                    ls -ltriah $vault_key
                     return 88
                     # (return 88) && true # for consideration https://stackoverflow.com/questions/6112540/return-an-exit-code-without-closing-shell/53454039?noredirect=1#comment111779181_53454039
                     # (exit 33) && true
                 fi
             else
-                printf "\n${RED}ERROR: The current user it not the owner of $vault_key.  Change the owner permssions and try again.${NC}\n"
+                printf "\n${RED}ERROR: The current user ($USER) it not the owner of $vault_key.  Change the owner permssions and try again.${NC}\n"
+                ls -ltriah $vault_key
                 return 88
             fi
         fi
