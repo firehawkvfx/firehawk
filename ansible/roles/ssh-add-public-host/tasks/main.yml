@@ -1,4 +1,4 @@
-- name: echo bastion public ip
+- name: "echo bastion public ip before connecting as user {{ variable_user }}. If the next stage cannot connect its possible ssd authorized_keys file has not been configured / initalised correctly on the host.  This can occur if the VM machine state was not saved after init"
   debug:
     msg: "{{ item }}"
   with_items:
