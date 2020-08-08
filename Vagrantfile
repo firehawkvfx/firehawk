@@ -173,7 +173,7 @@ Vagrant.configure(2) do |config|
                 node.trigger.after :up do |trigger|
                     trigger.warn = "Restarted for SSH config service alteration"
                 end
-                node.vm.provision "shell", inline: "chown -R deployuser:deployuser /secrets/keys/.vault-key*" # ensure deployuser owns the keys
+                node.vm.provision "shell", inline: "chown deployuser:deployuser /secrets/keys/.vault-key*" # ensure deployuser owns the keys
                 if machine[:hostname].include? "firehawkgateway"
                     node.vm.provision "shell", inline: "/deployuser/scripts/init-gateway.sh --#{envtier}"
                     # register address for gateway below
