@@ -32,3 +32,5 @@ variable "remote_ip_cidr" {}
 variable "vpn_private_ip" {}
 
 variable "sleep" {}
+
+variable "remote_mounts_on_local" {}

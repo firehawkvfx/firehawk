@@ -264,6 +264,7 @@ module "fsx" {
   fsx_storage = var.fsx_storage
   # sleep will save cost during idle time.
   sleep = var.sleep
+  remote_mounts_on_local = var.remote_mounts_on_local
 
   source                         = "./ansible/ansible_collections/firehawkvfx/fsx/terraform/fsx"
 
