@@ -299,6 +299,7 @@ if [[ "$vagrant_halt" == true ]]; then
     vagrant halt
 fi
 
+set -o pipefail # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 
 printf "\nvagrant_up: $vagrant_up\n"
 if [[ "$vagrant_up" == true ]]; then
@@ -319,7 +320,7 @@ if [[ "$vagrant_up" == true ]]; then
             echo "...Starting vagrant, and provisioning."
             # vagrant up --provision | ts '[%H:%M:%S]' # 
             echo "pwd $(pwd)"
-            $TF_VAR_firehawk_path/vagrant_provision.sh | ts '[%H:%M:%S]'
+            $TF_VAR_firehawk_path/vagrant_provision.sh | ts '[%H:%M:%S]'; exit_test
         else
             echo "...Starting vagrant"
             vagrant up | ts '[%H:%M:%S]'
@@ -368,7 +369,6 @@ if [ "$test_vm" = false ] ; then
 
     if [[ ! -z "$hostname" && ! -z "$port" && ! -z "$TF_VAR_envtier" ]]; then
         echo "init_vm_config: $init_vm_config"
-        set -o pipefail # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
         # set -o pipefail # Allow exit status of last command to fail to catch errors after pipe for ts function.
         ssh-keygen -R [$hostname]:$port -f ~/.ssh/known_hosts # clean host keys
         if [[ "$tf_action" == "sleep" ]]; then
