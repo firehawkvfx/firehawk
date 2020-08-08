@@ -103,7 +103,7 @@
   debug:
     var: item
   with_items: "{{ exports }}"
-  when: destroy | bool
+  when: destroy == false
   tags:
   - local_install
   - cloud_install
@@ -111,6 +111,7 @@
 - name: fsx exports to mount to this instance
   debug:
     var: item
+  when: destroy == false
   with_items: 
   - "{{ fsx_exports }}"
   tags:
