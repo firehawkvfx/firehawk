@@ -1,11 +1,5 @@
 # This playbook will validate exports on fsx and mount those with the /etc/fstab file.
 
-# to update a workstation after altering any fsx mounts for the first time use the command -
-# ansible-playbook -i ansible/inventory ansible/ansible_collections/firehawkvfx/fsx/fsx_volume_mounts.yaml --extra-vars "variable_host=role_workstation_centos hostname=cloud_workstation1.firehawkvfx.com"
-
-# to update an onsite centos workstation use-
-# ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/fsx/fsx_volume_mounts.yaml -v -v --extra-vars "variable_host=workstation1 variable_user=deployuser hostname=workstation1 ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key" --skip-tags 'cloud_install'
-
 - hosts: "{{ variable_host | default('role_node_centos') }}"
   remote_user: "{{ variable_user | default('centos') }}"
   gather_facts: "{{ variable_gather_facts | default('false') }}"
