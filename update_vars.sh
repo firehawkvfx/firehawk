@@ -713,6 +713,7 @@ source_vars () {
         done
 
         # substitute example var values into the template.
+        touch "$tmp_template_path"
         envsubst < "$temp_output" > "$tmp_template_path"
         rm $temp_output # remove temp so as to not accumulate results
 
