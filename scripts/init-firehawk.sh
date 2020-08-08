@@ -226,7 +226,7 @@ else
     echo "...Provision Local VM's"
     $TF_VAR_firehawk_path/scripts/init-openfirehawkserver-020-init.sh $ARGS; exit_test
     set +x
-    sed -i "s/^TF_VAR_vm_initialised=.*$/TF_VAR_vm_initialised=true/" $config_override # ...set the vm as having been initalised in config vars.
+    python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_vm_initialised=' 'true' # Enforce the vm state as being initalised
     source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override --force --silent; exit_test
   else
     echo "...Bypassing Init VM's"
