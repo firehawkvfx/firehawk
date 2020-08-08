@@ -209,7 +209,7 @@
     mount:
       fstype: lustre
       path: "/{{ item.item.volume_name }}"
-      opts: "defaults,noatime,flock,_netdev 0 0"
+      opts: "defaults,noatime,flock,_netdev\ 0\ 0"
       # source must pull the ip from the fsx primary interface
       src: "{{ fsx_ip }}@tcp:/{{ item.item.volume_name }}"
       state: "{{ ( destroy == false and item.item.path and item.rc == 0 and item.item.state == 'present') | ternary( 'mounted' , 'absent' ) }}"
@@ -380,7 +380,7 @@
     mount:
       fstype: lustre
       path: "/{{ item.item.volume_name }}"
-      opts: "defaults,noatime,flock,_netdev 0 0"
+      opts: "defaults,noatime,flock,_netdev\ 0 0"
       # source must pull the ip from the fsx primary interface
       src: "{{ fsx_ip }}@tcp:/{{ item.item.volume_name }}"
       state: "{{ ( item.item.path and item.rc == 0 and item.item.state == 'present') | ternary( 'mounted' , 'absent' ) }}"
