@@ -805,7 +805,8 @@ source_vars () {
                     # (exit 33) && true
                 fi
             else
-                printf "\n${RED}ERROR: The current user ($USER) it not the owner of $vault_key.  Change the owner permssions and try again.${NC}\n"
+                user_test=$(id -u)
+                printf "\n${RED}ERROR: The current user ($USER) (id -u: $user_test) (EUID: $EUID)  it not the owner of $vault_key.  Change the owner permssions and try again.${NC}\n"
                 ls -ltriah $vault_key
                 return 88
             fi
