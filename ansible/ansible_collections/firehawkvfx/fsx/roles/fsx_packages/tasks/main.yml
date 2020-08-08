@@ -54,4 +54,9 @@
     state: present
   when: not skip_packages and ( ansible_distribution == 'Ubuntu' )
 
-   
+- name: Reboot the server and wait for it to come back up. # This may not be necesary but a reboot resolved mounts to funciton properly
+  reboot:
+
+- name: Rebooted
+  debug:
+    msg: "rebooted"
