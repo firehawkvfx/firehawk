@@ -124,6 +124,7 @@
     state: directory
     owner: "{{ variable_user }}"
     group: "{{ variable_user }}"
+    mode: u=rwX,g=rwX,o=rwX
   become: true
   when: destroy == false and item.rc == 0
   with_items: 
@@ -138,6 +139,7 @@
     state: directory
     owner: "{{ variable_user }}"
     group: "{{ variable_user }}"
+    mode: u=rwX,g=rwX,o=rwX
   when: destroy == false and item.item.bind1 and item.rc == 0
   with_items: 
   - "{{ fsx_exports }}"
@@ -151,6 +153,7 @@
     state: directory
     owner: "{{ variable_user }}"
     group: "{{ variable_user }}"
+    mode: u=rwX,g=rwX,o=rwX
   when: destroy == false and item.item.bind2 and item.rc == 0
   with_items: 
   - "{{ fsx_exports }}"
