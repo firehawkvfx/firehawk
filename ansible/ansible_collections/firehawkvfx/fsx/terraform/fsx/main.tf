@@ -196,6 +196,7 @@ resource "aws_fsx_lustre_file_system" "fsx_storage" {
   depends_on = [ null_resource.init_fsx ]
   
   import_path      = local.fsx_import_path
+  export_path      = local.fsx_import_path
   storage_capacity = var.fsx_storage_capacity
   subnet_ids       = [ element( flatten( concat( var.subnet_ids, list("") ) ), 0 ) ]
   security_group_ids = concat( aws_security_group.fsx_vpc.*.id, aws_security_group.fsx_vpn.*.id, list("") )
