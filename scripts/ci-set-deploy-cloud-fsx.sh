@@ -11,6 +11,12 @@ python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VA
 python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_softnas_storage=' 'false' # ...On first apply, don't create softnas instance until vpn is working.
 python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_fsx_storage=' 'true' # ...On first apply, don't create softnas instance until vpn is working.
 
+if [[ "$TV_VAR_envtier" == "dev"]]; then
+  python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_remote_mounts_on_local=' 'false' # fsx cant be mounted to a test vm onsite. https://unix.stackexchange.com/questions/603567/how-can-i-fix-the-error-is-the-mgs-running-when-i-try-to-mount-fsx-for-lustre?stw=2
+else
+  python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_remote_mounts_on_local=' 'true' # mount fsx to bare metal nodes only at this time
+fi
+
 python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_aws_nodes_enabled=' 'false' # ...Site mounts will not be mounted in cloud.  currently this will disable provisioning any render node or remote workstation until vpn is confirmed to function after this step.
 
 # Alter the config file directly for these tests.  Revert to defaults in config.  config override will not disable if the var is set to itself
@@ -19,11 +25,5 @@ python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VA
 python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_localnas1_path_abs=' '$TF_VAR_localnas1_path_abs' # inherit default
 python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_localnas1_export_path=' '$TF_VAR_localnas1_export_path' # inherit default
 python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_localnas1_volume_name=' '$TF_VAR_localnas1_volume_name' # inherit default
-
-if [[ "$TV_VAR_envtier" == "dev"]]; then
-  python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_remote_mounts_on_local=' 'false' # fsx cant be mounted to a test vm onsite. https://unix.stackexchange.com/questions/603567/how-can-i-fix-the-error-is-the-mgs-running-when-i-try-to-mount-fsx-for-lustre?stw=2
-else
-  python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_remote_mounts_on_local=' 'true' # mount fsx to bare metal nodes only at this time
-fi
 
 python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_taint_single=' '(module.node.null_resource.fsx_mounts[0])' # taint 

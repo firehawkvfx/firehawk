@@ -12,6 +12,12 @@ python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VA
 python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_aws_nodes_enabled=' 'true' # ...Site mounts will not be mounted in cloud.  currently this will disable provisioning any render node or remote workstation until vpn is confirmed to function after this step.
 python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_fsx_storage=' 'true' # ...On first apply, don't create softnas instance until vpn is working.
 
+if [[ "$TV_VAR_envtier" == "dev"]]; then
+  python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_remote_mounts_on_local=' 'false' # fsx cant be mounted to a test vm onsite. https://unix.stackexchange.com/questions/603567/how-can-i-fix-the-error-is-the-mgs-running-when-i-try-to-mount-fsx-for-lustre?stw=2
+else
+  python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_remote_mounts_on_local=' 'true' # mount fsx to bare metal nodes only at this time
+fi
+
 # Alter the config file directly for these tests.  Revert to defaults in config.  config override will not disable if the var is set to itself
 python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_houdini_license_server_address=' '$TF_VAR_houdini_license_server_address' # inherit default
 python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_localnas1_private_ip=' '$TF_VAR_localnas1_private_ip' # inherit default

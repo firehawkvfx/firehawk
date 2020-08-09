@@ -281,6 +281,9 @@ If you have problems mounting FSx for lustre to your workstation's linux OS, it 
 
 If you intend to directly mount cloud storage to Mac OS, you should opt to use Softnas in your variables and config in place of FSx.  It is possible for FSx for Windows to be mounted to a Mac but it this is currently untested and not provisioned automatically at this stage.
 
+FSx for lustre cannot currently be mounted to Vagrant test vm's, so these onsite mounts are disabled.  FSx will be mounted in any of the green/blue resource environments
+https://unix.stackexchange.com/questions/603567/how-can-i-fix-the-error-is-the-mgs-running-when-i-try-to-mount-fsx-for-lustre?stw=2
+
 ## Replicate a Firehawk clone and manage your secrets repository
 
 - Clone this repository to your system / somewhere in your home dir.  This first deployment will be a dev test deployment.
