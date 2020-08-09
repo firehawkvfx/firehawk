@@ -366,7 +366,7 @@ else
     terraform refresh -lock=false; exit_test
 
     echo "...Terraform sleep"
-    terraform apply -lock=false --auto-approve -var sleep=true
+    terraform apply -lock=false --auto-approve -var sleep=true; exit_test
   elif [[ "$tf_action" == "single_test" ]]; then
     echo "...Test a singular one off command"; set -x
     $TF_VAR_firehawk_path/scripts/single-test.sh

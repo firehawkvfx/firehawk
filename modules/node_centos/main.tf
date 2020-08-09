@@ -637,7 +637,7 @@ resource "random_id" "ami_unique_name" {
     # Generate a new id each time we switch to a new instance id
     ami_id = aws_instance.node_centos[0].id
     # Currently fsx wont have a persistent IP after wake, so the image is updated after the fstab file is updated with the new ip.
-    fsx_mounts = null_resource.fsx_mounts[0].id
+    # fsx_mounts = null_resource.fsx_mounts[0].id
     fsx_private_ip = var.fsx_private_ip
   }
   byte_length = 8
