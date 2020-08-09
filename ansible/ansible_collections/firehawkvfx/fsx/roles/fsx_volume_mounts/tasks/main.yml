@@ -140,6 +140,7 @@
     owner: "{{ variable_user }}"
     group: "{{ variable_user }}"
     mode: u=rwX,g=rwX,o=rwX
+  become: true
   when: destroy == false and item.item.bind1 and item.rc == 0
   with_items: 
   - "{{ fsx_exports }}"
@@ -154,6 +155,7 @@
     owner: "{{ variable_user }}"
     group: "{{ variable_user }}"
     mode: u=rwX,g=rwX,o=rwX
+  become: true
   when: destroy == false and item.item.bind2 and item.rc == 0
   with_items: 
   - "{{ fsx_exports }}"

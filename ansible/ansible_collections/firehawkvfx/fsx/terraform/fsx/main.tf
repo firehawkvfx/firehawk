@@ -270,6 +270,30 @@ locals {
   fsx_volumes_default_path = "/deployuser/ansible/ansible_collections/firehawkvfx/fsx/roles/fsx_volume_mounts/files/fsx_volumes.yaml"
 }
 
+resource "null_resource" "fsx_update_file_system" { # Ensure the cluster synchronises changes in the S3 bucket.  Changes on the cluster must be pushed back to the bucket.
+  count      = ( !var.sleep && ( local.fsx_enabled == 1 ) ) ? 1 : 0
+  depends_on = [
+    aws_fsx_lustre_file_system.fsx_storage,
+    data.external.primary_interface_id,
+    data.aws_network_interface.fsx_primary_interface
+  ]
+  triggers = {
+    fsx_private_ip = local.fsx_private_ip
+    ebs_template_sha1    = "${sha1( file( fileexists( local.fsx_volumes_user_path ) ? local.fsx_volumes_user_path : local.fsx_volumes_default_path ))}" # file contents can trigger volume attachment 
+    fsx_enabled = local.fsx_enabled
+    sleep = var.sleep
+  }
+  provisioner "local-exec" {
+    interpreter = ["/bin/bash", "-c"]
+    command = <<EOT
+      . /deployuser/scripts/exit_test.sh
+      export SHOWCOMMANDS=true; set -x
+
+      aws fsx update-file-system --file-system-id ${local.id} --lustre-configuration AutoImportPolicy=NEW_CHANGED
+EOT
+  }
+}
+
 resource "null_resource" "attach_local_mounts_after_start" {
   count      = ( !var.sleep && ( local.fsx_enabled == 1 ) ) ? 1 : 0
   depends_on = [
@@ -289,9 +313,6 @@ resource "null_resource" "attach_local_mounts_after_start" {
     command = <<EOT
       . /deployuser/scripts/exit_test.sh
       export SHOWCOMMANDS=true; set -x
-
-      export common_tags='${ jsonencode( merge(var.common_tags, local.extra_tags) ) }'; exit_test
-      echo "common_tags: $common_tags"
 
       echo "TF_VAR_remote_mounts_on_local= $TF_VAR_remote_mounts_on_local"
       # ensure routes on workstation exist
@@ -330,34 +351,3 @@ EOT
 output "attach_local_mounts_after_start" {
   value = null_resource.attach_local_mounts_after_start.*.id
 }
-
-# resource "null_resource" "detach_local_mounts_after_stop" {
-#   count      = ( var.sleep && local.fsx_enabled == 1 ) ? 1 : 0
-#   depends_on = [
-#     aws_fsx_lustre_file_system.fsx_storage,
-#     data.external.primary_interface_id,
-#     data.aws_network_interface.fsx_primary_interface
-#   ]
-
-#   triggers = {
-#     fsx_enabled = local.fsx_enabled
-#     sleep = var.sleep
-#   }
-
-#   provisioner "local-exec" {
-#     interpreter = ["/bin/bash", "-c"]
-#     command = <<EOT
-#       . /deployuser/scripts/exit_test.sh
-#       export SHOWCOMMANDS=true; set -x
-
-#       export common_tags='${ jsonencode( merge(var.common_tags, local.extra_tags) ) }'; exit_test
-#       echo "common_tags: $common_tags"
-
-#       if [[ $TF_VAR_remote_mounts_on_local == true ]] ; then
-#         # unmount volumes from local site when fsx is shutdown.
-#         ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/fsx/fsx_volume_mounts.yaml --extra-vars "variable_host=workstation1 variable_user=deployuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
-#       fi
-# EOT
-#   }
-# }
-
