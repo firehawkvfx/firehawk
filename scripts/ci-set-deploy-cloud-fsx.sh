@@ -11,7 +11,7 @@ python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VA
 python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_softnas_storage=' 'false' # ...On first apply, don't create softnas instance until vpn is working.
 python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_fsx_storage=' 'true' # ...On first apply, don't create softnas instance until vpn is working.
 
-if [[ "$TV_VAR_envtier" == "dev"]]; then
+if [[ "$TF_VAR_envtier" == "dev"]]; then
   python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_remote_mounts_on_local=' 'false' # fsx cant be mounted to a test vm onsite. https://unix.stackexchange.com/questions/603567/how-can-i-fix-the-error-is-the-mgs-running-when-i-try-to-mount-fsx-for-lustre?stw=2
 else
   python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_remote_mounts_on_local=' 'true' # mount fsx to bare metal nodes only at this time
