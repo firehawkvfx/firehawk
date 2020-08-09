@@ -525,7 +525,7 @@ EOT
 }
 
 resource "null_resource" "fsx_mounts" {
-  count = var.aws_nodes_enabled && var.fsx_storage ? 1 : 0
+  count = ! var.sleep && var.aws_nodes_enabled && var.fsx_storage ? 1 : 0
 
   depends_on = [ var.fsx_private_ip, null_resource.install_deadline_worker ]
 
