@@ -9,19 +9,12 @@
   vars:
     variable_user: centos
     secrets_path: "{{ lookup('env','TF_VAR_secrets_path') }}"
-    vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/fsx_volumes/fsx_volumes.yaml", "files/fsx_volumes_{{ lookup('env','TF_VAR_envtier') }}.yaml", "files/fsx_volumes.yaml" ] # The first file found will be used, allowing the one in your secrets location to override defaults.
+    # vars_files_locs: [ "/{{ secrets_path }}/{{ lookup('env','TF_VAR_envtier') }}/fsx_volumes/fsx_volumes.yaml", "files/fsx_volumes_{{ lookup('env','TF_VAR_envtier') }}.yaml", "files/fsx_volumes.yaml" ] # The first file found will be used, allowing the one in your secrets location to override defaults.
 
   pre_tasks:
   - name: test connection and permissions
     debug:
       msg: "connection established"
-    tags:
-    - local_install
-    - cloud_install
-
-  - name: aquire vars from secrets path before using defaults for fsx mounts
-    include_vars: "{{ item }}"
-    with_first_found: "{{ vars_files_locs }}"
     tags:
     - always
 
