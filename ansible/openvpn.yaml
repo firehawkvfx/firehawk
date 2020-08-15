@@ -119,6 +119,20 @@
       register: command_result
       failed_when: "'ERROR' in command_result.stderr"
 
+    - name: ensure dns settings are correct
+      blockinfile:
+        path: /usr/local/openvpn_as/scripts/seperate/client.ovpn
+        marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
+        insertafter: '^.*setenv PUSH_PEER_INFO.*$'
+        block: |
+          push "dhcp-option DNS 10.0.0.2"
+
+    - name: start server afer settings change
+      shell: |
+        /usr/local/openvpn_as/scripts/sacli start
+      register: command_result
+      failed_when: "'ERROR' in command_result.stderr"
+
   roles:
     - role: openvpn
 
