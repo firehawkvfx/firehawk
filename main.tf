@@ -123,6 +123,7 @@ module "vpc" {
 
   bastion_ip         = module.bastion.public_ip
   bastion_dependency = module.bastion.bastion_dependency
+  # deadlinedb_complete = module.firehawk_init.deadlinedb_complete
 
   common_tags = local.common_tags
 }

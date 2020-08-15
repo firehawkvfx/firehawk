@@ -99,6 +99,7 @@ module "vpn" {
 
   bastion_ip = var.bastion_ip
   bastion_dependency = var.bastion_dependency
+  firehawk_init_dependency = var.firehawk_init_dependency
 
   #sleep will stop instances to save cost during idle time.
   sleep = var.sleep

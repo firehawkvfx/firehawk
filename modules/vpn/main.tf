@@ -85,6 +85,8 @@ variable "private_route_table_ids" {}
 variable "public_route_table_ids" {}
 variable "common_tags" {}
 
+variable "firehawk_init_dependency" {}
+
 module "openvpn" {
   #source = "github.com/firehawkvfx/tf_aws_openvpn"
 
@@ -139,6 +141,7 @@ module "openvpn" {
 
   bastion_ip = var.bastion_ip
   bastion_dependency = var.bastion_dependency
+  firehawk_init_dependency = var.firehawk_init_dependency
 
   #sleep will stop instances to save cost during idle time.
   sleep = var.sleep
