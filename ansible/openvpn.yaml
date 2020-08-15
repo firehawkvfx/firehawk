@@ -127,6 +127,7 @@
         block: |
           push "dhcp-option DOMAIN ap-southeast-2.compute.internal"
           push "dhcp-option DNS {{ private_ip }}" # Use the vpn private ip as the DNS resolver
+          script-security 2
           up /etc/openvpn/update-resolv-conf                                                                                      
           down /etc/openvpn/update-resolv-conf 
 
