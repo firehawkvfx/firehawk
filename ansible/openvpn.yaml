@@ -39,22 +39,6 @@
       debug:
         msg: "test vpn connection"
 
-    - name: ensure correct permissions on home dir to fix an issue with Open VPN AMI.
-      file: 
-        path: /home/openvpnas/
-        state: directory
-        owner: openvpnas
-        group: openvpnas
-      become: true
-
-    - name: Collect some facts only for ansible_distribution 01
-      setup:
-        gather_subset:
-          - '!all'
-          - 'min'
-      tags:
-      - always
-
 - hosts: "{{ variable_host | default('openvpnip_private') }}"
   remote_user: openvpnas
   gather_facts: "{{ variable_gather_facts | default('false') }}"
