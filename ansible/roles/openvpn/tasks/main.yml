@@ -9,6 +9,14 @@
   remote_user: deployuser
   become: yes
 
+- name: allow ip forwarding, uncomment line
+  replace:
+    path: /etc/sysctl.conf
+    regexp: '^#(.*net.ipv4.ip_forward=1.*)'
+    replace: '\1'
+  become_user: openvpnas
+  become: yes
+
 - name: contents of /usr/local/openvpn_as/scripts/seperate/
   command: "ls /usr/local/openvpn_as/scripts/seperate/"
   become_user: openvpnas
@@ -48,5 +56,11 @@
     force: yes
     flat: true
     mode: '0400'
+
+- name: inherit changes made to /etc/sysctl.conf
+  command: 'sysctl -p'
+  become_user: openvpnas
+  become: yes
+
 
 ### copy back to gateway next role
