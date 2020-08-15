@@ -39,6 +39,7 @@
     - gpgv2
     - jq
     - inotify-tools # Used to catch existance of interrupt file https://stackoverflow.com/questions/18893283/how-to-proceed-in-the-script-if-file-exists
+    - dnsmasq # For open vpn server,
     state: present
   become: true
 

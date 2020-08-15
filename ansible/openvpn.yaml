@@ -126,7 +126,7 @@
         insertafter: '^.*setenv PUSH_PEER_INFO.*$'
         block: |
           push "dhcp-option DOMAIN ap-southeast-2.compute.internal"
-          push "dhcp-option DNS 10.0.0.2"
+          push "dhcp-option DNS {{ private_ip }}" # Use the vpn private ip as the DNS resolver
 
     - name: start server afer settings change
       shell: |
