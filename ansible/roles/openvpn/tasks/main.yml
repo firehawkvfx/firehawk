@@ -14,7 +14,7 @@
     path: /etc/sysctl.conf
     regexp: '^#(.*net.ipv4.ip_forward=1.*)'
     replace: '\1'
-  become_user: openvpnas
+  # become_user: openvpnas
   become: yes
 
 - name: contents of /usr/local/openvpn_as/scripts/seperate/
