@@ -90,7 +90,7 @@
   tags:
   - init
 
-- name: force systemd to reread configs (2.4 and above)
+- name: force systemd to reread configs (2.4 and above).  Start openvpn client
   systemd:
     daemon_reload: yes
     name: openvpn
@@ -98,9 +98,9 @@
     enabled: yes
 
 - name: wait for first restart for service.
-  command: sleep 30
+  command: sleep 60
 
-- name: force systemd to reread configs (2.4 and above)
+- name: force systemd to restart openvpn client
   systemd:
     daemon_reload: yes
     name: openvpn
