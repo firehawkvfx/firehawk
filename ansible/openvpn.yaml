@@ -122,14 +122,15 @@
     - name: ensure dns settings are correct. # Use the vpn private ip as the DNS resolver
       blockinfile: # see https://www.reddit.com/r/aws/comments/5i4zqa/route53_private_dns_openvpn_happy_devops/
         path: /usr/local/openvpn_as/scripts/seperate/client.ovpn
-        marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
+        marker: "### {mark} ANSIBLE MANAGED BLOCK ###"
         insertafter: '^.*setenv PUSH_PEER_INFO.*$'
         block: |
           push "dhcp-option DOMAIN ap-southeast-2.compute.internal"
           push "dhcp-option DNS {{ private_ip }}"
           script-security 2
           up /etc/openvpn/update-resolv-conf                                                                                      
-          down /etc/openvpn/update-resolv-conf 
+          down /etc/openvpn/update-resolv-conf
+          down-pre
 
     - name: start server afer settings change
       shell: |
