@@ -39,6 +39,14 @@
       debug:
         msg: "test vpn connection"
 
+    - name: Collect some facts only for ansible_distribution 01
+      setup:
+        gather_subset:
+          - '!all'
+          - 'min'
+      tags:
+      - always
+
 - hosts: "{{ variable_host | default('openvpnip_private') }}"
   remote_user: openvpnas
   gather_facts: "{{ variable_gather_facts | default('false') }}"
