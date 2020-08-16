@@ -190,6 +190,7 @@
     nmcli:
       conn_name: tun0
       # type: ethernet
+      type: generic
       dns4:
       - "{{ private_ip }}"
       state: present
