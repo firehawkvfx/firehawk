@@ -176,7 +176,7 @@
       - network-manager
       - python-dbus
       - libnm-dev
-    state: present
+      state: present
 
   - name: Add two IPv4 DNS server addresses
     nmcli:
