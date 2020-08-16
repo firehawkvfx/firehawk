@@ -3,12 +3,44 @@
 
 # sudo mkdir -p /etc/openvpn/scripts
 
-- name: get script.  this should be forked instead.
-  get_url:
-    url: https://raw.githubusercontent.com/jonathanio/update-systemd-resolved/master/update-systemd-resolved
-    dest: '/etc/openvpn/scripts/'
-    mode: '0700'
+# https://askubuntu.com/questions/1032476/ubuntu-18-04-no-dns-resolution-when-connected-to-openvpn
+# - name: get script.  this should be forked instead.
+#   get_url:
+#     url: https://raw.githubusercontent.com/jonathanio/update-systemd-resolved/master/update-systemd-resolved
+#     dest: '/etc/openvpn/scripts/'
+#     mode: '0700'
+#   become: true
+
+- git:
+    repo: 'https://raw.githubusercontent.com/jonathanio/update-systemd-resolved/master/update-systemd-resolved'
+    dest: /home/deployuser
+    clone: yes
+
+- name: Build the default target
+  make:
+    chdir: /home/deployuser/update-systemd-resolved
   become: true
+
+- name: Started service
+  service:
+    name: systemd-resolved.service
+    state: started
+    enabled: true
+    daemon_reload: true
+  become: true
+
+- name: copy template file
+  copy:
+    remote_src: true
+    src: /home/deployuser/update-systemd-resolved/update-systemd-resolved
+    dest: /etc/openvpn/scripts/update-systemd-resolved
+  become: true
+
+# systemctl enable systemd-resolved.service
+# systemctl start systemd-resolved.service
+
+# may use ap instead
+# apt install openvpn-systemd-resolved
 
 # sudo wget  -P /etc/openvpn/scripts/
 # sudo chmod +x /etc/openvpn/scripts/update-systemd-resolved
