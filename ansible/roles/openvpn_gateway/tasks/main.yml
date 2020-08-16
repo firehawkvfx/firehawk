@@ -37,15 +37,6 @@
     dest: /etc/openvpn/scripts/update-systemd-resolved
   become: true
 
-# systemctl enable systemd-resolved.service
-# systemctl start systemd-resolved.service
-
-# may use ap instead
-# apt install openvpn-systemd-resolved
-
-# sudo wget  -P /etc/openvpn/scripts/
-# sudo chmod +x /etc/openvpn/scripts/update-systemd-resolved
-
 - name: Ansible copy files from ansible_host (copied earlier from openvpn server instance) to firehawkgateway (openvpn client)
   copy:
     src: /home/deployuser/openvpn_config/{{ item }}
