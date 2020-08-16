@@ -140,6 +140,7 @@
           # up-restart
           # down /etc/openvpn/scripts/update-systemd-resolved
           # down-pre
+          # dhcp-option DOMAIN-ROUTE .
 
     - name: start server afer settings change
       shell: |
@@ -162,3 +163,9 @@
   roles:
     - role: openvpn_gateway
 
+  tasks:
+  - name: configure name servers
+    net_system:
+      name_servers:
+        - "{{ openvpnip_private }}"
+    become: true
