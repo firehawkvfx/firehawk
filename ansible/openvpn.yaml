@@ -167,5 +167,5 @@
   - name: configure name servers
     net_system:
       name_servers:
-        - "{{ openvpnip_private }}"
+        - "{{ private_ip }}"
     become: true
