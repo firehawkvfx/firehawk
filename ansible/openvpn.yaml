@@ -186,11 +186,12 @@
       # daemon_reload: true
     become: true
 
-  - name: "Add two IPv4 DNS server addresses {{ private_ip }}"
+  - name: "Add IPv4 DNS server addresses {{ private_ip }}.  To check dns use 'nmcli device show tun0'"
     nmcli:
       conn_name: tun0
-      type: ethernet
+      # type: ethernet
       # type: generic
+      type: tun
       dns4:
       - "{{ private_ip }}"
       state: present
