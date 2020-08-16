@@ -164,8 +164,24 @@
     - role: openvpn_gateway
 
   tasks:
-  - name: configure name servers
-    net_system:
-      name_servers:
-        - "{{ private_ip }}"
-    become: true
+  # - name: configure name servers
+  #   net_system:
+  #     name_servers:
+  #       - "{{ private_ip }}"
+  #   become: true
+
+  - name: packages for nmcli
+    package:
+      name:
+      - network-manager
+      - python-dbus
+      - libnm-dev
+    state: present
+
+  - name: Add two IPv4 DNS server addresses
+    nmcli:
+      conn_name: tun0
+      # type: ethernet
+      dns4:
+      - "{{ private_ip }}"
+      state: present
