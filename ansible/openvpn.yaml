@@ -187,18 +187,20 @@
     - role: openvpn_gateway
 
   tasks:
-  - name: "Add IPv4 DNS server addresses {{ private_ip }}.  To check dns use 'nmcli device show tun0'"
-    nmcli:
-      conn_name: tun0
-      # type: ethernet
-      type: generic
-      # type: vlan
-      dns4:
-      - "{{ private_ip }}"
-      state: present
+  # - name: "Add IPv4 DNS server addresses {{ private_ip }}.  To check dns use 'nmcli device show tun0'"
+  #   nmcli:
+  #     conn_name: tun0
+  #     # type: ethernet
+  #     type: generic
+  #     # type: vlan
+  #     dns4:
+  #     - "{{ private_ip }}"
+  #     state: present
 
-  - name: retart and enable NetworkManager
-    service:
-      name: NetworkManager
-      state: restarted
-    become: true
+  # - name: retart and enable NetworkManager
+  #   service:
+  #     name: NetworkManager
+  #     state: restarted
+  #   become: true
+
+    # see https://askubuntu.com/questions/980382/how-do-i-to-set-the-dns-server-for-a-device-using-nmcli
