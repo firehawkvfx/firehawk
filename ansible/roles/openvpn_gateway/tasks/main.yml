@@ -1,6 +1,18 @@
 ---
 # tasks file for ansible/roles/openvpn_gateway
 
+# sudo mkdir -p /etc/openvpn/scripts
+
+- name: get script.  this should be forked instead.
+  get_url:
+    url: https://raw.githubusercontent.com/jonathanio/update-systemd-resolved/master/update-systemd-resolved
+    dest: '/etc/openvpn/scripts/'
+    mode: '0700'
+  become: true
+
+# sudo wget  -P /etc/openvpn/scripts/
+# sudo chmod +x /etc/openvpn/scripts/update-systemd-resolved
+
 - name: Ansible copy files from ansible_host (copied earlier from openvpn server instance) to firehawkgateway (openvpn client)
   copy:
     src: /home/deployuser/openvpn_config/{{ item }}

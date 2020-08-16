@@ -128,8 +128,10 @@
           push "dhcp-option DOMAIN ap-southeast-2.compute.internal"
           push "dhcp-option DNS {{ private_ip }}"
           script-security 2
-          up /etc/openvpn/update-resolv-conf                                                                                      
-          down /etc/openvpn/update-resolv-conf
+          # up /etc/openvpn/update-resolv-conf # not working in ubuntu 16.04                                                                     
+          # down /etc/openvpn/update-resolv-conf
+          up /etc/openvpn/scripts/update-systemd-resolved
+          down /etc/openvpn/scripts/update-systemd-resolved
           down-pre
 
     - name: start server afer settings change
