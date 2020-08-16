@@ -34,7 +34,6 @@
     - whois
     - python-passlib
     - zip
-    - openvpn
     - rng-tools
     - gpgv2
     - jq

@@ -1,0 +1,17 @@
+---
+# tasks file for openvpn_package
+
+- name: Add apt repo - ubuntu
+  apt_key:
+    url: https://swupdate.openvpn.net/repos/repo-public.gpg
+    state: present
+  become: true
+
+- name: sources.list fragment
+  command: echo "deb http://build.openvpn.net/debian/openvpn/release/2.5 xenial main" > /etc/apt/sources.list.d/openvpn-aptrepo.list
+  become: true
+
+- name: install latest open vpn package
+  package:
+    name:
+    - openvpn
