@@ -13,8 +13,9 @@
 
 - git:
     repo: 'https://raw.githubusercontent.com/jonathanio/update-systemd-resolved/master/update-systemd-resolved'
-    dest: /home/deployuser
+    dest: /home/deployuser/update-systemd-resolved
     clone: yes
+  become: true
 
 - name: Build the default target
   make:
