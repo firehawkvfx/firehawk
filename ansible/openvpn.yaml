@@ -191,7 +191,7 @@
       conn_name: tun0
       # type: ethernet
       # type: generic
-      type: tun
+      type: vlan
       dns4:
       - "{{ private_ip }}"
       state: present
