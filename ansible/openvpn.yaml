@@ -178,6 +178,14 @@
       - libnm-dev
       state: present
 
+  - name: Start and enable NetworkManager
+    service:
+      name: NetworkManager
+      state: started
+      enabled: true
+      # daemon_reload: true
+    become: true
+
   - name: Add two IPv4 DNS server addresses
     nmcli:
       conn_name: tun0
