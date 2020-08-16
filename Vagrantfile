@@ -135,7 +135,7 @@ Vagrant.configure(2) do |config|
                 node.vm.provision "shell", inline: "sudo add-apt-repository ppa:rmescandon/yq -y"
                 node.vm.provision "shell", inline: "sudo apt-get update -y"
                 node.vm.provision "shell", inline: "sudo apt-get install yq -y || echo 'Failure may indicate may have a duplicate mac/IP address on the same network.'"
-                node.vm.provision "shell", inline: "sudo apt-get install network-manager -y" # Used for DNS
+                # node.vm.provision "shell", inline: "sudo apt-get install network-manager -y" # Used for DNS
                 # Check env
                 node.vm.provision "shell", inline: "echo DEBIAN_FRONTEND=$DEBIAN_FRONTEND"
                 node.vm.provision "shell", inline: "export DEBIAN_FRONTEND=noninteractive"

@@ -160,10 +160,7 @@
     client_network: None
     client_netmask_bits: None
 
-  roles:
-    - role: openvpn_gateway
-
-  tasks:
+  pre_tasks:
   # - name: configure name servers
   #   net_system:
   #     name_servers:
@@ -186,6 +183,10 @@
       # daemon_reload: true
     become: true
 
+  roles:
+    - role: openvpn_gateway
+
+  tasks:
   - name: "Add IPv4 DNS server addresses {{ private_ip }}.  To check dns use 'nmcli device show tun0'"
     nmcli:
       conn_name: tun0
