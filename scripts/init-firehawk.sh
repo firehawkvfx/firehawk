@@ -6,7 +6,6 @@
 unset HISTFILE
 
 export LIVE_TERMINAL=false
-echo "LIVE_TERMINAL: $LIVE_TERMINAL"
 
 set -eE -o functrace # This block allows you to echo a line number for a failure.
 
@@ -157,8 +156,6 @@ parse_opts "$@"
 echo "set TF_VAR_softnas_volatile=$set_softnas_volatile in config override file=$config_override"
 sed -i "s/^TF_VAR_softnas_volatile=.*$/TF_VAR_softnas_volatile=${set_softnas_volatile}/" $config_override # ...Set if softnas volumes will be destroyed
 source $TF_VAR_firehawk_path/update_vars.sh --$TF_VAR_envtier --var-file config-override --force --silent; exit_test
-
-echo "LIVE_TERMINAL: $LIVE_TERMINAL"
 
 set_pipe() {
   id=$1
@@ -317,8 +314,6 @@ else
 
       echo "...Terraform Init" # required if aws provider version changes.
       terraform init; exit_test # Required to initialise any new modules
-      
-      echo "LIVE_TERMINAL: $LIVE_TERMINAL"
       
       echo "...Terraform refresh"
       terraform refresh -lock=false; exit_test
