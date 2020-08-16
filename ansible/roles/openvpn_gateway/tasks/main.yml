@@ -12,7 +12,7 @@
 #   become: true
 
 - git:
-    repo: 'https://raw.githubusercontent.com/jonathanio/update-systemd-resolved/master/update-systemd-resolved'
+    repo: 'https://github.com/jonathanio/update-systemd-resolved.git'
     dest: /home/deployuser/update-systemd-resolved
     clone: yes
   become: true
