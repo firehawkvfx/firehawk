@@ -305,6 +305,7 @@ printf "\nvagrant_up: $vagrant_up\n"
 if [[ "$vagrant_up" == true ]]; then
     echo "vagrant status:"
     vagrant_status="$(vagrant status)"
+    echo $vagrant_status
     total_running_machines=$(echo "$vagrant_status" | grep -ic 'running (virtualbox)') || true; exit_test
 
     echo "total_running_machines $total_running_machines"

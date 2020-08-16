@@ -7,14 +7,16 @@
     state: present
   become: true
 
-- name: Add apt repo - ubuntu
+- name: Add apt repo - /etc/apt/sources.list.d/openvpn-aptrepo.list
   apt_repository:
     repo: deb http://build.openvpn.net/debian/openvpn/release/2.4 xenial main
-    filename: /openvpn-aptrepo
+    filename: openvpn-aptrepo
     state: present
+  become: true
 
 - name: install latest open vpn package
   package:
     name:
     - openvpn
     update_cache: yes
+  become: true
