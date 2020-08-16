@@ -191,8 +191,14 @@
     nmcli:
       conn_name: tun0
       # type: ethernet
-      # type: generic
-      type: vlan
+      type: generic
+      # type: vlan
       dns4:
       - "{{ private_ip }}"
       state: present
+
+  - name: retart and enable NetworkManager
+    service:
+      name: NetworkManager
+      state: restarted
+    become: true
