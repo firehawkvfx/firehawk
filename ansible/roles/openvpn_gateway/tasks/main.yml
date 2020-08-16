@@ -1,5 +1,5 @@
 ---
-# tasks file for ansible/roles/openvpn-gateway
+# tasks file for ansible/roles/openvpn_gateway
 
 - name: Ansible copy files from ansible_host (copied earlier from openvpn server instance) to firehawkgateway (openvpn client)
   copy:

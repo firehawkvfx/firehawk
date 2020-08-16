@@ -4,4 +4,4 @@
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   
   roles:
-    - ansible/roles/openvpn-gateway
+    - ansible/roles/openvpn_gateway

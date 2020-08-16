@@ -151,5 +151,5 @@
     client_netmask_bits: None
 
   roles:
-    - role: openvpn-gateway
+    - role: openvpn_gateway
 
