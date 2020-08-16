@@ -186,11 +186,11 @@
       # daemon_reload: true
     become: true
 
-  - name: Add two IPv4 DNS server addresses
+  - name: "Add two IPv4 DNS server addresses {{ private_ip }}"
     nmcli:
       conn_name: tun0
-      # type: ethernet
-      type: generic
+      type: ethernet
+      # type: generic
       dns4:
       - "{{ private_ip }}"
       state: present
