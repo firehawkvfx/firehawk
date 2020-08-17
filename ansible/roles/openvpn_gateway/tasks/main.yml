@@ -134,16 +134,16 @@
 
 ### Configure DNS to point upstream
 
-- name: set dns in resolve.conf
+- name: 'set dns in resolve.conf'
   blockinfile:
     path: /etc/resolvconf/resolv.conf.d/head
     block: |
       nameserver {{ private_ip }}
-      # nameserver 8.8.8.8 
-      # nameserver 8.8.4.4
       nameserver 127.0.0.1
       search ap-southeast-2.compute.internal
-    marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.subnet }}"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK"
+# nameserver 8.8.8.8 
+# nameserver 8.8.4.4
 
 - name: force systemd to restart resolvconf
   systemd:
