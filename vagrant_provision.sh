@@ -9,3 +9,5 @@ BEGIN{ tog=0; }
 /./ { if(tog){print $1} }
 ' | \
 xargs -P2 -I {} vagrant up --provision {}
+
+vagrant snapshot push
