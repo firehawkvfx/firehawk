@@ -83,10 +83,6 @@
     line: '# OVPN_ACCESS_SERVER_AUTOLOGIN=1'
     insertafter: '# OVPN_ACCESS_SERVER_PROFILE='
 
-- name: test update -
-  debug:
-    msg: "updating autologin. {{ softnas1_private_ip1 }}"
-
 - name: Ansible copy local openvpn files to /etc/openvpn
   copy:
     src: /home/deployuser/openvpn_config/{{ item }}
@@ -135,6 +131,28 @@
     name: openvpn
     state: restarted
     enabled: yes
+
+### Configure DNS to point upstream
+
+- name: set dns in resolve.conf
+  blockinfile:
+    path: /etc/resolvconf/resolv.conf.d/head
+    block: |
+      nameserver {{ private_ip }}
+      # nameserver 8.8.8.8 
+      # nameserver 8.8.4.4
+      nameserver 127.0.0.1
+      search ap-southeast-2.compute.internal
+    marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.subnet }}"
+
+- name: force systemd to restart resolvconf
+  systemd:
+    # daemon_reload: yes
+    name: resolvconf
+    state: restarted
+    enabled: yes
+
+
 
 # - name: configure routes to opposite dev/prod environment so that nodes in both envs can access licence server
 #   shell: |

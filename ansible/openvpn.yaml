@@ -160,33 +160,30 @@
     client_network: None
     client_netmask_bits: None
 
-  pre_tasks:
-  # - name: configure name servers
-  #   net_system:
-  #     name_servers:
-  #       - "{{ private_ip }}"
+  # pre_tasks:
+
+  # - name: packages for nmcli
+  #   package:
+  #     name:
+  #     - network-manager
+  #     - python-dbus
+  #     - libnm-dev
+  #     state: present
+
+  # - name: Start and enable NetworkManager
+  #   service:
+  #     name: NetworkManager
+  #     state: started
+  #     enabled: true
+  #     # daemon_reload: true
   #   become: true
 
-  - name: packages for nmcli
-    package:
-      name:
-      - network-manager
-      - python-dbus
-      - libnm-dev
-      state: present
-
-  - name: Start and enable NetworkManager
-    service:
-      name: NetworkManager
-      state: started
-      enabled: true
-      # daemon_reload: true
-    become: true
-
   roles:
-    - role: openvpn_gateway
+  - role: openvpn_gateway
 
-  tasks:
+# see manual dns https://www.tecmint.com/set-permanent-dns-nameservers-in-ubuntu-debian/
+
+  # tasks:
   # - name: "Add IPv4 DNS server addresses {{ private_ip }}.  To check dns use 'nmcli device show tun0'"
   #   nmcli:
   #     conn_name: tun0
