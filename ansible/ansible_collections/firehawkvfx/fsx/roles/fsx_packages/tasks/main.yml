@@ -35,7 +35,7 @@
     # gpgcakey: 
   when: not skip_packages and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
 
-- name: Lustre packages - centos
+- name: Install Lustre packages - centos
   package:
     name:
     - kmod-lustre-client
@@ -56,21 +56,21 @@
     state: present
   when: not skip_packages and ( ansible_distribution == 'Ubuntu' )
 
-# - name: Lustre packages - ubuntu
-#   package:
-#     name:
-#     - linux-aws
-#     - lustre-client-modules-aws
-#     state: present
-#   when: not skip_packages and ( ansible_distribution == 'Ubuntu' )
-
-- name: Lustre packages - ubuntu or centos
+- name: Install Lustre packages - ubuntu
   package:
     name:
     - linux-aws
     - lustre-client-modules-aws
     state: present
-  when: not skip_packages
+  when: not skip_packages and ( ansible_distribution == 'Ubuntu' )
+
+# - name: Lustre packages - ubuntu or centos
+#   package:
+#     name:
+#     - linux-aws
+#     - lustre-client-modules-aws
+#     state: present
+#   when: not skip_packages
 
 - name: Reboot the server and wait for it to come back up. # This may not be necesary but a reboot resolved mounts to funciton properly
   reboot:
