@@ -19,36 +19,141 @@ locals {
   name = "firehawk-compute_pipeid${lookup(var.common_tags, "pipelineid", "0")}"
   extra_tags = { 
     role = "vpc"
+    Name = local.name
   }
 }
 
-module "vpc" {
-  source = "terraform-aws-modules/vpc/aws"
-  version = "~> 2.44.0"
+resource "aws_vpc" "main" {
+  count       = var.create_vpc ? 1 : 0
 
-  create_vpc = var.create_vpc
-
-  name = local.name
-  cidr = var.vpc_cidr
-
-  azs             = var.azs
-  private_subnets = var.private_subnets
-  public_subnets  = var.public_subnets
-
-  # if sleep is true, then nat is disabled to save costs during idle time.
-  enable_nat_gateway     = var.sleep || false == var.enable_nat_gateway ? false : true
-  single_nat_gateway     = true
-  one_nat_gateway_per_az = false
-
-  #not sure if this is actually required - it seems mroe related to aws type vpn gateway as a paid service
-  #enable_vpn_gateway = true
+  cidr_block       = var.vpc_cidr
 
   enable_dns_support   = true
   enable_dns_hostnames = true
 
   tags = merge(map("Name", format("%s", local.name)), var.common_tags, local.extra_tags)
-  
 }
+
+locals {
+  vpc_id = element( concat( aws_vpc.main.*.ids, list(""), 0 )
+}
+
+resource "aws_internet_gateway" "gw" {
+  vpc_id = local.vpc_id
+
+  tags = merge(map("Name", format("%s", local.name)), var.common_tags, local.extra_tags)
+}
+
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
+resource "aws_subnet" "public_subnet" {
+  count = var.create_vpc ? length( var.public_subnets ) : 0
+  vpc_id                  = local.vpc_id
+
+  availability_zone = element( data.aws_availability_zones.available.names, count.index )
+  cidr_block              = elment( var.public_subnets, count.index )
+  map_public_ip_on_launch = true
+
+  depends_on = [aws_internet_gateway.gw]
+
+  tags = merge(map("Name", format("%s", local.name)), var.common_tags, local.extra_tags)
+}
+
+resource "aws_eip" "nat" {
+  count = length( aws_subnet.public_subnet.*.ids )
+
+  vpc = true
+  depends_on                = [aws_internet_gateway.gw]
+
+  tags = merge(map("Name", format("%s", local.name)), var.common_tags, local.extra_tags)
+}
+
+
+
+resource "aws_subnet" "private_subnet" {
+  count = var.create_vpc ? length( var.private_subnets ) : 0
+  vpc_id     = local.vpc_id
+
+  availability_zone = element( data.aws_availability_zones.available.names, count.index )
+  cidr_block = element(var.private_subnets, count.index)
+  tags = merge(map("Name", format("%s", local.name)), var.common_tags, local.extra_tags)
+}
+
+resource "aws_nat_gateway" "gw" { # We use a single nat gateway currently to save cost.
+  count = var.sleep || false == var.enable_nat_gateway ? false : true
+  allocation_id = aws_eip.nat.id
+  subnet_id     = element( aws_subnet.private_subnet.ids, count.index )
+  tags = merge(map("Name", format("%s", local.name)), var.common_tags, local.extra_tags)
+}
+
+resource "aws_route_table" "private" {
+  count       = var.create_vpc ? 1 : 0
+  vpc_id = local.vpc_id
+  tags = merge(map("Name", "private"), var.common_tags, local.extra_tags)
+}
+
+resource "aws_route" "private_nat_gateway" {
+  count = var.create_vpc ? 1 : 0
+  route_table_id         = element(concat(aws_route_table.private.*.ids, list("")), 0)
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id         = aws_nat_gateway.gw.id
+  timeouts {
+    create = "5m"
+  }
+}
+
+resource "aws_route_table" "public" {
+  count       = var.create_vpc ? 1 : 0
+  vpc_id = local.vpc_id
+  tags = merge(map("Name", "public"), var.common_tags, local.extra_tags)
+}
+
+resource "aws_route" "public_gateway" {
+  count = var.create_vpc ? 1 : 0
+  route_table_id         = element(concat(aws_route_table.public.*.ids, list("")), 0)
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.gw.id
+  timeouts {
+    create = "5m"
+  }
+}
+
+resource "aws_route_table_association" "private_associations" {
+  count = length( aws_subnet.private_subnet.*.ids )
+
+  subnet_id      = element( aws_subnet.private_subnet.ids, count.index )
+  route_table_id = element( module.aws_route_table.private.*.ids, 0 )
+}
+
+# module "vpc" {
+#   source = "terraform-aws-modules/vpc/aws"
+#   version = "~> 2.44.0"
+
+#   create_vpc = var.create_vpc
+
+#   name = local.name
+#   cidr = var.vpc_cidr
+
+#   azs             = var.azs
+#   private_subnets = var.private_subnets
+#   public_subnets  = var.public_subnets
+
+#   # if sleep is true, then nat is disabled to save costs during idle time.
+#   enable_nat_gateway     = var.sleep || false == var.enable_nat_gateway ? false : true
+#   single_nat_gateway     = true
+#   one_nat_gateway_per_az = false
+
+#   #not sure if this is actually required - it seems mroe related to aws type vpn gateway as a paid service
+#   #enable_vpn_gateway = true
+
+#   enable_dns_support   = true
+#   enable_dns_hostnames = true
+
+#   tags = merge(map("Name", format("%s", local.name)), var.common_tags, local.extra_tags)
+  
+# }
 
 variable "remote_subnet_cidr" {
 }
@@ -66,21 +171,21 @@ module "vpn" {
   route_public_domain_name = var.route_public_domain_name
 
   # dummy attribute to force dependency on IGW.
-  igw_id = module.vpc.igw_id
+  igw_id = aws_internet_gateway.gw.id
 
-  vpc_id   = module.vpc.vpc_id
+  vpc_id   = local.vpc_id
   vpc_cidr = var.vpc_cidr
 
   #the cidr range that the vpn will assign to remote addresses within the vpc if routing.
   vpn_cidr           = var.vpn_cidr
   remote_subnet_cidr = var.remote_subnet_cidr
 
-  private_route_table_ids = module.vpc.private_route_table_ids
-  public_route_table_ids  = module.vpc.public_route_table_ids
+  private_route_table_ids = aws_route_table.private.*.ids
+  public_route_table_ids  = aws_route_table.public.*.ids
 
   #the remote public address that will connect to the openvpn instance
   remote_vpn_ip_cidr = var.remote_ip_cidr
-  public_subnet_ids  = module.vpc.public_subnets
+  public_subnet_ids  = aws_subnet.public_subnet.*.ids
 
   private_subnets = var.private_subnets
   public_subnets  = var.public_subnets
@@ -106,14 +211,9 @@ module "vpn" {
   common_tags = var.common_tags
 }
 
-locals {
-  max_subnet_length = length(var.private_subnets)
-  nat_gateway_count = length(module.vpc.natgw_ids)
-}
-
 resource "null_resource" "dependency_vpc" {
   triggers = {
-    vpc_id = module.vpc.vpc_id
+    vpc_id = local.vpc_id
   }
 }
 
