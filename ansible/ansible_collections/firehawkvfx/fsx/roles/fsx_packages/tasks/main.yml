@@ -15,10 +15,10 @@
 #     dest: /tmp/fsx-rpm-public-key.asc
 #   when: not skip_packages and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
 
-# - rpm_key:
-#     state: present
-#     key: /tmp/fsx-rpm-public-key.asc
-#   when: not skip_packages and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
+- rpm_key:
+    state: present
+    key: https://fsx-lustre-client-repo-public-keys.s3.amazonaws.com/fsx-rpm-public-key.asc
+  when: not skip_packages and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
 
 # - get_url:
 #     url: https://fsx-lustre-client-repo.s3.amazonaws.com/el/7/fsx-lustre-client.repo
@@ -29,8 +29,9 @@
   yum_repository:
     name: aws-fsx
     file: aws-fsx.repo
+    description: FXx for lustre repository  
     baseurl: https://fsx-lustre-client-repo.s3.amazonaws.com/el/7/fsx-lustre-client.repo
-    gpgkey: https://fsx-lustre-client-repo-public-keys.s3.amazonaws.com/fsx-rpm-public-key.asc
+    # gpgkey: https://fsx-lustre-client-repo-public-keys.s3.amazonaws.com/fsx-rpm-public-key.asc
     # gpgcakey: 
   when: not skip_packages and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
 
