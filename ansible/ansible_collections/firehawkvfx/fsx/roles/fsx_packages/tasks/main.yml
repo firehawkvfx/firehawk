@@ -9,20 +9,29 @@
   tags:
   - always
 
-- name: get key - centos
-  get_url:
-    url: https://fsx-lustre-client-repo-public-keys.s3.amazonaws.com/fsx-rpm-public-key.asc
-    dest: /tmp/fsx-rpm-public-key.asc
-  when: not skip_packages and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
+# - name: get key - centos
+#   get_url:
+#     url: https://fsx-lustre-client-repo-public-keys.s3.amazonaws.com/fsx-rpm-public-key.asc
+#     dest: /tmp/fsx-rpm-public-key.asc
+#   when: not skip_packages and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
 
-- rpm_key:
-    state: present
-    key: /tmp/fsx-rpm-public-key.asc
-  when: not skip_packages and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
+# - rpm_key:
+#     state: present
+#     key: /tmp/fsx-rpm-public-key.asc
+#   when: not skip_packages and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
 
-- get_url:
-    url: https://fsx-lustre-client-repo.s3.amazonaws.com/el/7/fsx-lustre-client.repo
-    dest: /etc/yum.repos.d/aws-fsx.repo
+# - get_url:
+#     url: https://fsx-lustre-client-repo.s3.amazonaws.com/el/7/fsx-lustre-client.repo
+#     dest: /etc/yum.repos.d/aws-fsx.repo
+#   when: not skip_packages and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
+
+- name: Add fsx lustre repo
+  yum_repository:
+    name: aws-fsx
+    file: aws-fsx.repo
+    baseurl: https://fsx-lustre-client-repo.s3.amazonaws.com/el/7/fsx-lustre-client.repo
+    gpgkey: https://fsx-lustre-client-repo-public-keys.s3.amazonaws.com/fsx-rpm-public-key.asc
+    # gpgcakey: 
   when: not skip_packages and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
 
 - name: Lustre packages - centos
@@ -46,13 +55,21 @@
     state: present
   when: not skip_packages and ( ansible_distribution == 'Ubuntu' )
 
-- name: Lustre packages - ubuntu
+# - name: Lustre packages - ubuntu
+#   package:
+#     name:
+#     - linux-aws
+#     - lustre-client-modules-aws
+#     state: present
+#   when: not skip_packages and ( ansible_distribution == 'Ubuntu' )
+
+- name: Lustre packages - ubuntu or centos
   package:
     name:
     - linux-aws
     - lustre-client-modules-aws
     state: present
-  when: not skip_packages and ( ansible_distribution == 'Ubuntu' )
+  when: not skip_packages
 
 - name: Reboot the server and wait for it to come back up. # This may not be necesary but a reboot resolved mounts to funciton properly
   reboot:
