@@ -15,7 +15,6 @@
   template:
     src: "{{ houdini_template }}"
     dest: "/tmp/houdini{{ houdini_version_item.houdini_major_version }}_from_template.env"
-    # owner: "deadlineuser"
     mode: '0666'
   become: yes
   connection: local
