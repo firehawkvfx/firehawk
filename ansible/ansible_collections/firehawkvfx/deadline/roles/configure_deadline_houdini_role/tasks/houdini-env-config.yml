@@ -16,6 +16,7 @@
     src: "{{ houdini_template }}"
     dest: "/tmp/houdini{{ houdini_version_item.houdini_major_version }}_from_template.env"
     owner: "deadlineuser"
+    mode: '0666'
   become: yes
   connection: local
   tags:
@@ -26,6 +27,7 @@
   copy:
     src: "/tmp/houdini{{ houdini_version_item.houdini_major_version }}_from_template.env"
     dest: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini{{ houdini_version_item.houdini_major_version }}_from_template.env"
+    mode: '0600'
     owner: "deadlineuser"
   become: true
   tags:
