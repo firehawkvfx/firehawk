@@ -28,11 +28,9 @@
 - name: Add fsx lustre repo
   yum_repository:
     name: aws-fsx
-    file: aws-fsx.repo
-    description: FXx for lustre repository  
-    baseurl: https://fsx-lustre-client-repo.s3.amazonaws.com/el/7/fsx-lustre-client.repo
-    # gpgkey: https://fsx-lustre-client-repo-public-keys.s3.amazonaws.com/fsx-rpm-public-key.asc
-    # gpgcakey: 
+    file: fsx-lustre-client
+    description: FSx for lustre repository  
+    baseurl: https://fsx-lustre-client-repo.s3.amazonaws.com/el/7/
   when: not skip_packages and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
 
 - name: Install Lustre packages - centos
