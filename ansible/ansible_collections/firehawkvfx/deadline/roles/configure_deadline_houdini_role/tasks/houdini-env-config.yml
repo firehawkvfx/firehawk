@@ -15,6 +15,7 @@
   template:
     src: "{{ houdini_template }}"
     dest: "/tmp/houdini{{ houdini_version_item.houdini_major_version }}_from_template.env"
+    owner: deadlineuser
   become: yes
   connection: local
   tags:
@@ -25,6 +26,7 @@
   copy:
     src: "/tmp/houdini{{ houdini_version_item.houdini_major_version }}_from_template.env"
     dest: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini{{ houdini_version_item.houdini_major_version }}_from_template.env"
+    owner: deadlineuser
   become: true
   tags:
   - cloud-install
