@@ -23,6 +23,7 @@
 - get_url:
     url: https://fsx-lustre-client-repo.s3.amazonaws.com/el/7/fsx-lustre-client.repo
     dest: /etc/yum.repos.d/aws-fsx.repo
+    mode: '0644'
   when: not skip_packages and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
 
 # - name: Add fsx lustre repo # couldn't get this to work because the .xml fle isn't present
@@ -51,6 +52,7 @@
   apt_repository:
     repo: deb https://fsx-lustre-client-repo.s3.amazonaws.com/ubuntu xenial main
     filename: fsxlustreclientrepo
+    mode: '0644'
     state: present
   when: not skip_packages and ( ansible_distribution == 'Ubuntu' )
 
