@@ -35,7 +35,7 @@ resource "aws_vpc" "main" {
 }
 
 locals {
-  vpc_id = element( concat( aws_vpc.main.*.ids, list(""), 0 )
+  vpc_id = element( concat( aws_vpc.main.*.ids, list("")), 0 )
 }
 
 resource "aws_internet_gateway" "gw" {
