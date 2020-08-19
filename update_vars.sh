@@ -62,11 +62,15 @@ save_template=true
 export tmp_template_path=$TF_VAR_firehawk_path/tmp/secrets.template
 echo "Ensure permissions to create and remove template: $tmp_template_path"
 touch $tmp_template_path
-rm $tmp_template_path
+if [ -f $tmp_template_path ]; then
+    rm -f $tmp_template_path
+fi
 temp_output=$TF_VAR_firehawk_path/tmp/secrets.temp
 echo "Ensure permissions to create and remove temp_output: $temp_output"
 touch $temp_output
-rm $temp_output
+if [ -f $tmp_template_path ]; then
+    rm -f $temp_output
+fi
 
 failed=false
 verbose=false

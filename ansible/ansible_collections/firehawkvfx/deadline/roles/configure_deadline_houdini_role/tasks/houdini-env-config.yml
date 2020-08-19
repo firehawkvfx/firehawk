@@ -15,6 +15,7 @@
   template:
     src: "{{ houdini_template }}"
     dest: "/tmp/houdini{{ houdini_version_item.houdini_major_version }}_from_template.env"
+    mode: '0666'
   become: yes
   connection: local
   tags:
@@ -25,6 +26,8 @@
   copy:
     src: "/tmp/houdini{{ houdini_version_item.houdini_major_version }}_from_template.env"
     dest: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini{{ houdini_version_item.houdini_major_version }}_from_template.env"
+    mode: '0600'
+    owner: "deadlineuser"
   become: true
   tags:
   - cloud-install
@@ -35,7 +38,7 @@
     path: "/home/deadlineuser/houdini{{ houdini_version_item.houdini_major_version }}/houdini.env"
     state: touch
     mode: '0600'
-    owner: deadlineuser
+    owner: "deadlineuser"
   become: yes
   tags:
   - cloud-install
@@ -76,7 +79,7 @@
     path: /home/deadlineuser/.bashrc
     line: "alias h{{ houdini_version_item.houdini_major_version }}='cwd=\"$(pwd)\" && cd /opt/hfs{{ houdini_version_item.houdini_major_version }}/ && source houdini_setup && cd $cwd && houdinifx'"
     backup: true
-    owner: deadlineuser
+    owner: "deadlineuser"
     regexp: ".*alias h{{ houdini_version_item.houdini_major_version }}=.*"
   become: yes
   tags:
@@ -89,7 +92,7 @@
     path: /home/deadlineuser/.bashrc
     line: "alias hy{{ houdini_version_item.houdini_major_version }}='cwd=\"$(pwd)\" && cd /opt/hfs{{ houdini_version_item.houdini_major_version }}/ && source houdini_setup && cd $cwd && hython'"
     backup: true
-    owner: deadlineuser
+    owner: "deadlineuser"
     regexp: ".*alias hy{{ houdini_version_item.houdini_major_version }}=.*"
   become: yes 
   tags:
@@ -102,7 +105,7 @@
     path: /home/deadlineuser/.bashrc
     line: "alias henv{{ houdini_version_item.houdini_major_version }}='cwd=\"$(pwd)\" && cd /opt/hfs{{ houdini_version_item.houdini_major_version }}/ && source houdini_setup && cd $cwd'"
     backup: true
-    owner: deadlineuser
+    owner: "deadlineuser"
     regexp: ".*alias henv{{ houdini_version_item.houdini_major_version }}=.*"
   become: yes 
   tags:
