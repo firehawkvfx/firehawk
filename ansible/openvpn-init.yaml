@@ -13,7 +13,7 @@
     client_netmask_bits: None
 
   roles:
-  # - {role: 'openvpn-gateway', tags: 'init'}
+  # - {role: 'openvpn_gateway', tags: 'init'}
 
   tasks:
   - name: allow ip forwarding, uncomment

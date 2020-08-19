@@ -52,6 +52,11 @@ output "init_awscli_complete" {
 resource "null_resource" "init_deadlinedb_firehawk" {
   count = ( var.firehawk_init && var.install_deadline_db ) ? 1 : 0
 
+  triggers = {
+    install_deadline_db = var.install_deadline_db
+    install_deadline_rcs = var.install_deadline_rcs
+  }
+
   depends_on = [ null_resource.init_awscli ]
 
   provisioner "local-exec" {

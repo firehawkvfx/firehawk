@@ -9,23 +9,32 @@
   tags:
   - always
 
-- name: get key - centos
-  get_url:
-    url: https://fsx-lustre-client-repo-public-keys.s3.amazonaws.com/fsx-rpm-public-key.asc
-    dest: /tmp/fsx-rpm-public-key.asc
-  when: not skip_packages and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
+# - name: get key - centos
+#   get_url:
+#     url: https://fsx-lustre-client-repo-public-keys.s3.amazonaws.com/fsx-rpm-public-key.asc
+#     dest: /tmp/fsx-rpm-public-key.asc
+#   when: not skip_packages and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
 
 - rpm_key:
     state: present
-    key: /tmp/fsx-rpm-public-key.asc
+    key: https://fsx-lustre-client-repo-public-keys.s3.amazonaws.com/fsx-rpm-public-key.asc
   when: not skip_packages and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
 
 - get_url:
     url: https://fsx-lustre-client-repo.s3.amazonaws.com/el/7/fsx-lustre-client.repo
     dest: /etc/yum.repos.d/aws-fsx.repo
+    mode: '0644'
   when: not skip_packages and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
 
-- name: Lustre packages - centos
+# - name: Add fsx lustre repo # couldn't get this to work because the .xml fle isn't present
+#   yum_repository:
+#     name: aws-fsx
+#     file: fsx-lustre-client
+#     description: FSx for lustre repository  
+#     baseurl: https://fsx-lustre-client-repo.s3.amazonaws.com/el/7
+#   when: not skip_packages and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
+
+- name: Install Lustre packages - centos
   package:
     name:
     - kmod-lustre-client
@@ -43,10 +52,11 @@
   apt_repository:
     repo: deb https://fsx-lustre-client-repo.s3.amazonaws.com/ubuntu xenial main
     filename: fsxlustreclientrepo
+    mode: '0644'
     state: present
   when: not skip_packages and ( ansible_distribution == 'Ubuntu' )
 
-- name: Lustre packages - ubuntu
+- name: Install Lustre packages - ubuntu
   package:
     name:
     - linux-aws

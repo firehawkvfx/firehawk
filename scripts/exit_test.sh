@@ -11,7 +11,6 @@ export SECONDS=0
 
 exit_test () {
     exit_code=$?
-    echo "LIVE_TERMINAL: $LIVE_TERMINAL"
     set +x
     interrupt=false
     failed=false

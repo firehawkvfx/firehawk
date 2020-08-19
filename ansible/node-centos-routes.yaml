@@ -70,6 +70,7 @@
     blockinfile:
       path: "/etc/sysconfig/network-scripts/route-{{ ethernet_interface }}"
       create: true
+      mode: '0600'
       block: |
         {{ item.subnet }} via {{ item.next_hop }} dev {{ ethernet_interface }}
       marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item.subnet }}"

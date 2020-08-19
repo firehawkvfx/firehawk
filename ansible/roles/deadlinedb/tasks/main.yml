@@ -191,7 +191,7 @@
   tags:
   - install
 
-- name: Uninstall mongo db if already present
+- name: Uninstall mongo db if already present # TODO dont use sudo here, use become.
   shell: |
     sudo rm -fr /var/log/mongodb
     sudo rm -fr /var/lib/mongodb
@@ -206,7 +206,7 @@
     name: 'mongod*'
     state: absent
     purge: true
-  become_user: "{{ user_deadlineuser_name }}"
+  # become_user: "{{ user_deadlineuser_name }}"
   become: true
   when: stat_result.stat.exists
   tags:

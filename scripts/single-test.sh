@@ -3,5 +3,4 @@
 echo "TF_VAR_firehawk_path: $TF_VAR_firehawk_path"
 echo "TF_VAR_secrets_path: $TF_VAR_secrets_path"
 
-# ansible-playbook -i ../secrets/dev/inventory ansible/ansible_collections/firehawkvfx/fsx/fsx_volume_mounts.yaml -vvv --extra-vars fsx_ip=10.1.1.248 --skip-tags 'local_install local_install_onsite_mounts' --tags cloud_install; exit_test
-cd /deployuser; echo $config_override; ansible/ansible_collections/firehawkvfx/fsx/fsx_packages.yaml --extra-vars 'variable_host=localhost variable_user=deployuser'
+ansible-playbook -i ../secrets/dev/inventory ansible/openvpn.yaml -vvvv --extra-vars 'vpn_address=52.63.218.41 private_ip=10.1.101.136 private_subnet1=10.1.1.0/24 public_subnet1=10.1.101.0/24 remote_subnet_cidr=192.168.92.0/24 client_network=172.17.232.0 client_netmask_bits=24'

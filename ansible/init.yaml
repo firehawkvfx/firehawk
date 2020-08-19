@@ -28,6 +28,7 @@
     - {role: 'init-host', tags: 'init-host'}
     - role: pip
     - role: init-packages
+    - role: openvpn_package
     - role: terraform
     - role: aws-cli
     - role: transparent-hugepages-check
