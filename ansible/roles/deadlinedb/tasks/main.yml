@@ -191,15 +191,27 @@
   tags:
   - install
 
-- name: Uninstall mongo db if already present # TODO dont use sudo here, use become.
-  shell: |
-    sudo rm -fr /var/log/mongodb
-    sudo rm -fr /var/lib/mongodb
-  become_user: "{{ user_deadlineuser_name }}"
+- name: Uninstall mongo db if already present
+  file:
+    state: absent
+    path: "{{ item }}/"
   become: true
   when: stat_result.stat.exists
+  with_items:
+  - '/var/log/mongodb'
+  - '/var/lib/mongodb'
   tags:
   - install
+
+# - name: Uninstall mongo db if already present # TODO dont use sudo here, use become.
+#   shell: |
+#     sudo rm -fr /var/log/mongodb
+#     sudo rm -fr /var/lib/mongodb
+#   become_user: "{{ user_deadlineuser_name }}"
+#   become: true
+#   when: stat_result.stat.exists
+#   tags:
+#   - install
 
 - name: purge mongo
   apt:
