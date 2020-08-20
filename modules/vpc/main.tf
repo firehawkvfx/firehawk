@@ -126,7 +126,7 @@ resource "aws_route" "public_gateway" {
 
 resource "aws_route_table_association" "private_associations" {
   depends_on = [ aws_subnet.private_subnet ]
-  count = length( local.private_subnets )
+  count = var.create_vpc ? length( local.private_subnets ) : 0
 
   subnet_id      = element( aws_subnet.private_subnet.*.ids, count.index )
   route_table_id = element( aws_route_table.private.*.ids, 0 )
