@@ -29,7 +29,7 @@ output "public_subnets_cidr_blocks" {
 }
 
 output "vpc_main_route_table_id" {
-  value = aws_vpc.vpc_main_route_table_id
+  value = aws_vpc.main.vpc_main_route_table_id
 }
 
 output "public_route_table_ids" {

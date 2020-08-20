@@ -87,8 +87,8 @@ resource "aws_subnet" "private_subnet" {
 }
 
 resource "aws_nat_gateway" "gw" { # We use a single nat gateway currently to save cost.
-  count = var.sleep || false == var.enable_nat_gateway ? false : true
-  allocation_id = aws_eip.nat.id
+  count = var.sleep || false == var.enable_nat_gateway ? 1 : 0
+  allocation_id = aws_eip.nat[count.index]
   subnet_id     = element( aws_subnet.private_subnet.*.ids, count.index )
   tags = merge(map("Name", format("%s", local.name)), var.common_tags, local.extra_tags)
 }
