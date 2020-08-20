@@ -66,9 +66,9 @@
 
 - name: Reboot the server and wait for it to come back up. # This may not be necesary but a reboot resolved mounts to funciton properly
   reboot:
-  when: reboot_after_lustre_install
+  when: reboot_after_lustre_install | bool
 
 - name: Rebooted
   debug:
     msg: "rebooted"
-  when: reboot_after_lustre_install
+  when: reboot_after_lustre_install | bool
