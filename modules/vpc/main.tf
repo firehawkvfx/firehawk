@@ -45,6 +45,8 @@ locals {
 }
 
 resource "aws_internet_gateway" "gw" {
+  count = var.create_vpc ? 1 : 0
+  
   vpc_id = local.vpc_id
 
   tags = merge(map("Name", format("%s", local.name)), var.common_tags, local.extra_tags)
@@ -77,7 +79,7 @@ resource "aws_subnet" "private_subnet" {
 }
 
 resource "aws_eip" "nat" { 
-  count = var.sleep || false == var.enable_nat_gateway ? 1 : 0
+  count = var.create_vpc && var.enable_nat_gateway && var.sleep == false ? 1 : 0
 
   vpc = true
   depends_on                = [aws_internet_gateway.gw]
@@ -86,14 +88,14 @@ resource "aws_eip" "nat" {
 }
 
 resource "aws_nat_gateway" "gw" { # We use a single nat gateway currently to save cost.
-  count = var.sleep || false == var.enable_nat_gateway ? 1 : 0
+  count = var.create_vpc && var.enable_nat_gateway && var.sleep == false ? 1 : 0
   allocation_id = aws_eip.nat[count.index]
   subnet_id     = element( aws_subnet.private_subnet.*.ids, count.index )
   tags = merge(map("Name", format("%s", local.name)), var.common_tags, local.extra_tags)
 }
 
 resource "aws_route_table" "private" {
-  count       = var.create_vpc ? 1 : 0
+  count  = var.create_vpc ? 1 : 0
   vpc_id = local.vpc_id
   tags = merge(map("Name", "private"), var.common_tags, local.extra_tags)
 }
