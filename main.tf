@@ -79,7 +79,7 @@ module "firehawk_init" {
 
 module "vpc" {
 
-  firehawk_init_dependency = module.firehawk_init.local-provisioning-complete
+  firehawk_init_dependency = module.firehawk_init.init_awscli_complete
   source = "./modules/vpc"
 
   create_vpc = var.enable_vpc
