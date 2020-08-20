@@ -36,7 +36,7 @@ resource "aws_vpc" "main" {
 
 locals {
   vpc_id = element( concat( aws_vpc.main.*.ids, list("")), 0 )
-  aws_internet_gateway = element( concat( aws_internet_gateway.gw.id, list("")), 0 )
+  aws_internet_gateway = element( concat( aws_internet_gateway.gw.*.ids, list("")), 0 )
   vpc_main_route_table_id = element( concat( aws_vpc.main.*.vpc_main_route_table_id, list("")), 0 )
   vpc_cidr_block = element( concat( aws_vpc.main.*.cidr_block, list("")), 0 )
   private_subnets = aws_subnet.private_subnet.*.ids
