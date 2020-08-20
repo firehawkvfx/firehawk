@@ -91,7 +91,7 @@ resource "aws_eip" "nat" {
 resource "aws_nat_gateway" "gw" { # We use a single nat gateway currently to save cost.
   count = var.create_vpc && var.enable_nat_gateway && var.sleep == false ? 1 : 0
   allocation_id = aws_eip.nat[count.index].id
-  subnet_id     = element( aws_subnet.private_subnet.*.id, count.index )
+  subnet_id     = element( aws_subnet.public_subnet.*.id, count.index )
   tags = merge(var.common_tags, local.extra_tags, map("Name", format("%s", local.name)))
 }
 
