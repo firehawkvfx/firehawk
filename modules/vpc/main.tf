@@ -38,10 +38,10 @@ locals {
   vpc_id = element( concat( aws_vpc.main.*.ids, list("")), 0 )
   vpc_main_route_table_id = element( concat( aws_vpc.main.*.vpc_main_route_table_id, list("")), 0 )
   vpc_cidr_block = element( concat( aws_vpc.main.*.cidr_block, list("")), 0 )
-  private_subnets = element( concat( aws_subnet.private_subnet.*.ids, list("")), 0 )
-  public_subnets = element( concat( aws_subnet.public_subnet.*.ids, list("")), 0 )
-  private_route_table_ids = element( concat( aws_route_table.private.*.ids, list("")), 0 )
-  public_route_table_ids = element( concat( aws_route_table.public.*.ids, list("")), 0 )
+  private_subnets = aws_subnet.private_subnet.*.ids
+  public_subnets = aws_subnet.public_subnet.*.ids
+  private_route_table_ids = aws_route_table.private.*.ids
+  public_route_table_ids = aws_route_table.public.*.ids
 }
 
 resource "aws_internet_gateway" "gw" {
@@ -67,23 +67,21 @@ resource "aws_subnet" "public_subnet" {
   tags = merge(map("Name", format("%s", local.name)), var.common_tags, local.extra_tags)
 }
 
-resource "aws_eip" "nat" {
-  count = length( aws_subnet.public_subnet.*.ids )
-
-  vpc = true
-  depends_on                = [aws_internet_gateway.gw]
-
-  tags = merge(map("Name", format("%s", local.name)), var.common_tags, local.extra_tags)
-}
-
-
-
 resource "aws_subnet" "private_subnet" {
   count = var.create_vpc ? length( var.private_subnets ) : 0
   vpc_id     = local.vpc_id
 
   availability_zone = element( data.aws_availability_zones.available.names, count.index )
   cidr_block = element(var.private_subnets, count.index)
+  tags = merge(map("Name", format("%s", local.name)), var.common_tags, local.extra_tags)
+}
+
+resource "aws_eip" "nat" { 
+  count = var.sleep || false == var.enable_nat_gateway ? 1 : 0
+
+  vpc = true
+  depends_on                = [aws_internet_gateway.gw]
+
   tags = merge(map("Name", format("%s", local.name)), var.common_tags, local.extra_tags)
 }
 
@@ -127,7 +125,8 @@ resource "aws_route" "public_gateway" {
 }
 
 resource "aws_route_table_association" "private_associations" {
-  count = length( aws_subnet.private_subnet.*.ids )
+
+  count = length( local.private_subnets )
 
   subnet_id      = element( aws_subnet.private_subnet.*.ids, count.index )
   route_table_id = element( aws_route_table.private.*.ids, 0 )
