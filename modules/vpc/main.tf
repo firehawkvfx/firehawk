@@ -36,6 +36,7 @@ resource "aws_vpc" "main" {
 
 locals {
   vpc_id = element( concat( aws_vpc.main.*.ids, list("")), 0 )
+  vpc_main_route_table_id = element( concat( aws_vpc.main.*.vpc_main_route_table_id, list("")), 0 )
   vpc_cidr_block = element( concat( aws_vpc.main.*.cidr_block, list("")), 0 )
   private_subnets = element( concat( aws_subnet.private_subnet.*.ids, list("")), 0 )
   public_subnets = element( concat( aws_subnet.public_subnet.*.ids, list("")), 0 )
@@ -103,7 +104,7 @@ resource "aws_route" "private_nat_gateway" {
   count = var.create_vpc ? 1 : 0
   route_table_id         = element(concat(aws_route_table.private.*.ids, list("")), 0)
   destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id         = aws_nat_gateway.gw.id
+  nat_gateway_id         = aws_nat_gateway.gw[count.index].id
   timeouts {
     create = "5m"
   }
@@ -119,7 +120,7 @@ resource "aws_route" "public_gateway" {
   count = var.create_vpc ? 1 : 0
   route_table_id         = element(concat(aws_route_table.public.*.ids, list("")), 0)
   destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.gw.id
+  gateway_id             = aws_internet_gateway.gw[count.index].id
   timeouts {
     create = "5m"
   }
