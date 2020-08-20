@@ -47,11 +47,10 @@ locals {
   aws_internet_gateway = element( concat( aws_internet_gateway.gw.*.id, list("")), 0 )
   vpc_main_route_table_id = element( concat( aws_vpc.main.*.main_route_table_id, list("")), 0 )
   vpc_cidr_block = element( concat( aws_vpc.main.*.cidr_block, list("")), 0 )
-  private_subnets = aws_subnet.private_subnet.*.ids
-  public_subnets = aws_subnet.public_subnet.*.ids
-  private_route_table_ids = aws_route_table.private.*.ids
-  public_route_table_ids = aws_route_table.public.*.ids
-
+  private_subnets = aws_subnet.private_subnet.*.id
+  public_subnets = aws_subnet.public_subnet.*.id
+  private_route_table_ids = aws_route_table.private.*.id
+  public_route_table_ids = aws_route_table.public.*.id
 }
 
 data "aws_availability_zones" "available" {
