@@ -42,8 +42,12 @@ EOT
 }
 }
 
+locals {
+  init_awscli_complete = element(concat(null_resource.init_awscli.*.id, list("")), 0)
+}
+
 output "init_awscli_complete" {
-  value = null_resource.init_awscli
+  value = local.init_awscli_complete
   depends_on = [
     null_resource.init_awscli
   ]
