@@ -36,6 +36,11 @@ resource "aws_vpc" "main" {
 
 locals {
   vpc_id = element( concat( aws_vpc.main.*.ids, list("")), 0 )
+  vpc_cidr_block = element( concat( aws_vpc.main.*.cidr_block, list("")), 0 )
+  private_subnets = element( concat( aws_subnet.private_subnet.*.ids, list("")), 0 )
+  public_subnets = element( concat( aws_subnet.public_subnet.*.ids, list("")), 0 )
+  private_route_table_ids = element( concat( aws_route_table.private.*.ids, list("")), 0 )
+  public_route_table_ids = element( concat( aws_route_table.public.*.ids, list("")), 0 )
 }
 
 resource "aws_internet_gateway" "gw" {
@@ -53,7 +58,7 @@ resource "aws_subnet" "public_subnet" {
   vpc_id                  = local.vpc_id
 
   availability_zone = element( data.aws_availability_zones.available.names, count.index )
-  cidr_block              = elment( var.public_subnets, count.index )
+  cidr_block              = element( var.public_subnets, count.index )
   map_public_ip_on_launch = true
 
   depends_on = [aws_internet_gateway.gw]
@@ -84,7 +89,7 @@ resource "aws_subnet" "private_subnet" {
 resource "aws_nat_gateway" "gw" { # We use a single nat gateway currently to save cost.
   count = var.sleep || false == var.enable_nat_gateway ? false : true
   allocation_id = aws_eip.nat.id
-  subnet_id     = element( aws_subnet.private_subnet.ids, count.index )
+  subnet_id     = element( aws_subnet.private_subnet.*.ids, count.index )
   tags = merge(map("Name", format("%s", local.name)), var.common_tags, local.extra_tags)
 }
 
@@ -123,8 +128,8 @@ resource "aws_route" "public_gateway" {
 resource "aws_route_table_association" "private_associations" {
   count = length( aws_subnet.private_subnet.*.ids )
 
-  subnet_id      = element( aws_subnet.private_subnet.ids, count.index )
-  route_table_id = element( module.aws_route_table.private.*.ids, 0 )
+  subnet_id      = element( aws_subnet.private_subnet.*.ids, count.index )
+  route_table_id = element( aws_route_table.private.*.ids, 0 )
 }
 
 # module "vpc" {

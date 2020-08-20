@@ -1,17 +1,18 @@
 output "vpc_id" {
-  value = module.vpc.vpc_id
+  value = local.vpc_id
 }
 
 output "vpc_cidr_block" {
-  value = module.vpc.vpc_cidr_block
+  value = local.vpc_cidr_block
 }
 
 output "private_subnets" {
-  value = module.vpc.private_subnets
+  depends_on = [ aws_subnet.private_subnet ]
+  value = var.private_subnets
 }
 
 output "private_subnets_cidr_blocks" {
-  value = module.vpc.private_subnets_cidr_blocks
+  value = local.private_subnets
 }
 
 output "vpc_cidr" {
@@ -19,23 +20,24 @@ output "vpc_cidr" {
 }
 
 output "public_subnets" {
-  value = module.vpc.public_subnets
+  depends_on = [ aws_subnet.public_subnet ]
+  value = var.public_subnets
 }
 
 output "public_subnets_cidr_blocks" {
-  value = module.vpc.public_subnets_cidr_blocks
+  value = local.public_subnets
 }
 
 output "vpc_main_route_table_id" {
-  value = module.vpc.vpc_main_route_table_id
+  value = aws_vpc.vpc_main_route_table_id
 }
 
 output "public_route_table_ids" {
-  value = module.vpc.public_route_table_ids
+  value = local.public_route_table_ids
 }
 
 output "private_route_table_ids" {
-  value = module.vpc.private_route_table_ids
+  value = local.private_route_table_ids
 }
 
 output "vpn_private_ip" {
