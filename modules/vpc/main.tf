@@ -67,7 +67,7 @@ resource "aws_subnet" "public_subnet" {
 
   depends_on = [aws_internet_gateway.gw]
 
-  tags = merge(map("Name", format("%s", local.name)), var.common_tags, local.extra_tags)
+  tags = merge(var.common_tags, local.extra_tags, map("Name", format("%s", local.name)))
 }
 
 resource "aws_subnet" "private_subnet" {
@@ -76,7 +76,7 @@ resource "aws_subnet" "private_subnet" {
 
   availability_zone = element( data.aws_availability_zones.available.names, count.index )
   cidr_block = element(var.private_subnets, count.index)
-  tags = merge(map("Name", format("%s", local.name)), var.common_tags, local.extra_tags)
+  tags = merge(var.common_tags, local.extra_tags, map("Name", format("%s", local.name)))
 }
 
 resource "aws_eip" "nat" { 
@@ -85,20 +85,20 @@ resource "aws_eip" "nat" {
   vpc = true
   depends_on                = [aws_internet_gateway.gw]
 
-  tags = merge(map("Name", format("%s", local.name)), var.common_tags, local.extra_tags)
+  tags = merge(var.common_tags, local.extra_tags, map("Name", format("%s", local.name)))
 }
 
 resource "aws_nat_gateway" "gw" { # We use a single nat gateway currently to save cost.
   count = var.create_vpc && var.enable_nat_gateway && var.sleep == false ? 1 : 0
   allocation_id = aws_eip.nat[count.index].id
   subnet_id     = element( aws_subnet.private_subnet.*.id, count.index )
-  tags = merge(map("Name", format("%s", local.name)), var.common_tags, local.extra_tags)
+  tags = merge(var.common_tags, local.extra_tags, map("Name", format("%s", local.name)))
 }
 
 resource "aws_route_table" "private" {
   count  = var.create_vpc ? 1 : 0
   vpc_id = local.vpc_id
-  tags = merge(map("Name", "private"), var.common_tags, local.extra_tags)
+  tags = merge(var.common_tags, local.extra_tags, map("Name", "${local.name}_private"))
 }
 
 resource "aws_route" "private_nat_gateway" {
@@ -114,7 +114,7 @@ resource "aws_route" "private_nat_gateway" {
 resource "aws_route_table" "public" {
   count       = var.create_vpc ? 1 : 0
   vpc_id = local.vpc_id
-  tags = merge(map("Name", "public"), var.common_tags, local.extra_tags)
+  tags = merge(var.common_tags, local.extra_tags, map("Name", "${local.name}_public"))
 }
 
 resource "aws_route" "public_gateway" {
