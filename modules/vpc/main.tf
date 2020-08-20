@@ -90,8 +90,8 @@ resource "aws_eip" "nat" {
 
 resource "aws_nat_gateway" "gw" { # We use a single nat gateway currently to save cost.
   count = var.create_vpc && var.enable_nat_gateway && var.sleep == false ? 1 : 0
-  allocation_id = aws_eip.nat[count.index]
-  subnet_id     = element( aws_subnet.private_subnet.*.ids, count.index )
+  allocation_id = aws_eip.nat[count.index].id
+  subnet_id     = element( aws_subnet.private_subnet.*.id, count.index )
   tags = merge(map("Name", format("%s", local.name)), var.common_tags, local.extra_tags)
 }
 
@@ -103,7 +103,7 @@ resource "aws_route_table" "private" {
 
 resource "aws_route" "private_nat_gateway" {
   count = var.create_vpc ? 1 : 0
-  route_table_id         = element(concat(aws_route_table.private.*.ids, list("")), 0)
+  route_table_id         = element(concat(aws_route_table.private.*.id, list("")), 0)
   destination_cidr_block = "0.0.0.0/0"
   nat_gateway_id         = aws_nat_gateway.gw[count.index].id
   timeouts {
@@ -119,7 +119,7 @@ resource "aws_route_table" "public" {
 
 resource "aws_route" "public_gateway" {
   count = var.create_vpc ? 1 : 0
-  route_table_id         = element(concat(aws_route_table.public.*.ids, list("")), 0)
+  route_table_id         = element(concat(aws_route_table.public.*.id, list("")), 0)
   destination_cidr_block = "0.0.0.0/0"
   gateway_id             = aws_internet_gateway.gw[count.index].id
   timeouts {
@@ -131,16 +131,16 @@ resource "aws_route_table_association" "private_associations" {
   depends_on = [ aws_subnet.private_subnet ]
   count = var.create_vpc ? length( local.private_subnets ) : 0
 
-  subnet_id      = element( aws_subnet.private_subnet.*.ids, count.index )
-  route_table_id = element( aws_route_table.private.*.ids, 0 )
+  subnet_id      = element( aws_subnet.private_subnet.*.id, count.index )
+  route_table_id = element( aws_route_table.private.*.id, 0 )
 }
 
 resource "aws_route_table_association" "public_associations" {
   depends_on = [ aws_subnet.public_subnet ]
   count = var.create_vpc ? length( local.public_subnets ) : 0
 
-  subnet_id      = element( aws_subnet.public_subnet.*.ids, count.index )
-  route_table_id = element( aws_route_table.public.*.ids, 0 )
+  subnet_id      = element( aws_subnet.public_subnet.*.id, count.index )
+  route_table_id = element( aws_route_table.public.*.id, 0 )
 }
 
 # module "vpc" {
@@ -196,12 +196,12 @@ module "vpn" {
   vpn_cidr           = var.vpn_cidr
   remote_subnet_cidr = var.remote_subnet_cidr
 
-  private_route_table_ids = aws_route_table.private.*.ids
-  public_route_table_ids  = aws_route_table.public.*.ids
+  private_route_table_ids = local.private_route_table_ids
+  public_route_table_ids  = local.public_route_table_ids
 
   #the remote public address that will connect to the openvpn instance
   remote_vpn_ip_cidr = var.remote_ip_cidr
-  public_subnet_ids  = aws_subnet.public_subnet.*.ids
+  public_subnet_ids  = local.public_subnets
 
   private_subnets = var.private_subnets
   public_subnets  = var.public_subnets
