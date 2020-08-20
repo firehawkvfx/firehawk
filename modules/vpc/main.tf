@@ -34,9 +34,17 @@ resource "aws_vpc" "main" {
   tags = merge(map("Name", format("%s", local.name)), var.common_tags, local.extra_tags)
 }
 
+resource "aws_internet_gateway" "gw" {
+  count = var.create_vpc ? 1 : 0
+  
+  vpc_id = local.vpc_id
+
+  tags = merge(map("Name", format("%s", local.name)), var.common_tags, local.extra_tags)
+}
+
 locals {
   vpc_id = element( concat( aws_vpc.main.*.ids, list("")), 0 )
-  aws_internet_gateway = element( concat( aws_internet_gateway.gw.*.ids, list("")), 0 )
+  aws_internet_gateway = element( concat( aws_internet_gateway.gw.*.id, list("")), 0 )
   vpc_main_route_table_id = element( concat( aws_vpc.main.*.vpc_main_route_table_id, list("")), 0 )
   vpc_cidr_block = element( concat( aws_vpc.main.*.cidr_block, list("")), 0 )
   private_subnets = aws_subnet.private_subnet.*.ids
@@ -44,14 +52,6 @@ locals {
   private_route_table_ids = aws_route_table.private.*.ids
   public_route_table_ids = aws_route_table.public.*.ids
 
-}
-
-resource "aws_internet_gateway" "gw" {
-  count = var.create_vpc ? 1 : 0
-  
-  vpc_id = local.vpc_id
-
-  tags = merge(map("Name", format("%s", local.name)), var.common_tags, local.extra_tags)
 }
 
 data "aws_availability_zones" "available" {
