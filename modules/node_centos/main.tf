@@ -242,7 +242,7 @@ resource "null_resource" "dependency_deadlinedb" {
 }
 
 data "aws_subnet" "private_subnet" {
-  count = length(var.private_subnet_ids)
+  count = var.aws_nodes_enabled ? length(var.private_subnet_ids) : 0
   id    = var.private_subnet_ids[count.index]
 }
 
