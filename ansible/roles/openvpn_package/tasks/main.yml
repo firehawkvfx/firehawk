@@ -9,6 +9,14 @@
 #   become: true
 
 # Instead we use this method:
+
+- name: Update and upgrade apt packages
+  become: true
+  apt:
+    upgrade: yes
+    update_cache: yes
+    cache_valid_time: 86400 #One day
+
 - name: Download apt gpt key for opevn vpn
   get_url: 
     url: https://swupdate.openvpn.net/repos/repo-public.gpg
