@@ -1,9 +1,22 @@
 ---
 # tasks file for openvpn_package
 
-- name: Add apt repo - ubuntu # https://community.openvpn.net/openvpn/wiki/OpenvpnSoftwareRepos
-  apt_key:
+# for some reason ansible struggles with this on the open vpn ami.  it can be tested at a later date with newer versions of ansible and py3
+# - name: Add apt repo - openvpn - ubuntu # https://community.openvpn.net/openvpn/wiki/OpenvpnSoftwareRepos
+#   apt_key:
+#     url: https://swupdate.openvpn.net/repos/repo-public.gpg
+#     state: present
+#   become: true
+
+- name: Add apt key - opevn vpn
+  get_url: 
     url: https://swupdate.openvpn.net/repos/repo-public.gpg
+    dest: /tmp/openvpn.gpg
+  become: true
+
+- name: install vpn key
+  apt_key:
+    file: /tmp/openvpn.gpg
     state: present
   become: true
 
