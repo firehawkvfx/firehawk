@@ -8,6 +8,7 @@
 #     state: present
 #   become: true
 
+# Instead we use this method:
 - name: Download apt gpt key for opevn vpn
   get_url: 
     url: https://swupdate.openvpn.net/repos/repo-public.gpg
@@ -27,6 +28,7 @@
   copy: 
     src: /tmp/openvpn.gpg
     dest: /tmp/openvpn.gpg
+    mode: '0644'
   become: yes
 
 - name: install vpn key
