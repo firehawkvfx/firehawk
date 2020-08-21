@@ -11,11 +11,11 @@
 # Instead we use this method:
 
 - name: Update and upgrade apt packages
-  become: true
   apt:
     upgrade: yes
     update_cache: yes
     cache_valid_time: 86400 #One day
+  become: true
 
 - name: Download apt gpt key for opevn vpn
   get_url: 

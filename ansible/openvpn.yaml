@@ -32,7 +32,7 @@
   become: true
 
   vars:
-    ansible_python_interpreter: "/usr/bin/python2.7"
+    ansible_python_interpreter: "/usr/bin/python3"
 
   tasks:
     - name: Test vpn connection.
@@ -45,7 +45,7 @@
   become: true
 
   vars:
-    ansible_python_interpreter: "/usr/bin/python2.7"
+    ansible_python_interpreter: "/usr/bin/python3"
     my_password: "{{ openvpn_user_pw | string | password_hash('sha512') }}"
 
   # install pexpect and its dependencies to use passwd
@@ -79,7 +79,7 @@
   vars:
     client_network: None
     client_netmask_bits: None
-    ansible_python_interpreter: "/usr/bin/python2.7"
+    ansible_python_interpreter: "/usr/bin/python3"
     
   pre_tasks:
     - name: Reboot the server and wait for it to come back up. # This may not be necesary but there were intermittent issues with /usr/local/openvpn_as/scripts/sacli that a reboot may have resolved
