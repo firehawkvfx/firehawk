@@ -16,6 +16,13 @@
   become: true
   connection: local # aquiring the key on the aws vpn ami has problems
 
+- name: ensure permissions are correct
+  file:
+    path: /tmp/openvpn.gpg
+    mode: '0644'
+  become: true
+  connection: local
+
 - name: Copy gpg key
   copy: 
     src: /tmp/openvpn.gpg
