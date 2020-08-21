@@ -800,7 +800,13 @@ source_vars () {
                 chmod 600 $vault_key || failed=true
             fi
             if [[ -O "$vault_key" || $EUID = 0 ]]; then # If we are the owner of the file, or we are root, continue.
-                octal_permissions=$(stat -c '%a' "$vault_key")
+                
+                if [[ "$OSTYPE" == "darwin"* ]]; then # Acquire file permissions.
+                    octal_permissions=$(stat -f %A "$vault_key")
+                else
+                    octal_permissions=$(stat -c '%a' "$vault_key")
+                fi
+                
                 if [[ "$octal_permissions" != "600" ]]; then
                     printf "\n${RED}ERROR: $vault_key not using valid permissions ($octal_permissions). Set to 600.${NC}\n"
                     ls -ltriah $vault_key
