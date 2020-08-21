@@ -8,11 +8,18 @@
 #     state: present
 #   become: true
 
-- name: Add apt key - opevn vpn
+- name: Add apt gpt key for opevn vpn
   get_url: 
     url: https://swupdate.openvpn.net/repos/repo-public.gpg
     dest: /tmp/openvpn.gpg
   become: true
+  connection: local # aquiring the key on the aws vpn ami has problems
+
+- name: Copy gpg key
+  copy: 
+    src: /tmp/openvpn.gpg
+    dest: /tmp/openvpn.gpg
+  become: yes
 
 - name: install vpn key
   apt_key:
