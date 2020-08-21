@@ -57,7 +57,7 @@ else
   esac
 fi
 
-
+# install terraform
 ansible-playbook -i ansible/inventory/hosts ansible/init.yaml -v --extra-vars "variable_user=deployuser set_hostname=ansiblecontrol"; exit_test
 printf "\n\nHave you installed keybase and initialised pgp?\n\nIf not it is highly recommended that you create a profile on your phone and desktop for 2fa.\nIf this process fails for any reason use 'keybase login' manually and test pgp decryption in the shell.\n\n"
 # echo "Ansible will create a PEM key at this path if it doesn't already exist: $TF_VAR_aws_private_key_path"
