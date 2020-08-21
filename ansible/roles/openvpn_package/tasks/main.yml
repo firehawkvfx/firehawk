@@ -49,6 +49,7 @@
   apt_repository:
     repo: deb http://build.openvpn.net/debian/openvpn/release/2.4 xenial main
     filename: openvpn-aptrepo
+    mode: '0644'
     state: present
   become: true
 
