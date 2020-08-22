@@ -32,6 +32,9 @@
   selinux:
     state: "{{ set_selinux }}"
   when: set_selinux != "unchanged"
+  vars:
+    ansible_python_interpreter: "{{ package_python_interpreter }}"
+
   
 - stat:
     path: "/home/{{ variable_user }}"
