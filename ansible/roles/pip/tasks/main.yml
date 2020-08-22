@@ -61,12 +61,16 @@
     state: latest
   become: true
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+  vars:
+    ansible_python_interpreter: "{{ package_python_interpreter }}"
 
 - name: install pip
   package:
     name: python-pip
     state: latest
   become: true
+  vars:
+    ansible_python_interpreter: "{{ package_python_interpreter }}"
 
 - name: upgrade pip
   pip: 
