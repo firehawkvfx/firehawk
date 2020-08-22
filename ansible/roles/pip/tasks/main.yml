@@ -40,6 +40,8 @@
     exclude: VirtualBox # exclude virtualbox - if the entire pipe is running on a single host, it isn't possibel to update virtual box since it is being used during execution of this script.
   become: true
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+  vars:
+    ansible_python_interpreter: /usr/bin/python2.7 # python 3 is not compatibale with the yum module
   tags:
   - upgrade-packages
 
