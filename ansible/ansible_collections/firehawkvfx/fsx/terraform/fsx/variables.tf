@@ -36,3 +36,5 @@ variable "sleep" {}
 variable "remote_mounts_on_local" {}
 
 variable "envtier" {}
+
+variable "private_route53_zone_id" {}

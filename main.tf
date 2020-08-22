@@ -271,6 +271,7 @@ module "fsx" {
   source                         = "./ansible/ansible_collections/firehawkvfx/fsx/terraform/fsx"
 
   fsx_bucket_prefix = var.fsx_bucket_prefix
+  private_route53_zone_id = module.vpc.private_route53_zone_id
   bucket_extension = var.bucket_extension
   subnet_ids = module.vpc.private_subnets
 

@@ -2,6 +2,10 @@ output "vpc_id" {
   value = local.vpc_id
 }
 
+output "private_route53_zone_id" {
+  value = local.private_route53_zone_id
+}
+
 output "vpc_cidr_block" {
   value = local.vpc_cidr_block
 }

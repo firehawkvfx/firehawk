@@ -51,6 +51,16 @@ locals {
   public_subnets = aws_subnet.public_subnet.*.id
   private_route_table_ids = aws_route_table.private.*.id
   public_route_table_ids = aws_route_table.public.*.id
+  private_route53_zone_id = element( concat( aws_route53_zone.private.*.id, list("")), 0 )
+}
+
+resource "aws_route53_zone" "private" { # the private hosted zone is used for host names privately ending with the domain name.
+  count = var.create_vpc ? 1 : 0
+
+  name = var.public_domain_name
+  vpc {
+    vpc_id = local.vpc_id
+  }
 }
 
 data "aws_availability_zones" "available" {
