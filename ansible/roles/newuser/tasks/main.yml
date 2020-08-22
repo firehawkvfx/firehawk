@@ -128,6 +128,8 @@
       ec2_list_running='aws ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId]' --filters Name=instance-state-name,Values=running --output text'
   with_items:
     - /home/{{ variable_user }}/.bashrc
+  vars:
+    ansible_python_interpreter: "{{ package_python_interpreter }}"
 
 - name: adding a new user requires a restart of pcoip service if present
   shell: |
