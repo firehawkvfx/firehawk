@@ -130,6 +130,8 @@
     package:
       name: expect
       state: present
+    vars:
+      ansible_python_interpreter: "{{ package_python_interpreter }}"
 
   - name: restart sshd.service
     service: 
@@ -234,6 +236,8 @@
       - bzip2
       - nmap
       state: present
+    vars:
+      ansible_python_interpreter: "{{ package_python_interpreter }}"
 
   - stat:
       path: /var/lib/Thinkbox/Deadline10/deadline.ini

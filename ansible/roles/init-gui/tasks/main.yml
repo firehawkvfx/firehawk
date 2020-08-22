@@ -3,22 +3,18 @@
 # these can be potentially provisioned with vagrant - its an extremely long process and its hlepful to monitor shell output incase of failure
 # When ansible allows monitoring, we should enable it here.
 
-- name: Add ubuntu gui support
-  package:
-    name: "{{ item }}"
-    state: present
-  with_items:
-    - ubuntu-desktop
-
 - name: Add  virtualbox requirements for gui support
   package:
-    name: "{{ item }}"
-    state: present
-  with_items:
+    name:
+    - ubuntu-desktop
     - virtualbox-guest-dkms
     - virtualbox-guest-utils
     - virtualbox-guest-x11
     - xserver-xorg-legacy
+    state: present
+  vars:
+    ansible_python_interpreter: "{{ package_python_interpreter }}"
+
 
 - name: Allow any user to login to gui.
   lineinfile:

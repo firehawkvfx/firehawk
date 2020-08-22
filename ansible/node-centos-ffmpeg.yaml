@@ -51,3 +51,5 @@
     with_items:
       - ffmpeg 
       - ffmpeg-devel
+    vars:
+      ansible_python_interpreter: "{{ package_python_interpreter }}"

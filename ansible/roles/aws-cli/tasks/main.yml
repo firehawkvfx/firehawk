@@ -23,6 +23,9 @@
   package:
     name: python-boto
   become: true
+  vars:
+    ansible_python_interpreter: "{{ package_python_interpreter }}"
+
 
 - name: install pip boto3
   pip:

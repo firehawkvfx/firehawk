@@ -6,13 +6,12 @@
   tasks:
     - name: install mkpasswd
       package:
-        name: whois
+        name:
+        - whois
+        - python-pip
         state: present
-
-    - name: install pip
-      package:
-        name: python-pip
-        state: present
+      vars:
+        ansible_python_interpreter: "{{ package_python_interpreter }}"
 
     - name: install pexpect
       pip:

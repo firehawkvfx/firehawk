@@ -134,7 +134,8 @@
       - bzip2
       - nmap
       #- nfs-utils-lib
-
+    vars:
+      ansible_python_interpreter: "{{ package_python_interpreter }}"
 # mounts are being tested in node-sentos-mounts.yaml now.
 
   - stat:

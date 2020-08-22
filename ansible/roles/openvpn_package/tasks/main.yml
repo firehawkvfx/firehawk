@@ -55,7 +55,8 @@
 
 - name: install latest open vpn package
   package:
-    name:
-    - openvpn
+    name: openvpn
     update_cache: yes
   become: true
+  vars:
+    ansible_python_interpreter: "{{ package_python_interpreter }}"

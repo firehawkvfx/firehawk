@@ -41,6 +41,9 @@
     - dnsmasq # For open vpn server,
     state: present
   become: true
+  vars:
+    ansible_python_interpreter: "{{ package_python_interpreter }}"
+
 
 - name: Install requests module to query web pages in (houdini python install script)
   pip:
@@ -72,4 +75,6 @@
     - nfs-common
     state: present
   become: true
+  vars:
+    ansible_python_interpreter: "{{ package_python_interpreter }}"
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
