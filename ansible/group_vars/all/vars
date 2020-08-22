@@ -4,6 +4,8 @@ general_use_ssh_key: "{{ lookup('env','TF_VAR_general_use_ssh_key') }}"
 
 ANSIBLE_FORCE_COLOR: 'true'
 
+package_python_interpreter: /usr/bin/python3
+
 selected_ansible_version: "{{ lookup('env','TF_VAR_selected_ansible_version') }}"
 
 config_override: "{{ lookup('env','config_override') }}"
