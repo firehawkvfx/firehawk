@@ -31,7 +31,7 @@
   debug:
     var: ansible_distribution
 
-- name: package dependencies CentOS
+- name: "package dependencies CentOS - package_python_interpreter {{ package_python_interpreter }}"
   package:
     name:
     - mesa-libGLw
