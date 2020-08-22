@@ -191,6 +191,8 @@ sudo rm ./test
 
 This login information should be entered into your encrypted secrets file in later steps, and is only temporarily used until the login is replaced with an ssh key for the deployuser (which will also be created automatically).  Once the ssh key is configured by Firehawk the password wont be usable for ssh access anymore.  Passwords are not recommend to be allowed for continued SSH access in a firehawk deployment.
 
+- Any machine that you intend to automate with ansible should have python 3 installed before commencing.
+
 ## Thinkbox Usage Based Licensing
 To use Deadline in AWS, instances that reside in AWS are free.  But any onsite systems that render will require a licence.  If you wish to use any other UBL licenses (eg houdini Engine) they will also 
 require your Thinkbox UBL URL and UBL activation code.  These are entered in your encrypted secrets file, and are used to configure the Deadline DB upon install automatically.

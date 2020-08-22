@@ -411,7 +411,7 @@ resource "null_resource" "provision_node_centos" {
     inline = [
       "sleep 10",
       "export SHOWCOMMANDS=true; set -x",
-      "sudo yum install -y python",
+      "sudo yum install -y python python3",
       "ssh-keyscan ${aws_instance.node_centos[0].private_ip}",
     ]
   }

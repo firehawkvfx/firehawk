@@ -206,7 +206,7 @@ resource "null_resource" "provision_bastion" {
       timeout     = "10m"
     }
 
-    inline = ["set -x && sudo yum install -y python"]
+    inline = ["set -x && sudo yum install -y python python3"]
   }
 
   provisioner "local-exec" {

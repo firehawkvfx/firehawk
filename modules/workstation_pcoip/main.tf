@@ -462,7 +462,7 @@ resource "null_resource" "workstation_pcoip" {
       "sleep 10",
       "export SHOWCOMMANDS=true; set -x",
       "sudo cloud-init status --wait",
-      "sudo yum install -y python",
+      "sudo yum install -y python python3",
       "while [ ! -f /etc/ssh/ssh_host_ecdsa_key.pub ]",
       "do",
       "  sleep 2",
