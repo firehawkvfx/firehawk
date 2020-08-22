@@ -127,7 +127,7 @@
       name: expect
       state: present
 
-  - name: install epel-release
+  - name: "install epel-release {{ package_python_interpreter }}"
     package:
       name: epel-release
       state: present
