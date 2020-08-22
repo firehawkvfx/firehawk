@@ -215,6 +215,10 @@ else
   echo "init_vm_config: $init_vm_config"
   if [[ "$TF_VAR_vm_initialised" == false ]] && [[ "$init_vm_config" == true ]]; then
     echo "...Init VM's"
+    if [[ "$TF_VAR_openfirehawkserver" = 'auto']]; then
+      echo "TF_VAR_openfirehawkserver IP has not been initialised correctly curing vagrant provisioning.  Currently set to: $TF_VAR_openfirehawkserver" 1>&2
+      exit 64
+    fi
     echo "Ensure hosts file exists"
     ansible-playbook ansible/inventory-add.yaml -v --extra-vars "variable_host=localhost" --tags 'init'; exit_test
     # ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "variable_host=localhost" --include-tags 'init'; exit_test #--extra-vars "host_name=firehawkgateway host_ip=$TF_VAR_openfirehawkserver group_name=role_gateway insert_ssh_key_string=ansible_ssh_private_key_file=$TF_VAR_general_use_ssh_key"; exit_test
