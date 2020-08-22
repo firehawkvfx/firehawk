@@ -55,6 +55,9 @@
   tags:
   - cloud-install
   - onsite-install
+  vars:
+    ansible_python_interpreter: "{{ package_python_interpreter }}"
+
 
 - name: set homedir in xml.
   replace:
