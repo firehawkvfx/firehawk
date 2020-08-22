@@ -34,6 +34,7 @@
 - name: "package dependencies CentOS - package_python_interpreter {{ package_python_interpreter }}"
   package:
     name:
+    - libselinux-python
     - mesa-libGLw
     - libXp
     - libXp-devel
