@@ -9,6 +9,7 @@
   - name: Service file # This is a service to ensure transparent huge pages is always disabled.
     copy:
       dest: "/etc/systemd/system/disable-transparent-huge-pages.service"
+      mode: '0644'
       content: |
         [Unit]
         Description=Disable Transparent Huge Pages (THP)
