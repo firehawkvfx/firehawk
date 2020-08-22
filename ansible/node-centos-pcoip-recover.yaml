@@ -121,6 +121,9 @@
     yum:
       name: '*'
       state: latest
+    vars:
+      ansible_python_interpreter: "{{ package_python_interpreter }}"
+
 
   - name: install mkpasswd
     package:
