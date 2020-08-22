@@ -717,7 +717,7 @@ resource "null_resource" "provision_softnas" {
       cd /deployuser
 
       ansible-playbook -i "$TF_VAR_inventory" ansible/ssh-add-private-host.yaml -v --extra-vars "private_ip=${aws_instance.softnas1[0].private_ip} bastion_ip=${var.bastion_ip}"; exit_test
-      ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=softnas0 host_ip=${aws_instance.softnas1[0].private_ip} group_name=role_softnas insert_ssh_key_string=ansible_ssh_private_key_file=$TF_VAR_aws_private_key_path python_interpreter='/usr/bin/python3' package_python_interpreter='/usr/bin/python3' package_python_interpreter='/usr/bin/python2.7'"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/inventory-add.yaml -v --extra-vars "host_name=softnas0 host_ip=${aws_instance.softnas1[0].private_ip} group_name=role_softnas insert_ssh_key_string=ansible_ssh_private_key_file=$TF_VAR_aws_private_key_path python_interpreter='/usr/bin/python2.7' package_python_interpreter='/usr/bin/python2.7'"; exit_test
       ansible-playbook -i "$TF_VAR_inventory" ansible/get-file.yaml -v --extra-vars "source=/var/log/cloud-init-output.log dest=$TF_VAR_firehawk_path/tmp/log/cloud-init-output-softnas.log variable_user=ec2-user variable_host=role_softnas"; exit_test
 
       # Initialise
