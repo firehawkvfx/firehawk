@@ -155,6 +155,7 @@ Vagrant.configure(2) do |config|
                     # to list available versions - pip install ansible==
                     node.vm.provision "shell", inline: "sudo -H pip install ansible==#{ansible_version}"
                 end
+                node.vm.provision "shell", inline: "sudo apt-get -y install python3-pip"
                 # configure a connection timeout to prevent ansible from getting stuck when there is an ssh issue.
                 node.vm.provision "shell", inline: "echo 'ConnectTimeout 60' >> /etc/ssh/ssh_config"
             
