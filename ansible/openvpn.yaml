@@ -50,7 +50,7 @@
 
   # install pexpect and its dependencies to use passwd
   roles:
-    - role: openvpn_package
+    # - role: openvpn_package
     - role: init-packages
 
   # set user password.  this is a temporary measure as it should be handled by user data, but for some reason open vpn isn't accepting that approach as of 2.71
