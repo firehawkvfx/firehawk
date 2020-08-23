@@ -84,7 +84,7 @@ module "vpc" {
 
   create_vpc = var.enable_vpc
 
-  route_public_domain_name = var.route_public_domain_name
+  route_public_domain_name = var.public_domain
 
   #sleep will disable the nat gateway to save cost during idle time.
   sleep              = var.sleep
@@ -272,7 +272,7 @@ module "fsx" {
 
   fsx_bucket_prefix = var.fsx_bucket_prefix
   private_route53_zone_id = module.vpc.private_route53_zone_id
-  public_domain_name = var.public_domain_name
+  private_domain = var.private_domain
   bucket_extension = var.bucket_extension
   subnet_ids = module.vpc.private_subnets
 

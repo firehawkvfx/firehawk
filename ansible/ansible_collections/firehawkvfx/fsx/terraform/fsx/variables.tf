@@ -39,4 +39,4 @@ variable "envtier" {}
 
 variable "private_route53_zone_id" {}
 
-variable "public_domain_name" {}
+variable "private_domain" {}

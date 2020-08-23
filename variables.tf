@@ -57,6 +57,8 @@ variable "firehawk_path" {}
 variable "public_domain" {
 }
 
+variable "private_domain" {}
+
 variable "openfirehawkserver" {
 }
 

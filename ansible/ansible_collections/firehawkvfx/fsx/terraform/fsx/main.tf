@@ -266,7 +266,7 @@ output "fsx_private_ip" {
 resource "aws_route53_record" "fsx_record" {
   count   = local.fsx_enabled
   zone_id = var.private_route53_zone_id
-  name    = element(concat(list("fsx.${var.public_domain_name}"), list("")), 0)
+  name    = element(concat(list("fsx.${var.private_domain}"), list("")), 0)
   type    = "A"
   ttl     = 300
   records = [local.fsx_private_ip]
@@ -340,7 +340,7 @@ resource "null_resource" "attach_local_mounts_after_start" {
         ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/fsx/fsx_volume_mounts.yaml --extra-vars "variable_host=workstation1 variable_user=deployuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key destroy=true variable_gather_facts=no" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
         
         # now mount current volumes
-        ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/fsx/fsx_volume_mounts.yaml -v -v --extra-vars "fsx_ip=fsx.${var.public_domain_name} variable_host=workstation1 variable_user=deployuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
+        ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/fsx/fsx_volume_mounts.yaml -v -v --extra-vars "fsx_ip=fsx.${var.private_domain} variable_host=workstation1 variable_user=deployuser ansible_ssh_private_key_file=$TF_VAR_onsite_workstation_private_ssh_key" --skip-tags 'cloud_install local_install_onsite_mounts' --tags 'local_install'; exit_test
       fi
 EOT
   }
