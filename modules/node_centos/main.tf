@@ -667,7 +667,7 @@ resource "null_resource" "start-node-after-ami" {
 # wakeup a node after sleep.  ensure the softnas instaqnce has finished creating its volumes otherwise mounts will not work - dependency_softnas
 resource "null_resource" "start-node" {
   count      = ! var.sleep && var.aws_nodes_enabled && var.wakeable ? 1 : 0
-  depends_on = [null_resource.dependency_softnas]
+  depends_on = [null_resource.dependency_softnas, var.fsx_private_ip]
 
   provisioner "local-exec" {
     interpreter = ["/bin/bash", "-c"]
