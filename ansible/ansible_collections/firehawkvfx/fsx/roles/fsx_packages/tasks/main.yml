@@ -20,11 +20,14 @@
     key: https://fsx-lustre-client-repo-public-keys.s3.amazonaws.com/fsx-rpm-public-key.asc
   when: not skip_packages and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
 
-- get_url:
+- name: download url
+  get_url:
     url: https://fsx-lustre-client-repo.s3.amazonaws.com/el/7/fsx-lustre-client.repo
     dest: /etc/yum.repos.d/aws-fsx.repo
     mode: '0644'
   when: not skip_packages and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
+  vars:
+    ansible_python_interpreter: "{{ package_python_interpreter }}"
 
 # - name: Add fsx lustre repo # couldn't get this to work because the .xml fle isn't present
 #   yum_repository:
@@ -41,6 +44,8 @@
     - lustre-client
     state: present
   when: not skip_packages and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
+  vars:
+    ansible_python_interpreter: "{{ package_python_interpreter }}"
 
 - name: Add an apt signing key - ubuntu
   apt_key:
@@ -63,6 +68,8 @@
     - lustre-client-modules-aws
     state: present
   when: not skip_packages and ( ansible_distribution == 'Ubuntu' )
+  vars:
+    ansible_python_interpreter: "{{ package_python_interpreter }}"
 
 - name: Reboot the server and wait for it to come back up. # This may not be necesary but a reboot resolved mounts to funciton properly
   reboot:

@@ -28,6 +28,8 @@
     name: jq
   tags:
   - always
+  vars:
+    ansible_python_interpreter: "{{ package_python_interpreter }}"
 
 - name: Check aws sts get-caller-identity
   shell: |

@@ -133,6 +133,8 @@
     checksum: "md5:{{hash}}"
   become: true
   when: houdini_version_item.houdini_auto_version and not output.stdout is search("File present in S3 bucket") # If the S3 sync does not occur, download from Side FX.
+  vars:
+    ansible_python_interpreter: "{{ package_python_interpreter }}"
 
 - name: Install Houdini 
   shell: |

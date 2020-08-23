@@ -31,9 +31,10 @@
   debug:
     var: ansible_distribution
 
-- name: package dependencies CentOS
+- name: "package dependencies CentOS - package_python_interpreter {{ package_python_interpreter }}"
   package:
     name:
+    - libselinux-python # selinux python bindings
     - mesa-libGLw
     - libXp
     - libXp-devel
@@ -43,6 +44,8 @@
   tags:
     - packages
   when: not skip_packages and ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' )
+  vars:
+    ansible_python_interpreter: "{{ package_python_interpreter }}"
 
 - name: package dependencies Ubuntu
   package:
@@ -56,18 +59,25 @@
   tags:
     - packages
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  vars:
+    ansible_python_interpreter: "{{ package_python_interpreter }}"
 
 - name: install pip
   package:
     name: python-pip
     state: latest
   when: not skip_packages
+  vars:
+    ansible_python_interpreter: "{{ package_python_interpreter }}"
+
 
 - name: install nmap to open port range for tops
   package:
     name: nmap
     state: present
   become: true
+  vars:
+    ansible_python_interpreter: "{{ package_python_interpreter }}"
 
 - name: dir permissions on /opt/houdini_install_script
   file:

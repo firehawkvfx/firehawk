@@ -32,6 +32,8 @@
     - python-passlib
     state: present
   become: true
+  vars:
+    ansible_python_interpreter: "{{ package_python_interpreter }}"
 
 - name: Install requests module to query web pages in (houdini python install script)
   pip:
@@ -64,3 +66,5 @@
     state: present
   become: true
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  vars:
+    ansible_python_interpreter: "{{ package_python_interpreter }}"

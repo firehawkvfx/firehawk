@@ -238,14 +238,14 @@ module "vpn" {
   common_tags = var.common_tags
 }
 
-resource "null_resource" "dependency_vpc" {
-  triggers = {
-    vpc_id = local.vpc_id
-  }
-}
+# resource "null_resource" "dependency_vpc" {
+#   triggers = {
+#     vpc_id = local.vpc_id
+#   }
+# }
 
-resource "null_resource" "dependency_vpn" {
-  triggers = {
-    vpn_id = module.vpn.id
-  }
-}
+# resource "null_resource" "dependency_vpn" {
+#   triggers = {
+#     vpn_id = module.vpn.id
+#   }
+# }

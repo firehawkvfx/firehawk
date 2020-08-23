@@ -37,11 +37,11 @@
   post_tasks:
   - name: Remote RPM install with yum
     yum:
-      name: https://download1.rpmfusion.org/free/el/rpmfusion-free-release-7.noarch.rpm
-
-  - name: Remote RPM install with yum
-    yum:
-      name: https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-7.noarch.rpm
+      name:
+      - https://download1.rpmfusion.org/free/el/rpmfusion-free-release-7.noarch.rpm
+      - https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-7.noarch.rpm
+    vars:
+      ansible_python_interpreter: "{{ package_python_interpreter }}"
 
   - name: Install ffmpeg packages
     package:
@@ -51,3 +51,5 @@
     with_items:
       - ffmpeg 
       - ffmpeg-devel
+    vars:
+      ansible_python_interpreter: "{{ package_python_interpreter }}"

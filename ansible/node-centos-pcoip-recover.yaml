@@ -121,21 +121,25 @@
     yum:
       name: '*'
       state: latest
+    vars:
+      ansible_python_interpreter: "{{ package_python_interpreter }}"
+
 
   - name: install mkpasswd
     package:
-      name: expect
+      name:
+      - expect
+      - epel-release
       state: present
-
-  - name: install epel-release
-    package:
-      name: epel-release
-      state: present
+    vars:
+      ansible_python_interpreter: "{{ package_python_interpreter }}"
 
   - name: install pip
     package:
       name: python-pip
       state: latest
+    vars:
+      ansible_python_interpreter: "{{ package_python_interpreter }}"
 
   - name: install pexpect
     pip:
@@ -151,6 +155,8 @@
     package: 
       name: python-boto
     become: true
+    vars:
+      ansible_python_interpreter: "{{ package_python_interpreter }}"
 
   - name: install the package, force upgrade
     pip: 

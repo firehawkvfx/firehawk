@@ -2,6 +2,9 @@
   package:
     name: expect
   become: true
+  vars:
+    ansible_python_interpreter: "{{ package_python_interpreter }}"
+
 
 - name: "Keybase: Run expect to wait for a keybase pass and decrypt - first time is dirty output."
   shell: |

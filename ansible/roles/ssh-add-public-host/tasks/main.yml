@@ -54,7 +54,7 @@
         ProxyCommand ssh -W %h:%p centos@bastion
   become: true
   become_user: "{{ variable_user }}"
-  when: set_bastion
+  when: set_bastion | bool
 
 - name: define ssh config for bastion if set_bastion=true.
   copy:

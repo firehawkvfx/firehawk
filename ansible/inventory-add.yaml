@@ -11,6 +11,8 @@
     # hosts_file: "{{ inventory }}/hosts"
     group_name: ''
     backup: false
+    python_interpreter: /usr/bin/python3
+    package_python_interpreter: /usr/bin/python3
   
   tasks:
   - name: Hosts file path is
@@ -60,7 +62,7 @@
     lineinfile:
       state: present
       path: "{{ hosts_file }}"
-      line: "ansible_control ansible_connection=local ansible_python_interpreter=/usr/bin/python3"
+      line: "ansible_control ansible_connection=local ansible_python_interpreter=/usr/bin/python3 package_python_interpreter=/usr/bin/python3"
       backup: "{{ backup }}"
       owner: deployuser
       regexp: "^ansible_control ansible_connection=.*"
@@ -95,7 +97,7 @@
     lineinfile:
       state: present
       path: "{{ hosts_file }}"
-      line: "{{ host_name }} ansible_host={{ host_ip }} {{ insert_ssh_key_string | default('') }} ansible_python_interpreter=/usr/bin/python3"
+      line: "{{ host_name }} ansible_host={{ host_ip }} {{ insert_ssh_key_string | default('') }} ansible_python_interpreter={{ python_interpreter }} package_python_interpreter={{ package_python_interpreter }}"
       backup: "{{ backup }}"
       owner: deployuser
       regexp: "^{{ host_name }} ansible_host=.*"
@@ -108,7 +110,7 @@
     lineinfile:
       state: present
       path: "{{ hosts_file }}"
-      line: "{{ host_name }} ansible_host={{ host_ip }} {{ insert_ssh_key_string | default('') }} ansible_python_interpreter=/usr/bin/python3"
+      line: "{{ host_name }} ansible_host={{ host_ip }} {{ insert_ssh_key_string | default('') }} ansible_python_interpreter={{ python_interpreter }} package_python_interpreter={{ package_python_interpreter }}"
       backup: "{{ backup }}"
       owner: deployuser
       regexp: "^{{ host_name }} ansible_host=.*"
