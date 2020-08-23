@@ -313,7 +313,7 @@ resource "null_resource" "attach_local_mounts_after_start" {
   ]
   triggers = {
     fsx_private_ip = local.fsx_private_ip
-    fsx_record = aws_route53_record.fsx_record
+    fsx_record = "${join(",", aws_route53_record.fsx_record)}"
     remote_mounts_on_local = var.remote_mounts_on_local
     ebs_template_sha1    = "${sha1( file( fileexists( local.fsx_volumes_user_path ) ? local.fsx_volumes_user_path : local.fsx_volumes_default_path ))}" # file contents can trigger volume attachment 
     fsx_enabled = local.fsx_enabled
