@@ -531,7 +531,7 @@ resource "null_resource" "fsx_mounts" {
 
   triggers = {
     instanceid = local.instanceid
-    fsx_private_ip = var.fsx_private_ip
+    fsx_hostname = var.fsx_hostname
   }
 
   provisioner "local-exec" {
