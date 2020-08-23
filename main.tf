@@ -24,14 +24,14 @@ variable "conflictkey" {}
 locals {
   pgp_public_key = length(regexall(".*keybase:.*", var.pgp_public_key)) > 0 ? var.pgp_public_key : filebase64("/secrets/keys/gpg_pub_key.gpg.pub")
   common_tags = {
-    environment  = "${var.envtier}"
-    resourcetier = "${var.resourcetier}"
-    conflictkey  = "${var.conflictkey}" 
+    environment  = var.envtier
+    resourcetier = var.resourcetier
+    conflictkey  = var.conflictkey 
     # The conflict key defines a name space where duplicate resources in different deployments sharing this name are prevented from occuring.  This is used to prevent a new deployment overwriting and existing resource unless it is destroyed first.
     # examples might be blue, green, dev1, dev2, dev3...dev100.  This allows us to lock deployments on some resources.
-    pipelineid   = "${var.active_pipeline}"
-    owner        = "${data.aws_canonical_user_id.current.display_name}"
-    accountid    = "${data.aws_caller_identity.current.account_id}"
+    pipelineid   = var.active_pipeline
+    owner        = data.aws_canonical_user_id.current.display_name
+    accountid    = data.aws_caller_identity.current.account_id
     terraform    = "true"
   }
 }
@@ -224,10 +224,10 @@ resource "null_resource" "provision_deadline_spot" {
 
   triggers = {
     ami_id                  = module.node.ami_id
-    config_template_sha1    = "${sha1(file( fileexists(local.override_config_template_file_path) ? local.override_config_template_file_path : local.config_template_file_path))}"
-    deadline_spot_sha1      = "${sha1(file("/deployuser/ansible/ansible_collections/firehawkvfx/deadline/deadline_spot.yaml"))}"
-    deadline_spot_role_sha1 = "${sha1(file("/deployuser/ansible/ansible_collections/firehawkvfx/deadline/roles/deadline_spot/tasks/main.yml"))}"
-    deadline_roles_tf_sha1  = "${sha1(file("/deployuser/modules/deadline/main.tf"))}"
+    config_template_sha1    = sha1(file( fileexists(local.override_config_template_file_path) ? local.override_config_template_file_path : local.config_template_file_path))
+    deadline_spot_sha1      = sha1(file("/deployuser/ansible/ansible_collections/firehawkvfx/deadline/deadline_spot.yaml"))
+    deadline_spot_role_sha1 = sha1(file("/deployuser/ansible/ansible_collections/firehawkvfx/deadline/roles/deadline_spot/tasks/main.yml"))
+    deadline_roles_tf_sha1  = sha1(file("/deployuser/modules/deadline/main.tf"))
     spot_access_key_id      = module.deadline.spot_access_key_id
     spot_secret             = module.deadline.spot_secret
     volume_size             = var.node_centos_volume_size
@@ -272,6 +272,7 @@ module "fsx" {
 
   fsx_bucket_prefix = var.fsx_bucket_prefix
   private_route53_zone_id = module.vpc.private_route53_zone_id
+  public_domain_name = var.public_domain_name
   bucket_extension = var.bucket_extension
   subnet_ids = module.vpc.private_subnets
 

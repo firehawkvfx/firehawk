@@ -38,3 +38,5 @@ variable "remote_mounts_on_local" {}
 variable "envtier" {}
 
 variable "private_route53_zone_id" {}
+
+variable "public_domain_name" {}
