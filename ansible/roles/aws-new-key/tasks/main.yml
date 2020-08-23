@@ -22,7 +22,7 @@
     path: "{{ aws_private_key_path }}"
     state: absent
   become: true
-  when: destroy
+  when: destroy | bool
 
 - name: create a new ec2 key pair, returns generated private key
   ec2_key:
