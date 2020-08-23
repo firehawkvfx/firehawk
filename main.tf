@@ -476,6 +476,7 @@ module "node" {
   # dependencies
   fsx_storage                 = var.fsx_storage
   fsx_private_ip                  = module.fsx.fsx_private_ip
+  private_domain              = var.private_domain
 
   softnas_storage                = var.softnas_storage
   

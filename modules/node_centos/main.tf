@@ -543,7 +543,7 @@ resource "null_resource" "fsx_mounts" {
 
       aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id} # ensure instance is started
 
-      ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/fsx/fsx_volume_mounts.yaml -vvv --extra-vars "fsx_ip=fsx.${var.public_domain_name}" --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/fsx/fsx_volume_mounts.yaml -vvv --extra-vars "fsx_ip=fsx.${var.private_domain}" --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"; exit_test
 EOT
 
   }
