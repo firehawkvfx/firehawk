@@ -254,15 +254,6 @@ locals {
   fsx_private_ip = element( concat( data.aws_network_interface.fsx_primary_interface.*.private_ip, list("")), 0 )
 }
 
-output "fsx_private_ip" {
-  depends_on = [
-    aws_fsx_lustre_file_system.fsx_storage,
-    data.external.primary_interface_id,
-    data.aws_network_interface.fsx_primary_interface
-  ]
-  value = local.fsx_private_ip
-}
-
 resource "aws_route53_record" "fsx_record" {
   count   = local.fsx_enabled
   zone_id = var.private_route53_zone_id
@@ -270,6 +261,16 @@ resource "aws_route53_record" "fsx_record" {
   type    = "A"
   ttl     = 300
   records = [local.fsx_private_ip]
+}
+
+output "fsx_private_ip" {
+  depends_on = [
+    aws_fsx_lustre_file_system.fsx_storage,
+    data.external.primary_interface_id,
+    data.aws_network_interface.fsx_primary_interface
+    aws_route53_record.fsx_record
+  ]
+  value = local.fsx_private_ip
 }
 
 ### attach mounts onsite if fsx is available
