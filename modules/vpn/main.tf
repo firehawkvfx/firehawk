@@ -86,6 +86,7 @@ variable "public_route_table_ids" {}
 variable "common_tags" {}
 
 variable "firehawk_init_dependency" {}
+variable "private_domain_name" {}
 
 module "openvpn" {
   #source = "github.com/firehawkvfx/tf_aws_openvpn"
@@ -105,6 +106,8 @@ module "openvpn" {
   private_subnets = var.private_subnets
 
   name = "openvpn_ec2_pipeid${lookup(var.common_tags, "pipelineid", "0")}"
+
+  private_domain_name = var.private_domain_name
 
   # VPC Inputs
   vpc_id             = var.vpc_id

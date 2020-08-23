@@ -195,6 +195,7 @@ module "vpn" {
   aws_region = var.region
 
   route_public_domain_name = var.route_public_domain_name
+  private_domain_name = var.private_domain
 
   # dummy attribute to force dependency on IGW.
   igw_id = local.aws_internet_gateway

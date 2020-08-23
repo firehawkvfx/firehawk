@@ -140,6 +140,7 @@
     block: |
       nameserver {{ private_ip }}
       search ap-southeast-2.compute.internal
+      search {{ private_domain_name }}
     marker: "# {mark} ANSIBLE MANAGED BLOCK"
 # nameserver 8.8.8.8 
 # nameserver 8.8.4.4

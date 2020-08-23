@@ -30,10 +30,7 @@ variable "attach_local_mounts_after_start" {
   default = []
 }
 
-
-variable "wakeable" {
-  default = true
-}
+variable "wakeable" {}
 
 # examples ["subnet-0a7554f56af4d6d0a", "subnet-0257c7f8b1d68b6e4"]
 variable "public_subnet_ids" {
