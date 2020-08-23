@@ -57,7 +57,7 @@ locals {
 resource "aws_route53_zone" "private" { # the private hosted zone is used for host names privately ending with the domain name.
   count = var.create_vpc ? 1 : 0
 
-  name = var.public_domain_name
+  name = var.private_domain
   vpc {
     vpc_id = local.vpc_id
   }

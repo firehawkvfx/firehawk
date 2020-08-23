@@ -64,6 +64,8 @@ variable "cert_arn" {
 variable "public_domain_name" {
 }
 
+variable "private_domain" {}
+
 variable "openvpn_user" {
 }
 
