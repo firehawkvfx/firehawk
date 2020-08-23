@@ -133,4 +133,6 @@ variable "softnas_storage" {}
 
 variable "fsx_private_ip" {}
 
+variable "fsx_hostname" {}
+
 variable "private_domain" {}

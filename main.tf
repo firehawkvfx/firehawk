@@ -274,6 +274,8 @@ module "fsx" {
   fsx_bucket_prefix = var.fsx_bucket_prefix
   private_route53_zone_id = module.vpc.private_route53_zone_id
   private_domain = var.private_domain
+  fsx_hostname = "fsx.${var.private_domain}"
+
   bucket_extension = var.bucket_extension
   subnet_ids = module.vpc.private_subnets
 
@@ -478,6 +480,7 @@ module "node" {
   fsx_storage                 = var.fsx_storage
   fsx_private_ip                  = module.fsx.fsx_private_ip
   private_domain              = var.private_domain
+  fsx_hostname = "fsx.${var.private_domain}"
 
   softnas_storage                = var.softnas_storage
   

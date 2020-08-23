@@ -525,7 +525,7 @@ EOT
 }
 
 resource "null_resource" "fsx_mounts" {
-  count = ! var.sleep && var.aws_nodes_enabled && var.fsx_storage ? 1 : 0
+  count = var.aws_nodes_enabled && var.fsx_storage ? 1 : 0
 
   depends_on = [ var.fsx_private_ip, null_resource.install_deadline_worker ]
 
@@ -543,7 +543,7 @@ resource "null_resource" "fsx_mounts" {
 
       aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id} # ensure instance is started
 
-      ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/fsx/fsx_volume_mounts.yaml -vvv --extra-vars "fsx_ip=fsx.${var.private_domain}" --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/fsx/fsx_volume_mounts.yaml -vvv --extra-vars "fsx_ip=${var.fsx_hostname}" --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"; exit_test
 EOT
 
   }
@@ -635,10 +635,8 @@ resource "random_id" "ami_unique_name" {
   count = var.aws_nodes_enabled ? 1 : 0
   keepers = {
     # Generate a new id each time we switch to a new instance id
-    ami_id = aws_instance.node_centos[0].id
-    # Currently fsx wont have a persistent IP after wake, so the image is updated after the fstab file is updated with the new ip.
-    fsx_mounts = null_resource.fsx_mounts[0].id
-    fsx_private_ip = var.fsx_private_ip
+    instance_id = aws_instance.node_centos[0].id
+    fsx_hostname = var.fsx_hostname
   }
   byte_length = 8
 }
@@ -649,7 +647,6 @@ resource "aws_ami_from_instance" "node_centos" {
   name               = "node_centos_houdini_${local.instanceid}_${random_id.ami_unique_name[0].hex}"
   source_instance_id = local.instanceid
   tags = merge(map("Name", format("%s", var.name)), var.common_tags, local.extra_tags)
-
 }
 
 #wakeup after ami

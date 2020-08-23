@@ -40,3 +40,4 @@ variable "envtier" {}
 variable "private_route53_zone_id" {}
 
 variable "private_domain" {}
+variable "fsx_hostname" {}
