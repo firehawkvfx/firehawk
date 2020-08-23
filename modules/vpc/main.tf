@@ -115,7 +115,7 @@ resource "aws_route" "private_nat_gateway" {
   count = var.create_vpc ? 1 : 0
   route_table_id         = element(concat(aws_route_table.private.*.id, list("")), 0)
   destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id         = aws_nat_gateway.gw[count.index].id
+  nat_gateway_id         = element(concat(aws_nat_gateway.gw.*.id, list("")), 0)
   timeouts {
     create = "5m"
   }
