@@ -84,7 +84,7 @@ module "vpc" {
 
   create_vpc = var.enable_vpc
 
-  route_public_domain_name = var.public_domain
+  route_public_domain_name = var.route_public_domain_name
 
   #sleep will disable the nat gateway to save cost during idle time.
   sleep              = var.sleep
