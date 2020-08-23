@@ -267,7 +267,7 @@ output "fsx_private_ip" {
   depends_on = [
     aws_fsx_lustre_file_system.fsx_storage,
     data.external.primary_interface_id,
-    data.aws_network_interface.fsx_primary_interface
+    data.aws_network_interface.fsx_primary_interface,
     aws_route53_record.fsx_record
   ]
   value = local.fsx_private_ip
