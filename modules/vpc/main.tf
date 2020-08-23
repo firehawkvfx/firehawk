@@ -16,7 +16,7 @@ resource "null_resource" "firehawk_init_dependency" {
 variable "common_tags" {}
 
 locals {
-  name = "firehawk-compute_pipeid${lookup(var.common_tags, "pipelineid", "0")}"
+  name = "firehawk_${lookup(var.common_tags, "resourcetier", "0")}_pipeid${lookup(var.common_tags, "pipelineid", "0")}"
   extra_tags = { 
     role = "vpc"
     Name = local.name
@@ -31,7 +31,7 @@ resource "aws_vpc" "main" {
   enable_dns_support   = true
   enable_dns_hostnames = true
 
-  tags = merge(map("Name", format("%s", local.name)), var.common_tags, local.extra_tags)
+  tags = merge(var.common_tags, local.extra_tags, map("Name", format("%s", local.name)))
 }
 
 resource "aws_internet_gateway" "gw" {
