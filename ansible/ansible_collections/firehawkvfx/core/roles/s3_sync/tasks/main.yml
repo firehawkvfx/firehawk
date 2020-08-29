@@ -17,6 +17,7 @@
   shell: |
     # set -x
     cd ~
+    
     echo "aws sts get-caller-identity"
     aws sts get-caller-identity
 
@@ -25,6 +26,7 @@
     echo "become user {{ sync_user }}"
     echo "whoami $(whoami)"
     echo "pwd: $(pwd)"
+    echo "PATH: $PATH"
     cd {{ basedir }}
     exit_code=$?
     echo "pwd: $(pwd)"
@@ -120,5 +122,7 @@
   register: output
   changed_when:
     - '"File already present" not in output.stdout'
+  failed_when:
+    - '"command not found" in output.stdout'
   args:
     executable: /bin/bash
