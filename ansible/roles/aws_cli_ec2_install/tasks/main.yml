@@ -159,7 +159,7 @@
 - name: Use expect to install AWS CLI- Centos - root
   expect:
     # this version of the command may be required for centos
-    command: "aws configure"
+    command: "/usr/local/bin/aws configure"
     responses:
       .*Access Key ID \[.*\]: "{{ storage_user_access_key_id }}"
       .*Secret Access Key \[.*\]: "{{ storage_user_secret_key }}"
