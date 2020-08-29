@@ -15,10 +15,6 @@ NC='\033[0m' # No Color
 # the directory of the current script
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-printf "\n${RED}Warning: Currently virtual box on linux may require a version lock after installing:${NC}\n"
-echo "6.1.10 had problems with centos 7 and gnome 2020/06/07. Ensure you use the version below, or update with caution:"
-echo "yum install VirtualBox-6.1-6.1.8_137981_el7-1.x86_64 versionlock; yum versionlock add VirtualBox-6.1-6.1.8_137981_el7-1.x86_64"
-
 # This block allows you to echo a line number for a failure. Only works on linux, not zsh macos
 # err_report() {
 #     echo "${BASH_SOURCE[0]}: $1 script err_report: Error on line $2"

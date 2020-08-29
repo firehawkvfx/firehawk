@@ -166,7 +166,7 @@
       .*region name \[.*\]: "{{ aws_region }}"
       .*output format \[.*\]: json
   become: true
-  no_log: true
+  # no_log: true
   when: ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' ) and aws_cli_root
   tags:
   - user_access
