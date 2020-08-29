@@ -64,7 +64,6 @@ IFS='
 '
 optspec=":hv-:t:"
 
-vagrant_up=true
 test_vm=false
 tf_action="apply"
 tf_init=true
@@ -295,9 +294,13 @@ echo "Vagrant box firehawkgateway$TF_VAR_envtier in $firehawkgateway_box"
 
 if [[ "$vagrant_halt" == true ]]; then
     echo "Halting vagrant"
-    echo "Warning: Doing this deadlinedb while running (firehawkgateway) may corrupt it."
+    echo "Warning: Doing this deadlinedb while running (firehawkgateway) may corrupt it."    
     vagrant halt
+    # Ensure the vm wont be broght up again after this run, unless the var has been defined.
+    if [[ -z "$vagrant_up" ]]; then vagrant_up=false; fi
 fi
+if [[ -z "$vagrant_up" ]]; then vagrant_up=true; fi # if not defined, assume the vm must be brought up.
+
 
 set -o pipefail # https://vaneyckt.io/posts/safer_bash_scripts_with_set_euxo_pipefail/
 
