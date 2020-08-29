@@ -120,7 +120,7 @@
 
 # install aws cli for the user.
 
-- name: Use expect to install AWS CLI- Centos
+- name: "Use expect to install AWS CLI- Centos {{ variable_become_user }}"
   expect:
     # different version of the command may be required for centos.  depending on install method this can change.  eg:
     # /usr/bin/aws

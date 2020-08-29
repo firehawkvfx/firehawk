@@ -108,6 +108,24 @@
     password: "{{ my_password }}"
   when: getent_passwd['ubuntu'] is defined
 
+- name: create dir
+  file: 
+    path: "/home/{{ variable_user }}/.ansible"
+    state: directory
+    mode: '0700'
+    owner: "{{ variable_user }}"
+    group: "{{ variable_user }}"
+  become: true
+
+- name: create dir
+  file: 
+    path: "/home/{{ variable_user }}/.ansible/tmp"
+    state: directory
+    mode: '0700'
+    owner: "{{ variable_user }}"
+    group: "{{ variable_user }}"
+  become: true
+
 - name: 'generate ssh key for {{ variable_user }}'
   shell: |
     df -h
