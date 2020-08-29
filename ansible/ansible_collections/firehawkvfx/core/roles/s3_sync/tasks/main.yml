@@ -123,6 +123,6 @@
   changed_when:
     - '"File already present" not in output.stdout'
   failed_when:
-    - '"command not found" in output.stdout'
+    - '"command not found" in output.stderr'
   args:
     executable: /bin/bash
