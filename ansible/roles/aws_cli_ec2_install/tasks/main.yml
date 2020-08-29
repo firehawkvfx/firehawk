@@ -42,10 +42,11 @@
 - name: Create a symbolic link for aws to get around PATH issues in Ansible. # https://github.com/ansible/ansible/issues/71520
   file:
     src: /usr/local/bin/aws
-    dest: /usr/bin/aws
+    dest: /bin/aws
     owner: root
     group: root
     state: link
+  become: true
 
 - name: install pexpect
   pip: 
@@ -174,7 +175,7 @@
       .*region name \[.*\]: "{{ aws_region }}"
       .*output format \[.*\]: json
   become: true
-  # no_log: true
+  no_log: true
   when: ( ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat' ) and aws_cli_root
   tags:
   - user_access
