@@ -283,6 +283,7 @@
 
 - name: "aws sts get-caller-identity for {{ variable_user }}"
   shell: |
+    echo "PATH: $PATH"
     aws sts get-caller-identity
   become_user: "{{ variable_user }}"
   tags:
