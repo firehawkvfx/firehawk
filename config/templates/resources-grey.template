@@ -106,8 +106,14 @@ TF_VAR_route_zone_id=insertvalue
 # default: TF_VAR_cert_arn=none
 TF_VAR_cert_arn=insertvalue
 
+# TF_VAR_private_domain:
+# The private prod domain name for your hosts.  This is required for the host names and fsx storage in a private network.  Launched Infrastructure will switch between different domains depending on the resource environment for isolation.
+# eg: TF_VAR_private_domain=grey.devexample.com
+# default: TF_VAR_private_domain=grey.openfirehawk.com
+TF_VAR_private_domain=insertvalue
+
 # TF_VAR_public_domain:
-# The public dev domain name in the AWS dev account.  You can purchase a cheap domain in AWS with lesser known extensions for testing and use this here. Launched Infrastructure will switch between different domains depending on the staging environment for isolation. Some resources, like licence servers, may exist in a single domain (usually prod), since they often are not dynamic and cant be moved easily.
+# The public prod domain name in the AWS prod account.  This is not needed unless you want public hostnames for end points like vpn.mydomain.com or bastion.mydomain.com You can purchase a cheap domain in aws with lesser known extensions for testing and use this here, provided you have entered a route zone id. Launched Infrastructure will switch between different domains depending on the staging environment for isolation.
 # eg: TF_VAR_public_domain=devexample.com
 # default: TF_VAR_public_domain=none
 TF_VAR_public_domain=insertvalue

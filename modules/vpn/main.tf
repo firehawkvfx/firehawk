@@ -30,7 +30,7 @@ variable "private_key" {
 }
 
 variable "instance_type" {
-  default = "m5.xlarge"
+  default = "t3.micro"
 }
 
 variable "cert_arn" {

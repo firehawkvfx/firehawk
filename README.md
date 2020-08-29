@@ -252,9 +252,9 @@ To set this up, you will have specified a new MAC address for the Firehawk VPN G
 - You can usually do that by specifying the MAC address of the host (defined in the secrets/resource file) on your router, and setting the ip you wish to reserve.  Some routers might require the host be up before you can set a static IP. In that case, you can reserve the static IP at the first opportunity and reload the Firehawk Gateway VM to check it actually aquired this address before you deploy any cloud resources.  If in doubt, destroy the VM and start over.  It should aquire the address correctly.
 
 Once you can ensure that these VM's are going to have a static IP, we can specify the routes to those IP's.  In a default deployment, on the router, we would setup these routes:
-- 10.1.0.0/16	sends traffic to 192.168.92.10.  It means traffic destined for the range 10.1.0.0 - 10.1.255.255 will go via 192.168.92.10 ( The /16 suffix is CIDR notation to specify a range of adresses)
-- 10.2.0.0/16	sends traffic to 192.168.92.20.  It means traffic destined for the range 10.2.0.0 - 10.2.255.255 will go via 192.168.92.20
-- 10.3.0.0/16	sends traffic to 192.168.92.30.  It means traffic destined for the range 10.3.0.0 - 10.3.255.255 will go via 192.168.92.30
+- 10.1.0.0/16	sends traffic to 192.168.92.10 (grey).  It means traffic destined for the range 10.1.0.0 - 10.1.255.255 will go via 192.168.92.10 ( The /16 suffix is CIDR notation to specify a range of adresses)
+- 10.2.0.0/16	sends traffic to 192.168.92.20 (blue).  It means traffic destined for the range 10.2.0.0 - 10.2.255.255 will go via 192.168.92.20
+- 10.3.0.0/16	sends traffic to 192.168.92.30 (green).  It means traffic destined for the range 10.3.0.0 - 10.3.255.255 will go via 192.168.92.30
 
 We also have these routes in a default configuration:
 - 172.17.232.0/24	sends traffic to 192.168.92.10
@@ -263,7 +263,38 @@ We also have these routes in a default configuration:
 
 These address ranges refer to the DHCP addresses that Open VPN will automaticaly generate for its own use with the encrypted tunnel.  Each source / destination address will get one of these DHCP addreses to use for the encrypted traffic through the VPN tunnel between sites.
 
-## FSX for Lustre
+## DNS
+
+A DNS service allows caching of hostnames and their associated IP addresses.  Generally a private DNS server isn't required since IP addresses can easily used- only a small number of hosts are needed to configure everything for rendering.  Beyond config, the Deadline Connection Server handles most of the communication with new hosts when they phone home and Deadline will serve tasks to them.
+
+However, our storage in AWS (FSx) is a different story.  It has an IP which changes each time the storage cluster is started, hopefully this will change one day, at which point we may not need DNS anymore. For now, it does require DNS to write to it and our nodes can have some shared storage available on boot to write output to.  We can also easily start a DNS microservice with Docker for onsite, and then configure our router to use this IP address of the host running the docker container.  This will allow our onsite systems to know the IP address of the FSx storage cluster and mount the storage volume.
+
+Thankfully, Docker makes this easy for us, and at only 6MB, this image is super lightweight to run.
+
+- Install docker and download this image. Preferably on a host that will always be available, and it must have a static IP.  Take note of this host's static IP with a command like ifconfig before you begin.  I choose to run this docker container on a small efficient device, like a Mac Mini or a NAS.
+```
+docker pull andyshinn/dnsmasq:2.81
+```
+
+- Next we will start the container, and provide a few arguments that will point each sub domain to the respective VPN client for each environment.
+```
+sudo docker run -p 53:53/tcp -p 53:53/udp --cap-add=NET_ADMIN andyshinn/dnsmasq:2.81 -S /grey.openfirehawk.com/192.168.92.10 -S /blue.openfirehawk.com/192.168.92.20 -S /green.openfirehawk.com/192.168.92.30 --log-facility=- | while read outlog; do echo "$(date): $outlog"; done 2>&1 | tee ~/dnsmasq.log &
+```
+
+
+Each of the domains in the docker command should match the var you entered for TF_VAR_private_domain in the secrets/resources-* files, and the ip addresses should match the static IP's being used by the open vpn clients.
+
+By running this, a query on our network for our storage hostname of fsx.blue.firehawkvfx.com would use the DNS server (our vpn client) at 192.168.92.20 to aquire the actual adress of our FSX storage in our Blue deployment, and so on for the other subdomains.  Hostnames that do not match the extensions of these queries will go out to the public internet as before.
+
+- You can test the DNS is running from another host.  $DOCKERIP can be replaced with the IP address of the host which is running docker.
+```
+host www.google.com $DOCKERIP
+``` 
+- Lastly, update the first entry in your router's DNS settings to point at the IP address of the host you ran the docker command on.  
+The should be an existing entry here already (Probably the router's own IP), and this existing entry can become the second entry.
+If there is no second entry and your router cannot be a DNS (unlikely!), You can try 8.8.8.8, which is not as effective as using an internal DNS but better than nothing!  If your private DNS server goes down, then requests will be serviced by the second entry.  Using your router to do this saves the hassle of configuring each machine on your network, and it will propogate out through your network automatically.
+
+## FSx for Lustre
 
 With the 0.1 release we are now using a FSx for Lustre storage solution as our default remote file system in place of SoftNAS.  FSx for Lustre has some interesting ablities:
 
