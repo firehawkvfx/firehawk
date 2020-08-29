@@ -19,8 +19,6 @@
     import_pool: true
     variable_user: centos
     pcoip: false
-    destroy: false
-    import_pool: true
 
   pre_tasks:
   - name: test connection and permissions
