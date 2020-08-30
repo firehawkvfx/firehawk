@@ -47,9 +47,6 @@
 - name: Check whether aws fsx describe-file-systems contains the mount
   # command: grep -E "^\/export\/{{ item.pool_name }}\/{{ item.volume_name }}.*" /etc/exports
   shell: |
-    # aws fsx describe-file-systems | jq ".FileSystems[] | select(.LustreConfiguration.MountName == \"{{ item.volume_name }}\")"
-    # aws fsx describe-file-systems | jq --slurp ".[0].FileSystems[] | select(.LustreConfiguration.MountName == \"{{ item.volume_name }}\")"
-    # aws fsx describe-file-systems | jq --slurp ".[0].FileSystems[].LustreConfiguration.MountName" --raw-output
     aws fsx describe-file-systems | jq --slurp ".[0].FileSystems[] | select(.FileSystemId == \"{{ fsx_id }}\") | .LustreConfiguration.MountName" --raw-output
   become_user: deployuser
   args:
@@ -388,4 +385,50 @@
   when: destroy == false
   with_items: "{{ fsx_exports }}"
   tags:
+  - cloud_install
+
+# After fsx is mounted, the permissions of these previously created paths have changed, so we set it straight.
+- name: ensure mount directories have correct permissions 
+  file: 
+    path: "{{ item.item.path }}"
+    state: directory
+    owner: "{{ variable_user }}"
+    group: "{{ variable_user }}"
+    mode: u=rwX,g=rwX,o=rwX
+  become: true
+  when: destroy == false and item.rc == 0
+  with_items: 
+  - "{{ fsx_exports }}"
+  tags:
+  - local_install
+  - cloud_install
+
+- name: ensure bind1 directories have correct permissions 
+  file: 
+    path: "{{ item.item.bind1 }}"
+    state: directory
+    owner: "{{ variable_user }}"
+    group: "{{ variable_user }}"
+    mode: u=rwX,g=rwX,o=rwX
+  become: true
+  when: destroy == false and item.item.bind1 and item.rc == 0
+  with_items: 
+  - "{{ fsx_exports }}"
+  tags:
+  - local_install
+  - cloud_install
+
+- name: ensure bind2 directories have correct permissions 
+  file: 
+    path: "{{ item.item.bind2 }}"
+    state: directory
+    owner: "{{ variable_user }}"
+    group: "{{ variable_user }}"
+    mode: u=rwX,g=rwX,o=rwX
+  become: true
+  when: destroy == false and item.item.bind2 and item.rc == 0
+  with_items: 
+  - "{{ fsx_exports }}"
+  tags:
+  - local_install
   - cloud_install
