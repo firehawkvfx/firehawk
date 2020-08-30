@@ -184,7 +184,7 @@ resource "aws_security_group" "resolver" {
     protocol    = "-1"
     from_port   = 53
     to_port     = 53
-    cidr_blocks = [var.vpc_cidr, var.vpn_cidr, var.remote_subnet_cidr, var.remote_vpn_ip_cidr]
+    cidr_blocks = [var.vpc_cidr, var.vpn_cidr, var.remote_subnet_cidr, var.remote_ip_cidr]
 
     description = "all incoming traffic from vpc, vpn dhcp, and remote subnet"
   }
@@ -222,9 +222,14 @@ resource "aws_route53_resolver_endpoint" "main" {
 
 resource "aws_route53_resolver_rule" "sys" {
   count = var.create_vpc ? 1 : 0
-  
+
   domain_name = var.private_domain
   rule_type   = "SYSTEM"
+}
+
+resource "aws_route53_resolver_rule_association" "sys" {
+  resolver_rule_id = aws_route53_resolver_rule.sys.id
+  vpc_id           = local.vpc_id
 }
 
 # module "vpc" { # this can simplify things but it is an external dependency, so it is left here latent incase needed.
