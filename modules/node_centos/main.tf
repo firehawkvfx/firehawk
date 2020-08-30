@@ -524,6 +524,10 @@ EOT
   }
 }
 
+variable "fsx_id" {
+  default = "none"
+}
+
 resource "null_resource" "fsx_mounts" {
   count = var.aws_nodes_enabled && var.fsx_storage ? 1 : 0
 
@@ -543,7 +547,7 @@ resource "null_resource" "fsx_mounts" {
 
       aws ec2 start-instances --instance-ids ${aws_instance.node_centos[0].id} # ensure instance is started
 
-      ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/fsx/fsx_volume_mounts.yaml -vvv --extra-vars "fsx_ip=${var.fsx_hostname}" --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"; exit_test
+      ansible-playbook -i "$TF_VAR_inventory" ansible/ansible_collections/firehawkvfx/fsx/fsx_volume_mounts.yaml -vvv --extra-vars "fsx_ip=${var.fsx_hostname} fsx_id=${var.fsx_id}" --skip-tags "local_install local_install_onsite_mounts" --tags "cloud_install"; exit_test
 EOT
 
   }

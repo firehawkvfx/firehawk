@@ -479,6 +479,7 @@ module "node" {
   # dependencies
   fsx_storage                 = var.fsx_storage
   fsx_private_ip                  = module.fsx.fsx_private_ip
+  fsx_id = module.fsx.id # the id of the fsx volume to mount to the instance
   private_domain              = var.private_domain
   fsx_hostname = "fsx.${var.private_domain}"
 
