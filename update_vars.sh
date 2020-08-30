@@ -748,6 +748,8 @@ source_vars () {
         # # any var ending in _prod or _dev will be stripped and mapped based on the envtier
         python $TF_VAR_firehawk_path/scripts/envtier_vars.py; exit_test
         envsubst < "$TF_VAR_firehawk_path/tmp/envtier_mapping.txt" > "$TF_VAR_firehawk_path/tmp/envtier_exports.txt"; exit_test
+        
+        # envtier_exports.txt
 
         echo "envsubst TF_VAR_prod_path_abs_cloud: $TF_VAR_prod_path_abs_cloud"
         # Next- using the current envtier environment, evaluate the variables for the that envrionment.  
@@ -758,9 +760,9 @@ source_vars () {
             export $i
         done
 
-        echo " post envsubst TF_VAR_prod_path_abs_cloud: $TF_VAR_prod_path_abs_cloud"
+        echo "post envsubst TF_VAR_prod_path_abs_cloud: $TF_VAR_prod_path_abs_cloud"
         
-        rm $TF_VAR_firehawk_path/tmp/envtier_exports.txt
+        # rm $TF_VAR_firehawk_path/tmp/envtier_exports.txt
 
         # lastly update the vault key path
         # set vault key location based on envtier dev/prod
