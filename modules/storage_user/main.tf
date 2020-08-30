@@ -28,7 +28,8 @@ resource "aws_iam_group_policy" "query_instances_group_policy" {
             "Effect": "Allow",
             "Action": [
                 "ec2:DescribeInstances",
-                "ec2:DescribeInstanceStatus"
+                "ec2:DescribeInstanceStatus",
+                "fsx:DescribeFileSystems"
             ],
             "Resource": "*"
         }
