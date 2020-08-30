@@ -255,9 +255,6 @@ locals {
 }
 
 resource "aws_route53_record" "fsx_record" {
-  triggers = {
-    fsx_id = local.id
-  }
   count   = local.fsx_enabled
   zone_id = var.private_route53_zone_id
   name    = var.fsx_hostname
