@@ -224,6 +224,9 @@ output "network_interface_ids" {
 # Terraform provider API does list the primary interface in the correct order to obtain it.  so we use a custom data source to aquire the primary interface
 
 data "external" "primary_interface_id" { 
+  triggers = {
+    fsx_id = local.id
+  }
   count = local.fsx_enabled
   program = ["/bin/bash", "${path.module}/primary_interface.sh"]
   
@@ -255,6 +258,9 @@ locals {
 }
 
 resource "aws_route53_record" "fsx_record" {
+  triggers = {
+    fsx_id = local.id
+  }
   count   = local.fsx_enabled
   zone_id = var.private_route53_zone_id
   name    = var.fsx_hostname
