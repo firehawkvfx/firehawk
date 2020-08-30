@@ -225,12 +225,12 @@ resource "aws_route53_resolver_endpoint" "main" {
 
   ip_address {
     subnet_id = local.private_subnet1_id
-    ip        = cidrhost(element( var.private_subnets, 0 ), 3)
+    ip        = cidrhost(element( var.private_subnets, 0 ), 4)
   }
 
   ip_address {
     subnet_id = local.private_subnet2_id
-    ip        = cidrhost(element( var.private_subnets, 1 ), 3)
+    ip        = cidrhost(element( var.private_subnets, 1 ), 4)
   }
 
   tags = merge(var.common_tags, local.extra_tags, map("Name", format("resolver_%s", local.name)))
