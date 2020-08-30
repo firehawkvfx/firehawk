@@ -10,14 +10,16 @@ template_path = os.environ['tmp_template_path']
 envtier_mapping_path = TF_VAR_firehawk_path + "/tmp/envtier_mapping.txt"
 
 # set values to those relevant to the current envtier in a dictionary based on the _dev or _prod appended names space on any keys.
+extensions = ['_dev', '_prod']
 with open(template_path) as f:
     for line in f:
-        if not line.startswith('#'):
-            if line.endswith('_dev') or line.endswith('_prod'): 
-                s = line.split('=')[0]
-                s = re.sub('_prod$', '', s)
-                s = re.sub('_dev$', '', s)
-                varname=s
+        if line.startswith('#'):
+            continue
+        
+        line = line.split('=')[0]
+        for ext in extensions:
+            if line.endswith(ext):
+                varname = line[:-len(ext)]
                 outdict[varname] = varname+'_'+envtier
 
 # write environment mappings to tmp file
