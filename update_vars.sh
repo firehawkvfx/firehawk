@@ -406,15 +406,15 @@ export config_path=$(to_abs_path $TF_VAR_secrets_path/config)
 echo_if_not_silent '...Check for config override, init if not present.'
 if [ ! -f $config_override ]; then
     echo_if_not_silent "...Initialising $config_override"
-    cp "$TF_VAR_firehawk_path/config/defaults/defaults-config-override-$TF_VAR_envtier" "$config_override"
+    cp "$TF_VAR_firehawk_path/config/defaults/defaults-config-override" "$config_override"
 fi
 
 current_version=$(cat $config_override | awk -F"=" '{if($1=="defaults_config_overide_version") print $2}')
-target_version=$(cat $TF_VAR_firehawk_path/config/defaults/defaults-config-override-$TF_VAR_envtier | awk -F"=" '{if($1=="defaults_config_overide_version") print $2}')
+target_version=$(cat $TF_VAR_firehawk_path/config/defaults/defaults-config-override | awk -F"=" '{if($1=="defaults_config_overide_version") print $2}')
 
 if [[ "$target_version" != "$current_version" ]]; then
     echo "...Version doesn't match config.  Initialising $config_override"
-    cp "$TF_VAR_firehawk_path/config/defaults/defaults-config-override-$TF_VAR_envtier" "$config_override"
+    cp "$TF_VAR_firehawk_path/config/defaults/defaults-config-override" "$config_override"
 fi
 
 # init defaults
