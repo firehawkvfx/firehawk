@@ -732,6 +732,8 @@ source_vars () {
             if [[ $verbose = true ]]; then echo "eval value: $value"; fi
             # echo "$key : $value"
             export "$key=$value" # Export the environment var
+
+            if [[ "$key"=="TF_VAR_prod_path_abs_cloud" ]]; then echo "TF_VAR_prod_path_abs_cloud: $TF_VAR_prod_path_abs_cloud"; fi
         done
 
         echo_if_not_silent "Exported."
