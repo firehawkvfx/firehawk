@@ -277,9 +277,9 @@ Thankfully, Docker makes this easy for us, and at only 6MB, this image is super 
 docker pull andyshinn/dnsmasq:2.81
 ```
 
-- Next we will start the container, and provide a few arguments that will point each sub domain to the respective VPN client for each environment.
+- Next we will start the container, and provide a few arguments that will point each sub domain to the respective VPN client for each environment.  where this command states `ap-southeast-2.compute.internal` ensure you use the name for your respective region.  This is also the default domain that all your private instances will end with, visible in the ec2 console.
 ```
-sudo docker run -p 53:53/tcp -p 53:53/udp --cap-add=NET_ADMIN andyshinn/dnsmasq:2.81 -S /grey.openfirehawk.com/192.168.92.10 -S /blue.openfirehawk.com/192.168.92.20 -S /green.openfirehawk.com/192.168.92.30 --log-facility=- | while read outlog; do echo "$(date): $outlog"; done 2>&1 | tee ~/dnsmasq.log &
+sudo docker run -p 53:53/tcp -p 53:53/udp --cap-add=NET_ADMIN andyshinn/dnsmasq:2.81 -S /grey.openfirehawk.com/10.1.1.4 -S /blue.openfirehawk.com/10.2.1.4 -S /green.openfirehawk.com/10.3.1.4 -S /ap-southeast-2.compute.internal/10.3.1.4/10.2.1.4/10.1.1.4 --log-facility=- | while read outlog; do echo "$(date): $outlog"; done 2>&1 | tee ~/dnsmasq.log &
 ```
 
 

@@ -35,9 +35,8 @@ variable "softnas_instance_type" {
   default = "m4.xlarge"
 }
 
-
 variable "azs" {
-  default = ["ap-southeast-2a", "ap-southeast-2b"]
+  default = []
 }
 
 variable "node_centos_volume_size" {

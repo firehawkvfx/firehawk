@@ -179,7 +179,7 @@
   tags:
   - local_install
 
-- name: Mount fsx Lustre volume from export - If this fails, verify the lustre packages are installed and the system has been rebooted at least once after installation of packages.
+- name: Mount fsx Lustre volume from export - {{ fsx_ip }}@tcp:/{{ item.item.volume_name }} to /{{ item.item.volume_name }} If this fails, verify the lustre packages are installed and the system has been rebooted at least once after installation of packages.
   become: yes
   mount:
     fstype: lustre
@@ -202,7 +202,7 @@
   - local_install
   - cloud_install
 
-- name: bind master mounts to named paths.  bind2 references the absolute mount names such as /cloud_prod.  bind1 is relative site names such as /prod, which are not pushed from cloud to onsite since those paths should exist onsite from a high performance local mount
+- name: "bind master mounts to named paths.  /{{ item.item.volume_name }} to {{ item.item.bind2 }} bind2 references the absolute mount names such as /cloud_prod.  bind1 is relative site names such as /prod, which are not pushed from cloud to onsite since those paths should exist onsite from a high performance local mount"
   become: yes
   mount:
     fstype: none
@@ -364,7 +364,7 @@
   tags:
   - cloud_install
 
-- name: bind1 master mounts to named paths.  bind1 references the absolute mount names such as /cloud_prod.  bind1 is relative site names such as /prod, which are not pushed from cloud to onsite since those paths should exist onsite from a high performance local mount
+- name: "bind1 master mounts to named paths.  /{{ item.item.volume_name }} to {{ item.item.bind1 }} bind1 references the absolute mount names such as /cloud_prod.  bind1 is relative site names such as /prod, which are not pushed from cloud to onsite since those paths should exist onsite from a high performance local mount"
   become: yes
   mount:
     fstype: none
@@ -378,7 +378,7 @@
   tags:
   - cloud_install
 
-- name: bind2 master mounts to named paths.  bind2 references the absolute mount names such as /cloud_prod.  bind1 is relative site names such as /prod, which are not pushed from cloud to onsite since those paths should exist onsite from a high performance local mount
+- name: "bind2 master mounts to named paths.  /{{ item.item.volume_name }} to {{ item.item.bind2 }} bind2 references the absolute mount names such as /cloud_prod.  bind1 is relative site names such as /prod, which are not pushed from cloud to onsite since those paths should exist onsite from a high performance local mount"
   become: yes
   mount:
     fstype: none
