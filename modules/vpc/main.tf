@@ -34,16 +34,29 @@ resource "aws_vpc" "main" {
   tags = merge(var.common_tags, local.extra_tags, map("Name", format("%s", local.name)))
 }
 
+resource "aws_vpc_dhcp_options" "main" {
+  count       = var.create_vpc ? 1 : 0
+  domain_name          = var.private_domain # This may not be available to be customised for us-east-1
+  tags = merge(var.common_tags, local.extra_tags, map("Name", format("dhcpoptions_%s", local.name)))
+}
+
+resource "aws_vpc_dhcp_options_association" "dns_resolver" {
+  count       = var.create_vpc ? 1 : 0
+  vpc_id          = local.vpc_id
+  dhcp_options_id = local.aws_vpc_dhcp_options_id
+}
+
 resource "aws_internet_gateway" "gw" {
   count = var.create_vpc ? 1 : 0
   
   vpc_id = local.vpc_id
 
-  tags = merge(map("Name", format("%s", local.name)), var.common_tags, local.extra_tags)
+  tags = merge(var.common_tags, local.extra_tags, map("Name", format("igw_%s", local.name)))
 }
 
 locals {
   vpc_id = element( concat( aws_vpc.main.*.id, list("")), 0 )
+  aws_vpc_dhcp_options_id = element( concat( aws_vpc_dhcp_options.main.*.id, list("")), 0 )
   aws_internet_gateway = element( concat( aws_internet_gateway.gw.*.id, list("")), 0 )
   vpc_main_route_table_id = element( concat( aws_vpc.main.*.main_route_table_id, list("")), 0 )
   vpc_cidr_block = element( concat( aws_vpc.main.*.cidr_block, list("")), 0 )
