@@ -53,7 +53,7 @@
   shell: |
     # aws fsx describe-file-systems | jq ".FileSystems[] | select(.LustreConfiguration.MountName == \"{{ item.volume_name }}\")"
     # aws fsx describe-file-systems | jq --slurp ".[0].FileSystems[] | select(.LustreConfiguration.MountName == \"{{ item.volume_name }}\")"
-    aws fsx describe-file-systems | jq --slurp ".[0].FileSystems[].LustreConfiguration.MountName"
+    aws fsx describe-file-systems | jq --slurp ".[0].FileSystems[].LustreConfiguration.MountName" --raw-output
   become_user: deployuser
   args:
     executable: /bin/bash
