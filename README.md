@@ -71,6 +71,7 @@ IAMFullAccess
 AmazonS3FullAccess
 AmazonECS_FullAccess
 AmazonRoute53FullAccess
+AmazonRoute53ResolverFullAccess
 ```
 - Create a new policy named ``GetCostAndUsage``
 - Provide the following policy in JSON

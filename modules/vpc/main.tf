@@ -181,21 +181,37 @@ resource "aws_security_group" "resolver" {
   tags = merge(var.common_tags, local.extra_tags, map("Name", format("resolver_%s", local.name)))
 
   ingress {
-    protocol    = "-1"
+    protocol    = "tcp"
     from_port   = 53
     to_port     = 53
     cidr_blocks = [var.vpc_cidr, var.vpn_cidr, var.remote_subnet_cidr, var.remote_ip_cidr]
 
-    description = "all incoming traffic from vpc, vpn dhcp, and remote subnet"
+    description = "TCP traffic from vpc, vpn dhcp, and remote subnet"
+  }
+  ingress {
+    protocol    = "udp"
+    from_port   = 53
+    to_port     = 53
+    cidr_blocks = [var.vpc_cidr, var.vpn_cidr, var.remote_subnet_cidr, var.remote_ip_cidr]
+
+    description = "UDP traffic from vpc, vpn dhcp, and remote subnet"
   }
 
   egress {
-    protocol    = "-1"
+    protocol    = "tcp"
     from_port   = 53
     to_port     = 53
     cidr_blocks = [var.vpc_cidr, var.vpn_cidr, var.remote_subnet_cidr, var.remote_ip_cidr]
 
-    description = "all incoming traffic from vpc, vpn dhcp, and remote subnet"
+    description = "TCP traffic to vpc, vpn dhcp, and remote subnet"
+  }
+  egress {
+    protocol    = "udp"
+    from_port   = 53
+    to_port     = 53
+    cidr_blocks = [var.vpc_cidr, var.vpn_cidr, var.remote_subnet_cidr, var.remote_ip_cidr]
+
+    description = "UDP traffic to vpc, vpn dhcp, and remote subnet"
   }
 }
 
