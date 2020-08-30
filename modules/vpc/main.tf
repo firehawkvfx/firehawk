@@ -37,7 +37,7 @@ resource "aws_vpc" "main" {
 resource "aws_vpc_dhcp_options" "main" {
   count       = var.create_vpc ? 1 : 0
   domain_name          = var.private_domain # This may not be available to be customised for us-east-1
-  domain_name_servers  = "AmazonProvidedDNS"
+  domain_name_servers  = ["AmazonProvidedDNS"]
   tags = merge(var.common_tags, local.extra_tags, map("Name", format("dhcpoptions_%s", local.name)))
 }
 
