@@ -44,6 +44,15 @@
   vars:
     ansible_python_interpreter: "{{ package_python_interpreter }}"
 
+- name: install bind-utils for host command
+  package:
+    name:
+    - bind-utils
+    state: present
+  become: true
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+  vars:
+    ansible_python_interpreter: "{{ package_python_interpreter }}"
 
 - name: Install requests module to query web pages in (houdini python install script)
   pip:

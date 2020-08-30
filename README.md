@@ -282,7 +282,6 @@ docker pull andyshinn/dnsmasq:2.81
 sudo docker run -p 53:53/tcp -p 53:53/udp --cap-add=NET_ADMIN andyshinn/dnsmasq:2.81 -S /grey.openfirehawk.com/10.1.1.4 -S /blue.openfirehawk.com/10.2.1.4 -S /green.openfirehawk.com/10.3.1.4 -S /ap-southeast-2.compute.internal/10.3.1.4/10.2.1.4/10.1.1.4 --log-facility=- | while read outlog; do echo "$(date): $outlog"; done 2>&1 | tee ~/dnsmasq.log &
 ```
 
-
 Each of the domains in the docker command should match the var you entered for TF_VAR_private_domain in the secrets/resources-* files, and the ip addresses should match the static IP's being used by the open vpn clients.
 
 By running this, a query on our network for our storage hostname of fsx.blue.firehawkvfx.com would use the DNS server (our vpn client) at 192.168.92.20 to aquire the actual adress of our FSX storage in our Blue deployment, and so on for the other subdomains.  Hostnames that do not match the extensions of these queries will go out to the public internet as before.
@@ -294,6 +293,8 @@ host www.google.com $DOCKERIP
 - Lastly, update the first entry in your router's DNS settings to point at the IP address of the host you ran the docker command on.  
 The should be an existing entry here already (Probably the router's own IP), and this existing entry can become the second entry.
 If there is no second entry and your router cannot be a DNS (unlikely!), You can try 8.8.8.8, which is not as effective as using an internal DNS but better than nothing!  If your private DNS server goes down, then requests will be serviced by the second entry.  Using your router to do this saves the hassle of configuring each machine on your network, and it will propogate out through your network automatically.
+
+- Optional: If you need a failover should the hardware running the docker container go down, you can run the same docker command on another piece of hardware on your network and add this as the second entry for your router's DNS.
 
 ## FSx for Lustre
 
