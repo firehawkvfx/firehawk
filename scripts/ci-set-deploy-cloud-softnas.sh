@@ -20,11 +20,11 @@ python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VA
 
 python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_remote_mounts_on_local=' 'true' # ...Softnas nfs exports will not be mounted on local site
 sed -i 's/^TF_VAR_softnas_skip_update=.*$/TF_VAR_softnas_skip_update=true/' $config_override
-python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_provision_deadline_spot_plugin=' 'false' # Don't provision the deadline spot plugin for this stage
-python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_install_houdini=' 'false' # install houdini
-python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_install_deadline_db=' 'false' # install deadline
-python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_install_deadline_rcs=' 'false' # install deadline
-python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_install_deadline_worker=' 'false' # install deadline
+# python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_provision_deadline_spot_plugin=' 'false' # Don't provision the deadline spot plugin for this stage
+# python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_install_houdini=' 'false' # install houdini
+# python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_install_deadline_db=' 'false' # install deadline
+# python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_install_deadline_rcs=' 'false' # install deadline
+# python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_install_deadline_worker=' 'false' # install deadline
 python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_workstation_enabled=' 'false' # install deadline
 python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_taint_single=' '("module.softnas.aws_instance.softnas1[0]" "module.softnas.aws_network_interface.nas1eth0[0]")' # taint 
 # python $TF_VAR_firehawk_path/scripts/replace_value.py -f $config_override 'TF_VAR_taint_single=' '(module.softnas.null_resource.provision_softnas_volumes[0])' # taint 
