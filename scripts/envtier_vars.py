@@ -13,7 +13,7 @@ envtier_mapping_path = TF_VAR_firehawk_path + "/tmp/envtier_mapping.txt"
 with open(template_path) as f:
     for line in f:
         if not line.startswith('#'):
-            if ('_dev' in line) or ('_prod' in line): 
+            if line.endswith('_dev') or line.endswith('_prod'): 
                 s = line.split('=')[0]
                 s = re.sub('_prod$', '', s)
                 s = re.sub('_dev$', '', s)
