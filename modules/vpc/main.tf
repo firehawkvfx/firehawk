@@ -62,6 +62,8 @@ locals {
   vpc_main_route_table_id = element( concat( aws_vpc.main.*.main_route_table_id, list("")), 0 )
   vpc_cidr_block = element( concat( aws_vpc.main.*.cidr_block, list("")), 0 )
   private_subnets = aws_subnet.private_subnet.*.id
+  private_subnet1_id = element( concat( aws_subnet.private_subnet.*.id, list("")), 0 )
+  private_subnet2_id = element( concat( aws_subnet.private_subnet.*.id, list("")), 1 )
   public_subnets = aws_subnet.public_subnet.*.id
   private_route_table_ids = aws_route_table.private.*.id
   public_route_table_ids = aws_route_table.public.*.id
@@ -91,7 +93,7 @@ resource "aws_subnet" "public_subnet" {
 
   depends_on = [aws_internet_gateway.gw]
 
-  tags = merge(var.common_tags, local.extra_tags, map("Name", format("%s", local.name)))
+  tags = merge(var.common_tags, local.extra_tags, map("Name", format("public%s_%s", count.index, local.name)))
 }
 
 resource "aws_subnet" "private_subnet" {
@@ -100,7 +102,7 @@ resource "aws_subnet" "private_subnet" {
 
   availability_zone = element( data.aws_availability_zones.available.names, count.index )
   cidr_block = element(var.private_subnets, count.index)
-  tags = merge(var.common_tags, local.extra_tags, map("Name", format("%s", local.name)))
+  tags = merge(var.common_tags, local.extra_tags, map("Name", format("private%s_%s", count.index, local.name)))
 }
 
 resource "aws_eip" "nat" { 
@@ -165,6 +167,64 @@ resource "aws_route_table_association" "public_associations" {
 
   subnet_id      = element( aws_subnet.public_subnet.*.id, count.index )
   route_table_id = element( aws_route_table.public.*.id, 0 )
+}
+
+### Route 53 resolver for DNS
+
+
+resource "aws_security_group" "resolver" {
+  count = var.create_vpc ? 1 : 0
+  name        = format("resolver_%s", local.name)
+  vpc_id      = local.vpc_id
+  description = "Route 53 Resolver security group"
+
+  tags = merge(var.common_tags, local.extra_tags, map("Name", format("resolver_%s", local.name)))
+
+  ingress {
+    protocol    = "-1"
+    from_port   = 53
+    to_port     = 53
+    cidr_blocks = [var.vpc_cidr, var.vpn_cidr, var.remote_subnet_cidr, var.remote_vpn_ip_cidr]
+
+    description = "all incoming traffic from vpc, vpn dhcp, and remote subnet"
+  }
+
+  egress {
+    protocol    = "-1"
+    from_port   = 53
+    to_port     = 53
+    cidr_blocks = [var.vpc_cidr, var.vpn_cidr, var.remote_subnet_cidr, var.remote_ip_cidr]
+
+    description = "all incoming traffic from vpc, vpn dhcp, and remote subnet"
+  }
+}
+
+resource "aws_route53_resolver_endpoint" "main" {
+  count = var.create_vpc ? 1 : 0
+
+  name      = "main"
+  direction = "INBOUND"
+
+  security_group_ids = aws_security_group.resolver.*.id
+
+  ip_address {
+    subnet_id = local.private_subnet1_id
+    ip        = cidrhost(element( var.public_subnets, 0 ), 3)
+  }
+
+  ip_address {
+    subnet_id = local.private_subnet2_id
+    ip        = cidrhost(element( var.public_subnets, 1 ), 3)
+  }
+
+  tags = merge(var.common_tags, local.extra_tags, map("Name", format("resolver_%s", local.name)))
+}
+
+resource "aws_route53_resolver_rule" "sys" {
+  count = var.create_vpc ? 1 : 0
+  
+  domain_name = var.private_domain
+  rule_type   = "SYSTEM"
 }
 
 # module "vpc" { # this can simplify things but it is an external dependency, so it is left here latent incase needed.
