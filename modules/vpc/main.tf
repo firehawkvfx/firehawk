@@ -228,7 +228,9 @@ resource "aws_route53_resolver_rule" "sys" {
 }
 
 resource "aws_route53_resolver_rule_association" "sys" {
-  resolver_rule_id = aws_route53_resolver_rule.sys.id
+  count = var.create_vpc ? 1 : 0
+
+  resolver_rule_id = element(concat(aws_route53_resolver_rule.sys.*.id, list("")), 0)
   vpc_id           = local.vpc_id
 }
 
