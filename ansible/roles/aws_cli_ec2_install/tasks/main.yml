@@ -160,7 +160,7 @@
 - name: Use expect to install AWS CLI- Ubuntu
   expect:
     # this version of the command may be required for ubuntu
-    command: "/usr/local/bin/aws configure"
+    command: "aws configure"
     responses:
       .*Access Key ID \[.*\]: "{{ storage_user_access_key_id }}"
       .*Secret Access Key \[.*\]: "{{ storage_user_secret_key }}"
@@ -178,7 +178,7 @@
 - name: Use expect to install AWS CLI- Centos - root
   expect:
     # this version of the command may be required for centos
-    command: "/usr/local/bin/aws configure"
+    command: "aws configure"
     responses:
       .*Access Key ID \[.*\]: "{{ storage_user_access_key_id }}"
       .*Secret Access Key \[.*\]: "{{ storage_user_secret_key }}"
@@ -193,7 +193,7 @@
 - name: Use expect to install AWS CLI- Ubuntu - root
   expect:
     # this version of the command may be required for ubuntu
-    command: "/usr/local/bin/aws configure"
+    command: "aws configure"
     responses:
       .*Access Key ID \[.*\]: "{{ storage_user_access_key_id }}"
       .*Secret Access Key \[.*\]: "{{ storage_user_secret_key }}"

@@ -34,7 +34,7 @@
 
 - name: Case insensitive password string match for aws configure
   expect:
-    command: /usr/local/bin/aws configure
+    command: aws configure
     #/home/{{ variable_user }}/.local/bin/aws configure
     responses:
       .*Access Key ID \[.*\]: "{{ AWS_ACCESS_KEY }}"
