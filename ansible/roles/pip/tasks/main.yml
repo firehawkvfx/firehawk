@@ -78,19 +78,18 @@
   pip: 
     name: pip
     extra_args: --upgrade
-    executable: /bin/pip
   become: true
   tags:
     - upgrade-pip
 
-- name: upgrade pip3
-  pip: 
-    name: pip
-    extra_args: --upgrade
-    executable: /bin/pip3.6
-  become: true
-  tags:
-    - upgrade-pip
+# - name: upgrade pip3
+#   pip: 
+#     name: pip
+#     extra_args: --upgrade
+#     executable: /bin/pip3.6
+#   become: true
+#   tags:
+#     - upgrade-pip
 
 - name: upgrade pyopenssl
   pip: 
