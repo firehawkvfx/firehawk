@@ -78,6 +78,7 @@
   pip: 
     name: pip
     extra_args: --upgrade
+    executable: pip3
   become: true
   tags:
     - upgrade-pip
