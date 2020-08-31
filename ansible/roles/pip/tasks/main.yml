@@ -66,7 +66,9 @@
 
 - name: install pip
   package:
-    name: python-pip
+    name:
+    - python-pip
+    - python3-pip
     state: latest
   become: true
   vars:
@@ -77,6 +79,16 @@
     name: pip
     extra_args: --upgrade
   become: true
+  executable: /bin/pip
+  tags:
+    - upgrade-pip
+
+- name: upgrade pip3
+  pip: 
+    name: pip
+    extra_args: --upgrade
+  become: true
+  executable: /bin/pip3.6
   tags:
     - upgrade-pip
 
