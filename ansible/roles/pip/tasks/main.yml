@@ -78,8 +78,8 @@
   pip: 
     name: pip
     extra_args: --upgrade
+    executable: /bin/pip
   become: true
-  executable: /bin/pip
   tags:
     - upgrade-pip
 
@@ -87,8 +87,8 @@
   pip: 
     name: pip
     extra_args: --upgrade
+    executable: /bin/pip3.6
   become: true
-  executable: /bin/pip3.6
   tags:
     - upgrade-pip
 
