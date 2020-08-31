@@ -78,9 +78,11 @@
   pip: 
     name: pip
     extra_args: --upgrade
-    # executable: pip3.6
+    # executable: pip3.5
   become: true
   when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  vars:
+    ansible_python_interpreter: "{{ package_python_interpreter }}"
   tags:
     - upgrade-pip
 
@@ -88,13 +90,13 @@
   pip: 
     name: pip
     extra_args: --upgrade
-    executable: pip3.6
+    # executable: pip3.6
   become: true
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+  vars:
+    ansible_python_interpreter: "{{ package_python_interpreter }}"
   tags:
     - upgrade-pip
-
-
 
 # - name: upgrade pip3
 #   pip: 
@@ -109,6 +111,8 @@
   pip: 
     name: pyopenssl
     extra_args: --upgrade
+  vars:
+    ansible_python_interpreter: "{{ package_python_interpreter }}"
   become: true
 
 # may break ubuntu in vagrant.
