@@ -29,6 +29,7 @@ servers=[
     :ram => 1024,
     :cpu => 2,
     :primary => true
+    :type => 'control'
   },
   {
     :hostname => "firehawkgateway#{envtier}",
@@ -40,6 +41,7 @@ servers=[
     :ram => 8192,
     :cpu => 4,
     :primary => false
+    :type => 'gateway'
   }
 ]
 
@@ -176,7 +178,7 @@ Vagrant.configure(2) do |config|
                     trigger.warn = "Restarted for SSH config service alteration"
                 end
                 node.vm.provision "shell", inline: "chown deployuser:deployuser /secrets/keys/.vault-key*" # ensure deployuser owns the keys
-                if machine[:hostname].include? "firehawkgateway"
+                if machine[:type] == "gateway"
                     node.vm.provision "shell", inline: "/deployuser/scripts/init-gateway.sh --#{envtier}"
                     # register address for gateway below
                     node.vm.provision "shell", inline: "cd /deployuser; source ./update_vars.sh --#{envtier} --#{resourcetier} --init --save-template=false; echo $config_override; ansible-playbook ansible/get_host_ip.yml -v --extra-vars 'update_openfirehawkserver_ip_var=true'" # config_override=#{ENV['config_override']}
