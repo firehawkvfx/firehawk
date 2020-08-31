@@ -27,26 +27,36 @@
 - name: install awscli, force upgrade - root
   pip: 
     name: awscli
-    extra_args: --upgrade --bin-dir /usr/local/sbin
+    extra_args: --upgrade
   become: true
 
 # for some reason this can still have permissions issues on the deployuser vm when command line is fine.  this only occurs with the ansible modules
 - name: install awscli, force upgrade
   pip: 
     name: awscli
-    extra_args: --upgrade --user --bin-dir /usr/local/sbin
+    extra_args: --upgrade --user
   become_user: "{{ variable_become_user }}"
   become: true
-  when: selected_ansible_version == 'latest'
+  # when: selected_ansible_version == 'latest'
 
-# - name: Create a symbolic link for aws to get around PATH issues in Ansible. # https://github.com/ansible/ansible/issues/71520
-#   file:
-#     src: /usr/local/bin/aws
-#     dest: /bin/aws
-#     owner: root
-#     group: root
-#     state: link
-#   become: true
+- name: get aws command
+  command: which aws
+  register: aws_path
+  become_user: "{{ variable_become_user }}"
+  become: true
+
+- name: show aws path
+  debug:
+    var: aws_path
+
+- name: Create a symbolic link for aws to get around PATH issues in Ansible. # https://github.com/ansible/ansible/issues/71520
+  file:
+    src: "{{ aws_path.stdout }}"
+    dest: /usr/local/sbin/aws
+    owner: root
+    group: root
+    state: link
+  become: true
 
 - name: install pexpect
   pip: 
@@ -54,7 +64,7 @@
     extra_args: --upgrade --user
   become_user: "{{ variable_become_user }}"
   become: true
-  when: selected_ansible_version == 'latest'
+  # when: selected_ansible_version == 'latest'
 
 - name: install the boto package, force upgrade
   pip: 
@@ -62,7 +72,7 @@
     extra_args: --user
   become_user: "{{ variable_become_user }}"
   become: true
-  when: selected_ansible_version == 'latest'
+  # when: selected_ansible_version == 'latest'
 
 # on an ec2 instance, the cli credentials are inherited automatically by the role or permissions assigned to the instance.  Below is the optional tag to intall a specific access key for a user account.  the inputs are provided as environment variables with pgp encryption.
 
