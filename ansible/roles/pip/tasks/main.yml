@@ -74,14 +74,27 @@
   vars:
     ansible_python_interpreter: "{{ package_python_interpreter }}"
 
-- name: upgrade pip
+- name: upgrade pip - ubuntu
   pip: 
     name: pip
     extra_args: --upgrade
-    executable: pip3
+    # executable: pip3.6
   become: true
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
   tags:
     - upgrade-pip
+
+- name: upgrade pip - centos
+  pip: 
+    name: pip
+    extra_args: --upgrade
+    executable: pip3.6
+  become: true
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+  tags:
+    - upgrade-pip
+
+
 
 # - name: upgrade pip3
 #   pip: 
