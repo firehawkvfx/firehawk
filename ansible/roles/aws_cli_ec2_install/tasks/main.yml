@@ -27,26 +27,26 @@
 - name: install awscli, force upgrade - root
   pip: 
     name: awscli
-    extra_args: --upgrade
+    extra_args: --upgrade --bin-dir /usr/local/sbin
   become: true
 
 # for some reason this can still have permissions issues on the deployuser vm when command line is fine.  this only occurs with the ansible modules
 - name: install awscli, force upgrade
   pip: 
     name: awscli
-    extra_args: --upgrade --user
+    extra_args: --upgrade --user --bin-dir /usr/local/sbin
   become_user: "{{ variable_become_user }}"
   become: true
   when: selected_ansible_version == 'latest'
 
-- name: Create a symbolic link for aws to get around PATH issues in Ansible. # https://github.com/ansible/ansible/issues/71520
-  file:
-    src: /usr/local/bin/aws
-    dest: /bin/aws
-    owner: root
-    group: root
-    state: link
-  become: true
+# - name: Create a symbolic link for aws to get around PATH issues in Ansible. # https://github.com/ansible/ansible/issues/71520
+#   file:
+#     src: /usr/local/bin/aws
+#     dest: /bin/aws
+#     owner: root
+#     group: root
+#     state: link
+#   become: true
 
 - name: install pexpect
   pip: 
