@@ -28,7 +28,7 @@ servers=[
     :box => ENV['ansiblecontrol_box'],
     :ram => 1024,
     :cpu => 2,
-    :primary => true
+    :primary => true,
     :type => 'control'
   },
   {
@@ -40,7 +40,7 @@ servers=[
     :box => ENV['firehawkgateway_box'],
     :ram => 8192,
     :cpu => 4,
-    :primary => false
+    :primary => false,
     :type => 'gateway'
   }
 ]
