@@ -17,9 +17,11 @@
   shell: |
     # set -x
     cd ~
+    echo "shell: $SHELL"
+    echo "path: $PATH" # /usr/local/sbin should be contained in the path.  try 'export PATH=$PATH:/usr/local/sbin'
     
-    echo "aws sts get-caller-identity"
-    aws sts get-caller-identity
+    echo "{{ aws_executable }} sts get-caller-identity"
+    {{ aws_executable }} sts get-caller-identity
 
     filename="{{ filename }}"
     
@@ -35,10 +37,10 @@
     test_file () {
       local filename="$1"
       echo "ls bucket: {{ bucket }}"
-      aws s3 ls s3://{{ bucket }}/
-      aws s3 ls s3://{{ bucket }}/|grep {{ filename }}
-      aws s3 ls s3://{{ bucket }}/|grep {{ filename }}|wc -c
-      wordcount=`aws s3 ls s3://{{ bucket }}/|grep {{ filename }}|wc -c`
+      {{ aws_executable }} s3 ls s3://{{ bucket }}/
+      {{ aws_executable }} s3 ls s3://{{ bucket }}/|grep {{ filename }}
+      {{ aws_executable }} s3 ls s3://{{ bucket }}/|grep {{ filename }}|wc -c
+      wordcount=`{{ aws_executable }} s3 ls s3://{{ bucket }}/|grep {{ filename }}|wc -c`
       echo "wordcount: $wordcount"
       if [[ "${wordcount}" -eq 0 ]]; then
         file_in_bucket=false
@@ -66,7 +68,7 @@
       if [[ {{ mode }} == 'push' ]]; then
         echo "Sync Push: File not yet present in S3 bucket, will push."
         if [ -f "{{ filename }}" ] || [[ "$skip_existance_check" == true ]]; then
-          aws s3 sync . s3://{{ bucket }}/ --exclude "{{ exclude }}" --include "{{ filename }}" --no-progress --acl bucket-owner-full-control # see https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html https://aws.amazon.com/premiumsupport/knowledge-center/s3-bucket-owner-access/
+          {{ aws_executable }} s3 sync . s3://{{ bucket }}/ --exclude "{{ exclude }}" --include "{{ filename }}" --no-progress --acl bucket-owner-full-control # see https://docs.aws.amazon.com/AmazonS3/latest/dev/acl-overview.html https://aws.amazon.com/premiumsupport/knowledge-center/s3-bucket-owner-access/
           
           if [[ "$skip_existance_check" == true ]]; then
             echo "Skipping existance check"
@@ -101,7 +103,7 @@
           echo "{{ filename }} File already present on disk.  Won't Pull"
           exit 0
         else 
-          aws s3 sync s3://{{ bucket }}/ . --exclude "{{ exclude }}" --include "{{ filename }}" --no-progress
+          {{ aws_executable }} s3 sync s3://{{ bucket }}/ . --exclude "{{ exclude }}" --include "{{ filename }}" --no-progress
           if [[ "$skip_existance_check" == true ]]; then
             echo "Skipping existance check"
             exit 0

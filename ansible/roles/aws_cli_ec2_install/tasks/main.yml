@@ -9,6 +9,16 @@
   tags:
   - always
 
+- name: Set pip interpreter - centos.   In centos we use python2.7 but for pip we require python3. https://britishgeologicalsurvey.github.io/devops/centos7-python2-end-of-life/
+  set_fact:
+    pip_python_interpreter: "/usr/bin/python3"
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
+
+- name: Set pip interpreter - ubuntu
+  set_fact:
+    pip_python_interpreter: "{{ package_python_interpreter }}"
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+
 - name: install whois, passlib
   package:
     name: "{{ item }}"
@@ -28,6 +38,8 @@
   pip: 
     name: awscli
     extra_args: --upgrade
+  vars:
+    ansible_python_interpreter: "{{ pip_python_interpreter }}"
   become: true
 
 # for some reason this can still have permissions issues on the deployuser vm when command line is fine.  this only occurs with the ansible modules
@@ -35,15 +47,23 @@
   pip: 
     name: awscli
     extra_args: --upgrade --user
+  vars:
+    ansible_python_interpreter: "{{ pip_python_interpreter }}"
   become_user: "{{ variable_become_user }}"
   become: true
   # when: selected_ansible_version == 'latest'
 
-- name: get aws command
+- name: get aws command. if this errors can can pass the path as a var to the playbook- aws_path=$(which aws)
   command: which aws
-  register: aws_path
+  register: command_output
   become_user: "{{ variable_become_user }}"
-  become: true
+  when: aws_path is undefined
+
+- set_fact:
+    aws_path: "{{ command_output.stdout }}"
+  when: aws_path is undefined
+
+  # become: true
 
 - name: show aws path
   debug:
@@ -51,7 +71,7 @@
 
 - name: Create a symbolic link for aws to get around PATH issues in Ansible. # https://github.com/ansible/ansible/issues/71520
   file:
-    src: "{{ aws_path.stdout }}"
+    src: "{{ aws_path }}"
     dest: /usr/local/sbin/aws
     owner: root
     group: root
@@ -62,6 +82,8 @@
   pip: 
     name: pexpect
     extra_args: --upgrade --user
+  vars:
+    ansible_python_interpreter: "{{ pip_python_interpreter }}"
   become_user: "{{ variable_become_user }}"
   become: true
   # when: selected_ansible_version == 'latest'
@@ -70,6 +92,8 @@
   pip: 
     name: boto3
     extra_args: --user
+  vars:
+    ansible_python_interpreter: "{{ pip_python_interpreter }}"
   become_user: "{{ variable_become_user }}"
   become: true
   # when: selected_ansible_version == 'latest'
