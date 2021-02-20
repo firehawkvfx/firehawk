@@ -94,7 +94,7 @@
   become: true
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'RedHat'
   vars:
-    ansible_python_interpreter: "{{ package_python_interpreter }}"
+    ansible_python_interpreter: "/usr/bin/python3" # python 2.7 will produce errors if attempting pip upgrade
   tags:
     - upgrade-pip
 
