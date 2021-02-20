@@ -424,12 +424,21 @@ For the first run though we will proceed in stages to ensure you have working co
   ```
   You should be able to ping the VPN from within the Firehawk VM, and from the dev workstation vm.  If not, check that you have configured [static routes](#static-routes) correctly.  Don't proceed until this is verified.  When you no longer want to use the resource you should put the resources to sleep, or if there a problem preventing this step from succeeding you will need to destroy the deployment when you are finished to not incur unwanted costs.
 
-- Once the VPN connection works, we can test deploy all the cloud resources.  if you ran any cusotm scripts to disable functions, you should run them again after ci-set-deploy-cloud.sh
+- Once the VPN connection works, we can test deploy with storage - AWS FSX for Lustre.  If you ran any cusotm scripts to disable functions, you should run them again after ci-set-deploy-cloud-fsx.sh
+  ```
+  source ./update_vars.sh --dev --init
+  ./scripts/ci-set-deploy-cloud-fsx # set config overrides to allow deployment of FSX.
+  source ./update_vars.sh --dev --init
+  ./firehawk.sh
+  ```
+  This will deploy an FSX storage cluster.  If your onsite workstation is a Centos7 VM, you may not be able to mount FSX for Lustre to test.  You will need to fully deploy to test the mount in cloud instance, or test on a local workstation with bare metal (recomended).
+
+- Once the FSX storage works, we can test deploy all the cloud resources.  If you ran any custom scripts to disable functions, you should run them again after ci-set-deploy-cloud.sh
   ```
   source ./update_vars.sh --dev --init
   ./scripts/ci-set-deploy-cloud.sh # set config overrides to allow deployment
   source ./update_vars.sh --dev --init
-  ./firehawk.sh --softnas-destroy-volumes true
+  ./firehawk.sh
   ```
 
 - While your Infrastructure is up, you should be able to select the deadlineuser in the dev workstaion / VM, and login with a password. Open a terminal in the VM GUI, logged in as deadlineuser and run:
@@ -451,6 +460,8 @@ When we deploy to cloud above, we specify if we want to keep the Storage EBS vol
   source ./update_vars.sh  --init
   ./firehawk.sh --softnas-destroy-volumes true
   ```
+
+  Note: destroy volumes options with FSX is untested.
 
 ## Diagnosing problems
 Provided the Vagrant VM's are running and initialised (terraform is installed and available), when diagnosing problems it may be useful to avoid using firehawk.sh (which runs outside the vm).  Instead you can try running commmands with the ansiblecontrol vm.
