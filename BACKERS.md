@@ -6,16 +6,18 @@ OpenFirehawk is an open source project (MPL2.0).  It's developement is made poss
 
 ### Backers
 
-Harvey Fong
-Anton Ognyev  
-Stan Shapetskiy  
-Sergio Caires  
-Edward Twiss  
-Seona Hwang  
-Chris Hönninger  
+Harvey Fong  
 Anthony Morrelle  
+Michael Garrett
+Hunter Williams
 
 ### Previous Backers
+Chris Hönninger  
+Seona Hwang  
+Edward Twiss  
+Sergio Caires  
+Stan Shapetskiy  
+Anton Ognyev  
 Janghyung Kim  
 Mikas Sadauskas  
 Zach Judson  
