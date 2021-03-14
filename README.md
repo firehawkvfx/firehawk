@@ -246,3 +246,15 @@ modules/vault-configuration/modules/sign-ssh-key/sign_ssh_key.sh --trusted-ca ~/
 
 All hosts now have the capability for authenticated SSH with certificates!  The default time to live (TTL) on SSH client certificates is one month, at which point you can just run this step again.
 
+# Terminology
+
+Some terminology will be covered here.
+
+- resourcetier
+Synonymous with environment or tier. Environment and tier are commonly used in many projects, resourcetier is defined to be abe to uniquely identify what this means in this project.  It is the name that defines an isolated deployment environment: dev / blue / green / main
+
+- resourcetier: main
+The Main VPC or Main account is intended to optionally function as a persistent VPC resource spanning multiple deployments in other environments.  It can provide resources and parameters to the other environments that they would require for thei creation, and can persist beyond their destruction.  It is also possible to dynamically create a main VPC in any other resourcetier for testing purposes or to accelerate a turnkey deployment solution, since requiring users to have multiple AWS accounts configured can add considerable overhead.
+
+- resourcetier: blue / green
+The Blue and Green resourcetier are the production environments.  
