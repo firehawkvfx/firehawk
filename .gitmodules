@@ -1,0 +1,9 @@
+[submodule "firehawk-main"]
+	path = firehawk-main
+	url = git@github.com:firehawkvfx/firehawk-main.git
+[submodule "firehawk-render-cluster"]
+	path = firehawk-render-cluster
+	url = git@github.com:firehawkvfx/firehawk-render-cluster.git
+[submodule "packer-firehawk-amis"]
+	path = packer-firehawk-amis
+	url = git@github.com:firehawkvfx/packer-firehawk-amis.git
