@@ -257,4 +257,8 @@ Synonymous with environment or tier. Environment and tier are commonly used in m
 The Main VPC or Main account is intended to optionally function as a persistent VPC resource spanning multiple deployments in other environments.  It can provide resources and parameters to the other environments that they would require for thei creation, and can persist beyond their destruction.  It is also possible to dynamically create a main VPC in any other resourcetier for testing purposes or to accelerate a turnkey deployment solution, since requiring users to have multiple AWS accounts configured can add considerable overhead.
 
 - resourcetier: blue / green
-The Blue and Green resourcetier are the production environments.  
+The Blue and Green resourcetier are the production environments.  They allow slow rollover from one deployment version to the next.  They should both be able to operate in parallel during transition, and instances able to be turned off / on at any point safely to save cost.
+
+- resourcetier: dev
+The Dev environment intended for all code commits and testing.  No new committed code should go directly to the other tiers.  It should be tested and deployed in dev first.  It is also possible (though untested) to isolate multiple dev deployments by the conflict key, a string made of the resource tier (dev) and pipeline id (the iteration of the deployment) producing a string like dev234 for the conflict key.  The purpose of this is to allow multiple deployments tests to run at once via users or a Continuous Integration pipeline.
+
