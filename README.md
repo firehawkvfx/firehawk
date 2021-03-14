@@ -4,13 +4,31 @@ Firehawk is a work in progress for VFX rendering infrastructure, using multi-clo
 
 It uses AWS Cloud 9 as a seed instance to simplify launching the infrastructure.  The scheduler implemented presently is Deadline - it provides Usage Based Licenses for many types of software to provide access for artists at low cost and free to use the scheduler on AWS instances.  It is possible to build images to support other schedulers.
 
-Firehawk uses these techologies:
-Hashicorp Vault - for dynamic secrets management, and authentication (Multi cloud capable)
-Hashicorp Terraform - for orchestration (Multi cloud capable)
-Hashicorp Packer - for building images (Multi cloud capable)
+The primary reason for this project's creation is to provide low cost high powered cloud capability for Side FX Houdini users, and to provde a pathway for artists to roll their own cloud with any software they choose.
+
+Firehawk uses these multi cloud capable techologies:
+Hashicorp Vault - for dynamic secrets management, and authentication
+Hashicorp Terraform - for orchestration
+Hashicorp Consul - for DNS / service discovery
+Hashicorp Vagrant - for client side Open VPN deployment
+OpenVPN - for a private gateway between the client network and cloud.
 Redhat Ansible - For consistent provisioning in some packer templates (Multi cloud capable)
+Redhat Centos
+Canonical Ubuntu
 
 Current implementation uses AWS.
+
+# Backers
+Please see [BACKERS.md](https://github.com/firehawkvfx/firehawk/blob/main/BACKERS.md) for a list of generous backers that have made this project possible!
+
+I want to extend my deep gratitude to the support provided by:
+- Side FX for providing licenses enabling this project
+- AWS for contributing cloud resources.
+
+I also want to take a moment to thank Andrew Paxson who has contributed his knowledge to the project.
+
+And especially to the other companies providing the open source technologies that make this project possible:
+Hashicorp, OpenVPN, Redhat, Canonical
 
 # Firehawk-Main
 The Firehawk Main VPC (WIP) deploys Hashicorp Vault into a private VPC with auto unsealing.
