@@ -168,6 +168,7 @@ cd $TF_VAR_firehawk_path
 - Initialise the vault:
 ```
 ssh ubuntu@(Vault Private IP)
+export VAULT_ADDR=https://vault.service.consul:8200
 vault operator init -recovery-shares=1 -recovery-threshold=1
 vault login (Root Token)
 ```
