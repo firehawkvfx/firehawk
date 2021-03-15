@@ -242,10 +242,15 @@ This would read the public key from the provided path if it exists, and if it do
 In the file browser at ~/.ssh/remote_host/ you should now see id_rsa-cert.pub, ssh_known_hosts, and trusted-user-ca-keys.pem
 - Right click on these files to download them
 
-- If they are on your Mac or Linux desktop you can configure the downloaded files for use with:
+- If they are on your Mac or Linux desktop you can configure the downloaded files enabling your host as an SSH client with:
 ```
 modules/vault-configuration/modules/sign-ssh-key/sign_ssh_key.sh --trusted-ca ~/Downloads/trusted-user-ca-keys.pem --cert ~/Downloads/id_rsa-cert.pub
 ```
+- You will also need to configure the known hosts certificate.  This provides protection against Man In The Middle attacks:
+```
+./modules/vault-configuration/modules/known-hosts/known_hosts.sh --external-domain ap-southeast-2.compute.amazonaws.com --trusted-ca ~/Downloads/trusted-user-ca-keys.pem --ssh-known-hosts ~/Downloads/ssh_known_hosts_fragment
+```
+
 
 All hosts now have the capability for authenticated SSH with certificates!  The default time to live (TTL) on SSH client certificates is one month, at which point you can just run this step again.
 
