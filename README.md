@@ -224,7 +224,7 @@ source ./update_vars.sh
 ```
 ./modules/vault-configuration/modules/sign-ssh-key/sign_ssh_key.sh 
 ./modules/vault-configuration/modules/sign-host-key/sign_host_key.sh
-./modules/vault-configuration/modules/sign-host-key/known_hosts.sh
+./modules/vault-configuration/modules/known-hosts/known_hosts.sh
 ```
 
 The remote host you intend to run the vpn on will need to do the same.
@@ -244,12 +244,18 @@ In the file browser at ~/.ssh/remote_host/ you should now see id_rsa-cert.pub, s
 
 - If they are on your Mac or Linux desktop you can configure the downloaded files enabling your host as an SSH client with:
 ```
-modules/vault-configuration/modules/sign-ssh-key/sign_ssh_key.sh --trusted-ca ~/Downloads/trusted-user-ca-keys.pem --cert ~/Downloads/id_rsa-cert.pub
+./modules/vault-configuration/modules/sign-ssh-key/sign_ssh_key.sh --trusted-ca ~/Downloads/trusted-user-ca-keys.pem --cert ~/Downloads/id_rsa-cert.pub
 ```
 - You will also need to configure the known hosts certificate.  This provides protection against Man In The Middle attacks:
 ```
 ./modules/vault-configuration/modules/known-hosts/known_hosts.sh --external-domain ap-southeast-2.compute.amazonaws.com --trusted-ca ~/Downloads/trusted-user-ca-keys.pem --ssh-known-hosts ~/Downloads/ssh_known_hosts_fragment
 ```
+- Test logging into your bastion host.  There should be no warnings or errors:
+```
+ssh -i ~/.ssh/id_rsa-cert.pub -i ~/.ssh/id_rsa centos@( My bastion public DNS name )
+```
+- Now you should be able too ssh into a private host, via public the bastion host, with the command provided at the end of running: `./wake`
+
 
 
 All hosts now have the capability for authenticated SSH with certificates!  The default time to live (TTL) on SSH client certificates is one month, at which point you can just run this step again.
