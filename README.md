@@ -212,7 +212,7 @@ terraform apply "tfplan"
 
 Congratulations!  You now have a fully configured vault.
 
-## You should be able to continue to deploy tthe rest of the main account with the wake command
+## You should be able to continue to deploy the rest of the main account with the wake command
 ```
 source ./update_vars.sh
 ./wake
@@ -220,7 +220,7 @@ source ./update_vars.sh
 
 ## Aquire SSH certificates
 
-- Add known hosts certificate, sign your cloud9 host Key, and sign your host as an SSH Client to other hosts.
+- in cloud 9, Add known hosts certificate, sign your cloud9 host Key, and sign your private key as with a valid SSH client certificate for other hosts.
 ```
 ./modules/vault-configuration/modules/sign-ssh-key/sign_ssh_key.sh 
 ./modules/vault-configuration/modules/sign-host-key/sign_host_key.sh
@@ -228,19 +228,21 @@ source ./update_vars.sh
 ```
 
 The remote host you intend to run the vpn on will need to do the same.
-- In the cloud9 file browser, click the cog to show the home dir.
-- Create a new folder in /home/ec2-user/.ssh named something like 'remote_host' or the machine name.
-- In a file browser on the remote host, ensure you have generated an rsa public key, and drag the public key into this folder in the web browser.
+- In a terminal on your remote host that you wish to enable for SSH access, get your public key contents and copy it to the clipboard:
+```
+cat ~/.ssh/id_rsa.pub
+```
 
-- From cloud9, sign the public key.  eg:
-
+- From cloud9, sign the public key, and provide a path to output the resulting certificates to.  eg:
 ```
 ./modules/vault-configuration/modules/sign-ssh-key/sign_ssh_key.sh --public-key ~/.ssh/remote_host/id_rsa.pub
 ```
-In the file browser at ~/.ssh/remote_host/ you should now see id_rsa-cert.pub and trusted-user-ca-keys.pem
+This would read the public key from the provided path if it exists, and if it doesn't you are prompted to paste in your public key contents.
+
+In the file browser at ~/.ssh/remote_host/ you should now see id_rsa-cert.pub, ssh_known_hosts, and trusted-user-ca-keys.pem
 - Right click on these files to download them
 
-- If they are on your Mac or Linux desktop you can configure the downloaded files for use with with
+- If they are on your Mac or Linux desktop you can configure the downloaded files for use with:
 ```
 modules/vault-configuration/modules/sign-ssh-key/sign_ssh_key.sh --trusted-ca ~/Downloads/trusted-user-ca-keys.pem --cert ~/Downloads/id_rsa-cert.pub
 ```
