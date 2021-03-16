@@ -285,14 +285,26 @@ It is important you do not take this step in an unsecured network.  The purpose 
 
 - TODO: describe how to configure static routes.
 
+- Ensure SSH forwarding is functional with the result command given to you by `./wake`:
+```
+ssh -J centos@ec2-13-211-132-68.ap-southeast-2.compute.amazonaws.com centos@i-0330138643ba03b32.node.consul -L 8200:vault.service.consul:8200
+```
+- From Cloud 9, create a token to automatically retrieve your vpn config using the vpn_read_config_policy
+You must provide a vault token, which should based on a policy of least privilege.  This token will have a short ttl, enough time for out automation script to aquire the VPN config.
+```
+vault token create -policy=vpn_read_config_policy -explicit-max-ttl=5m
+```
+
 - Run the vagrant wake script 
 ./modules/terraform-aws-vpn/modules/openvpn-vagrant-client/wake {resourcetier} {public host} {private host} 
 eg:
 ```
-./modules/terraform-aws-vpn/modules/openvpn-vagrant-client/wake dev centos@ec2-3-24-240-130.ap-southeast-2.compute.amazonaws.com centos@i-0d10804bc2b694690.node.consul
+./modules/terraform-aws-vpn/modules/openvpn-vagrant-client/wake dev centos@ec2-13-211-132-68.ap-southeast-2.compute.amazonaws.com centos@i-0330138643ba03b32.node.consul
 ```
-You must provide a vault token, which should based on a policy of least privilege.  For a dev environment, it is fine to use the admin token for now, but we should be destroying the vault s3 bucket if we operate this way.
-You can acquire the dynamic open vpn password in vault under `/dev/network/openvpn_admin_pw`
+
+
+
+- You can acquire the dynamic open vpn password in vault under `/dev/network/openvpn_admin_pw`
 
 # Terminology
 
