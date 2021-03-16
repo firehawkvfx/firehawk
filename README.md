@@ -250,15 +250,49 @@ In the file browser at ~/.ssh/remote_host/ you should now see id_rsa-cert.pub, s
 ```
 ./modules/vault-configuration/modules/known-hosts/known_hosts.sh --external-domain ap-southeast-2.compute.amazonaws.com --trusted-ca ~/Downloads/trusted-user-ca-keys.pem --ssh-known-hosts ~/Downloads/ssh_known_hosts_fragment
 ```
-- Test logging into your bastion host.  There should be no warnings or errors:
+- Test logging into your bastion host, providing your new cert, and private key.  There should be no warnings or errors:
 ```
-ssh -i ~/.ssh/id_rsa-cert.pub -i ~/.ssh/id_rsa centos@( My bastion public DNS name )
+ssh -i ~/.ssh/id_rsa-cert.pub -i ~/.ssh/id_rsa centos@< Bastion Public DNS Name >
 ```
-- Now you should be able too ssh into a private host, via public the bastion host, with the command provided at the end of running: `./wake`
+- Now you should be able to ssh into a private host, via public the bastion host, with the command provided at the end of running: `./wake`  eg:
+```
+ssh -J centos@ec2-3-24-240-130.ap-southeast-2.compute.amazonaws.com centos@i-0d10804bc2b694690.node.consul -L 8200:vault.service.consul:8200
+```
+This command will also forward the vault web interface which is found at: https://127.0.0.1:8200/ui/
+You will get SSL certificate warnings in your web browser, which for now will have to be ignored, but these can be resolved.
 
 
+All hosts now have the capability for authenticated SSH with certificates!  The default time to live (TTL) on SSH client certificates is one month, at which point you can just run this step again to authenticate a new public key.  It is best practice to generate a new private/public key pair before requesting another certificate.
 
-All hosts now have the capability for authenticated SSH with certificates!  The default time to live (TTL) on SSH client certificates is one month, at which point you can just run this step again.
+### Diagnosing SSH problems:
+
+Usually a lot can be determined by looking at the user data logs.
+The cloud 9 host can ssh in to any private IP, but you will have to ignore host key checking.  Be mindful of this, it is why we should really only do it on a private network, and to resolve issues in a dev environment.
+The user data log is available at:
+```
+/var/log/user-data.log 
+```
+
+### Configuring the VPN from your remote client (WIP)
+
+Provided web forwarding is established and you have the vault UI running, you should be able to automate a VPN gateway.
+It is required that the SSH connection is established automatically because you have SSH certificates configured.
+It is important you do not take this step in an unsecured network.  The purpose of the VPN gateway is to unify two networks.  The only limiting factors for communication protocols will be security groups.
+
+- Configure the vpn hosts json file with an ip address valid for your onsite network.  If possible, onl your router, assign the mac addresses to have the IP addresses from the json file in `firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client/ip_addresses.json`
+
+- There are steps that must also be taken to configure your router to allow access to your cloud private subnet by configuring the VPN static routes.
+
+- TODO: describe how to configure static routes.
+
+- Run the vagrant wake script 
+./modules/terraform-aws-vpn/modules/openvpn-vagrant-client/wake {resourcetier} {public host} {private host} 
+eg:
+```
+./modules/terraform-aws-vpn/modules/openvpn-vagrant-client/wake dev centos@ec2-3-24-240-130.ap-southeast-2.compute.amazonaws.com centos@i-0d10804bc2b694690.node.consul
+```
+You must provide a vault token, which should based on a policy of least privilege.  For a dev environment, it is fine to use the admin token for now, but we should be destroying the vault s3 bucket if we operate this way.
+You can acquire the dynamic open vpn password in vault under `/dev/network/openvpn_admin_pw`
 
 # Terminology
 
