@@ -289,10 +289,10 @@ It is important you do not take this step in an unsecured network.  The purpose 
 ```
 ssh -J centos@ec2-13-211-132-68.ap-southeast-2.compute.amazonaws.com centos@i-0330138643ba03b32.node.consul -L 8200:vault.service.consul:8200
 ```
-- From Cloud 9, create a token to automatically retrieve your vpn config using the vpn_read_config_policy
-You must provide a vault token, which should based on a policy of least privilege.  This token will have a short ttl, enough time for out automation script to aquire the VPN config.
+- From Cloud 9, create a token you can use to automatically retrieve your vpn config using the vpn_read_config_policy
+You must provide a vault token, which should based on a policy of least privilege.  This token will have a short ttl, enough time for our automation script to acquire the VPN config.  We can also define a reasonable use limit, preventing the secret from being useful once we are done with it!
 ```
-vault token create -policy=vpn_read_config_policy -explicit-max-ttl=5m
+vault token create -policy=vpn_read_config_policy -explicit-max-ttl=5m -use-limit=1
 ```
 
 - Run the vagrant wake script 
