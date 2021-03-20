@@ -5,12 +5,12 @@ remote_state {
     if_exists = "overwrite_terragrunt"
   }
   config = {
-    bucket = "state.terraform.${var.bucket_extension}"
+    bucket = "state.terraform.dev.firehawkvfx.com"
 
     key = "${path_relative_to_include()}/terraform.tfstate"
-    region         = var.aws_default_region
+    region         = ap-southeast-2
     encrypt        = true
-    dynamodb_table = "locks.state.terraform.${var.bucket_extension}"
+    dynamodb_table = "locks.state.terraform.dev.firehawkvfx.com"
   }
 }
 
