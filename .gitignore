@@ -1,4 +1,5 @@
 terragrunt.hcl
+s3-backend.tf
 .terraform/
 modules/terraform-aws-iam-profile-provisioner/s3-backend.tf
 modules/terraform-aws-iam-profile-vault-client/s3-backend.tf
