@@ -13,13 +13,25 @@ remote_state {
   }
 }
 
-terraform {
-  before_hook "before_hook_1" {
-    commands = ["apply", "plan", "destroy"]
-    execute  = ["source", "./update_vars.sh"]
-  }
-  inputs {
-    vpcname     = "vaultvpc"
-    projectname = "firehawk-main" # A tag to recognise resources created in this project
-  }
-}
+# terraform {
+#   before_hook "before_hook_1" {
+#     commands = ["apply", "plan", "destroy"]
+#     execute  = ["source", "./update_vars.sh"]
+#   }
+#   inputs {
+#     vpcname     = "vaultvpc"
+#     projectname = "firehawk-main" # A tag to recognise resources created in this project
+#   }
+# }
+
+# generate "provider" {
+#   path = "provider.tf"
+#   if_exists = "overwrite_terragrunt"
+#   contents = <<EOF
+# provider "aws" {
+#   assume_role {
+#     role_arn = "arn:aws:iam::0123456789:role/terragrunt"
+#   }
+# }
+# EOF
+# }
