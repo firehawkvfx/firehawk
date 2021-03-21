@@ -17,6 +17,14 @@ exit_if_error() {
 
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
 
+export AWS_DEFAULT_REGION=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/\(.*\)[a-z]/\1/')
+export TF_VAR_resourcetier="$(aws ec2 describe-tags --filters Name=resource-id,Values=$TF_VAR_instance_id_main_cloud9 --out=json|jq '.Tags[]| select(.Key == "resourcetier")|.Value' --raw-output)" # Can be dev,green,blue,main.  it is pulled from this instance's tags by default
+# Retrieve SSM parameters set by cloudformation
+get_parameters=$( aws ssm get-parameters --names \
+    "/firehawk/resourcetier/${TF_VAR_resourcetier}/global_bucket_extension" )
+export TF_VAR_global_bucket_extension=$(echo $get_parameters | jq ".Parameters[]| select(.Name == \"/firehawk/resourcetier/${TF_VAR_resourcetier}/global_bucket_extension\")|.Value" --raw-output)
+export TF_VAR_bucket_extension="$TF_VAR_resourcetier.$TF_VAR_global_bucket_extension"
+
 # Raise error if var isn't defined.
 if [[ -z "$AWS_DEFAULT_REGION" ]]; then
     exit_if_error 1 "AWS_DEFAULT_REGION not defined.  Ensure you have run 'source update_vars.sh' from the repository root folder."
