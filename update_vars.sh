@@ -83,9 +83,10 @@ export TF_VAR_resourcetier_vault="$TF_VAR_resourcetier" # WARNING: if vault is d
 # export TF_VAR_projectname="$projectname"
 
 # Instance and vpc data
-export TF_VAR_deployer_ip_cidr="$(curl http://169.254.169.254/latest/meta-data/public-ipv4)/32" # Initially there will be no remote ip onsite, so we use the cloud 9 ip.
 export TF_VAR_remote_cloud_public_ip_cidr="$(curl http://169.254.169.254/latest/meta-data/public-ipv4)/32" # The cloud 9 IP to provision with.
 export TF_VAR_remote_cloud_private_ip_cidr="$(curl http://169.254.169.254/latest/meta-data/local-ipv4)/32"
+export TF_VAR_deployer_ip_cidr="$TF_VAR_remote_cloud_private_ip_cidr" # Initially there will be no remote ip onsite, so we use the cloud 9 ip.  You may wish to switch this to a public ip to debug some scenarios (like if a peering connection is not established)
+
 macid=$(curl http://169.254.169.254/latest/meta-data/network/interfaces/macs/)
 export TF_VAR_vpc_id_main_cloud9=$(curl http://169.254.169.254/latest/meta-data/network/interfaces/macs/${macid}/vpc-id) # Aquire the cloud 9 instance's VPC ID to peer with Main VPC
 export TF_VAR_cloud9_instance_name="$(aws ec2 describe-tags --filters Name=resource-id,Values=$TF_VAR_instance_id_main_cloud9 --out=json|jq '.Tags[]| select(.Key == "Name")|.Value' --raw-output)"
