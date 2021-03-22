@@ -193,9 +193,9 @@ cd modules/vault-configuration
 ./generate-plan-init
 terraform apply "tfplan"
 ```
-- Now you can create an admin token
+- Now you can create an admin token.  include any other policies you may need to create tokens for.
 ```
-vault token create -policy=admins
+vault token create -policy=admins -policy=vpn_read_config -explicit-max-ttl=720h
 ```
 
 - And login with the new admin token.
