@@ -302,8 +302,6 @@ eg:
 ./modules/terraform-aws-vpn/modules/openvpn-vagrant-client/wake dev centos@ec2-13-211-132-68.ap-southeast-2.compute.amazonaws.com centos@i-0330138643ba03b32.node.consul
 ```
 
-
-
 - You can acquire the dynamic open vpn password in vault under `/dev/network/openvpn_admin_pw`
 
 # Terminology
