@@ -152,8 +152,8 @@ export TF_VAR_deadline_db_ami_id=$(retrieve_ami $latest_ami $ami_role $TF_VAR_am
 warn_if_invalid "$ami_role" "$TF_VAR_deadline_db_ami_id" "TF_VAR_deadline_db_ami_id"
 # AMI query by commit - Render node
 ami_role="firehawk_centos7_rendernode_ami"
-export TF_VAR_centos7_rendernode_ami=$(retrieve_ami $latest_ami $ami_role $TF_VAR_ami_commit_hash)
-warn_if_invalid "$ami_role" "$TF_VAR_centos7_rendernode_ami" "TF_VAR_centos7_rendernode_ami"
+export TF_VAR_node_centos7_houdini_ami_id=$(retrieve_ami $latest_ami $ami_role $TF_VAR_ami_commit_hash)
+warn_if_invalid "$ami_role" "$TF_VAR_node_centos7_houdini_ami_id" "TF_VAR_node_centos7_houdini_ami_id"
 # Terraform Vars
 export TF_VAR_general_use_ssh_key="$HOME/.ssh/id_rsa" # For debugging deployment of most resources- not for production use.
 export TF_VAR_aws_private_key_path="$TF_VAR_general_use_ssh_key"
