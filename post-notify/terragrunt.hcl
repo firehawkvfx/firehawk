@@ -12,8 +12,10 @@ dependencies {
   paths = [
     "../firehawk-main/modules/terraform-aws-vault-client",
     "../firehawk-main/modules/terraform-aws-vpn",
+    "../firehawk-main/modules/terraform-aws-bastion",
     "../firehawk-render-cluster/modules/terraform-aws-node-houdini",
     "../firehawk-render-cluster/modules/terraform-aws-deadline-db",
+    "../firehawk-render-cluster/modules/terraform-aws-vault-client"
     ]
 }
 
