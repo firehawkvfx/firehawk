@@ -79,7 +79,7 @@ export TF_VAR_instance_id_main_cloud9=$(curl http://169.254.169.254/latest/meta-
 export TF_VAR_resourcetier="$(aws ec2 describe-tags --filters Name=resource-id,Values=$TF_VAR_instance_id_main_cloud9 --out=json|jq '.Tags[]| select(.Key == "resourcetier")|.Value' --raw-output)" # Can be dev,green,blue,main.  it is pulled from this instance's tags by default
 export TF_VAR_resourcetier_vault="$TF_VAR_resourcetier" # WARNING: if vault is deployed in a seperate tier for use, then this will probably need to become an SSM driven parameter from the template
 # export TF_VAR_vpcname="${TF_VAR_resourcetier}${vpcname}" # Why no underscores? Because the vpc name is used to label terraform state S3 buckets
-# export TF_VAR_vpcname_vault="${TF_VAR_resourcetier}vaultvpc" # WARNING: if vault is deployed in a seperate tier for use, then this will probably need to become an SSM driven parameter from the template
+# export TF_VAR_vpcname_vaultvpc="${TF_VAR_resourcetier}vaultvpc" # WARNING: if vault is deployed in a seperate tier for use, then this will probably need to become an SSM driven parameter from the template
 # export TF_VAR_projectname="$projectname"
 
 # Instance and vpc data
