@@ -1,0 +1,30 @@
+#!/bin/bash
+set -e
+
+cd $TF_VAR_firehawk_path/modules/terraform-aws-bastion
+bastion_public_dns=$(terragrunt output public_dns)
+
+cd $TF_VAR_firehawk_path/modules/terraform-aws-vault-client
+vault_client_consul_private_dns=$(terragrunt output consul_private_dns)
+
+printf "\nA private Vault client can be used to forward the Vault UI to your remote onsite web browser (address https://127.0.0.1:8200/ui) via the bastion by forwarding the web service. From your remote host, enable forwarding with:\n"
+printf "ssh -J centos@${bastion_public_dns} centos@${vault_client_consul_private_dns} -L 8200:vault.service.consul:8200\n"
+
+# - Ensure SSH forwarding is functional with the result command given to you by `./wake`:
+# ```
+# ssh -J centos@ec2-13-211-132-68.ap-southeast-2.compute.amazonaws.com centos@i-0330138643ba03b32.node.consul -L 8200:vault.service.consul:8200
+# ```
+# - From Cloud 9, create a token you can use to automatically retrieve your vpn config using the vpn_read_config_policy
+# You must provide a vault token, which should based on a policy of least privilege.  This token will have a short ttl, enough time for our automation script to acquire the VPN config.  We can also define a reasonable use limit, preventing the secret from being useful once we are done with it!  in This case we need to use it twice, once to login, and another when we request the vpn config file.
+# ```
+# vault token create -policy=vpn_read_config -explicit-max-ttl=5m -ttl=5m -use-limit=2
+# ```
+
+# - Run the vagrant wake script 
+# ./modules/terraform-aws-vpn/modules/openvpn-vagrant-client/wake {resourcetier} {public host} {private host} 
+# eg:
+# ```
+# ./modules/terraform-aws-vpn/modules/openvpn-vagrant-client/wake dev centos@ec2-13-211-132-68.ap-southeast-2.compute.amazonaws.com centos@i-0330138643ba03b32.node.consul
+# ```
+
+# - You can acquire the dynamic open vpn password in vault under `/dev/network/openvpn_admin_pw`
