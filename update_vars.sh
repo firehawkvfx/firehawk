@@ -110,7 +110,7 @@ if [[ "$TF_VAR_resourcetier"=="dev" ]]; then
 else
   export TF_VAR_environment="prod"
 fi
-export TF_VAR_firehawk_path="$SCRIPTDIR/firehawk-main"
+export TF_VAR_firehawk_path="$SCRIPTDIR/deploy/firehawk-main"
 
 # Packer Vars
 
