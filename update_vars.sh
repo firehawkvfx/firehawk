@@ -241,7 +241,7 @@ fi
 
 export TF_VAR_ca_public_key_file_path="/home/ec2-user/.ssh/tls/ca.crt.pem"
 if [[ -f "$TF_VAR_ca_public_key_file_path" ]]; then
-  export TF_VAR_SSL_expiry=$(cat "$TF_VAR_ca_public_key_file_path" | openssl x509 -noout -)
+  export TF_VAR_SSL_expiry=$(cat "$TF_VAR_ca_public_key_file_path" | openssl x509 -noout -enddate | awk -F "=" '{print $2}')
   export PKR_VAR_SSL_expiry="$TF_VAR_SSL_expiry"
   echo "Current SSL Certificates will expire: $TF_VAR_SSL_expiry"
 else
