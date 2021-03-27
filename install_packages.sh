@@ -20,5 +20,6 @@ sudo mv /tmp/packer /usr/local/bin/.
 
 wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.28.16/terragrunt_linux_386 -P /tmp/ # Get Terragrunt
 sudo mv /tmp/terragrunt_linux_386 /usr/local/bin/terragrunt
+sudo chmod +x /usr/local/bin/terragrunt
 
 mkdir -p "$HOME/.ssh/tls" # The directory to store TLS certificates in.
