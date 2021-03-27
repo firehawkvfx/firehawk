@@ -8,6 +8,10 @@ locals {
 
 inputs = local.common_vars.inputs
 
+dependencies {
+  paths = ["../vpc"]
+}
+
 terraform {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/terraform-aws-iam-profile-vault-client?ref=v0.0.5"
+  source = "github.com/firehawkvfx/firehawk-main.git//modules/terraform-aws-vpc-main-cloud9-peering?ref=v0.0.5"
 }
