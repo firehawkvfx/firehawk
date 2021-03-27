@@ -156,12 +156,12 @@ export TF_VAR_aws_private_key_path="$TF_VAR_general_use_ssh_key"
 
 # SSH Public Key is used for debugging instances only.  Not for general use.  Use SSH Certificates instead.
 export TF_VAR_aws_key_name="cloud9_$TF_VAR_cloud9_instance_name"
-public_key_path="$HOME/.ssh/id_rsa.pub"
+export TF_VAR_public_key_path="$HOME/.ssh/id_rsa.pub"
 export TF_VAR_vault_public_key=""
-if [[ ! -f $public_key_path ]] ; then
-  log_warn "Warning: File $public_key_path is not there, aborting. Ensure you have initialised a keypair with ssh-keygen.  This should occur automatically when you deploy init/"
+if [[ ! -f $TF_VAR_public_key_path ]] ; then
+  log_warn "Warning: File $TF_VAR_public_key_path is not there. Ensure you have initialised a keypair with ssh-keygen.  This should occur automatically when you deploy init/"
 else
-  export TF_VAR_vault_public_key=$(cat $public_key_path)
+  export TF_VAR_vault_public_key=$(cat $TF_VAR_public_key_path)
 fi
 
 export TF_VAR_log_dir="$SCRIPTDIR/tmp/log"; mkdir -p $TF_VAR_log_dir
