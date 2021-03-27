@@ -158,8 +158,7 @@ export TF_VAR_aws_private_key_path="$TF_VAR_general_use_ssh_key"
 export TF_VAR_aws_key_name="cloud9_$TF_VAR_cloud9_instance_name"
 public_key_path="$HOME/.ssh/id_rsa.pub"
 if [[ ! -f $public_key_path ]] ; then
-    echo "File $public_key_path is not there, aborting. Ensure you have initialised a keypair with ssh-keygen.  This should occur automatically when you deploy init/"
-    return
+    log_warn "Warning: File $public_key_path is not there, aborting. Ensure you have initialised a keypair with ssh-keygen.  This should occur automatically when you deploy init/"
 fi
 export TF_VAR_vault_public_key=$(cat $public_key_path)
 
