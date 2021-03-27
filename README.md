@@ -121,6 +121,11 @@ export PKR_VAR_test_consul=true
 ## Vault Deployment
 
 
+- Source vars again to pickup the AMI ID's
+```
+source ./update_vars.sh
+```
+
 - Deploy Vault
 ```
 cd $TF_VAR_firehawk_path
