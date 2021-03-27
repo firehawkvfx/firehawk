@@ -1,0 +1,19 @@
+#!/bin/bash
+
+set -e
+
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
+
+if [[ -z "$1" ]]; then
+    echo "1st arg must be a private ip of a vault server instance."
+    exit 1
+fi
+
+readonly host2=$1
+
+echo "Warning: This step is a temporary measure until vault instances can init themselves.  A better workflow is required here for production use since we are not protected against MITM."
+echo "we are however in a newly created private subnet, and it is a temporary compromise."
+echo "Removing any previous host keys for: $host2"
+ssh-keygen -R $host2
+
+ssh -l ubuntu 10.1.0.23 "bash -s" < "$SCRIPTDIR/scripts/initialize-ssh"                                                                                                                                           
