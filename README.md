@@ -130,10 +130,22 @@ cd $TF_VAR_firehawk_path
 terragrunt run-all apply
 ```
 
-- Initialise the vault:
+- Check vault status, on first use it will not be initialized:
 ```
+ssh-keygen -R (Vault Private IP) # clean out any old host keys since this is a new instance.
 ssh ubuntu@(Vault Private IP)
 export VAULT_ADDR=https://127.0.0.1:8200
+vault status
+```
+Will show that the vault is sealed:
+```
+Key                      Value
+---                      -----
+Initialized              false
+```
+
+- Initialise the vault:
+```
 vault operator init -recovery-shares=1 -recovery-threshold=1
 vault login (Root Token)
 ```
@@ -142,7 +154,7 @@ vault login (Root Token)
 
 - exit the vault instance, and ensure you are joined to the consul cluster in the cloud9 instance.
 ```
-sudo /opt/consul/bin/run-consul --client --cluster-tag-key "$${consul_cluster_tag_key}" --cluster-tag-value "$${consul_cluster_tag_value}"
+sudo /opt/consul/bin/run-consul --client --cluster-tag-key "${consul_cluster_tag_key}" --cluster-tag-value "${consul_cluster_tag_value}"
 consul catalog services
 ```
 This should show 2 services: consul and vault.
