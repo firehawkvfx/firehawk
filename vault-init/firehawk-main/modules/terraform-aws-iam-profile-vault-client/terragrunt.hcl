@@ -9,5 +9,6 @@ locals {
 inputs = local.common_vars.inputs
 
 terraform {
-  source = "../../../../deploy/firehawk-main/modules/terraform-aws-iam-profile-vault-client"
+  # source = "../../../../deploy/firehawk-main/modules/terraform-aws-iam-profile-vault-client"
+  source = "github.com/firehawkvfx/firehawk-main.git//modules/terraform-aws-iam-profile-vault-client?ref=v0.0.4"
 }
