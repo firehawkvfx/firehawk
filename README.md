@@ -80,9 +80,10 @@ cd firehawk-main; ./install_packages.sh
 source ./update_vars.sh
 ```
 
-- Initialise required SSH Keys, KMS Keys, certificates and S3 Buckets. Note: it is important you do not run destroy when TF_VAR_init=true is set, as this will destroy the SSL Certificates used in images.
+- Initialise required SSH Keys, KMS Keys, certificates and S3 Buckets. Note: it is important you are mindful if you run destroy in init/ as this will destroy the SSL Certificates used in images required to establish connections with Vault and Consul.
 ```
-TF_VAR_init=true terragrunt --terragrunt-include-dir firehawk-init run-all apply
+cd init
+terragrunt run-all apply
 ```
 
 - Install Consul and Vault client
@@ -91,66 +92,39 @@ cd modules/vault
 ./install-consul-vault-client --vault-module-version v0.13.11  --vault-version 1.5.5 --consul-module-version v0.8.0 --consul-version 1.8.4 --build amazonlinux2 --cert-file-path /home/ec2-user/.ssh/tls/ca.crt.pem
 ```
 
-## Build images for Vault and Consul
-
-- Build Vault and Consul Images
-```
-cd $TF_VAR_firehawk_path
-./build.sh
-```
-
-While this is occuring, in another terminal you can also build images for the vault clients and continue with the next step...
-
-## Build images for the bastion, internal vault client, and vpn server
+## Build images
 
 For each client instance we build a base AMI to run os updates (you only need to do this infrequently).  Then we build the complete AMI from the base AMI to speed up subsequent builds (and provide a better foundation from ever changing software updates).
 
-- Run this script to automate all subsequent builds for teh vault and consul clients.
+- Build Base AMI's
 ```
-scripts/build_vault_clients.sh
+source ./update_vars.sh
+cd deploy/packer-firehawk-amis
+source ./packer_vars.sh
+cd modules/firehawk-base-ami
+./build.sh
+```
+
+- When this is complete you can build the final AMI's which will use the base AMI's
+```
+cd modules/firehawk-ami
+./build.sh
 ```
 
 - Check that you have images for the bastion, vault client, and vpn server in you AWS Management Console | Ami's.  If any are missing you may wish to try running the contents of the script manually.
 
-Note: The images here are built without a valt cluster, but there will be no verification of Consul DNS resolution. If you wish to test DNS during the image build and your vault cluster is running, run these steps after vault is up and run:
+Note: The images here are built without a vault cluster, but there will be no verification of Consul DNS resolution. If you wish to test DNS during the image build and your vault cluster is already running, run these steps after vault is up and run:
 ```
 export PKR_VAR_test_consul=true
 ```
 
-## Policies and Vault Deployment
+## Vault Deployment
 
-- Create a policy enabling Packer to build images with vault access.  You only need to ensure these policies exist once per resourcetier (dev/green/blue/prod). These policies are not required to build images in the main account, but may be used to build images for rendering.
-```
-cd modules/terraform-aws-iam-profile-provisioner
-./generate-plan
-terraform apply tfplan
-```
-
-- Create KMS Keys to auto unseal the vault
-```
-cd modules/terraform-aws-kms-key
-./generate-plan
-terraform apply tfplan
-```
-
-- Create a VPC for Vault
-```
-cd modules/vpc
-./generate-plan
-terraform apply tfplan
-```
-
-- Enable peering between vault vpc and current Cloud 9 vpc
-```
-cd modules/terraform-aws-vpc-main-cloud9-peering
-./generate-plan
-terraform apply tfplan
-```
 
 - Deploy Vault
 ```
 cd $TF_VAR_firehawk_path
-./wake
+terragrunt run-all apply
 ```
 
 - Initialise the vault:

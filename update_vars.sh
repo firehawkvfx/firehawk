@@ -78,10 +78,6 @@ export AWS_DEFAULT_REGION=$(curl -s http://169.254.169.254/latest/meta-data/plac
 export TF_VAR_instance_id_main_cloud9=$(curl http://169.254.169.254/latest/meta-data/instance-id)
 export TF_VAR_resourcetier="$(aws ec2 describe-tags --filters Name=resource-id,Values=$TF_VAR_instance_id_main_cloud9 --out=json|jq '.Tags[]| select(.Key == "resourcetier")|.Value' --raw-output)" # Can be dev,green,blue,main.  it is pulled from this instance's tags by default
 export TF_VAR_resourcetier_vault="$TF_VAR_resourcetier" # WARNING: if vault is deployed in a seperate tier for use, then this will probably need to become an SSM driven parameter from the template
-# export TF_VAR_vpcname="${TF_VAR_resourcetier}${vpcname}" # Why no underscores? Because the vpc name is used to label terraform state S3 buckets
-# export TF_VAR_vpcname_vaultvpc="${TF_VAR_resourcetier}vaultvpc" # WARNING: if vault is deployed in a seperate tier for use, then this will probably need to become an SSM driven parameter from the template
-# export TF_VAR_projectname="$projectname"
-
 # Instance and vpc data
 export TF_VAR_remote_cloud_public_ip_cidr="$(curl http://169.254.169.254/latest/meta-data/public-ipv4)/32" # The cloud 9 IP to provision with.
 export TF_VAR_remote_cloud_private_ip_cidr="$(curl http://169.254.169.254/latest/meta-data/local-ipv4)/32"
@@ -160,11 +156,9 @@ export TF_VAR_aws_private_key_path="$TF_VAR_general_use_ssh_key"
 
 # SSH Public Key is used for debugging instances only.  Not for general use.  Use SSH Certificates instead.
 export TF_VAR_aws_key_name="cloud9_$TF_VAR_cloud9_instance_name"
-# export TF_VAR_aws_key_name="deployer-key-$TF_VAR_resourcetier"
 public_key_path="$HOME/.ssh/id_rsa.pub"
 if [[ ! -f $public_key_path ]] ; then
-    echo "File $public_key_path is not there, aborting. Ensure you have initialised a keypair with ssh-keygen"
-    # ssh-keygen -t rsa -C "my-key" -f ~/.ssh/my-key
+    echo "File $public_key_path is not there, aborting. Ensure you have initialised a keypair with ssh-keygen.  This should occur automatically when you deploy init/"
     return
 fi
 export TF_VAR_vault_public_key=$(cat $public_key_path)
@@ -227,20 +221,6 @@ else
   return
 fi
 
-# common_tags_path="$SCRIPTDIR/common_tags.json"
-# echo "read: $common_tags_path"
-# export TF_VAR_common_tags=$(jq -n -f "$common_tags_path" \
-#   --arg environment "$TF_VAR_environment" \
-#   --arg resourcetier "$TF_VAR_resourcetier" \
-#   --arg conflictkey "$TF_VAR_conflictkey" \
-#   --arg pipelineid "$TF_VAR_pipelineid" \
-#   --arg region "$AWS_DEFAULT_REGION" \
-#   --arg vpcname "$TF_VAR_vpcname" \
-#   --arg projectname "$TF_VAR_projectname" \
-#   --arg accountid "$TF_VAR_account_id" \
-#   --arg owner "$TF_VAR_owner" )
-
-# echo "TF_VAR_common_tags: $TF_VAR_common_tags"
 
 export TF_VAR_ca_public_key_file_path="/home/ec2-user/.ssh/tls/ca.crt.pem"
 if [[ -f "$TF_VAR_ca_public_key_file_path" ]]; then
