@@ -71,7 +71,7 @@ Your instance should now have permission to create and destroy any resource with
 
 - Clone the repo, and install required binaries and packages.
 ```
-git clone --recurse-submodules https://github.com/firehawkvfx/firehawk-main.git
+git clone --recurse-submodules -j 8 https://github.com/firehawkvfx/firehawk-main.git
 cd firehawk-main; ./install_packages.sh
 ```
 
