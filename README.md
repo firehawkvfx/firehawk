@@ -92,9 +92,9 @@ cd modules/vault
 ./install-consul-vault-client --vault-module-version v0.13.11  --vault-version 1.5.5 --consul-module-version v0.8.0 --consul-version 1.8.4 --build amazonlinux2 --cert-file-path /home/ec2-user/.ssh/tls/ca.crt.pem
 ```
 
-## Build images
+## Build Images
 
-For each client instance we build a base AMI to run os updates (you only need to do this infrequently).  Then we build the complete AMI from the base AMI to speed up subsequent builds (and provide a better foundation from ever changing software updates).
+For each client instance we build a base AMI to run OS updates (you only need to do this infrequently).  Then we build the complete AMI from the base AMI to speed up subsequent builds (the base AMI provides better reproducible results from ever changing software updates).
 
 - Build Base AMI's
 ```
