@@ -99,15 +99,13 @@ For each client instance we build a base AMI to run os updates (you only need to
 - Build Base AMI's
 ```
 source ./update_vars.sh
-cd deploy/packer-firehawk-amis
-source ./packer_vars.sh
-cd modules/firehawk-base-ami
+cd deploy/packer-firehawk-amis/modules/firehawk-base-ami
 ./build.sh
 ```
 
 - When this is complete you can build the final AMI's which will use the base AMI's
 ```
-cd modules/firehawk-ami
+cd deploy/packer-firehawk-amis/modules/firehawk-ami
 ./build.sh
 ```
 
