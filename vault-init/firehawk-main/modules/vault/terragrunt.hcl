@@ -16,6 +16,8 @@ dependencies {
 }
 
 terraform {
+  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault?ref=v0.0.6"
+
   after_hook "after_hook_1" {
     commands = ["apply"]
     execute  = ["bash", "post-tf-run-consul"]
@@ -24,10 +26,6 @@ terraform {
     commands = ["apply"]
     execute  = ["bash", "post-tf-vault-login"]
   }
-}
-
-terraform {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault?ref=v0.0.6"
 }
 
 # skip = true
