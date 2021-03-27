@@ -75,26 +75,14 @@ git clone --recurse-submodules https://github.com/firehawkvfx/firehawk-main.git
 cd firehawk-main; ./install_packages.sh
 ```
 
-- Initialise the environment variables and spin up the resources.
+- Initialise the environment variables to spin up the resources.
 ```
 source ./update_vars.sh
 ```
 
-- Initialise an S3 bucket for terraform remote state.  This only needs to be done once per account / tier (main/dev/green/blue)
+- Initialise required SSH Keys, KMS Keys, certificates and S3 Buckets. Note: it is important you do not run destroy when TF_VAR_init=true is set, as this will destroy the SSL Certificates used in images.
 ```
-./init_backend
-```
-
-- Initialise the cloud9 host & Vault back end. This will also initialise an IAM profile for packer builds to access S3.  You will need to do this each time you create a new cloud 9 host.  This will ensure you have an RSA key and configure it to ssh into hosts for testing.  It also ensures your S3 backed is functioning correctly.
-```
-./init_host
-```
-
-- Create TLS Certificates for your Vault images
-```
-cd modules/terraform-aws-vault/modules/private-tls-cert
-terraform plan -out=tfplan
-terraform apply tfplan
+TF_VAR_init=true terragrunt --terragrunt-include-dir firehawk-init run-all apply
 ```
 
 - Install Consul and Vault client
