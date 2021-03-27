@@ -130,29 +130,24 @@ cd $TF_VAR_firehawk_path
 terragrunt run-all apply
 ```
 
-- Check vault status, on first use it will not be initialized:
+- On first vault will not be initialized.  You can use a shell script to aid this.:
 ```
-ssh-keygen -R (Vault Private IP) # clean out any old host keys since this is a new instance.
-ssh ubuntu@(Vault Private IP)
-export VAULT_ADDR=https://127.0.0.1:8200
-vault status
-```
-Will show that the vault is sealed:
-```
-Key                      Value
----                      -----
-Initialized              false
+$TF_VAR_firehawk_path/modules/vault/initialize-vault (A Vault Private IP adress)
 ```
 
-- Initialise the vault:
+- It should return something like this to show success:
 ```
-vault operator init -recovery-shares=1 -recovery-threshold=1
-vault login (Root Token)
+Initializing vault...
+Recovery Key 1: 23l4jh13l5jh23ltjh25=
+
+Initial Root Token: s.lk235lj235k23j525jn
+
+Success! Vault is initialized
 ```
 
-- Store all sensitive output in an encrypted password manager for later use.
+- Store all sensitive output (The recovery key and root token) in an encrypted password manager for later use.
 
-- exit the vault instance, and ensure you are joined to the consul cluster in the cloud9 instance.
+- Ensure you are joined to the consul cluster in the cloud9 instance.
 ```
 sudo /opt/consul/bin/run-consul --client --cluster-tag-key "${consul_cluster_tag_key}" --cluster-tag-value "${consul_cluster_tag_value}"
 consul catalog services
@@ -164,12 +159,16 @@ This should show 2 services: consul and vault.
 vault login
 ```
 
-- Configure vault with firehawk defaults.
+- Configure vault with firehawk defaults, generate a plan.
 ```
-cd modules/vault-configuration
-./generate-plan-init
-terraform apply "tfplan"
+cd $TF_VAR_firehawk_path/modules/vault-configuration
+TF_VAR_configure_vault=true TF_VAR_init=true terragrunt plan -out="tfplan"
 ```
+- If the plan looks good then apply it:
+```
+terragrunt apply "tfplan"
+```
+
 - Now you can create an admin token.  include any other policies you may need to create tokens for.
 ```
 vault token create -policy=admins -policy=vpn_read_config -explicit-max-ttl=720h
