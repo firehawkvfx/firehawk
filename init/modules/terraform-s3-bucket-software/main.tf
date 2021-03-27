@@ -73,7 +73,7 @@ module "iam_policies_s3_shared_bucket" {
 
 # Define policy for the role allowing access to the bucket.
 module "iam_policies_s3_multi_account_role" {
-  source = "../../modules/aws-iam-policies-s3-multi-account-role"
+  source = "${var.firehawk_path}/modules/aws-iam-policies-s3-multi-account-role"
   name = "MultiAccountRolePolicyS3BucketAccess_${var.conflictkey}"
   iam_role_id = aws_iam_role.multi_account_role.id
   shared_bucket_arn = aws_s3_bucket.shared_bucket.arn
