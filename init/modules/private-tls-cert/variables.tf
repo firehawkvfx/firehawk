@@ -21,8 +21,8 @@ variable "private_key_file_path" {
   default     = "/home/ec2-user/.ssh/tls/vault.key.pem"
 }
 
-variable "owner" {
-  description = "The OS user who should be given ownership over the certificate files."
+variable "cert_owner" {
+  description = "The OS user who should be given cert_ownership over the certificate files."
   type        = string
   default     = "ec2-user"
 }
