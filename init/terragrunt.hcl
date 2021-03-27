@@ -6,7 +6,7 @@ remote_state {
   }
   config = {
     bucket         = "state.terraform.${get_env("TF_VAR_bucket_extension", "")}"
-    key            = "${path_relative_to_include()}/terraform.tfstate"
+    key            = "init/${path_relative_to_include()}/terraform.tfstate"
     region         = "${get_env("AWS_DEFAULT_REGION", "")}"
     encrypt        = true
     dynamodb_table = "locks.state.terraform.${get_env("TF_VAR_bucket_extension", "")}"
