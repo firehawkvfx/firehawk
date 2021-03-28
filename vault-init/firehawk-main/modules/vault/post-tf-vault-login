@@ -48,7 +48,7 @@ retry \
 
 retry \
     "vault status | grep -m 1 'Initialized.*'" \
-    "Ensuring vault is initialized..."
+    "Ensuring vault is initialized..." \
     "Vault doesn't appear to be initialised.  You should try to SSH to a Vault server instance directly to initialise it."
 
 # until vault status | grep -m 1 "Initialized.*"; do sleep 1 ; done
