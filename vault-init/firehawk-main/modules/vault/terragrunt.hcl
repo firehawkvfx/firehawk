@@ -18,14 +18,14 @@ dependencies {
 terraform {
   source = "github.com/firehawkvfx/firehawk-main.git//modules/vault?ref=test-pull-request-236"
 
-  # after_hook "after_hook_1" {
-  #   commands = ["apply"]
-  #   execute  = ["bash", "post-tf-run-consul"]
-  # }
-  # after_hook "after_hook_2" {
-  #   commands = ["apply"]
-  #   execute  = ["bash", "post-tf-vault-login"]
-  # }
+  after_hook "after_hook_1" {
+    commands = ["apply"]
+    execute  = ["bash", "post-tf-run-consul"]
+  }
+  after_hook "after_hook_2" {
+    commands = ["apply"]
+    execute  = ["bash", "post-tf-vault-login"]
+  }
 }
 
 # skip = true
