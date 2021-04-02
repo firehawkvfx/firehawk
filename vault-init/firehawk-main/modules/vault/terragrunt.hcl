@@ -16,7 +16,7 @@ dependencies {
 }
 
 terraform {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault?ref=test-pull-request-236"
+  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault?ref=test-relocate-policies"
 
   after_hook "after_hook_1" {
     commands = ["apply"]

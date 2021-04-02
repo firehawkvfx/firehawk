@@ -28,7 +28,7 @@ dependencies {
 skip = local.skip
 
 terraform {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-policies?ref=test-pull-request-236"
+  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-policies?ref=test-relocate-policies"
 
   after_hook "after_hook_1" {
     commands = ["apply"]
