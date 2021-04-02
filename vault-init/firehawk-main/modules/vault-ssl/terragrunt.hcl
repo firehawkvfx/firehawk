@@ -21,8 +21,9 @@ dependencies {
     ]
 }
 
-skip = local.skip
+# skip = local.skip
+skip = true
 
 terraform {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-userpass?ref=test-relocate-policies"
+  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-ssl?ref=test-relocate-policies"
 }
