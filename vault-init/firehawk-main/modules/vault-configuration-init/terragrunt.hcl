@@ -2,14 +2,6 @@ include {
   path = find_in_parent_folders()
 }
 
-variable "init" {
-  default = false
-}
-
-variable "configure_vault" {
-  default = false
-}
-
 locals {
   common_vars = read_terragrunt_config(find_in_parent_folders("common.hcl"))
   init = lower(get_env("TF_VAR_init", "false"))=="true" ? true : false
