@@ -7,7 +7,13 @@ locals {
   skip = ( lower(get_env("TF_VAR_configure_vault", "false"))=="true" ? "false" : "true" )
 }
 
-inputs = local.common_vars.inputs
+inputs = merge(
+  local.common_vars.inputs,
+  { 
+    "init" : true,
+    "configure_vault" : true 
+  }
+)
 
 dependencies {
   paths = [
