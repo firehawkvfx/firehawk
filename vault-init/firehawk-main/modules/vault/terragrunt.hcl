@@ -10,8 +10,7 @@ inputs = local.common_vars.inputs
 
 dependencies {
   paths = [
-    "../vpc",
-    "../terraform-aws-vpc-main-cloud9-peering"
+    "../vault"
     ]
 }
 
