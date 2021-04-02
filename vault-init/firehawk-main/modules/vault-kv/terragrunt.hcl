@@ -27,7 +27,7 @@ dependencies {
 skip = local.skip
 
 terraform {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-configuration?ref=test-relocate-policies"
+  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-kv?ref=test-relocate-policies"
 }
 
 # To initialise vault values (after logging in with root token):
