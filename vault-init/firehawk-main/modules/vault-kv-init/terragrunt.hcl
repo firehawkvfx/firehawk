@@ -20,14 +20,14 @@ inputs = merge(
 
 dependencies {
   paths = [
-    "../vault-kv-init"
+    "../vault-policies"
     ]
 }
 
 skip = local.skip
 
 terraform {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-kv?ref=test-relocate-policies"
+  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-kv-init?ref=test-relocate-policies"
 }
 
 # To initialise vault values (after logging in with root token):

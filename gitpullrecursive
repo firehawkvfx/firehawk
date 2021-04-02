@@ -15,8 +15,11 @@ function options {
     local key="$1"
 
     case "$key" in
-      --clear-caches)
+      --clear-cache)
+        echo "...Clearing cache recursively"
         find . -type d -name ".terragrunt-cache" -prune -exec rm -rf {} \;
+        echo "git status"
+        git status
         ;;
       --branch)
         branch="$2"
