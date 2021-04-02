@@ -12,8 +12,8 @@ variable "configure_vault" {
 
 locals {
   common_vars = read_terragrunt_config(find_in_parent_folders("common.hcl"))
-  init = var.init
-  configure_vault = var.configure_vault
+  init = lower(get_env("TF_VAR_init", "false"))=="true" ? true : false
+  configure_vault = lower(get_env("TF_VAR_configure_vault", "false"))=="true" ? true : false
   # skip = ( lower(get_env("TF_VAR_configure_vault", "false"))=="true" ? "false" : "true" )
   skip = ( local.configure_vault == "true" ? "false" : "true" )
 }
