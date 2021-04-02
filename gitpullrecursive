@@ -9,12 +9,18 @@ SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # 
 cd $SCRIPTDIR
 
 function options {
+  branch=""
+
   while [[ $# > 0 ]]; do
     local key="$1"
 
     case "$key" in
       --clear-caches)
         find . -type d -name ".terragrunt-cache" -prune -exec rm -rf {} \;
+        ;;
+      --branch)
+        branch="$2"
+        shift
         ;;
     #   --help)
     #     print_usage
@@ -34,5 +40,5 @@ function options {
 
 options "$@"
 
-git pull origin $1 --recurse
+git pull origin $branch --recurse
 cd $pwd
