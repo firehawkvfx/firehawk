@@ -5,31 +5,37 @@ include {
 locals {
   common_vars = read_terragrunt_config(find_in_parent_folders("common.hcl"))
   init = lower(get_env("TF_VAR_init", "false"))=="true" ? true : false
-  configure_vault = lower(get_env("TF_VAR_configure_vault", "false"))=="true" ? true : false
-  # skip = ( lower(get_env("TF_VAR_configure_vault", "false"))=="true" ? "false" : "true" )
-  skip = ( local.configure_vault ? false : true )
+  # configure_vault = lower(get_env("TF_VAR_configure_vault", "false"))=="true" ? true : false
+  skip = ( local.init ? false : true )
 }
 
-inputs = merge(
-  local.common_vars.inputs,
-  { 
-    "init" : local.init,
-    "configure_vault" : local.configure_vault 
-  }
-)
+inputs = local.common_vars.inputs
+
+# inputs = merge(
+#   local.common_vars.inputs,
+#   { 
+#     "init" : local.init,
+#     "configure_vault" : local.configure_vault 
+#   }
+# )
 
 dependencies {
   paths = [
-    "../vault-policies"
+    "../vault"
     ]
 }
 
 skip = local.skip
 
 terraform {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-configuration?ref=test-pull-request-236"
-}
+  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-policies?ref=test-pull-request-236"
 
+  after_hook "after_hook_1" {
+    commands = ["apply"]
+    execute  = ["bash", "scripts/create-token"]
+  }
+
+}
 # To initialise vault values (after logging in with root token):
 # TF_VAR_configure_vault=true TF_VAR_init=true terragrunt plan -out="tfplan" && terragrunt apply "tfplan"
 
