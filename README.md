@@ -161,10 +161,10 @@ This should show 2 services: consul and vault.
 vault login
 ```
 
-- Configure Vault with firehawk defaults, generate a plan.  Be careful with `TF_VAR_init=true` as it will erase existing data KV paths should you apply it to an already configured Vault.
+- Configure Vault with firehawk defaults, generate a plan.
 ```
 cd /deploy/firehawk-main/modules/vault-configuration
-TF_VAR_configure_vault=true TF_VAR_init=true terragrunt apply
+TF_VAR_configure_vault=true terragrunt apply
 ```
 - Next run without init to configure various endpoints, ssh certificates, and role based endpoints
 ```
