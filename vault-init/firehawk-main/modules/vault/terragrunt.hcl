@@ -16,7 +16,7 @@ dependencies {
 }
 
 terraform {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault?ref=test-relocate-policies"
+  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault?ref=policies-cert-paths-deadline-vpn"
 
   after_hook "after_hook_1" {
     commands = ["apply"]
