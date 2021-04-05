@@ -24,5 +24,5 @@ dependencies {
 skip = local.skip
 
 terraform {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-profiles?ref=test-relocate-policies"
+  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-profiles?ref=policies-cert-paths-deadline-vpn"
 }
