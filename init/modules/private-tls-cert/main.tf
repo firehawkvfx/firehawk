@@ -72,8 +72,6 @@ resource "tls_locally_signed_cert" "cert" {
 
   validity_period_hours = var.validity_period_hours
   allowed_uses          = var.allowed_uses
-
-
 }
 # Store the certificate's public key in a file.
 resource "null_resource" "public_key_file_path" {
