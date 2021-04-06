@@ -23,7 +23,9 @@ resource "tls_self_signed_cert" "ca" {
 }
 # Store the CA public key in a file.
 resource "null_resource" "ca_public_key_file_path" {
-  count = fileexists(var.ca_public_key_file_path) ? 0 : 1
+  triggers = {
+    always_run = timestamp() # Always run this since we dont know if this is a new vault and an old state file.  This could be better.  perhaps track an init var in the vault?
+  }
   provisioner "local-exec" {
     command = "echo '${tls_self_signed_cert.ca.cert_pem}' > '${var.ca_public_key_file_path}' && chmod ${var.permissions} '${var.ca_public_key_file_path}' && chown ${var.cert_owner} '${var.ca_public_key_file_path}'"
   }
@@ -40,7 +42,9 @@ resource "tls_private_key" "cert" {
 }
 # Store the certificate's private key in a file.
 resource "null_resource" "private_key_file_path" {
-  count = fileexists(var.private_key_file_path) ? 0 : 1
+  triggers = {
+    always_run = timestamp() # Always run this since we dont know if this is a new vault and an old state file.  This could be better.  perhaps track an init var in the vault?
+  }
   provisioner "local-exec" {
     command = "echo '${tls_private_key.cert.private_key_pem}' > '${var.private_key_file_path}' && chmod ${var.permissions} '${var.private_key_file_path}' && chown ${var.cert_owner} '${var.private_key_file_path}'"
   }
@@ -73,7 +77,9 @@ resource "tls_locally_signed_cert" "cert" {
 }
 # Store the certificate's public key in a file.
 resource "null_resource" "public_key_file_path" {
-  count = fileexists(var.public_key_file_path) ? 0 : 1
+  triggers = {
+    always_run = timestamp() # Always run this since we dont know if this is a new vault and an old state file.  This could be better.  perhaps track an init var in the vault?
+  }
   provisioner "local-exec" {
     command = "echo '${tls_locally_signed_cert.cert.cert_pem}' > '${var.public_key_file_path}' && chmod ${var.permissions} '${var.public_key_file_path}' && chown ${var.cert_owner} '${var.public_key_file_path}'"
   }
