@@ -109,6 +109,8 @@ fi
 export TF_VAR_firehawk_path="$SCRIPTDIR/deploy/firehawk-main"
 
 # Packer Vars
+export TF_VAR_deadline_version="10.1.14.5"
+export PKR_VAR_deadline_version="$TF_VAR_deadline_version"
 
 export PACKER_LOG=1
 export PACKER_LOG_PATH="packerlog.log"
