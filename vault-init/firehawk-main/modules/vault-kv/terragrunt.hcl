@@ -5,7 +5,6 @@ include {
 locals {
   common_vars = read_terragrunt_config(find_in_parent_folders("common.hcl"))
   configure_vault = lower(get_env("TF_VAR_configure_vault", "false"))=="true" ? true : false
-  # skip = ( lower(get_env("TF_VAR_configure_vault", "false"))=="true" ? "false" : "true" )
   skip = ( local.configure_vault ? false : true )
 }
 

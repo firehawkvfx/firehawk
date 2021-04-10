@@ -125,11 +125,12 @@ The first time you launch Vault, it will not have any config stored in the S3 ba
 source ./update_vars.sh
 ```
 
-- Deploy Vault
+- Deploy Vault.  
 ```
 cd vault-init
 terragrunt run-all apply
 ```
+Note: If in a dev environment and you need to update the repositories on each run, use `--terragrunt-source-update`
 
 - On first use vault will not be initialized.  You can use a shell script to aid this:
 ```
@@ -161,12 +162,7 @@ This should show 2 services: consul and vault.
 vault login
 ```
 
-- Configure Vault with firehawk defaults, generate a plan.
-```
-cd /deploy/firehawk-main/modules/vault-configuration
-TF_VAR_configure_vault=true terragrunt apply
-```
-- Next run without init to configure various endpoints, ssh certificates, and role based endpoints
+- Configure Vault with firehawk defaults (from directory vault-init/)
 ```
 TF_VAR_configure_vault=true terragrunt apply
 ```

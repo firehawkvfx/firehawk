@@ -25,4 +25,13 @@ skip = local.skip
 
 terraform {
   source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-ssh?ref=test-relocate-policies"
+  # Configure this host for SSH Certificates
+  after_hook "after_hook_1" {
+    commands = ["apply"]
+    execute  = ["bash", "modules/known-hosts/known_hosts.sh"]
+  }
+  after_hook "after_hook_2" {
+    commands = ["apply"]
+    execute  = ["bash", "modules/sign-ssh-key/sign_ssh_key.sh"]
+  }
 }
