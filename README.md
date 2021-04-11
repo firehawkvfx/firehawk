@@ -130,7 +130,7 @@ source ./update_vars.sh
 cd vault-init
 terragrunt run-all apply
 ```
-Note: If in a dev environment and you need to update the repositories on each run, use `--terragrunt-source-update`
+Note: If in a dev environment and you need to update the repositories on each run, use `terragrunt run-all apply --terragrunt-source-update`
 
 - On first use vault will not be initialized.  You can use a shell script to aid this:
 ```
