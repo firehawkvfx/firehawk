@@ -8,7 +8,9 @@ cd $TF_VAR_firehawk_path/modules/terraform-aws-vault-client
 vault_client_consul_private_dns=$(terragrunt output consul_private_dns)
 
 printf "\nA private Vault client can be used to forward the Vault UI to your remote onsite web browser (address https://127.0.0.1:8200/ui) via the bastion by forwarding the web service. From your remote host, enable forwarding with:\n"
-printf "ssh -J centos@${bastion_public_dns} centos@${vault_client_consul_private_dns} -L 8200:vault.service.consul:8200\n"
+printf "\nssh -J centos@${bastion_public_dns} centos@${vault_client_consul_private_dns} -L 8200:vault.service.consul:8200\n"
+printf "\nYou can create a shorter lived token to use the web UI remotely:"
+printf "vault token create -policy=admins -explicit-max-ttl=18h"
 
 # - Ensure SSH forwarding is functional with the result command given to you by `./wake`:
 # ```
