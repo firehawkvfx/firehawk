@@ -10,17 +10,11 @@ data "aws_caller_identity" "current" {}
 locals {
   common_tags = merge( var.common_tags, { role = "shared bucket" } )
   share_with_arns = concat( [ data.aws_caller_identity.current.account_id ], var.share_with_arns )
-  # vault_map = element( concat( data.vault_generic_secret.installers_bucket.*.data, list({}) ), 0 )
-  # bucket_name = var.use_vault && contains( keys(local.vault_map), "value" ) ? lookup( local.vault_map, "value", var.bucket_name) : var.bucket_name
   bucket_name = var.installers_bucket
 }
 
 # See https://blog.gruntwork.io/how-to-manage-terraform-state-28f5697e68fa for the origin of some of this code.
 
-# data "vault_generic_secret" "installers_bucket" { # The name of the bucket is defined in vault  
-#   count = var.use_vault ? 1 : 0
-#   path = "main/aws/installers_bucket"
-# }
 resource "aws_s3_bucket" "shared_bucket" {
   bucket = local.bucket_name
   acl    = "private"

@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# init should only restore paths to default values.
+TF_VAR_configure_vault=true terragrunt run-all apply

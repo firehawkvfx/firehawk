@@ -125,11 +125,12 @@ The first time you launch Vault, it will not have any config stored in the S3 ba
 source ./update_vars.sh
 ```
 
-- Deploy Vault
+- Deploy Vault.  
 ```
 cd vault-init
 terragrunt run-all apply
 ```
+Note: If in a dev environment and you need to update the repositories on each run, use `terragrunt run-all apply --terragrunt-source-update`
 
 - On first use vault will not be initialized.  You can use a shell script to aid this:
 ```
@@ -161,12 +162,7 @@ This should show 2 services: consul and vault.
 vault login
 ```
 
-- Configure Vault with firehawk defaults, generate a plan.  Be careful with `TF_VAR_init=true` as it will erase existing data KV paths should you apply it to an already configured Vault.
-```
-cd /deploy/firehawk-main/modules/vault-configuration
-TF_VAR_configure_vault=true TF_VAR_init=true terragrunt apply
-```
-- Next run without init to configure various endpoints, ssh certificates, and role based endpoints
+- Configure Vault with firehawk defaults (from directory vault-init/)
 ```
 TF_VAR_configure_vault=true terragrunt apply
 ```
@@ -272,7 +268,7 @@ It is important you do not take this step in an unsecured network.  The purpose 
 - From Cloud 9, create a token you can use to automatically retrieve your vpn config using the vpn_read_config_policy
 You must provide a vault token, which should based on a policy of least privilege.  This token will have a short ttl, enough time for our automation script to acquire the VPN config.  We can also define a reasonable use limit, preventing the secret from being useful once we are done with it!  in This case we need to use it twice, once to login, and another when we request the vpn config file.
 ```
-vault token create -policy=vpn_read_config -explicit-max-ttl=5m -ttl=5m -use-limit=2
+vault token create -policy=vpn_read_config -policy=deadline_client -explicit-max-ttl=5m -ttl=5m -use-limit=2
 ```
 
 - Run the vagrant wake script 

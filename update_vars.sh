@@ -109,6 +109,8 @@ fi
 export TF_VAR_firehawk_path="$SCRIPTDIR/deploy/firehawk-main"
 
 # Packer Vars
+export TF_VAR_deadline_version="10.1.14.5"
+export PKR_VAR_deadline_version="$TF_VAR_deadline_version"
 
 export PACKER_LOG=1
 export PACKER_LOG_PATH="packerlog.log"
@@ -150,6 +152,11 @@ warn_if_invalid "$ami_role" "$TF_VAR_deadline_db_ami_id" "TF_VAR_deadline_db_ami
 ami_role="firehawk_centos7_rendernode_ami"
 export TF_VAR_node_centos7_houdini_ami_id=$(retrieve_ami $latest_ami $ami_role $TF_VAR_ami_commit_hash)
 warn_if_invalid "$ami_role" "$TF_VAR_node_centos7_houdini_ami_id" "TF_VAR_node_centos7_houdini_ami_id"
+# AMI query by commit - Workstation
+ami_role="firehawk_amazonlinux2_nicedcv_ami"
+export TF_VAR_workstation_amazonlinux2_nicedcv_ami_id=$(retrieve_ami $latest_ami $ami_role $TF_VAR_ami_commit_hash)
+warn_if_invalid "$ami_role" "$TF_VAR_workstation_amazonlinux2_nicedcv_ami_id" "TF_VAR_workstation_amazonlinux2_nicedcv_ami_id"
+
 # Terraform Vars
 export TF_VAR_general_use_ssh_key="$HOME/.ssh/id_rsa" # For debugging deployment of most resources- not for production use.
 export TF_VAR_aws_private_key_path="$TF_VAR_general_use_ssh_key"

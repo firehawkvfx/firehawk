@@ -5,9 +5,43 @@
 set -e # exit on failure
 
 pwd=$(pwd)
-
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
-
 cd $SCRIPTDIR
-git pull origin $1 --recurse
+
+function options {
+  branch=""
+
+  while [[ $# > 0 ]]; do
+    local key="$1"
+
+    case "$key" in
+      --clear-cache)
+        echo "...Clearing cache recursively"
+        find . -type d -name ".terragrunt-cache" -prune -exec rm -rf {} \;
+        echo "git status"
+        git status
+        ;;
+      --branch)
+        branch="$2"
+        shift
+        ;;
+    #   --help)
+    #     print_usage
+    #     exit
+    #     ;;
+      *)
+        log_error "Unrecognized argument: $key"
+        print_usage
+        exit 1
+        ;;
+    esac
+
+    shift
+  done
+
+}
+
+options "$@"
+
+git pull origin $branch --recurse
 cd $pwd
