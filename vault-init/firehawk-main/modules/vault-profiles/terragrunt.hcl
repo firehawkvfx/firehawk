@@ -24,5 +24,5 @@ dependencies {
 skip = local.skip
 
 terraform {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-profiles?ref=update-default-path-vpn-certs"
+  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-profiles?ref=v0.0.9"
 }

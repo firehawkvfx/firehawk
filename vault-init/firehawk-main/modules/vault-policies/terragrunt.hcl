@@ -19,7 +19,7 @@ dependencies {
 skip = local.skip
 
 terraform {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-policies?ref=update-default-path-vpn-certs"
+  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-policies?ref=v0.0.9"
 
   after_hook "after_hook_1" {
     commands = ["apply"]

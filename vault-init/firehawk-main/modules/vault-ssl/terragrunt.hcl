@@ -25,5 +25,5 @@ dependencies {
 skip = true
 
 terraform {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-ssl?ref=test-relocate-policies"
+  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-ssl?ref=v0.0.9"
 }
