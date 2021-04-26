@@ -14,7 +14,7 @@ dependencies {
     "../firehawk-main/modules/terraform-aws-bastion",
     "../firehawk-render-cluster/modules/terraform-aws-vpn",
     "../firehawk-render-cluster/modules/terraform-aws-node-houdini",
-    "../firehawk-render-cluster/modules/terraform-aws-deadline-db",
+    "../firehawk-render-cluster/modules/terraform-aws-deadline-spot",
     "../firehawk-render-cluster/modules/terraform-aws-vault-client"
     ]
 }
