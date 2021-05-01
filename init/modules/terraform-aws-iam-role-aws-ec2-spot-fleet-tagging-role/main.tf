@@ -17,15 +17,3 @@ data "aws_iam_policy_document" "assume_role" { # Determines the services able to
     }
   }
 }
-
-# resource "null_resource" "provision_deadline_spot" { # alternative method to potentially avoid import errors, but presently there are ansible issues: https://stackoverflow.com/questions/67345350/how-to-fix-failed-to-import-the-required-python-library-botocore-or-boto3-wi
-#   provisioner "local-exec" { # configure deadline groups and UBL
-#     interpreter = ["/bin/bash", "-c"]
-#     command     = <<EOT
-# set -x
-# cd ${path.module}
-# ansible-galaxy collection install community.aws
-# ANSIBLE_STDOUT_CALLBACK=debug ansible-playbook -i ansible/inventory/hosts ansible/ensure_role_exists.yaml
-# EOT
-#   }
-# }

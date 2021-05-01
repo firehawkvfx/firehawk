@@ -12,7 +12,7 @@ terraform {
   before_hook "before_hook_1" {
     commands = ["apply"]
     execute  = [
-      "bash", "auto_import.sh" # attempt to import the resource in case it already exists
+      "bash", "auto_import.sh" # Attempt to import the resource in case it already exists, since we cannot know if the user's account has already created this role for Deadline
       ]
   }
 }
