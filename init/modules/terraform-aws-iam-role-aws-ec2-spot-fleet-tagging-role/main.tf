@@ -25,7 +25,7 @@ resource "null_resource" "provision_deadline_spot" {
 set -x
 cd ${path.module}
 ansible-galaxy collection install community.aws
-ANSIBLE_STDOUT_CALLBACK=debug ansible-playbook ./ensure_role_exists.yaml
+ANSIBLE_STDOUT_CALLBACK=debug ansible-playbook -i ansible/inventory/hosts ansible/ensure_role_exists.yaml
 EOT
   }
 }
