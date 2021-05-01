@@ -5,8 +5,7 @@ cd $SCRIPTDIR
 sudo yum install -y git
 sudo yum install -y python python3.7 python3-pip
 python3 -m pip install --user --upgrade pip # Do not run pip as sudo. Do this instead.
-python3 -m pip install ansible boto3
-
+python3 -m pip install ansible boto3 botocore
 # ssh-keyscan -H localhost >> ~/.ssh/known_hosts # accept this hosts key for ansible
 
 sudo yum install -y jq

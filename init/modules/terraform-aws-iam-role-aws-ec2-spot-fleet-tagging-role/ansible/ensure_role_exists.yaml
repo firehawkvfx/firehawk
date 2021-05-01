@@ -13,4 +13,6 @@
       managed_policies:
         - arn:aws:iam::aws:policy/service-role/AmazonEC2SpotFleetTaggingRole
     vars:
-      ansible_python_interpreter: "/usr/bin/python3"
+      ansible_python_interpreter: /usr/bin/python3
+
+    
