@@ -1,0 +1,19 @@
+## This role allows spot fleets started by deadline to have tags assigned to instances.  Only one per account is possble, so it is created during init. 
+resource "aws_iam_role" "service_role" {
+  name = "AWSServiceRoleForEC2SpotFleet"
+  assume_role_policy = data.aws_iam_policy_document.assume_role.json
+  tags = merge( var.common_tags, map( "role", "deadline") )
+  managed_policy_arns = [
+    "arn:aws:iam::aws:policy/aws-service-role/AWSEC2SpotFleetServiceRolePolicy"
+  ]
+}
+data "aws_iam_policy_document" "assume_role" { # Determines the services able to assume the role.
+  statement {
+    effect  = "Allow"
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["ec2.amazonaws.com"]
+    }
+  }
+}
