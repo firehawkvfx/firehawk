@@ -17,3 +17,15 @@
 #     }
 #   }
 # }
+
+resource "null_resource" "provision_deadline_spot" {
+  provisioner "local-exec" { # configure deadline groups and UBL
+    interpreter = ["/bin/bash", "-c"]
+    command     = <<EOT
+set -x
+cd ${path.module}
+ansible-galaxy collection install community.aws
+ANSIBLE_STDOUT_CALLBACK=debug ansible-playbook ./ensure_role_exists.yaml
+EOT
+  }
+}
