@@ -1,6 +1,5 @@
 - hosts: localhost
   connection: local
-  # remote_user: "{{ variable_connect_as_user | default('ec2-user') }}"
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
   any_errors_fatal: true
@@ -12,7 +11,7 @@
       assume_role_policy_document: "{{ lookup('file','policy.json') }}"
       managed_policies:
         - arn:aws:iam::aws:policy/service-role/AmazonEC2SpotFleetTaggingRole
-    # vars:
-    #   ansible_python_interpreter: /usr/bin/python3
+    vars:
+      ansible_python_interpreter: /usr/bin/python3
 
     
