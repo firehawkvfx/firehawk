@@ -1,5 +1,5 @@
 ### This role allows spot fleets started by deadline to have tags assigned to instances.  Only one per account is possble, so it is created during init. 
-resource "aws_iam_role" "instance_role" {
+resource "aws_iam_role" "service_role" {
   name = "aws-ec2-spot-fleet-tagging-role"
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
   tags = merge( var.common_tags, map( "role", "deadline") )
