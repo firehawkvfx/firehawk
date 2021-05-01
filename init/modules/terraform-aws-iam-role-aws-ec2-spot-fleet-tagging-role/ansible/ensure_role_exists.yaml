@@ -4,9 +4,6 @@
   become: true
   any_errors_fatal: true
 
-  vars:
-  ansible_python_interpreter: "/usr/bin/python3"
-
   tasks:
   - name: "Create a role and attach a managed policy called 'aws-ec2-spot-fleet-tagging-role'"
     community.aws.iam_role:
@@ -15,4 +12,4 @@
       managed_policies:
         - arn:aws:iam::aws:policy/service-role/AmazonEC2SpotFleetTaggingRole
     vars:
-      ansible_python_interpreter: "{{ ansible_python_interpreter }}"
+      ansible_python_interpreter: "/usr/bin/python3"
