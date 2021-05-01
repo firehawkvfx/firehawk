@@ -1,12 +1,9 @@
-# ansible-galaxy collection install community.aws
-
----
-- hosts: "{{ variable_host | default('localhost') }}"
+- hosts: localhost
   remote_user: "{{ variable_connect_as_user | default('ec2-user') }}"
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
   any_errors_fatal: true
-  
+
   vars:
   ansible_python_interpreter: "/usr/bin/python3"
 
