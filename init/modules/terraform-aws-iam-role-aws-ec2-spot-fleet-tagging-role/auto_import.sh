@@ -20,6 +20,6 @@ if [[ ! exit_status -eq 0 ]]; then # if not, then attempt import
     fi
 else
     echo
-    echo "Resource already exists, no auto-import required"
+    echo "Resource already exists, no auto-import required for: $resource_id"
     echo
 fi
