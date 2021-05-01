@@ -1,5 +1,6 @@
 - hosts: localhost
-  remote_user: "{{ variable_connect_as_user | default('ec2-user') }}"
+  connection: local
+  # remote_user: "{{ variable_connect_as_user | default('ec2-user') }}"
   gather_facts: "{{ variable_gather_facts | default('false') }}"
   become: true
   any_errors_fatal: true
