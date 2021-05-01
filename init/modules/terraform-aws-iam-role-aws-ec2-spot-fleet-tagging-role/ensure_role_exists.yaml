@@ -7,9 +7,10 @@
   become: true
   any_errors_fatal: true
 
-- name: "Create a role and attach a managed policy called 'aws-ec2-spot-fleet-tagging-role'"
-  community.aws.iam_role:
-    name: aws-ec2-spot-fleet-tagging-role
-    assume_role_policy_document: "{{ lookup('file','policy.json') }}"
-    managed_policies:
-      - arn:aws:iam::aws:policy/service-role/AmazonEC2SpotFleetTaggingRole
+  tasks:
+  - name: "Create a role and attach a managed policy called 'aws-ec2-spot-fleet-tagging-role'"
+    community.aws.iam_role:
+      name: aws-ec2-spot-fleet-tagging-role
+      assume_role_policy_document: "{{ lookup('file','policy.json') }}"
+      managed_policies:
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2SpotFleetTaggingRole
