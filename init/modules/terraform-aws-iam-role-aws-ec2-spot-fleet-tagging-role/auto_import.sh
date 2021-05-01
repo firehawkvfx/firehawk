@@ -9,7 +9,7 @@ if [[ ! exit_status -eq 0 ]]; then # if not, then attempt import
     output=$((terragrunt import $state_path $resource_id) 2>&1) && exit_status=0 || exit_status=$?
     if [[ ! exit_status -eq 0 ]]; then # if import failed, assume we will be able to create it with terraform
         echo
-        echo 'The iam role will be created by terraform'
+        echo "The resource $resource_id will be created by terraform"
         echo
     else
         echo "$output"
