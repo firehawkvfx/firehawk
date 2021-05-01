@@ -12,7 +12,7 @@
       assume_role_policy_document: "{{ lookup('file','policy.json') }}"
       managed_policies:
         - arn:aws:iam::aws:policy/service-role/AmazonEC2SpotFleetTaggingRole
-    vars:
-      ansible_python_interpreter: /usr/bin/python3
+    # vars:
+    #   ansible_python_interpreter: /usr/bin/python3
 
     
