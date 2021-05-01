@@ -1,4 +1,5 @@
 #!/bin/bash
+
 state_path='aws_iam_role.service_role'
 resource_id='aws-ec2-spot-fleet-tagging-role'
 
