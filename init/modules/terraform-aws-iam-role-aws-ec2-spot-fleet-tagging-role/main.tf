@@ -13,7 +13,7 @@ data "aws_iam_policy_document" "assume_role" { # Determines the services able to
     actions = ["sts:AssumeRole"]
     principals {
       type        = "Service"
-      identifiers = ["ec2.amazonaws.com"]
+      identifiers = ["spotfleet.amazonaws.com"]
     }
   }
 }
