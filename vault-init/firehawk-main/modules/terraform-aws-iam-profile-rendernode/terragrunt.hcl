@@ -9,5 +9,5 @@ locals {
 inputs = local.common_vars.inputs
 
 terraform {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/terraform-aws-iam-profile-rendernode?ref=config-deadline-spot"
+  source = "github.com/firehawkvfx/firehawk-main.git//modules/terraform-aws-iam-profile-rendernode?ref=v0.0.10"
 }
