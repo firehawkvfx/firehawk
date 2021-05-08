@@ -121,10 +121,10 @@ export PKR_VAR_packer_iam_profile_name="packer_instance_role_$TF_VAR_conflictkey
 
 ### Query existance of images required for deployment of instances.  Some parts of infrastructure can be deployed without images
 
-latest_ami=true # If using latest, this should only be allowed in a dev environment.  Otherwise, all images must be built from the same template
-if [[ "$PKR_VAR_resourcetier" != "dev" ]]; then
-  latest_ami=false
-fi
+latest_ami=false # If using latest, this should only be allowed in a dev environment.  Otherwise, all images must be built from the same template
+# if [[ "$PKR_VAR_resourcetier" != "dev" ]]; then
+#   latest_ami=false
+# fi
 # AMI query by commit - Vault and Consul Servers
 export TF_VAR_ami_commit_hash="$(cd $TF_VAR_firehawk_path/../packer-firehawk-amis/modules/firehawk-ami; git rev-parse HEAD)" 
 
