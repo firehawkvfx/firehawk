@@ -6,8 +6,6 @@ locals {
   common_vars = read_terragrunt_config(find_in_parent_folders("common.hcl"))
 }
 
-inputs = local.common_vars.inputs
-
 dependencies {
   paths = [ # not strictly dependencies, but if they fail, there is no point in continuing to deploy a vpc or anything else.
     "../terraform-aws-iam-profile-bastion", 
@@ -23,5 +21,12 @@ dependencies {
 terraform {
   source = "github.com/firehawkvfx/firehawk-main.git//modules/vpc?ref=v0.0.11"
 }
+
+inputs = merge(
+  local.common_vars.inputs,
+  {
+    "enable_nat_gateway" : false 
+  }
+)
 
 # skip = true
