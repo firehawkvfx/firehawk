@@ -16,7 +16,7 @@ dependencies {
 }
 
 terraform {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault?ref=update-vault"
+  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault?ref=v0.0.14"
 
   after_hook "after_hook_1" {
     commands = ["apply"]
