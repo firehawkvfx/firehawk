@@ -21,6 +21,12 @@ function options {
         echo "git status"
         git status
         ;;
+      --deinit-and-init-submodules)
+        echo "...deinit submodules"
+        git submodule deinit -f .
+        echo "...submodule update"
+        git submodule update --init --recursive
+        ;;
       --branch)
         branch="$2"
         shift
