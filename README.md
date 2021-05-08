@@ -134,11 +134,10 @@ Note: If in a dev environment and you need to update the repositories on each ru
 
 - On first use vault will not be initialized.  You can use a shell script to aid this:
 ```
-cd vault-init/firehawk-main/modules/vault
-./initialize-vault (provide a Vault Private IP address as an argument here)
+./init (provide a Vault Private IP address as an argument here)
 ```
 
-- It should return something like this to show success:
+- It should return something this in the log:
 ```
 Initializing vault...
 Recovery Key 1: 23l4jh13l5jh23ltjh25=
@@ -146,6 +145,10 @@ Recovery Key 1: 23l4jh13l5jh23ltjh25=
 Initial Root Token: s.lk235lj235k23j525jn
 
 Success! Vault is initialized
+```
+During init, it also created an admin token, and logged in with that token.  You can check this with:
+```
+vault token lookup
 ```
 
 - Store all sensitive output (The recovery key and root token) in an encrypted password manager for later use.
@@ -157,47 +160,28 @@ consul catalog services
 ```
 This should show 2 services: consul and vault.
 
-- login to vault on your current instance (using the root token when prompted).  This is the first and only time you will use your root token:
-```
-vault login
-```
-
-- Configure Vault with firehawk defaults (from directory vault-init/)
-```
-TF_VAR_configure_vault=true terragrunt apply
-```
-
-- Now you can create an admin token.  include any other policies you may need to create tokens for as an admin.
-```
-vault token create -policy=admins -policy=vpn_read_config -explicit-max-ttl=720h
-```
-
-- And login with the new admin token.
-```
-vault login
-```
-
 - Now ensure updates to the vault config will work with your admin token. 
 ```
-TF_VAR_configure_vault=true terragrunt apply
+TF_VAR_configure_vault=true terragrunt run-all apply
 ```
 
 Congratulations!  You now have a fully configured vault.
 
 ## Continue to deploy the rest of the resources from deploy/
 ```
-cd deploy
+cd ../deploy
 terragrunt run-all apply
 ```
 
 ## Acquire SSH certificates
 
-- In cloud 9, Add known hosts certificate, sign your cloud9 host Key, and sign your private key as with a valid SSH client certificate for other hosts.
+- In cloud 9, Add known hosts certificate, sign your cloud9 host Key, and sign your private key as with a valid SSH client certificate for other hosts.  This was already done during init, but its good practice to get familiar with how to sign an SSH cert.
 ```
-firehawk-main/modules/vault-configuration/modules/sign-ssh-key/sign_ssh_key.sh 
-firehawk-main/modules/vault-configuration/modules/sign-host-key/sign_host_key.sh
-firehawk-main/modules/vault-configuration/modules/known-hosts/known_hosts.sh
+firehawk-main/modules/vault-configuration/modules/sign-ssh-key/sign_ssh_key.sh # This signs your cloud9 private key, enabling it to be used to SSH to other hosts.
+firehawk-main/modules/vault-configuration/modules/sign-host-key/sign_host_key.sh # This signs a host key, so that it is recognised as part of the infra that other systems can SSH to.  If a host key is not signed, then we have a way of knowing if a host is not part of our infra.
+firehawk-main/modules/vault-configuration/modules/known-hosts/known_hosts.sh # This provides the public CA (Certificate Authority) cert to your host, allowing you to recognise what hosts you can SSH to safely.
 ```
+
 
 The remote host you intend to run the vpn on remotely will need to do the same.
 - In a terminal on your remote host that you wish to enable for SSH access, get your public key contents and copy it to the clipboard:
