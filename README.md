@@ -177,9 +177,9 @@ terragrunt run-all apply
 
 - In cloud 9, Add known hosts certificate, sign your cloud9 host Key, and sign your private key as with a valid SSH client certificate for other hosts.  This was already done during init, but its good practice to get familiar with how to sign an SSH cert.
 ```
-firehawk-main/modules/vault-configuration/modules/sign-ssh-key/sign_ssh_key.sh # This signs your cloud9 private key, enabling it to be used to SSH to other hosts.
-firehawk-main/modules/vault-configuration/modules/sign-host-key/sign_host_key.sh # This signs a host key, so that it is recognised as part of the infra that other systems can SSH to.  If a host key is not signed, then we have a way of knowing if a host is not part of our infra.
-firehawk-main/modules/vault-configuration/modules/known-hosts/known_hosts.sh # This provides the public CA (Certificate Authority) cert to your host, allowing you to recognise what hosts you can SSH to safely.
+firehawk-main/modules/vault-ssh/modules/sign-ssh-key/sign_ssh_key.sh # This signs your cloud9 private key, enabling it to be used to SSH to other hosts.
+firehawk-main/modules/vault-ssh/modules/sign-host-key/sign_host_key.sh # This signs a host key, so that it is recognised as part of the infra that other systems can SSH to.  If a host key is not signed, then we have a way of knowing if a host is not part of our infra.
+firehawk-main/modules/vault-ssh/modules/known-hosts/known_hosts.sh # This provides the public CA (Certificate Authority) cert to your host, allowing you to recognise what hosts you can SSH to safely.
 ```
 
 
@@ -191,24 +191,20 @@ cat ~/.ssh/id_rsa.pub
 
 - From cloud9, sign the public key, and provide a path to output the resulting certificates to.  eg:
 ```
-firehawk-main/modules/vault-configuration/modules/sign-ssh-key/sign_ssh_key.sh --public-key ~/.ssh/remote_host/id_rsa.pub
+firehawk-main/modules/vault-ssh/modules/sign-ssh-key/sign_ssh_key.sh --public-key ~/.ssh/remote_host/id_rsa.pub
 ```
 This will read the public key from the provided path if it exists, and if it doesn't you are prompted to paste in your public key contents.
 
-In the file browser at ~/.ssh/remote_host/ you should now see id_rsa-cert.pub, ssh_known_hosts, and trusted-user-ca-keys.pem
-- Right click on each of these files to download them
+In the file browser at ~/.ssh/remote_host/ you should now see id_rsa-cert.pub, trusted-user-ca-keys.pem, and ssh_known_hosts_fragment (in the directory above)
+- Right click on each of these files to download them, ensure they do not get renamed by your browser when you download.
 
 - If they are on your Mac or Linux desktop you can configure the downloaded files enabling your host as an SSH client with:
 ```
-firehawk-main/modules/vault-configuration/modules/sign-ssh-key/sign_ssh_key.sh --trusted-ca ~/Downloads/trusted-user-ca-keys.pem --cert ~/Downloads/id_rsa-cert.pub
+firehawk-main/modules/vault-ssh/modules/sign-ssh-key/sign_ssh_key.sh --trusted-ca ~/Downloads/trusted-user-ca-keys.pem --cert ~/Downloads/id_rsa-cert.pub
 ```
-- You will also need to configure the known hosts certificate.  This is for better protection against Man In The Middle attacks:
+- You will also need to configure the known hosts certificate.  This provides better protection against Man In The Middle (MITM) attacks:
 ```
-firehawk-main/modules/vault-configuration/modules/known-hosts/known_hosts.sh --external-domain ap-southeast-2.compute.amazonaws.com --trusted-ca ~/Downloads/trusted-user-ca-keys.pem --ssh-known-hosts ~/Downloads/ssh_known_hosts_fragment
-```
-- Test logging into your bastion host, providing your new cert, and private key.  There should be no warnings or errors:
-```
-ssh -i ~/.ssh/id_rsa-cert.pub -i ~/.ssh/id_rsa centos@< Bastion Public DNS Name >
+firehawk-main/modules/vault-ssh/modules/known-hosts/known_hosts.sh --external-domain ap-southeast-2.compute.amazonaws.com --trusted-ca ~/Downloads/trusted-user-ca-keys.pem --ssh-known-hosts ~/Downloads/ssh_known_hosts_fragment
 ```
 - Now you should be able to ssh into a private host, via public the bastion host, with the command provided at the end of running this in `deploy/`: `terragrunt run-all apply`  eg:
 ```
@@ -217,7 +213,12 @@ ssh -J centos@ec2-3-24-240-130.ap-southeast-2.compute.amazonaws.com centos@i-0d1
 This command will also forward the vault web interface which is found at: https://127.0.0.1:8200/ui/
 You will get SSL certificate warnings in your web browser, which for now will have to be ignored, but these can be resolved.
 
-- You shouldn't use a long lived admin token outside of the cloud 9 environment.  Create another token with a more reasonable period to login via the web browser:
+If this doesn't work, test logging into your bastion host, providing your new cert, and private key.  There should be no warnings or errors, otherwise you may have a problem configuring the CA on your system:
+```
+ssh -i ~/.ssh/id_rsa-cert.pub -i ~/.ssh/id_rsa centos@< Bastion Public DNS Name >
+```
+
+- You shouldn't use a long lived admin token outside of the cloud 9 environment.  Create another token with a more reasonable period to login via the cloud9 terminal in your browser:
 ```
 vault token create -policy=admins -explicit-max-ttl=18h
 ```
