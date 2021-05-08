@@ -89,7 +89,7 @@ terragrunt run-all apply
 - Install Consul and Vault client
 ```
 cd modules/vault
-./install-consul-vault-client --vault-module-version v0.13.11  --vault-version 1.5.5 --consul-module-version v0.8.0 --consul-version 1.8.4 --build amazonlinux2 --cert-file-path /home/ec2-user/.ssh/tls/ca.crt.pem
+./install-consul-vault-client --vault-module-version v0.15.1  --vault-version 1.6.1 --consul-module-version v0.8.0 --consul-version 1.9.2 --build amazonlinux2 --cert-file-path /home/ec2-user/.ssh/tls/ca.crt.pem
 ```
 
 ## Build Images
