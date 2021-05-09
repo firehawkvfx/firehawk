@@ -23,7 +23,7 @@ function options {
         ;;
       --deinit-and-init-submodules)
         echo "...deinit submodules"
-        git submodule deinit -f .
+        git submodule deinit -f $SCRIPTDIR
         echo "...submodule update"
         git submodule update --init --recursive
         ;;
