@@ -50,4 +50,7 @@ function options {
 options "$@"
 
 git pull origin $branch --recurse
+
+git submodule status --recursive
+
 cd $pwd
