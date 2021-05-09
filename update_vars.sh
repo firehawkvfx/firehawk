@@ -101,7 +101,7 @@ fi
 export PKR_VAR_resourcetier="$TF_VAR_resourcetier"
 export TF_VAR_pipelineid="0" # Uniquely name and tag the resources produced by a CI pipeline
 export TF_VAR_conflictkey="${TF_VAR_resourcetier}${TF_VAR_pipelineid}" # The conflict key is a unique identifier for a deployment.
-if [[ "$TF_VAR_resourcetier"=="dev" ]]; then
+if [[ "$TF_VAR_resourcetier" == "dev" ]]; then
   export TF_VAR_environment="dev"
 else
   export TF_VAR_environment="prod"

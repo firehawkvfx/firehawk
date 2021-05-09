@@ -8,24 +8,38 @@ pwd=$(pwd)
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
 cd $SCRIPTDIR
 
+function clearcache {
+  echo "...Clearing cache recursively"
+  find . -type d -name ".terragrunt-cache" -prune -exec rm -rf {} \;
+  echo "git status"
+  git status
+}
+
+function initsubmodules {
+  echo "...deinit submodules"
+  git submodule deinit -f $SCRIPTDIR
+  echo "...submodule update"
+  git submodule update --init --recursive
+}
+
 function options {
   branch=""
 
   while [[ $# > 0 ]]; do
     local key="$1"
+    clear_cache="false"
+    init_submodules="false"
 
     case "$key" in
       --clear-cache)
-        echo "...Clearing cache recursively"
-        find . -type d -name ".terragrunt-cache" -prune -exec rm -rf {} \;
-        echo "git status"
-        git status
+        clear_cache="true"
         ;;
-      --deinit-and-init-submodules)
-        echo "...deinit submodules"
-        git submodule deinit -f $SCRIPTDIR
-        echo "...submodule update"
-        git submodule update --init --recursive
+      --init-submodules)
+        init_submodules="true"
+        ;;
+      --init-all)
+        init_submodules="true"
+        clear_cache="true"
         ;;
       --branch)
         branch="$2"
@@ -45,12 +59,19 @@ function options {
     shift
   done
 
+  if [[ "$clear_cache" == "true" ]]; then
+    clearcache
+  fi
+  if [[ "$init_submodules" == "true" ]]; then
+    initsubmodules
+  fi
+
 }
 
 options "$@"
 
 git pull origin $branch --recurse
-
+echo "...Submodule status"
 git submodule status --recursive
 
 cd $pwd
