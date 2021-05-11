@@ -6,15 +6,15 @@ It uses AWS Cloud 9 as a seed instance to simplify launching the infrastructure.
 
 The primary reason for this project's creation is to provide low cost high powered cloud capability for Side FX Houdini users, and to provde a pathway for artists to roll their own cloud with any software they choose.
 
-Firehawk uses these multi cloud capable techologies:
-Hashicorp Vault - for dynamic secrets management, and authentication
-Hashicorp Terraform - for orchestration
-Hashicorp Consul - for DNS / service discovery
-Hashicorp Vagrant - for client side Open VPN deployment
-OpenVPN - for a private gateway between the client network and cloud.
-Redhat Ansible - For consistent provisioning in some packer templates (Multi cloud capable)
-Redhat Centos
-Canonical Ubuntu
+Firehawk uses these multi cloud capable techologies:  
+Hashicorp Vault - for dynamic secrets management, and authentication  
+Hashicorp Terraform - for orchestration  
+Hashicorp Consul - for DNS / service discovery  
+Hashicorp Vagrant - for client side Open VPN deployment  
+OpenVPN - for a private gateway between the client network and cloud.  
+Redhat Ansible - For consistent provisioning in some packer templates (Multi cloud capable)  
+Redhat Centos  
+Canonical Ubuntu  
 
 Current implementation uses AWS.
 
