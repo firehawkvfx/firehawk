@@ -27,9 +27,9 @@ if [[ $invalid -eq 1 ]]; then
     set_mac_value
 else
     echo "Result: ${get_parms}"
-    value=$(echo ${get_parms} | jq -r .Parameters.Value)
+    value=$(echo ${get_parms} | jq -r '.Parameters[0].Value')
 
-    length=$(echo ${get_parms} | jq -r '.Parameters.Value | length')
+    length=$(echo ${get_parms} | jq -r '.Parameters[0].Value | length')
 
     if [[ $length -eq 0 ]]; then
         echo "Parm exists but is empty: $parm_name"
