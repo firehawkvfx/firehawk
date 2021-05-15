@@ -29,18 +29,10 @@ else
     echo "Result: ${get_parms}"
     value=$(echo ${get_parms} | jq -r '.Parameters[0].Value')
 
-    length=$(echo ${get_parms} | jq -r '.Parameters[0].Value | length')
-
-    if [[ $length -eq 0 ]]; then
-        echo "Parm exists but is empty: $parm_name"
-        echo "...Initialising a value for: ${parm_name}"
-        set_mac_value
-    fi
-
     [[ "$value" =~ ^([a-fA-F0-9]{2}){5}[a-fA-F0-9]{2}$ ]] && valid="true" || valid="false"
     if [[ "$valid" == "false" ]]; then
         echo "ERROR: MAC Address was invalid: ${value}"
-        echo "If you set a custom value for the parm you should correctly format it (no :), or make it blank so this script can correctly init the value."
+        echo "If you set a custom value for the parm you should correctly format it (no :), or delete it so this script can correctly init the value."
         exit 1
     fi
 
