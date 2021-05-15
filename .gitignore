@@ -5,3 +5,4 @@ modules/terraform-aws-iam-profile-provisioner/s3-backend.tf
 modules/terraform-aws-iam-profile-vault-client/s3-backend.tf
 .DS_Store
 **/.terragrunt-cache/
+**/.terraform.lock.hcl

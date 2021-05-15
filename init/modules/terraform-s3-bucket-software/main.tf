@@ -14,12 +14,37 @@ locals {
 }
 
 # See https://blog.gruntwork.io/how-to-manage-terraform-state-28f5697e68fa for the origin of some of this code.
+variable "bucketlogs_bucket" {
+  description = "The bucket to store logs in"
+  type = string
+}
+
+#tfsec:ignore:AWS002
+resource "aws_s3_bucket" "log_bucket" {
+  bucket = var.bucketlogs_bucket
+  acl    = "log-delivery-write"
+  versioning {
+    enabled = true
+  }
+  # Enable server-side encryption by default
+  server_side_encryption_configuration {
+    rule {
+      apply_server_side_encryption_by_default {
+        sse_algorithm = "AES256"
+      }
+    }
+  }
+}
 
 resource "aws_s3_bucket" "shared_bucket" {
   bucket = local.bucket_name
   acl    = "private"
   versioning {
-    enabled = false
+    enabled = true
+  }
+  logging {
+    target_bucket = aws_s3_bucket.log_bucket.id
+    target_prefix = "log/bucket_${local.bucket_name}"
   }
   # Enable server-side encryption by default
   server_side_encryption_configuration {
