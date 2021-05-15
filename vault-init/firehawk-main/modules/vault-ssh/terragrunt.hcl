@@ -30,8 +30,20 @@ terraform {
     commands = ["apply"]
     execute  = ["bash", "modules/known-hosts/known_hosts.sh"]
   }
-  after_hook "after_hook_2" {
+  after_hook "after_hook_2" { # Sign the cloud 9 user ssh key
     commands = ["apply"]
     execute  = ["bash", "modules/sign-ssh-key/sign_ssh_key.sh"]
+  }
+  after_hook "after_hook_3" { # Retrieve remote user ssh key
+    commands = ["apply"]
+    execute  = ["bash", "modules/ssm-values/ssm_retrieve_public_key.sh"]
+  }
+  after_hook "after_hook_4" { # Sign the remote user ssh key
+    commands = ["apply"]
+    execute  = ["bash", "modules/sign-ssh-key/sign_ssh_key.sh", "--public-key",  "~/.ssh/remote_host/id_rsa.pub"]
+  }
+  after_hook "after_hook_5" { # post ssh cert as parameter
+    commands = ["apply"]
+    execute  = ["bash", "modules/ssm-values/ssm_post_public_cert.sh"]
   }
 }
