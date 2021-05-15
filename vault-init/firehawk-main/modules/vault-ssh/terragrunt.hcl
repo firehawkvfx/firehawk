@@ -40,7 +40,7 @@ terraform {
   }
   after_hook "after_hook_4" { # Sign the remote user ssh key
     commands = ["apply"]
-    execute  = ["bash", "modules/sign-ssh-key/sign_ssh_key.sh", "--public-key",  "~/.ssh/remote_host/id_rsa.pub"]
+    execute  = ["bash", "modules/sign-ssh-key/sign_ssh_key.sh", "--public-key",  "/home/ec2-user/.ssh/remote_host/id_rsa.pub"]
   }
   after_hook "after_hook_5" { # post ssh cert as parameter
     commands = ["apply"]
