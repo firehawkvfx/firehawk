@@ -12,16 +12,37 @@ parm_name="/firehawk/resourcetier/${TF_VAR_resourcetier}/onsite_private_vpn_mac"
 get_parms=$(aws ssm get-parameters --names ${parm_name})
 invalid=$(echo ${get_parms} | jq -r .'InvalidParameters | length')
 
+function set_mac_value {
+random_mac="$(${SCRIPTDIR}/random_mac_unicast.sh)"
+
+aws ssm put-parameter \
+    --name "${parm_name}" \
+    --type "String" \
+    --value "${random_mac}" \
+    --overwrite
+}
+
 if [[ $invalid -eq 1 ]]; then
     echo "...Initialising a value for: ${parm_name}"
-
-    random_mac="$(${SCRIPTDIR}/random_mac_unicast.sh)"
-
-    aws ssm put-parameter \
-        --name "${parm_name}" \
-        --type "String" \
-        --value "${random_mac}" \
-        --overwrite
+    set_mac_value
 else
     echo "Result: ${get_parms}"
+    value=$(echo ${get_parms} | jq -r .Parameters.Value)
+
+    length=$(echo ${get_parms} | jq -r '.Parameters.Value | length')
+
+    if [[ $length -eq 0 ]]; then
+        echo "Parm exists but is empty: $parm_name"
+        echo "...Initialising a value for: ${parm_name}"
+        set_mac_value
+    fi
+
+    [[ "$value" =~ ^([a-fA-F0-9]{2}){5}[a-fA-F0-9]{2}$ ]] && valid="true" || valid="false"
+    if [[ "$valid" == "false" ]]; then
+        echo "ERROR: MAC Address was invalid: ${value}"
+        echo "If you set a custom value for the parm you should correctly format it (no :), or make it blank so this script can correctly init the value."
+        exit 1
+    fi
+
+    echo "Success! MAC Address Value: ${value}"
 fi
