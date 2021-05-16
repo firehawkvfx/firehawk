@@ -69,6 +69,10 @@ The tag will define the environment in the shell.
 - Once connected, disable "AWS Managed Temporary Credentials" ( Select the Cloud9 Icon in the top left | AWS Settings )
 Your instance should now have permission to create and destroy any resource with Terraform.
 
+- Enusre the cloud9 instance has an adequately size EBS volume.  You can expand the volume by running:
+```
+deploy/firehawk-main/scripts/resize.sh
+```
 ## Create the Hashicorp Vault deployment
 
 - Clone the repo, and install required binaries and packages.
@@ -88,12 +92,6 @@ cd init
 terragrunt run-all apply
 ```
 
-- Install Consul and Vault client
-```
-cd modules/vault
-./install-consul-vault-client --vault-module-version v0.15.1  --vault-version 1.6.1 --consul-module-version v0.8.0 --consul-version 1.9.2 --build amazonlinux2 --cert-file-path /home/ec2-user/.ssh/tls/ca.crt.pem
-```
-
 ## Build Images
 
 For each client instance we build a base AMI to run OS updates (you only need to do this infrequently).  Then we build the complete AMI from the base AMI to speed up subsequent builds (the base AMI provides better reproducible results from ever changing software updates).
@@ -111,18 +109,13 @@ cd deploy/packer-firehawk-amis/modules/firehawk-ami
 ./build.sh
 ```
 
-- Check that you have images for the bastion, vault client, and vpn server in you AWS Management Console | Ami's.  If any are missing you may wish to try running the contents of the script manually.
-
-Note: The images here are built without a vault cluster, but there will be no verification of Consul DNS resolution. If you wish to test DNS during the image build and your vault cluster is already running, run these steps after vault is up and run:
-```
-export PKR_VAR_test_consul=true
-```
+- Check that you have images for the bastion, vault client, and vpn server in AWS Management Console | Ami's.  If any are missing you may wish to try running the contents of the script manually.
 
 ## First time Vault deployment
 
 The first time you launch Vault, it will not have any config stored in the S3 backend yet.  Once you have completed these steps you wont have to run them again.
 
-- Source vars again to pickup the AMI ID's
+- Source environment variables to pickup the AMI ID's. They should be listed as they are found:
 ```
 source ./update_vars.sh
 ```
@@ -132,14 +125,8 @@ source ./update_vars.sh
 cd vault-init
 terragrunt run-all apply
 ```
-Note: If in a dev environment and you need to update the repositories on each run, use `terragrunt run-all apply --terragrunt-source-update`
 
-- On first use vault will not be initialized.  You can use a shell script to aid this:
-```
-./init (provide a Vault Private IP address as an argument here)
-```
-
-- It should return something this in the log:
+- After around 10 minutes, we should see this in the log:
 ```
 Initializing vault...
 Recovery Key 1: 23l4jh13l5jh23ltjh25=
@@ -153,7 +140,18 @@ During init, it also created an admin token, and logged in with that token.  You
 vault token lookup
 ```
 
-- Store all sensitive output (The recovery key and root token) in an encrypted password manager for later use.
+- Store the root token and recovery key in an encrypted password manager.
+
+
+- Next we can use terraform to configure vault...  You can use a shell script to aid this:
+```
+./init
+```
+
+- After this step you should now be using an admin token
+
+
+- Store all the above mentioned sensitive output (The recovery key, root token, and admin) in an encrypted password manager for later use.
 
 - Ensure you are joined to the consul cluster:
 ```
