@@ -50,9 +50,11 @@ This deployment uses Cloud 9 to simplify management of AWS Secret Keys.  You wil
 `Create a new no-ingress EC2 instance for environment (access via Systems Manager)`
 This will create a Cloud 9 instance with no inbound access.
 
-- Ensure the EBS volume size is 20GB.  If you need to expand the volume more later you can use firehawk-main/scripts/resize.sh
+- Ensure the EBS volume size is 25GB.  If you need to expand the volume more later you can use firehawk-main/scripts/resize.sh
 
-- Ensure the instance type is the recommended type for production (m5.large)
+- Ensure the instance type is at least t3.large (under other instance types)
+
+- Select `Amazon Linux 2` platform.
 
 - Ensure you add tags:
 ```
@@ -72,7 +74,7 @@ Your instance should now have permission to create and destroy any resource with
 - Clone the repo, and install required binaries and packages.
 ```
 git clone --recurse-submodules -j 8 https://github.com/firehawkvfx/firehawk-main.git
-cd firehawk-main; ./install_packages.sh
+cd firehawk; ./install-packages
 ```
 
 - Initialise the environment variables to spin up the resources.
