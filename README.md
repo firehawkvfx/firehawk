@@ -173,9 +173,31 @@ cd ../deploy
 terragrunt run-all apply
 ```
 
-## Acquire SSH certificates
+## Acquire SSH Certificates (Automated)
 
-- In cloud 9, Add known hosts certificate, sign your cloud9 host Key, and sign your private key as with a valid SSH client certificate for other hosts.  This was already done during init, but its good practice to get familiar with how to sign an SSH cert.
+This workflow is currently tested on MacOS it should also be supported on Linux but is unverified.
+
+When the vault-ssh module is applied by Terraform, it automatically signs the Cloud9 user's SSH key.  It also retrieves your remote onsite user's public key from an SSM parameter which you will have already set on the cloudformation parameter template.  It signs it and stores the public certificate as an SSM parameter value.  This can be retrieved with AWS credentials and configure for your onsite host.
+
+- Generate a set of AWS credentials with vault on the cloud9 host:
+```
+vault read aws/creds/aws-creds-ssm-parameters-ssh-certs
+```
+
+- With the CLI installed on your onsite host, ensure you have installed the AWS CLI, and configure these credentials, along with your region:
+```
+aws configure 
+```
+- You will now be able to read parameters, for example:
+```
+aws ssm get-parameters --names /firehawk/resourcetier/dev/trusted_ca
+```
+
+
+
+## Acquire SSH Certificates (Manual)
+
+- In cloud 9, Add known hosts certificate, sign your cloud9 host Key, and sign your private key as with a valid SSH client certificate for other hosts.  This was already done during init, but its fine to get familiar with how to automate signing an SSH cert.
 ```
 firehawk-main/modules/vault-ssh/modules/sign-ssh-key/sign_ssh_key.sh # This signs your cloud9 private key, enabling it to be used to SSH to other hosts.
 firehawk-main/modules/vault-ssh/modules/sign-host-key/sign_host_key.sh # This signs a host key, so that it is recognised as part of the infra that other systems can SSH to.  If a host key is not signed, then we have a way of knowing if a host is not part of our infra.
