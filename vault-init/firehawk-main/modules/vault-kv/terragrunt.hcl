@@ -24,5 +24,5 @@ dependencies {
 skip = local.skip
 
 terraform {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-kv?ref=v0.0.16"
+  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-kv?ref=v0.0.19"
 }

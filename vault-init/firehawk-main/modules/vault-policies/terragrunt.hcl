@@ -19,7 +19,7 @@ dependencies {
 skip = local.skip
 
 terraform {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-policies?ref=v0.0.17"
+  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-policies?ref=v0.0.19"
 
   after_hook "after_hook_1" {
     commands = ["apply"]
