@@ -1,3 +1,4 @@
+#!/bin/bash
 
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
 cd $SCRIPTDIR
@@ -15,8 +16,8 @@ wget https://releases.hashicorp.com/terraform/0.13.5/terraform_0.13.5_linux_amd6
 sudo unzip /tmp/terraform_0.13.5_linux_amd64.zip -d /tmp/
 sudo mv /tmp/terraform /usr/local/bin/.
 
-wget https://releases.hashicorp.com/packer/1.6.4/packer_1.6.4_linux_amd64.zip -P /tmp/ # Get Packer
-sudo unzip /tmp/packer_1.6.4_linux_amd64.zip -d /tmp/
+wget https://releases.hashicorp.com/packer/1.7.2/packer_1.7.2_linux_amd64.zip -P /tmp/ # Get Packer
+sudo unzip /tmp/packer_1.7.2_linux_amd64.zip -d /tmp/
 sudo mv /tmp/packer /usr/local/bin/.
 
 wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.28.16/terragrunt_linux_386 -P /tmp/ # Get Terragrunt
