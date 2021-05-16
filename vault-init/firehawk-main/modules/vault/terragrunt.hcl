@@ -16,7 +16,7 @@ dependencies {
 }
 
 terraform {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault?ref=v0.0.14"
+  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault?ref=sign-ssm"
 
   after_hook "after_hook_1" {
     commands = ["apply"]
