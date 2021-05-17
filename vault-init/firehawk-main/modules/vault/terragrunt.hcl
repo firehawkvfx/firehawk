@@ -16,7 +16,7 @@ dependencies {
 }
 
 terraform {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault?ref=bug-consul-init"
+  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault?ref=merge-bug-consul-init-and-bump-versions"
 
   after_hook "after_hook_1" {
     commands = ["apply"]
