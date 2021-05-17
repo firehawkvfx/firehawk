@@ -50,9 +50,7 @@ This deployment uses Cloud 9 to simplify management of AWS Secret Keys.  You wil
 `Create a new no-ingress EC2 instance for environment (access via Systems Manager)`
 This will create a Cloud 9 instance with no inbound access.
 
-- Ensure the EBS volume size is 25GB.  If you need to expand the volume more later you can use firehawk-main/scripts/resize.sh
-
-- Ensure the instance type is at least t3.large (under other instance types)
+- Ensure the instance type is at least m5.large (under other instance types)
 
 - Select `Amazon Linux 2` platform.
 
@@ -64,20 +62,16 @@ The tag will define the environment in the shell.
 
 - Once up, in AWS Management Console | EC2 : Select the instance, and change the instance profile to your `Cloud9CustomAdminRoleFirehawk`
 
-- Ensure you can connect to the IDE through AWS Management Console | Cloud9.
+- Connect to the session through AWS Management Console | Cloud9.
 
-- Once connected, disable "AWS Managed Temporary Credentials" ( Select the Cloud9 Icon in the top left | AWS Settings )
+- When connected, disable "AWS Managed Temporary Credentials" ( Select the Cloud9 Icon in the top left | AWS Settings )
 Your instance should now have permission to create and destroy any resource with Terraform.
 
-- Enusre the cloud9 instance has an adequately size EBS volume.  You can expand the volume by running:
-```
-deploy/firehawk-main/scripts/resize.sh
-```
 ## Create the Hashicorp Vault deployment
 
 - Clone the repo, and install required binaries and packages.
 ```
-git clone --recurse-submodules -j 8 https://github.com/firehawkvfx/firehawk-main.git
+git clone --recurse https://github.com/firehawkvfx/firehawk-main.git
 cd firehawk; ./install-packages
 ```
 
@@ -91,6 +85,7 @@ source ./update_vars.sh
 cd init
 terragrunt run-all apply
 ```
+- Ensure you reboot the instance after this point, or DNS for consul will not function properly (dnsmasq requires this).
 
 ## Build Images
 
@@ -120,10 +115,10 @@ The first time you launch Vault, it will not have any config stored in the S3 ba
 source ./update_vars.sh
 ```
 
-- Deploy Vault.  
+- Deploy Vault.
 ```
 cd vault-init
-terragrunt run-all apply
+./init
 ```
 
 - After around 10 minutes, we should see this in the log:
@@ -140,7 +135,7 @@ During init, it also created an admin token, and logged in with that token.  You
 vault token lookup
 ```
 
-- Store the root token and recovery key in an encrypted password manager.
+- Store the root token and recovery key in an encrypted password manager.  If you have problems with any steps in vault-init, and you wish to start from scratch, you can use the ./destroy script to start over. You may also delete the contents of the S3 bucket storing the vault data for a clean install.
 
 
 - Next we can use terraform to configure vault...  You can use a shell script to aid this:
