@@ -14,7 +14,7 @@ set -e
 # ```
 # aws ssm get-parameters --names /firehawk/resourcetier/dev/trusted_ca
 # ```
-printf "\nRemote Client Auth Instructions:"
+printf "\nRemote Client Auth Instructions (Required only once per Vault install):"
 printf "\nGenerate a set of AWS credentials for your remote client on the cloud9 host:"
 printf "\nvault read aws/creds/aws-creds-ssm-parameters-ssh-certs"
 printf "\n"
@@ -37,8 +37,9 @@ bastion_public_dns=$(terragrunt output public_dns)
 
 cd $TF_VAR_firehawk_path/modules/terraform-aws-vault-client
 vault_client_consul_private_dns=$(terragrunt output consul_private_dns)
-
-printf "\nA private Vault client can be used to forward the Vault UI to your remote onsite web browser (address https://127.0.0.1:8200/ui) via the bastion by forwarding the web service. From your remote host, enable forwarding with:\n"
+printf "\n"
+printf "\nSSH and remote Vault UI Instructions (Required on each deploy):"
+printf "\nA private Vault client can be used to forward the Vault UI to your remote onsite web browser (address https://127.0.0.1:8200/ui) via the bastion by forwarding the web service. From your remote host, enable forwarding with:"
 printf "\nssh -J centos@${bastion_public_dns} centos@${vault_client_consul_private_dns} -L 8200:vault.service.consul:8200\n"
 printf "\nYou can create a shorter lived token to use the web UI remotely:\n"
 printf "vault token create -policy=admins -explicit-max-ttl=18h\n"
