@@ -61,7 +61,7 @@ printf "\n"
 printf "\nDeadline:"
 printf "\nWith a VPN, you can now install the deadline client (download the same installer used from your software s3 bucket)."
 printf "\nWhen installing, you will use an RCS connection to 10.1.128.12 (dev), and you will set the path to your certificate."
-printf "\nYou will have the client certificate located in your home dir: ~/.ssh/Deadline10RemoteClient.pfx"
+printf "\nDuring the VPN auth process, you will already have the client certificate located in your home dir: ~/.ssh/Deadline10RemoteClient.pfx"
 printf "\n"
 # - Ensure SSH forwarding is functional with the result command given to you by `./wake`:
 # ```
