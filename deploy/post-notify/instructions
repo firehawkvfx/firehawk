@@ -15,10 +15,10 @@ set -e
 # aws ssm get-parameters --names /firehawk/resourcetier/dev/trusted_ca
 # ```
 printf "\nRemote Client Auth Instructions:"
-printf "\nGenerate a set of AWS credentials for your remote client on the cloud9 host:\n"
+printf "\nGenerate a set of AWS credentials for your remote client on the cloud9 host:"
 printf "\nvault read aws/creds/aws-creds-ssm-parameters-ssh-certs"
 printf "\n"
-printf "\nWith the CLI installed on your onsite host, ensure you have installed the AWS CLI, and configure these credentials, along with your region:\n"
+printf "\nWith the CLI installed on your onsite host, ensure you have installed the AWS CLI, and configure these credentials for use, along with your region:"
 printf "\naws configure"
 printf "\n"
 printf "\nYou will now be able to read parameters, for example:"
@@ -27,13 +27,10 @@ printf "\n"
 printf "\nConfigure a your trusted known hosts Certificate Authority and specify an expected external DNS name"
 printf "\nfirehawk/deploy/firehawk-main/modules/vault-ssh/modules/known-hosts/known_hosts.sh --ssm --external-domain ap-southeast-2.compute.amazonaws.com"
 printf "\n"
-printf "\nConfigure your signed public key with Vault (This should have been the same public key you pasted into the cloudformation template)"
-printf "\n"
+printf "\nConfigure your signed public key with Vault (This should have been the same public key you pasted into the cloudformation template):"
 printf "\nfirehawk/deploy/firehawk-main/modules/vault-ssh/modules/sign-ssh-key/sign_ssh_key.sh  --ssm"
-
 printf "\n"
-printf "\nYou will now be able to SSH into your private network."
-printf "\n"
+printf "\nYou will now be able to SSH into your cloud private network using your remote host.  This will allow further automation."
 
 cd $TF_VAR_firehawk_path/modules/terraform-aws-bastion
 bastion_public_dns=$(terragrunt output public_dns)
@@ -45,6 +42,14 @@ printf "\nA private Vault client can be used to forward the Vault UI to your rem
 printf "\nssh -J centos@${bastion_public_dns} centos@${vault_client_consul_private_dns} -L 8200:vault.service.consul:8200\n"
 printf "\nYou can create a shorter lived token to use the web UI remotely:\n"
 printf "vault token create -policy=admins -explicit-max-ttl=18h\n"
+printf "\n"
+printf "\nUsing that token, login to the UI with your web browser at https://127.0.0.1:8200/ui"
+printf "\n"
+printf "\nVPN Instructions:"
+printf "\nIn the web ui, locate the VPN password at: dev/network/openvpn_admin_pw"
+printf "\nStartup the VPN for your remote onsite host:"
+printf "\nfirehawk/deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client/wake dev centos@${bastion_public_dns} centos@${vault_client_consul_private_dns}"
+printf "\nFollow the steps provided to create a token to retrieve the VPN authentication certificates."
 
 # - Ensure SSH forwarding is functional with the result command given to you by `./wake`:
 # ```
