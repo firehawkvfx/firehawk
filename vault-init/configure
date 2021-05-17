@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# Configure will setup vault roles for general use with Firehawk.
+TF_VAR_configure_vault=true terragrunt run-all apply --terragrunt-source-update

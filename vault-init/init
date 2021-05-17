@@ -1,4 +1,4 @@
 #!/bin/bash
 
-# init should only restore paths to default values.
-TF_VAR_configure_vault=true terragrunt run-all apply --terragrunt-source-update
+# init will deploy vault only and ensure it is initialised.
+terragrunt run-all apply --terragrunt-source-update

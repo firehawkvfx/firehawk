@@ -24,7 +24,7 @@ dependencies {
 skip = local.skip
 
 terraform {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-ssh?ref=v0.0.19"
+  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-ssh?ref=bug-consul-init"
   # Configure this host for SSH Certificates
   after_hook "after_hook_1" {
     commands = ["apply"]
