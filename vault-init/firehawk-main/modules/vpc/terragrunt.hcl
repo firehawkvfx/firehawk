@@ -21,7 +21,7 @@ dependencies {
 }
 
 terraform {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/vpc?ref=v0.0.19"
+  source = "github.com/firehawkvfx/firehawk-main.git//modules/vpc?ref=v0.0.20"
 }
 
 # skip = true

@@ -25,5 +25,5 @@ dependencies {
 skip = true
 
 terraform {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-userpass?ref=v0.0.19"
+  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-userpass?ref=v0.0.20"
 }

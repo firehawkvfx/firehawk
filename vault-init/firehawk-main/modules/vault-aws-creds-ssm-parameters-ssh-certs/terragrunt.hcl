@@ -24,5 +24,5 @@ dependencies {
 skip = local.skip
 
 terraform {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-aws-creds-ssm-parameters-ssh-certs?ref=v0.0.19"
+  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-aws-creds-ssm-parameters-ssh-certs?ref=v0.0.20"
 }
