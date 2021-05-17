@@ -135,12 +135,12 @@ During init, it also created an admin token, and logged in with that token.  You
 vault token lookup
 ```
 
-- Store the root token and recovery key in an encrypted password manager.  If you have problems with any steps in vault-init, and you wish to start from scratch, you can use the ./destroy script to start over. You may also delete the contents of the S3 bucket storing the vault data for a clean install.
+- Store the root token, admin token, and recovery key in an encrypted password manager.  If you have problems with any steps in vault-init, and you wish to start from scratch, you can use the ./destroy script to start over. You may also delete the contents of the S3 bucket storing the vault data for a clean install.
 
 
 - Next we can use terraform to configure vault...  You can use a shell script to aid this:
 ```
-./init
+./configure
 ```
 
 - After this step you should now be using an admin token
