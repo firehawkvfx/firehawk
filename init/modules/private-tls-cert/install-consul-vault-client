@@ -148,6 +148,9 @@ function run {
     if [[ "$build" == "ubuntu16" ]] || [[ "$build" == "amazonlinux2" ]]; then
         /tmp/terraform-aws-consul/modules/install-dnsmasq/install-dnsmasq
         sudo service dnsmasq restart # starting the service is required for it to function on first boot.
+        log ""
+        log "WARNING: Ensure you reboot this instance before attempting to use consul"
+        log ""
     elif [[ "$build" == "ubuntu18" ]]; then
         /tmp/terraform-aws-consul/modules/setup-systemd-resolved/setup-systemd-resolved
     else
