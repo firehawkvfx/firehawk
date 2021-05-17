@@ -188,8 +188,6 @@ aws configure
 aws ssm get-parameters --names /firehawk/resourcetier/dev/trusted_ca
 ```
 
-
-
 ## Acquire SSH Certificates (Manual)
 
 - In cloud 9, Add known hosts certificate, sign your cloud9 host Key, and sign your private key as with a valid SSH client certificate for other hosts.  This was already done during init, but its fine to get familiar with how to automate signing an SSH cert.
