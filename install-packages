@@ -8,11 +8,12 @@ SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # 
 cd $SCRIPTDIR
 
 sudo yum install -y git
-sudo yum install -y python python3.7 python3-pip
+sudo yum install -y python python3.7 python3-pip # for a specific python version - https://realpython.com/intro-to-pyenv/
 python3 -m pip install --user --upgrade pip # Do not run pip as sudo. Do this instead.
 python3 -m pip install ansible boto3 botocore
-# ssh-keyscan -H localhost >> ~/.ssh/known_hosts # accept this hosts key for ansible
 
+# sudo yum install -y python-devel # for a specific ansible vesion - https://stackoverflow.com/questions/40661622/how-to-install-older-package-of-ansible
+# python3 -m pip ansible==2.1.0.0 
 sudo yum install -y jq
 mkdir -p $SCRIPTDIR/tmp
 
