@@ -259,6 +259,7 @@ function export_vars {
 
 function options { # Not all defaults are available as args, however the script has been built to easily alter this.
   local latest_ami="$DEFAULT_LATEST_AMI"
+  local run="true"
 
   while [[ $# > 0 ]]; do
     local key="$1"
@@ -268,18 +269,19 @@ function options { # Not all defaults are available as args, however the script 
         ;;
       --help)
         print_usage
-        exit
+        run="false"
         ;;
       *)
         log_error "Unrecognized argument: $key"
         print_usage
-        exit 1
+        run="false"
         ;;
     esac
     shift
   done
-
-  export_vars "$latest_ami"
+  if [[ "$run" == "true" ]];
+    export_vars "$latest_ami"
+  fi
 }
 
 options "$@"
