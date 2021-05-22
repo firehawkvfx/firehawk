@@ -1,7 +1,8 @@
 #!/bin/bash
 
 echo
-echo "Ensure you place the zip file containing all the certs you wish to configure for the UBL license forwarder."
+echo "Ensure you place the zip file containing all the certs you wish to configure for the UBL license forwarder in the bucket path:"
+echo "ublcertszip/"
 echo "This file is provided by Thinkbox when you purchase UBL credits for the first time for any software.  If you purchase credits for new software for the first time you must update this file."
 echo
 
