@@ -279,7 +279,7 @@ function options { # Not all defaults are available as args, however the script 
     esac
     shift
   done
-  if [[ "$run" == "true" ]];
+  if [[ "$run" == "true" ]]; then
     export_vars "$latest_ami"
   fi
 }
