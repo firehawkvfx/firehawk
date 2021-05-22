@@ -13,3 +13,10 @@ dependencies {
     "../terraform-aws-iam-profile-deadline-db"
     ]
 }
+
+terraform {
+  after_hook "after_hook_1" {
+    commands = ["apply"]
+    execute  = ["bash", "instructions"]
+  }
+}
