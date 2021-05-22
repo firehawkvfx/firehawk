@@ -7,7 +7,10 @@ locals {
 }
 
 inputs = local.common_vars.inputs
+prevent_destroy = true
 
-terraform {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/terraform-aws-iam-profile-deadline-db?ref=v0.0.20"
+dependencies {
+  paths = [
+    "../terraform-aws-iam-profile-deadline-db"
+    ]
 }
