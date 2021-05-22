@@ -22,3 +22,10 @@ terraform { # After SSL certs have been generated, isntall them to the current i
       ]
   }
 }
+
+terraform {
+  after_hook "after_hook_1" {
+    commands = ["apply"]
+    execute  = ["bash", "instructions"]
+  }
+}
