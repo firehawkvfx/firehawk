@@ -9,7 +9,7 @@ data "aws_caller_identity" "current" {}
 data "aws_canonical_user_id" "current" {}
 
 locals {
-  bucket_name = "deadline-license-forwarder.${var.bucket_extension}"
+  bucket_name = "ublcerts.${var.bucket_extension}"
   common_tags = {
     environment  = var.environment
     resourcetier = var.resourcetier
