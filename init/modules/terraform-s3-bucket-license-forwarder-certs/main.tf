@@ -68,17 +68,17 @@ data "terraform_remote_state" "deadline_db_profile" { # The deadline DB instance
   }
 }
 
-# module "iam_policies_s3_license_forwarder_certs_bucket" { # policy for the bucket allowing access for the role
-#   source = "../../../deploy/firehawk-main/modules/aws-iam-policies-s3-license-forwarder-certs-bucket"
-#   bucket_name = local.bucket_name
-#   multi_account_role_arn = data.terraform_remote_state.deadline_db_profile.outputs.instance_role_arn
-# }
+module "iam_policies_s3_license_forwarder_certs_bucket" { # policy for the bucket allowing access for the role
+  source = "../../../deploy/firehawk-main/modules/aws-iam-policies-s3-license-forwarder-certs-bucket"
+  bucket_name = local.bucket_name
+  multi_account_role_arn = data.terraform_remote_state.deadline_db_profile.outputs.instance_role_arn
+}
 
-# module "iam_policies_s3_multi_account_role" { # Define policy for the role allowing access to the bucket.
-#   source = "../../../deploy/firehawk-main/modules/aws-iam-policies-s3-multi-account-role"
-#   depends_on = [aws_s3_bucket.license_forwarder_cert_bucket]
-#   name = "MultiAccountRolePolicyS3BucketDeadlineLicenseForwarderAccess_${var.conflictkey}"
-#   iam_role_id = data.terraform_remote_state.deadline_db_profile.outputs.instance_role_id
-#   shared_bucket_arn = aws_s3_bucket.license_forwarder_cert_bucket.arn
-# }
+module "iam_policies_s3_multi_account_role" { # Define policy for the role allowing access to the bucket.
+  source = "../../../deploy/firehawk-main/modules/aws-iam-policies-s3-multi-account-role"
+  depends_on = [aws_s3_bucket.license_forwarder_cert_bucket]
+  name = "MultiAccountRolePolicyS3BucketDeadlineLicenseForwarderAccess_${var.conflictkey}"
+  iam_role_id = data.terraform_remote_state.deadline_db_profile.outputs.instance_role_id
+  shared_bucket_arn = aws_s3_bucket.license_forwarder_cert_bucket.arn
+}
 
