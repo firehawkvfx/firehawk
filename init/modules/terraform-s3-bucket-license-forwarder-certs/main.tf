@@ -49,6 +49,13 @@ resource "aws_s3_bucket" "license_forwarder_cert_bucket" {
   )
 }
 
+resource "aws_s3_bucket_object" "base_folder" {
+  bucket  = aws_s3_bucket.license_forwarder_cert_bucket.id
+  acl     = "private"
+  key     =  "ublcertszip/"
+  content_type = "application/x-directory"
+}
+
 resource "aws_s3_bucket_public_access_block" "backend" { # https://medium.com/dnx-labs/terraform-remote-states-in-s3-d74edd24a2c4
   depends_on = [aws_s3_bucket.license_forwarder_cert_bucket]
   bucket = aws_s3_bucket.license_forwarder_cert_bucket.id
