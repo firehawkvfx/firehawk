@@ -7,7 +7,6 @@ locals {
 }
 
 inputs = local.common_vars.inputs
-prevent_destroy = true
 
 dependencies {
   paths = [
