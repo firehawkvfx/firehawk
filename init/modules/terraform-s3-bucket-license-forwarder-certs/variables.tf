@@ -21,3 +21,8 @@ variable "conflictkey" {
     description = "The conflictkey is a unique name for each deployement usuallly consisting of the resourcetier and the pipeid."
     type = string
 }
+
+variable "bucket_extension_vault" {
+    description = "The bucket extension where the terraform remote state resides"
+    type = string
+}
