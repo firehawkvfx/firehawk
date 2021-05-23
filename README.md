@@ -87,6 +87,7 @@ terragrunt run-all apply
 ```
 - Ensure you reboot the instance after this point, or DNS for consul will not function properly (dnsmasq requires this).
 
+- If you have Deadline Certificates (required for third party / Houdini UBL) you should go to the ublcerts bucket just created and ensure the zip file containing the certs exists at `ublcertszip/certs.zip` in the S3 Bucket.  The Deadline DB / License forwarder has access to this bucket to install the certificates on deployment.
 ## Build Images
 
 For each client instance we build a base AMI to run OS updates (you only need to do this infrequently).  Then we build the complete AMI from the base AMI to speed up subsequent builds (the base AMI provides better reproducible results from ever changing software updates).
