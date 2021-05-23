@@ -260,6 +260,7 @@ function export_vars {
 function options { # Not all defaults are available as args, however the script has been built to easily alter this.
   local latest_ami="$DEFAULT_LATEST_AMI"
   local run="true"
+  local sub_script="true"
 
   while [[ $# > 0 ]]; do
     local key="$1"
@@ -270,6 +271,9 @@ function options { # Not all defaults are available as args, however the script 
       --help)
         print_usage
         run="false"
+        ;;
+      --sub-script)
+        sub_script="true"
         ;;
       *)
         log_error "Unrecognized argument: $key"
