@@ -14,7 +14,7 @@ function print_usage {
   echo
   echo "Options:"
   echo
-  echo -e "  --latest-ami\t\tThis will find the latest AMI available, ignoring the commit hash in the packer-firehawk-amis module."
+  echo -e "  --latest-amis\t\tThis will find the latest AMI available, ignoring the commit hash in the packer-firehawk-amis module."
   echo
   echo "Example:"
   echo
@@ -175,7 +175,7 @@ function export_vars {
     export TF_VAR_workstation_amazonlinux2_nicedcv_ami_id=$(retrieve_ami $latest_ami $ami_role $TF_VAR_ami_commit_hash)
     warn_if_invalid "$ami_role" "$TF_VAR_workstation_amazonlinux2_nicedcv_ami_id" "TF_VAR_workstation_amazonlinux2_nicedcv_ami_id"
   fi
-  
+
   # Terraform Vars
   export TF_VAR_general_use_ssh_key="$HOME/.ssh/id_rsa" # For debugging deployment of most resources- not for production use.
   export TF_VAR_aws_private_key_path="$TF_VAR_general_use_ssh_key"
@@ -269,7 +269,7 @@ function options { # Not all defaults are available as args, however the script 
   while [[ $# > 0 ]]; do
     local key="$1"
     case "$key" in
-      --latest-ami)
+      --latest-amis)
         latest_ami="true"
         ;;
       --skip-find-amis)
