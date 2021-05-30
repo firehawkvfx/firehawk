@@ -3,21 +3,18 @@ variable "share_with_arns" {
   type        = list(string)
   default     = []
 }
-
 variable "bucketlogs_bucket" {
   description = "The bucket to store logs in"
   type        = string
 }
-
 variable "fsx_bucket" {
   description = "The S3 Bucket to persist installation and software to"
   type        = string
 }
-
 variable "role_name" {
   description = "Name of the role that multiple accounts can assume for access to the bucket."
   type        = string
-  default     = "multi_account_role"
+  default     = "multi_account_role_s3_fsx"
 }
 variable "common_tags" {
   description = "Common tags for all resources in a deployment run."

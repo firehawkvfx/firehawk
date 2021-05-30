@@ -27,7 +27,6 @@ variable "conflictkey" {
   description = "The conflictkey is a unique name for each deployement usuallly consisting of the resourcetier and the pipeid."
   type        = string
 }
-
 variable "firehawk_path" {
   description = "The full path to firehawk-main"
   type        = string
