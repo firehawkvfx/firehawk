@@ -9,7 +9,7 @@ variable "bucketlogs_bucket" {
   type        = string
 }
 
-variable "installers_bucket" {
+variable "fsx_bucket" {
   description = "The S3 Bucket to persist installation and software to"
   type        = string
 }

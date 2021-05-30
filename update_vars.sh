@@ -241,6 +241,7 @@ function export_vars {
     
     export TF_VAR_bucket_extension="$TF_VAR_resourcetier.$TF_VAR_global_bucket_extension"
     export TF_VAR_bucketlogs_bucket="bucketlogs.$TF_VAR_resourcetier.$TF_VAR_global_bucket_extension"
+    export TF_VAR_fsx_bucket="fsx.$TF_VAR_resourcetier.$TF_VAR_global_bucket_extension"
     export TF_VAR_installers_bucket="software.$TF_VAR_resourcetier.$TF_VAR_global_bucket_extension" # All installers should be kept in the same bucket.  If a main account is present, packer builds should trigger from the main account.
     export TF_VAR_bucket_extension_vault="$TF_VAR_resourcetier.$TF_VAR_global_bucket_extension" # WARNING: if vault is deployed in a seperate tier for use, then this will probably need to become an SSM driven parameter from the template 
     # export PKR_VAR_installers_bucket="$TF_VAR_installers_bucket"
