@@ -6,7 +6,7 @@ data "aws_caller_identity" "current" {}
 locals {
   common_tags     = merge(var.common_tags, { role = "shared bucket" })
   share_with_arns = concat([data.aws_caller_identity.current.account_id], var.share_with_arns)
-  bucket_name     = var.fsx_bucket
+  bucket_name     = var.rendering_bucket
 }
 
 # See https://blog.gruntwork.io/how-to-manage-terraform-state-28f5697e68fa for the origin of some of this code.
