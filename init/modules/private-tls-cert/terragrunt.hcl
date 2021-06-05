@@ -21,4 +21,8 @@ terraform { # After SSL certs have been generated, isntall them to the current i
       "--cert-file-path", local.ca_public_key_file_path
       ]
   }
+  after_hook "after_hook_2" {
+    commands = ["apply"]
+    execute  = ["bash", "instructions"]
+  }
 }
