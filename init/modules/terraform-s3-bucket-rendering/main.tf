@@ -65,8 +65,9 @@ data "aws_iam_policy_document" "multi_account_assume_role_policy" {
 # Define policy for the bucket restricting access to the role
 module "iam_policies_s3_shared_bucket" {
   source                 = "../../../deploy/firehawk-main/modules/aws-iam-policies-s3-shared-bucket"
-  depends_on             = [aws_s3_bucket.shared_bucket]
-  bucket_name            = local.bucket_name
+  depends_on             = [ aws_s3_bucket.shared_bucket ]
+  bucket_id            = aws_s3_bucket.shared_bucket.id
+  bucket_arn            = aws_s3_bucket.shared_bucket.arn
   multi_account_role_arn = aws_iam_role.multi_account_role.arn
 }
 
