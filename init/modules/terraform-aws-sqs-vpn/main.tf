@@ -38,6 +38,6 @@ resource "aws_ssm_parameter" "remote_in_vpn_url" {
   name      = "/firehawk/resourcetier/${var.resourcetier}/sqs_remote_in_vpn_url"
   type      = "SecureString"
   overwrite = true
-  value     = aws_sqs_queue.remote_in_vpn_url.url
+  value     = aws_sqs_queue.remote_in_vpn.url
   tags      = merge(map("Name", "remote_in_vpn"), var.common_tags)
 }
