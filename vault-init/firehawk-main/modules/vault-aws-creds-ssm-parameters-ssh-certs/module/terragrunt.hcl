@@ -11,9 +11,9 @@ locals {
 dependency "data" {
   config_path = "../data"
   mock_outputs = {
-    cloud_in_cert = "fake_url"
-    remote_in_cert = "fake_url"
-    remote_in_vpn = "fake_url"
+    cloud_in_cert_arn = "fake_arn"
+    remote_in_cert_arn = "fake_arn"
+    remote_in_vpn_arn = "fake_arn"
   }
 }
 
@@ -31,7 +31,7 @@ inputs = merge(
   local.common_vars.inputs,
   {
     "configure_vault" : local.configure_vault 
-    "sqs_send_arns" : [ dependency.data.outputs.cloud_in_cert ]
-    "sqs_recieve_arns" : [ dependency.data.outputs.remote_in_cert, dependency.data.outputs.remote_in_vpn ]
+    "sqs_send_arns" : [ dependency.data.outputs.cloud_in_cert_arn ]
+    "sqs_recieve_arns" : [ dependency.data.outputs.remote_in_cert_arn, dependency.data.outputs.remote_in_vpn_arn ]
   }
 )

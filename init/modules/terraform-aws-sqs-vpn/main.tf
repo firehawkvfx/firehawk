@@ -6,12 +6,12 @@ resource "aws_sqs_queue" "cloud_in_cert" { # the queue that cloud 9 will poll fo
   fifo_queue                        = true
 }
 
-resource "aws_ssm_parameter" "cloud_in_cert" {
-  name      = "/firehawk/resourcetier/${var.resourcetier}/sqs_cloud_in_cert"
+resource "aws_ssm_parameter" "cloud_in_cert_url" {
+  name      = "/firehawk/resourcetier/${var.resourcetier}/sqs_cloud_in_cert_url"
   type      = "SecureString"
   overwrite = true
   value     = aws_sqs_queue.cloud_in_cert.url
-  tags      = merge(map("Name", "cloud_in_cert"), var.common_tags)
+  tags      = merge(map("Name", "cloud_in_cert_url"), var.common_tags)
 }
 
 resource "aws_sqs_queue" "remote_in_cert" { # the queue that your remote vpn host will poll for certificates
@@ -20,12 +20,12 @@ resource "aws_sqs_queue" "remote_in_cert" { # the queue that your remote vpn hos
   fifo_queue                        = true
 }
 
-resource "aws_ssm_parameter" "remote_in_cert" {
-  name      = "/firehawk/resourcetier/${var.resourcetier}/sqs_remote_in_cert"
+resource "aws_ssm_parameter" "remote_in_cert_url" {
+  name      = "/firehawk/resourcetier/${var.resourcetier}/sqs_remote_in_cert_url"
   type      = "SecureString"
   overwrite = true
   value     = aws_sqs_queue.remote_in_cert.url
-  tags      = merge(map("Name", "remote_in_cert"), var.common_tags)
+  tags      = merge(map("Name", "remote_in_cert_url"), var.common_tags)
 }
 
 resource "aws_sqs_queue" "remote_in_vpn" { # the queue that your remote vpn host will poll for certificates
@@ -34,10 +34,10 @@ resource "aws_sqs_queue" "remote_in_vpn" { # the queue that your remote vpn host
   fifo_queue                        = true
 }
 
-resource "aws_ssm_parameter" "remote_in_vpn" {
-  name      = "/firehawk/resourcetier/${var.resourcetier}/sqs_remote_in_vpn"
+resource "aws_ssm_parameter" "remote_in_vpn_url" {
+  name      = "/firehawk/resourcetier/${var.resourcetier}/sqs_remote_in_vpn_url"
   type      = "SecureString"
   overwrite = true
-  value     = aws_sqs_queue.remote_in_vpn.url
+  value     = aws_sqs_queue.remote_in_vpn_url.url
   tags      = merge(map("Name", "remote_in_vpn"), var.common_tags)
 }
