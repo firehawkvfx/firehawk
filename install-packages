@@ -25,7 +25,7 @@ wget https://releases.hashicorp.com/packer/1.7.2/packer_1.7.2_linux_amd64.zip -P
 sudo unzip /tmp/packer_1.7.2_linux_amd64.zip -d /tmp/
 sudo mv /tmp/packer /usr/local/bin/.
 
-wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.28.16/terragrunt_linux_386 -P /tmp/ # Get Terragrunt
+wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.30.3/terragrunt_linux_386 -P /tmp/ # Get Terragrunt
 sudo mv /tmp/terragrunt_linux_386 /usr/local/bin/terragrunt
 sudo chmod +x /usr/local/bin/terragrunt
 
