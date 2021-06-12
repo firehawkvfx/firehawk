@@ -17,7 +17,8 @@ inputs = merge(
 
 dependencies {
   paths = [
-    "../vault-policies"
+    "../vault-policies",
+    "../vault-aws-creds-ssm-parameters-ssh-certs/module"
     ]
 }
 
@@ -34,16 +35,16 @@ terraform {
     commands = ["apply"]
     execute  = ["bash", "modules/sign-ssh-key/sign_ssh_key.sh"]
   }
-  after_hook "after_hook_3" { # Retrieve remote user ssh key
-    commands = ["apply"]
-    execute  = ["bash", "modules/ssm-values/ssm_retrieve_public_key.sh"]
-  }
-  after_hook "after_hook_4" { # Sign the remote user ssh key
-    commands = ["apply"]
-    execute  = ["bash", "modules/sign-ssh-key/sign_ssh_key.sh", "--public-key",  "/home/ec2-user/.ssh/remote_host/id_rsa.pub"]
-  }
-  after_hook "after_hook_5" { # post ssh cert as parameter
-    commands = ["apply"]
-    execute  = ["bash", "modules/ssm-values/ssm_post_public_cert.sh"]
-  }
+  # after_hook "after_hook_3" { # Retrieve remote user ssh key # deprecated in favour of using sqs queue.
+  #   commands = ["apply"]
+  #   execute  = ["bash", "modules/ssm-values/ssm_retrieve_public_key.sh"]
+  # }
+  # after_hook "after_hook_4" { # Sign the remote user ssh key
+  #   commands = ["apply"]
+  #   execute  = ["bash", "modules/sign-ssh-key/sign_ssh_key.sh", "--public-key",  "/home/ec2-user/.ssh/remote_host/id_rsa.pub"]
+  # }
+  # after_hook "after_hook_5" { # post ssh cert as parameter
+  #   commands = ["apply"]
+  #   execute  = ["bash", "modules/ssm-values/ssm_post_public_cert.sh"]
+  # }
 }
