@@ -3,7 +3,7 @@ set -e
 
 # - Generate a set of AWS credentials with vault on the cloud9 host:
 # ```
-# vault read aws/creds/aws-creds-ssm-parameters-ssh-certs
+# vault read aws/creds/aws-creds-vpn-cert
 # ```
 
 # - With the CLI installed on your onsite host, ensure you have installed the AWS CLI, and configure these credentials, along with your region:
@@ -16,7 +16,7 @@ set -e
 # ```
 printf "\nRemote Client Auth Instructions (Required only once per Vault install):"
 printf "\nGenerate a set of AWS credentials for your remote client on the cloud9 host:"
-printf "\nvault read aws/creds/aws-creds-ssm-parameters-ssh-certs"
+printf "\nvault read aws/creds/aws-creds-vpn-cert"
 printf "\n"
 printf "\nEnsure the AWS CLI is installed on your onsite host, and configure these credentials for use, along with your region:"
 printf "\naws configure"

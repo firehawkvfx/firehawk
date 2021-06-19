@@ -18,7 +18,7 @@ inputs = merge(
 dependencies {
   paths = [
     "../vault-policies",
-    "../vault-aws-creds-ssm-parameters-ssh-certs/module"
+    "../vault-aws-creds-vpn-cert/module"
     ]
 }
 

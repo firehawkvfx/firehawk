@@ -19,7 +19,7 @@ dependency "data" {
   mock_outputs = {
     cloud_in_cert_arn = "fake_arn"
     remote_in_cert_arn = "fake_arn"
-    remote_in_vpn_arn = "fake_arn"
+    remote_in_deadline_cert_arn = "fake_arn"
   }
 }
 
@@ -30,8 +30,9 @@ dependencies {
 inputs = merge(
   local.common_vars.inputs,
   {
+    "backend_name" : "aws-creds-deadline-cert"
     "configure_vault" : local.configure_vault 
     "sqs_send_arns" : [ dependency.data.outputs.cloud_in_cert_arn ]
-    "sqs_recieve_arns" : [ dependency.data.outputs.remote_in_cert_arn, dependency.data.outputs.remote_in_vpn_arn ]
+    "sqs_recieve_arns" : [ dependency.data.outputs.remote_in_cert_arn, dependency.data.outputs.remote_in_deadline_cert_arn ]
   }
 )

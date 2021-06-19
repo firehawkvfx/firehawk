@@ -177,7 +177,7 @@ When the vault-ssh module is applied by Terraform, it automatically signs the Cl
 
 - Generate a set of AWS credentials with vault on the cloud9 host:
 ```
-vault read aws/creds/aws-creds-ssm-parameters-ssh-certs
+vault read aws/creds/aws-creds-deadline-cert
 ```
 
 - With the CLI installed on your onsite host, ensure you have installed the AWS CLI, and configure these credentials, along with your region:
