@@ -2,6 +2,7 @@
 
 resource "aws_sqs_queue" "remote_in_deadline_cert" { # the queue that your remote deadline_cert host will poll for certificates
   kms_master_key_id                 = "alias/aws/sqs"
+  name_prefix                       = "remote_in_deadline_cert_${lookup(var.common_tags, "resourcetier", "0")}${lookup(var.common_tags, "pipelineid", "0")}_"
   kms_data_key_reuse_period_seconds = 300
   fifo_queue                        = true
   content_based_deduplication       = true

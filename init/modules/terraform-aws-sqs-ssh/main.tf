@@ -2,6 +2,7 @@
 
 resource "aws_sqs_queue" "cloud_in_cert" { # the queue that cloud 9 will poll for pub keys.
   kms_master_key_id                 = "alias/aws/sqs"
+  name_prefix                       = "cloud_in_cert_${lookup(var.common_tags, "resourcetier", "0")}${lookup(var.common_tags, "pipelineid", "0")}_"
   kms_data_key_reuse_period_seconds = 300
   fifo_queue                        = true
   content_based_deduplication       = true
@@ -18,6 +19,7 @@ resource "aws_ssm_parameter" "cloud_in_cert_url" {
 
 resource "aws_sqs_queue" "remote_in_cert" { # the queue that your remote vpn host will poll for certificates
   kms_master_key_id                 = "alias/aws/sqs"
+  name_prefix                       = "remote_in_cert_${lookup(var.common_tags, "resourcetier", "0")}${lookup(var.common_tags, "pipelineid", "0")}_"
   kms_data_key_reuse_period_seconds = 300
   fifo_queue                        = true
   content_based_deduplication       = true
