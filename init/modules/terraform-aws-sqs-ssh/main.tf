@@ -6,6 +6,8 @@ resource "aws_sqs_queue" "cloud_in_cert" { # the queue that cloud 9 will poll fo
   kms_data_key_reuse_period_seconds = 300
   fifo_queue                        = true
   content_based_deduplication       = true
+  visibility_timeout_seconds        = 30
+  message_retention_seconds         = 60 # public keys should be consumed rapidly
   tags      = merge(tomap({ "Name" : "cloud_in_cert" }), var.common_tags)
 }
 
@@ -23,6 +25,8 @@ resource "aws_sqs_queue" "remote_in_cert" { # the queue that your remote vpn hos
   kms_data_key_reuse_period_seconds = 300
   fifo_queue                        = true
   content_based_deduplication       = true
+  visibility_timeout_seconds        = 30
+  message_retention_seconds         = 60 # public keys should be consumed rapidly
   tags      = merge(tomap({ "Name" : "remote_in_cert" }), var.common_tags)
 }
 

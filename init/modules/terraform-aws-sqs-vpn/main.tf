@@ -6,6 +6,8 @@ resource "aws_sqs_queue" "remote_in_vpn" { # the queue that your remote vpn host
   kms_data_key_reuse_period_seconds = 300
   fifo_queue                        = true
   content_based_deduplication       = true
+  visibility_timeout_seconds        = 30
+  message_retention_seconds         = 300 # vpn creds will be erased within 5 mins if not consumed
   tags                              = merge(tomap({ "Name" : "remote_in_vpn" }), var.common_tags)
 }
 

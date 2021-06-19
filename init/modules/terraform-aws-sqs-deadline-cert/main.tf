@@ -6,7 +6,9 @@ resource "aws_sqs_queue" "remote_in_deadline_cert" { # the queue that your remot
   kms_data_key_reuse_period_seconds = 300
   fifo_queue                        = true
   content_based_deduplication       = true
-  tags      = merge(tomap({ "Name" : "remote_in_vpn" }), var.common_tags)
+  visibility_timeout_seconds        = 0
+  message_retention_seconds         = 900 # 15 mins
+  tags                              = merge(tomap({ "Name" : "remote_in_vpn" }), var.common_tags)
 }
 
 resource "aws_ssm_parameter" "remote_in_deadline_cert_url" {
