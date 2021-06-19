@@ -29,11 +29,11 @@ terraform {
   # Configure this host for SSH Certificates
   after_hook "after_hook_1" {
     commands = ["apply"]
-    execute  = ["bash", "modules/known-hosts/known_hosts.sh"]
+    execute  = ["bash", "modules/firehawk-auth-scripts/known-hosts"]
   }
   after_hook "after_hook_2" { # Sign the cloud 9 user ssh key
     commands = ["apply"]
-    execute  = ["bash", "modules/sign-ssh-key/sign_ssh_key.sh"]
+    execute  = ["bash", "modules/firehawk-auth-scripts/sign-ssh-key"]
   }
   # after_hook "after_hook_3" { # Retrieve remote user ssh key # deprecated in favour of using sqs queue.
   #   commands = ["apply"]
@@ -41,7 +41,7 @@ terraform {
   # }
   # after_hook "after_hook_4" { # Sign the remote user ssh key
   #   commands = ["apply"]
-  #   execute  = ["bash", "modules/sign-ssh-key/sign_ssh_key.sh", "--public-key",  "/home/ec2-user/.ssh/remote_host/id_rsa.pub"]
+  #   execute  = ["bash", "modules/firehawk-auth-scripts/sign-ssh-key", "--public-key",  "/home/ec2-user/.ssh/remote_host/id_rsa.pub"]
   # }
   # after_hook "after_hook_5" { # post ssh cert as parameter
   #   commands = ["apply"]

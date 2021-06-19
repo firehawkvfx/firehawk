@@ -193,9 +193,9 @@ aws ssm get-parameters --names /firehawk/resourcetier/dev/trusted_ca
 
 - In cloud 9, Add known hosts certificate, sign your cloud9 host Key, and sign your private key as with a valid SSH client certificate for other hosts.  This was already done during init, but its fine to get familiar with how to automate signing an SSH cert.
 ```
-firehawk-main/modules/vault-ssh/modules/sign-ssh-key/sign_ssh_key.sh # This signs your cloud9 private key, enabling it to be used to SSH to other hosts.
-firehawk-main/modules/vault-ssh/modules/sign-host-key/sign_host_key.sh # This signs a host key, so that it is recognised as part of the infra that other systems can SSH to.  If a host key is not signed, then we have a way of knowing if a host is not part of our infra.
-firehawk-main/modules/vault-ssh/modules/known-hosts/known_hosts.sh # This provides the public CA (Certificate Authority) cert to your host, allowing you to recognise what hosts you can SSH to safely.
+firehawk-main/modules/vault-ssh/modules/firehawk-auth-scripts/sign-ssh-key # This signs your cloud9 private key, enabling it to be used to SSH to other hosts.
+firehawk-main/modules/vault-ssh/modules/firehawk-auth-scripts/sign-host-key # This signs a host key, so that it is recognised as part of the infra that other systems can SSH to.  If a host key is not signed, then we have a way of knowing if a host is not part of our infra.
+firehawk-main/modules/vault-ssh/modules/firehawk-auth-scripts/known-hosts # This provides the public CA (Certificate Authority) cert to your host, allowing you to recognise what hosts you can SSH to safely.
 ```
 
 
@@ -207,7 +207,7 @@ cat ~/.ssh/id_rsa.pub
 
 - From cloud9, sign the public key, and provide a path to output the resulting certificates to.  eg:
 ```
-firehawk-main/modules/vault-ssh/modules/sign-ssh-key/sign_ssh_key.sh --public-key ~/.ssh/remote_host/id_rsa.pub
+firehawk-main/modules/vault-ssh/modules/firehawk-auth-scripts/sign-ssh-key --public-key ~/.ssh/remote_host/id_rsa.pub
 ```
 This will read the public key from the provided path if it exists, and if it doesn't you are prompted to paste in your public key contents.
 
@@ -216,11 +216,11 @@ In the file browser at ~/.ssh/remote_host/ you should now see id_rsa-cert.pub, t
 
 - If they are on your Mac or Linux desktop you can configure the downloaded files enabling your host as an SSH client with:
 ```
-firehawk-main/modules/vault-ssh/modules/sign-ssh-key/sign_ssh_key.sh --trusted-ca ~/Downloads/trusted-user-ca-keys.pem --cert ~/Downloads/id_rsa-cert.pub
+firehawk-main/modules/vault-ssh/modules/firehawk-auth-scripts/sign-ssh-key --trusted-ca ~/Downloads/trusted-user-ca-keys.pem --cert ~/Downloads/id_rsa-cert.pub
 ```
 - You will also need to configure the known hosts certificate.  This provides better protection against Man In The Middle (MITM) attacks:
 ```
-firehawk-main/modules/vault-ssh/modules/known-hosts/known_hosts.sh --external-domain ap-southeast-2.compute.amazonaws.com --trusted-ca ~/Downloads/trusted-user-ca-keys.pem --ssh-known-hosts ~/Downloads/ssh_known_hosts_fragment
+firehawk-main/modules/vault-ssh/modules/firehawk-auth-scripts/known-hosts --external-domain ap-southeast-2.compute.amazonaws.com --trusted-ca ~/Downloads/trusted-user-ca-keys.pem --ssh-known-hosts ~/Downloads/ssh_known_hosts_fragment
 ```
 - Now you should be able to ssh into a private host, via public the bastion host, with the command provided at the end of running this in `deploy/`: `terragrunt run-all apply`  eg:
 ```
