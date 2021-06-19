@@ -20,6 +20,7 @@ dependency "data" {
     cloud_in_cert_arn = "fake_arn"
     remote_in_cert_arn = "fake_arn"
     remote_in_vpn_arn = "fake_arn"
+    vault_aws_secret_backend_path = "fake_path"
   }
 }
 
@@ -30,6 +31,7 @@ dependencies {
 inputs = merge(
   local.common_vars.inputs,
   {
+    "vault_aws_secret_backend_path" : dependency.data.outputs.vault_aws_secret_backend_path
     "backend_name" : "aws-creds-vpn-cert"
     "configure_vault" : local.configure_vault 
     "sqs_send_arns" : [ dependency.data.outputs.cloud_in_cert_arn ]
