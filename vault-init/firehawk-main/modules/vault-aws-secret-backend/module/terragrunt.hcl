@@ -15,7 +15,7 @@ locals {
 }
 
 dependencies {
-  paths = ["../vault-policies"]
+  paths = ["../../vault-policies"]
 }
 
 inputs = local.common_vars.inputs
