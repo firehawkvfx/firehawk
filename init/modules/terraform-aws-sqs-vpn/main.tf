@@ -2,7 +2,7 @@
 
 resource "aws_sqs_queue" "remote_in_vpn" { # the queue that your remote vpn host will poll for certificates
   kms_master_key_id                 = "alias/aws/sqs"
-  name      = "remote_in_vpn_${lookup(var.common_tags, "resourcetier", "0")}${lookup(var.common_tags, "pipelineid", "0")}"
+  name      = "remote-in-vpn-${lookup(var.common_tags, "resourcetier", "0")}${lookup(var.common_tags, "pipelineid", "0")}"
   kms_data_key_reuse_period_seconds = 300
   fifo_queue                        = true
   content_based_deduplication       = true
