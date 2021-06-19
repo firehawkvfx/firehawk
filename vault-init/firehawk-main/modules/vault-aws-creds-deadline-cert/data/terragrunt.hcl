@@ -12,5 +12,6 @@ inputs = local.common_vars.inputs
 dependencies {
   paths = [
     "../../vault-policies"
+    "../../vault-aws-secret-backend/module"
     ]
 }
