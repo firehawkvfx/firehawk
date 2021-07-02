@@ -272,6 +272,7 @@ You must provide a vault token, which should based on a policy of least privileg
 vault token create -policy=vpn_read_config -policy=deadline_client -explicit-max-ttl=5m -ttl=5m -use-limit=4
 ```
 
+
 - Run the vagrant wake script 
 ./modules/terraform-aws-vpn/modules/openvpn-vagrant-client/wake {resourcetier} {public host} {private host} 
 eg:
