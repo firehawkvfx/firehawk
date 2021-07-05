@@ -11,16 +11,16 @@ echo "Ensure a mac adress exists for the vpn in env: ${TF_VAR_resourcetier}"
 parm_name="/firehawk/resourcetier/${TF_VAR_resourcetier}/onsite_private_vpn_mac"
 
 function validate {
-get_parms=$(aws ssm get-parameters --names ${parm_name})
-invalid=$(echo ${get_parms} | jq -r .'InvalidParameters | length')
+    get_parms=$(aws ssm get-parameters --names ${parm_name})
+    invalid=$(echo ${get_parms} | jq -r .'InvalidParameters | length')
 }
 function set_mac_value {
-random_mac="$(${SCRIPTDIR}/random_mac_unicast.sh)"
-aws ssm put-parameter \
-    --name "${parm_name}" \
-    --type "String" \
-    --value "${random_mac}" \
-    --overwrite
+    random_mac="$(${SCRIPTDIR}/random_mac_unicast.sh)"
+    aws ssm put-parameter \
+        --name "${parm_name}" \
+        --type "String" \
+        --value "${random_mac}" \
+        --overwrite
 }
 
 validate
