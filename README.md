@@ -171,7 +171,7 @@ terragrunt run-all apply
 
 ## Acquire SSH Certificates (Automated)
 
-This workflow is currently tested on MacOS it should also be supported on Linux but is unverified.
+This workflow is currently tested on MacOS is also supported on Linux.
 
 When the vault-ssh module is applied by Terraform, it automatically signs the Cloud9 user's SSH key.  It also retrieves your remote onsite user's public key from an SSM parameter which you will have already set on the cloudformation parameter template.  It signs it and stores the public certificate as an SSM parameter value.  This can be retrieved with AWS credentials and configure for your onsite host.
 
@@ -245,7 +245,7 @@ All hosts now have the capability for authenticated SSH with certificates!  The 
 
 ### Diagnosing SSH problems:
 
-Usually a lot can be determined by looking at the user data logs to deetermine if SSH Certs, Vault, and Consul are all behaving.
+Usually a lot can be determined by looking at the user data logs to determine if SSH Certs, Vault, and Consul are all behaving.
 The Cloud 9 host can ssh in to any private IP, but you will have to ignore host key checking if there are problems with certificates.  Be mindful of this, it is why we should really only do it on a private network, and to resolve issues in a dev environment.
 The user data log is available at:
 ```
