@@ -3,7 +3,7 @@ set -e
 
 # - Generate a set of AWS credentials with vault on the cloud9 host:
 # ```
-# vault read aws/creds/aws-creds-ssm-parameters-ssh-certs
+# vault read aws/creds/aws-creds-vpn-cert
 # ```
 
 # - With the CLI installed on your onsite host, ensure you have installed the AWS CLI, and configure these credentials, along with your region:
@@ -16,7 +16,7 @@ set -e
 # ```
 printf "\nRemote Client Auth Instructions (Required only once per Vault install):"
 printf "\nGenerate a set of AWS credentials for your remote client on the cloud9 host:"
-printf "\nvault read aws/creds/aws-creds-ssm-parameters-ssh-certs"
+printf "\nvault read aws/creds/aws-creds-vpn-cert"
 printf "\n"
 printf "\nEnsure the AWS CLI is installed on your onsite host, and configure these credentials for use, along with your region:"
 printf "\naws configure"
@@ -25,10 +25,10 @@ printf "\nYou will now be able to read parameters, for example:"
 printf "\naws ssm get-parameters --names /firehawk/resourcetier/dev/ssh_known_hosts_fragment"
 printf "\n"
 printf "\nFor protection against Man In The Middle attacks configure your trusted known hosts Certificate Authority and specify an expected external DNS name:"
-printf "\nfirehawk/deploy/firehawk-main/modules/vault-ssh/modules/known-hosts/known_hosts.sh --ssm --external-domain ap-southeast-2.compute.amazonaws.com"
+printf "\nfirehawk/deploy/firehawk-main/modules/vault-ssh/modules/firehawk-auth-scripts/known-hosts --ssm --external-domain ap-southeast-2.compute.amazonaws.com"
 printf "\n"
 printf "\nConfigure your previously signed public key with Vault (This should have been the same public key you pasted into the cloudformation template, it was signed during vault-init/configure):"
-printf "\nfirehawk/deploy/firehawk-main/modules/vault-ssh/modules/sign-ssh-key/sign_ssh_key.sh  --ssm"
+printf "\nfirehawk/deploy/firehawk-main/modules/vault-ssh/modules/firehawk-auth-scripts/sign-ssh-key  --ssm"
 printf "\n"
 printf "\nYou will now be able to SSH into your cloud private network using your remote host.  This will allow further automation."
 

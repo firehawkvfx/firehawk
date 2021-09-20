@@ -1,0 +1,3 @@
+#!/bin/bash
+
+terragrunt run-all destroy --terragrunt-source-update --terragrunt-source-map github.com/firehawkvfx/firehawk-main.git=$TF_VAR_firehawk_path
