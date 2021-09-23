@@ -226,7 +226,7 @@ This will return:
 serverhost=https://www.sidefx.com/license/sesinetd
 ```
 
-- Configure your Client ID anf Client Secret:
+- Configure your Client ID and Client Secret:
 ```
 echo "APIKey=www.sidefx.com MY_CLIENT_ID MY_CLIENT_SECRET" | tee ~/houdini18.5/hserver.opt
 cat ~/houdini18.5/hserver.opt
