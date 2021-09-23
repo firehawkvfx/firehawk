@@ -238,6 +238,8 @@ APIKey=www.sidefx.com MY_CLIENT_ID MY_CLIENT_SECRET
 
 - start hserver:
 ```
+cd /opt/hfs18.5
+source ./houdini_setup
 hserver
 hserver -l
 Hostname:       ip-10-1-129-157.ap-southeast-2.compute.internal [CentOS Linux release 7.9.2009 (Core)]
@@ -259,8 +261,6 @@ Used Licenses: None
 - Run hython:
 
 ```
-cd /opt/hfs18.5
-source ./houdini_setup
 hython
 ```
 
