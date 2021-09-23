@@ -211,20 +211,10 @@ Once mounted, we now have shared storage with our cloud nodes and our onsite wor
 A generated Client ID and Client Secret can be used to distribute any floating licenses from your Side FX account if you don't wish to use UBL or you want to use them in combination with Deadline's Limits feature.  This alleviates the need of depending on a VPN to use your own licenses (although you still need a VPN for PDG and other functions).
 
 
-- Login to your Side FX account on the website and goto Services > Application License Usage.
+- Login to your Side FX account on the website and goto Services > Manage applications authentication.
 - Create a new key (using authorization-code as the grant type).  You must also set https://www.sidefx.com in the Redirect Uris section. The Client Type is "confidential".
 
 To use this key and Side FX license server on a headless node you can test with the following procedure (and confirm you have setup the key correctly):
-
-- Ensure the license server is configured.
-```
-echo "serverhost=https://www.sidefx.com/license/sesinetd" | tee ~/.sesi_licenses.pref
-cat ~/.sesi_licenses.pref 
-```
-This will return:
-```
-serverhost=https://www.sidefx.com/license/sesinetd
-```
 
 - Configure your Client ID and Client Secret:
 ```
@@ -236,26 +226,34 @@ This will return:
 APIKey=www.sidefx.com MY_CLIENT_ID MY_CLIENT_SECRET
 ```
 
-- start hserver:
+- Ensure the license server is configured.
 ```
-cd /opt/hfs18.5
-source ./houdini_setup
-hserver
+echo "serverhost=https://www.sidefx.com/license/sesinetd" | tee ~/.sesi_licenses.pref
+cd /opt/hfs18.5/; source ./houdini_setup && hserver ; sleep 10 ; hserver -S https://www.sidefx.com/license/sesinetd ; hserver ; 
+```
+
+- check hserver:
+```
 hserver -l
-Hostname:       ip-10-1-129-157.ap-southeast-2.compute.internal [CentOS Linux release 7.9.2009 (Core)]
-Uptime:         0:35:24 [Started: Thu Sep 23 05:16:02 2021]
-License Server: https://wwww.sidefx.com/license/sesinetd
-Connected To:   https://wwww.sidefx.com/license/sesinetd
-Server Version: <unknown>
+Hostname:       ip-10-1-129-54.ap-southeast-2.compute.internal  [CentOS Linux release 7.9.2009 (Core)]
+Uptime:         0:24:14 [Started: Thu Sep 23 12:51:07 2021]
+License Server: https://www.sidefx.com/license/sesinetd
+Connected To:   https://www.sidefx.com/license/sesinetd
+Server Version: sesinetd19.0.10917
 Version:        Houdini18.5.696
 ReadAccess:     +.+.+.*
 WriteAccess:    +.+.+.*
 Forced Http: false
 Used Licenses: None
 
-    186 of 962 MB available
+    196 of 962 MB available
     CPU Usage:0% load
     0 active tasks (2 slots)
+```
+
+- Check the diagnostic for any errors:
+```
+sesictrl diagnostic
 ```
 
 - Run hython:
