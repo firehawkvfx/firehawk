@@ -169,6 +169,106 @@ cd ../deploy
 terragrunt run-all apply
 ```
 
+## Install the deadline certificate service
+
+If you are running Ubuntu 18 or Mac OS, its possible to install a service on your local system to make aquiring certificates for deadline easier.  The service can monitor a message queue for credentials authenticating for automated aquisition of deadline certificates.  The deadline certificates are required, and they are unique with each deploy.  The service provides a means of handling dynamic rotation of these certificates each time a deployment occurs.
+
+On your remote onsite host run:
+```
+cd deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client/scripts/firehawk-auth-scripts
+./install-deadline-cert-service --resourcetier dev --init
+```
+
+## Install the VPN Vagrant Virtual Machine
+
+Warning: Not Safe for Production
+
+The Vagrant VPN VM is a proof of concept.  It is not safe for production, because extra work and testing is required for the VM to be secure.  SSH access is not secured on this VM.  The VPN VM operates as a router, allowing multiple onsite connections to reach your AWS private network.  Ensure you have installed Vagrant and follow the steps by running this on the same system as above:
+
+```
+vagrant plugin install vagrant-vbguest
+vagrant plugin install vagrant-reload
+
+cd deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client
+./wake --resourcetier dev
+```
+
+## Mount the AWS S3 File gateway
+
+The AWS File Gateway is an instance that caches the S3 Bucket and provides the bucket's contents as an NFS mount.  A shared NFS mount is required to enable inputs like scene files to be read, and outputs to be written.  Once files are written to the Filegateway mount, they will be synced back to the S3 bucket and become eventually consistent.  You must first find the private IP address in the AWS console of the file gateway to mount it to your local system: 
+
+eg:
+```
+cd deploy/firehawk-render-cluster/modules/terraform-aws-s3-file-gateway/module/scripts
+showmount -e 10.1.139.151 # This will show a list of available mounts.  if they are not visible, something is wrong.  Most likely the VPN or static routes are not configured correctly on your network.
+./mount-filegateway 10.1.139.151 rendering.dev.firehawkvfx.com /Volumes/cloud_prod
+```
+
+Once mounted, we now have shared storage with our cloud nodes and our onsite workstation.  We can save scene files here and render them.
+
+## Configure Side FX Cloud License server
+
+A generated Client ID and Client Secret can be used to distribute any floating licenses from your Side FX account if you don't wish to use UBL or you want to use them in combination with Deadline's Limits feature.  This alleviates the need of depending on a VPN to use your own licenses (although you still need a VPN for PDG and other functions).
+
+
+- Login to your Side FX account on the website and goto Services > Application License Usage.
+- Create a new key (using authorization-code as the grant type).  You must also set https://www.sidefx.com in the Redirect Uris section. The Client Type is "confidential".
+
+To use this key and Side FX license server on a headless node you can test with the following procedure (and confirm you have setup the key correctly):
+
+- Ensure the license server is configured.
+```
+echo "serverhost=https://www.sidefx.com/license/sesinetd" | tee ~/.sesi_licenses.pref
+cat ~/.sesi_licenses.pref 
+```
+This will return:
+```
+serverhost=https://www.sidefx.com/license/sesinetd
+```
+
+- Configure your Client ID anf Client Secret:
+```
+echo "APIKey=www.sidefx.com MY_CLIENT_ID MY_CLIENT_SECRET" | tee ~/houdini18.5/hserver.opt
+cat ~/houdini18.5/hserver.opt
+```
+This will return:
+```
+APIKey=www.sidefx.com MY_CLIENT_ID MY_CLIENT_SECRET
+```
+
+- start hserver:
+```
+hserver
+hserver -l
+Hostname:       ip-10-1-129-157.ap-southeast-2.compute.internal [CentOS Linux release 7.9.2009 (Core)]
+Uptime:         0:35:24 [Started: Thu Sep 23 05:16:02 2021]
+License Server: https://wwww.sidefx.com/license/sesinetd
+Connected To:   https://wwww.sidefx.com/license/sesinetd
+Server Version: <unknown>
+Version:        Houdini18.5.696
+ReadAccess:     +.+.+.*
+WriteAccess:    +.+.+.*
+Forced Http: false
+Used Licenses: None
+
+    186 of 962 MB available
+    CPU Usage:0% load
+    0 active tasks (2 slots)
+```
+
+- Run hython:
+
+```
+cd /opt/hfs18.5
+source ./houdini_setup
+hython
+```
+
+
+## ## Advanced ##
+
+These steps are available if you don't wish to use automaiton to configure certificates
+
 ## Acquire SSH Certificates (Automated)
 
 This workflow is currently tested on MacOS is also supported on Linux.
