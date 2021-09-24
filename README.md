@@ -256,7 +256,7 @@ Used Licenses: None
 sesictrl diagnostic
 ```
 
-- Run hython:
+- Run hython to acquire a floating engine license:
 
 ```
 hython
