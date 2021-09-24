@@ -229,7 +229,7 @@ APIKey=www.sidefx.com MY_CLIENT_ID MY_CLIENT_SECRET
 - Ensure the license server is configured.
 ```
 echo "serverhost=https://www.sidefx.com/license/sesinetd" | tee ~/.sesi_licenses.pref
-cd /opt/hfs18.5/; source ./houdini_setup && hserver ; sleep 10 ; hserver -S https://www.sidefx.com/license/sesinetd ; hserver ; 
+cd /opt/hfs18.5/; source ./houdini_setup && hserver ; sleep 10 ; hserver -S https://www.sidefx.com/license/sesinetd ; hserver -q ; hserver 
 ```
 
 - check hserver:
