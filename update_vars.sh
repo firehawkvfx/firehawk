@@ -70,6 +70,20 @@ function retrieve_ami {
   echo "$ami_result"
 }
 
+function retrieve_tag_value_from_ami {
+  local -r ami_id="$1"
+  local -r aws_region="$2"
+  local -r tag_key="$3"
+
+  if [[ -z "$ami_id" || "$ami_id" == "null" ]]; then
+    result=""
+  else 
+    result=$(aws ec2 describe-images --region $aws_region --image-ids $ami_id | jq ".Images[0].Tags | .[] | select (.Key == \"${tag_key}\").Value")
+  fi
+
+  echo "$result"
+}
+
 function warn_if_invalid {
   local -r ami_role=$1
   local -r ami_result=$2
@@ -126,9 +140,6 @@ function export_vars {
   export TF_VAR_firehawk_path="$SCRIPTDIR/deploy/firehawk-main"
 
   # Packer Vars
-  export TF_VAR_deadline_version="10.1.18.5"
-  export PKR_VAR_deadline_version="$TF_VAR_deadline_version"
-
   export PACKER_LOG=1
   export PACKER_LOG_PATH="packerlog.log"
   export TF_VAR_provisioner_iam_profile_name="provisioner_instance_role_$TF_VAR_conflictkey"
@@ -174,6 +185,9 @@ function export_vars {
     ami_role="firehawk_amazonlinux2_nicedcv_ami"
     export TF_VAR_workstation_amazonlinux2_nicedcv_ami_id=$(retrieve_ami $latest_ami $ami_role $TF_VAR_ami_commit_hash)
     warn_if_invalid "$ami_role" "$TF_VAR_workstation_amazonlinux2_nicedcv_ami_id" "TF_VAR_workstation_amazonlinux2_nicedcv_ami_id"
+
+    # define vars depending on found images:
+    export TF_VAR_deadline_version=$(retrieve_tag_value_from_ami $TF_VAR_deadline_db_ami_id $AWS_DEFAULT_REGION "deadline_version")
   fi
 
   # Terraform Vars
