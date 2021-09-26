@@ -77,6 +77,8 @@ function warn_if_invalid {
 
   if [[ -z "$ami_result" || "$ami_result" == "null" ]]; then
     log_warn "Images required for deployment are not present.  You will need to build them before continuing."
+    log_warn "$var_name"
+    log_warn ""
   else
     printf "$var_name"
     printf "\n  Found role $ami_role result:"
