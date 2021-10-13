@@ -179,9 +179,27 @@ cd deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client
 ./install-deadline-cert-service --resourcetier dev --init
 ```
 
+## Install the Raspberry Pi Open VPN gateway
+
+To maintain a shared network with AWS, it is recommended that you use a dedicated Raspberry Pi.  This runs a service that once initialised will detect when a VPN is available, and dynamically get the required credentials to establish the connection with AWS.
+
+- Ensure the infrastructure is up and running from cloud 9 `./apply`
+- Ensure your Rasberry PI has a clean install of Ubuntu Server 20.04
+- Configure a proper ssh password for your Raspberry Pi.  WARNING: Skipping this step is a major security risk.
+- Clone the repository to your Raspberry Pi.
+- Assign a static IP address to your Raspberry Pi with your router.
+- You will need to configure static routes on your router to send traffic intended for AWS via this static IP.  
+TODO: provide more details for users unfamiliar with this step.
+- Install requirements and use the wake script to initialise credentials.
+```
+cd deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client
+./install-requirements --host-type metal
+./wake --resourcetier dev --host-type metal
+```
+
 ## Install the VPN Vagrant Virtual Machine
 
-Warning: Not Safe for Production
+Warning: Not Safe for Production it is recommended you use the above described Raspberry Pi method instead.
 
 The Vagrant VPN VM is a proof of concept.  It is not safe for production, because extra work and testing is required for the VM to be secure.  SSH access is not secured on this VM.  The VPN VM operates as a router, allowing multiple onsite connections to reach your AWS private network.  Ensure you have installed Vagrant and follow the steps by running this on the same system as above:
 
@@ -350,34 +368,16 @@ The user data log is available at:
 /var/log/user-data.log 
 ```
 
-### Configuring the VPN from your remote client (WIP)
-
-Provided web forwarding is established and you have the vault UI running, you should be able to automate a VPN gateway.
-It is required that the SSH connection is established automatically because you have SSH certificates configured.
-It is important you do not take this step in an unsecured network.  The purpose of the VPN gateway is to unify two networks.  The only limiting factors for communication protocols will be security groups.
-
-- Configure the vpn hosts json file with an ip address valid for your onsite network.  If possible, onl your router, assign the mac addresses to have the IP addresses from the json file in `firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client/ip_addresses.json`
-
-- There are steps that must also be taken to configure your router to allow access to your cloud private subnet by configuring the VPN static routes.
-
-- TODO: describe how to configure static routes.
-
-- Ensure SSH forwarding is functional and you can use the Vault UI explained in the previous steps:
-
-- From Cloud 9, create a token you can use to automatically retrieve your vpn config using the vpn_read_config_policy
-You must provide a vault token, which should based on a policy of least privilege.  This token will have a short ttl, enough time for our automation script to acquire the VPN config.  We can also define a reasonable use limit, preventing the secret from being useful once we are done with it!  in This case we need to use it twice, once to login, and another when we request the vpn config file.
+### Diagnosing VPN problems:
+By observing the logs on the Raspberry Pi you should be able to determine if a connection is established or if errors are encountered while trying to gather current credentials, or establish a connection with the vpn.
 ```
-vault token create -policy=vpn_read_config -policy=deadline_client -explicit-max-ttl=5m -ttl=5m -use-limit=4
+tail -f /var/log/syslog
 ```
-
-- Run the vagrant wake script 
-./modules/terraform-aws-vpn/modules/openvpn-vagrant-client/wake {resourcetier} {public host} {private host} 
-eg:
+You can also check the credential service and open vpn service status with:
 ```
-./modules/terraform-aws-vpn/modules/openvpn-vagrant-client/wake dev centos@ec2-13-211-132-68.ap-southeast-2.compute.amazonaws.com centos@i-0330138643ba03b32.node.consul
+systemctl status awsauthvpn.service
+systemctl status openvpn
 ```
-
-- You can acquire the dynamic open vpn password in vault under `/dev/network/openvpn_admin_pw`
 
 # Terminology
 
