@@ -1,4 +1,4 @@
 #!/bin/bash
 
 # init will deploy vault only and ensure it is initialised.
-terragrunt run-all apply --terragrunt-source-update --terragrunt-source-map github.com/firehawkvfx/firehawk-main.git=$TF_VAR_firehawk_path
+terragrunt run-all apply --terragrunt-source-update --terragrunt-source-map github.com/firehawkvfx/firehawk-main.git=$TF_VAR_firehawk_path --terragrunt-non-interactive
