@@ -1,0 +1,11 @@
+version: 0.0
+os: linux
+hooks:
+  BeforeInstall:
+    - location: install-packages
+      timeout: 300
+      runas: root
+  ApplicationStop:
+    - location: scripts/stop
+      timeout: 300
+      runas: root
