@@ -1,0 +1,13 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - ./install-packages
+  build:
+    commands:
+      - echo '...replace with real build commands...'
+
+artifacts:
+  files:
+    - '**/*'

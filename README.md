@@ -169,15 +169,138 @@ cd ../deploy
 terragrunt run-all apply
 ```
 
+## Install the deadline certificate service
+
+If you are running Ubuntu 18 or Mac OS, its possible to install a service on your local system to make aquiring certificates for deadline easier.  The service can monitor a message queue for credentials authenticating for automated aquisition of deadline certificates.  The deadline certificates are required, and they are unique with each deploy.  The service provides a means of handling dynamic rotation of these certificates each time a deployment occurs.
+
+On your remote mac, ubuntu or Windows WSL (ubuntu) onsite host run:
+```
+cd deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client/scripts/firehawk-auth-scripts
+./install-deadline-cert-service --resourcetier dev --init
+```
+
+On Windows Subsystem for Linux, running the above command will not be able to start the service (no systemd support).  So run it anyway, but after in a shell, execute this:
+```
+cd deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client/scripts/firehawk-auth-scripts
+watch -n 60 ./aws-auth-deadline-cert --resourcetier dev
+```
+This will ensure a current certificate exists in the user's home dir whenever a new Deadline DB is deployed.
+
+## Install the Raspberry Pi Open VPN gateway
+
+To maintain a shared network with AWS, it is recommended that you use a dedicated Raspberry Pi.  This runs a service that once initialised will detect when a VPN is available, and dynamically get the required credentials to establish the connection with AWS.
+
+- Ensure the infrastructure is up and running from cloud 9 `./apply`
+- Ensure your Rasberry PI has a clean install of Ubuntu Server 20.04
+- Configure a proper ssh password for your Raspberry Pi.  WARNING: Skipping this step is a major security risk.
+- Clone the repository to your Raspberry Pi.
+- Assign a static IP address to your Raspberry Pi with your router.
+- You will need to configure static routes on your router to send traffic intended for AWS via this static IP.  
+TODO: provide more details for users unfamiliar with this step.
+- Install requirements and use the wake script to initialise credentials.
+```
+cd deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client
+./install-requirements --host-type metal
+./wake --resourcetier dev --host-type metal
+```
+
+## Install the VPN Vagrant Virtual Machine
+
+Warning: Not Safe for Production it is recommended you use the above described Raspberry Pi method instead.
+
+The Vagrant VPN VM is a proof of concept.  It is not safe for production, because extra work and testing is required for the VM to be secure.  SSH access is not secured on this VM.  The VPN VM operates as a router, allowing multiple onsite connections to reach your AWS private network.  Ensure you have installed Vagrant and follow the steps by running this on the same system as above:
+
+```
+vagrant plugin install vagrant-vbguest
+vagrant plugin install vagrant-reload
+
+cd deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client
+./wake --resourcetier dev
+```
+
+## Mount the AWS S3 File gateway
+
+The AWS File Gateway is an instance that caches the S3 Bucket and provides the bucket's contents as an NFS mount.  A shared NFS mount is required to enable inputs like scene files to be read, and outputs to be written.  Once files are written to the Filegateway mount, they will be synced back to the S3 bucket and become eventually consistent.  You must first find the private IP address in the AWS console of the file gateway to mount it to your local system: 
+
+eg:
+```
+cd deploy/firehawk-render-cluster/modules/terraform-aws-s3-file-gateway/module/scripts
+showmount -e 10.1.139.151 # This will show a list of available mounts.  if they are not visible, something is wrong.  Most likely the VPN or static routes are not configured correctly on your network.
+./mount-filegateway 10.1.139.151 rendering.dev.firehawkvfx.com /Volumes/cloud_prod
+```
+
+Once mounted, we now have shared storage with our cloud nodes and our onsite workstation.  We can save scene files here and render them.
+
+## Configure Side FX Cloud License server
+
+A generated Client ID and Client Secret can be used to distribute any floating licenses from your Side FX account if you don't wish to use UBL or you want to use them in combination with Deadline's Limits feature.  This alleviates the need of depending on a VPN to use your own licenses (although you still need a VPN for PDG and other functions).
+
+
+- Login to your Side FX account on the website and goto Services > Manage applications authentication.
+- Create a new key (using authorization-code as the grant type).  You must also set https://www.sidefx.com in the Redirect Uris section. The Client Type is "confidential".
+
+To use this key and Side FX license server on a headless node you can test with the following procedure (and confirm you have setup the key correctly):
+
+- Configure your Client ID and Client Secret:
+```
+echo "APIKey=www.sidefx.com MY_CLIENT_ID MY_CLIENT_SECRET" | tee ~/houdini18.5/hserver.opt
+cat ~/houdini18.5/hserver.opt
+```
+This will return:
+```
+APIKey=www.sidefx.com MY_CLIENT_ID MY_CLIENT_SECRET
+```
+
+- Ensure the license server is configured.
+```
+echo "serverhost=https://www.sidefx.com/license/sesinetd" | tee ~/.sesi_licenses.pref
+cd /opt/hfs18.5/; source ./houdini_setup && hserver ; sleep 10 ; hserver -S https://www.sidefx.com/license/sesinetd ; hserver -q ; hserver 
+```
+
+- check hserver:
+```
+hserver -l
+Hostname:       ip-10-1-129-54.ap-southeast-2.compute.internal  [CentOS Linux release 7.9.2009 (Core)]
+Uptime:         0:24:14 [Started: Thu Sep 23 12:51:07 2021]
+License Server: https://www.sidefx.com/license/sesinetd
+Connected To:   https://www.sidefx.com/license/sesinetd
+Server Version: sesinetd19.0.10917
+Version:        Houdini18.5.696
+ReadAccess:     +.+.+.*
+WriteAccess:    +.+.+.*
+Forced Http: false
+Used Licenses: None
+
+    196 of 962 MB available
+    CPU Usage:0% load
+    0 active tasks (2 slots)
+```
+
+- Check the diagnostic for any errors:
+```
+sesictrl diagnostic
+```
+
+- Run hython to acquire a floating engine license:
+
+```
+hython
+```
+
+
+## ## Advanced ##
+
+These steps are available if you don't wish to use automaiton to configure certificates
+
 ## Acquire SSH Certificates (Automated)
 
-This workflow is currently tested on MacOS it should also be supported on Linux but is unverified.
+This workflow is currently tested on MacOS is also supported on Linux.
 
 When the vault-ssh module is applied by Terraform, it automatically signs the Cloud9 user's SSH key.  It also retrieves your remote onsite user's public key from an SSM parameter which you will have already set on the cloudformation parameter template.  It signs it and stores the public certificate as an SSM parameter value.  This can be retrieved with AWS credentials and configure for your onsite host.
 
 - Generate a set of AWS credentials with vault on the cloud9 host:
 ```
-vault read aws/creds/aws-creds-ssm-parameters-ssh-certs
+vault read aws/creds/aws-creds-deadline-cert
 ```
 
 - With the CLI installed on your onsite host, ensure you have installed the AWS CLI, and configure these credentials, along with your region:
@@ -193,9 +316,9 @@ aws ssm get-parameters --names /firehawk/resourcetier/dev/trusted_ca
 
 - In cloud 9, Add known hosts certificate, sign your cloud9 host Key, and sign your private key as with a valid SSH client certificate for other hosts.  This was already done during init, but its fine to get familiar with how to automate signing an SSH cert.
 ```
-firehawk-main/modules/vault-ssh/modules/sign-ssh-key/sign_ssh_key.sh # This signs your cloud9 private key, enabling it to be used to SSH to other hosts.
-firehawk-main/modules/vault-ssh/modules/sign-host-key/sign_host_key.sh # This signs a host key, so that it is recognised as part of the infra that other systems can SSH to.  If a host key is not signed, then we have a way of knowing if a host is not part of our infra.
-firehawk-main/modules/vault-ssh/modules/known-hosts/known_hosts.sh # This provides the public CA (Certificate Authority) cert to your host, allowing you to recognise what hosts you can SSH to safely.
+firehawk-main/modules/vault-ssh/modules/firehawk-auth-scripts/sign-ssh-key # This signs your cloud9 private key, enabling it to be used to SSH to other hosts.
+firehawk-main/modules/vault-ssh/modules/firehawk-auth-scripts/sign-host-key # This signs a host key, so that it is recognised as part of the infra that other systems can SSH to.  If a host key is not signed, then we have a way of knowing if a host is not part of our infra.
+firehawk-main/modules/vault-ssh/modules/firehawk-auth-scripts/known-hosts # This provides the public CA (Certificate Authority) cert to your host, allowing you to recognise what hosts you can SSH to safely.
 ```
 
 
@@ -207,7 +330,7 @@ cat ~/.ssh/id_rsa.pub
 
 - From cloud9, sign the public key, and provide a path to output the resulting certificates to.  eg:
 ```
-firehawk-main/modules/vault-ssh/modules/sign-ssh-key/sign_ssh_key.sh --public-key ~/.ssh/remote_host/id_rsa.pub
+firehawk-main/modules/vault-ssh/modules/firehawk-auth-scripts/sign-ssh-key --public-key ~/.ssh/remote_host/id_rsa.pub
 ```
 This will read the public key from the provided path if it exists, and if it doesn't you are prompted to paste in your public key contents.
 
@@ -216,11 +339,11 @@ In the file browser at ~/.ssh/remote_host/ you should now see id_rsa-cert.pub, t
 
 - If they are on your Mac or Linux desktop you can configure the downloaded files enabling your host as an SSH client with:
 ```
-firehawk-main/modules/vault-ssh/modules/sign-ssh-key/sign_ssh_key.sh --trusted-ca ~/Downloads/trusted-user-ca-keys.pem --cert ~/Downloads/id_rsa-cert.pub
+firehawk-main/modules/vault-ssh/modules/firehawk-auth-scripts/sign-ssh-key --trusted-ca ~/Downloads/trusted-user-ca-keys.pem --cert ~/Downloads/id_rsa-cert.pub
 ```
 - You will also need to configure the known hosts certificate.  This provides better protection against Man In The Middle (MITM) attacks:
 ```
-firehawk-main/modules/vault-ssh/modules/known-hosts/known_hosts.sh --external-domain ap-southeast-2.compute.amazonaws.com --trusted-ca ~/Downloads/trusted-user-ca-keys.pem --ssh-known-hosts ~/Downloads/ssh_known_hosts_fragment
+firehawk-main/modules/vault-ssh/modules/firehawk-auth-scripts/known-hosts --external-domain ap-southeast-2.compute.amazonaws.com --trusted-ca ~/Downloads/trusted-user-ca-keys.pem --ssh-known-hosts ~/Downloads/ssh_known_hosts_fragment
 ```
 - Now you should be able to ssh into a private host, via public the bastion host, with the command provided at the end of running this in `deploy/`: `terragrunt run-all apply`  eg:
 ```
@@ -245,41 +368,23 @@ All hosts now have the capability for authenticated SSH with certificates!  The 
 
 ### Diagnosing SSH problems:
 
-Usually a lot can be determined by looking at the user data logs to deetermine if SSH Certs, Vault, and Consul are all behaving.
+Usually a lot can be determined by looking at the user data logs to determine if SSH Certs, Vault, and Consul are all behaving.
 The Cloud 9 host can ssh in to any private IP, but you will have to ignore host key checking if there are problems with certificates.  Be mindful of this, it is why we should really only do it on a private network, and to resolve issues in a dev environment.
 The user data log is available at:
 ```
 /var/log/user-data.log 
 ```
 
-### Configuring the VPN from your remote client (WIP)
-
-Provided web forwarding is established and you have the vault UI running, you should be able to automate a VPN gateway.
-It is required that the SSH connection is established automatically because you have SSH certificates configured.
-It is important you do not take this step in an unsecured network.  The purpose of the VPN gateway is to unify two networks.  The only limiting factors for communication protocols will be security groups.
-
-- Configure the vpn hosts json file with an ip address valid for your onsite network.  If possible, onl your router, assign the mac addresses to have the IP addresses from the json file in `firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client/ip_addresses.json`
-
-- There are steps that must also be taken to configure your router to allow access to your cloud private subnet by configuring the VPN static routes.
-
-- TODO: describe how to configure static routes.
-
-- Ensure SSH forwarding is functional and you can use the Vault UI explained in the previous steps:
-
-- From Cloud 9, create a token you can use to automatically retrieve your vpn config using the vpn_read_config_policy
-You must provide a vault token, which should based on a policy of least privilege.  This token will have a short ttl, enough time for our automation script to acquire the VPN config.  We can also define a reasonable use limit, preventing the secret from being useful once we are done with it!  in This case we need to use it twice, once to login, and another when we request the vpn config file.
+### Diagnosing VPN problems:
+By observing the logs on the Raspberry Pi you should be able to determine if a connection is established or if errors are encountered while trying to gather current credentials, or establish a connection with the vpn.
 ```
-vault token create -policy=vpn_read_config -policy=deadline_client -explicit-max-ttl=5m -ttl=5m -use-limit=4
+tail -f /var/log/syslog
 ```
-
-- Run the vagrant wake script 
-./modules/terraform-aws-vpn/modules/openvpn-vagrant-client/wake {resourcetier} {public host} {private host} 
-eg:
+You can also check the credential service and open vpn service status with:
 ```
-./modules/terraform-aws-vpn/modules/openvpn-vagrant-client/wake dev centos@ec2-13-211-132-68.ap-southeast-2.compute.amazonaws.com centos@i-0330138643ba03b32.node.consul
+systemctl status awsauthvpn.service
+systemctl status openvpn
 ```
-
-- You can acquire the dynamic open vpn password in vault under `/dev/network/openvpn_admin_pw`
 
 # Terminology
 

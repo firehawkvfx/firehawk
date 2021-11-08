@@ -4,7 +4,7 @@
 
 set -e # exit on failure
 
-pwd=$(pwd)
+EXECDIR="$(pwd)"
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
 cd $SCRIPTDIR
 
@@ -74,4 +74,7 @@ git pull origin $branch --recurse
 echo "...Submodule status"
 git submodule status --recursive
 
-cd $pwd
+cd ~
+cd $EXECDIR
+
+echo "Done pulling git repo."

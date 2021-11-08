@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -e
+
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
+
+source $SCRIPTDIR/update_vars.sh
+$SCRIPTDIR/install-packages
+$SCRIPTDIR/init/init
+echo "You must Reboot to apply DNSMASQ to environment"

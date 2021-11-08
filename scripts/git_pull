@@ -1,0 +1,10 @@
+#!/bin/bash
+
+set -e # exit on failure
+
+EXECDIR="$(pwd)"
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
+
+echo "git_pull: Pulling all submodules"
+cd $SCRIPTDIR/..
+./gitpullrecursive --init-all
