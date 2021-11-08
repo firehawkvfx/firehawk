@@ -1,9 +1,9 @@
 [submodule "firehawk-main"]
 	path = deploy/firehawk-main
-	url = ../firehawk-main.git
+	url = https://github.com/firehawkvfx/firehawk-main.git
 [submodule "firehawk-render-cluster"]
 	path = deploy/firehawk-render-cluster
-	url = ../firehawk-render-cluster.git
+	url = https://github.com/firehawkvfx/firehawk-render-cluster.git
 [submodule "packer-firehawk-amis"]
 	path = deploy/packer-firehawk-amis
-	url = ../packer-firehawk-amis.git
+	url = https://github.com/firehawkvfx/packer-firehawk-amis.git
