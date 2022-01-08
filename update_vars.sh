@@ -91,6 +91,11 @@ SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # 
 function export_vars {
   local -r latest_ami="$1"
   local -r skip_find_amis="$2"
+  local -r verbose="$3"
+  if [[ "$verbose" == "true "]]; then
+    echo "Enabled verbose mode"
+    set -x
+  fi
   # Region is required for AWS CLI
   export AWS_DEFAULT_REGION=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/\(.*\)[a-z]/\1/')
   # Get the resourcetier from the instance tag.
@@ -268,6 +273,7 @@ function options { # Not all defaults are available as args, however the script 
   local run="true"
   local sub_script="true"
   local skip_find_amis="false"
+  local verbose="false"
 
   while [[ $# > 0 ]]; do
     local key="$1"
@@ -285,6 +291,9 @@ function options { # Not all defaults are available as args, however the script 
       --sub-script)
         sub_script="true"
         ;;
+      --verbose)
+        verbose="true"
+        ;;
       *)
         log_error "Unrecognized argument: $key"
         print_usage
@@ -294,7 +303,7 @@ function options { # Not all defaults are available as args, however the script 
     shift
   done
   if [[ "$run" == "true" ]]; then
-    export_vars "$latest_ami" "$skip_find_amis"
+    export_vars "$latest_ami" "$skip_find_amis" "$verbose"
   fi
 }
 
