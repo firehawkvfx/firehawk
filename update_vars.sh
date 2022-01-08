@@ -303,6 +303,7 @@ function options { # Not all defaults are available as args, however the script 
     shift
   done
   if [[ "$run" == "true" ]]; then
+    echo "verbose: $verbose"
     export_vars "$latest_ami" "$skip_find_amis" "$verbose"
   fi
 }
