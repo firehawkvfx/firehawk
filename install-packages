@@ -7,27 +7,29 @@ aws sts get-caller-identity
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
 cd $SCRIPTDIR
 
-sudo yum install -y git
-sudo yum install -y python python3.7 python3-pip # for a specific python version - https://realpython.com/intro-to-pyenv/
+SUDOCMD="" # replace with text sudo to use elevated permissions
+
+$SUDOCMD yum install -y git
+$SUDOCMD yum install -y python python3.7 python3-pip # for a specific python version - https://realpython.com/intro-to-pyenv/
 python3 -m pip install --user --upgrade pip # Do not run pip as sudo. Do this instead.
 python3 -m pip install ansible boto3 botocore
 
 # sudo yum install -y python-devel # for a specific ansible vesion - https://stackoverflow.com/questions/40661622/how-to-install-older-package-of-ansible
 # python3 -m pip ansible==2.1.0.0 
-sudo yum install -y jq
+$SUDOCMD yum install -y jq
 mkdir -p $SCRIPTDIR/tmp
 
 wget https://releases.hashicorp.com/terraform/0.13.7/terraform_0.13.7_linux_amd64.zip -P /tmp/ # Get terraform
-sudo unzip /tmp/terraform_0.13.7_linux_amd64.zip -d /tmp/
-sudo mv /tmp/terraform /usr/local/bin/.
+$SUDOCMD unzip /tmp/terraform_0.13.7_linux_amd64.zip -d /tmp/
+$SUDOCMD mv /tmp/terraform /usr/local/bin/.
 
 wget https://releases.hashicorp.com/packer/1.7.2/packer_1.7.2_linux_amd64.zip -P /tmp/ # Get Packer
-sudo unzip /tmp/packer_1.7.2_linux_amd64.zip -d /tmp/
-sudo mv /tmp/packer /usr/local/bin/.
+$SUDOCMD unzip /tmp/packer_1.7.2_linux_amd64.zip -d /tmp/
+$SUDOCMD mv /tmp/packer /usr/local/bin/.
 
 wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.30.3/terragrunt_linux_386 -P /tmp/ # Get Terragrunt
-sudo mv /tmp/terragrunt_linux_386 /usr/local/bin/terragrunt
-sudo chmod +x /usr/local/bin/terragrunt
+$SUDOCMD mv /tmp/terragrunt_linux_386 /usr/local/bin/terragrunt
+$SUDOCMD chmod +x /usr/local/bin/terragrunt
 
 mkdir -p "$HOME/.ssh/tls" # The directory to store TLS certificates in.
 
