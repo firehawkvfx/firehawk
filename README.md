@@ -56,6 +56,28 @@ IAMFullAccess
 AdministratorAccess
 
 WARNING: These are overly permissive for development and should be further restricted. (TODO: define restricted policies)
+
+Create a policy named SSMParameterAccessFirehawk to allow codebuild access to SSM parameters:
+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ssm:DescribeParameters"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ssm:GetParameters"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
 ## Creating The Cloud9 Environment
 
 - In AWS Management Console | Cloud9: Select Create Environment
