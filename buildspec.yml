@@ -5,7 +5,7 @@ phases:
     commands:
       - git submodule init
       - git submodule update --recursive
-      - source ./update_vars.sh --verbose
+      - source ./update_vars.sh --verbose --codebuild --resourcetier dev
       - ./install-packages
       - ./init/init
   build:

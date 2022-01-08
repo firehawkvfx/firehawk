@@ -92,6 +92,8 @@ function export_vars {
   local -r latest_ami="$1"
   local -r skip_find_amis="$2"
   local -r verbose="$3"
+  local -r codebuild="$4"
+  local -r resourcetier="$5"
 
   if [[ "$verbose" == "true" ]]; then
     echo "Enabled verbose mode"
@@ -99,21 +101,31 @@ function export_vars {
   fi
   # Region is required for AWS CLI
   echo "AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION"
-  
-  export AWS_DEFAULT_REGION=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/\(.*\)[a-z]/\1/')
-  # Get the resourcetier from the instance tag.
-  export TF_VAR_instance_id_main_cloud9=$(curl http://169.254.169.254/latest/meta-data/instance-id)
-  export TF_VAR_resourcetier="$(aws ec2 describe-tags --filters Name=resource-id,Values=$TF_VAR_instance_id_main_cloud9 --out=json|jq '.Tags[]| select(.Key == "resourcetier")|.Value' --raw-output)" # Can be dev,green,blue,main.  it is pulled from this instance's tags by default
+
+  if [[ "$codebuild" == "false" ]]; then
+    export AWS_DEFAULT_REGION=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/\(.*\)[a-z]/\1/')
+  fi
+  # Get the resourcetier from the instance tag if not passed inline
+  if [[ -z "$resourcetier" ]]; then
+    export TF_VAR_instance_id_main_cloud9=$(curl http://169.254.169.254/latest/meta-data/instance-id)
+    resourcetier="$(aws ec2 describe-tags --filters Name=resource-id,Values=$TF_VAR_instance_id_main_cloud9 --out=json|jq '.Tags[]| select(.Key == "resourcetier")|.Value' --raw-output)"
+  fi
+  export TF_VAR_resourcetier="$resourcetier" # Can be dev,green,blue,main.  it is pulled from this instance's tags by default
   export TF_VAR_resourcetier_vault="$TF_VAR_resourcetier" # WARNING: if vault is deployed in a seperate tier for use, then this will probably need to become an SSM driven parameter from the template
   # Instance and vpc data
-  export TF_VAR_remote_cloud_public_ip_cidr="$(curl http://169.254.169.254/latest/meta-data/public-ipv4)/32" # The cloud 9 IP to provision with.
-  export TF_VAR_remote_cloud_private_ip_cidr="$(curl http://169.254.169.254/latest/meta-data/local-ipv4)/32"
-  export TF_VAR_deployer_ip_cidr="$TF_VAR_remote_cloud_private_ip_cidr" # Initially there will be no remote ip onsite, so we use the cloud 9 ip.  You may wish to switch this to a public ip to debug some scenarios (like if a peering connection is not established)
+  if [[ "$codebuild" == "false" ]]; then
+    export TF_VAR_remote_cloud_public_ip_cidr="$(curl http://169.254.169.254/latest/meta-data/public-ipv4)/32" # The cloud 9 IP to provision with.
+    export TF_VAR_remote_cloud_private_ip_cidr="$(curl http://169.254.169.254/latest/meta-data/local-ipv4)/32"
+    export TF_VAR_deployer_ip_cidr="$TF_VAR_remote_cloud_private_ip_cidr" # Initially there will be no remote ip onsite, so we use the cloud 9 ip.  You may wish to switch this to a public ip to debug some scenarios (like if a peering connection is not established)
+    macid=$(curl http://169.254.169.254/latest/meta-data/network/interfaces/macs/)
+    export TF_VAR_vpc_id_main_cloud9=$(curl http://169.254.169.254/latest/meta-data/network/interfaces/macs/${macid}/vpc-id) # Aquire the cloud 9 instance's VPC ID to peer with Main VPC
+    export TF_VAR_cloud9_instance_name="$(aws ec2 describe-tags --filters Name=resource-id,Values=$TF_VAR_instance_id_main_cloud9 --out=json|jq '.Tags[]| select(.Key == "Name")|.Value' --raw-output)"
+    export TF_VAR_account_id=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | grep -oP '(?<="accountId" : ")[^"]*(?=")')
+  else
+    export TF_VAR_cloud9_instance_name="codebuild"
+    export TF_VAR_account_id="$CODEBUILD_WEBHOOK_ACTOR_ACCOUNT_ID"
+  fi
 
-  macid=$(curl http://169.254.169.254/latest/meta-data/network/interfaces/macs/)
-  export TF_VAR_vpc_id_main_cloud9=$(curl http://169.254.169.254/latest/meta-data/network/interfaces/macs/${macid}/vpc-id) # Aquire the cloud 9 instance's VPC ID to peer with Main VPC
-  export TF_VAR_cloud9_instance_name="$(aws ec2 describe-tags --filters Name=resource-id,Values=$TF_VAR_instance_id_main_cloud9 --out=json|jq '.Tags[]| select(.Key == "Name")|.Value' --raw-output)"
-  export TF_VAR_account_id=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | grep -oP '(?<="accountId" : ")[^"]*(?=")')
   export TF_VAR_owner="$(aws s3api list-buckets --query Owner.DisplayName --output text)"
   # region specific vars
   export PKR_VAR_aws_region="$AWS_DEFAULT_REGION"
@@ -277,6 +289,8 @@ function options { # Not all defaults are available as args, however the script 
   local sub_script="true"
   local skip_find_amis="false"
   local verbose="false"
+  local codebuild="false"
+  local resourcetier=""
 
   while [[ $# > 0 ]]; do
     local key="$1"
@@ -297,6 +311,13 @@ function options { # Not all defaults are available as args, however the script 
       --verbose)
         verbose="true"
         ;;
+      --codebuild)
+        codebuild="true"
+        ;;
+      --resourcetier)
+        resourcetier="$2"
+        shift
+        ;;
       *)
         log_error "Unrecognized argument: $key"
         print_usage
@@ -307,7 +328,7 @@ function options { # Not all defaults are available as args, however the script 
   done
   if [[ "$run" == "true" ]]; then
     echo "verbose: $verbose"
-    export_vars "$latest_ami" "$skip_find_amis" "$verbose"
+    export_vars "$latest_ami" "$skip_find_amis" "$verbose" "$codebuild" "$resourcetier"
   fi
 }
 
