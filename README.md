@@ -73,6 +73,7 @@ Your instance should now have permission to create and destroy any resource with
 ```
 git clone --recurse https://github.com/firehawkvfx/firehawk-main.git
 cd firehawk; ./install-packages
+./deploy/firehawk-main/scripts/resize.sh
 ```
 
 - Initialise the environment variables to spin up the resources.

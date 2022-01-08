@@ -33,6 +33,5 @@ $SUDOCMD chmod +x /usr/local/bin/terragrunt
 
 mkdir -p "$HOME/.ssh/tls" # The directory to store TLS certificates in.
 
-echo "Resizing EBS volume..."
-
-$SCRIPTDIR/deploy/firehawk-main/scripts/resize.sh
+# echo "Resizing EBS volume..."
+# $SCRIPTDIR/deploy/firehawk-main/scripts/resize.sh
