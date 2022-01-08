@@ -16,5 +16,5 @@ artifacts:
   files:
     - '**/*'
 
-batch:
-  fast-fail: false
+# batch:
+#   fast-fail: false

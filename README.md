@@ -42,6 +42,20 @@ This deployment uses Cloud 9 to simplify management of AWS Secret Keys.  You wil
   - modules/cloudformation-cloud9-vault-iam/cloudformation_cloud9_policies.yaml
   - modules/cloudformation-cloud9-vault-iam/cloudformation_ssm_parameters_firehawk.yaml
 
+Follow the guide here to create a codebuild service role:
+https://docs.aws.amazon.com/codebuild/latest/userguide/setting-up.html
+
+We will set the name of the policy as:
+CodeBuildServiceRolePolicyFirehawk
+
+And then create a role attaching the above policy.  This role will be named:
+CodeBuildServiceRoleFirehawk
+
+Also attach the policies named:
+IAMFullAccess
+AdministratorAccess
+
+WARNING: These are overly permissive for development and should be further restricted. (TODO: define restricted policies)
 ## Creating The Cloud9 Environment
 
 - In AWS Management Console | Cloud9: Select Create Environment
