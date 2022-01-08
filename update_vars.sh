@@ -98,6 +98,7 @@ function export_vars {
     set -x
   fi
   # Region is required for AWS CLI
+  echo "AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION"
   export AWS_DEFAULT_REGION=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/\(.*\)[a-z]/\1/')
   # Get the resourcetier from the instance tag.
   export TF_VAR_instance_id_main_cloud9=$(curl http://169.254.169.254/latest/meta-data/instance-id)
