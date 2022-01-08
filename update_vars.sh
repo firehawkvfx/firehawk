@@ -92,7 +92,8 @@ function export_vars {
   local -r latest_ami="$1"
   local -r skip_find_amis="$2"
   local -r verbose="$3"
-  if [[ "$verbose" == "true "]]; then
+
+  if [[ "$verbose" == "true" ]]; then
     echo "Enabled verbose mode"
     set -x
   fi
