@@ -3,6 +3,8 @@ version: 0.2
 phases:
   install:
     commands:
+      - git submodule init
+      - git submodule update --recursive
       - ./install-packages
   build:
     commands:
