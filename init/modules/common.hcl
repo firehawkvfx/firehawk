@@ -3,6 +3,8 @@
 locals { # inputs can't reference themselves, so we use locals first
   resourcetier = get_env("TF_VAR_resourcetier", "")
 
+  user = get_env("USER", "")
+
   # absolute project tags
   vpcname_rendervpc     = "${local.resourcetier}rendervpc"
   projectname_rendervpc = "firehawk-render-cluster" # A tag to recognise resources created in this project
@@ -44,6 +46,8 @@ locals { # inputs can't reference themselves, so we use locals first
 
 inputs = {
   resourcetier = local.resourcetier
+
+  cert_owner = local.user
 
   ca_public_key_file_path = local.ca_public_key_file_path
   public_key_file_path = local.public_key_file_path

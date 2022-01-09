@@ -25,7 +25,7 @@ variable "private_key_file_path" {
 variable "cert_owner" {
   description = "The OS user who should be given cert_ownership over the certificate files."
   type        = string
-  default     = "ec2-user"
+  # default     = "ec2-user"
 }
 
 variable "organization_name" {
