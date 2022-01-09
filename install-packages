@@ -10,7 +10,7 @@ cd $SCRIPTDIR
 
 SUDOCMD="" # replace with text sudo to use elevated permissions
 
-$SUDOCMD yum install -y git
+# $SUDOCMD yum install -y git
 $SUDOCMD yum install -y python python3.7 python3-pip # for a specific python version - https://realpython.com/intro-to-pyenv/
 python3 -m pip install --user --upgrade pip # Do not run pip as sudo. Do this instead.
 python3 -m pip install ansible boto3 botocore
@@ -18,15 +18,15 @@ python3 -m pip install ansible boto3 botocore
 $SUDOCMD yum install -y jq
 mkdir -p $SCRIPTDIR/tmp
 
-wget https://releases.hashicorp.com/terraform/0.13.7/terraform_0.13.7_linux_amd64.zip -P /tmp/ # Get terraform
+wget https://releases.hashicorp.com/terraform/0.13.7/terraform_0.13.7_linux_amd64.zip -P /tmp/ --quiet # Get terraform
 $SUDOCMD unzip /tmp/terraform_0.13.7_linux_amd64.zip -d /tmp/
 $SUDOCMD mv /tmp/terraform /usr/local/bin/.
 
-wget https://releases.hashicorp.com/packer/1.7.2/packer_1.7.2_linux_amd64.zip -P /tmp/ # Get Packer
+wget https://releases.hashicorp.com/packer/1.7.2/packer_1.7.2_linux_amd64.zip -P /tmp/ --quiet # Get Packer
 $SUDOCMD unzip /tmp/packer_1.7.2_linux_amd64.zip -d /tmp/
 $SUDOCMD mv /tmp/packer /usr/local/bin/.
 
-wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.30.3/terragrunt_linux_386 -P /tmp/ # Get Terragrunt
+wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.30.3/terragrunt_linux_386 -P /tmp/ --quiet # Get Terragrunt
 $SUDOCMD mv /tmp/terragrunt_linux_386 /usr/local/bin/terragrunt
 $SUDOCMD chmod +x /usr/local/bin/terragrunt
 
