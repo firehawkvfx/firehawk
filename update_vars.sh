@@ -272,8 +272,8 @@ function export_vars {
     log_error "SSM parameters are not yet initialised.  You can init SSM parameters with the cloudformation template modules/cloudformation-cloud9-vault-iam/cloudformation_ssm_parameters_firehawk.yaml"
     return
   fi
-
-
+  echo "Current user home dir:"
+  echo ~
   export TF_VAR_ca_public_key_file_path="/home/ec2-user/.ssh/tls/ca.crt.pem"
   if [[ -f "$TF_VAR_ca_public_key_file_path" ]]; then
     export TF_VAR_SSL_expiry=$(cat "$TF_VAR_ca_public_key_file_path" | openssl x509 -noout -enddate | awk -F "=" '{print $2}')
