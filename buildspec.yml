@@ -29,7 +29,7 @@ phases:
       # - git submodule update --recursive
       # - git config pull.rebase true
       - ./gitpullrecursive --init-all
-      - source ./update_vars.sh --verbose --codebuild --resourcetier $resourcetier
+      - source ./update_vars.sh --codebuild --resourcetier $resourcetier
       - ./install-packages
       # - ./init/init
   build:
