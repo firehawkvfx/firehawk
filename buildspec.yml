@@ -11,6 +11,7 @@ phases:
     commands:
       # - git submodule init
       # - git submodule update --recursive --depth 10 -j 8
+      - git remote prune origin
       - git checkout dev
       - git config pull.rebase false
       - git pull
