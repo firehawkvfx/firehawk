@@ -11,9 +11,13 @@ cd $SCRIPTDIR
 SUDOCMD="" # replace with text sudo to use elevated permissions
 
 # $SUDOCMD yum install -y git
-$SUDOCMD yum install -y python python3.7 python3-pip # for a specific python version - https://realpython.com/intro-to-pyenv/
-python3 -m pip install --user --upgrade pip # Do not run pip as sudo. Do this instead.
-python3 -m pip install ansible boto3 botocore
+$SUDOCMD yum install -y python
+$SUDOCMD yum install -y python3.7
+$SUDOCMD yum install -y python3-pip # for a specific python version - https://realpython.com/intro-to-pyenv/
+pip install --user --upgrade pip
+pip install ansible boto3 botocore
+# python3 -m pip install --user --upgrade pip # Do not run pip as sudo. Do this instead.
+# python3 -m pip install ansible boto3 botocore
 
 $SUDOCMD yum install -y jq
 mkdir -p $SCRIPTDIR/tmp
