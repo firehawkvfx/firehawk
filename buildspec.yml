@@ -9,7 +9,9 @@ env:
 phases:
   pre_build:
     commands:
+      - pip3 install --user --upgrade pip3
       - pip3 install awscli --upgrade --user
+      - pip3 install ansible boto3 botocore
   install:
     commands:
       # - git submodule init
