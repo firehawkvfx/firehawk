@@ -13,15 +13,15 @@ phases:
       # - git submodule update --recursive --depth 10 -j 8
       # - git remote prune origin
       - git status
-      - git rev-parse head
-      - git checkout dev
-      - git config pull.rebase false
-      - git pull
-      - git status
-      - git submodule init
-      - git submodule update --recursive
+      # - git rev-parse head
+      # - git checkout dev
+      # - git config pull.rebase false
+      # - git pull
+      # - git status
+      # - git submodule init
+      # - git submodule update --recursive
       # - git config pull.rebase true
-      - ./gitpullrecursive --init-all
+      - ./gitpullrecursive --init-all --skip-deinit
       - source ./update_vars.sh --verbose --codebuild --resourcetier $resourcetier
       - ./install-packages
       - ./init/init

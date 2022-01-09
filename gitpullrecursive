@@ -15,9 +15,12 @@ function clearcache {
   git status
 }
 
-function initsubmodules {
+function deinitsubmodules {
   echo "...deinit submodules"
   git submodule deinit -f $SCRIPTDIR
+}
+
+function initsubmodules {
   echo "...submodule update"
   git submodule update --init --recursive
 }
@@ -28,6 +31,7 @@ function options {
   while [[ $# > 0 ]]; do
     local key="$1"
     clear_cache="false"
+    deinit_submodules="true"
     init_submodules="false"
 
     case "$key" in
@@ -40,6 +44,9 @@ function options {
       --init-all)
         init_submodules="true"
         clear_cache="true"
+        ;;
+      --skip-deinit)
+        deinit_submodules="false"
         ;;
       --branch)
         branch="$2"
@@ -63,6 +70,9 @@ function options {
     clearcache
   fi
   if [[ "$init_submodules" == "true" ]]; then
+    if [[ "$deinit_submodules" == "true" ]]; then
+      deinitsubmodules
+    fi
     initsubmodules
   fi
 
