@@ -59,6 +59,7 @@ WARNING: These are overly permissive for development and should be further restr
 
 Create a policy named SSMParameterAccessFirehawk to allow codebuild access to SSM parameters:
 
+
 {
     "Version": "2012-10-17",
     "Statement": [
