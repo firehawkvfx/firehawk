@@ -7,6 +7,9 @@ env:
     onsite_public_ip: "/firehawk/resourcetier/$resourcetier/onsite_public_ip"
 
 phases:
+  pre_build:
+    commands:
+      - pip3 install awscli --upgrade --user
   install:
     commands:
       # - git submodule init
