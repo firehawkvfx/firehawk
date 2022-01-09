@@ -27,7 +27,7 @@ resource "null_resource" "ca_public_key_file_path" {
     always_run = timestamp() # Always run this since we dont know if this is a new vault and an old state file.  This could be better.  perhaps track an init var in the vault?
   }
   provisioner "local-exec" {
-    command = "echo '${tls_self_signed_cert.ca.cert_pem}' > '${var.ca_public_key_file_path}' && chmod ${var.permissions} '${var.ca_public_key_file_path}' && chown ${var.cert_owner} '${var.ca_public_key_file_path}'"
+    command = "echo 'set permissions init/modules/private-tls-cert' && echo '${tls_self_signed_cert.ca.cert_pem}' > '${var.ca_public_key_file_path}' && chmod ${var.permissions} '${var.ca_public_key_file_path}' && chown ${var.cert_owner} '${var.ca_public_key_file_path}'"
   }
 }
 
