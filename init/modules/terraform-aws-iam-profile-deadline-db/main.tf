@@ -46,20 +46,20 @@ data "aws_iam_policy_document" "assume_role" { # Determines the services able to
 # }
 
 module "iam_policies_deadline_spot_fleet" {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/aws-iam-policies-deadline-spot-fleet?ref=v0.0.12"
+  source = "github.com/firehawkvfx/firehawk-main.git//modules/aws-iam-policies-deadline-spot-fleet?ref=v0.0.24"
   name = "DeadlineSpotFleetLauncher_${var.conflictkey}"
   iam_role_id = aws_iam_role.instance_role.id
 }
 
 # Policy Allowing Read and write access to S3
 module "iam_policies_s3_read_write" {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/aws-iam-policies-s3-read-write?ref=v0.0.3"
+  source = "github.com/firehawkvfx/firehawk-main.git//modules/aws-iam-policies-s3-read-write?ref=v0.0.24"
   name = "S3ReadWrite_${var.conflictkey}"
   iam_role_id = aws_iam_role.instance_role.id
 }
 # Policy to query the identity of the current role.  Required for Vault.
 module "iam_policies_get_caller_identity" {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/aws-iam-policies-get-caller-identity?ref=v0.0.3"
+  source = "github.com/firehawkvfx/firehawk-main.git//modules/aws-iam-policies-get-caller-identity?ref=v0.0.24"
   name = "STSGetCallerIdentity_${var.conflictkey}"
   iam_role_id = aws_iam_role.instance_role.id
 }
