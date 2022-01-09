@@ -5,9 +5,19 @@ include {
 locals {
   common_vars = read_terragrunt_config(find_in_parent_folders("common.hcl"))
   ca_public_key_file_path = var.ca_public_key_file_path
+  public_key_file_path = var.public_key_file_path
+  private_key_file_path = var.private_key_file_path
 }
 
-inputs = local.common_vars.inputs
+# inputs = local.common_vars.inputs
+inputs = merge(
+  local.common_vars.inputs,
+  {
+    ca_public_key_file_path = local.ca_public_key_file_path
+    public_key_file_path    = local.public_key_file_path
+    private_key_file_path   = local.private_key_file_path
+  }
+)
 
 terraform { # After SSL certs have been generated, isntall them to the current instance. 
   after_hook "after_hook_1" {

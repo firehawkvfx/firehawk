@@ -275,6 +275,8 @@ function export_vars {
   echo "Current user home dir:"
   echo ~
   export TF_VAR_ca_public_key_file_path="$HOME/.ssh/tls/ca.crt.pem"
+  export TF_VAR_public_key_file_path="$HOME/.ssh/tls/vault.crt.pem"
+  export TF_VAR_private_key_file_path="$HOME/.ssh/tls/vault.key.pem"
   if [[ -f "$TF_VAR_ca_public_key_file_path" ]]; then
     export TF_VAR_SSL_expiry=$(cat "$TF_VAR_ca_public_key_file_path" | openssl x509 -noout -enddate | awk -F "=" '{print $2}')
     export PKR_VAR_SSL_expiry="$TF_VAR_SSL_expiry"
