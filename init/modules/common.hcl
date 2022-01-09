@@ -45,6 +45,10 @@ locals { # inputs can't reference themselves, so we use locals first
 inputs = {
   resourcetier = local.resourcetier
 
+  ca_public_key_file_path = local.ca_public_key_file_path
+  public_key_file_path = local.public_key_file_path
+  private_key_file_path = local.private_key_file_path
+
   vpcname_rendervpc = local.vpcname_rendervpc
   projectname_rendervpc = local.projectname_rendervpc
   common_tags_rendervpc = local.common_tags_rendervpc
