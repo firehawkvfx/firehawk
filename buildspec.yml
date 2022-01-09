@@ -11,10 +11,10 @@ phases:
     commands:
       - python3 -m pip install --user --upgrade pip
       - python3 -m pip install ansible boto3 botocore
-      - git status
-      - ./gitpullrecursive --init-all
   install:
     commands:
+      - git status
+      - ./gitpullrecursive --init-all
       - source ./update_vars.sh --codebuild --resourcetier $resourcetier
       - ./install-packages
       - ./init/init
