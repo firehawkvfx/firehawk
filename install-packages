@@ -14,8 +14,6 @@ $SUDOCMD yum install -y python python3.7 python3-pip # for a specific python ver
 python3 -m pip install --user --upgrade pip # Do not run pip as sudo. Do this instead.
 python3 -m pip install ansible boto3 botocore
 
-# sudo yum install -y python-devel # for a specific ansible vesion - https://stackoverflow.com/questions/40661622/how-to-install-older-package-of-ansible
-# python3 -m pip ansible==2.1.0.0 
 $SUDOCMD yum install -y jq
 mkdir -p $SCRIPTDIR/tmp
 

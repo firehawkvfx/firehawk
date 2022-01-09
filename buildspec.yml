@@ -23,8 +23,9 @@ phases:
       # - git config pull.rebase true
       - ./gitpullrecursive --init-all
       - source ./update_vars.sh --verbose --codebuild --resourcetier $resourcetier
+      - set -x
       - ./install-packages
-      - ./init/init
+      # - ./init/init
   build:
     commands:
       - echo '...replace with real build commands...'
