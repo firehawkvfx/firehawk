@@ -21,7 +21,7 @@ phases:
       # - git submodule init
       # - git submodule update --recursive
       # - git config pull.rebase true
-      - ./gitpullrecursive --init-all --skip-deinit
+      - ./gitpullrecursive --init-all
       - source ./update_vars.sh --verbose --codebuild --resourcetier $resourcetier
       - ./install-packages
       - ./init/init
