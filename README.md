@@ -78,6 +78,7 @@ Create a policy named SSMParameterAccessFirehawk to allow codebuild access to SS
         }
     ]
 }
+
 ## Creating The Cloud9 Environment
 
 - In AWS Management Console | Cloud9: Select Create Environment
