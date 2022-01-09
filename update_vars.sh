@@ -165,13 +165,6 @@ function export_vars {
   #   latest_ami=false
   # fi
   # AMI query by commit - Vault and Consul Servers
-  set -x
-  ls
-  ls deploy
-  ls deploy/packer-firehawk-amis
-  ls deploy/packer-firehawk-amis/modules
-  ls deploy/packer-firehawk-amis/modules/firehawk-ami
-
 
   export TF_VAR_ami_commit_hash="$(cd $TF_VAR_firehawk_path/../packer-firehawk-amis/modules/firehawk-ami; git rev-parse HEAD)" 
 
