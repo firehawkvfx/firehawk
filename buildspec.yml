@@ -1,11 +1,17 @@
 version: 0.2
 
+env:
+  variables:
+    resourcetier: dev
+  parameter-store:
+    onsite_public_ip: "/firehawk/resourcetier/$resourcetier/onsite_public_ip"
+
 phases:
   install:
     commands:
       - git submodule init
       - git submodule update --recursive
-      - source ./update_vars.sh --verbose --codebuild --resourcetier dev
+      - source ./update_vars.sh --verbose --codebuild --resourcetier $resourcetier
       - ./install-packages
       - ./init/init
   build:
