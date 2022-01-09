@@ -11,27 +11,13 @@ phases:
     commands:
       - python3 -m pip install --user --upgrade pip
       - python3 -m pip install ansible boto3 botocore
-      # - pip3 install --user --upgrade pip3
-      # - pip3 install awscli --upgrade --user
-      # - pip3 install ansible boto3 botocore
+      - git status
+      - ./gitpullrecursive --init-all
   install:
     commands:
-      # - git submodule init
-      # - git submodule update --recursive --depth 10 -j 8
-      # - git remote prune origin
-      - git status
-      # - git rev-parse head
-      # - git checkout dev
-      # - git config pull.rebase false
-      # - git pull
-      # - git status
-      # - git submodule init
-      # - git submodule update --recursive
-      # - git config pull.rebase true
-      - ./gitpullrecursive --init-all
       - source ./update_vars.sh --codebuild --resourcetier $resourcetier
       - ./install-packages
-      # - ./init/init
+      - ./init/init
   build:
     commands:
       - echo '...replace with real build commands...'
