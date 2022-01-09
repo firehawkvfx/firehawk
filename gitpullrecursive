@@ -80,7 +80,7 @@ function options {
 
 options "$@"
 
-git pull origin $branch --recurse
+# git pull origin $branch --recurse
 echo "...Submodule status"
 git submodule status --recursive
 
