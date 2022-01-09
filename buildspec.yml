@@ -18,10 +18,13 @@ phases:
       - source ./update_vars.sh --codebuild --resourcetier $resourcetier
       - ./install-packages
       - ./init/init
-  build:
-    commands:
-      - echo '...replace with real build commands...'
-
+      - cd deploy/packer-firehawk-amis/modules/firehawk-base-ami
+      - ./build.sh
+  # build:
+  #   commands:
+  #     - source ./update_vars.sh --codebuild --resourcetier $resourcetier
+  #     - cd deploy/packer-firehawk-amis/modules/firehawk-base-ami
+  #     - ./build.sh
 artifacts:
   files:
     - '**/*'
