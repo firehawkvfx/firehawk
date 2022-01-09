@@ -3,7 +3,7 @@
 locals { # inputs can't reference themselves, so we use locals first
   resourcetier = get_env("TF_VAR_resourcetier", "")
 
-  user = get_env("USER", "")
+  cert_owner = get_env("TF_VAR_cert_owner")
 
   # absolute project tags
   vpcname_rendervpc     = "${local.resourcetier}rendervpc"
@@ -47,7 +47,7 @@ locals { # inputs can't reference themselves, so we use locals first
 inputs = {
   resourcetier = local.resourcetier
 
-  cert_owner = local.user
+  cert_owner = local.cert_owner
 
   ca_public_key_file_path = local.ca_public_key_file_path
   public_key_file_path = local.public_key_file_path

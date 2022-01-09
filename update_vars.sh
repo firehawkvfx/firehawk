@@ -128,6 +128,8 @@ function export_vars {
 
   export TF_VAR_owner="$(aws s3api list-buckets --query Owner.DisplayName --output text)"
   export TF_VAR_public_key_owner="$HOME"
+  export TF_VAR_cert_owner="$USER"
+  echo "TF_VAR_cert_owner: $TF_VAR_cert_owner"
   # region specific vars
   export PKR_VAR_aws_region="$AWS_DEFAULT_REGION"
   export TF_VAR_aws_internal_domain=$AWS_DEFAULT_REGION.compute.internal # used for FQDN resolution

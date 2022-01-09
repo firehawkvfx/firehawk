@@ -2,8 +2,5 @@
 
 # init will deploy vault only and ensure it is initialised.
 set -x
-ls $TF_VAR_firehawk_path
-ls $TF_VAR_firehawk_path/modules
-ls $TF_VAR_firehawk_path/modules/terraform-aws-vpn
 
 terragrunt run-all apply --terragrunt-source-update --terragrunt-source-map github.com/firehawkvfx/firehawk-main.git=$TF_VAR_firehawk_path --terragrunt-non-interactive
