@@ -94,6 +94,7 @@ function export_vars {
   local -r verbose="$3"
   local -r codebuild="$4"
   local -r resourcetier="$5"
+  local -r user_var="$6"
 
   if [[ "$verbose" == "true" ]]; then
     echo "Enabled verbose mode"
@@ -128,7 +129,7 @@ function export_vars {
 
   export TF_VAR_owner="$(aws s3api list-buckets --query Owner.DisplayName --output text)"
   export TF_VAR_public_key_owner="$HOME"
-  export TF_VAR_cert_owner="$USERNAME"
+  export TF_VAR_cert_owner="$user_var"
   echo "TF_VAR_cert_owner: $TF_VAR_cert_owner"
   # region specific vars
   export PKR_VAR_aws_region="$AWS_DEFAULT_REGION"
@@ -297,6 +298,11 @@ function options { # Not all defaults are available as args, however the script 
   local verbose="false"
   local codebuild="false"
   local resourcetier=""
+  local user_var="$USER"
+  if [[ -z "$user_var" ]]; then
+    user_var="root"
+    echo "user_var empty. Set to: $user_var"
+  fi
 
   while [[ $# > 0 ]]; do
     local key="$1"
@@ -324,6 +330,10 @@ function options { # Not all defaults are available as args, however the script 
         resourcetier="$2"
         shift
         ;;
+      --user-var)
+        user_var="$2"
+        shift
+        ;;
       *)
         log_error "Unrecognized argument: $key"
         print_usage
@@ -334,7 +344,7 @@ function options { # Not all defaults are available as args, however the script 
   done
   if [[ "$run" == "true" ]]; then
     echo "verbose: $verbose"
-    export_vars "$latest_ami" "$skip_find_amis" "$verbose" "$codebuild" "$resourcetier"
+    export_vars "$latest_ami" "$skip_find_amis" "$verbose" "$codebuild" "$resourcetier" "$user_var"
   fi
 }
 
