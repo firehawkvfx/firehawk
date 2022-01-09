@@ -131,6 +131,10 @@ function export_vars {
   export TF_VAR_public_key_owner="$HOME"
   export TF_VAR_cert_owner="$user_var"
   echo "TF_VAR_cert_owner: $TF_VAR_cert_owner"
+  if [[ -z "$TF_VAR_cert_owner" ]]; then
+    echo "ERROR: TF_VAR_cert_owner is empty."
+    exit 1
+  fi
   # region specific vars
   export PKR_VAR_aws_region="$AWS_DEFAULT_REGION"
   export TF_VAR_aws_internal_domain=$AWS_DEFAULT_REGION.compute.internal # used for FQDN resolution
