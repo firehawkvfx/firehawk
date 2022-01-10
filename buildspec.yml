@@ -21,6 +21,10 @@ phases:
       - source ./update_vars.sh --codebuild --resourcetier $resourcetier
       # - ./deploy/packer-firehawk-amis/modules/firehawk-base-ami/build.sh
       - source ./update_vars.sh --codebuild --resourcetier $resourcetier
+      - ls ./deploy
+      - ls ./deploy/packer-firehawk-amis
+      - ls ./deploy/packer-firehawk-amis/modules
+      - ls ./deploy/packer-firehawk-amis/modules/firehawk-ami
       - ./deploy/packer-firehawk-amis/modules/firehawk-ami/build.sh
   # build:
   #   commands:
