@@ -126,6 +126,7 @@ function export_vars {
     export TF_VAR_cloud9_instance_name="codebuild"
     export TF_VAR_account_id="$CODEBUILD_WEBHOOK_ACTOR_ACCOUNT_ID"
   fi
+  export PKR_VAR_account_id="$TF_VAR_account_id"
 
   export TF_VAR_owner="$(aws s3api list-buckets --query Owner.DisplayName --output text)"
   export TF_VAR_public_key_owner="$HOME"
