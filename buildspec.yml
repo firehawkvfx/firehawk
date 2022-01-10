@@ -22,7 +22,7 @@ phases:
       # - ./deploy/packer-firehawk-amis/modules/firehawk-base-ami/build.sh
       - source ./update_vars.sh --codebuild --resourcetier $resourcetier
       - ls ./deploy
-      - ansible --version
+      # - ansible --version
       - ./deploy/packer-firehawk-amis/modules/firehawk-ami/build.sh
   # build:
   #   commands:
