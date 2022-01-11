@@ -12,6 +12,8 @@ phases:
   #     - python3 -m pip install --user --upgrade pip
   #     - python3 -m pip install ansible boto3 botocore
   install:
+    runtime-versions:
+      python: 3.8
     commands:
       - python3.8 --version
       - pip --version
