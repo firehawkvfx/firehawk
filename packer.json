@@ -1,0 +1,26 @@
+{
+    "builders": [{
+        "type": "amazon-ebs",
+        "region": "ap-southeast-1",
+        "ami_regions": "ap-southeast-1",
+        "source_ami": "ami-0ff21806645c5e492",
+        "instance_type": "t2.micro",
+        "ssh_username": "ec2-user",
+        "ami_name": "packer-quick-start {{timestamp}}",
+        "ami_description": "created by packer at {{timestamp}}",
+        "ebs_optimized": false,
+        "tags": {
+            "OS_Version": "Amazon Linux AMI 2018.03",
+            "timestamp": "{{timestamp}}",
+            "isotime": "{{isotime \"2006-01-02 03:04:05\"}}"
+        },
+        "disable_stop_instance": false
+    }],
+    "provisioners": [
+        {
+            "type" : "ansible",
+            "user": "ec2-user",
+            "playbook_file" : "ansible/main.yaml"
+        }
+    ]
+}

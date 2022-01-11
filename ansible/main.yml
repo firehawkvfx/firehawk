@@ -1,0 +1,9 @@
+---
+- hosts: all
+  become: yes
+  gather_facts: no
+  tasks:
+    - name: be sure httpd is installed
+      yum: name=httpd state=installed
+    - name: be sure httpd is running and enabled
+      service: name=httpd state=started enabled=yes
