@@ -12,10 +12,6 @@ locals {
   aws_kms_key_tags = merge(map("Name", "vault-kms-unseal-${random_pet.env.id}"), local.common_tags)
 }
 
-output "aws_kms_key_tags" {
-  aws_kms_key_tags = local.aws_kms_key_tags
-}
-
 resource "aws_kms_key" "vault" {
   description             = "Vault unseal key"
   deletion_window_in_days = 10
