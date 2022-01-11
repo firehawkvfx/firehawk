@@ -54,6 +54,8 @@ CodeBuildServiceRoleFirehawk
 Also attach the policies named:
 IAMFullAccess
 AdministratorAccess
+AmazonEC2FullAccess
+AmazonSSMFullAccess
 
 WARNING: These are overly permissive for development and should be further restricted. (TODO: define restricted policies)
 
