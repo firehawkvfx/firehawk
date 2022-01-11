@@ -47,6 +47,7 @@ phases:
       - curl -qL -o packer.zip https://releases.hashicorp.com/packer/1.7.8/packer_1.7.8_linux_amd64.zip && unzip packer.zip
       - ./packer version
       - python3.8 -m pip install --user ansible
+      - find /. -name 'ansible' -type f 
       - ansible --version
       - echo 'Validate packer json'
       - ./packer validate packer.json
