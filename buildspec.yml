@@ -44,10 +44,10 @@ phases:
       - python --version
       - pip --version
       - python -m pip install --upgrade pip
-      - curl -qL -o packer.zip https://releases.hashicorp.com/packer/1.4.3/packer_1.4.3_linux_amd64.zip && unzip packer.zip
+      - curl -qL -o packer.zip https://releases.hashicorp.com/packer/1.7.8/packer_1.7.8_linux_amd64.zip && unzip packer.zip
       - ./packer version
       - python -m pip install --user ansible
-      - ansible --version
+      - /etc/ansible/ansible --version
       - echo 'Validate packer json'
       - ./packer validate packer.json
   build:
