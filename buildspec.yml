@@ -48,6 +48,8 @@ phases:
       - ./packer version
       - python3.8 -m pip install --user ansible
       - find /. -name 'ansible' -type f 
+      - /root/.local/bin/ansible --version
+      - export PATH=$PATH:/root/.local/bin/ansible
       - ansible --version
       - echo 'Validate packer json'
       - ./packer validate packer.json
