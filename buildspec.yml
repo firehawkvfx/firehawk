@@ -38,15 +38,15 @@ version: 0.2
 phases:
   install:
     runtime-versions:
-      python: 3.7
+      python: 3.8
   pre_build:
     commands:
-      - python --version
+      - python3.8 --version
       - pip --version
-      - python -m pip install --upgrade pip
+      - python3.8 -m pip install --upgrade pip
       - curl -qL -o packer.zip https://releases.hashicorp.com/packer/1.7.8/packer_1.7.8_linux_amd64.zip && unzip packer.zip
       - ./packer version
-      - python -m pip install --user ansible
+      - python3.8 -m pip install --user ansible
       - /etc/ansible/ansible --version
       - echo 'Validate packer json'
       - ./packer validate packer.json
