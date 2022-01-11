@@ -127,7 +127,7 @@ function export_vars {
     export TF_VAR_account_id=$(aws sts get-caller-identity | jq .Account)
   fi
   echo "TF_VAR_account_id: $TF_VAR_account_id"
-  export PKR_VAR_account_id="$TF_VAR_account_id"
+  export PKR_VAR_account_id=$TF_VAR_account_id
   echo "PKR_VAR_account_id: $PKR_VAR_account_id"
 
   export TF_VAR_owner="$(aws s3api list-buckets --query Owner.DisplayName --output text)"
