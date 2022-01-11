@@ -48,23 +48,15 @@ https://docs.aws.amazon.com/codebuild/latest/userguide/setting-up.html
 We will set the name of the policy as:
 CodeBuildServiceRolePolicyFirehawk
 
-And then create a role attaching the above policy.  This role will be named:
-CodeBuildServiceRoleFirehawk
-
-Also attach the policies named:
-IAMFullAccess
-AdministratorAccess
-AmazonEC2FullAccess
-AmazonSSMFullAccess
-
-WARNING: These are overly permissive for development and should be further restricted. (TODO: define restricted policies)
-
-Create a policy named SSMParameterAccessFirehawk to allow codebuild access to SSM parameters:
-
-
 {
     "Version": "2012-10-17",
     "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": "kms:*",
+            "Resource": "*"
+        },
         {
             "Effect": "Allow",
             "Action": [
@@ -78,9 +70,84 @@ Create a policy named SSMParameterAccessFirehawk to allow codebuild access to SS
                 "ssm:GetParameters"
             ],
             "Resource": "*"
+        },
+        {
+            "Sid": "CloudWatchLogsPolicy",
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "CodeCommitPolicy",
+            "Effect": "Allow",
+            "Action": [
+                "codecommit:GitPull"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "S3GetObjectPolicy",
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:GetObjectVersion"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "S3PutObjectPolicy",
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "ECRPullPolicy",
+            "Effect": "Allow",
+            "Action": [
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "ECRAuthPolicy",
+            "Effect": "Allow",
+            "Action": [
+                "ecr:GetAuthorizationToken"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "S3BucketIdentity",
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetBucketAcl",
+                "s3:GetBucketLocation"
+            ],
+            "Resource": "*"
         }
     ]
 }
+
+And then create a role attaching the above policy.  This role will be named:
+CodeBuildServiceRoleFirehawk
+
+Also attach the policies named:
+IAMFullAccess
+AdministratorAccess
+AmazonEC2FullAccess
+AmazonS3FullAccess
+
+WARNING: These are overly permissive for development and should be further restricted. (TODO: define restricted policies)
+
+
 
 
 ## Creating The Cloud9 Environment
