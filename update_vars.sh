@@ -124,7 +124,7 @@ function export_vars {
     export TF_VAR_account_id=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | grep -oP '(?<="accountId" : ")[^"]*(?=")')
   else
     export TF_VAR_cloud9_instance_name="codebuild"
-    export TF_VAR_account_id="$CODEBUILD_WEBHOOK_ACTOR_ACCOUNT_ID"
+    export TF_VAR_account_id="$(aws sts get-caller-identity | jq .Account)"
   fi
   echo "TF_VAR_account_id: $TF_VAR_account_id"
   export PKR_VAR_account_id="$TF_VAR_account_id"
