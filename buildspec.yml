@@ -31,8 +31,6 @@ phases:
       - ./install-packages
       - ./init/init
   build:
-    runtime-versions:
-      python: 3.8
     commands:
       - source ./update_vars.sh --codebuild --resourcetier $resourcetier
       - ./deploy/packer-firehawk-amis/modules/firehawk-base-ami/build.sh
