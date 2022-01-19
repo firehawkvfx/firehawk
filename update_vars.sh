@@ -117,7 +117,7 @@ function export_vars {
   if [[ "$codebuild" == "false" ]]; then
     export TF_VAR_remote_cloud_public_ip_cidr="$(curl http://169.254.169.254/latest/meta-data/public-ipv4)/32" # The cloud 9 IP to provision with.
     export TF_VAR_remote_cloud_private_ip_cidr="$(curl http://169.254.169.254/latest/meta-data/local-ipv4)/32"
-    export TF_VAR_deployer_ip_cidr="$TF_VAR_remote_cloud_private_ip_cidr" # Initially there will be no remote ip onsite, so we use the cloud 9 ip.  You may wish to switch this to a public ip to debug some scenarios (like if a peering connection is not established)
+    # export TF_VAR_deployer_ip_cidr="$TF_VAR_remote_cloud_private_ip_cidr" # Initially there will be no remote ip onsite, so we use the cloud 9 ip.  You may wish to switch this to a public ip to debug some scenarios (like if a peering connection is not established)
     macid=$(curl http://169.254.169.254/latest/meta-data/network/interfaces/macs/)
     export TF_VAR_vpc_id_main_cloud9=$(curl http://169.254.169.254/latest/meta-data/network/interfaces/macs/${macid}/vpc-id) # Aquire the cloud 9 instance's VPC ID to peer with Main VPC
     export TF_VAR_cloud9_instance_name="$(aws ec2 describe-tags --filters Name=resource-id,Values=$TF_VAR_instance_id_main_cloud9 --out=json|jq '.Tags[]| select(.Key == "Name")|.Value' --raw-output)"
@@ -129,6 +129,7 @@ function export_vars {
   echo "TF_VAR_account_id: $TF_VAR_account_id"
   export PKR_VAR_account_id=$TF_VAR_account_id
   echo "PKR_VAR_account_id: $PKR_VAR_account_id"
+  echo "TF_VAR_deployer_sg_id: $TF_VAR_deployer_sg_id"
 
   export TF_VAR_owner="$(aws s3api list-buckets --query Owner.DisplayName --output text)"
   export TF_VAR_public_key_owner="$HOME"
