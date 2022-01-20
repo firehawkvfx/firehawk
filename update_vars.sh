@@ -130,6 +130,7 @@ function export_vars {
   export PKR_VAR_account_id=$TF_VAR_account_id
   echo "PKR_VAR_account_id: $PKR_VAR_account_id"
   echo "TF_VAR_deployer_sg_id: $TF_VAR_deployer_sg_id"
+  echo "TF_VAR_vpc_id_main_cloud9: $TF_VAR_vpc_id_main_cloud9"
 
   export TF_VAR_owner="$(aws s3api list-buckets --query Owner.DisplayName --output text)"
   export TF_VAR_public_key_owner="$HOME"
