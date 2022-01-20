@@ -25,6 +25,8 @@ phases:
       - ./gitpullrecursive --init-all
       - source ./update_vars.sh --codebuild --resourcetier $resourcetier
       - ./install-packages
+      - codebuild-breakpoint
+      - source ./update_vars.sh --codebuild --resourcetier $resourcetier
       - ./init/init
   build:
     commands:
