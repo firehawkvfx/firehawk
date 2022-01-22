@@ -35,6 +35,11 @@ wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.30.3/terrag
 $SUDOCMD mv /tmp/terragrunt_linux_386 /usr/local/bin/terragrunt
 $SUDOCMD chmod +x /usr/local/bin/terragrunt
 
+echo "...Installing Consul"
+rm -fr /tmp/terraform-aws-consul
+git clone --branch "v0.8.0" https://github.com/hashicorp/terraform-aws-consul.git /tmp/terraform-aws-consul
+/tmp/terraform-aws-consul/modules/install-consul/install-consul --version "1.9.2"
+
 mkdir -p "$HOME/.ssh/tls" # The directory to store TLS certificates in.
 
 # echo "Resizing EBS volume..."
