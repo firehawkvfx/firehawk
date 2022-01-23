@@ -8,38 +8,36 @@ env:
 
 phases:
   install:
-    # runtime-versions:
-    #   python: 3.8
+    runtime-versions:
+      python: 3.8
     commands:
-      - set -x
-      - yum update -y --skip-broken
-      # - python3.8 --version
-      # - pip --version
-      # - python3.8 -m pip install --upgrade pip
-      # - curl -qL -o packer.zip https://releases.hashicorp.com/packer/1.7.8/packer_1.7.8_linux_amd64.zip && unzip packer.zip
-      # - ./packer version
-      # - python3.8 -m pip install --user ansible boto3 botocore
-      # - /root/.local/bin/ansible --version
-      # - export PATH=$PATH:/root/.local/bin
-      # - ansible --version
-      # - git status
-      # - git rev-parse HEAD
-      # - ./gitpullrecursive --init-all
-      # - echo "Get container data:"
-      # - curl -sSf "$ECS_CONTAINER_METADATA_URI_V4/task"
-      # - source ./update_vars.sh --codebuild --resourcetier $resourcetier
+      - python3.8 --version
+      - pip --version
+      - python3.8 -m pip install --upgrade pip
+      - curl -qL -o packer.zip https://releases.hashicorp.com/packer/1.7.8/packer_1.7.8_linux_amd64.zip && unzip packer.zip
+      - ./packer version
+      - python3.8 -m pip install --user ansible boto3 botocore
+      - /root/.local/bin/ansible --version
+      - export PATH=$PATH:/root/.local/bin
+      - ansible --version
+      - git status
+      - git rev-parse HEAD
+      - ./gitpullrecursive --init-all
+      - echo "Get container data:"
+      - curl -sSf "$ECS_CONTAINER_METADATA_URI_V4/task"
+      - source ./update_vars.sh --codebuild --resourcetier $resourcetier
       - ./install-packages
-      # - echo "PATH=$PATH"
+      - echo "PATH=$PATH"
+      - source ./update_vars.sh --codebuild --resourcetier $resourcetier
+      - ./init/init
+  build:
+    commands:
       # - source ./update_vars.sh --codebuild --resourcetier $resourcetier
-      # - ./init/init
-  # build:
-  #   commands:
-  #     # - source ./update_vars.sh --codebuild --resourcetier $resourcetier
-  #     # - ./deploy/packer-firehawk-amis/modules/firehawk-base-ami/build.sh
-  #     # - source ./update_vars.sh --codebuild --resourcetier $resourcetier
-  #     # - ./deploy/packer-firehawk-amis/modules/firehawk-ami/build.sh
-  #     - source ./update_vars.sh --codebuild --resourcetier $resourcetier
-  #     # - codebuild-breakpoint
-  #     - ./vault-init/init
-  #     # - source ./update_vars.sh --codebuild --resourcetier $resourcetier
-  #     # - ./vault-init/configure
+      # - ./deploy/packer-firehawk-amis/modules/firehawk-base-ami/build.sh
+      # - source ./update_vars.sh --codebuild --resourcetier $resourcetier
+      # - ./deploy/packer-firehawk-amis/modules/firehawk-ami/build.sh
+      - source ./update_vars.sh --codebuild --resourcetier $resourcetier
+      # - codebuild-breakpoint
+      - ./vault-init/init
+      # - source ./update_vars.sh --codebuild --resourcetier $resourcetier
+      # - ./vault-init/configure
