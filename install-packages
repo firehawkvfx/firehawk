@@ -46,7 +46,7 @@ $SUDOCMD yum install dhclient -y
 # mkdir -p /etc/dhcp
 # touch /etc/dhcp/dhclient.conf
 /tmp/terraform-aws-consul/modules/install-dnsmasq/install-dnsmasq --skip-package-update
-sudo service dnsmasq restart # starting the service is required for it to function on first boot.
+$SUDOCMD service dnsmasq restart # starting the service is required for it to function on first boot.
 
 mkdir -p "$HOME/.ssh/tls" # The directory to store TLS certificates in.
 
