@@ -145,17 +145,17 @@ function run {
     #     /tmp/terraform-aws-consul/modules/install-consul/install-consul --version $consul_version
     # fi
 
-    if [[ "$build" == "ubuntu16" ]] || [[ "$build" == "amazonlinux2" ]]; then
-        /tmp/terraform-aws-consul/modules/install-dnsmasq/install-dnsmasq
-        sudo service dnsmasq restart # starting the service is required for it to function on first boot.
-        log "WARNING:"
-        log "WARNING: Ensure you reboot this instance before attempting to use consul"
-    elif [[ "$build" == "ubuntu18" ]]; then
-        /tmp/terraform-aws-consul/modules/setup-systemd-resolved/setup-systemd-resolved
-    else
-        log_error 'No var $build specified'
-        exit 1
-    fi
+    # if [[ "$build" == "ubuntu16" ]] || [[ "$build" == "amazonlinux2" ]]; then
+    #     /tmp/terraform-aws-consul/modules/install-dnsmasq/install-dnsmasq
+    #     sudo service dnsmasq restart # starting the service is required for it to function on first boot.
+    #     log "WARNING:"
+    #     log "WARNING: Ensure you reboot this instance before attempting to use consul"
+    # elif [[ "$build" == "ubuntu18" ]]; then
+    #     /tmp/terraform-aws-consul/modules/setup-systemd-resolved/setup-systemd-resolved
+    # else
+    #     log_error 'No var $build specified'
+    #     exit 1
+    # fi
 }
 
 function update {
