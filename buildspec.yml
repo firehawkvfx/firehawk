@@ -28,7 +28,7 @@ phases:
       # - echo "Get container data:"
       # - curl -sSf "$ECS_CONTAINER_METADATA_URI_V4/task"
       # - source ./update_vars.sh --codebuild --resourcetier $resourcetier
-      # - ./install-packages
+      - ./install-packages
       # - echo "PATH=$PATH"
       # - source ./update_vars.sh --codebuild --resourcetier $resourcetier
       # - ./init/init
