@@ -12,6 +12,8 @@ phases:
     #   python: 3.8
     commands:
       - set -x
+      - curl http://www.google.com
+      - sleep 5
       - rm /etc/resolv.conf
       - touch /etc/resolv.conf
       - echo "nameserver 8.8.8.8" | tee --append /etc/resolv.conf
