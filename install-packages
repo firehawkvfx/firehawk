@@ -35,14 +35,11 @@ mkdir -p $SCRIPTDIR/tmp
 yum --showduplicates list libuv | expand
 $SUDOCMD yum install libuv-1.42.0
 
-echo "...Installing Consul"
-set -x
-rm -fr /tmp/terraform-aws-consul
-git clone --branch "v0.11.0" https://github.com/hashicorp/terraform-aws-consul.git /tmp/terraform-aws-consul
-/tmp/terraform-aws-consul/modules/install-consul/install-consul --version "1.11.2"
-echo "Done installing Consul."
+# echo "...Installing Consul"
+# set -x
+# rm -fr /tmp/terraform-aws-consul
+# git clone --branch "v0.11.0" https://github.com/hashicorp/terraform-aws-consul.git /tmp/terraform-aws-consul
+# /tmp/terraform-aws-consul/modules/install-consul/install-consul --version "1.11.2"
+# echo "Done installing Consul."
 
-mkdir -p "$HOME/.ssh/tls" # The directory to store TLS certificates in.
-
-# echo "Resizing EBS volume..."
-# $SCRIPTDIR/deploy/firehawk-main/scripts/resize.sh
+# mkdir -p "$HOME/.ssh/tls" # The directory to store TLS certificates in.
