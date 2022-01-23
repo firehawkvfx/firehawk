@@ -11,7 +11,9 @@ phases:
     # runtime-versions:
     #   python: 3.8
     commands:
-      - yum-config-manager --save --setopt=dev.mysql.com_downloads_repo_yum_.skip_if_unavailable=true
+      - set -x
+      - cat /etc/resolv.conf
+      # - yum-config-manager --save --setopt=dev.mysql.com_downloads_repo_yum_.skip_if_unavailable=true
       - yum update -y
       # - python3.8 --version
       # - pip --version
