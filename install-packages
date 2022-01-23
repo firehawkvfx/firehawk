@@ -39,8 +39,11 @@ $SUDOCMD chmod +x /usr/local/bin/terragrunt
 git clone --branch "pull-request-241" https://github.com/queglay/terraform-aws-consul.git /tmp/terraform-aws-consul
 /tmp/terraform-aws-consul/modules/install-consul/install-consul --version "1.9.2" --skip-package-update
 
-echo "...Search /etc/dhcp/dhclient*"
-ls /etc/dhcp/dhclient*
+# echo "...Search /etc/dhcp/dhclient*"
+# ls /etc/dhcp/dhclient*
+$SUDOCMD yum install dhclient -y
+# echo "WARNING: IT IS HIGHLY LIKELY CREATING THIS NEXT FILE WILL NOT FIX DNSMASQ /etc/dhcp/dhclient.conf"
+# mkdir -p /etc/dhcp
 # touch /etc/dhcp/dhclient.conf
 /tmp/terraform-aws-consul/modules/install-dnsmasq/install-dnsmasq --skip-package-update
 sudo service dnsmasq restart # starting the service is required for it to function on first boot.
