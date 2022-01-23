@@ -11,6 +11,7 @@ cd $SCRIPTDIR
 SUDOCMD="" # replace with text sudo to use elevated permissions
 
 # $SUDOCMD yum install -y git
+$SUDOCMD yum update -y
 $SUDOCMD yum install -y sudo
 # $SUDOCMD yum install -y python
 # $SUDOCMD yum install -y python3.7
