@@ -136,14 +136,14 @@ function run {
         fi
     }
 
-    rm -fr /tmp/terraform-aws-consul
-    git clone --branch $consul_module_version https://github.com/hashicorp/terraform-aws-consul.git /tmp/terraform-aws-consul
+    # rm -fr /tmp/terraform-aws-consul
+    # git clone --branch $consul_module_version https://github.com/hashicorp/terraform-aws-consul.git /tmp/terraform-aws-consul
 
-    if test -n "$consul_download_url"; then
-        /tmp/terraform-aws-consul/modules/install-consul/install-consul --download-url $consul_download_url
-    else
-        /tmp/terraform-aws-consul/modules/install-consul/install-consul --version $consul_version
-    fi
+    # if test -n "$consul_download_url"; then
+    #     /tmp/terraform-aws-consul/modules/install-consul/install-consul --download-url $consul_download_url
+    # else
+    #     /tmp/terraform-aws-consul/modules/install-consul/install-consul --version $consul_version
+    # fi
 
     if [[ "$build" == "ubuntu16" ]] || [[ "$build" == "amazonlinux2" ]]; then
         /tmp/terraform-aws-consul/modules/install-dnsmasq/install-dnsmasq

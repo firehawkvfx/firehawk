@@ -37,7 +37,7 @@ $SUDOCMD mv /tmp/terragrunt_linux_386 /usr/local/bin/terragrunt
 $SUDOCMD chmod +x /usr/local/bin/terragrunt
 
 git clone --branch "pull-request-241" https://github.com/queglay/terraform-aws-consul.git /tmp/terraform-aws-consul
-/tmp/terraform-aws-consul/modules/install-consul/install-consul --version "1.11.2" --skip-package-update
+/tmp/terraform-aws-consul/modules/install-consul/install-consul --version "1.9.2" --skip-package-update
 
 mkdir -p "$HOME/.ssh/tls" # The directory to store TLS certificates in.
 
