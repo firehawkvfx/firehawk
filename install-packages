@@ -10,9 +10,15 @@ cd $SCRIPTDIR
 
 SUDOCMD="" # replace with text sudo to use elevated permissions
 
-# $SUDOCMD yum install -y git
 $SUDOCMD yum install -y sudo
-$SUDOCMD yum update -y --skip-broken
+
+# This fixes yum update problems with codebuild
+$SUDOCMD yum install -y yum-utils
+$SUDOCMD yum remove -y libuv-1.39.0-1.amzn2.x86_64
+$SUDOCMD yum clean all
+$SUDOCMD rm -rf /var/cache/yum
+$SUDOCMD yum update -y
+
 $SUDOCMD yum install -y python
 $SUDOCMD yum install -y python3.7
 $SUDOCMD yum install -y python3-pip # for a specific python version - https://realpython.com/intro-to-pyenv/
