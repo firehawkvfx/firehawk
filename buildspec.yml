@@ -38,6 +38,7 @@ phases:
       # - ./deploy/packer-firehawk-amis/modules/firehawk-ami/build.sh
       - source ./update_vars.sh --codebuild --resourcetier $resourcetier
       # - codebuild-breakpoint
-      - ./vault-init/init
+      # - ./vault-init/init
+      - ./vault-init/destroy
       # - source ./update_vars.sh --codebuild --resourcetier $resourcetier
       # - ./vault-init/configure
