@@ -2,9 +2,9 @@ version: 0.0
 os: linux
 hooks:
   BeforeInstall:
-    - location: scripts/git_pull
-      timeout: 300
-      runas: root
+    # - location: scripts/git_pull
+    #   timeout: 300
+    #   runas: root
     - location: install-packages
       timeout: 300
       runas: root

@@ -1,3 +1,4 @@
 #!/bin/bash
 
-echo "End Deployment: Firehawk
+echo "End Deployment: Firehawk"
+
