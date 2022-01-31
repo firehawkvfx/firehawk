@@ -23,7 +23,7 @@ terraform { # After SSL certs have been generated, isntall them to the current i
   }
   after_hook "after_hook_1" {
     commands = ["apply"]
-    execute  = ["bash", "sudo", "service", "dnsmasq", "restart"]
+    execute  = ["bash", "service", "dnsmasq", "restart"]
   }
   after_hook "after_hook_2" {
     commands = ["apply"]
