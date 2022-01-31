@@ -10,7 +10,7 @@ locals {
 inputs = local.common_vars.inputs
 
 terraform { # After SSL certs have been generated, isntall them to the current instance. 
-  after_hook "after_hook_1" {
+  after_hook "after_hook_0" {
     commands = ["apply"]
     execute  = ["bash", "install-consul-vault-client", 
       "--vault-module-version", "v0.15.1",  
@@ -20,6 +20,10 @@ terraform { # After SSL certs have been generated, isntall them to the current i
       "--build", "amazonlinux2", 
       "--cert-file-path", local.ca_public_key_file_path
       ]
+  }
+  after_hook "after_hook_1" {
+    commands = ["apply"]
+    execute  = ["bash", "sudo", "service", "dnsmasq", "restart"]
   }
   after_hook "after_hook_2" {
     commands = ["apply"]
