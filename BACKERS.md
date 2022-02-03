@@ -10,7 +10,9 @@ Harvey Fong
 Anthony Morrelle  
 Michael Garrett  
 Hunter Williams  
-Mike Marcuzzi
+Mike Marcuzzi  
+Pascal Wiemers  
+  
 ### Previous Backers
 
 Geordie Martinez
