@@ -1,0 +1,18 @@
+#!/bin/bash
+
+set -e # exit on failure
+
+EXECDIR="$(pwd)"
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
+
+echo "USER: $USER"
+echo "install_log_agent: for region $AWS_DEFAULT_REGION"
+cd $SCRIPTDIR/..
+
+wget https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py
+wget https://s3.amazonaws.com/aws-codedeploy-us-east-1/cloudwatch/codedeploy_logs.conf
+chmod +x ./awslogs-agent-setup.py
+sudo python awslogs-agent-setup.py -n -r $AWS_DEFAULT_REGION -c s3://aws-codedeploy-us-east-1/cloudwatch/awslogs.conf
+sudo mkdir -p /var/awslogs/etc/config
+sudo cp codedeploy_logs.conf /var/awslogs/etc/config/
+sudo service awslogs restart

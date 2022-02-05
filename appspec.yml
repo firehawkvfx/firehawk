@@ -5,9 +5,13 @@ hooks:
     # - location: scripts/git_pull
     #   timeout: 300
     #   runas: root
+    - location: scripts/install_log_agent
+      timeout: 300
+      runas: root
     - location: install-packages
       timeout: 300
       runas: root
+
   ApplicationStop:
     - location: scripts/stop
       timeout: 300
