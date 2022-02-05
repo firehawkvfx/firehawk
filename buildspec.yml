@@ -29,11 +29,11 @@ phases:
       # - curl -sSf "$ECS_CONTAINER_METADATA_URI_V4/task"
       # - source ./update_vars.sh --codebuild --resourcetier $resourcetier
       # - ./install-packages
-      # - mkdir -p "$HOME/.ssh/tls"
-      # - export PATH=$PATH:/root/.local/bin
-      # - echo "PATH=$PATH"
-      # - source ./update_vars.sh --codebuild --resourcetier $resourcetier
-      # - ./init/init
+      - mkdir -p "$HOME/.ssh/tls"
+      - export PATH=$PATH:/root/.local/bin
+      - echo "PATH=$PATH"
+      - source ./update_vars.sh --codebuild --resourcetier $resourcetier
+      - ./init/init
   build:
     commands:
       # - source ./update_vars.sh --codebuild --resourcetier $resourcetier
