@@ -207,6 +207,10 @@ function export_vars {
     export TF_VAR_node_centos7_houdini_ami_id=$(retrieve_ami $latest_ami $ami_role $TF_VAR_ami_commit_hash)
     warn_if_invalid "$ami_role" "$TF_VAR_node_centos7_houdini_ami_id" "TF_VAR_node_centos7_houdini_ami_id"
     # AMI query by commit - Workstation
+    ami_role="firehawk_amazonlinux2_ami"
+    export TF_VAR_provisioner_ami_id=$(retrieve_ami $latest_ami $ami_role $TF_VAR_ami_commit_hash)
+    warn_if_invalid "$ami_role" "$TF_VAR_provisioner_ami_id" "TF_VAR_provisioner_ami_id"
+    # AMI query by commit - Workstation
     ami_role="firehawk_amazonlinux2_nicedcv_ami"
     export TF_VAR_workstation_amazonlinux2_nicedcv_ami_id=$(retrieve_ami $latest_ami $ami_role $TF_VAR_ami_commit_hash)
     warn_if_invalid "$ami_role" "$TF_VAR_workstation_amazonlinux2_nicedcv_ami_id" "TF_VAR_workstation_amazonlinux2_nicedcv_ami_id"
