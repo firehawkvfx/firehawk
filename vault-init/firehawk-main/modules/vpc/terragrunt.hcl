@@ -11,8 +11,7 @@ inputs = local.common_vars.inputs
 dependencies {
   paths = [ # not strictly dependencies, but if they fail, there is no point in continuing to deploy a vpc or anything else.
     "../terraform-aws-iam-profile-bastion", 
-    "../terraform-aws-iam-profile-openvpn",
-    "../terraform-aws-iam-profile-provisioner",  
+    "../terraform-aws-iam-profile-openvpn", 
     "../terraform-aws-iam-profile-vault-client",
     "../terraform-aws-iam-profile-rendernode"
     ]
