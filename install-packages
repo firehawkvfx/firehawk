@@ -7,7 +7,13 @@ echo "Installing packages for AWS codebuild environment"
 
 aws sts get-caller-identity
 
-SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
+SOURCE=${BASH_SOURCE[0]} # resolve the script dir even if a symlink is used to this script
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
+  SOURCE=$(readlink "$SOURCE")
+  [[ $SOURCE != /* ]] && SOURCE=$DIR/$SOURCE # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+SCRIPTDIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
 cd $SCRIPTDIR
 
 SUDOCMD="" # replace with text sudo to use elevated permissions
@@ -39,6 +45,9 @@ $SUDOCMD mv /tmp/packer /usr/local/bin/.
 wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.30.3/terragrunt_linux_386 -P /tmp/ --quiet # Get Terragrunt
 $SUDOCMD mv /tmp/terragrunt_linux_386 /usr/local/bin/terragrunt
 $SUDOCMD chmod +x /usr/local/bin/terragrunt
+
+echo "Set ownership to ec2-user for: $SCRIPTDIR"
+$SUDOCMD chown -R ec2-user:ec2-user $SCRIPTDIR
 
 # $SUDOCMD rm -fr /tmp/terraform-aws-consul
 # git clone --branch "pull-request-241" https://github.com/queglay/terraform-aws-consul.git /tmp/terraform-aws-consul
