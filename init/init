@@ -1,8 +1,5 @@
 #!/bin/bash
-# init will deploy vault only and ensure it is initialised.
-
-resourcetier = "dev"
-
+# init will deploy Minimum set of s3 buckets and create SSH keys prior to deployment
 set -x
 set -e
 EXECDIR="$(pwd)"
