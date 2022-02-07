@@ -3,6 +3,8 @@
 set -e
 set -x
 
+echo "Installing packages for AWS codebuild environment"
+
 aws sts get-caller-identity
 
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script

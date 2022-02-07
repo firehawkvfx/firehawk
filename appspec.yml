@@ -8,10 +8,14 @@ hooks:
     - location: scripts/install_log_agent
       timeout: 300
       runas: root
+  Install:
     - location: install-packages
       timeout: 300
       runas: root
-
+  ApplicationStart:
+    - location: init/init # ensure all requirement are initialised (SSH keys, S3 buckets, profiles etc)
+      timeout: 300
+      runas: root
   ApplicationStop:
     - location: scripts/stop
       timeout: 300
