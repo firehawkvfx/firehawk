@@ -22,10 +22,6 @@ $SUDOCMD yum update -y
 $SUDOCMD yum install -y python
 $SUDOCMD yum install -y python3.7
 $SUDOCMD yum install -y python3-pip # for a specific python version - https://realpython.com/intro-to-pyenv/
-# pip install --user --upgrade pip
-# pip install ansible boto3 botocore
-# python3 -m pip install --user --upgrade pip # Do not run pip as sudo. Do this instead.
-# python3 -m pip install ansible boto3 botocore
 
 $SUDOCMD yum install -y jq
 mkdir -p $SCRIPTDIR/tmp
@@ -42,20 +38,20 @@ wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.30.3/terrag
 $SUDOCMD mv /tmp/terragrunt_linux_386 /usr/local/bin/terragrunt
 $SUDOCMD chmod +x /usr/local/bin/terragrunt
 
-$SUDOCMD rm -fr /tmp/terraform-aws-consul
-git clone --branch "pull-request-241" https://github.com/queglay/terraform-aws-consul.git /tmp/terraform-aws-consul
-/tmp/terraform-aws-consul/modules/install-consul/install-consul --version "1.9.2" --skip-package-update
+# $SUDOCMD rm -fr /tmp/terraform-aws-consul
+# git clone --branch "pull-request-241" https://github.com/queglay/terraform-aws-consul.git /tmp/terraform-aws-consul
+# /tmp/terraform-aws-consul/modules/install-consul/install-consul --version "1.9.2" --skip-package-update
 
-# echo "...Search /etc/dhcp/dhclient*"
-# ls /etc/dhcp/dhclient*
-$SUDOCMD yum install dhclient -y
-# echo "WARNING: IT IS HIGHLY LIKELY CREATING THIS NEXT FILE WILL NOT FIX DNSMASQ /etc/dhcp/dhclient.conf"
-# mkdir -p /etc/dhcp
-# touch /etc/dhcp/dhclient.conf
-/tmp/terraform-aws-consul/modules/install-dnsmasq/install-dnsmasq --skip-package-update
-sleep 2
-# $SUDOCMD service dnsmasq restart
-$SUDOCMD systemctl enable dnsmasq # starting the service is required for it to function on first boot.
+# # echo "...Search /etc/dhcp/dhclient*"
+# # ls /etc/dhcp/dhclient*
+# $SUDOCMD yum install dhclient -y
+# # echo "WARNING: IT IS HIGHLY LIKELY CREATING THIS NEXT FILE WILL NOT FIX DNSMASQ /etc/dhcp/dhclient.conf"
+# # mkdir -p /etc/dhcp
+# # touch /etc/dhcp/dhclient.conf
+# /tmp/terraform-aws-consul/modules/install-dnsmasq/install-dnsmasq --skip-package-update
+# sleep 2
+# # $SUDOCMD service dnsmasq restart
+# $SUDOCMD systemctl enable dnsmasq # starting the service is required for it to function on first boot.
 
 mkdir -p "$HOME/.ssh/tls" # The directory to store TLS certificates in.
 
