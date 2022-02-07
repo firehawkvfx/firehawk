@@ -93,7 +93,7 @@ function export_vars {
   local -r skip_find_amis="$2"
   local -r verbose="$3"
   local -r codebuild="$4"
-  local -r resourcetier="$5"
+  local resourcetier="$5"
   local -r user_var="$6"
 
   if [[ "$verbose" == "true" ]]; then
