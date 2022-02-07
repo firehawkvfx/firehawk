@@ -11,10 +11,14 @@ export AWS_DEFAULT_REGION=$(curl -s http://169.254.169.254/latest/meta-data/plac
 echo "install_log_agent: for region $AWS_DEFAULT_REGION"
 cd $SCRIPTDIR/..
 
-wget https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py
-wget https://s3.amazonaws.com/aws-codedeploy-us-east-1/cloudwatch/codedeploy_logs.conf
-chmod +x ./awslogs-agent-setup.py
-sudo python awslogs-agent-setup.py -n -r $AWS_DEFAULT_REGION -c s3://aws-codedeploy-us-east-1/cloudwatch/awslogs.conf
-sudo mkdir -p /var/awslogs/etc/config
-sudo cp codedeploy_logs.conf /var/awslogs/etc/config/
-sudo service awslogs restart
+# wget https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py
+# wget https://s3.amazonaws.com/aws-codedeploy-us-east-1/cloudwatch/codedeploy_logs.conf
+# chmod +x ./awslogs-agent-setup.py
+# sudo python awslogs-agent-setup.py -n -r $AWS_DEFAULT_REGION -c s3://aws-codedeploy-us-east-1/cloudwatch/awslogs.conf
+# sudo mkdir -p /var/awslogs/etc/config
+# sudo cp codedeploy_logs.conf /var/awslogs/etc/config/
+# sudo service awslogs restart
+
+echo "Starting the logs agent"
+sudo systemctl start awslogsd
+sudo systemctl enable awslogsd.service
