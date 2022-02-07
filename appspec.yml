@@ -11,12 +11,12 @@ hooks:
   Install:
     - location: install-packages
       timeout: 300
-      runas: root
+      runas: ec2-user
   ApplicationStart:
     - location: init/init # ensure all requirement are initialised (SSH keys, S3 buckets, profiles etc)
       timeout: 300
-      runas: root
+      runas: ec2-user
   ApplicationStop:
     - location: scripts/stop
       timeout: 300
-      runas: root
+      runas: ec2-user
