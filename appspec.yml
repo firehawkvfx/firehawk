@@ -1,10 +1,15 @@
 version: 0.0
 os: linux
+# permissions:
+#   - object: /tmp/my-app/my-folder-2
+#     pattern: "**"
+#     except: [my-file-8.txt]
+#     owner: ec2-user
+#     mode: 777
+#     type:
+#       - file
 hooks:
   BeforeInstall:
-    # - location: scripts/git_pull
-    #   timeout: 300
-    #   runas: root
     - location: scripts/install_log_agent
       timeout: 300
       runas: root

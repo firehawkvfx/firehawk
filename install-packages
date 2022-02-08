@@ -16,7 +16,7 @@ done
 SCRIPTDIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
 cd $SCRIPTDIR
 
-SUDOCMD="" # replace with text sudo to use elevated permissions
+SUDOCMD="sudo" # replace with text sudo to use elevated permissions
 
 $SUDOCMD yum install -y sudo
 
