@@ -14,7 +14,7 @@ hooks:
       timeout: 300
       runas: root
   Install:
-    - location: ./install-packages
+    - location: scripts/install-packages
       timeout: 300
       runas: ec2-user
   ApplicationStart:
