@@ -236,7 +236,9 @@ function export_vars {
     export TF_VAR_vault_public_key=$(cat $TF_VAR_public_key_path)
   fi
 
-  export TF_VAR_log_dir="$SCRIPTDIR/tmp/log"; mkdir -p $TF_VAR_log_dir
+  export TF_VAR_log_dir="$SCRIPTDIR/tmp/log"; 
+  ls -ltriah $SCRIPTDIR
+  mkdir -p $TF_VAR_log_dir
 
   export VAULT_ADDR=https://vault.service.consul:8200 # verify dns before login with: dig vault.service.consul
   export consul_cluster_tag_key="consul-servers" # These tags are used when new hosts join a consul cluster. 
