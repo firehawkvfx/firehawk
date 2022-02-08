@@ -25,6 +25,6 @@ cd /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.d
 echo '{"agent": {"metrics_collection_interval": 10,"logfile": "/opt/codedeploy-agent/deployment-root/deployment-logs/codedeploy-agent-deployments.log"},"logs": { "logs_collected": {"files": {"collect_list": [{"file_path": "/var/log/aws/codedeploy-agent/codedeploy-agent.log","log_group_name": "codedeploy-agent-log","log_stream_name": "{instance_id}-codedeploy-agent-log"},{"file_path": "/tmp/codedeploy-agent.update.log", "log_group_name": "codedeploy-updater-log", "log_stream_name": "{instance_id}-codedeploy-updater-log" },{"file_path": "/opt/codedeploy-agent/deployment-root/deployment-logs/codedeploy-agent-deployments.log", "log_group_name": "codedeploy-deployments-log", "log_stream_name": "{instance_id}-codedeploy-deployments-log"} ] }},"log_stream_name": "codedeploy_firehawk_deploy","force_flush_interval": 15}}' >> cloudwatch.cfg
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:cloudwatch.cfg -s
 
-echo "Starting the logs agent"
-sudo systemctl start awslogsd
-sudo systemctl enable awslogsd.service
+# echo "Starting the logs agent"
+# sudo systemctl start awslogsd
+# sudo systemctl enable awslogsd.service
