@@ -21,6 +21,6 @@ cd $SCRIPTDIR
 # $SCRIPTDIR/../scripts/install-packages
 
 # terragrunt run-all apply --terragrunt-source-update --terragrunt-non-interactive
-source ../update_vars.sh
+# source ../update_vars.sh
 terragrunt run-all apply --terragrunt-source-update --terragrunt-source-map github.com/firehawkvfx/firehawk-main.git=$TF_VAR_firehawk_path --terragrunt-non-interactive
 cd $EXECDIR
