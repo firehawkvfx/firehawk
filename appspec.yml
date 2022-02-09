@@ -18,6 +18,9 @@ hooks:
       timeout: 300
       runas: ec2-user
   ApplicationStart:
+    - location: scripts/install-packages
+      timeout: 300
+      runas: ec2-user
     - location: init/init # ensure all requirement are initialised (SSH keys, S3 buckets, profiles etc)
       timeout: 300
       runas: ec2-user
