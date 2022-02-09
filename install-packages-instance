@@ -32,6 +32,10 @@ $SUDOCMD yum install -y python3.7
 $SUDOCMD yum install -y python3-pip # for a specific python version - https://realpython.com/intro-to-pyenv/
 
 $SUDOCMD yum install -y jq
+
+echo "Set ownership to ec2-user for: $SCRIPTDIR"
+$SUDOCMD chown -R ec2-user:ec2-user $SCRIPTDIR
+echo "Create tmp dir: $SCRIPTDIR/tmp"
 mkdir -p $SCRIPTDIR/tmp
 
 wget https://releases.hashicorp.com/terraform/0.13.7/terraform_0.13.7_linux_amd64.zip -P /tmp/ --quiet # Get terraform
@@ -46,8 +50,7 @@ wget https://github.com/gruntwork-io/terragrunt/releases/download/v0.30.3/terrag
 $SUDOCMD mv /tmp/terragrunt_linux_386 /usr/local/bin/terragrunt
 $SUDOCMD chmod +x /usr/local/bin/terragrunt
 
-echo "Set ownership to ec2-user for: $SCRIPTDIR"
-$SUDOCMD chown -R ec2-user:ec2-user $SCRIPTDIR
+
 
 # $SUDOCMD rm -fr /tmp/terraform-aws-consul
 # git clone --branch "pull-request-241" https://github.com/queglay/terraform-aws-consul.git /tmp/terraform-aws-consul
