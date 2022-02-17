@@ -34,7 +34,7 @@ resource "aws_s3_bucket" "vault_backend" {
   )
 }
 resource "aws_s3_bucket_acl" "acl_config" {
-  bucket = data.aws_s3_bucket.vault_backend.id
+  bucket = aws_s3_bucket.vault_backend.id
   acl    = "private"
 }
 resource "aws_s3_bucket_versioning" "versioning_config" {
