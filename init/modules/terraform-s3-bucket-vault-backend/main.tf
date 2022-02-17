@@ -33,11 +33,6 @@ resource "aws_s3_bucket" "vault_backend" {
     local.common_tags,
   )
 }
-resource "aws_s3_bucket_logging" "logging_config" {
-  bucket        = data.aws_s3_bucket.log_bucket.id
-  target_bucket = aws_s3_bucket.log_bucket.id
-  target_prefix = "log/bucket_${local.bucket_name}"
-}
 resource "aws_s3_bucket_acl" "acl_config" {
   bucket = data.aws_s3_bucket.vault_backend.id
   acl    = "private"
