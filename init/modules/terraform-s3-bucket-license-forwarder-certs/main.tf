@@ -54,7 +54,7 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "encryption_config
   }
 }
 
-resource "aws_s3_bucket_object" "base_folder" {
+resource "aws_s3_object" "base_folder" {
   bucket  = aws_s3_bucket.license_forwarder_cert_bucket.id
   acl     = "private"
   key     =  "ublcertszip/"
