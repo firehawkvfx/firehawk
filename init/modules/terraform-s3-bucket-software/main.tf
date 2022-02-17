@@ -32,7 +32,7 @@ resource "aws_s3_bucket_logging" "logging_config" {
   target_prefix = "log/bucket_${local.bucket_name}"
 }
 resource "aws_s3_bucket_acl" "acl_config" {
-  bucket = data.aws_s3_bucket.shared_bucket.id
+  bucket = aws_s3_bucket.shared_bucket.id
   acl    = "private"
 }
 resource "aws_s3_bucket_versioning" "versioning_config" {
