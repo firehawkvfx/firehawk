@@ -1,7 +1,0 @@
-#!/bin/bash
-
-echo
-echo "Vault Instructions:"
-echo
-echo "Since dnsmasq has been installed, if this is the first time you have run this on the current instance, you must reboot the system before attemopting to run vault, or DNS lookup will fail."
-echo
