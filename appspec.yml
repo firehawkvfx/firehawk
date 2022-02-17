@@ -37,14 +37,13 @@ hooks:
     - location: scripts/install_log_agent
       timeout: 300
       runas: root
-  Install:
     - location: install-packages-instance
       timeout: 300
       runas: ec2-user
   ApplicationStart:
-    - location: install-packages-instance
-      timeout: 300
-      runas: ec2-user
+    # - location: install-packages-instance
+    #   timeout: 300
+    #   runas: ec2-user
     - location: init/init-deploy # ensure all requirement are initialised (SSH keys, S3 buckets, profiles etc)
       timeout: 3600 # 1 hour timeout.
       runas: ec2-user
