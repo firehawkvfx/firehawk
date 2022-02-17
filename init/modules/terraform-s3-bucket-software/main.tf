@@ -17,27 +17,35 @@ data "aws_s3_bucket" "log_bucket" {
 
 resource "aws_s3_bucket" "shared_bucket" {
   bucket = local.bucket_name
-  acl    = "private"
-  versioning {
-    enabled = true
-  }
-  logging {
-    target_bucket = data.aws_s3_bucket.log_bucket.id
-    target_prefix = "log/bucket_${local.bucket_name}"
-  }
-  # Enable server-side encryption by default
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
-    }
-  }
   tags = merge(
     { "description" = "Used for storing files for reuse accross accounts." },
     local.common_tags,
   )
 }
+resource "aws_s3_bucket_logging" "logging_config" {
+  bucket        = data.aws_s3_bucket.log_bucket.id
+  target_bucket = aws_s3_bucket.log_bucket.id
+  target_prefix = "log/bucket_${local.bucket_name}"
+}
+resource "aws_s3_bucket_acl" "acl_config" {
+  bucket = data.aws_s3_bucket.shared_bucket.id
+  acl    = "private"
+}
+resource "aws_s3_bucket_versioning" "versioning_config" {
+  bucket = aws_s3_bucket.shared_bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+resource "aws_s3_bucket_server_side_encryption_configuration" "encryption_config" {
+  bucket = aws_s3_bucket.shared_bucket.id
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
 resource "aws_s3_bucket_public_access_block" "backend" { # https://medium.com/dnx-labs/terraform-remote-states-in-s3-d74edd24a2c4
   bucket = aws_s3_bucket.shared_bucket.id
 

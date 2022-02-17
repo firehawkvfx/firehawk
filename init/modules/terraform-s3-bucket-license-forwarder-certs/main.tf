@@ -29,24 +29,29 @@ locals {
 
 resource "aws_s3_bucket" "license_forwarder_cert_bucket" {
   bucket = local.bucket_name
-  acl    = "private"
-  # Enable versioning so we can see the full revision history of our
-  # state files
-  versioning {
-    enabled = true
-  }
-  # Enable server-side encryption by default
-  server_side_encryption_configuration {
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
-    }
-  }
   tags = merge(
     {"description" = "Used for Terraform remote state configuration. DO NOT DELETE this Bucket unless you know what you are doing."},
     local.common_tags,
   )
+}
+resource "aws_s3_bucket_acl" "acl_config" {
+  bucket = aws_s3_bucket.license_forwarder_cert_bucket.id
+  acl    = "private"
+}
+resource "aws_s3_bucket_versioning" "versioning_config" {
+  bucket = aws_s3_bucket.license_forwarder_cert_bucket.id
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+resource "aws_s3_bucket_server_side_encryption_configuration" "encryption_config" {
+  bucket = aws_s3_bucket.license_forwarder_cert_bucket.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
 }
 
 resource "aws_s3_bucket_object" "base_folder" {
