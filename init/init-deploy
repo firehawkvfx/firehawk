@@ -12,15 +12,7 @@ done
 SCRIPTDIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd ) # The directory of this script
 cd $SCRIPTDIR
 
-# echo "Set ownership to ec2-user for: $SCRIPTDIR/.."
-# sudo chown -R ec2-user:ec2-user $SCRIPTDIR/..
-# ls -ltriah
-
-# cd $SCRIPTDIR
-
-# $SCRIPTDIR/../scripts/install-packages
-
-# terragrunt run-all apply --terragrunt-source-update --terragrunt-non-interactive
 source ../update_vars.sh
+terragrunt run-all terragrunt init --terragrunt-source-update --terragrunt-source-map github.com/firehawkvfx/firehawk-main.git=$TF_VAR_firehawk_path --terragrunt-non-interactive
 terragrunt run-all apply --terragrunt-source-update --terragrunt-source-map github.com/firehawkvfx/firehawk-main.git=$TF_VAR_firehawk_path --terragrunt-non-interactive
 cd $EXECDIR
