@@ -11,21 +11,15 @@ export AWS_DEFAULT_REGION=$(curl -s http://169.254.169.254/latest/meta-data/plac
 echo "install_log_agent: for region $AWS_DEFAULT_REGION"
 cd $SCRIPTDIR/..
 
-# wget https://s3.amazonaws.com/aws-cloudwatch/downloads/latest/awslogs-agent-setup.py
-# wget https://s3.amazonaws.com/aws-codedeploy-us-east-1/cloudwatch/codedeploy_logs.conf
-# chmod +x ./awslogs-agent-setup.py
-# sudo python awslogs-agent-setup.py -n -r $AWS_DEFAULT_REGION -c s3://aws-codedeploy-us-east-1/cloudwatch/awslogs.conf
-# sudo mkdir -p /var/awslogs/etc/config
-# sudo cp codedeploy_logs.conf /var/awslogs/etc/config/
-# sudo service awslogs restart
-
-sudo yum install amazon-cloudwatch-agent -y
-
 date=$(date +'%Y/%m/%d/%R')
 
+echo "Stopping cloudwatch agent"
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a stop
+
 cd /opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.d
-# echo "{\"agent\": {\"metrics_collection_interval\": 10,\"logfile\": \"/opt/codedeploy-agent/deployment-root/deployment-logs/codedeploy-agent-deployments.log\"},\"logs\": { \"logs_collected\": {\"files\": {\"collect_list\": [{\"file_path\": \"/var/log/aws/codedeploy-agent/codedeploy-agent.log\",\"log_group_name\": \"codedeploy-agent-log\",\"log_stream_name\": \"{instance_id}-codedeploy-agent-log-${date}\"},{\"file_path\": \"/tmp/codedeploy-agent.update.log\", \"log_group_name\": \"codedeploy-updater-log\", \"log_stream_name\": \"{instance_id}-codedeploy-updater-log\" },{\"file_path\": \"/opt/codedeploy-agent/deployment-root/deployment-logs/codedeploy-agent-deployments.log\", \"log_group_name\": \"codedeploy-deployments-log\", \"log_stream_name\": \"{instance_id}-codedeploy-deployments-log\"} ] }},\"log_stream_name\": \"codedeploy_firehawk_deploy\",\"force_flush_interval\": 15}}" >> cloudwatch.cfg
+echo "{\"agent\": {\"metrics_collection_interval\": 10,\"logfile\": \"/opt/codedeploy-agent/deployment-root/deployment-logs/codedeploy-agent-deployments.log\"},\"logs\": { \"logs_collected\": {\"files\": {\"collect_list\": [{\"file_path\": \"/var/log/aws/codedeploy-agent/codedeploy-agent.log\",\"log_group_name\": \"codedeploy-agent-log\",\"log_stream_name\": \"{instance_id}-codedeploy-agent-log-${date}\"},{\"file_path\": \"/tmp/codedeploy-agent.update.log\", \"log_group_name\": \"codedeploy-updater-log\", \"log_stream_name\": \"{instance_id}-codedeploy-updater-log\" },{\"file_path\": \"/opt/codedeploy-agent/deployment-root/deployment-logs/codedeploy-agent-deployments.log\", \"log_group_name\": \"codedeploy-deployments-log-${date}\", \"log_stream_name\": \"{instance_id}-codedeploy-deployments-log\"} ] }},\"log_stream_name\": \"codedeploy_firehawk_deploy\",\"force_flush_interval\": 15}}" >> cloudwatch.cfg
 
-echo '{"agent": {"metrics_collection_interval": 10,"logfile": "/opt/codedeploy-agent/deployment-root/deployment-logs/codedeploy-agent-deployments.log"},"logs": { "logs_collected": {"files": {"collect_list": [{"file_path": "/var/log/aws/codedeploy-agent/codedeploy-agent.log","log_group_name": "codedeploy-agent-log","log_stream_name": "{instance_id}-codedeploy-agent-log"},{"file_path": "/tmp/codedeploy-agent.update.log", "log_group_name": "codedeploy-updater-log", "log_stream_name": "{instance_id}-codedeploy-updater-log" },{"file_path": "/opt/codedeploy-agent/deployment-root/deployment-logs/codedeploy-agent-deployments.log", "log_group_name": "codedeploy-deployments-log", "log_stream_name": "{instance_id}-codedeploy-deployments-log"} ] }},"log_stream_name": "my_log_stream_name","force_flush_interval": 15}}' >> cloudwatch.cfg
+# echo '{"agent": {"metrics_collection_interval": 10,"logfile": "/opt/codedeploy-agent/deployment-root/deployment-logs/codedeploy-agent-deployments.log"},"logs": { "logs_collected": {"files": {"collect_list": [{"file_path": "/var/log/aws/codedeploy-agent/codedeploy-agent.log","log_group_name": "codedeploy-agent-log","log_stream_name": "{instance_id}-codedeploy-agent-log"},{"file_path": "/tmp/codedeploy-agent.update.log", "log_group_name": "codedeploy-updater-log", "log_stream_name": "{instance_id}-codedeploy-updater-log" },{"file_path": "/opt/codedeploy-agent/deployment-root/deployment-logs/codedeploy-agent-deployments.log", "log_group_name": "codedeploy-deployments-log", "log_stream_name": "{instance_id}-codedeploy-deployments-log"} ] }},"log_stream_name": "my_log_stream_name","force_flush_interval": 15}}' >> cloudwatch.cfg
 
+echo "Starting cloudwatch agent"
 /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:cloudwatch.cfg -s
