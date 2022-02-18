@@ -94,6 +94,12 @@ while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
 done
 SCRIPTDIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
 
+pathadd() {
+    if [ -d "$1" ] && [[ ":$PATH:" != *":$1:"* ]]; then
+        PATH="${PATH:+"$PATH:"}$1"
+    fi
+}
+
 function export_vars {
   local -r latest_ami="$1"
   local -r skip_find_amis="$2"
@@ -108,6 +114,8 @@ function export_vars {
   fi
   # Region is required for AWS CLI
   echo "AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION"
+
+  pathadd /usr/local/bin # SSM environment doens't inclue this in PATH, so we need to add it to the PATH
 
   if [[ "$codebuild" == "false" ]]; then
     export AWS_DEFAULT_REGION=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone | sed 's/\(.*\)[a-z]/\1/')
