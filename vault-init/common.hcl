@@ -32,6 +32,20 @@ locals { # inputs can't reference themselves, so we use locals first
     "projectname" : local.projectname_vaultvpc,
     "terraform" : "true",
   }
+  vpcname_deployervpc     = "${local.resourcetier}deployervpc"
+  projectname_deployervpc = "firehawk-main" # A tag to recognise resources created in this project
+  common_tags_deployervpc = {
+    "environment" : get_env("TF_VAR_environment", ""),
+    "resourcetier" : get_env("TF_VAR_resourcetier", ""),
+    "conflictkey" : get_env("TF_VAR_conflictkey", ""),
+    "pipelineid" : get_env("TF_VAR_pipelineid", ""),
+    "accountid" : get_env("TF_VAR_account_id", ""),
+    "owner" : get_env("TF_VAR_owner", ""),
+    "region" : get_env("AWS_DEFAULT_REGION", ""),
+    "vpcname" : local.vpcname_deployervpc,
+    "projectname" : local.projectname_deployervpc,
+    "terraform" : "true",
+  }
 
   ### tags for this project ###
   vpcname     = local.vpcname_vaultvpc
@@ -50,6 +64,9 @@ inputs = {
   projectname_vaultvpc = local.projectname_vaultvpc
   common_tags_vaultvpc = local.common_tags_vaultvpc
 
+  vpcname_deployervpc     = local.vpcname_deployervpc
+  projectname_deployervpc = local.projectname_deployervpc
+  common_tags_deployervpc = local.common_tags_deployervpc
   # tags for this project
   vpcname     = local.vpcname
   projectname = local.projectname
