@@ -13,7 +13,7 @@ terraform { # After SSL certs have been generated, isntall them to the current i
   after_hook "after_hook_1" {
     commands = ["apply"]
     execute  = ["bash", "install-consul-vault-client", 
-      "--vault-module-version", "v0.15.1",  
+      "--vault-module-version", "v0.17.0",  
       "--vault-version", "1.6.1", 
       "--consul-module-version", "v0.8.0", 
       "--consul-version", "1.9.2", 
