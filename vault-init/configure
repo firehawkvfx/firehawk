@@ -5,5 +5,5 @@ SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # 
 cd $SCRIPTDIR
 # Configure will setup vault roles for general use with Firehawk.
 source ../update_vars.sh
-TF_VAR_configure_vault=true terragrunt run-all apply --terragrunt-source-update --terragrunt-source-map github.com/firehawkvfx/firehawk-main.git=$TF_VAR_firehawk_path
+TF_VAR_configure_vault=true terragrunt run-all apply --terragrunt-source-update --terragrunt-source-map github.com/firehawkvfx/firehawk-main.git=$TF_VAR_firehawk_path --terragrunt-non-interactive
 cd $EXECDIR
