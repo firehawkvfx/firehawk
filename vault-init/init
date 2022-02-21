@@ -5,6 +5,11 @@ SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # 
 cd $SCRIPTDIR
 # init will deploy vault only and ensure it is initialised.
 source ../update_vars.sh
-source ../env_vars.sh
+# source ../env_vars.sh
+echo "ensuring vault_consul_ami_id: $TF_VAR_vault_consul_ami_id"
+if [[ -z "$TF_VAR_vault_consul_ami_id" ]]; then
+    echo "TF_VAR_vault_consul_ami_id is empty"
+    exit 1
+fi
 terragrunt run-all apply --terragrunt-source-update --terragrunt-source-map github.com/firehawkvfx/firehawk-main.git=$TF_VAR_firehawk_path --terragrunt-non-interactive
 cd $EXECDIR

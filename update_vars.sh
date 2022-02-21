@@ -232,8 +232,8 @@ function export_vars {
   if test ! -f "$SCRIPTDIR/env_vars.sh"; then
     log_error "env_vars.sh does not exist.  Required to define images"
     exit 1
-  # else
-  #   source $SCRIPTDIR/env_vars.sh
+  else
+    source $SCRIPTDIR/env_vars.sh
   fi
 
   # Terraform Vars
