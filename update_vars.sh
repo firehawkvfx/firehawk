@@ -230,7 +230,7 @@ function export_vars {
   #   warn_if_invalid "$ami_role" "$TF_VAR_workstation_amazonlinux2_nicedcv_ami_id" "TF_VAR_workstation_amazonlinux2_nicedcv_ami_id"
   # fi
   if test ! -f "$SCRIPTDIR/env_vars.sh"; then
-    log_error "env_vars.sh doe not exist.  Required to define images"
+    log_error "env_vars.sh does not exist.  Required to define images"
     exit 1
   else
     source $SCRIPTDIR/env_vars.sh
