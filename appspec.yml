@@ -50,6 +50,9 @@ hooks:
     - location: vault-init/init
       timeout: 3600 # 1 hour timeout.
       runas: ec2-user
+    - location: vault-init/configure
+      timeout: 3600 # 1 hour timeout.
+      runas: ec2-user
   ApplicationStop:
     - location: scripts/stop
       timeout: 300
