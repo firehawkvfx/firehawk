@@ -52,39 +52,39 @@ function error_if_empty {
 
 # Query AMI's by role tag and commit
 
-function retrieve_ami {
-  local -r latest_ami="$1"
-  local -r ami_role="$2"
-  local -r ami_commit_hash="$3"
-  local ami_result="null"
-  if [[ "$latest_ami" == true ]]; then
-    ami_filters="Name=tag:ami_role,Values=$ami_role"
-    # printf "\n...Query latest AMI"
-  else
-    ami_filters="Name=tag:ami_role,Values=$ami_role Name=tag:commit_hash,Values=$ami_commit_hash"
-    # printf "\n...Query AMI with commit: $ami_commit_hash"
-  fi
-  # this query by aws will return null presently if invalid
-  ami_result=$(aws ec2 describe-images --filters $ami_filters --owners self --region $AWS_DEFAULT_REGION --query 'sort_by(Images, &CreationDate)[].ImageId' --output json | jq '.[-1]' --raw-output)
+# function retrieve_ami {
+#   local -r latest_ami="$1"
+#   local -r ami_role="$2"
+#   local -r ami_commit_hash="$3"
+#   local ami_result="null"
+#   if [[ "$latest_ami" == true ]]; then
+#     ami_filters="Name=tag:ami_role,Values=$ami_role"
+#     # printf "\n...Query latest AMI"
+#   else
+#     ami_filters="Name=tag:ami_role,Values=$ami_role Name=tag:commit_hash,Values=$ami_commit_hash"
+#     # printf "\n...Query AMI with commit: $ami_commit_hash"
+#   fi
+#   # this query by aws will return null presently if invalid
+#   ami_result=$(aws ec2 describe-images --filters $ami_filters --owners self --region $AWS_DEFAULT_REGION --query 'sort_by(Images, &CreationDate)[].ImageId' --output json | jq '.[-1]' --raw-output)
 
-  echo "$ami_result"
-}
+#   echo "$ami_result"
+# }
 
-function warn_if_invalid {
-  local -r ami_role=$1
-  local -r ami_result=$2
-  local -r var_name=$3
+# function warn_if_invalid {
+#   local -r ami_role=$1
+#   local -r ami_result=$2
+#   local -r var_name=$3
 
-  if [[ -z "$ami_result" || "$ami_result" == "null" ]]; then
-    log_warn "Images required for deployment are not present.  You will need to build them before continuing."
-    log_warn "$var_name"
-    log_warn ""
-  else
-    printf "$var_name"
-    printf "\n  Found role $ami_role result:"
-    printf "\n  $ami_result\n\n"
-  fi
-}
+#   if [[ -z "$ami_result" || "$ami_result" == "null" ]]; then
+#     log_warn "Images required for deployment are not present.  You will need to build them before continuing."
+#     log_warn "$var_name"
+#     log_warn ""
+#   else
+#     printf "$var_name"
+#     printf "\n  Found role $ami_role result:"
+#     printf "\n  $ami_result\n\n"
+#   fi
+# }
 
 SOURCE=${BASH_SOURCE[0]} # resolve the script dir even if a symlink is used to this script
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
@@ -232,8 +232,8 @@ function export_vars {
   if test ! -f "$SCRIPTDIR/env_vars.sh"; then
     log_error "env_vars.sh does not exist.  Required to define images"
     exit 1
-  else
-    source $SCRIPTDIR/env_vars.sh
+  # else
+  #   source $SCRIPTDIR/env_vars.sh
   fi
 
   # Terraform Vars
