@@ -27,7 +27,7 @@ function print_usage {
   echo
   echo "Example:"
   echo
-  echo "  ./install-consul-vault-client --vault-module-version v0.17.0  --vault-version 1.6.1 --consul-module-version v0.8.0 --consul-version 1.9.2 --build amazonlinux2 --cert-file-path /home/ec2-user/.ssh/tls/ca.crt.pem"
+  echo "  ./install-consul-vault-client --vault-module-version v0.17.0  --vault-version 1.6.1 --consul-module-version v0.8.0 --consul-version 1.9.2 --build amazonlinux2 --cert-file-path $HOME/.ssh/tls/ca.crt.pem"
 }
 
 function log {
@@ -85,11 +85,11 @@ function run {
     rm -fr /tmp/terraform-aws-vault
     git clone --branch $vault_module_version https://github.com/hashicorp/terraform-aws-vault.git /tmp/terraform-aws-vault
 
-    if test -n "$vault_download_url"; then
-        /tmp/terraform-aws-vault/modules/install-vault/install-vault --download-url $vault_download_url
-    else
-        /tmp/terraform-aws-vault/modules/install-vault/install-vault --version $vault_version
-    fi
+    # if test -n "$vault_download_url"; then
+    #     /tmp/terraform-aws-vault/modules/install-vault/install-vault --download-url $vault_download_url --skip-package-update
+    # else
+    #     /tmp/terraform-aws-vault/modules/install-vault/install-vault --version $vault_version --skip-package-update
+    # fi
 
     if [[ "$install_auth_signing_script" == 'true' ]]; then
         # sudo cp $SCRIPTDIR/auth/sign-request.py /opt/vault/scripts/
@@ -136,26 +136,26 @@ function run {
         fi
     }
 
-    rm -fr /tmp/terraform-aws-consul
-    git clone --branch $consul_module_version https://github.com/hashicorp/terraform-aws-consul.git /tmp/terraform-aws-consul
+    # rm -fr /tmp/terraform-aws-consul
+    # git clone --branch $consul_module_version https://github.com/hashicorp/terraform-aws-consul.git /tmp/terraform-aws-consul
 
-    if test -n "$consul_download_url"; then
-        /tmp/terraform-aws-consul/modules/install-consul/install-consul --download-url $consul_download_url
-    else
-        /tmp/terraform-aws-consul/modules/install-consul/install-consul --version $consul_version
-    fi
+    # if test -n "$consul_download_url"; then
+    #     /tmp/terraform-aws-consul/modules/install-consul/install-consul --download-url $consul_download_url
+    # else
+    #     /tmp/terraform-aws-consul/modules/install-consul/install-consul --version $consul_version
+    # fi
 
-    if [[ "$build" == "ubuntu16" ]] || [[ "$build" == "amazonlinux2" ]]; then
-        /tmp/terraform-aws-consul/modules/install-dnsmasq/install-dnsmasq
-        sudo service dnsmasq restart # starting the service is required for it to function on first boot.
-        log "WARNING:"
-        log "WARNING: Ensure you reboot this instance before attempting to use consul"
-    elif [[ "$build" == "ubuntu18" ]]; then
-        /tmp/terraform-aws-consul/modules/setup-systemd-resolved/setup-systemd-resolved
-    else
-        log_error 'No var $build specified'
-        exit 1
-    fi
+    # if [[ "$build" == "ubuntu16" ]] || [[ "$build" == "amazonlinux2" ]]; then
+    #     /tmp/terraform-aws-consul/modules/install-dnsmasq/install-dnsmasq
+    #     sudo service dnsmasq restart # starting the service is required for it to function on first boot.
+    #     log "WARNING:"
+    #     log "WARNING: Ensure you reboot this instance before attempting to use consul"
+    # elif [[ "$build" == "ubuntu18" ]]; then
+    #     /tmp/terraform-aws-consul/modules/setup-systemd-resolved/setup-systemd-resolved
+    # else
+    #     log_error 'No var $build specified'
+    #     exit 1
+    # fi
 }
 
 function update {
