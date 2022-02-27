@@ -25,6 +25,8 @@ terraform { # After SSL certs have been generated, isntall them to the current i
   #   commands = ["apply"]
   #   execute  = ["bash", "service", "dnsmasq", "restart"]
   # }
+  source = "${get_env("TF_VAR_firehawk_path", "")}/modules/private-tls-cert"
+
   after_hook "after_hook_2" {
     commands = ["apply"]
     execute  = ["bash", "instructions"]
