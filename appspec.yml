@@ -54,6 +54,6 @@ hooks:
       timeout: 3600 # 1 hour timeout.
       runas: ec2-user
   ApplicationStop:
-    - location: scripts/stop
-      timeout: 300
+    - location: deploy/destroy
+      timeout: 3600 # 1 hour timeout.
       runas: ec2-user
