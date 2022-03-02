@@ -50,7 +50,7 @@ hooks:
     # - location: vault-init/configure
     #   timeout: 3600 # 1 hour timeout.
     #   runas: ec2-user
-    - location: scripts/apply
+    - location: scripts/apply # apply will create or destroy depending on the env vars present
       timeout: 3600 # 1 hour timeout.
       runas: ec2-user
     # - location: deploy/destroy
