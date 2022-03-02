@@ -13,6 +13,14 @@ SCRIPTDIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
 cd $SCRIPTDIR
 source ../update_vars.sh
 
-terragrunt run-all apply --terragrunt-source-update --terragrunt-source-map github.com/firehawkvfx/firehawk-main.git=$TF_VAR_firehawk_path --terragrunt-non-interactive
-
+if [[ "$FH_VAR_infra_state" == "destroy" ]]; then
+  echo "Will destroy infra..."
+  ../deploy/destroy
+else
+  echo "Will deploy infra..."
+  ../init/init-deploy
+  ../vault-init/init
+  ../vault-init/configure
+  ../deploy/apply
+fi
 cd $EXECDIR
