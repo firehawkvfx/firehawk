@@ -13,7 +13,7 @@ SCRIPTDIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
 cd $SCRIPTDIR
 source ../update_vars.sh
 
-if [[ "$FH_VAR_infra_state" == "destroy" ]]; then
+if [[ "$FH_VAR_target_infra_state" == "destroy" ]]; then
   echo "Will destroy infra..."
   ../deploy/destroy
 else
