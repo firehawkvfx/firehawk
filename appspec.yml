@@ -41,15 +41,15 @@ hooks:
       timeout: 300
       runas: ec2-user
   ApplicationStart:
-    - location: init/init-deploy # ensure all requirement are initialised (SSH keys, S3 buckets, profiles etc)
-      timeout: 3600 # 1 hour timeout.
-      runas: ec2-user
-    - location: vault-init/init
-      timeout: 3600 # 1 hour timeout.
-      runas: ec2-user
-    - location: vault-init/configure
-      timeout: 3600 # 1 hour timeout.
-      runas: ec2-user
+    # - location: init/init-deploy # ensure all requirement are initialised (SSH keys, S3 buckets, profiles etc)
+    #   timeout: 3600 # 1 hour timeout.
+    #   runas: ec2-user
+    # - location: vault-init/init
+    #   timeout: 3600 # 1 hour timeout.
+    #   runas: ec2-user
+    # - location: vault-init/configure
+    #   timeout: 3600 # 1 hour timeout.
+    #   runas: ec2-user
     - location: deploy/apply
       timeout: 3600 # 1 hour timeout.
       runas: ec2-user
