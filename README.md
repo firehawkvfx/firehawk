@@ -308,9 +308,8 @@ To maintain a shared network with AWS, it is recommended that you use a dedicate
 TODO: provide more details for users unfamiliar with this step.
 - Install requirements and use the wake script to initialise credentials.
 ```
-cd deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client
-./install-requirements --host-type metal
-./wake --resourcetier dev --host-type metal
+deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client/install-requirements --host-type metal
+deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client/wake --resourcetier dev --host-type metal
 ```
 
 ## Install the VPN Vagrant Virtual Machine
