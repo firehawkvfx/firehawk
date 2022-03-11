@@ -21,8 +21,8 @@ phases:
       - echo "PATH=$PATH"
   build:
     commands:
-      - scripts/destroy_deployment_artifact
-      # - scripts/create_deployment_artifact
+      # - scripts/destroy_deployment_artifact
+      - scripts/create_deployment_artifact
 
 artifacts:
   files:
