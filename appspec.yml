@@ -1,14 +1,5 @@
 version: 0.0
 os: linux
-# permissions:
-#   - object: /tmp/my-app/my-folder-2
-#     pattern: "**"
-#     except: [my-file-8.txt]
-#     owner: ec2-user
-#     mode: 777
-#     type:
-#       - file
-
 
 files:
   - source: /
@@ -21,17 +12,6 @@ permissions:
     owner: ec2-user
     group: ec2-user
 
-# hooks:
-#   BeforeInstall:
-#     - location: scripts/before_install.sh
-#       timeout: 300
-#       runas: root
-
-#   AfterInstall:
-#     - location: scripts/after_install.sh
-#       timeout: 300
-#       runas: root
-
 hooks:
   BeforeInstall:
     - location: scripts/install_log_agent
@@ -41,21 +21,9 @@ hooks:
       timeout: 300
       runas: ec2-user
   ApplicationStart:
-    # - location: init/init-deploy # ensure all requirement are initialised (SSH keys, S3 buckets, profiles etc)
-    #   timeout: 3600 # 1 hour timeout.
-    #   runas: ec2-user
-    # - location: vault-init/init
-    #   timeout: 3600 # 1 hour timeout.
-    #   runas: ec2-user
-    # - location: vault-init/configure
-    #   timeout: 3600 # 1 hour timeout.
-    #   runas: ec2-user
     - location: scripts/apply # apply will create or destroy depending on the env vars present
       timeout: 3600 # 1 hour timeout.
       runas: ec2-user
-    # - location: deploy/destroy
-    #   timeout: 3600 # 1 hour timeout.
-    #   runas: ec2-user
   # ApplicationStop:
   #   - location: deploy/destroy
   #     timeout: 3600 # 1 hour timeout.

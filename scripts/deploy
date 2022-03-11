@@ -1,0 +1,14 @@
+#!/bin/bash
+
+set -e
+
+cd $SCRIPTDIR/..
+
+aws deploy create-deployment \
+  --application-name firehawk-codedeploy-app \
+  --deployment-config-name CodeDeployDefault.OneAtATime \
+  --deployment-group-name firehawk-deployment-group \
+  --description "Firehawk deployment" \
+  --s3-location bucket=codedeploy.dev.firehawkvfx.com,bundleType=zip,key=codedeploy-app-firehawk.zip \
+  --file-exists-behavior OVERWRITE \
+  --ignore-application-stop-failures

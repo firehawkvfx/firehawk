@@ -1,0 +1,91 @@
+#!/bin/bash
+
+set -e
+
+DEFAULT_LATEST_AMI="false"
+latest_ami="$DEFAULT_LATEST_AMI"
+success="true"
+
+EXECDIR="$(pwd)"
+SOURCE=${BASH_SOURCE[0]} # resolve the script dir even if a symlink is used to this script
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
+  SOURCE=$(readlink "$SOURCE")
+  [[ $SOURCE != /* ]] && SOURCE=$DIR/$SOURCE # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+SCRIPTDIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd ) # The directory of this script
+
+export TF_VAR_firehawk_path="$SCRIPTDIR/../deploy/firehawk-main/" # the path of the firehawk-main folder
+export TF_VAR_firehawk_ami_path="$SCRIPTDIR/../deploy/packer-firehawk-amis/modules/firehawk-ami"
+echo "AWS_DEFAULT_REGION: $AWS_DEFAULT_REGION"
+
+function log {
+  local -r level="$1"
+  local -r message="$2"
+  local -r timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+  >&2 echo -e "${timestamp} [${level}] [$SCRIPT_NAME] ${message}"
+}
+
+function log_info {
+  local -r message="$1"
+  log "INFO" "$message"
+}
+
+function log_warn {
+  local -r message="$1"
+  log "WARN" "$message"
+}
+
+function log_error {
+  local -r message="$1"
+  log "ERROR" "$message"
+}
+
+function error_if_empty {
+  if [[ -z "$2" ]]; then
+    log_error "$1"
+  fi
+  return
+}
+
+function output_ami_var {
+  local -r ami_role=$1
+  local -r ami_result=$2
+  local -r var_name=$3
+
+  if [[ -z "$ami_result" || "$ami_result" == "null" ]]; then
+    success="false"
+    log_warn "Images required for deployment are not present.  You will need to build them before continuing."
+    log_warn "$var_name"
+    log_warn ""
+  else
+    printf "$var_name"
+    printf "\n  Found role $ami_role result:"
+    printf "\n  $ami_result\n\n"
+    echo "export $var_name=$ami_result" | tee --append $SCRIPTDIR/../env_vars.sh
+  fi
+}
+
+# Query AMI's by role tag and commit
+function retrieve_ami {
+  local -r latest_ami="$1"
+  local -r ami_role="$2"
+  local -r ami_commit_hash="$3"
+  local ami_result="null"
+  if [[ "$latest_ami" == true ]]; then
+    ami_filters="Name=tag:ami_role,Values=$ami_role"
+    log_info "\n...Query latest AMI"
+  else
+    ami_filters="Name=tag:ami_role,Values=$ami_role Name=tag:commit_hash,Values=$ami_commit_hash"
+    log_info "\n...Query AMI with commit: $ami_commit_hash"
+  fi
+  # this query by aws will return null presently if invalid
+  ami_result=$(aws ec2 describe-images --filters $ami_filters --owners self --region $AWS_DEFAULT_REGION --query 'sort_by(Images, &CreationDate)[].ImageId' --output json | jq '.[-1]' --raw-output)
+
+  echo "$ami_result"
+}
+
+# Construct env vars file to bake some of the config.
+
+rm -fr $SCRIPTDIR/../env_vars.sh
+echo "#!/bin/bash" | tee $SCRIPTDIR/../env_vars.sh
