@@ -1,0 +1,31 @@
+version: 0.2
+
+env:
+  variables:
+    resourcetier: dev
+  # parameter-store:
+  #   onsite_public_ip: "/firehawk/resourcetier/$resourcetier/onsite_public_ip"
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.8
+    commands:
+      - echo "Version of Node in Docker Image"
+      - node --version
+      - python3.8 --version
+      - git rev-parse HEAD
+      - ./gitpullrecursive --init-all
+      - mkdir -p "$HOME/.ssh/tls"
+      - export PATH=$PATH:/root/.local/bin
+      - echo "PATH=$PATH"
+  build:
+    commands:
+      - scripts/create_deployment_artifact
+
+artifacts:
+  files:
+    - '**/*'
+  base-directory: .
+  name: BuildArtifact
+  discard-paths: no
