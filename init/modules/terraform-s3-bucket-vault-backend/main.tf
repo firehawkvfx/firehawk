@@ -1,7 +1,14 @@
-provider "aws" {
-  #  if you haven't installed and configured the aws cli, you will need to provide your aws access key and secret key.
-  # in a dev environment these version locks below can be disabled.  in production, they should be locked based on the suggested versions from terraform init.
-  version = "~> 4.3.0"
+terraform {
+  required_providers {
+    aws = {
+      source = "hashicorp/aws"
+      version = "~> 4.3.0"
+    }
+    null = {
+      version = "~> 3.0"
+    }
+  }
+  required_version = ">= 0.13"
 }
 
 data "aws_region" "current" {}
