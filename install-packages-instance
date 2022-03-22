@@ -28,7 +28,7 @@ SUDOCMD="sudo" # replace with text sudo to use elevated permissions
 # $SUDOCMD yum update -y
 
 # $SUDOCMD yum install -y python
-# $SUDOCMD yum install -y python3.7
+# $SUDOCMD yum install -y python3.8
 # $SUDOCMD yum install -y python3-pip # for a specific python version - https://realpython.com/intro-to-pyenv/
 
 # $SUDOCMD yum install -y jq
