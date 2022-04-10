@@ -301,29 +301,16 @@ To maintain a shared network with AWS, it is recommended that you use a dedicate
 
 - Ensure the infrastructure is up and running from cloud 9 `./apply`
 - Ensure your Rasberry PI has a clean install of Ubuntu Server 20.04
-- Configure a proper ssh password for your Raspberry Pi.  WARNING: Skipping this step is a major security risk.
+- Configure an excellent unique ssh password for your Raspberry Pi.  WARNING: Skipping this step is a major security risk.
 - Clone the repository to your Raspberry Pi.
 - Assign a static IP address to your Raspberry Pi with your router.
-- You will need to configure static routes on your router to send traffic intended for AWS via this static IP.  
-TODO: provide more details for users unfamiliar with this step.
+- You will need to configure static routes on your router to send traffic intended for AWS via this static IP.
+  - Configure a static route to the AWS Subnet specified in the cloudformation template (eg 10.0.1.0/24) via your raspberry PI Static IP configured above.
+  - Configure a static route to the VPN DHCP subnet specified in the cloudformation template (default 172.17.232.0/24).  This route should also send traffic via your raspberry PI Static IP.
 - Install requirements and use the wake script to initialise credentials.
 ```
 deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client/install-requirements --host-type metal
 deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client/wake --resourcetier dev --host-type metal
-```
-
-## Install the VPN Vagrant Virtual Machine
-
-Warning: Not Safe for Production it is recommended you use the above described Raspberry Pi method instead.
-
-The Vagrant VPN VM is a proof of concept.  It is not safe for production, because extra work and testing is required for the VM to be secure.  SSH access is not secured on this VM.  The VPN VM operates as a router, allowing multiple onsite connections to reach your AWS private network.  Ensure you have installed Vagrant and follow the steps by running this on the same system as above:
-
-```
-vagrant plugin install vagrant-vbguest
-vagrant plugin install vagrant-reload
-
-cd deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client
-./wake --resourcetier dev
 ```
 
 ## Mount the AWS S3 File gateway
