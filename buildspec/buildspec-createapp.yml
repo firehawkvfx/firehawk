@@ -17,8 +17,12 @@ phases:
       - git rev-parse HEAD
       - ./gitpullrecursive --init-all
       - mkdir -p "$HOME/.ssh/tls"
+      - ./deploy/packer-firehawk-amis/scripts/install-packages
+      # - ./scripts/install-packages # Requirements to ensure the instance exists with the current image to deploy with
       - export PATH=$PATH:/root/.local/bin
       - echo "PATH=$PATH"
+      - source ./update_vars.sh --codebuild --resourcetier $resourcetier
+      - ./predeploy/predeploy-aws-shell
   build:
     commands:
       - scripts/create_deployment_artifact
