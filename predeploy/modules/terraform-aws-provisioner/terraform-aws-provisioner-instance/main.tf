@@ -4,7 +4,7 @@ data "terraform_remote_state" "provisioner_security_group" { # read the arn with
   backend = "s3"
   config = {
     bucket = "state.terraform.${var.bucket_extension_vault}"
-    key    = "init/modules/terraform-aws-sg-provisioner/terraform.tfstate"
+    key    = "predeploy/modules/terraform-aws-sg-provisioner/terraform.tfstate"
     region = data.aws_region.current.name
   }
 }
