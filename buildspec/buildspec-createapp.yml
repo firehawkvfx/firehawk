@@ -21,11 +21,12 @@ phases:
       # - ./scripts/install-packages # Requirements to ensure the instance exists with the current image to deploy with
       - export PATH=$PATH:/root/.local/bin
       - echo "PATH=$PATH"
-      - source ./update_vars.sh --codebuild --resourcetier $resourcetier
-      - ./predeploy/predeploy-aws-shell
+
   build:
     commands:
-      - scripts/create_deployment_artifact
+      - scripts/create_deployment_artifact # ensure image list is generated 
+      - source ./update_vars.sh --codebuild --resourcetier $resourcetier
+      - ./predeploy/predeploy-aws-shell # ensure deployer instance exists
 
 artifacts:
   files:
