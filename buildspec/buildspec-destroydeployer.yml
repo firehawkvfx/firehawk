@@ -1,0 +1,36 @@
+version: 0.2
+
+env:
+  variables:
+    resourcetier: dev
+  # parameter-store:
+  #   onsite_public_ip: "/firehawk/resourcetier/$resourcetier/onsite_public_ip"
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.8
+    commands:
+      - echo "Version of Node in Docker Image"
+      - node --version
+      - python3.8 --version
+      - git rev-parse HEAD
+      - ./gitpullrecursive --init-all
+      - mkdir -p "$HOME/.ssh/tls"
+      - ./deploy/packer-firehawk-amis/scripts/install-packages
+      # - ./scripts/install-packages # Requirements to ensure the instance exists with the current image to deploy with
+      - export PATH=$PATH:/root/.local/bin
+      - echo "PATH=$PATH"
+
+  build:
+    commands:
+      - scripts/destroy_deployment_artifact
+      - source ./update_vars.sh --codebuild --resourcetier $resourcetier
+      - deploy/destroy
+
+artifacts:
+  files:
+    - '**/*'
+  base-directory: .
+  name: BuildArtifact
+  discard-paths: no
