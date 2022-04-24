@@ -17,8 +17,7 @@ phases:
       - git rev-parse HEAD
       - ./gitpullrecursive --init-all
       - mkdir -p "$HOME/.ssh/tls"
-      # Ensure the instance exists with the current image to deploy with
-      - ./scripts/install-packages
+      - ./scripts/install-packages # Requirements to ensure the instance exists with the current image to deploy with
       - export PATH=$PATH:/root/.local/bin
       - echo "PATH=$PATH"
       - source ./update_vars.sh --codebuild --resourcetier $resourcetier
