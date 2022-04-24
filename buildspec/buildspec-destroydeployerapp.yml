@@ -26,7 +26,7 @@ phases:
     commands:
       - scripts/destroy_deployment_artifact
       - source ./update_vars.sh --codebuild --resourcetier $resourcetier
-      - deploy/destroy
+      - predeploy/destroy
 
 artifacts:
   files:
