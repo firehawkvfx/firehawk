@@ -282,7 +282,12 @@ terragrunt run-all apply
 
 If you are running Ubuntu 18 or Mac OS, its possible to install a service on your local system to make aquiring certificates for deadline easier.  The service can monitor a message queue for credentials authenticating for automated aquisition of deadline certificates.  The deadline certificates are required, and they are unique with each deploy.  The service provides a means of handling dynamic rotation of these certificates each time a deployment occurs.
 
-On your remote mac, ubuntu or Windows WSL (ubuntu) onsite host ensure you have the AWS CLI, and jq installed.  Then Run:
+On your remote mac, ubuntu or Windows WSL (ubuntu) onsite host ensure you have the AWS CLI, and jq installed.
+```
+cd deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client/scripts/firehawk-auth-scripts
+./install-awscli
+```
+Then Run:
 ```
 cd deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client/scripts/firehawk-auth-scripts
 ./install-deadline-cert-service --resourcetier dev --init
