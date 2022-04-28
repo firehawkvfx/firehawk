@@ -282,7 +282,7 @@ terragrunt run-all apply
 
 If you are running Ubuntu 18 or Mac OS, its possible to install a service on your local system to make aquiring certificates for deadline easier.  The service can monitor a message queue for credentials authenticating for automated aquisition of deadline certificates.  The deadline certificates are required, and they are unique with each deploy.  The service provides a means of handling dynamic rotation of these certificates each time a deployment occurs.
 
-On your remote mac, ubuntu or Windows WSL (ubuntu) onsite host run:
+On your remote mac, ubuntu or Windows WSL (ubuntu) onsite host ensure you have the AWS CLI, and jq installed.  Then Run:
 ```
 cd deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client/scripts/firehawk-auth-scripts
 ./install-deadline-cert-service --resourcetier dev --init
@@ -299,13 +299,14 @@ This will ensure a current certificate exists in the user's home dir whenever a 
 
 To maintain a shared network with AWS, it is recommended that you use a dedicated Raspberry Pi.  This runs a service that once initialised will detect when a VPN is available, and dynamically get the required credentials to establish the connection with AWS.
 
-- Ensure the infrastructure is up and running from cloud 9 `./apply`
+- Ensure the infrastructure is up and running from AWS CodeDeploy
 - Ensure your Rasberry PI has a clean install of Ubuntu Server 20.04
-- Configure an excellent unique ssh password for your Raspberry Pi.  WARNING: Skipping this step is a major security risk.
+- Ensure you are not running a second VPN, it will interfere with the Firehawk VPN.
+- Configure an excellent unique ssh password for your Raspberry Pi.  WARNING: Skipping this step is a major security risk.  Don't do it.  Just don't.
 - Clone the repository to your Raspberry Pi.
 - Assign a static IP address to your Raspberry Pi with your router.
 - You will need to configure static routes on your router to send traffic intended for AWS via this static IP.
-  - Configure a static route to the AWS Subnet specified in the cloudformation template (eg 10.0.1.0/24) via your raspberry PI Static IP configured above.
+  - Configure a static route to the AWS Subnet specified in the cloudformation template (eg 10.1.0.0/16) via your raspberry PI Static IP configured above.
   - Configure a static route to the VPN DHCP subnet specified in the cloudformation template (default 172.17.232.0/24).  This route should also send traffic via your raspberry PI Static IP.
 - Install requirements and use the wake script to initialise credentials.
 ```
