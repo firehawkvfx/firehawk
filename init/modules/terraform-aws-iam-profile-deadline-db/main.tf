@@ -69,8 +69,8 @@ module "consul_iam_policies_for_client" {
   iam_role_id = aws_iam_role.instance_role.id
 }
 module "iam_policies_secrets_manager_put" {
-  source       = "github.com/hashicorp/terraform-aws-consul.git//modules/aws-iam-policies-secrets-manager-put?ref=v0.0.39"
+  source       = "github.com/firehawkvfx/firehawk-main.git//modules/aws-iam-policies-secrets-manager-put?ref=v0.0.39"
+  name         = "SecretsManagerPutDeadlineCert_${var.conflictkey}"
   iam_role_id  = aws_iam_role.instance_role.id
   resourcetier = var.resourcetier
-  name         = "SecretsManagerPutDeadlineCert_${var.conflictkey}"
 }
