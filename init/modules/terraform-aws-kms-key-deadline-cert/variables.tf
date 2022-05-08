@@ -2,6 +2,10 @@ variable "name_prefix" {
   description = "The prefix for the name of the key"
   type        = string
 }
+variable "secrets_manager_parameter" {
+  description = "The secret parameter to store file content"
+  type        = string
+}
 variable "ssm_parameter_name_kms_key_id" {
   description = "The ssm parameter to store the key id"
   type        = string
