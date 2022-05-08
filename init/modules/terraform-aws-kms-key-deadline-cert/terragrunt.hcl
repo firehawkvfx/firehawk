@@ -12,7 +12,7 @@ inputs = merge(
   {
     name_prefix = "deadline-cert",
     description = "The KMS key use to aquire the deadline certificate."
-    ssm_parameter_name_kms_key_id = "/firehawk/resourcetier/${local.resourcetier}/vault_kms_unseal_key_id"
+    ssm_parameter_name_kms_key_id = "/firehawk/resourcetier/${local.resourcetier}/deadline_cert_kms_key_id"
   }
 )
 prevent_destroy = true
