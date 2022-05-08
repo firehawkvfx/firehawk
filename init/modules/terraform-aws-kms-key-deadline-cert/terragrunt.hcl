@@ -4,7 +4,7 @@ include {
 
 locals {
   common_vars = read_terragrunt_config(find_in_parent_folders("common.hcl"))
-  resourcetier = lookup(local.common_vars.inputs.common_tags["resourcetier"])
+  resourcetier = local.common_vars.inputs.common_tags["resourcetier"]
 }
 
 inputs = merge(
