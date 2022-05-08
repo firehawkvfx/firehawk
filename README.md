@@ -290,7 +290,7 @@ cd deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client
 Then Run:
 ```
 cd deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client/scripts/firehawk-auth-scripts
-./install-deadline-cert-service --resourcetier dev --init
+./install-deadline-cert-service-bash --resourcetier dev --init
 ```
 
 On Windows Subsystem for Linux, running the above command will not be able to start the service (no systemd support).  So run it anyway, but after in a shell, execute this:
