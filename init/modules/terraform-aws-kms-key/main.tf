@@ -20,11 +20,12 @@ resource "aws_ssm_parameter" "vault_kms_unseal" {
   tags  = merge(tomap({"Name": "vault_kms_unseal_key_id"}), local.common_tags)
 }
 
-data "aws_ssm_parameter" "vault_kms_unseal" {
-  depends_on = [aws_ssm_parameter.vault_kms_unseal]
-  name       = "/firehawk/resourcetier/${var.resourcetier}/vault_kms_unseal_key_id"
-}
+# example to get a key from the ssm parameter
+# data "aws_ssm_parameter" "vault_kms_unseal" {
+#   depends_on = [aws_ssm_parameter.vault_kms_unseal]
+#   name       = "/firehawk/resourcetier/${var.resourcetier}/vault_kms_unseal_key_id"
+# }
 
-data "aws_kms_key" "vault" {
-  key_id = data.aws_ssm_parameter.vault_kms_unseal.value
-}
+# data "aws_kms_key" "vault" {
+#   key_id = data.aws_ssm_parameter.vault_kms_unseal.value
+# }
