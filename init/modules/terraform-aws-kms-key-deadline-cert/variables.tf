@@ -6,7 +6,7 @@ variable "secrets_manager_parameter" {
   description = "The secret parameter to store file content"
   type        = string
 }
-variable "ssm_parameter_name_kms_key_id" {
+variable "kms_key_alias_name" {
   description = "The ssm parameter to store the key id"
   type        = string
 }

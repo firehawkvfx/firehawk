@@ -7,3 +7,9 @@ locals {
 }
 
 inputs = local.common_vars.inputs
+
+dependencies {
+  paths = [
+    "../terraform-aws-kms-key-deadline-cert"
+    ]
+}
