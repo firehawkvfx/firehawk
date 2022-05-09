@@ -75,7 +75,7 @@ data "aws_secretsmanager_secret" "deadline_cert" {
   name = "/firehawk/resourcetier/${var.resourcetier}/file_deadline_cert"
 }
 module "iam_policies_secrets_manager_put" {
-  source       = "github.com/firehawkvfx/firehawk-main.git//modules/aws-iam-policies-secrets-manager-put?ref=main"
+  source       = "github.com/firehawkvfx/firehawk-main.git//modules/aws-iam-policies-secrets-manager-put?ref=v0.0.42"
   name         = "SecretsManagerPutDeadlineCert_${var.conflictkey}"
   iam_role_id  = aws_iam_role.instance_role.id
   resourcetier = var.resourcetier
