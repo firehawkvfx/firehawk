@@ -332,6 +332,15 @@ showmount -e 10.1.139.151 # This will show a list of available mounts.  if they 
 
 Once mounted, we now have shared storage with our cloud nodes and our onsite workstation.  We can save scene files here and render them.
 
+## Mount NFS on windows:
+
+Ensure the NFS service is installed in powershell 7 as an admin.
+```
+Enable-WindowsOptionalFeature -FeatureName ServicesForNFS-ClientOnly, ClientForNFS-Infrastructure -Online -NoRestart
+```
+Mount the drive using the IP address listed in the AWS storage gateway webpage:
+mount.exe -o nolock,hard 10.1.143.59:/rendering.dev.firehawkvfx.com X:
+
 ## Configure Side FX Cloud License server
 
 A generated Client ID and Client Secret can be used to distribute any floating licenses from your Side FX account if you don't wish to use UBL or you want to use them in combination with Deadline's Limits feature.  This alleviates the need of depending on a VPN to use your own licenses (although you still need a VPN for PDG and other functions).
