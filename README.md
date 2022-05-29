@@ -305,7 +305,7 @@ This will ensure a current certificate exists in the user's home dir whenever a 
 To maintain a shared network with AWS, it is recommended that you use a dedicated Raspberry Pi.  This runs a service that once initialised will detect when a VPN is available, and dynamically get the required credentials to establish the connection with AWS.
 
 - Ensure the infrastructure is up and running from AWS CodeDeploy
-- Ensure your Rasberry PI has a clean install of Ubuntu Server 20.04
+- Ensure your Raspberry PI has a clean install of Ubuntu Server 20.04
 - Ensure you are not running a second VPN, it will interfere with the Firehawk VPN.
 - Configure an excellent unique ssh password for your Raspberry Pi.  WARNING: Skipping this step is a major security risk.  Don't do it.  Just don't.
 - Clone the repository to your Raspberry Pi.
@@ -317,6 +317,22 @@ To maintain a shared network with AWS, it is recommended that you use a dedicate
 ```
 deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client/install-requirements --host-type metal
 deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client/wake --resourcetier dev --host-type metal
+```
+- Provided you have run init-aws-auth-ssh and have SSH certificates configured, start the service with:
+```
+sudo systemctl start awsauthvpn
+```
+- You can enable on boot with:
+```
+sudo systemctl enable awsauthvpn
+```
+- In service logs, you will see the message "VPN is up" after the service succeeds. You can view the service logs with:
+```
+sudo journalctl -S today -u awsauthvpn
+```
+- Or follow live output with:
+```
+sudo journalctl -f -u awsauthvpn
 ```
 
 ## Mount the AWS S3 File gateway
