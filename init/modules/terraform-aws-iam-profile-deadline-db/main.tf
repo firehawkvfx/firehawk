@@ -46,7 +46,7 @@ data "aws_iam_policy_document" "assume_role" { # Determines the services able to
 # }
 
 module "iam_policies_deadline_spot_fleet" {
-  source      = "${get_env("TF_VAR_firehawk_path", "")}/modules/aws-iam-policies-deadline-spot-fleet"
+  source      = "../../../deploy/firehawk-main/modules/aws-iam-policies-deadline-spot-fleet"
   name        = "DeadlineSpotFleetLauncher_${var.conflictkey}"
   iam_role_id = aws_iam_role.instance_role.id
 }

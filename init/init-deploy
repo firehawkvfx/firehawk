@@ -1,6 +1,6 @@
 #!/bin/bash
 # init will deploy Minimum set of s3 buckets and create SSH keys prior to deployment
-set -x
+# set -x
 set -e
 EXECDIR="$(pwd)"
 SOURCE=${BASH_SOURCE[0]} # resolve the script dir even if a symlink is used to this script
