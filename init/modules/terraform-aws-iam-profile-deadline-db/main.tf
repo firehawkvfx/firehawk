@@ -46,20 +46,20 @@ data "aws_iam_policy_document" "assume_role" { # Determines the services able to
 # }
 
 module "iam_policies_deadline_spot_fleet" {
-  source      = "../../../deploy/firehawk-main/modules/aws-iam-policies-deadline-spot-fleet"
+  source      = "${var.firehawk_path}/modules/aws-iam-policies-deadline-spot-fleet"
   name        = "DeadlineSpotFleetLauncher_${var.conflictkey}"
   iam_role_id = aws_iam_role.instance_role.id
 }
 
 # Policy Allowing Read and write access to S3
 module "iam_policies_s3_read_write" {
-  source      = "../../../deploy/firehawk-main/modules/aws-iam-policies-s3-read-write"
+  source      = "${var.firehawk_path}/modules/aws-iam-policies-s3-read-write"
   name        = "S3ReadWrite_${var.conflictkey}"
   iam_role_id = aws_iam_role.instance_role.id
 }
 # Policy to query the identity of the current role.  Required for Vault.
 module "iam_policies_get_caller_identity" {
-  source      = "../../../deploy/firehawk-main/modules/aws-iam-policies-get-caller-identity"
+  source      = "${var.firehawk_path}/modules/aws-iam-policies-get-caller-identity"
   name        = "STSGetCallerIdentity_${var.conflictkey}"
   iam_role_id = aws_iam_role.instance_role.id
 }
@@ -75,7 +75,7 @@ data "aws_secretsmanager_secret" "deadline_cert" {
   name = "/firehawk/resourcetier/${var.resourcetier}/file_deadline_cert"
 }
 module "iam_policies_secrets_manager_put" {
-  source       = "../../../deploy/firehawk-main/modules/aws-iam-policies-secrets-manager-put"
+  source       = "${var.firehawk_path}/modules/aws-iam-policies-secrets-manager-put"
   name         = "SecretsManagerPutDeadlineCert_${var.conflictkey}"
   iam_role_id  = aws_iam_role.instance_role.id
   resourcetier = var.resourcetier

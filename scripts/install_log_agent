@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -e # exit on failure
-set -x
+# set -x
 
 EXECDIR="$(pwd)"
 SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
