@@ -3,7 +3,7 @@ include {
 }
 
 terraform {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-aws-secret-backend?ref=v0.0.20"
+  source = "${get_env("TF_VAR_firehawk_path", "")}/modules/vault-aws-secret-backend"
 }
 
 skip = local.skip

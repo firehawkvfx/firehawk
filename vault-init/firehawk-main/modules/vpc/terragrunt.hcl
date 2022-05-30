@@ -18,7 +18,7 @@ dependencies {
 }
 
 terraform {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/vpc?ref=v0.0.20"
+  source = "${get_env("TF_VAR_firehawk_path", "")}/modules/vpc"
 }
 
 # skip = true

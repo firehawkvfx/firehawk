@@ -13,5 +13,5 @@ dependencies {
 }
 
 terraform {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/terraform-aws-vpc-main-cloud9-peering?ref=v0.0.20"
+  source = "${get_env("TF_VAR_firehawk_path", "")}/modules/terraform-aws-vpc-main-cloud9-peering"
 }

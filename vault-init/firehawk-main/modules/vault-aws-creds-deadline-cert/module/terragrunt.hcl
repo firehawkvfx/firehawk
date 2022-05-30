@@ -3,7 +3,7 @@ include {
 }
 
 terraform {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-aws-creds-ssm-parameters-ssh-certs?ref=v0.0.20"
+  source = "${get_env("TF_VAR_firehawk_path", "")}/modules/vault-aws-creds-ssm-parameters-ssh-certs"
 }
 
 skip = local.skip

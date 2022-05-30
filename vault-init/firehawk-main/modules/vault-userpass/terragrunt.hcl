@@ -25,5 +25,5 @@ dependencies {
 skip = true
 
 terraform {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/vault-userpass?ref=v0.0.20"
+  source = "${get_env("TF_VAR_firehawk_path", "")}/modules/vault-userpass"
 }
