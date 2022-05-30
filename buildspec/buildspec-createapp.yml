@@ -24,9 +24,13 @@ phases:
 
   build:
     commands:
-      - scripts/create_deployment_artifact # ensure image list is generated 
+      - source ./deploy/packer-firehawk-amis/update_vars.sh --codebuild --resourcetier $resourcetier
+      - ./deploy/packer-firehawk-amis/modules/firehawk-base-ami/build.sh # Ensure base images exist
+      - source ./deploy/packer-firehawk-amis/update_vars.sh --codebuild --resourcetier $resourcetier
+      - ./deploy/packer-firehawk-amis/modules/firehawk-ami/build.sh # Ensure images to deploy exist
+      - scripts/create_deployment_artifact # Ensure image list is generated 
       - source ./update_vars.sh --codebuild --resourcetier $resourcetier
-      - ./predeploy/predeploy-aws-shell # ensure deployer instance exists
+      - ./predeploy/predeploy-aws-shell # Ensure deployer instance exists to run BuildArtifact with AWS CodePipeline
 
 artifacts:
   files:
