@@ -73,8 +73,8 @@ data "aws_iam_policy_document" "multi_account_assume_role_policy" {
 }
 # Define policy for the bucket restricting access to the role
 module "iam_policies_s3_shared_bucket" {
-  # source                 = "${var.firehawk_path}/modules/aws-iam-policies-s3-shared-bucket"
-  source                 = "${var.firehawk_path}/modules/aws-iam-policies-s3-shared-bucket"
+  # source                 = "github.com/firehawkvfx/firehawk-main.git//modules/aws-iam-policies-s3-shared-bucket"
+  source                 = "github.com/firehawkvfx/firehawk-main.git//modules/aws-iam-policies-s3-shared-bucket"
   depends_on             = [aws_s3_bucket.shared_bucket]
   bucket_id              = aws_s3_bucket.shared_bucket.id
   bucket_arn             = aws_s3_bucket.shared_bucket.arn
@@ -83,8 +83,8 @@ module "iam_policies_s3_shared_bucket" {
 
 # Define policy for the role allowing access to the bucket.
 module "iam_policies_s3_multi_account_role" {
-  # source            = "${var.firehawk_path}/modules/aws-iam-policies-s3-multi-account-role"
-  source            = "${var.firehawk_path}/modules/aws-iam-policies-s3-multi-account-role"
+  # source            = "github.com/firehawkvfx/firehawk-main.git//modules/aws-iam-policies-s3-multi-account-role"
+  source            = "github.com/firehawkvfx/firehawk-main.git//modules/aws-iam-policies-s3-multi-account-role"
   name              = "MultiAccountRolePolicyS3BucketAccess_${var.conflictkey}"
   iam_role_id       = aws_iam_role.multi_account_role.id
   shared_bucket_arn = aws_s3_bucket.shared_bucket.arn
