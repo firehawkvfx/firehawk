@@ -28,13 +28,13 @@ data "aws_iam_policy_document" "assume_role" { # Determines the services able to
 }
 # Policy Allowing Read and write access to S3
 module "iam_policies_s3_read_write" {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/aws-iam-policies-s3-read-write"
+  source = "../modules/aws-iam-policies-s3-read-write"
   name = "S3ReadWrite_${var.conflictkey}"
   iam_role_id = aws_iam_role.instance_role.id
 }
 # Policy to query the identity of the current role.  Required for Vault.
 module "iam_policies_get_caller_identity" {
-  source = "github.com/firehawkvfx/firehawk-main.git//modules/aws-iam-policies-get-caller-identity"
+  source = "../modules/aws-iam-policies-get-caller-identity"
   name = "STSGetCallerIdentity_${var.conflictkey}"
   iam_role_id = aws_iam_role.instance_role.id
 }
