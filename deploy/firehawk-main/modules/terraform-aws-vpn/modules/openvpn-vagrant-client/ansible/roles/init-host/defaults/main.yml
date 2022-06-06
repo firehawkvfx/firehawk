@@ -1,0 +1,4 @@
+---
+# defaults file for roles/init-host
+
+delegate_host: ansible_control

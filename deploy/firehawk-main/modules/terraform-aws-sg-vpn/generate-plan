@@ -1,0 +1,46 @@
+#!/bin/bash
+set -e
+
+exit_if_error() {
+  local exit_code=$1
+  shift
+  [[ $exit_code ]] &&               # do nothing if no error code passed
+    ((exit_code != 0)) && {         # do nothing if error code is 0
+      printf 'ERROR: %s\n' "$@" >&2 # we can use better logging here
+      exit "$exit_code"             # we could also check to make sure
+                                    # error code is numeric when passed
+    }
+}
+
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
+namespace="$TF_VAR_vpcname-$(basename $SCRIPTDIR)"
+echo "Namespace for terraform remote state: $namespace"
+
+# Raise error if var isn't defined.
+if [[ -z "$TF_VAR_resourcetier" ]]; then
+    exit_if_error 1 "TF_VAR_resourcetier not defined."
+fi
+if [[ -z "$AWS_DEFAULT_REGION" ]]; then
+    exit_if_error 1 "AWS_DEFAULT_REGION not defined."
+fi
+if [[ -z "$TF_VAR_bucket_extension" ]]; then
+    exit_if_error 1 "TF_VAR_bucket_extension not defined."
+fi
+if [[ -z "$TF_VAR_vpcname" ]]; then
+    exit_if_error 1 "TF_VAR_vpcname not defined."
+fi
+
+# If sourced, dont execute
+(return 0 2>/dev/null) && sourced=1 || sourced=0
+echo "Script sourced: $sourced"
+if [[ "$sourced" -eq 0 ]]; then
+  terraform init \
+      -input=false \
+      -backend-config="bucket=state.terraform.$TF_VAR_bucket_extension" \
+      -backend-config="key=$TF_VAR_resourcetier/${TF_VAR_vpcname}-terraform-aws-sg-bastion/terraform.tfstate" \
+      -backend-config="region=$AWS_DEFAULT_REGION" \
+      -backend-config="dynamodb_table=locks.state.terraform.$TF_VAR_bucket_extension"
+  terraform plan -out=tfplan -input=false
+fi
+
+set +e

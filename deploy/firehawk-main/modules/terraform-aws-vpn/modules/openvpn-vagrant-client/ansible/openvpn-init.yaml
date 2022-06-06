@@ -1,0 +1,78 @@
+# configures autologin for open vpn and routes.
+
+# to update routes only for the deployuser host, execute 
+# ansible-playbook -i ansible/inventory ansible/openvpn.yaml -v --extra-vars "" --tags add-routes
+
+- hosts: "{{ variable_host | default('firehawk_gateway') }}"
+  remote_user: deployuser
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
+  become: true
+
+  vars:
+    ansible_python_interpreter: "/usr/bin/python3"
+    client_network: None
+    client_netmask_bits: None
+    # vpn_nic: eth1 # no default - this arg must be provided
+    configure_gateway: true
+
+  tasks:
+  - name: ensure file exists (Ubuntu 18 needs this for legacy reasons presently)
+    copy:
+      content: "#!/bin/bash"
+      dest: /etc/rc.local
+      force: no
+      group: sys
+      owner: root
+      mode: 0777
+    tags:
+    - init
+
+  - name: insert marker start
+    lineinfile:
+      path: /etc/rc.local
+      insertafter: "^#?.By default.*$"
+      line: "# BEGIN ANSIBLE MANAGED BLOCK"
+      backup: yes
+    tags:
+    - init
+
+  - name: insert marker end
+    lineinfile:
+      path: /etc/rc.local
+      insertafter: "# BEGIN ANSIBLE MANAGED BLOCK"
+      line: "# END ANSIBLE MANAGED BLOCK"
+      create: true
+    tags:
+    - init
+
+  - name: insert/update block in /etc/rc.local
+    blockinfile:
+      path: /etc/rc.local
+      backup: yes
+      content: |
+        #promiscuous mode required for routing
+        /sbin/ifconfig {{ vpn_nic }} up
+        /sbin/ifconfig {{ vpn_nic }} promisc
+    when: configure_gateway|bool
+    tags:
+    - init
+
+  - name: execute and check with netstat
+    shell: |
+      /etc/rc.local
+      netstat -i
+    register: netstatout
+    become: true
+    tags:
+    - init
+
+  - debug:
+      msg: "{{ netstatout.stdout }}"
+
+  - name: allow ip forwarding, uncomment
+    replace:
+      path: /etc/sysctl.conf
+      regexp: '^#(.*net.ipv4.ip_forward=1.*)'
+      replace: '\1'
+    tags:
+    - init

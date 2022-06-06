@@ -1,0 +1,59 @@
+#!/bin/bash
+
+set -e
+
+function log {
+  local -r level="$1"
+  local -r message="$2"
+  local -r timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+  >&2 echo -e "${timestamp} [${level}] [$SCRIPT_NAME] ${message}"
+}
+
+function log_info {
+  local -r message="$1"
+  log "INFO" "$message"
+}
+
+function log_warn {
+  local -r message="$1"
+  log "WARN" "$message"
+}
+
+function log_error {
+  local -r message="$1"
+  log "ERROR" "$message"
+}
+
+function error_if_empty {
+  if [[ -z "$2" ]]; then
+    log_error "$1"
+  fi
+  return
+}
+
+# data "aws_ssm_parameter" "vault_kms_unseal" {
+#   name = "/firehawk/resourcetier/${var.resourcetier}/vault_kms_unseal_key_id"
+# }
+# data "aws_kms_key" "vault" {
+#   key_id = data.aws_ssm_parameter.vault_kms_unseal.value
+# }
+
+if [[ -z "$1" ]]; then
+    echo "1st argument must not be empty: $1"
+    exit 1
+fi
+
+if [[ -z "$TF_VAR_resourcetier" ]]; then
+  export TF_VAR_instance_id_main_cloud9=$(curl http://169.254.169.254/latest/meta-data/instance-id)
+  export TF_VAR_resourcetier="$(aws ec2 describe-tags --filters Name=resource-id,Values=$TF_VAR_instance_id_main_cloud9 --out=json|jq '.Tags[]| select(.Key == "resourcetier")|.Value' --raw-output)"
+fi
+
+get_parameters=$( aws ssm get-parameters --names \
+    "/firehawk/resourcetier/${TF_VAR_resourcetier}/vault_kms_token_key_id" )
+
+export TF_VAR_vault_kms_token_key_id=$(echo $get_parameters | jq ".Parameters[]| select(.Name == \"/firehawk/resourcetier/${TF_VAR_resourcetier}/vault_kms_token_key_id\")|.Value" --raw-output)
+error_if_empty "SSM Parameter missing: vault_kms_token_key_id" "$TF_VAR_vault_kms_token_key_id"
+
+aws secretsmanager put-secret-value \
+    --secret-id "/firehawk/resourcetier/${TF_VAR_resourcetier}/vault_root_token" \
+    --secret-string "$1"

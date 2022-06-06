@@ -1,0 +1,26 @@
+#!/bin/bash
+
+set -e
+
+initialized="$(vault status | awk '/^Initialized/' | awk '{ print $2 }')"
+
+if [[ "$initialized" == "false" ]]; then
+    echo "Initializing vault..."
+    export VAULT_ADDR=https://127.0.0.1:8200
+    result="$(vault operator init -recovery-shares=1 -recovery-threshold=1)"
+
+    recovery_key=$(echo "$result" | awk '/^Recovery Key 1:/ { print $4 ; exit }')
+    initial_root_token=$(echo "$result" | awk '/^Initial Root Token:/ { print $4 ; exit }')
+
+    if [[ -z "$initial_root_token" ]] || [[ -z "$recovery_key" ]]; then
+        >&2 echo "Error:  Attempted to initialise but couldn't scrape recovery_key or initial_root_token"
+        exit 1
+    fi
+
+    # echo "Recovery Key 1: $recovery_key"
+    # echo "Initial Root Token: $initial_root_token"
+
+    echo "$result"
+elif [[ "$initialized" == "true" ]]; then
+    echo "Vault is already initialised.  Ensure you can login with a token."
+fi

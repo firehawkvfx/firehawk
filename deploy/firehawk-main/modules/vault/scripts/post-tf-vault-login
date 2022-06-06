@@ -1,0 +1,67 @@
+#!/bin/bash
+
+set -e
+
+# Log the given message. All logs are written to stderr with a timestamp.
+function log {
+ local -r message="$1"
+ local readonly timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+ >&2 echo -e "$timestamp $message"
+}
+# A retry function that attempts to run a command a number of times and returns the output
+function retry {
+  local -r cmd="$1"
+  local -r description="$2"
+  local -r error_message="$3"
+
+  for i in $(seq 1 30); do
+    log "$description"
+
+    # The boolean operations with the exit status are there to temporarily circumvent the "set -e" at the
+    # beginning of this script which exits the script immediatelly for error status while not losing the exit status code
+    output=$(eval "$cmd") && exit_status=0 || exit_status=$?
+    log "$output"
+    if [[ $exit_status -eq 0 ]]; then
+      echo "$output"
+      return
+    fi
+    log "$description failed. Will sleep for 10 seconds and try again."
+    sleep 10
+  done;
+
+  log "$description failed after 30 attempts."
+  log "$error_message"
+  exit $exit_status
+}
+
+if [[ -z "$VAULT_TOKEN" ]]; then
+    printf "\nInstances from this point require you to login to vault.  To avoid this message you can define the var VAULT_TOKEN\n"
+fi
+
+retry \
+    "vault status | grep -m 1 'Initialized.*'" \
+    "Ensuring vault is initialized..." \
+    "Vault doesn't appear to be initialised.  You should try to SSH to a Vault server instance directly to initialise it."
+
+initialised=true
+vault status | grep -m 1 "Initialized.*true" || initialised=false
+
+if [[ "$initialised" == false ]]; then
+    echo "Vault is not Initialized.  Aborting. You will need to login and initialise the vault"
+    exit 1
+fi
+sleep 10 # before attempting a lookup some duration is required.
+
+echo "vault token lookup"
+
+output=$(vault token lookup) && exit_status=0 || exit_status=$?
+errors=$(echo "$output") | grep '^{' | jq -r .errors
+
+if [[ $exit_status -eq 0 && -z "$errors" ]]; then
+    # echo "$output"
+    echo "...Logged in."
+else
+    echo "...Logging in. Or exit and use: vault login --no-print"
+    vault login --no-print $VAULT_TOKEN
+fi
+# vault token lookup

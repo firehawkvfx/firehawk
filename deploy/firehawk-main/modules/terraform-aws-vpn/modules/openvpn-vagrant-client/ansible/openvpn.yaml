@@ -1,0 +1,136 @@
+# configures autologin for open vpn and routes.
+
+# to update routes only for the deployuser host, execute 
+# ansible-playbook -i ansible/inventory ansible/openvpn.yaml -v --extra-vars "" --tags add-routes
+
+# - hosts: firehawkgateway
+#   remote_user: deployuser
+#   gather_facts: "{{ variable_gather_facts | default('false') }}"
+#   become: true
+
+#   tasks:
+#   - name: Test connection.
+#     debug:
+#       msg: "test connection"
+
+#   - set_fact:
+#       hosts_confirmed: true
+#     delegate_to: localhost
+#     delegate_facts: true
+
+# - name: Verify hosts
+#   hosts: localhost
+#   gather_facts: no
+#   tasks:
+
+#   - assert:
+#       that: hosts_confirmed | default(false) # A method that verifies the host was reached.
+
+- hosts: "{{ variable_host | default('openvpnip_private') }}"
+  remote_user: openvpnas
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
+  become: true
+
+  vars:
+    ansible_python_interpreter: "/usr/bin/python2.7"
+
+  tasks:
+    - name: Test vpn connection.
+      debug:
+        msg: "test vpn connection"
+
+# - hosts: "{{ variable_host | default('openvpnip_private') }}"
+#   remote_user: openvpnas
+#   gather_facts: "{{ variable_gather_facts | default('false') }}"
+#   become: true
+
+#   vars:
+#     ansible_python_interpreter: "/usr/bin/python2.7"
+#     my_password: "{{ openvpn_user_pw | string | password_hash('sha512') }}"
+
+#   # install pexpect and its dependencies to use passwd
+#   roles:
+#     - role: init-packages
+
+#   # set user password.  this is a temporary measure as it should be handled by user data, but for some reason open vpn isn't accepting that approach as of 2.71
+#   post_tasks:
+#     - getent:
+#         database: passwd
+#         key: "{{ openvpn_user }}"
+#         fail_key: False
+
+#     - name: check if user exists
+#       debug:
+#         var: getent_passwd[ openvpn_user ]
+
+#     - name: "Set login user password - {{ openvpn_user }}"
+#       user:
+#         name: "{{ openvpn_user }}"
+#         password: "{{ my_password }}"
+#       when: getent_passwd[ openvpn_user ] is defined
+#       no_log: true
+
+# - hosts: "{{ variable_host | default('openvpnip_private') }}"
+#   remote_user: openvpnas
+#   gather_facts: "{{ variable_gather_facts | default('false') }}"
+#   become: true
+
+#   vars:
+#     client_network: None
+#     client_netmask_bits: None
+#     ansible_python_interpreter: "/usr/bin/python2.7"
+    
+#   pre_tasks:
+#     - name: Reboot the server and wait for it to come back up. # This may not be necesary but there were intermittent issues with /usr/local/openvpn_as/scripts/sacli that a reboot may have resolved
+#       reboot:
+
+#     - name: Rebooted
+#       debug:
+#         msg: "rebooted"
+
+#     - name: create dir.
+#       file:
+#         path: /usr/local/openvpn_as/scripts/seperate
+#         state: directory
+
+#     - name: configure openvpn server settings
+#       shell: |
+#         ls -la /usr/local/openvpn_as/scripts/
+#         /usr/local/openvpn_as/scripts/sacli -k vpn.daemon.0.client.network -v {{ client_network }} ConfigPut
+#         /usr/local/openvpn_as/scripts/sacli -k vpn.daemon.0.client.netmask_bits -v {{ client_netmask_bits }} ConfigPut
+#         /usr/local/openvpn_as/scripts/sacli --key 'vpn.server.tls_auth' --value 'true' ConfigPut
+#         /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.gateway_access --value 'true' ConfigPut
+#         /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.private_network.0 --value '{{ private_subnet1 }}' ConfigPut
+#         /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.private_network.1 --value '{{ public_subnet1 }}' ConfigPut
+#         /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.private_network.2 --value '{{ client_network }}/{{ client_netmask_bits }}' ConfigPut
+#         /usr/local/openvpn_as/scripts/sacli --key vpn.server.routing.private_access --value 'route' ConfigPut
+#         /usr/local/openvpn_as/scripts/sacli --key 'vpn.client.routing.reroute_dns' --value 'true' ConfigPut
+#         /usr/local/openvpn_as/scripts/sacli --key 'vpn.server.dhcp_option.domain' --value 'ap-southeast-2.compute.internal' ConfigPut
+#         /usr/local/openvpn_as/scripts/sacli --key 'vpn.server.routing.allow_private_nets_to_clients' --value 'true' ConfigPut
+#         /usr/local/openvpn_as/scripts/sacli start
+#         cd /usr/local/openvpn_as/scripts/
+#         ./sacli --user {{ openvpn_user }} --key 'prop_autologin' --value 'true' UserPropPut
+#         ./sacli --user {{ openvpn_user }} --key 'c2s_route.0' --value '{{ onsite_private_subnet_cidr }}' UserPropPut
+#         ./sacli --user {{ openvpn_user }} AutoGenerateOnBehalfOf
+#         ./sacli -o ./seperate --cn {{ openvpn_user }} get5
+#         chown {{ openvpn_user }} seperate/*
+#         /usr/local/openvpn_as/scripts/sacli start
+#         ls -la seperate
+#       register: command_result
+#       failed_when: "'ERROR' in command_result.stderr"
+
+#   roles:
+#     - role: openvpn
+
+- hosts: "{{ variable_host | default('firehawk_gateway') }}"
+  remote_user: deployuser
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
+  become: true
+
+  vars:
+    client_network: None
+    client_netmask_bits: None
+
+  roles:
+    - role: openvpn-gateway
+

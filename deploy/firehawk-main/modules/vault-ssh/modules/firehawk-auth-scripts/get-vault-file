@@ -1,0 +1,281 @@
+#!/bin/bash
+# This script aquires needed vpn client files from vault to an intermediary bastion
+
+set -e
+
+EXECDIR="$(pwd)"
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
+
+function print_usage {
+  echo
+  echo "Usage: get-vault-file [OPTIONS]"
+  echo
+  echo "This script can be used to install Vault and its dependencies. This script has been tested with Ubuntu 16.04, Ubuntu 18.04 and Amazon Linux 2."
+  echo
+  echo "Options:"
+  echo
+  echo -e "  --host1\t\tThe 'user@hostname' required to SSH to the jump box/bastion host."
+  echo -e "  --host2\t\tThe 'user@hostname' required to SSH to the vault client/private host."
+  echo -e "  --source-vault-path\t\tThe full vault path to the location of the file data in vault."
+  echo -e "  --target-path\t\tThe final location you would like the file to reside."
+  echo -e "  --vault-token\t\tThe vault token that will be utilised on the vault client to retrieve the data."
+  echo
+  echo "Example:"
+  echo
+  echo "  get-vault-file --host1 centos@ec2-3-25-143-13.ap-southeast-2.compute.amazonaws.com --host2 centos@i-0df3060971160cdd6.node.consul --source-vault-path dev/data/vpn/client_cert_files/usr/local/openvpn_as/scripts/seperate/client.ovpn --target-path ../openvpn_config/client.ovpn --vault-token 34hgkj323r2wgsg"
+}
+
+function log {
+  local -r level="$1"
+  local -r message="$2"
+  local -r timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+  >&2 echo -e "${timestamp} [${level}] [$SCRIPT_NAME] ${message}"
+}
+
+function log_info {
+  local -r message="$1"
+  log "INFO" "$message"
+}
+
+function log_warn {
+  local -r message="$1"
+  log "WARN" "$message"
+}
+
+function log_error {
+  local -r message="$1"
+  log "ERROR" "$message"
+}
+
+function assert_not_empty {
+  local -r arg_name="$1"
+  local -r arg_value="$2"
+
+  if [[ -z "$arg_value" ]]; then
+    log_error "The value for '$arg_name' cannot be empty"
+    print_usage
+    exit 1
+  fi
+}
+
+# # Log the given message. All logs are written to stderr with a timestamp.
+# function log {
+#  local -r message="$1"
+#  local -r timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+#  >&2 echo -e "$timestamp $message"
+# }
+
+function get_file_remote() {
+  local -r host1=$1
+  local -r host2=$2
+  local -r VAULT_TOKEN=$3
+  local -r source_file_path=$4
+  local -r source_vault_path=$5
+  log "Requesting files from vault to client in private subnet"
+  ssh -o ProxyCommand="ssh $host1 -W %h:%p" $host2 "VAULT_TOKEN=$VAULT_TOKEN bash -s" < $SCRIPTDIR/request_vault_file.sh "$source_file_path" "$source_vault_path"
+}
+
+function retrieve_file {
+  local -r host1=$1
+  local -r host2=$2
+  local -r target_path="$4"
+  local -r bastion_user="$5"
+  local -r base_path="/home/$bastion_user/tmp"
+  local -r source_path="${base_path}$3"
+
+  log_info "Copy: $source_path to localhost: $target_path"
+
+  scp -i ~/.ssh/id_rsa-cert.pub -i ~/.ssh/id_rsa -o ProxyCommand="ssh -i ~/.ssh/id_rsa-cert.pub -i ~/.ssh/id_rsa -W %h:%p $host1" $host2:$source_path "$target_path"
+  chmod 0600 "$target_path"
+
+  # Clean up
+  log "...Cleaning up"
+  ssh -o ProxyCommand="ssh $host1 -W %h:%p" $host2 "sudo rm -frv $base_path/*"
+
+  [[ -s "$target_path" ]] && exit_status=0 || exit_status=1
+  if [[ $exit_status -eq 1 ]]; then
+    log_info "Error retrieving file"
+    exit 1
+  else 
+    log_info "Success"
+  fi
+}
+
+function stdout_to_file {
+  local -r response="$1"
+  local -r target_path="$2"
+
+  errors=$(echo "$response" | jq -r '.errors | length')
+  if [[ ! $errors -eq 0 ]]; then
+    log_info "Vault request failed: $response"
+    exit 1
+  fi
+  target_dir=$(dirname $target_path)
+  log_info "stdout_to_file in dir: $target_dir"
+  
+  if [ ! -d "$target_dir" ]; then
+     log_error "Directory $target_dir DOES NOT exist."
+     exit 1
+  fi
+
+  PERM=$(stat --format "%A" "$target_dir")
+  # log_info "$target_dir $PERM"
+  u=${PERM:1:3}
+  g=${PERM:4:3}
+  o=${PERM:7:3}
+  log_info "$target_dir $u $g $o"
+  if [[ "$u" != "rwx" ]] || [[ "$g" != "rwx" ]] || [[ "$g" != "rwx" ]]; then
+    echo "Dir permissions may prevent suitable access, updating permissions"
+    chmod u=rwX,g=rwX,o=rwX "$target_dir" # ensure accesible permissions.
+  fi
+  # sudo mkdir -p "$(dirname $target_path)" # ensure the directory exists
+  # sudo mkdir -p "$target_dir)" # ensure the directory exists
+  # sudo chmod u=rwX,g=rwX,o=rwX "$target_dir" # ensure accesible permissions.
+  
+  log_info "Check file path is writable: $target_path"
+  if test -f "$target_path"; then
+    log_info "File exists: ensuring it is writeable"
+    chmod u+w "$target_path"
+    touch "$target_path"
+  else
+    log_info "Ensuring path is writeable"
+    touch "$target_path"
+    chmod u+w "$target_path"
+  fi
+  if [[ -f "$target_path" ]]; then
+    chmod u+w "$target_path"
+  else
+    log_error "Error: path does not exist, var may not be a file: $target_path "
+  fi
+
+  log_info "Write file content from stdout..."
+  echo "$response" | jq -r '.data.data.value' | base64 --decode > $target_path
+  if [[ ! -f "$target_path" ]] || [[ ! -s "$target_path" ]]; then
+    log_error "Error: no file or empty result at $target_path"
+    exit 1
+  fi
+  log_info "Request Complete."
+}
+
+function get_file_stdout() { # uses stdout to retrieve vault data, avoiding the need to store a file on a remote bastion host.
+  # local -r host1=$1
+  # local -r host2=$2
+  local -r token="$1"
+  local -r source_vault_path="$2"
+  local -r target_path="$3"
+
+  log_info "Local Vault request"
+  log_info "Retrieve: $source_vault_path"
+
+  response=$($SCRIPTDIR/request_stdout.sh "$source_vault_path/file" "$token")
+  stdout_to_file "$response" "$target_path"
+}
+
+function get_file_stdout_proxy() { # uses stdout to retrieve vault data, avoiding the need to store a file on a remote bastion host.
+  local -r host1=$1
+  local -r host2=$2
+  local -r token="$3"
+  local -r source_vault_path="$4"
+  local -r target_path="$5"
+
+  if [[ "$OSTYPE" == "darwin"* ]]; then # if running on a mac, the system wide known hosts file is located below.
+    local -r ssh_known_hosts_path="/usr/local/etc/ssh/ssh_known_hosts"
+  else
+    local -r ssh_known_hosts_path="/etc/ssh/ssh_known_hosts"
+  fi
+
+  log_info "SSH via: $host1 to: $host2"
+  log_info "Retrieve: $source_vault_path"
+  log_info "HOME: $HOME"
+  # these may help debugging, with -vv as ssh args
+  # set -x
+  # eval `ssh-agent -s`
+  response=$(ssh -i "$HOME/.ssh/id_rsa-cert.pub" -i "$HOME/.ssh/id_rsa" -o UserKnownHostsFile="$ssh_known_hosts_path" -o ProxyCommand="ssh -i \"$HOME/.ssh/id_rsa-cert.pub\" -i \"$HOME/.ssh/id_rsa\" -o UserKnownHostsFile=\"$ssh_known_hosts_path\" $host1 -W %h:%p" $host2 "bash -s" < $SCRIPTDIR/request_stdout.sh "$source_vault_path/file" "$token")
+
+  stdout_to_file "$response" "$target_path"
+}
+
+function getfile {
+  local version=""
+  local download_url=""
+  local path="$DEFAULT_INSTALL_PATH"
+  local user="$DEFAULT_VAULT_USER"
+  local local_request="false"
+
+  while [[ $# > 0 ]]; do
+    local key="$1"
+
+    case "$key" in
+      --host1)
+        host1="$2"
+        shift
+        ;;
+      --host2)
+        host2="$2"
+        shift
+        ;;
+      --source-vault-path)
+        source_vault_path="$2"
+        shift
+        ;;
+      --target-path)
+        target_path="$2"
+        shift
+        ;;
+      --vault-token)
+        VAULT_TOKEN="$2"
+        shift
+        ;;
+      --local)
+        local_request="true"
+        ;;
+      --help)
+        print_usage
+        exit
+        ;;
+      *)
+        log_error "Unrecognized argument: $key"
+        print_usage
+        exit 1
+        ;;
+    esac
+
+    shift
+  done
+  if [[ "$local_request" == "false" ]]; then
+    assert_not_empty "--host1" "$host1"
+    assert_not_empty "--host2" "$host2"
+  fi
+  assert_not_empty "--source-vault-path" "$source_vault_path"
+  assert_not_empty "--target-path" "$target_path"
+
+  if [[ -z "$VAULT_TOKEN" ]]; then
+    echo "Provide a vault token to utilise on the private vault client:"
+    read -s -p "VAULT_TOKEN: " VAULT_TOKEN
+  fi
+
+  bastion_user="$(echo $host2 | awk -F '@' '{print $1}')"
+
+  # Retrieve generated secrets from Vault.  Would be better if we can use vault as an intermediary to generate certs.
+  echo "Aquiring file from Vault"
+  # These are temproraily disabled, but should be preserved to retain a procedure to store a file from vault remotely.
+  # get_file_remote "$host1" "$host2" "$VAULT_TOKEN" "$source_file_path" "$source_vault_path" # This method uses a reqest to store the file remotely.  Recommended only if this is the final destination of the secret.
+  # retrieve_file "$host1" "$host2" "$source_file_path" "$target_path" "$bastion_user"
+
+  if [[ "$local_request" == "false" ]]; then
+    echo "Aquiring file from Vault with ssh proxy"
+    get_file_stdout_proxy "$host1" "$host2" "$VAULT_TOKEN" "$source_vault_path" "$target_path"
+  else
+    echo "Aquiring file from Vault with localhost"
+    get_file_stdout "$VAULT_TOKEN" "$source_vault_path" "$target_path"
+  fi
+
+  if test -f $target_path; then
+    echo "File aquired!"
+  else
+    echo "Could not aquire data. Aborting."
+    exit 1;
+  fi
+}
+
+getfile "$@"

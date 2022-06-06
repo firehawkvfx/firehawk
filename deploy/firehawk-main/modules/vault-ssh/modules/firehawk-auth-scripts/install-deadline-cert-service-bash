@@ -1,0 +1,244 @@
+#!/bin/bash
+
+set -e
+
+EXECDIR="$(pwd)"
+SCRIPTDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)" # The directory of this script
+cd "$SCRIPTDIR"
+
+function print_usage {
+  echo
+  echo "Usage: wake [OPTIONS]"
+  echo
+  echo "Configures AWS credentials and a service to auto update a Deadline client certificate."
+  echo
+  echo "Options:"
+  echo
+  echo -e "  --resource-tier\tThe environment to use on first vagrant up. (eg: dev/blue/green/main)."
+  echo -e "  --aws-region\t\tThe region to configure AWS CLI with on first 'vagrant up'."
+  echo -e "  --aws-access-key\tThe AWS Access Key to configure AWS CLI with on first 'vagrant up'."
+  echo -e "  --aws-secret-key\tThe AWS Secret Key to configure AWS CLI with on first 'vagrant up'."
+  echo
+  echo "Example: Configure AWS credentials and the deadline cert service."
+  echo
+  echo "  install-deadline-cert-service-bash --resourcetier dev"
+}
+
+function log {
+  local -r level="$1"
+  local -r message="$2"
+  local -r timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+  echo >&2 -e "${timestamp} [${level}] [$SCRIPT_NAME] ${message}"
+}
+
+function log_info {
+  local -r message="$1"
+  log "INFO" "$message"
+}
+
+function log_warn {
+  local -r message="$1"
+  log "WARN" "$message"
+}
+
+function log_error {
+  local -r message="$1"
+  log "ERROR" "$message"
+}
+
+function error_if_empty {
+  if [[ -z "$2" ]]; then
+    log_error "$1"
+    exit 1
+  fi
+  return
+}
+
+function assert_not_empty {
+  local -r arg_name="$1"
+  local -r arg_value="$2"
+
+  if [[ -z "$arg_value" ]]; then
+    log_error "The value for '$arg_name' cannot be empty"
+    print_usage
+    exit 1
+  fi
+}
+
+# if [[ -z "$1" ]]; then
+#     echo "ERROR: 1st args provided must be the resourcetier (dev / main) to lookup the local private ip address to be used.  You have configured this in ip_addresses.json"
+#     exit 1
+# fi
+
+# if [[ -z "$2" ]]; then
+#   echo "Error: 2nd arg bastion host must be provided. eg:"
+#   echo "./copy_vault_file_from_bastion.sh main centos@ec2-3-25-143-13.ap-southeast-2.compute.amazonaws.com centos@i-0df3060971160cdd6.node.consul"
+#   exit 1
+# fi
+
+# if [[ -z "$3" ]]; then
+#   echo "Error: 3rd arg vault client must be provided. eg: centos@i-00265f3f7614cbbee.node.consul"
+#   echo "./copy_vault_file_from_bastion.sh main centos@ec2-3-25-143-13.ap-southeast-2.compute.amazonaws.com centos@i-0df3060971160cdd6.node.consul"
+#   exit 1
+# fi
+
+# if [[ -z "$VAULT_TOKEN" ]]; then
+#   echo "You can generate a token to login and retrieve the VPN config with:"
+#   echo ""
+#   echo "vault token create -policy=vpn_read_config -policy=deadline_client -explicit-max-ttl=5m -ttl=5m -use-limit=4"
+#   echo ""
+#   echo "Provide a vault token to utilise on the private vault client:"
+#   read -s -p "VAULT_TOKEN: " VAULT_TOKEN
+#   echo ""
+# fi
+
+# export resourcetier="$1"
+# echo "resourcetier: $resourcetier"
+
+# host1="$2"
+# host2="$3"
+
+# openvpn_user="openvpnas"
+
+# if [[ -z "$openvpn_user_pw" ]]; then
+#     echo "After establishing SSH forwarding, retrieve the VPN password from the Vault UI https://127.0.0.1:8200/ui"
+#     read -s -p "openvpn_user_pw: " openvpn_user_pw
+# fi
+
+# if [[ -z "$openvpn_user_pw" ]]; then
+#     echo "ERROR: provided openvpn_user_pw is empty.  Try again."
+#     exit 1
+# fi
+
+# echo "openvpn_user: $openvpn_user"
+
+# echo "Request the VPN config / certs"
+# source_file_path="/usr/local/openvpn_as/scripts/seperate/client.ovpn" # the original file path that was stored in vault
+# source_vault_path="$resourcetier/data/vpn/client_cert_files$source_file_path" # the full namespace / path to the file in vault.
+# target_path="$SCRIPTDIR/openvpn_config/$(basename $source_file_path)"
+
+# rm -f $SCRIPTDIR/openvpn_config/client.ovpn
+# rm -f $SCRIPTDIR/openvpn_config/openvpn.conf
+
+# $SCRIPTDIR/scripts/get-vault-file --host1 $host1 --host2 $host2 --source-vault-path $source_vault_path --target-path $target_path --vault-token $VAULT_TOKEN
+
+# # Replicate file for vpn.  This might be able to be deprecated, or replaced with a move
+# cp -f $SCRIPTDIR/openvpn_config/client.ovpn $SCRIPTDIR/openvpn_config/openvpn.conf
+
+# echo "Request the deadline client certifcate."
+# source_file_path="/opt/Thinkbox/certs/Deadline10RemoteClient.pfx" # the original file path that was stored in vault
+# source_vault_path="$resourcetier/data/deadline/client_cert_files$source_file_path" # the full namespace / path to the file in vault.
+# target_path="$HOME/.ssh/$(basename $source_file_path)"
+
+# $SCRIPTDIR/scripts/get-vault-file --host1 $host1 --host2 $host2 --source-vault-path $source_vault_path --target-path $target_path --vault-token $VAULT_TOKEN
+
+# openvpn_user=$openvpn_user openvpn_user_pw=$openvpn_user_pw vagrant up
+
+function install {
+  local resourcetier="$TF_VAR_resourcetier"
+  local configure_aws="false"
+
+  while [[ $# > 0 ]]; do
+    local key="$1"
+
+    case "$key" in
+    --resourcetier)
+      resourcetier="$2"
+      # configure_aws="true"
+      shift
+      ;;
+    --aws-region)
+      aws_region="$2"
+      configure_aws="true"
+      shift
+      ;;
+    --aws-access-key)
+      aws_access_key="$2"
+      configure_aws="true"
+      shift
+      ;;
+    --aws-secret-key)
+      aws_secret_key="$2"
+      configure_aws="true"
+      shift
+      ;;
+    --init)
+      configure_aws="true"
+      ;;
+    --help)
+      print_usage
+      exit
+      ;;
+    *)
+      log_error "Unrecognized argument: $key"
+      print_usage
+      exit 1
+      ;;
+    esac
+
+    shift
+  done
+
+  target_path="$SCRIPTDIR/ip_addresses.json"
+
+  if [[ "$configure_aws" == "true" ]] || ! test -f "$target_path"; then
+    echo
+    echo "To aquire AWS credentials, run the following from the provisioner ec2 instance:"
+    echo "sudo su - ec2-user"
+    echo "cd server"
+    echo "source ./update_vars.sh"
+    echo "deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client/scripts/firehawk-auth-scripts/sign-ssh-key --generate-aws-key"
+    echo
+    if [[ -z "$resourcetier" ]]; then
+      read -p "resourcetier (dev/blue/green/main): " resourcetier
+      if [[ -z "$resourcetier" ]]; then
+        echo "ERROR: Cannot be empty."
+        exit 1
+      fi
+    fi
+    if [[ -z "$aws_region" ]]; then
+      read -p "aws_region: " aws_region
+      if [[ -z "$aws_region" ]]; then
+        echo "ERROR: Cannot be empty."
+        exit 1
+      fi
+    fi
+    if [[ -z "$aws_access_key" ]]; then
+      read -s -p "aws_access_key: " aws_access_key
+      if [[ -z "$aws_access_key" ]]; then
+        echo "ERROR: Cannot be empty."
+        exit 1
+      fi
+      echo
+    fi
+    if [[ -z "$aws_secret_key" ]]; then
+      read -s -p "aws_secret_key: " aws_secret_key
+      if [[ -z "$aws_secret_key" ]]; then
+        echo "ERROR: Cannot be empty."
+        exit 1
+      fi
+      echo
+    fi
+
+    # This step will configure the CLI for the service's persistent use of the credentials
+
+    $SCRIPTDIR/init-aws-auth-ssh --resourcetier "$resourcetier" --no-prompts --aws-region "$aws_region" --aws-access-key "$aws_access_key" --aws-secret-key "$aws_secret_key"
+
+    # configure_aws="true" aws_region="$aws_region" aws_access_key="$aws_access_key" aws_secret_key="$aws_secret_key" vagrant provision --provision-with bootstrap,vpn
+  fi
+
+  $SCRIPTDIR/aws-auth-deadline-cert --resourcetier "$resourcetier" --install-service
+
+  # echo ""
+  # echo "Once the host is up for the first time, you can pair it with your infra by running this to get an SSH certificate:"
+  # echo "./scripts/firehawk-auth-scripts/init-aws-auth-ssh --resourcetier dev"
+  # echo ""
+  # echo "Next to aquire a new set of VPN credentials, this next command will poll for a message providing access credentials to get a new VPN cert (required each time the VPN access server is started)."
+  # echo "In the VPN terraform template, when it is deployed it will provide some temporary credentials over a message service to retrieve the VPN certificate from Vault."
+  # echo "./scripts/firehawk-auth-scripts/init-aws-auth-vpn --resourcetier dev"
+  # echo ""
+  # echo "To repeat sending new crednetials, terminate the vpn and run deploy/apply to send another message and replace the credentials."
+  # echo ""
+}
+
+install "$@"

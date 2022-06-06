@@ -1,0 +1,143 @@
+#!/bin/bash
+
+set -e
+
+EXECDIR="$(pwd)"
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
+readonly SCRIPT_NAME="$(basename "$0")"
+cd "$SCRIPTDIR"
+
+readonly DEFAULT_resourcetier="$TF_VAR_resourcetier"
+
+# These helper functions are from the sign_ssh_key.sh Hashicorp script
+
+function print_usage {
+  echo
+  echo "Usage: sign_ssh_key.sh [OPTIONS]"
+  echo
+  echo "If authenticated to Vault, signs a public key with Vault for use as an SSH client, generating a public certificate in the same directory as the public key with the suffix '-cert.pub'."
+  echo
+  echo "Options:"
+  echo
+  echo -e "  --resourcetier\tThe resourcetier env to run in."
+}
+
+function log {
+  local -r level="$1"
+  local -r message="$2"
+  local -r timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+  >&2 echo -e "${timestamp} [${level}] [$SCRIPT_NAME] ${message}"
+}
+
+function log_bare {
+  local -r message="$1"
+  >&2 echo -e "${message}"
+}
+
+function log_info {
+  local -r message="$1"
+  log "INFO" "$message"
+}
+
+function log_warn {
+  local -r message="$1"
+  log "WARN" "$message"
+}
+
+function log_error {
+  local -r message="$1"
+  log "ERROR" "$message"
+}
+
+function ssm_get_parm {
+  local -r parm_name="$1"
+
+  output=$(aws ssm get-parameters --with-decryption --names ${parm_name}) && exit_status=0 || exit_status=$?
+
+  invalid=$(echo ${output} | jq -r .'InvalidParameters | length')
+  if [[ $exit_status -eq 0 && $invalid -eq 0 ]]; then
+      log "Result: ${output}"
+      value=$(echo ${output} | jq -r '.Parameters[0].Value')
+      echo "$value"
+      return
+  fi
+  log "...Failed retrieving: ${parm_name}"
+  log "Result: ${output}"
+}
+
+function get_cert_from_vault_local {
+  local -r resourcetier="$1"
+  local -r vault_token="$2"
+
+  echo "Request the deadline client certifcate on the localhost."
+  source_file_path="/opt/Thinkbox/certs/Deadline10RemoteClient.pfx" # the original file path that was stored in vault
+  source_vault_path="$resourcetier/data/deadline/client_cert_files$source_file_path" # the full namespace / path to the file in vault.
+  tmp_target_path="$HOME/.ssh/_$(basename $source_file_path)"
+  target_path="$HOME/.ssh/$(basename $source_file_path)"
+  if test -f "$tmp_target_path"; then
+    rm -f $tmp_target_path
+  fi
+  echo "get-vault-file"
+  $SCRIPTDIR/get-vault-file --local --source-vault-path $source_vault_path --target-path $tmp_target_path --vault-token $vault_token
+  mv -f $tmp_target_path $target_path 
+  echo "Moved file to: $target_path"
+}
+
+function get_cert_fingerprint {
+  source_file_path="/opt/Thinkbox/certs/Deadline10RemoteClient.pfx" # the original file path that was stored in vault
+  target_path="$HOME/.ssh/$(basename $source_file_path)"
+  $SCRIPTDIR/get_cert_fingerprint.sh "$target_path"
+}
+
+function sqs_send_deadline_payload {
+  local -r resourcetier="$1"
+  log "...Aquiring host names for vault queries."
+  local -r host1="$(cd $TF_VAR_firehawk_path/../firehawk-render-cluster/modules/terraform-aws-vpn/data; terragrunt output --raw bastion_public_dns)"
+  local -r host2="$(cd $TF_VAR_firehawk_path/../firehawk-render-cluster/modules/terraform-aws-vpn/data; terragrunt output --raw vault_client_private_dns)"
+
+  printf "\n...Waiting for consul vpn service before attempting SQS notify.\n\n"
+  until consul catalog services | grep -m 1 "deadline"; do sleep 10 ; done
+
+  log "...Updating SQS queue to retrieve a valid token" # TODO we should also drain the queue of any existing messages.
+  sqs_remote_in_deadline_cert_url="$(ssm_get_parm /firehawk/resourcetier/$resourcetier/sqs_remote_in_deadline_cert_url)"
+
+  log "...Get deadline cert with local tokent and aquire fingerprint"
+  get_cert_from_vault_local "$resourcetier" "$(cat $HOME/.vault-token)"
+  current_fingerprint="$(get_cert_fingerprint)"
+  append_json="{ \"deadline_client_cert_fingerprint\" : \"$current_fingerprint\" }"
+  log "append_json: $append_json"
+  # current_fingerprint="$(openssl pkcs12 -in $target_path -nodes -passin pass: |openssl x509 -noout -fingerprint)"
+
+  $SCRIPTDIR/sqs-notify --sqs-queue-url "$sqs_remote_in_deadline_cert_url" --host1 "$host1" --host2 "$host2" --token-policy deadline_client --token-use-limit 40 --append-json "$append_json"
+}
+
+function main {
+  local resourcetier="$DEFAULT_resourcetier"
+  
+  while [[ $# > 0 ]]; do
+    local key="$1"
+
+    case "$key" in
+      --resourcetier)
+        resourcetier="$2"
+        shift
+        ;;
+      --help)
+        print_usage
+        exit
+        ;;
+      *)
+        log_error "Unrecognized argument: $key"
+        print_usage
+        exit 1
+        ;;
+    esac
+
+    shift
+  done
+
+  sqs_send_deadline_payload "$resourcetier"
+
+}
+
+main "$@"

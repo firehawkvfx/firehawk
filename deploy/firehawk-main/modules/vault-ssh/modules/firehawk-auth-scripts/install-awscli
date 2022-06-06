@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -e
+
+echo "Installing AWS CLI & jq"
+
+if [[ -n "$(command -v yum)" ]]; then sudo yum install jq -y; fi
+if [[ -n "$(command -v apt-get)" ]]; then sudo apt-get install jq -y; fi
+# if sudo test -f /bin/aws; then sudo rm -f /bin/aws; fi # Ensure AWS CLI v1 doesn't exist
+cd $TEMP
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-2.5.4.zip" -o "awscliv2.zip"
+unzip -q awscliv2.zip
+sudo ./aws/install -b /usr/local/bin --update
+aws --version
+
+# for windows
+# msiexec.exe /i https://awscli.amazonaws.com/AWSCLIV2.msi

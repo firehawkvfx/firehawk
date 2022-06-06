@@ -1,0 +1,10 @@
+.terraform/
+terraform.tfstate*
+plan
+tmp/log/*
+**/.DS_Store
+**/tfplan
+# These will be simplified when all modules have migrated to terragrunt
+**/s3-backend.tf
+**/.terragrunt-cache/*
+**/.terraform.lock.hcl

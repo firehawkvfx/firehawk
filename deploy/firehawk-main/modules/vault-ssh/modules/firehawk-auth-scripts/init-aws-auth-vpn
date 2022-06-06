@@ -1,0 +1,293 @@
+#!/bin/bash
+
+set -e
+
+
+readonly DEFAULT_POLL_DURATION=5
+readonly DEFAULT_SERVICE_INTERVAL=60
+
+EXECDIR="$(pwd)"
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
+
+function print_usage {
+  echo
+  echo "Usage: init-aws-auth-vpn [OPTIONS]"
+  echo
+  echo "Retrieves a specific payload provided by firehawk to an SQS queue.  The payload allows temporary use of a vault token to aquire a VPN cert"
+  echo "You must already have AWS credentials configured for this function to work in."
+  echo
+  echo "Options:"
+  echo
+  echo -e "  --resourcetier\tThe environment to use (dev/blue/green/main)"
+  echo -e "  --install-service\tInstall a service to regularly check for VPN credentials if there is no VPN tun interface established."
+  echo
+  echo "Example: Wait for VPN payload in message queue."
+  echo
+  echo "  init-aws-auth-vpn --resourcetier dev"
+  echo
+  echo "Example: Install as a service to poll for VPN auth payload.  Service will poll 3 times every $DEFAULT_SERVICE_INTERVAL seconds. "
+  echo
+  echo "  init-aws-auth-vpn --resourcetier dev --install-service"
+}
+
+function log {
+  local -r level="$1"
+  local -r message="$2"
+  local -r timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+  >&2 echo -e "${timestamp} [${level}] [$SCRIPT_NAME] ${message}"
+}
+
+function log_info {
+  local -r message="$1"
+  log "INFO" "$message"
+}
+
+function log_warn {
+  local -r message="$1"
+  log "WARN" "$message"
+}
+
+function log_error {
+  local -r message="$1"
+  log "ERROR" "$message"
+}
+
+function error_if_empty {
+  if [[ -z "$2" ]]; then
+    log_error "$1"
+    exit 1
+  fi
+  return
+}
+
+function assert_not_empty {
+  local -r arg_name="$1"
+  local -r arg_value="$2"
+
+  if [[ -z "$arg_value" ]]; then
+    log_error "The value for '$arg_name' cannot be empty"
+    print_usage
+    exit 1
+  fi
+}
+
+# function cron { # See https://stackoverflow.com/questions/878600/how-to-create-a-cron-job-using-bash-automatically-without-the-interactive-editor
+#   local -r resourcetier="$1"
+#   log "...Configuring cron.d to ensure VPN is up once per minute."
+#   sudo cat > /etc/cron.d/aws-auth-vpn << EOF
+# SHELL=/bin/bash 
+# PATH=/sbin:/bin:/usr/sbin:/usr/bin 
+# HOME=/home/deployuser  
+# * * * * * deployuser /deployuser/scripts/firehawk-auth-scripts/init-aws-auth-vpn --resourcetier $resourcetier
+# EOF
+# }
+function install_service { # see https://opensource.com/article/20/7/systemd-timers for further examples
+  local -r resourcetier="$1"
+  local -r target_script_dir="/opt/firehawk-auth-scripts"
+  # set -x
+  sudo mkdir -p $target_script_dir
+  # sudo chmod -R u=rwX,g=rwX,o=rwX $target_script_dir
+  sudo cp -fr $SCRIPTDIR/* $target_script_dir
+  sudo chown -R deployuser:deployuser $target_script_dir
+  sudo chmod -R u=rwX,g=rwX,o=rX $target_script_dir
+  sudo chmod u+x,g+x $target_script_dir/init-aws-auth-vpn
+
+  if [[ -z "$target_script_dir" ]]; then
+    echo "ERROR no defined target_script_dir: $target_script_dir "
+    exit 1
+  fi
+
+  var=$1
+  sudo tee "/etc/systemd/system/awsauthvpn.service" > /dev/null <<EOF
+[Unit]
+Description=Service: Ensure VPN credentials are current (Firehawk: Utilises AWS CLI user credentials)
+Wants=awsauthvpn.timer
+
+[Service]
+Type=oneshot
+User=deployuser
+Group=deployuser
+ExecStart=$target_script_dir/init-aws-auth-vpn --resourcetier $resourcetier
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+  sudo tee "/etc/systemd/system/awsauthvpn.timer" > /dev/null <<EOF
+[Unit]
+Description=Regular timer to handle VPN auth changes - Automates a VPN with dynamic credentials.
+Requires=awsauthvpn.service
+
+[Timer]
+Unit=awsauthvpn.service
+OnUnitActiveSec=$DEFAULT_SERVICE_INTERVAL
+
+[Install]
+WantedBy=timers.target
+EOF
+
+  echo
+  echo "...Starting and enabling service on boot"
+  echo
+
+  sudo systemctl start awsauthvpn
+  sudo systemctl daemon-reload
+  sudo systemctl enable awsauthvpn
+
+  echo ""
+  echo "Provided you have run init-aws-auth-ssh and have SSH certificates configured, start the service with:"
+  echo "sudo systemctl start awsauthvpn"
+  echo "You can enable on boot with:"
+  echo "sudo systemctl enable awsauthvpn"
+  echo ""
+  echo "You can view the service logs with:"
+  echo "sudo journalctl -S today -u awsauthvpn"
+  echo ""
+  echo "Or follow live output with:"
+  echo "sudo journalctl -f -u awsauthvpn"
+}
+
+function ssm_get_parm {
+  local -r parm_name="$1"
+
+  output=$(aws ssm get-parameters --with-decryption --names ${parm_name}) && exit_status=0 || exit_status=$?
+
+  invalid=$(echo ${output} | jq -r .'InvalidParameters | length')
+  if [[ $exit_status -eq 0 && $invalid -eq 0 ]]; then
+      log "Result: ${output}"
+      value=$(echo ${output} | jq -r '.Parameters[0].Value')
+      echo "$value"
+      return
+  fi
+  log "...Failed retrieving: ${parm_name}"
+  log "Result: ${output}"
+}
+
+function get_vpn_cert {
+  local -r resourcetier="$1"
+  local -r host1="$2"
+  local -r host2="$3"
+  local -r vault_token="$4"
+
+  echo "Request the VPN config / certs"
+  source_file_path="/usr/local/openvpn_as/scripts/seperate/client.ovpn" # the original file path that was stored in vault
+  source_vault_path="$resourcetier/data/vpn/client_cert_files$source_file_path" # the full namespace / path to the file in vault.
+  target_path="$SCRIPTDIR/../openvpn_config/$(basename $source_file_path)"
+
+  rm -f $SCRIPTDIR/../openvpn_config/client.ovpn
+  rm -f $SCRIPTDIR/../openvpn_config/openvpn.conf
+
+  $SCRIPTDIR/get-vault-file --host1 $host1 --host2 $host2 --source-vault-path $source_vault_path --target-path $target_path --vault-token $vault_token
+
+  # Replicate file for vpn.  This might be able to be deprecated, or replaced with a move
+  cp -f $SCRIPTDIR/../openvpn_config/client.ovpn $SCRIPTDIR/../openvpn_config/openvpn.conf
+
+  # echo "Request the deadline client certifcate."
+  # source_file_path="/opt/Thinkbox/certs/Deadline10RemoteClient.pfx" # the original file path that was stored in vault
+  # source_vault_path="$resourcetier/data/deadline/client_cert_files$source_file_path" # the full namespace / path to the file in vault.
+  # target_path="$HOME/.ssh/$(basename $source_file_path)"
+
+  # $SCRIPTDIR/get-vault-file --host1 $host1 --host2 $host2 --source-vault-path $source_vault_path --target-path $target_path --vault-token $VAULT_TOKEN
+
+  # openvpn_user=$openvpn_user openvpn_user_pw=$openvpn_user_pw 
+
+  # vagrant up
+}
+
+function poll_sqs_remote_in_vpn {
+  local -r resourcetier="$1"
+  local -r parm_name="/firehawk/resourcetier/$resourcetier/sqs_remote_in_vpn_url"
+  local -r sqs_queue_url="$(ssm_get_parm "$parm_name")"
+
+  log "...Polling SQS queue for vault and vpn pass"
+
+  local -r max_count=3 # set to 1 or larger to limit the number of retries
+  
+  local count=0
+  local poll="true"
+
+  while [[ "$poll" == "true" ]]; do # the funciton will poll the message queue until a message is received, or count is reached.
+    ((count+=1))
+
+    local msg="$(aws sqs receive-message --queue-url $sqs_queue_url)"
+    if [[ ! -z "$msg" ]]; then
+      poll="false"
+      local reciept_handle="$(echo "$msg" | jq -r '.Messages[] | .ReceiptHandle')"
+      aws sqs delete-message --queue-url $sqs_queue_url --receipt-handle $reciept_handle && echo "$msg" | jq -r '.Messages[] | .Body' 
+    fi
+
+    if [[ "$poll" == "true" ]]; then
+      if [[ $max_count -gt 0 ]] && [[ $count -ge $max_count ]]; then
+        poll="false"
+        log "Max count reached."
+      else
+        log "...Waiting $DEFAULT_POLL_DURATION seconds before retry."
+        sleep $DEFAULT_POLL_DURATION
+      fi
+    fi
+  done
+}
+
+function install {
+  local resourcetier=""
+  local run_vpn="true"
+  local install_service="false"
+  
+  while [[ $# > 0 ]]; do
+    local key="$1"
+
+    case "$key" in
+      --resourcetier)
+        resourcetier="$2"
+        shift
+        ;;
+      --install-service)
+        run_vpn="false"
+        install_service="true"
+        ;;
+      --help)
+        print_usage
+        exit
+        ;;
+      *)
+        log_error "Unrecognized argument: $key"
+        print_usage
+        exit 1
+        ;;
+    esac
+
+    shift
+  done
+
+  error_if_empty "Argument resourcetier or env var TF_VAR_resourcetier not provided" "$resourcetier"
+
+  if [[ "$install_service" == "true" ]]; then
+    install_service "$resourcetier"
+  fi
+
+  if [[ "$run_vpn" == "true" ]]; then
+    if ! /sbin/ifconfig tun0 | grep -q "00-00-00-00-00-00-00-00-00-00-00-00-00-00-00-00"; then
+      log "tun0 down"
+      log "...Getting SQS endpoint from SSM Parameter and await SQS message for VPN credentials."
+      local -r result="$(poll_sqs_remote_in_vpn $resourcetier)"
+
+      if [[ ! -z "$result" ]]; then
+        local -r openvpn_user="openvpnas"
+        local -r openvpn_user_pw=$(echo "$result" | jq -r '.openvpn_admin_pw')
+        local -r host1=$(echo "$result" | jq -r '.host1')
+        local -r host2=$(echo "$result" | jq -r '.host2')
+        local -r vault_token=$(echo "$result" | jq -r '.token')
+
+        get_vpn_cert "$resourcetier" "$host1" "$host2" "$vault_token"
+        cd /opt/firehawk-auth-scripts; ansible-playbook ansible/openvpn.yaml -v --extra-vars "variable_host=localhost openvpn_user=$openvpn_user openvpn_user_pw=$openvpn_user_pw"
+      else
+        log "No payload aquired."
+      fi
+    else
+      log "VPN is up"
+    fi
+  fi
+
+}
+
+install "$@"

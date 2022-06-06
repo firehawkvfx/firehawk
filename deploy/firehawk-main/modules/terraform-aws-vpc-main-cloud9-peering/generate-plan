@@ -1,0 +1,20 @@
+#!/bin/bash
+set -e
+
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
+
+# Raise error if var isn't defined.
+if [[ -z "$AWS_DEFAULT_REGION" ]]; then
+    exit_if_error 1 "AWS_DEFAULT_REGION not defined."
+fi
+if [[ -z "$TF_VAR_bucket_extension" ]]; then
+    exit_if_error 1 "TF_VAR_bucket_extension not defined."
+fi
+# init the s3 backend if it doesn't exist.
+terraform init \
+    -input=false \
+    -backend-config="bucket=state.terraform.$TF_VAR_bucket_extension" \
+    -backend-config="key=$TF_VAR_resourcetier/terraform-aws-vpc-main-cloud9-peering/terraform.tfstate" \
+    -backend-config="region=$AWS_DEFAULT_REGION" \
+    -backend-config="dynamodb_table=locks.state.terraform.$TF_VAR_bucket_extension"
+terraform plan -out=tfplan -input=false -var "sleep=false"

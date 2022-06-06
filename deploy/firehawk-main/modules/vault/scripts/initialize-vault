@@ -1,0 +1,239 @@
+#!/bin/bash
+
+# This script will intialise vault by sshing into the first vault server listed by tag
+
+set -e
+
+# Log the given message. All logs are written to stderr with a timestamp.
+function log {
+ local -r message="$1"
+ local readonly timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+ >&2 echo -e "$timestamp $message"
+}
+# A retry function that attempts to run a command a number of times and returns the output
+function retry {
+  local -r cmd="$1"
+  local -r description="$2"
+  local -r error_message="$3"
+
+  for i in $(seq 1 30); do
+    log "$description"
+
+    # The boolean operations with the exit status are there to temporarily circumvent the "set -e" at the
+    # beginning of this script which exits the script immediatelly for error status while not losing the exit status code
+    output=$(eval "$cmd") && exit_status=0 || exit_status=$?
+    log "$output"
+    if [[ $exit_status -eq 0 ]]; then
+      echo "$output"
+      return
+    fi
+    log "$description failed. Will sleep for 10 seconds and try again."
+    sleep 10
+  done;
+
+  log "$description failed after 30 attempts."
+  log "$error_message"
+  exit $exit_status
+}
+function retryifnooutput {
+  local -r cmd="$1"
+  local -r description="$2"
+  local -r error_message="$3"
+
+  for i in $(seq 1 30); do
+    log "$description"
+
+    # The boolean operations with the exit status are there to temporarily circumvent the "set -e" at the
+    # beginning of this script which exits the script immediatelly for error status while not losing the exit status code
+    output=$(eval "$cmd") && exit_status=0 || exit_status=$?
+    # log "$output"
+    if [[ $exit_status -eq 0 ]] && [[ ! -z "$output" ]]; then
+      echo "$output"
+      return
+    fi
+    log "...failed. Will sleep for 10 seconds and try again."
+    sleep 10
+  done;
+
+  log "$description failed after 30 attempts."
+  log "$error_message"
+  exit $exit_status
+}
+
+exit_if_error() {
+  local exit_code=$1
+  shift
+  [[ $exit_code ]] &&               # do nothing if no error code passed
+    ((exit_code != 0)) && {         # do nothing if error code is 0
+      printf 'ERROR: %s\n' "$@" >&2 # we can use better logging here
+      exit "$exit_code"             # we could also check to make sure
+                                    # error code is numeric when passed
+    }
+}
+
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
+
+query=$(aws ec2 describe-instances --filter "Name=instance-state-name,Values=running" "Name=tag:Name,Values=vault-example" --query "Reservations[].Instances[0]")
+instanceid="$(echo $query | jq '.[0]["InstanceId"]' --raw-output)"
+privateip="$(echo $query | jq '.[0]["PrivateIpAddress"]' --raw-output)"
+hostname=$instanceid.node.consul
+
+get_host_key() {
+  local -r instanceid=$1
+  local -r privateip=$2
+  aws ec2 get-console-output --instance-id $instanceid | jq .Output -r |sed -n -e '1,/-----BEGIN SSH HOST KEY KEYS-----/d; /-----END SSH HOST KEY KEYS-----/q; p' | grep ecdsa-sha2-nistp256 | awk -v host=$instanceid.node.consul,$privateip -v space=' ' '{ print host space $1 space $2 }'
+}
+
+# get_host_key $instanceid $privateip # required for ssh to  vault
+# known_hosts_fragment=$(retryifnooutput \
+#     "get_host_key $instanceid $privateip" \
+#     "Querying host key for $instanceid..." \
+#     "Failed to aquire host key.")
+# if [[ -z "$known_hosts_fragment" ]]; then
+#     exit_if_error 1 "Couldn't get-console-output."
+# else
+#     echo "$known_hosts_fragment" | tee --append ~/.ssh/known_hosts
+#     echo "Added to known hosts: $known_hosts_fragment"
+# fi
+
+echo
+echo "...Checking Vault status"
+# If vault is already initialised, skip init process.
+initialised="false"
+output=$(vault status) && exit_status=0 || exit_status=$?
+if [[ $exit_status -eq 0 ]]; then
+  echo "$output" | grep -m 1 "Initialized.*true" && initialised="true"
+fi
+
+echo "initialised: $initialised"
+
+if [[ "$initialised" == "true" ]]; then
+  echo "Vault is already Initialized."
+  echo ""
+else
+  echo "...Proceeding to initialize vault after host key aquired."
+
+  echo "Removing any previous host keys for: $hostname,$privateip"
+  ssh-keygen -R $hostname || echo "No host key by name required removal"
+  ssh-keygen -R $privateip || echo "No host key by ip required removal"
+  printf "\nAdding hostkeys using AWS CLI query for $hostname,$privateip\n" # A seperate channel should always be used to add hsot keys, so we use the cli.
+  printf "The first time an instance is starting this may take 2-3 minutes.\n\n"
+
+  get_host_key $instanceid $privateip # required for ssh to  vault
+  known_hosts_fragment=$(retryifnooutput \
+      "get_host_key $instanceid $privateip" \
+      "Querying host key for $instanceid..." \
+      "Failed to aquire host key.")
+  if [[ -z "$known_hosts_fragment" ]]; then
+      exit_if_error 1 "Couldn't get-console-output."
+  else
+      echo "$known_hosts_fragment" | tee --append ~/.ssh/known_hosts
+      echo "Added to known hosts: $known_hosts_fragment"
+  fi
+
+  result="$(ssh -l ubuntu $hostname "bash -s" < "$SCRIPTDIR/initialize-ssh")" && exit_status=0 || exit_status=$?
+
+  if [[ ! $exit_status -eq 0 ]]; then
+    echo ""
+    echo "Error: Did not initialize vault:"
+    echo "initialize-ssh returned: $result"
+    echo "If you have updated images, you must destroy the autoscaling group first to update the keys with the new deployer key."
+    exit 1
+  fi
+
+  recovery_key=$(echo "$result" | awk '/^Recovery Key 1:/ { print $4 ; exit }')
+  initial_root_token=$(echo "$result" | awk '/^Initial Root Token:/ { print $4 ; exit }')
+
+  echo ""
+  echo "recovery_key: $recovery_key"
+  echo "initial_root_token: $initial_root_token"
+  echo ""
+
+  if [[ -z "$initial_root_token" ]] || [[ -z "$recovery_key" ]]; then
+    echo ""
+    echo "Vault appears to already be initialised."
+    echo "Result Output:"
+    echo "$result"
+    echo ""
+  else
+    echo "Will store root token with SSM Secrets Manager"
+    store=$(echo "{ \"recovery_key\" : \"$recovery_key\", \"root_token\" : \"$initial_root_token\" }" | jq -r '.') && exit_status=0 || exit_status=$?
+
+    if [[ ! $exit_status -eq 0 ]]; then
+      echo ""
+      echo "Error: formatting json to store token with jq:"
+      echo "jq returned: $result"
+      exit 1
+    fi
+
+    $SCRIPTDIR/store-token "$store"
+    echo "Finished storing token."
+  fi
+fi
+
+# Ensure a vault host exists before any further queries/login
+get_vault_ip() {
+  dig vault.service.consul | awk '/^;; ANSWER SECTION:$/ { getline ; print $5 ; exit }'
+}
+retryifnooutput \
+    "get_vault_ip" \
+    "Querying vault IP's exist for service..." \
+    "Failed to hosts for vault.service.consul."
+
+printf "\n\nAuthenticating to Vault.\n\n"
+
+if [[ ! -z "$initial_root_token" ]]; then
+  echo "...Logging in with initial token. Or exit and use: vault login --no-print"
+  retry \
+    "vault login --no-print $initial_root_token" \
+    "...Logging in with initial token" \
+    "Failed to login with initial token."
+else
+  echo "Checking if a valid token is already available..."
+  sleep 10 # before attempting a lookup some duration is required.
+  # If a token is already valid, no need to login.
+  output=$(vault token lookup) && exit_status=0 || exit_status=$?
+  errors=$(echo "$output") | grep '^{' | jq -r .errors
+
+  echo ""
+
+  if [[ $exit_status -eq 0 && -z "$errors" ]]; then
+      echo "...Already logged in"
+      # echo "$output"
+      policies="$(echo \"$output\" | awk '/^policies/ { print $2 ; exit }')"
+      echo "policies: $policies"
+  else
+      echo "...No available token for login"
+      echo "output: $output"
+      echo "errors: $errors"
+      echo "exit_status: $exit_status"
+      echo ""
+      # get the root token from the secrets manager, this must be an existing vault store from the s3 bucket, but we are on a fresh provisioner instance
+      echo "...Will aquire key from secrets manager"
+      if [[ -z "$TF_VAR_resourcetier" ]]; then
+        export TF_VAR_instance_id_main_cloud9=$(curl http://169.254.169.254/latest/meta-data/instance-id)
+        export TF_VAR_resourcetier="$(aws ec2 describe-tags --filters Name=resource-id,Values=$TF_VAR_instance_id_main_cloud9 --out=json|jq '.Tags[]| select(.Key == "resourcetier")|.Value' --raw-output)"
+      fi
+      secret_result=$(aws secretsmanager get-secret-value --secret-id "/firehawk/resourcetier/${TF_VAR_resourcetier}/vault_root_token" | jq -r '.SecretString') && exit_status=0 || exit_status=$?
+      if [[ ! $exit_status -eq 0 ]]; then
+        echo ""
+        echo "Error: aws secretsmanager get-secret-value failed:"
+        echo "jq returned: $secret_result"
+        exit 1
+      fi
+      # recovery_key=$(echo "$secret_result" | jq -r '.recovery_key')
+      initial_root_token=$(echo "$secret_result" | jq -r '.root_token')
+      echo ""
+      # echo "recovery_key: $recovery_key"
+      echo "initial_root_token: $initial_root_token"
+      echo ""
+      echo "...Logging in with root token from secrets manager. Or exit and use: vault login --no-print"
+      retry \
+        "vault login --no-print $initial_root_token" \
+        "...Logging in with root token" \
+        "Failed to login with root token."
+      # echo "...Logging in manually. Or exit and use: vault login --no-print"
+      # vault login --no-print
+  fi
+  echo ""
+fi

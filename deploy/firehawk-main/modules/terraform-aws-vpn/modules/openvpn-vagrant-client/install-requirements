@@ -1,0 +1,107 @@
+#!/bin/bash
+
+function print_usage {
+  echo
+  echo "Usage: ./install-requirements [OPTIONS]"
+  echo
+  echo "This script to initialise pacakges required for the VPN."
+  echo
+  echo "Options:"
+  echo
+  echo -e "  --host-type\t\tUse either 'metal' or 'vagrant' to decide the environment we are provisioning for."
+  echo
+  echo "Example:"
+  echo
+  echo "  ./install-requirements --host-type='metal'"
+}
+
+function log {
+  local -r level="$1"
+  local -r message="$2"
+  local -r timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+  >&2 echo -e "${timestamp} [${level}] [$SCRIPT_NAME] ${message}"
+}
+
+function log_info {
+  local -r message="$1"
+  log "INFO" "$message"
+}
+
+function log_warn {
+  local -r message="$1"
+  log "WARN" "$message"
+}
+
+function log_error {
+  local -r message="$1"
+  log "ERROR" "$message"
+}
+
+function has_yum {
+  [[ -n "$(command -v yum)" ]]
+}
+
+function has_apt_get {
+  [[ -n "$(command -v apt-get)" ]]
+}
+
+function has_brew {
+  [[ "$OSTYPE" == "darwin"* ]]
+}
+
+function run_it {
+  local host_type="$1"
+
+  if [[ "$host_type" == "vagrant" ]]; then
+    if $(has_apt_get); then
+        sudo DEBIAN_FRONTEND=noninteractive apt-get install -y jq virtualbox vagrant awscli openssh-server
+    elif $(has_yum); then
+        sudo yum install -y jq virtualbox vagrant awscli openssh-server
+    elif $(has_brew); then
+        sudo brew install -y jq virtualbox vagrant awscli
+    else
+        echo "Could not find apt-get, yum, or brew. Cannot install dependencies on this OS."
+        exit 1
+    fi
+  else
+    if $(has_apt_get); then
+        sudo DEBIAN_FRONTEND=noninteractive apt-get install -y jq awscli openssh-server net-tools
+    elif $(has_yum); then
+        sudo yum install -y jq awscli openssh-server
+    elif $(has_brew); then
+        sudo brew install -y jq awscli
+    else
+        echo "Could not find apt-get, yum, or brew. Cannot install dependencies on this OS."
+        exit 1
+    fi
+  fi
+
+}
+
+function install {
+  local resourcetier="$TF_VAR_resourcetier"
+  local configure_aws="false"
+  local host_type="metal"
+  
+  while [[ $# > 0 ]]; do
+    local key="$1"
+
+    case "$key" in
+      --host-type)
+        host_type="$2"
+        shift
+        ;;
+      *)
+        log_error "Unrecognized argument: $key"
+        print_usage
+        exit 1
+        ;;
+    esac
+
+    shift
+  done
+
+  run_it "$host_type"
+}
+
+install "$@"

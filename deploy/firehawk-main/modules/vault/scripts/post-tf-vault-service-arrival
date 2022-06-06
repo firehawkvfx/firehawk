@@ -1,0 +1,47 @@
+#!/bin/bash
+
+set -e
+
+# Log the given message. All logs are written to stderr with a timestamp.
+function log {
+ local -r message="$1"
+ local readonly timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+ >&2 echo -e "$timestamp $message"
+}
+# A retry function that attempts to run a command a number of times and returns the output
+function retry {
+  local -r cmd="$1"
+  local -r description="$2"
+  local -r error_message="$3"
+
+  for i in $(seq 1 30); do
+    log "$description"
+
+    # The boolean operations with the exit status are there to temporarily circumvent the "set -e" at the
+    # beginning of this script which exits the script immediatelly for error status while not losing the exit status code
+    output=$(eval "$cmd") && exit_status=0 || exit_status=$?
+    log "$output"
+    if [[ $exit_status -eq 0 ]]; then
+      echo "$output"
+      return
+    fi
+    log "$description failed. Will sleep for 10 seconds and try again."
+    sleep 10
+  done;
+
+  log "$description failed after 30 attempts."
+  log "$error_message"
+  exit $exit_status
+}
+
+if [[ -z "$VAULT_TOKEN" ]]; then
+    printf "\nInstances from this point require you to login to vault.  To avoid this message you can define the var VAULT_TOKEN\n"
+fi
+
+printf "\nWaiting for consul vault service\n(Ignore the following connection errors for a reasonable period until connection is established)...\n\n"
+# until consul catalog services | grep -m 1 "vault"; do sleep 1 ; done
+
+retry \
+    "consul catalog services | grep -m 1 'vault'" \
+    "Waiting for consul vault service..." \
+    "Couldn't obeerve the vault service.  You should try reinstalling consul on this instance and establishing a connection."

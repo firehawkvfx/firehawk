@@ -1,6 +1,3 @@
-[submodule "firehawk-main"]
-	path = deploy/firehawk-main
-	url = https://github.com/firehawkvfx/firehawk-main.git
 [submodule "firehawk-render-cluster"]
 	path = deploy/firehawk-render-cluster
 	url = https://github.com/firehawkvfx/firehawk-render-cluster.git

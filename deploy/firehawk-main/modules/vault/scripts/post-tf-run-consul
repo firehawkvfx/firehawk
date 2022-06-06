@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+
+if [[ ! -f "/opt/consul/bin/run-consul" ]]; then
+    echo "You have not yet installed consul."
+    exit 0 # if the user hasn't installed consul yet, this step must be performed manually.
+fi
+
+echo "Running Consul..."
+sudo /opt/consul/bin/run-consul --client --cluster-tag-key "${consul_cluster_tag_key}" --cluster-tag-value "${consul_cluster_tag_value}"

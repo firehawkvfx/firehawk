@@ -1,0 +1,3 @@
+export DEBIAN_FRONTEND=noninteractive
+export ANSIBLE_INVENTORY=/vagrant/ansible/inventory/hosts
+export ANSIBLE_STDOUT_CALLBACK=debug

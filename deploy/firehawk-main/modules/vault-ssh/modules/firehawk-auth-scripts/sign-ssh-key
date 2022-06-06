@@ -1,0 +1,637 @@
+#!/bin/bash
+
+set -e
+
+EXECDIR="$(pwd)"
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
+readonly SCRIPT_NAME="$(basename "$0")"
+cd "$SCRIPTDIR"
+
+readonly DEFAULT_resourcetier="$TF_VAR_resourcetier"
+readonly DEFAULT_aws_backend_role="aws-creds-deadline-cert"
+readonly DEFAULT_PUBLIC_KEY="$HOME/.ssh/id_rsa.pub"
+readonly DEFAULT_TRUSTED_CA="/etc/ssh/trusted-user-ca-keys.pem"
+readonly DEFAULT_SSH_KNOWN_HOSTS="/etc/ssh/ssh_known_hosts"
+readonly DEFAULT_SSH_KNOWN_HOSTS_FRAGMENT=$HOME/.ssh/ssh_known_hosts_fragment
+readonly DEFAULT_POLL_DURATION=10
+readonly VAULT_ADDR=https://vault.service.consul:8200
+
+# These helper functions are from the sign_ssh_key.sh Hashicorp script
+
+function print_usage {
+  echo
+  echo "Usage: sign_ssh_key.sh [OPTIONS]"
+  echo
+  echo "If authenticated to Vault, signs a public key with Vault for use as an SSH client, generating a public certificate in the same directory as the public key with the suffix '-cert.pub'."
+  echo
+  echo "Options:"
+  echo
+  echo -e "  --public-key\tThe public key to sign (Must end in .pub lowercase). Optional. Default: $DEFAULT_PUBLIC_KEY."
+  echo -e "  --generate-aws-key\tA host authenticated to vault can generate an AWS Key for a remote host to then send it's public key via an SQS queue"
+  echo
+  echo "Example: Generate an AWS key and poll SQS queue for a public key from a ssh client."
+  echo
+  echo "  sign_ssh_key.sh --generate-aws-key"
+  echo
+  echo "Example: Generate an AWS key and poll SQS queue for a public key from a remote vpn client."
+  echo
+  echo "  sign_ssh_key.sh --generate-aws-key --aws-backend-role aws-creds-vpn-cert"
+  echo
+  echo "Example: Sign this hosts public key with Vault."
+  echo
+  echo "  sign_ssh_key.sh"
+  echo
+  echo "Example: Sign a non-default public key with Vault.  If the key does not exist at this location, user will be prompted to paste the key in."
+  echo
+  echo "  sign_ssh_key.sh --public-key ~/.ssh/remote_host/id_rsa.pub"
+  echo
+  echo "Example: On a Remote host configure a provided cert file and trusted CA file where vault access is unavailable."
+  echo
+  echo "  sign_ssh_key.sh --trusted-ca ~/Downloads/trusted-user-ca-keys.pem --cert ~/Downloads/id_rsa-cert.pub"
+}
+
+function log {
+  local -r level="$1"
+  local -r message="$2"
+  local -r timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+  >&2 echo -e "${timestamp} [${level}] [$SCRIPT_NAME] ${message}"
+}
+
+function log_bare {
+  local -r message="$1"
+  >&2 echo -e "${message}"
+}
+
+function log_info {
+  local -r message="$1"
+  log "INFO" "$message"
+}
+
+function log_warn {
+  local -r message="$1"
+  log "WARN" "$message"
+}
+
+function log_error {
+  local -r message="$1"
+  log "ERROR" "$message"
+}
+
+### END HEADER
+
+function error_if_empty {
+  if [[ -z "$2" ]]; then
+    log_error "$1"
+  fi
+  return
+}
+
+function assert_not_empty {
+  local -r arg_name="$1"
+  local -r arg_value="$2"
+
+  if [[ -z "$arg_value" ]]; then
+    log_error "The value for '$arg_name' cannot be empty"
+    print_usage
+    exit 1
+  fi
+}
+
+function request_trusted_ca {
+  local -r trusted_ca="$1"
+  # Aquire the public CA cert to approve an authority for known hosts.
+  vault read -field=public_key ssh-client-signer/config/ca | sudo tee $trusted_ca
+}
+
+function configure_trusted_ca {
+  local -r trusted_ca="$1"
+  sudo chmod 0644 "$trusted_ca"
+  # If TrustedUserCAKeys not defined, then add it to sshd_config
+  sudo grep -q "^TrustedUserCAKeys" /etc/ssh/sshd_config || echo 'TrustedUserCAKeys' | sudo tee -a /etc/ssh/sshd_config
+  # Ensure the value for TrustedUserCAKeys is configured correctly
+  sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.tmp
+  sudo python3 $SCRIPTDIR/replace_value.py -f /etc/ssh/sshd_config.tmp "TrustedUserCAKeys" " $trusted_ca"
+  sudo mv /etc/ssh/sshd_config.tmp /etc/ssh/sshd_config # if the python script doesn't error, then we update the original.  If this file were to be misconfigured it will break SSH and your instance.
+}
+
+function configure_cert_restart {
+  local -r cert="$1"
+  sudo chmod 0644 "$cert"
+
+  # View result metadata
+  ssh-keygen -Lf "$cert"
+
+  log_info "Restarting SSH service..."
+  # mac / centos / amazon linux, restart ssh service
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+    echo "OS Type: darwin"
+    sudo launchctl unload /System/Library/LaunchDaemons/ssh.plist
+    sudo launchctl load -w /System/Library/LaunchDaemons/ssh.plist
+  elif uname -r | grep -q "Microsoft"; then
+    echo "OS Type: Windows Subsystem for Linux"
+    sudo service ssh restart
+  else
+    echo "OS Type: other / linux"
+    sudo systemctl restart sshd
+  fi
+
+  if test -f "$cert"; then
+    log_info "Cert exists at path: $cert"
+  else
+    log_error "Cert doesn't exist at path: $cert"
+  fi
+
+  log_info "Done signing SSH client key."
+}
+
+function request_sign_public_key {
+  local -r public_key="$1"
+  local -r trusted_ca="$2"
+  local -r cert="$3"
+  local -r resourcetier="$4"
+  local -r ssh_known_hosts="$DEFAULT_SSH_KNOWN_HOSTS"
+
+  if [[ "$public_key"!="$DEFAULT_PUBLIC_KEY" ]]; then
+    log "Copying $trusted_ca to $(dirname $public_key). Ensure you download this file to $trusted_ca if you intend to connect from a remote client."
+    sudo cp $trusted_ca $(dirname $public_key)
+    log "Configuring known hosts. To ensure $ssh_known_hosts is current before copying to homedir for download."
+    $SCRIPTDIR/../firehawk-auth-scripts/known-hosts --resourcetier "$resourcetier"
+    log "Copying $DEFAULT_SSH_KNOWN_HOSTS_FRAGMENT to $(dirname $public_key).  Ensure you download this file to a remote client if you intend to connect from that client, ensuring ssh hosts have valid certs."
+    # sudo rm -fv "$(dirname $public_key)/ssh_known_hosts_fragment" # if the file is the same, cp will raise a non 0 exit code, so we remove it.
+    FILE1=$DEFAULT_SSH_KNOWN_HOSTS_FRAGMENT
+    FILE2="$(dirname $public_key)/$(basename $DEFAULT_SSH_KNOWN_HOSTS_FRAGMENT)"
+    if [ "$(stat -L -c %d:%i FILE1)" = "$(stat -L -c %d:%i FILE2)" ]; then
+      echo "FILE1 and FILE2 refer to a single file, with one inode, on one device. Skip copy."
+    else
+      sudo cp -f "$FILE1" "$FILE2"
+    fi
+  fi
+
+  log_info "Signing public key (This is not a sensitive/secret value)"
+  
+  vault write ssh-client-signer/sign/ssh-role \
+      public_key=@$public_key
+
+  # Save the signed public cert
+  vault write -field=signed_key ssh-client-signer/sign/ssh-role \
+      public_key=@$public_key > $cert
+}
+
+function get_trusted_ca_ssm {
+  local -r trusted_ca="$1"
+  local -r resourcetier="$2"
+  log_info "Validating that credentials are configured..."
+  aws sts get-caller-identity
+  log_info "Updating: $trusted_ca"
+  aws ssm get-parameters --names /firehawk/resourcetier/$resourcetier/trusted_ca | jq -r '.Parameters[0].Value' | sudo tee "$trusted_ca"
+}
+
+function get_cert_ssm {
+  local -r cert="$1"
+  local -r resourcetier="$2"
+  log_info "Updating: $cert"
+  aws ssm get-parameters --names /firehawk/resourcetier/$resourcetier/onsite_user_public_cert | jq -r '.Parameters[0].Value' | tee "$cert"
+}
+
+function ssm_get_parm {
+  local -r parm_name="$1"
+
+  output=$(aws ssm get-parameters --with-decryption --names ${parm_name}) && exit_status=0 || exit_status=$?
+
+  invalid=$(echo ${output} | jq -r .'InvalidParameters | length')
+  if [[ $exit_status -eq 0 && $invalid -eq 0 ]]; then
+      log "Result: ${output}"
+      value=$(echo ${output} | jq -r '.Parameters[0].Value')
+      echo "$value"
+      return
+  fi
+  log "...Failed retrieving: ${parm_name}"
+  log "Result: ${output}"
+}
+
+function queue_msg_count {
+  local -r sqs_queue_url="$1"
+  queue_msgs="$(aws sqs get-queue-attributes --queue-url $sqs_queue_url --attribute-names ApproximateNumberOfMessages | jq -r '.Attributes.ApproximateNumberOfMessages')"
+  echo "$queue_msgs"
+}
+
+function sqs_send_file {
+  local -r resourcetier="$1"
+  local -r file_path="$2"
+  local -r parm_name="$3"
+  sqs_queue_url="$(ssm_get_parm $parm_name)"
+
+  log "Ensuring queue is empty before sending message..."
+  queue_msgs="$(queue_msg_count $sqs_queue_url)"
+  while [[ ! "$queue_msgs" -eq 0 ]]; do
+    queue_msgs="$(queue_msg_count $sqs_queue_url)"
+    log "Queue msg count: $queue_msgs"
+    log "...Waiting $DEFAULT_POLL_DURATION seconds before retry until empty."
+    sleep $DEFAULT_POLL_DURATION
+  done
+
+  # If ssm parm is empty, this is an error
+  error_if_empty "Could not resolve $parm_name" "$sqs_queue_url"
+  file_content="$(cat $file_path)"
+  log "...Sending $file_path to $sqs_queue_url"
+  aws sqs send-message --queue-url $sqs_queue_url --message-body "$file_content" --message-group-id "$resourcetier"
+
+  # cant rely on this because msg may be immediately removed from queue
+  # log "Ensuring message is in queue: $sqs_queue_url"
+  # queue_msgs="$(aws sqs get-queue-attributes --queue-url $sqs_queue_url --attribute-names ApproximateNumberOfMessages | jq -r '.Attributes.ApproximateNumberOfMessages')"
+  # if [[ "$queue_msgs" -eq 0 ]]; then 
+  #   log "...Sent message not in queue. ApproximateNumberOfMessages: $queue_msgs"
+  # else
+  #   log "ApproximateNumberOfMessages: $queue_msgs"
+  # fi
+  # log "Test recieve message"
+  # aws sqs receive-message --queue-url $sqs_queue_url
+}
+
+function poll_public_key {
+  local -r resourcetier="$1"
+  local -r parm_name="/firehawk/resourcetier/$resourcetier/sqs_cloud_in_cert_url"
+  local -r sqs_queue_url="$(ssm_get_parm "$parm_name")"
+
+  log "...Polling SQS queue for your remote host's public key"
+  log "SQS queue url: $sqs_queue_url"
+  poll="true"
+  while [[ "$poll" == "true" ]]; do
+    local msg="$(aws sqs receive-message --queue-url $sqs_queue_url)"
+    if [[ ! -z "$msg" ]]; then
+      poll="false"
+      reciept_handle="$(echo "$msg" | jq -r '.Messages[] | .ReceiptHandle')"
+      log "Delete msg from $sqs_queue_url"
+      log "msg: $msg"
+      aws sqs delete-message --queue-url $sqs_queue_url --receipt-handle $reciept_handle && echo "$msg" | jq -r '.Messages[] | .Body' 
+    fi
+    log "...Waiting $DEFAULT_POLL_DURATION seconds before retry."
+    sleep $DEFAULT_POLL_DURATION
+  done
+}
+
+function poll_public_signed_cert {
+  local -r resourcetier="$1"
+  local -r fingerprint="$2"
+  local -r parm_name="/firehawk/resourcetier/$resourcetier/sqs_remote_in_cert_url"
+  local -r sqs_queue_url="$(ssm_get_parm "$parm_name")"
+
+  # log "...Polling SQS queue for your remote host's signed cert"
+  log_bare ""
+  log_bare "Please confirm on remote host the fingerprint matches below:"
+  log_bare ""
+  log_bare "$fingerprint"
+  log_bare ""
+
+  poll="true"
+  while [[ "$poll" == "true" ]]; do
+    local msg="$(aws sqs receive-message --queue-url $sqs_queue_url)"
+    if [[ ! -z "$msg" ]]; then
+      poll="false"
+      reciept_handle="$(echo "$msg" | jq -r '.Messages[] | .ReceiptHandle')"
+      aws sqs delete-message --queue-url $sqs_queue_url --receipt-handle $reciept_handle && echo "$msg" | jq -r '.Messages[] | .Body' 
+    fi
+    log_bare "...Awaiting response: $sqs_queue_url"
+    sleep $DEFAULT_POLL_DURATION
+    
+  done
+}
+
+function generate_aws_creds {
+  local -r aws_backend_role="$1"
+  echo ""
+  echo "...Generating AWS credentials."
+  #: Suppress output with > /dev/null 2>&1 &
+  local -r aws_creds=$(vault read aws/creds/$aws_backend_role)
+  local -r access_key="$(echo "$aws_creds" | awk '/^access_key/ { print $2 ; exit }')"
+  local -r secret_key="$(echo "$aws_creds" | awk '/^secret_key/ { print $2 ; exit }')"
+  echo ""
+  echo "region: $AWS_DEFAULT_REGION"
+  echo "access_key: $access_key"
+  echo "secret_key: $secret_key"
+  echo ""
+}
+
+function generate_aws_creds_vpn {
+  local -r aws_backend_role="$1"
+  echo ""
+  echo "Assuming you are configuring a VPN for first time use.  Configure your remote host with these keys to automate SSH and VPN auth (./wake --resourcetier dev --host-type metal)."
+  generate_aws_creds "$aws_backend_role"
+  echo "On your remote host, start the VPN with:"
+  echo "deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client/wake --resourcetier dev --host-type metal"
+  echo ""
+}
+
+function generate_aws_creds_deadline {
+  local -r aws_backend_role="$1"
+  echo ""
+  echo "Assuming you are configuring an SSH host for first time use that will aquire Deadline client certificates."
+  generate_aws_creds "$aws_backend_role"
+  echo ""
+}
+
+function sqs_purge_vpn {
+  local -r resourcetier="$1"
+  sqs_remote_in_vpn_url="$(ssm_get_parm /firehawk/resourcetier/$resourcetier/sqs_remote_in_vpn_url)"    
+  log "...Ensuring queue is empty: $sqs_remote_in_vpn_url"
+  $SCRIPTDIR/sqs-notify --sqs-queue-url "$sqs_remote_in_vpn_url" --purge-only
+}
+
+function sqs_send_vpn_payload {
+  local -r resourcetier="$1"
+  log "...Aquiring host names for vault queries."
+  local -r host1="$(cd $TF_VAR_firehawk_path/../firehawk-render-cluster/modules/terraform-aws-vpn/data; terragrunt output --raw bastion_public_dns)"
+  local -r host2="$(cd $TF_VAR_firehawk_path/../firehawk-render-cluster/modules/terraform-aws-vpn/data; terragrunt output --raw vault_client_private_dns)"
+  log "...Updating SQS queue to retrieve a valid token" # TODO we should also drain the queue of any existing messages.
+  sqs_remote_in_vpn_url="$(ssm_get_parm /firehawk/resourcetier/$resourcetier/sqs_remote_in_vpn_url)"    
+
+  printf "\n...Waiting for consul vpn service before attempting SQS notify.\n\n"
+  until consul catalog services | grep -m 1 "vpn"; do sleep 10 ; done
+
+  openvpn_admin_pw="$(vault kv get -field=value -address="$VAULT_ADDR" -format=json $resourcetier/network/openvpn_admin_pw)"
+  append_json="{ \"openvpn_admin_pw\" : $openvpn_admin_pw }"
+  $SCRIPTDIR/sqs-notify --sqs-queue-url "$sqs_remote_in_vpn_url" --host1 "$host1" --host2 "$host2" --token-policy vpn_read_config --token-use-limit 4 --append-json "$append_json"
+  # $TF_VAR_firehawk_path/modules/terraform-aws-vpn/modules/tf_aws_openvpn/scripts/sqs_notify.sh "$resourcetier" "$sqs_remote_in_vpn_url" "$host1" "$host2"
+}
+
+function sqs_purge_deadline {
+  local -r resourcetier="$1"
+  sqs_remote_in_deadline_cert_url="$(ssm_get_parm /firehawk/resourcetier/$resourcetier/sqs_remote_in_deadline_cert_url)" 
+  log "...Ensuring queue is empty: $sqs_remote_in_deadline_cert_url"
+  $SCRIPTDIR/sqs-notify --sqs-queue-url "$sqs_remote_in_deadline_cert_url" --purge-only
+}
+
+function get_cert_from_vault_local {
+  local -r resourcetier="$1"
+  local -r vault_token="$2"
+
+  echo "Request the deadline client certifcate on the localhost."
+  source_file_path="/opt/Thinkbox/certs/Deadline10RemoteClient.pfx" # the original file path that was stored in vault
+  source_vault_path="$resourcetier/data/deadline/client_cert_files$source_file_path" # the full namespace / path to the file in vault.
+  tmp_target_path="$HOME/.ssh/_$(basename $source_file_path)"
+  target_path="$HOME/.ssh/$(basename $source_file_path)"
+  if test -f "$tmp_target_path"; then
+    rm -f $tmp_target_path
+  fi
+  echo "get-vault-file"
+  # set -x
+  $SCRIPTDIR/get-vault-file --local --source-vault-path $source_vault_path --target-path $tmp_target_path --vault-token $vault_token
+  mv -f $tmp_target_path $target_path 
+  echo "Moved file to: $target_path"
+}
+
+function get_cert_fingerprint {
+  source_file_path="/opt/Thinkbox/certs/Deadline10RemoteClient.pfx" # the original file path that was stored in vault
+  target_path="$HOME/.ssh/$(basename $source_file_path)"
+  $SCRIPTDIR/get_cert_fingerprint.sh "$target_path"
+}
+
+function sqs_send_deadline_payload {
+  local -r resourcetier="$1"
+  log "...Aquiring host names for vault queries."
+  local -r host1="$(cd $TF_VAR_firehawk_path/../firehawk-render-cluster/modules/terraform-aws-vpn/data; terragrunt output --raw bastion_public_dns)"
+  local -r host2="$(cd $TF_VAR_firehawk_path/../firehawk-render-cluster/modules/terraform-aws-vpn/data; terragrunt output --raw vault_client_private_dns)"
+
+  printf "\n...Waiting for consul vpn service before attempting SQS notify.\n\n"
+  until consul catalog services | grep -m 1 "deadline"; do sleep 10 ; done
+
+  log "...Updating SQS queue to retrieve a valid token" # TODO we should also drain the queue of any existing messages.
+  sqs_remote_in_deadline_cert_url="$(ssm_get_parm /firehawk/resourcetier/$resourcetier/sqs_remote_in_deadline_cert_url)"
+
+  log "...Get deadline cert with local tokent and aquire fingerprint"
+  get_cert_from_vault_local "$resourcetier" "$(cat $HOME/.vault-token)"
+  current_fingerprint="$(get_cert_fingerprint)"
+  append_json="{ \"deadline_client_cert_fingerprint\" : \"$current_fingerprint\" }"
+
+  $SCRIPTDIR/sqs-notify --sqs-queue-url "$sqs_remote_in_deadline_cert_url" --host1 "$host1" --host2 "$host2" --token-policy deadline_client --token-use-limit 40 --append-json "$append_json"
+}
+
+function install {
+  local public_key="$DEFAULT_PUBLIC_KEY"
+  local resourcetier="$DEFAULT_resourcetier"
+  local aws_backend_role="$DEFAULT_aws_backend_role"
+  local trusted_ca=""
+  local cert=""
+  local aquire_pubkey_certs_via_ssm="false"
+  local trusted_ca_via_ssm="false"
+  local generate_aws_key="false"
+  local sqs_get_public_key="false"
+  local sqs_send_signed_cert="false"
+  local sqs_send_vpn_payload="false"
+  local sqs_send_deadline_payload="false"
+  local aws_access_key=""
+  local aws_secret_key=""
+  local aws_configure="false"
+  local public_key_content=""
+  local poll_public_cert="false"
+  local configure_cert="true"
+  
+  while [[ $# > 0 ]]; do
+    local key="$1"
+
+    case "$key" in
+      --public-key)
+        assert_not_empty "$key" "$2"
+        public_key="$2"
+        shift
+        ;;
+      --trusted-ca)
+        assert_not_empty "$key" "$2"
+        trusted_ca="$2"
+        shift
+        ;;
+      --cert)
+        assert_not_empty "$key" "$2"
+        cert="$2"
+        shift
+        ;;
+      --resourcetier)
+        resourcetier="$2"
+        shift
+        ;;
+      --ssm)
+        aquire_pubkey_certs_via_ssm="true"
+        trusted_ca_via_ssm="true"
+        ;;
+      --generate-aws-key)
+        generate_aws_key="true"
+        sqs_get_public_key="true"
+        sqs_send_signed_cert="true"
+        ;;
+      --aws-backend-role)
+        aws_backend_role="$2"
+        shift
+        ;;
+      --aws-configure) # Provide an access key on a remote client to send public key and recieve cert via an sqs queue
+        aws_configure="true"
+        trusted_ca_via_ssm="true"
+        poll_public_cert="true"
+        sqs_send="true"
+        ;;
+      --sqs-send) # Provide an access key on a remote client to send public key and recieve cert via an sqs queue
+        trusted_ca_via_ssm="true"
+        poll_public_cert="true"
+        sqs_send="true"
+        ;;
+      --help)
+        print_usage
+        exit
+        ;;
+      *)
+        log_error "Unrecognized argument: $key"
+        print_usage
+        exit 1
+        ;;
+    esac
+
+    shift
+  done
+
+  error_if_empty "Argument resourcetier or env var TF_VAR_resourcetier not provided" "$resourcetier"
+
+  if [[ "$generate_aws_key" == "true" ]]; then
+    if [[ "$aws_backend_role" == "aws-creds-vpn-cert" ]]; then
+      generate_aws_creds_vpn "$aws_backend_role"
+      sqs_send_vpn_payload="true"
+      sqs_purge_vpn "$resourcetier"
+    elif [[ "$aws_backend_role" == "aws-creds-deadline-cert" ]]; then
+      echo ""
+      echo "You can configure a service to retrieve the deadline certificate dynsamicall on ubuntu / centos / macos with this command:"
+      echo "  install-deadline-cert-service-bash --resourcetier dev" 
+      echo ""
+      generate_aws_creds_deadline "$aws_backend_role"
+      sqs_send_deadline_payload="true"
+      sqs_purge_deadline "$resourcetier"
+    else
+      log_error "--aws-backend-role must be aws-creds-vpn-cert or aws-creds-deadline-cert"
+      exit 1
+    fi
+  fi
+
+  if [[ "$sqs_get_public_key" == "true" ]]; then
+    configure_cert="false" # if we are getting a remote pub key to produce a cert, then this host will not need to use the result for ssh (we are a server, not client).
+    public_key_content="$(poll_public_key $resourcetier)" # poll for a public key and save it to a file
+    log "public_key_content: $public_key_content"
+    public_key="$HOME/.ssh/remote_host/id_rsa.pub"
+
+    target="$public_key"
+    create_dir="$(dirname ${target})"
+    
+    log "...Create dir: $create_dir"
+    mkdir -p "${create_dir}"
+    echo "$public_key_content" | tee "$target"
+
+    if test ! -f "$target"; then
+      log "Failed to write: $target"
+      exit 1
+    fi
+
+    log_bare "...Aquiring Fingerprint"
+    received_fingerprint="$(ssh-keygen -l -f $public_key)"
+    received_fingerprint=($received_fingerprint)
+    received_fingerprint=${received_fingerprint[1]}
+
+    read -r -p "Does this match the remote host's fingerprint: $received_fingerprint [Y/n] " input
+
+    log_bare "Selected: $input"
+
+    case $input in
+      [yY][eE][sS]|[yY])
+        log_bare "Yes"
+        ;;
+      [nN][oO]|[nN])
+        log_bare "No"
+        exit 1
+        ;;
+      *)
+        log_bare "Invalid input: $input"
+        exit 1
+        ;;
+    esac
+  fi
+
+  if [[ "$aws_configure" == "true" ]]; then # we can use an aws secret to provide a channel to post the hosts public key and receive a cert via AWS SQS.
+    aws configure # this is an interactive input.
+    # aws configure set default.region us-east-1
+    # aws configure set aws_access_key_id 'YOUR_ACCESS_KEY'
+    # aws configure set aws_secret_access_key 'YOUR_SECRET_KEY'
+    # aws ecr get-login | sudo sh
+  fi
+
+  fingerprint=""
+  if [[ "$sqs_send" == "true" ]]; then
+    log_info "Send public key to parameter: /firehawk/resourcetier/$resourcetier/sqs_cloud_in_cert_url"
+    sqs_send_file "$resourcetier" "$HOME/.ssh/id_rsa.pub" "/firehawk/resourcetier/$resourcetier/sqs_cloud_in_cert_url"
+    fingerprint="$(ssh-keygen -l -f $HOME/.ssh/id_rsa.pub)"
+    fingerprint=($fingerprint) # to array
+    fingerprint=${fingerprint[1]} # get 2nd arg
+  fi
+
+  if [[ "$trusted_ca_via_ssm" == "true" ]]; then
+    log_info "Requesting trusted CA via SSM Parameter..."
+    trusted_ca="$DEFAULT_TRUSTED_CA"
+    get_trusted_ca_ssm $trusted_ca "$resourcetier" > /dev/null 2>&1 &
+  elif [[ -z "$trusted_ca" ]]; then # if no trusted ca provided, request it from vault and store in default location.
+    trusted_ca="$DEFAULT_TRUSTED_CA"
+    log_info "Requesting Vault provide the trusted CA..."
+    request_trusted_ca "$trusted_ca" > /dev/null 2>&1 &
+  else
+    log_info "Trusted CA path provided. Skipping vault request. Copy to standard path..."
+    cp -frv "$trusted_ca" "$DEFAULT_TRUSTED_CA"
+    trusted_ca="$DEFAULT_TRUSTED_CA"
+  fi
+
+  log_info "Configure this host to use trusted CA"
+  configure_trusted_ca "$trusted_ca" # configure trusted ca for our host
+
+  if [[ "$poll_public_cert" == "true" ]]; then # Get the public cert via sqs
+    log_info "Configure known hosts CA."
+    $SCRIPTDIR/../firehawk-auth-scripts/known-hosts --resourcetier "$resourcetier" --ssm --external-domain ap-southeast-2.compute.amazonaws.com
+    log_info "Polling SQS queue for signed cert... Ensure you have confirmed fingerprint: $fingerprint"
+    public_signed_cert_content="$(poll_public_signed_cert $resourcetier $fingerprint)"
+    cert=${public_key/.pub/-cert.pub}
+    echo "$public_signed_cert_content" | tee $cert
+  elif [[ "$aquire_pubkey_certs_via_ssm" == "true" ]]; then # get cert via SSM
+    log_info "Requesting SSH Cert via SSM Parameter..."
+    cert=${public_key/.pub/-cert.pub}
+    get_cert_ssm $cert "$resourcetier"
+  elif [[ -z "$cert" ]]; then # if no cert provided, request it from vault and store in along side the public key.
+    # if public key doesn't exist, allow user to paste it in
+    if test ! -f "$public_key"; then
+      log_info "Public key not present at location: $public_key"
+      log_info "You can paste the contents of the new file here (read the public key on the remote host eg: cat ~/.ssh/id_rsa.pub):"
+      mkdir -p $(dirname "$public_key")
+      read public_key_content
+      echo "$public_key_content" | tee "$public_key"
+    fi
+    log_info "Requesting Vault sign public key for SSH client..."
+    cert=${public_key/.pub/-cert.pub}
+    request_sign_public_key "$public_key" "$trusted_ca" "$cert" "$resourcetier"
+
+    if [[ "$sqs_send_signed_cert" == "true" ]]; then
+      sqs_send_file "$resourcetier" "$cert" "/firehawk/resourcetier/$resourcetier/sqs_remote_in_cert_url"
+    fi
+  else
+    log_info "Cert path provided: public key already signed. copying to default ssh dir ~/.ssh"
+    sudo cp -frv "$cert" ~/.ssh
+    cert="$(sudo basename $cert)"
+    cert="$HOME/.ssh/$cert"
+  fi
+
+  if [[ "$configure_cert" == "true" ]]; then
+    log_info "Configure cert for use: $cert"
+    configure_cert_restart "$cert"
+  fi
+
+  if [[ "$sqs_send_vpn_payload" == "true" ]]; then
+    sqs_send_vpn_payload "$resourcetier"
+  elif [[ "$sqs_send_deadline_payload" == "true" ]]; then
+    sqs_send_deadline_payload "$resourcetier"
+  fi
+
+  log_info "Complete!"
+}
+
+install "$@"
+
+cd $EXECDIR
