@@ -13,6 +13,7 @@ SCRIPTDIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
 cd $SCRIPTDIR
 source ../update_vars.sh
 
-terragrunt run-all apply --terragrunt-source-update --terragrunt-source-map github.com/firehawkvfx/firehawk-main.git=$TF_VAR_firehawk_path --terragrunt-non-interactive
+terragrunt run-all apply --terragrunt-source-update --terragrunt-non-interactive
+#--terragrunt-source-map github.com/firehawkvfx/firehawk-main.git=$TF_VAR_firehawk_path 
 
 cd $EXECDIR
