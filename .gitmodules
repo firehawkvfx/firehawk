@@ -1,6 +1,3 @@
-[submodule "firehawk-render-cluster"]
-	path = deploy/firehawk-render-cluster
-	url = https://github.com/firehawkvfx/firehawk-render-cluster.git
 [submodule "packer-firehawk-amis"]
 	path = deploy/packer-firehawk-amis
 	url = https://github.com/firehawkvfx/packer-firehawk-amis.git

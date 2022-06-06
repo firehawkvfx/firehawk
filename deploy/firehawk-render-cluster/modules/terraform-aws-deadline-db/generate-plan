@@ -1,0 +1,54 @@
+#!/bin/bash
+set -e
+
+exit_if_error() {
+  local exit_code=$1
+  shift
+  [[ $exit_code ]] &&               # do nothing if no error code passed
+    ((exit_code != 0)) && {         # do nothing if error code is 0
+      printf 'ERROR: %s\n' "$@" >&2 # we can use better logging here
+      exit "$exit_code"             # we could also check to make sure
+                                    # error code is numeric when passed
+    }
+}
+
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
+
+# Raise error if var isn't defined.
+if [[ -z "$AWS_DEFAULT_REGION" ]]; then
+    exit_if_error 1 "AWS_DEFAULT_REGION not defined.  Ensure you have run 'source update_vars.sh' from the repository root folder."
+fi
+if [[ -z "$TF_VAR_bucket_extension" ]]; then
+    exit_if_error 1 "TF_VAR_bucket_extension not defined.  Ensure you have run 'source update_vars.sh' from the repository root folder."
+fi
+
+# manifest="$SCRIPTDIR/modules/vault-client-ami/manifest.json"
+# if [[ -f "$manifest" ]]; then
+#     export TF_VAR_centos7_ami="$(jq -r '.builds[] | select(.name == "centos7-ami") | .artifact_id' "$manifest" | tail -1 | cut -d ":" -f2)"
+#     echo "Found centos7_ami in manifest: TF_VAR_centos7_ami=$TF_VAR_centos7_ami"
+#     export TF_VAR_vault_client_ami_id=$TF_VAR_centos7_ami
+#     echo "TF_VAR_vault_client_ami_id=$TF_VAR_vault_client_ami_id"
+# else
+#     echo "Manifest for ami does not exist.  Build the base ami and try again."
+#     exit 1
+# fi
+
+cd "$SCRIPTDIR/../terraform-aws-bastion"
+export TF_VAR_bastion_public_dns=$(terraform output public_dns)
+cd "$SCRIPTDIR"
+echo "TF_VAR_bastion_public_dns: $TF_VAR_bastion_public_dns"
+
+# If sourced, dont execute
+(return 0 2>/dev/null) && sourced=1 || sourced=0
+echo "Script sourced: $sourced"
+if [[ "$sourced" -eq 0 ]]; then
+  terraform init \
+      -input=false \
+      -backend-config="bucket=state.terraform.$TF_VAR_bucket_extension" \
+      -backend-config="key=$TF_VAR_resourcetier/terraform-aws-vault-client/terraform.tfstate" \
+      -backend-config="region=$AWS_DEFAULT_REGION" \
+      -backend-config="dynamodb_table=locks.state.terraform.$TF_VAR_bucket_extension"
+  terraform plan -out=tfplan -input=false
+fi
+
+set +e

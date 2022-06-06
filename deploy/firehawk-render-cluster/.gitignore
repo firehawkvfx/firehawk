@@ -1,0 +1,6 @@
+.DS_Store
+**/tfplan
+**/.terraform/
+**/.terraform.lock.hcl
+**/s3-backend.tf
+modules/terraform-aws-deadline-spot/.terraform.lock.hcl

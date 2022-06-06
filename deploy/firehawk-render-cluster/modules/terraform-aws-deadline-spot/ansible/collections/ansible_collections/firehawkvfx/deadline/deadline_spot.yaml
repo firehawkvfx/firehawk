@@ -1,0 +1,16 @@
+- hosts: deadlinedb.service.consul
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
+  become: true
+  remote_user: ubuntu
+
+  vars:
+    package_python_interpreter: /usr/bin/python3
+    deadlineuser_name:
+    config_generated_json:
+    aws_region:
+    local_config_output_dir:
+    remote_config_output_dir:
+    user_data:
+
+  roles:
+  - {role: 'firehawkvfx.deadline.deadline_spot', tags: 'update'}

@@ -1,0 +1,38 @@
+#!/bin/bash
+
+set -e
+
+function has_yum {
+  [[ -n "$(command -v yum)" ]]
+}
+function has_apt_get {
+  [[ -n "$(command -v apt-get)" ]]
+}
+
+function add_sudo_user() {
+  local -r user_name="$1"
+  if $(has_apt_get); then
+    local -r sudo_group=sudo
+  elif $(has_yum); then
+    local -r sudo_group=wheel
+  else
+    echo "ERROR: Could not find apt-get or yum."
+    exit 1
+  fi
+  echo "Ensuring user exists: $user_name with groups: $sudo_group $user_name"
+  if id "$user_name" &>/dev/null; then
+    echo 'User found.  Ensuring user is in sudoers.'
+    sudo usermod -a -G $sudo_group $user_name
+  else
+      echo 'user not found'
+      sudo useradd -m -d /home/$user_name/ -s /bin/bash -G $sudo_group $user_name
+  fi
+  echo "Adding user as passwordless sudoer."
+  touch "/etc/sudoers.d/98_$user_name"; grep -qxF "$user_name ALL=(ALL) NOPASSWD:ALL" /etc/sudoers.d/98_$user_name || echo "$user_name ALL=(ALL) NOPASSWD:ALL" >> "/etc/sudoers.d/98_$user_name"
+  sudo -i -u $user_name mkdir -p /home/$user_name/.ssh
+  # Generate a public and private key - some tools can fail without one.
+  rm -frv /home/$user_name/.ssh/id_rsa*
+  sudo -i -u $user_name bash -c "ssh-keygen -q -b 2048 -t rsa -f /home/$user_name/.ssh/id_rsa -C \"\" -N \"\""  
+}
+
+add_sudo_user "$@"

@@ -1,0 +1,20 @@
+- name: Ensure db is still valid.  if this fails, db is corrupted or there is a permissions issue
+  block:
+    - name: check limits # https://serverfault.com/questions/591812/how-to-set-ulimits-for-mongod
+      shell: |
+        cat /etc/security/limits.conf
+      become: true
+
+    - name: check db with password
+      shell: |
+        cd /opt/Thinkbox/DeadlineDatabase10/mongo/application/bin/
+        ./{{ mongo_executable }} --eval 'printjson(db.getCollectionNames())'
+      no_log: true
+      # when: deadline_proxy_certificate_password is defined
+      become: true
+      retries: 5
+      delay: 5
+      register: result
+      until: result.rc == 0
+  rescue:
+    - meta: end_play

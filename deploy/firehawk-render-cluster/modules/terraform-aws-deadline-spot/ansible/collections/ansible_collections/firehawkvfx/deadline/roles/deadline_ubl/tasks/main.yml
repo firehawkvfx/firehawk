@@ -1,0 +1,58 @@
+- name: init ubl licence info if first time install, and enable other config default to ease usage. Also init some limit groups for UBL use. Direct db calls may not be supported by Thinkbox in the future.
+  shell: | 
+    cd /opt/Thinkbox/DeadlineDatabase10/mongo/application/bin/
+
+    cd /opt/Thinkbox/Deadline10/bin
+    ./deadlinecommand -SetRepositoryOption "EnableRemoteAdministration" True
+    ./deadlinecommand -SetRepositoryOption "EnableRemoteCommandWhitelist" False
+    ./deadlinecommand -SetRepositoryOption "SlaveUseIPAddress" True
+    ./deadlinecommand -SetRepositoryOption "PulseUseIPAddress" True
+    ./deadlinecommand -SetRepositoryOption "UsageBasedURL" "{{ ubl_url }}"
+    ./deadlinecommand -SetRepositoryOption "UsageBasedActivationCode" "{{ ubl_activation_code }}"
+    ./deadlinecommand -SetLimitGroup engine_ubl 0 "" False
+    ./deadlinecommand -SetLimitGroup mantra_ubl 0 "" False
+    LINE1=$(cat <<END
+    db.LimitGroups.update({"_id": "engine_ubl"},{\$set: {"Props.UseThreePLE": true}})
+    db.LimitGroups.update({"_id": "engine_ubl"},{\$set: {"Props.ThreePLE": "houdini"}})
+    db.LimitGroups.update({"_id": "engine_ubl"},{\$set: {"Props.Overage": 4}})
+    db.LimitGroups.update({"_id": "mantra_ubl"},{\$set: {"Props.UseThreePLE": true}})
+    db.LimitGroups.update({"_id": "mantra_ubl"},{\$set: {"Props.ThreePLE": "mantra"}})
+    db.LimitGroups.update({"_id": "mantra_ubl"},{\$set: {"Props.Overage": 4}})
+    db.LimitGroups.find().pretty()
+    END
+    )
+    /opt/Thinkbox/DeadlineDatabase10/mongo/application/bin/deadline_mongo --eval "$LINE1"
+  when: ubl_url
+  no_log: true
+  become: true
+  register: deadline_ubl
+  with_items:
+  - update
+
+- name: show output
+  debug:
+    var: deadline_ubl
+  when: ubl_url
+
+# deprecated
+# ./{{ mongo_executable }} --eval 'db.DeadlineSettings.update({"_id": "deadline_network_settings"},{$set:{UsageBasedURL: "{{ ubl_url }}"}})'
+# ./{{ mongo_executable }} --eval 'db.DeadlineSettings.update({"_id": "deadline_network_settings"},{$set:{UsageBasedActivationCode: "{{ ubl_activation_code }}"}})'
+# ./{{ mongo_executable }} --eval 'db.DeadlineSettings.update({"_id": "deadline_network_settings"},{$set:{SlaveUseIPAddress: true}})' # Required over VPN without DNS
+# ./{{ mongo_executable }} --eval 'db.DeadlineSettings.update({"_id": "deadline_network_settings"},{$set:{PulseUseIPAddress: true}})' # Required over VPN without DNS
+# ./{{ mongo_executable }} --eval 'db.DeadlineSettings.update({"_id": "deadline_network_settings"},{$set:{EnableRemoteAdministration: true}})' # Required over VPN to configure deadline
+# ./{{ mongo_executable }} --eval 'db.DeadlineSettings.update({"_id": "deadline_network_settings"},{$set:{EnableRemoteCommandWhitelist: false}})'
+
+# - debug:
+#     msg: "{{ deadline_ubl.stdout }}"
+#   when: ubl_url
+
+# - name: update ubl licence info if already installed
+#   shell: |
+#     cd /opt/Thinkbox/DeadlineDatabase10/mongo/application/bin/
+#     ./{{ mongo_executable }} --eval 'db.DeadlineSettings.update({"_id": "deadline_network_settings"},{$set:{UsageBasedURL: "{{ ubl_url }}"}})'
+#     ./{{ mongo_executable }} --eval 'db.DeadlineSettings.update({"_id": "deadline_network_settings"},{$set:{UsageBasedActivationCode: "{{ ubl_activation_code }}"}})'
+#   when: ubl_url
+#   # no_log: true
+#   become: true
+#   register: deadline_ubl
+

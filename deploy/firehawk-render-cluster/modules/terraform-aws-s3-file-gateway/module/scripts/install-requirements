@@ -1,0 +1,24 @@
+#!/bin/bash
+
+function has_yum {
+  [[ -n "$(command -v yum)" ]]
+}
+
+function has_apt_get {
+  [[ -n "$(command -v apt-get)" ]]
+}
+
+function has_brew {
+  [[ "$OSTYPE" == "darwin"* ]]
+}
+
+if $(has_apt_get); then
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y nfs-common
+elif $(has_yum); then
+    sudo yum install -y nfs-common
+elif $(has_brew); then
+    sudo brew install -y nfs-common
+else
+    echo "Could not find apt-get, yum, or brew. Cannot install dependencies on this OS."
+    exit 1
+fi

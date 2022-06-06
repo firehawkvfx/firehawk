@@ -1,0 +1,139 @@
+- debug:
+    msg: "warning, multiple subnets in the json spot fleet template may cause errors"
+
+- name: show first existing file or ignore if none do
+  set_fact:
+    config_template: "{{ lookup('first_found', findme) }}"
+  vars:
+    findme:
+      # - "/secrets/overrides/ansible/collections/ansible_collections/firehawkvfx/deadline/roles/deadline_spot/files/config_template.json"
+      - "config_template.json"
+
+- debug:
+    var: config_template
+
+- name: Create dir
+  file: 
+    path: "{{ remote_config_output_dir }}"
+    state: directory
+    # mode: u=rwX,g=rX,o-rwx
+    owner: "{{ deadlineuser_name }}"
+    # group: syscontrol
+  become: true
+
+- name: generate spot fleet config from template
+  template:
+    src: "{{ config_template }}"
+    dest: "{{ config_generated_json }}"
+
+- name: 'Copy to config output dir'
+  fetch:
+    src: "{{ config_generated_json }}"
+    dest: "{{ local_config_output_dir }}"
+
+- name: show first existing file or ignore if none do
+  set_fact:
+    update_spot: "{{ lookup('first_found', findme) }}"
+  vars:
+    findme:
+      - "update_spot.py"
+
+- name: copy update_spot.py to remote
+  copy:
+    src: "{{ update_spot }}"
+    dest: "{{ remote_config_output_dir }}/"
+
+- name: exec spot template - json
+  shell: | 
+    # set -x
+    cd /opt/Thinkbox/Deadline10/bin
+    ./deadlinecommand -ExecuteScriptNoGui "{{ remote_config_output_dir }}/update_spot.py"
+  become: true
+
+- name: Enable spot plugin
+  shell: | 
+    # set -x
+    cd /opt/Thinkbox/DeadlineDatabase10/mongo/application/bin/
+    ./{{ mongo_executable }} --eval '
+      db.EventPluginSettingsCollection.update({"_id": "spot"},{$set:{"PluginEnabled": "1"}});'
+  become: true
+
+- name: Spot plugin config
+  shell: | 
+    # set -x
+    cd /opt/Thinkbox/DeadlineDatabase10/mongo/application/bin/
+    ./{{ mongo_executable }} --eval '
+      db.EventPluginSettingsCollection.update({"_id": "spot"},{$set:{"PluginEnabled": "1"}});
+
+      db.EventPluginSettingsCollection.update(
+        { "_id" : "spot" },
+        {
+          "$set" : {
+            "DlInit.$[element]" : [ "{{ item.key }}", "{{ item.value }}"]
+          }
+        },
+        {
+          "arrayFilters": [
+            { "element.0" : "{{ item.key }}" } 
+          ]
+        }
+      )'
+  become: true
+  no_log: true
+  with_items:
+  - { key: "State", value: "Global Enabled" }
+  - { key: "ResourceTracker", value: "True" }
+  - { key: "UseLocalCredentials", value: "False" }
+  - { key: "AccessID", value: "" }
+  - { key: "SecretKey", value: "" } # This must be blank for the instance profile to function.
+  - { key: "Logging", value: "Verbose" }
+  - { key: "Region", value: "{{ aws_region }}" }
+  - { key: "IdleShutdown", value: "2" }
+  - { key: "DeleteTerminatedSlaves", value: "True" }
+  - { key: "StrictHardCap", value: "True" }
+  - { key: "StaggerInstances", value: "{{ stagger_instances }}" }
+  - { key: "PreJobTaskMode", value: "Conservative" }
+  - { key: "AWSInstanceStatus", value: "Disabled" }
+
+- name: Restart service deadline10launcher
+  service:
+    name: deadline10launcher
+    state: restarted
+  become: true
+
+# to list collections-
+# show collections;
+
+# To list the contents of EventPluginSettingsCollection (for example):
+# db.EventPluginSettingsCollection.find().pretty()
+
+# debug permissions with root {{ AWS_ACCESS_KEY }}
+# debug permissions with root {{ AWS_SECRET_KEY }}
+# normal use with {{ spot_access_key_id }}
+# normal use with {{ spot_secret_key }}
+
+# if using deadline > v10.0.28.2, use conf_list_blob in place of conf_json_blob
+# - name: init spot template - list blob
+#   shell: | 
+#     # set -x
+#     cd /opt/Thinkbox/DeadlineDatabase10/mongo/application/bin/
+#     ./{{ mongo_executable }} --sslPEMKeyPassword "avaultpassword" --eval 'db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"PluginEnabled": "1"}})'
+
+#     ./{{ mongo_executable }} --sslPEMKeyPassword "avaultpassword" --eval '
+#       var StaggerInstances = "5";
+#       var IdleShutdown = "10";
+#       var spot_json = cat("{{ config_generated_json }}");
+#       var conf_json_blob = { "State" : "Global Enabled", "AccessID" : "{{ AWS_ACCESS_KEY }}", "SecretKey" : "{{ AWS_SECRET_KEY }}", "Logging" : "Verbose", "Region" : "{{ aws_region }}", "Config" : spot_json, "IdleShutdown" : IdleShutdown, "DeleteTerminatedSlaves" : "True", "StrictHardCap" : "True", "StaggerInstances" : StaggerInstances };
+#       var conf_list_blob = [ [ "State", "Global Enabled" ], [ "ResourceTracker", "True" ], [ "AccessID", "{{ AWS_ACCESS_KEY }}" ], [ "SecretKey", "{{ AWS_SECRET_KEY }}" ], [ "Logging", "Verbose" ], [ "Region", "{{ aws_region }}" ], [ "Config", spot_json ], [ "IdleShutdown", IdleShutdown ], [ "DeleteTerminatedSlaves", "True" ], [ "StrictHardCap", "True" ], [ "StaggerInstances", StaggerInstances ] ];
+#       db.EventPluginSettingsCollection.{{ item }}({"_id": "spot"},{$set:{"DlInit": conf_list_blob}});
+#     '
+#     var done = "true"
+#   become: true
+#   register: deadline_db
+#   with_items:
+#   - insert
+#   - update
+
+# to query db entries ue something like - > db.EventPluginSettingsCollection.find({"_id": "spot"})
+# > db.EventPluginSettingsCollection.find({"_id": "spot"})
+# { "_id" : "spot", "LastWriteTime" : ISODate("2019-12-16T11:04:30.499Z"), "Name" : "Spot", "PluginEnabled" : 1, "DebugLogging" : false, "Icon" : null, "Limits" : [ ], "DlInit" : [ [ "State", "Disabled" ], [ "ResourceTracker", "True" ], [ "AccessID", "" ], [ "SecretKey", "" ], [ "Logging", "Standard" ], [ "Region", "us-west-2" ], [ "Config", "{}" ], [ "IdleShutdown", "10" ], [ "DeleteTerminatedSlaves", "False" ], [ "DeleteInterruptedSlaves", "False" ], [ "StrictHardCap", "True" ], [ "StaggerInstances", "50" ], [ "PreJobTaskMode", "Conservative" ], [ "AWSInstanceStatus", "Disabled" ] ], "Meta" : {  } }

@@ -1,0 +1,16 @@
+- hosts: deadlinedb.service.consul
+  gather_facts: "{{ variable_gather_facts | default('false') }}"
+  become: true
+  remote_user: ubuntu
+
+  vars:
+    package_python_interpreter: /usr/bin/python3
+    remote_config_output_dir:
+    config_generated_json:
+    aws_region:
+
+  roles:
+  - role: 'firehawkvfx.deadline.deadline_db_check'
+  - role: 'firehawkvfx.deadline.deadline_groups' # add groups
+  - role: 'firehawkvfx.deadline.deadline_ubl' # enable ubl
+  - role: 'firehawkvfx.deadline.deadline_db_check'

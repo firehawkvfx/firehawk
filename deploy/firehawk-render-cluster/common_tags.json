@@ -1,0 +1,12 @@
+{
+    "environment": "\($environment)",
+    "resourcetier": "\($resourcetier)",
+    "conflictkey": "\($conflictkey)",
+    "pipelineid": "\($pipelineid)",
+    "accountid": "\($accountid)",
+    "owner": "\($owner)",
+    "region": "\($region)",
+    "vpcname": "\($vpcname)",
+    "projectname": "\($projectname)",
+    "terraform": "true"
+}

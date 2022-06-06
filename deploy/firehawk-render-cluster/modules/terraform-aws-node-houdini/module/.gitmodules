@@ -1,0 +1,3 @@
+[submodule "modules/deadline-db-ami/ansible/collections/ansible_collections/firehawkvfx/core"]
+	path = modules/deadline-db-ami/ansible/collections/ansible_collections/firehawkvfx/core
+	url = https://github.com/firehawkvfx/ansible_collection_core.git
