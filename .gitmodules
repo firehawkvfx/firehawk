@@ -10,3 +10,6 @@
 [submodule "deploy/firehawk-main/modules/terraform-aws-vpn"]
 	path = deploy/firehawk-main/modules/terraform-aws-vpn
 	url = https://github.com/firehawkvfx/terraform-aws-vpn.git
+[submodule "deploy/firehawk-main/modules/vault-ssh/modules/firehawk-auth-scripts"]
+	path = deploy/firehawk-main/modules/vault-ssh/modules/firehawk-auth-scripts
+	url = https://github.com/firehawkvfx/firehawk-auth-scripts.git
