@@ -22,7 +22,7 @@ data "aws_vpc" "primary" { # The primary is the Main VPC containing vault
 }
 module "vault" {
   count = length(local.vaultvpc_id) > 0 ? 1 : 0
-  source = "https://github.com/firehawkvfx/terraform-aws-vault.git?ref=firehawk_v0.0.6"
+  source = "github.com/firehawkvfx/terraform-aws-vault.git?ref=firehawk_v0.0.6"
 
   use_default_vpc    = false
   vpc_tags           = local.common_tags #tags used to find the vpc to deploy into.
