@@ -29,7 +29,7 @@ inputs = merge(
 )
 
 # terraform {
-#   source = "${get_env("TF_VAR_firehawk_path", "")}/modules/vault"
+#   source = "../../../firehawk-main/modules/modules/vault"
 
 #   after_hook "after_hook_1" {
 #     commands = ["apply"]

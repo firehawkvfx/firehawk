@@ -3,7 +3,7 @@ include {
 }
 
 terraform {
-  source = "${get_env("TF_VAR_firehawk_path", "")}/modules/terraform-aws-vpn"
+  source = "../../../../firehawk-main/modules/terraform-aws-vpn"
 }
 
 locals {
