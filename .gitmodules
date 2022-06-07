@@ -1,3 +1,6 @@
 [submodule "packer-firehawk-amis"]
 	path = deploy/packer-firehawk-amis
 	url = https://github.com/firehawkvfx/packer-firehawk-amis.git
+[submodule "deploy/firehawk-main/modules/vpc/modules/terraform-aws-vpc"]
+	path = deploy/firehawk-main/modules/vpc/modules/terraform-aws-vpc
+	url = https://github.com/firehawkvfx/terraform-aws-vpc.git
