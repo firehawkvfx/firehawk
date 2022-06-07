@@ -25,7 +25,7 @@ dependencies {
 skip = local.skip
 
 terraform {
-  source = "../../../firehawk-main/modules/modules/vault-ssh"
+  source = "../../../firehawk-main/modules/vault-ssh"
   # Configure this host for SSH Certificates
   after_hook "after_hook_1" {
     commands = ["apply"]

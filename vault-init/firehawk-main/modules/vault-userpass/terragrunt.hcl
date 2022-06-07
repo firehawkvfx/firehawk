@@ -25,5 +25,5 @@ dependencies {
 skip = true
 
 terraform {
-  source = "../../../firehawk-main/modules/modules/vault-userpass"
+  source = "../../../firehawk-main/modules/vault-userpass"
 }

@@ -17,7 +17,7 @@ dependencies {
 }
 
 terraform {
-  source = "../../../firehawk-main/modules/modules/terraform-aws-sg-vpn"
+  source = "../../../firehawk-main/modules/terraform-aws-sg-vpn"
 }
 
 # skip = false

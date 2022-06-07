@@ -13,5 +13,5 @@ dependencies {
 }
 
 terraform {
-  source = "../../../firehawk-main/modules/modules/terraform-aws-vpc-main-cloud9-peering"
+  source = "../../../firehawk-main/modules/terraform-aws-vpc-main-cloud9-peering"
 }
