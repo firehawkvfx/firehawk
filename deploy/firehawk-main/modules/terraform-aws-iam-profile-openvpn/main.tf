@@ -20,7 +20,7 @@ data "aws_iam_policy_document" "assume_role" { # Determines the services able to
 }
 # Policy to query the identity of the current role.  Required for Vault.
 module "iam_policies_get_caller_identity" {
-  source = "../modules/aws-iam-policies-get-caller-identity"
+  source = "../aws-iam-policies-get-caller-identity"
   name = "STSGetCallerIdentity_${var.conflictkey}"
   iam_role_id = aws_iam_role.instance_role.id
 }
