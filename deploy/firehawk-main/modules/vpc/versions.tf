@@ -8,6 +8,9 @@ terraform {
       source = "hashicorp/null"
       version = "~> 3.0"
     }
+    local = {
+      source = "hashicorp/local"
+    }
   }
   required_version = ">= 0.13"
 }
