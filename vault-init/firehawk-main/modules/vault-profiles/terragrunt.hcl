@@ -24,5 +24,5 @@ dependencies {
 skip = local.skip
 
 terraform {
-  source = "${get_env("TF_VAR_firehawk_path", "")}/modules/vault-profiles"
+  source = "../../../firehawk-main/modules/modules/vault-profiles"
 }

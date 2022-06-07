@@ -18,7 +18,7 @@ dependencies {
 }
 
 terraform {
-  source = "${get_env("TF_VAR_firehawk_path", "")}/modules/vpc"
+  source = "../../../firehawk-main/modules/modules/vpc"
 }
 
 # skip = true

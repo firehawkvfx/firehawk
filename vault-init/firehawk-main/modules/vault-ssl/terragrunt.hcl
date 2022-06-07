@@ -25,5 +25,5 @@ dependencies {
 skip = true
 
 terraform {
-  source = "${get_env("TF_VAR_firehawk_path", "")}/modules/vault-ssl"
+  source = "../../../firehawk-main/modules/modules/vault-ssl"
 }

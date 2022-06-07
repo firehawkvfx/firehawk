@@ -19,7 +19,7 @@ dependencies {
 skip = local.skip
 
 terraform {
-  source = "${get_env("TF_VAR_firehawk_path", "")}/modules/vault-policies"
+  source = "../../../firehawk-main/modules/modules/vault-policies"
 
   after_hook "after_hook_1" {
     commands = ["apply"]
