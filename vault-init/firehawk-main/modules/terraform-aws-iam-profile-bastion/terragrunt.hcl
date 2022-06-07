@@ -9,5 +9,5 @@ locals {
 inputs = local.common_vars.inputs
 
 terraform {
-  source = "../../../firehawk-main/modules/terraform-aws-iam-profile-bastion"
+  source = "../../../../deploy/firehawk-main/modules/terraform-aws-iam-profile-bastion"
 }

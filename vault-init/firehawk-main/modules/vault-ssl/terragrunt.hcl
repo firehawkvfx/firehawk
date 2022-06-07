@@ -25,5 +25,5 @@ dependencies {
 skip = true
 
 terraform {
-  source = "../../../firehawk-main/modules/vault-ssl"
+  source = "../../../../deploy/firehawk-main/modules/vault-ssl"
 }

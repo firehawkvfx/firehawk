@@ -3,7 +3,7 @@ include {
 }
 
 terraform {
-  source = "../../../firehawk-main/modules/vault-aws-secret-backend"
+  source = "../../../../deploy/firehawk-main/modules/vault-aws-secret-backend"
 }
 
 skip = local.skip

@@ -18,7 +18,7 @@ dependencies {
 }
 
 terraform {
-  source = "../../../firehawk-main/modules/vpc"
+  source = "../../../../deploy/firehawk-main/modules/vpc"
 }
 
 # skip = true

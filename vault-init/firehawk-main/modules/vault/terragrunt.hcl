@@ -16,7 +16,7 @@ dependencies {
 }
 
 terraform {
-  source = "../../../firehawk-main/modules/vault"
+  source = "../../../../deploy/firehawk-main/modules/vault"
 
   after_hook "after_hook_1" {
     commands = ["apply"]
