@@ -16,7 +16,7 @@ installers_bucket="${installers_bucket}"
 deadline_version="${deadline_version}"
 # Get latest installed houdini version for config.
 array=($(ls -d /opt/hfs*.*))
-houdini_dir_latest="${array[-1]}"
+houdini_dir_latest="$${array[-1]}"
 if [[ -z "$houdini_dir_latest" ]]; then
   echo "Error aquiring item from array: $array"
   exit 1
