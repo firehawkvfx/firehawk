@@ -110,7 +110,7 @@ if [[ "$houdini_license_server_enabled" == "true" ]] && [[ ! -z "$houdini_licens
       return
     fi
 
-    sudo -i -u $deadlineuser_name bash -c "echo \"APIKey=www.sidefx.com ${sesi_client_id} $sesi_client_secret_key\" | tee /home/$deadlineuser_name/houdini18.5/hserver.opt"
+    sudo -i -u $deadlineuser_name bash -c "echo \"APIKey=www.sidefx.com ${sesi_client_id} $sesi_client_secret_key\" | tee /home/$deadlineuser_name/houdini${houdini_major_version}/hserver.opt"
   else
     echo "...Connecting Private License Server"
   fi

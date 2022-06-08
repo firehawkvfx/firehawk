@@ -77,7 +77,7 @@ function init {
   cp -frv $SCRIPTDIR/test_ondemand_pdg_deadline* "$test_dir"
 
   echo ""
-  cd /opt/hfs18.5; source ./houdini_setup
+  cd /opt/hfs19.0; source ./houdini_setup
   cd $SCRIPTDIR
 }
 
