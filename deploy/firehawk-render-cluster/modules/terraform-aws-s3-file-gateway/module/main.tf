@@ -58,6 +58,8 @@ locals {
 }
 
 resource "aws_ssm_parameter" "nfs_file_share_path" {
+  depends_on = [aws_instance.gateway]
+
   name      = "/firehawk/resourcetier/${var.resourcetier}/cloud_nfs_filegateway_export"
   type      = "String"
   overwrite = true
