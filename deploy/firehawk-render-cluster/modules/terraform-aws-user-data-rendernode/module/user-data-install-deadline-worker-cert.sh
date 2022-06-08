@@ -14,6 +14,16 @@ deadlineuser_name="${deadlineuser_name}"
 resourcetier="${resourcetier}"
 installers_bucket="${installers_bucket}"
 deadline_version="${deadline_version}"
+# Get latest installed houdini version for config.
+array=($(ls -d /opt/hfs*.*))
+houdini_dir_latest="${array[-1]}"
+if [[ -z "$houdini_dir_latest" ]]; then
+  echo "Error aquiring item from array: $array"
+  exit 1
+fi
+echo "houdini_dir_latest: $houdini_dir_latest"
+houdini_major_version=${houdini_dir_latest: -4}
+echo "houdini_major_version: $houdini_major_version"
 
 # Script vars (implicit)
 export VAULT_ADDR=https://vault.service.consul:8200
@@ -110,19 +120,19 @@ if [[ "$houdini_license_server_enabled" == "true" ]] && [[ ! -z "$houdini_licens
       return
     fi
 
-    sudo -i -u $deadlineuser_name bash -c "echo \"APIKey=www.sidefx.com ${sesi_client_id} $sesi_client_secret_key\" | tee /home/$deadlineuser_name/houdini${houdini_major_version}/hserver.opt"
+    sudo -i -u $deadlineuser_name bash -c "echo \"APIKey=www.sidefx.com ${sesi_client_id} $sesi_client_secret_key\" | tee /home/$deadlineuser_name/houdini$houdini_major_version/hserver.opt"
   else
     echo "...Connecting Private License Server"
   fi
 
-  sudo -i -u $deadlineuser_name bash -c "cd /opt/hfs${houdini_major_version} && source ./houdini_setup && hserver"
+  sudo -i -u $deadlineuser_name bash -c "cd /opt/hfs$houdini_major_version && source ./houdini_setup && hserver"
   echo "...End license server config"
 
   set +x
 else
   printf "\n...Skippping setting of Houdini license server: houdini_license_server_enabled: ${houdini_license_server_enabled} houdini_license_server_address:${houdini_license_server_address}\n\n"
   echo "Starting hserver process to enable UBL"
-  sudo -i -u $deadlineuser_name bash -c "cd /opt/hfs${houdini_major_version} && source ./houdini_setup && hserver ; sleep 10 ; hserver ; hserver -S 127.0.0.1"
+  sudo -i -u $deadlineuser_name bash -c "cd /opt/hfs$houdini_major_version && source ./houdini_setup && hserver ; sleep 10 ; hserver ; hserver -S 127.0.0.1"
 fi
 
 echo "Determine if mounts should be altered..."
@@ -157,8 +167,6 @@ cloud_mount="false"
 if [[ "$cloud_s3_gateway" == "true" ]] || [[ "$cloud_fsx_storage" == "true" ]]; then
   cloud_mount="true"
 fi
-
-houdini_major_version=${houdini_major_version}
 
 function bind_to {
   local -r source="$1"
@@ -225,7 +233,6 @@ systemctl enable deadline10launcher
 echo "...Start: deadline10launcher"
 systemctl start deadline10launcher
 
-# If add to deadline group tag is found, then add the instance to the group.
 this_instance_id=$(curl http://169.254.169.254/latest/meta-data/instance-id)
 add_to_deadline_group="$(aws ec2 describe-tags --filters Name=resource-id,Values=$this_instance_id --out=json|jq '.Tags[]| select(.Key == "add_to_deadline_group")|.Value' --raw-output)"
 if [[ ! -z "$add_to_deadline_group" ]]; then
