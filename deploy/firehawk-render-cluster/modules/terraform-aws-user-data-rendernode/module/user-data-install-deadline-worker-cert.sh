@@ -22,7 +22,7 @@ if [[ -z "$houdini_dir_latest" ]]; then
   exit 1
 fi
 echo "houdini_dir_latest: $houdini_dir_latest"
-houdini_major_version=${houdini_dir_latest: -4}
+houdini_major_version=$${houdini_dir_latest: -4}
 echo "houdini_major_version: $houdini_major_version"
 
 # Script vars (implicit)
@@ -233,6 +233,7 @@ systemctl enable deadline10launcher
 echo "...Start: deadline10launcher"
 systemctl start deadline10launcher
 
+# If add to deadline group tag is found, then add the instance to the group.
 this_instance_id=$(curl http://169.254.169.254/latest/meta-data/instance-id)
 add_to_deadline_group="$(aws ec2 describe-tags --filters Name=resource-id,Values=$this_instance_id --out=json|jq '.Tags[]| select(.Key == "add_to_deadline_group")|.Value' --raw-output)"
 if [[ ! -z "$add_to_deadline_group" ]]; then
