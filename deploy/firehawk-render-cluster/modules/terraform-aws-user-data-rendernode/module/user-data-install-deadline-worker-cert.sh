@@ -229,9 +229,9 @@ echo "...Finished mounting."
 df -h
 
 echo "...Enable: deadline10launcher"
-systemctl enable deadline10launcher
+sudo -i -u $deadlineuser_name bash -c "sudo systemctl enable deadline10launcher"
 echo "...Start: deadline10launcher"
-systemctl start deadline10launcher
+sudo -i -u $deadlineuser_name bash -c "sudo systemctl start deadline10launcher"
 
 # If add to deadline group tag is found, then add the instance to the group.
 this_instance_id=$(curl http://169.254.169.254/latest/meta-data/instance-id)
