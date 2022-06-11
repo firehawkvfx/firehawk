@@ -125,7 +125,7 @@ if [[ "$houdini_license_server_enabled" == "true" ]] && [[ ! -z "$houdini_licens
     echo "...Connecting Private License Server"
   fi
 
-  sudo -i -u $deadlineuser_name bash -c "cd /opt/hfs$houdini_major_version && source ./houdini_setup && hserver"
+  sudo -i -u $deadlineuser_name bash -c "cd /opt/hfs$houdini_major_version && source ./houdini_setup && hserver ; sleep 10 ; hserver ; hserver -S $houdini_license_server_address"
   echo "...End license server config"
 
   set +x
