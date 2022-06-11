@@ -47,7 +47,7 @@ variable "private_subnet_ids" {
 variable "instance_type" {
   description = "The AWS instance type to use."
   type        = string
-  default     = "t3.micro"
+  default     = "t4g.large"
 }
 variable "node_skip_update" {
   description = "Skipping node updates is not recommended, but it is available to speed up deployment tests when diagnosing problems"
