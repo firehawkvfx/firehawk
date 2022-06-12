@@ -13,3 +13,6 @@
 [submodule "deploy/firehawk-main/modules/vault-ssh/modules/firehawk-auth-scripts"]
 	path = deploy/firehawk-main/modules/vault-ssh/modules/firehawk-auth-scripts
 	url = https://github.com/firehawkvfx/firehawk-auth-scripts.git
+[submodule "deploy/firehawk-main/modules/vault/modules/terraform-aws-vault"]
+	path = deploy/firehawk-main/modules/vault/modules/terraform-aws-vault
+	url = https://github.com/firehawkvfx/terraform-aws-vault.git
