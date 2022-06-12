@@ -7,6 +7,17 @@
     "ValidFrom": "{{ valid_from }}",
     "ValidUntil": "{{ valid_until }}",
     "TerminateInstancesWithExpiration": true,
+    "TagSpecifications": [
+      {
+        "ResourceType": "spot-fleet-request",
+        "Tags": [
+          {
+            "Key": "DeadlineTrackedAWSResource",
+            "Value": "SpotEventPlugin"
+          }
+        ]
+      }
+    ],
     "LaunchSpecifications": [
       {
         "ImageId": "{{ ami_id }}",
@@ -155,6 +166,17 @@
     "ValidUntil": "{{ valid_until }}",
     "TerminateInstancesWithExpiration": true,
     "InstanceInterruptionBehavior": "terminate",
+    "TagSpecifications": [
+      {
+        "ResourceType": "spot-fleet-request",
+        "Tags": [
+          {
+            "Key": "DeadlineTrackedAWSResource",
+            "Value": "SpotEventPlugin"
+          }
+        ]
+      }
+    ],
     "LaunchSpecifications": [
       {
         "ImageId": "{{ ami_id }}",
@@ -304,6 +326,17 @@
     "ValidFrom": "{{ valid_from }}",
     "ValidUntil": "{{ valid_until }}",
     "TerminateInstancesWithExpiration": true,
+    "TagSpecifications": [
+      {
+        "ResourceType": "spot-fleet-request",
+        "Tags": [
+          {
+            "Key": "DeadlineTrackedAWSResource",
+            "Value": "SpotEventPlugin"
+          }
+        ]
+      }
+    ],
     "LaunchSpecifications": [
       {
         "ImageId": "{{ ami_id }}",
@@ -451,6 +484,17 @@
     "ValidFrom": "{{ valid_from }}",
     "ValidUntil": "{{ valid_until }}",
     "TerminateInstancesWithExpiration": true,
+    "TagSpecifications": [
+      {
+        "ResourceType": "spot-fleet-request",
+        "Tags": [
+          {
+            "Key": "DeadlineTrackedAWSResource",
+            "Value": "SpotEventPlugin"
+          }
+        ]
+      }
+    ],
     "LaunchSpecifications": [
       {
         "ImageId": "{{ ami_id }}",
@@ -709,6 +753,17 @@
     "ValidFrom": "{{ valid_from }}",
     "ValidUntil": "{{ valid_until }}",
     "TerminateInstancesWithExpiration": true,
+    "TagSpecifications": [
+      {
+        "ResourceType": "spot-fleet-request",
+        "Tags": [
+          {
+            "Key": "DeadlineTrackedAWSResource",
+            "Value": "SpotEventPlugin"
+          }
+        ]
+      }
+    ],
     "LaunchSpecifications": [
       {
         "ImageId": "{{ ami_id }}",
@@ -725,7 +780,7 @@
             "DeviceName": "/dev/sda1",
             "Ebs": {
               "DeleteOnTermination": true,
-              "VolumeType": "standard",
+              "VolumeType": "{{ volume_type }}",
               "VolumeSize": {{ volume_size }},
               "SnapshotId": "{{ snapshot_id }}"
             }
@@ -752,7 +807,7 @@
             "DeviceName": "/dev/sda1",
             "Ebs": {
               "DeleteOnTermination": true,
-              "VolumeType": "standard",
+              "VolumeType": "{{ volume_type }}",
               "VolumeSize": {{ volume_size }},
               "SnapshotId": "{{ snapshot_id }}"
             }
@@ -779,7 +834,7 @@
             "DeviceName": "/dev/sda1",
             "Ebs": {
               "DeleteOnTermination": true,
-              "VolumeType": "standard",
+              "VolumeType": "{{ volume_type }}",
               "VolumeSize": {{ volume_size }},
               "SnapshotId": "{{ snapshot_id }}"
             }
@@ -806,7 +861,7 @@
             "DeviceName": "/dev/sda1",
             "Ebs": {
               "DeleteOnTermination": true,
-              "VolumeType": "standard",
+              "VolumeType": "{{ volume_type }}",
               "VolumeSize": {{ volume_size }},
               "SnapshotId": "{{ snapshot_id }}"
             }
@@ -833,7 +888,7 @@
             "DeviceName": "/dev/sda1",
             "Ebs": {
               "DeleteOnTermination": true,
-              "VolumeType": "standard",
+              "VolumeType": "{{ volume_type }}",
               "VolumeSize": {{ volume_size }},
               "SnapshotId": "{{ snapshot_id }}"
             }
@@ -860,7 +915,7 @@
             "DeviceName": "/dev/sda1",
             "Ebs": {
               "DeleteOnTermination": true,
-              "VolumeType": "standard",
+              "VolumeType": "{{ volume_type }}",
               "VolumeSize": {{ volume_size }},
               "SnapshotId": "{{ snapshot_id }}"
             }
@@ -888,7 +943,7 @@
             "DeviceName": "/dev/sda1",
             "Ebs": {
               "DeleteOnTermination": true,
-              "VolumeType": "standard",
+              "VolumeType": "{{ volume_type }}",
               "VolumeSize": {{ volume_size }},
               "SnapshotId": "{{ snapshot_id }}"
             }
@@ -916,7 +971,7 @@
             "DeviceName": "/dev/sda1",
             "Ebs": {
               "DeleteOnTermination": true,
-              "VolumeType": "standard",
+              "VolumeType": "{{ volume_type }}",
               "VolumeSize": {{ volume_size }},
               "SnapshotId": "{{ snapshot_id }}"
             }
@@ -944,7 +999,7 @@
             "DeviceName": "/dev/sda1",
             "Ebs": {
               "DeleteOnTermination": true,
-              "VolumeType": "standard",
+              "VolumeType": "{{ volume_type }}",
               "VolumeSize": {{ volume_size }},
               "SnapshotId": "{{ snapshot_id }}"
             }
