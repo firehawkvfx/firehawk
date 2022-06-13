@@ -101,11 +101,11 @@ function test_result {
     sleep 1
     if [[ ! -f "$output_file" ]]; then
         echo "FAILED: output was not on disk after test at path: $output_file"
-        cleanup "false"
+        # cleanup "true"
         exit 1
     else
         echo "PASSED: output was found on disk after test at path: $output_file"
-        cleanup "false"
+        cleanup "true"
         exit 0
     fi
 }
