@@ -6,7 +6,7 @@ SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # 
 mount_cloud_prod="/Volumes/cloud_prod"
 test_dir="$mount_cloud_prod/tests"
 output_dir="$test_dir/geo"
-output_file="$output_dir/test_ondemand_pdg_deadline.spheregeo.0001.bgeo.sc"
+output_file="$output_dir/test_ondemand_pdg_deadline.rop_geometry_single.1.bgeo.sc"
 
 function print_usage {
   echo
@@ -77,7 +77,7 @@ function init {
   cp -frv $SCRIPTDIR/test_ondemand_pdg_deadline* "$test_dir"
 
   echo ""
-  cd /opt/hfs19.0; source ./houdini_setup
+  cd /opt/hfs18.5; source ./houdini_setup
   cd $SCRIPTDIR
 }
 
