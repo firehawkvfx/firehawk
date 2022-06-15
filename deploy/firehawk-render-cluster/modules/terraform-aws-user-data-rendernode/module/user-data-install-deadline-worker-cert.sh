@@ -133,6 +133,14 @@ EOF
     chown $deadlineuser_name:$deadlineuser_name /home/$deadlineuser_name/houdini$houdini_major_version/hserver.ini
     chmod u=rw /home/$deadlineuser_name/houdini$houdini_major_version/hserver.ini
 
+    old_file="/opt/hfs$houdini_major_version/hserver.ini"
+    if test -f $old_file; then
+      echo "Removing old duplicate INI: $old_file"
+      rm -fv $old_file
+    else
+      echo "No hserver.ini file needed removal: $old_file"
+    fi
+
     # sudo -i -u $deadlineuser_name bash -c "echo \"APIKey=www.sidefx.com ${sesi_client_id} $sesi_client_secret_key\" | tee /home/$deadlineuser_name/houdini$houdini_major_version/hserver.opt"
   else
     echo "...Connecting Private License Server"
