@@ -108,8 +108,8 @@ debugMode=1
 enableHttp=1
 maxThreads=12
 EOF
-  chown $deadlineuser_name:$deadlineuser_name /home/$deadlineuser_name/hserver.ini
-  chmod u=rw /home/$deadlineuser_name/hserver.ini
+  chown $deadlineuser_name:$deadlineuser_name /home/$deadlineuser_name/houdini$houdini_major_version/hserver.ini
+  chmod u=rw /home/$deadlineuser_name/houdini$houdini_major_version/hserver.ini
 
   if [[ $houdini_license_server_address == *"www.sidefx.com"* ]]; then 
     # If using houdini cloud license server, configure oauth2 keys.
