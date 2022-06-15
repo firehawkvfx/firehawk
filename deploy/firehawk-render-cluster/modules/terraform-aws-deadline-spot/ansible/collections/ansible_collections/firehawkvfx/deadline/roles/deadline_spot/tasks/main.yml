@@ -88,7 +88,7 @@
   - { key: "SecretKey", value: "" } # This must be blank for the instance profile to function.
   - { key: "Logging", value: "Verbose" }
   - { key: "Region", value: "{{ aws_region }}" }
-  - { key: "IdleShutdown", value: "2" }
+  - { key: "IdleShutdown", value: "{{ idle_shutdown }}" }
   - { key: "DeleteTerminatedSlaves", value: "True" }
   - { key: "StrictHardCap", value: "True" }
   - { key: "StaggerInstances", value: "{{ stagger_instances }}" }

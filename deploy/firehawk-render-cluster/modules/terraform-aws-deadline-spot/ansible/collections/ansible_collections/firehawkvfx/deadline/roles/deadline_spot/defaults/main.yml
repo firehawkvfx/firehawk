@@ -3,5 +3,6 @@ mongo_executable: deadline_mongo
 # The maximum number of instances to launch in a spot fleet for houdini engine
 max_spot_capacity_engine: 1
 max_spot_capacity_mantra: 1
+idle_shutdown : 2
 stagger_instances: 5
 user_data:
