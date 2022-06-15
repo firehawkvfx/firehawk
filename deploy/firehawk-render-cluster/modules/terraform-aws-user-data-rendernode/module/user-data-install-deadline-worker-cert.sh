@@ -101,15 +101,7 @@ if [[ "$houdini_license_server_enabled" == "true" ]] && [[ ! -z "$houdini_licens
   set -x
   sudo -i -u $deadlineuser_name bash -c "echo \"serverhost=$houdini_license_server_address\" | sudo tee /home/$deadlineuser_name/.sesi_licenses.pref"
 
-  # Enable debugging of hserver to a log file
-  tee /home/$deadlineuser_name/houdini$houdini_major_version/hserver.ini <<EOF
-logfile=/var/log/hserver.log
-debugMode=1
-enableHttp=1
-maxThreads=12
-EOF
-  chown $deadlineuser_name:$deadlineuser_name /home/$deadlineuser_name/houdini$houdini_major_version/hserver.ini
-  chmod u=rw /home/$deadlineuser_name/houdini$houdini_major_version/hserver.ini
+
 
   if [[ $houdini_license_server_address == *"www.sidefx.com"* ]]; then 
     # If using houdini cloud license server, configure oauth2 keys.
@@ -130,7 +122,18 @@ EOF
       return
     fi
 
-    sudo -i -u $deadlineuser_name bash -c "echo \"APIKey=www.sidefx.com ${sesi_client_id} $sesi_client_secret_key\" | tee /home/$deadlineuser_name/houdini$houdini_major_version/hserver.opt"
+    # Enable debugging of hserver to a log file
+    tee /home/$deadlineuser_name/houdini$houdini_major_version/hserver.ini <<EOF
+APIKey=www.sidefx.com ${sesi_client_id} $sesi_client_secret_key
+logfile=/var/log/hserver.log
+debugMode=1
+enableHttp=1
+maxThreads=12
+EOF
+    chown $deadlineuser_name:$deadlineuser_name /home/$deadlineuser_name/houdini$houdini_major_version/hserver.ini
+    chmod u=rw /home/$deadlineuser_name/houdini$houdini_major_version/hserver.ini
+
+    # sudo -i -u $deadlineuser_name bash -c "echo \"APIKey=www.sidefx.com ${sesi_client_id} $sesi_client_secret_key\" | tee /home/$deadlineuser_name/houdini$houdini_major_version/hserver.opt"
   else
     echo "...Connecting Private License Server"
   fi
