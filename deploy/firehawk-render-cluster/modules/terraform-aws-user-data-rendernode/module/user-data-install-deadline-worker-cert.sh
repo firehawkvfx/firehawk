@@ -133,12 +133,12 @@ EOF
     chown $deadlineuser_name:$deadlineuser_name /home/$deadlineuser_name/houdini$houdini_major_version/hserver.ini
     chmod u=rw /home/$deadlineuser_name/houdini$houdini_major_version/hserver.ini
 
-    old_file="/opt/hfs$houdini_major_version/hserver.ini"
+    old_file="/opt/hfs$houdini_major_version/houdini/hserver.opt"
     if test -f $old_file; then
-      echo "Removing old duplicate INI: $old_file"
+      echo "Removing old duplicate hserver config: $old_file"
       rm -fv $old_file
     else
-      echo "No hserver.ini file needed removal: $old_file"
+      echo "No hserver config needed removal: $old_file"
     fi
 
     # sudo -i -u $deadlineuser_name bash -c "echo \"APIKey=www.sidefx.com ${sesi_client_id} $sesi_client_secret_key\" | tee /home/$deadlineuser_name/houdini$houdini_major_version/hserver.opt"
@@ -146,14 +146,14 @@ EOF
     echo "...Connecting Private License Server"
   fi
 
-  sudo -i -u $deadlineuser_name bash -c "cd /opt/hfs$houdini_major_version && source ./houdini_setup && hserver & ; sleep 10 ; hserver -S $houdini_license_server_address ; hserver -l"
+  sudo -i -u $deadlineuser_name bash -c "cd /opt/hfs$houdini_major_version && source ./houdini_setup && hserver ; sleep 10 ; hserver -S $houdini_license_server_address ; hserver -l"
   echo "...End license server config"
 
   set +x
 else
   printf "\n...Skippping setting of Houdini license server: houdini_license_server_enabled: ${houdini_license_server_enabled} houdini_license_server_address:${houdini_license_server_address}\n\n"
-  echo "Starting hserver process to enable UBL"
-  sudo -i -u $deadlineuser_name bash -c "cd /opt/hfs$houdini_major_version && source ./houdini_setup && hserver & ; sleep 10 ; hserver -S 127.0.0.1 ; hserver -l"
+  echo "Starting hserver process to allow UBL"
+  sudo -i -u $deadlineuser_name bash -c "cd /opt/hfs$houdini_major_version && source ./houdini_setup && hserver ; sleep 10 ; hserver -S 127.0.0.1 ; hserver -l"
 fi
 
 echo "Determine if mounts should be altered..."
