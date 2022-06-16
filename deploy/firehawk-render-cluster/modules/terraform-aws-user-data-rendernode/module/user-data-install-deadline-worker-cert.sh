@@ -122,6 +122,14 @@ if [[ "$houdini_license_server_enabled" == "true" ]] && [[ ! -z "$houdini_licens
       return
     fi
 
+    old_file="/opt/hfs$houdini_major_version/houdini/hserver.opt"
+    if test -f $old_file; then
+      echo "Removing old duplicate hserver config: $old_file"
+      rm -fv $old_file
+    else
+      echo "No hserver config needed removal: $old_file"
+    fi
+    
     # Enable debugging of hserver to a log file
     tee /home/$deadlineuser_name/houdini$houdini_major_version/hserver.ini <<EOF
 APIKey=www.sidefx.com ${sesi_client_id} $sesi_client_secret_key
@@ -133,13 +141,7 @@ EOF
     chown $deadlineuser_name:$deadlineuser_name /home/$deadlineuser_name/houdini$houdini_major_version/hserver.ini
     chmod u=rw /home/$deadlineuser_name/houdini$houdini_major_version/hserver.ini
 
-    old_file="/opt/hfs$houdini_major_version/houdini/hserver.opt"
-    if test -f $old_file; then
-      echo "Removing old duplicate hserver config: $old_file"
-      rm -fv $old_file
-    else
-      echo "No hserver config needed removal: $old_file"
-    fi
+
 
     # sudo -i -u $deadlineuser_name bash -c "echo \"APIKey=www.sidefx.com ${sesi_client_id} $sesi_client_secret_key\" | tee /home/$deadlineuser_name/houdini$houdini_major_version/hserver.opt"
   else
