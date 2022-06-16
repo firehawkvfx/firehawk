@@ -1,0 +1,215 @@
+#!/bin/bash
+
+set -e
+
+readonly DEFAULT_POLL_DURATION=5
+readonly DEFAULT_SERVICE_INTERVAL=60
+
+EXECDIR="$(pwd)"
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" # The directory of this script
+
+function print_usage {
+  echo
+  echo "Usage: hserver-systemd-service [OPTIONS]"
+  echo
+  echo "Retrieves a specific payload provided by firehawk to an SQS queue.  The payload allows temporary use of a vault token to aquire a VPN cert"
+  echo "You must already have AWS credentials configured for this function to work in."
+  echo
+  echo "Options:"
+  echo
+  echo -e "  --houdini-major-version\tThe major houdini version (19.0)"
+  echo -e "  --service-user-name\tThe username the service will run as (deadlineuser)"
+  echo -e "  --houdini-license-server-address\tThe url or IP address of your houdini license server (https://www.sidefx.com/license/sesinetd)"
+  echo -e "  --install-service\tInstall a service to run on startup."
+  echo
+  echo "Example: Wait for payload in message queue."
+  echo
+  echo "  hserver-systemd-service --houdini-major-version 19.0 --service-user-name deadlineuser --houdini-license-server-address https://www.sidefx.com/license/sesinetd"
+  echo
+  echo "Example: Install as a service to run on startup."
+  echo
+  echo "  hserver-systemd-service --install-service --houdini-major-version 19.0 --service-user-name deadlineuser --houdini-license-server-address https://www.sidefx.com/license/sesinetd"
+}
+
+function log {
+  local -r level="$1"
+  local -r message="$2"
+  local -r timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+  >&2 echo -e "${timestamp} [${level}] [$SCRIPT_NAME] ${message}"
+}
+
+function log_info {
+  local -r message="$1"
+  log "INFO" "$message"
+}
+
+function log_warn {
+  local -r message="$1"
+  log "WARN" "$message"
+}
+
+function log_error {
+  local -r message="$1"
+  log "ERROR" "$message"
+}
+
+function error_if_empty {
+  if [[ -z "$2" ]]; then
+    log_error "$1"
+    exit 1
+  fi
+  return
+}
+
+function assert_not_empty {
+  local -r arg_name="$1"
+  local -r arg_value="$2"
+
+  if [[ -z "$arg_value" ]]; then
+    log_error "The value for '$arg_name' cannot be empty"
+    print_usage
+    exit 1
+  fi
+}
+
+
+function install_service_systemd { # see https://opensource.com/article/20/7/systemd-timers for further examples
+  local -r houdini_major_version="$1"
+  local -r service_user_name="$2"
+  local -r houdini_license_server_address="$3"
+
+  sudo tee "/etc/systemd/system/firehawkhserver.service" > /dev/null <<EOF
+[Unit]
+Description=Service: Ensures hserver is running
+
+[Service]
+Type=oneshot
+User=$USER
+Group=$USER
+ExecStart=$SCRIPTDIR/hserver-systemd-service --houdini-major-version $houdini_major_version --service-user-name $service_user_name --houdini-license-server-address $houdini_license_server_address
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+#   sudo tee "/etc/systemd/system/firehawkhserver.timer" > /dev/null <<EOF
+# [Unit]
+# Description=Regular timer to handle Cert changes - Automates dynamic credentials.
+# Requires=firehawkhserver.service
+
+# [Timer]
+# Unit=firehawkhserver.service
+# OnUnitActiveSec=$DEFAULT_SERVICE_INTERVAL
+
+# [Install]
+# WantedBy=timers.target
+# EOF
+
+  echo
+  echo "...Starting and enabling service on boot"
+  echo
+  echo "sudo systemctl start firehawkhserver"
+  echo "You can enable on boot with:"
+  echo "sudo systemctl enable firehawkhserver"
+  echo
+  echo "You can view the service logs with:"
+  echo "sudo journalctl -S today -u firehawkhserver"
+  echo
+  echo "Or follow live output with:"
+  echo "sudo journalctl -f -u firehawkhserver"
+
+  echo "service contents:"
+  sudo cat /etc/systemd/system/firehawkhserver.service
+  
+  echo "...Running 'systemctl start firehawkhserver'"
+  sudo -i -u $service_user_name bash -c "sudo systemctl start firehawkhserver"
+  echo "...Running 'systemctl enable firehawkhserver'"
+  sudo -i -u $service_user_name bash -c "sudo systemctl enable firehawkhserver"
+  echo "...Running 'systemctl daemon-reload'"
+  sudo -i -u $service_user_name bash -c "sudo systemctl daemon-reload"
+
+}
+
+
+# function test_service_up {
+#   local -r deadline_client_cert_fingerprint="$1"
+#   log "...Try to get fingerprint from local certificate"
+#   source_file_path="/opt/Thinkbox/certs/Deadline10RemoteClient.pfx" # the original file path that was stored in vault
+#   target_path="$HOME/.ssh/$(basename $source_file_path)"
+#   if test -f "$target_path"; then
+#     log "local certificate exists"
+#     local_fingerprint="$($SCRIPTDIR/get_cert_fingerprint.sh $target_path)"
+#     log "return result"
+#     if [[ "$deadline_client_cert_fingerprint" == "$local_fingerprint" ]]; then
+#       echo "service is up"
+#     fi
+#   fi
+# }
+
+function run_service {
+  local -r houdini_major_version="$1"
+  local -r service_user_name="$2"
+  local -r houdini_license_server_address="$3"
+  echo "Starting hserver $houdini_major_version as user: $service_user_name for address: $houdini_license_server_address"
+
+  sudo -i -u $service_user_name bash -c "cd /opt/hfs$houdini_major_version && source ./houdini_setup && hserver ; hserver -S $houdini_license_server_address ; hserver -l"
+}
+
+function install {
+  local resourcetier=""
+  local houdini_major_version=""
+  local houdini_license_server_address=""
+  local service_user_name=""
+  local script_mode="run_service" # can be either run_service or install_service
+  
+  while [[ $# > 0 ]]; do
+    local key="$1"
+
+    case "$key" in
+      --service-user-name)
+        service_user_name="$2"
+        shift
+        ;;
+      --houdini-major-version)
+        houdini_major_version="$2"
+        shift
+        ;;
+      --houdini-license-server-address)
+        houdini_license_server_address="$2"
+        shift
+        ;;
+      --install-service)
+        script_mode="install_service"
+        ;;
+      --help)
+        print_usage
+        exit
+        ;;
+      *)
+        log_error "Unrecognized argument: $key"
+        print_usage
+        exit 1
+        ;;
+    esac
+
+    shift
+  done
+
+  # error_if_empty "Argument resourcetier or env var TF_VAR_resourcetier not provided" "$resourcetier"
+  
+  
+  if [[ "$script_mode" == "install_service" ]]; then
+    install_service_systemd "$houdini_major_version" "$service_user_name" "$houdini_license_server_address"
+  elif [[ "$script_mode" == "run_service" ]]; then
+    error_if_empty "Must specify the houdini major version. eg: 19.0" "$houdini_major_version"
+    error_if_empty "Must specify the username running the service. eg: deadlineuser" "$service_user_name"
+    error_if_empty "Must specify the liense server. eg: https://www.sidefx.com/license/sesinetd" "$houdini_license_server_address"
+    run_service "$houdini_major_version" "$service_user_name" "$houdini_license_server_address"
+  else
+    log_error "No mode specifed."
+  fi
+
+
+}
+
+install "$@"
