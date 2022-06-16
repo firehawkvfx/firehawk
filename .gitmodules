@@ -16,3 +16,6 @@
 [submodule "deploy/firehawk-main/modules/vault/modules/terraform-aws-vault"]
 	path = deploy/firehawk-main/modules/vault/modules/terraform-aws-vault
 	url = https://github.com/firehawkvfx/terraform-aws-vault.git
+[submodule "deploy/firehawk-render-cluster/modules/terraform-aws-user-data-rendernode/module/aws-ec2-user-data-scripts"]
+	path = deploy/firehawk-render-cluster/modules/terraform-aws-user-data-rendernode/module/modules/aws-ec2-user-data-scripts
+	url = https://github.com/firehawkvfx/aws-ec2-user-data-scripts.git

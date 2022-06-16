@@ -148,14 +148,16 @@ EOF
     echo "...Connecting Private License Server"
   fi
 
-  sudo -i -u $deadlineuser_name bash -c "cd /opt/hfs$houdini_major_version && source ./houdini_setup && hserver ; sleep 10 ; hserver -S $houdini_license_server_address ; hserver -l"
+  echo "...Installing hserver systemd service"
+  sudo -i -u $deadlineuser_name bash -c "/usr/local/bin/hserver-systemd-service --install-service --houdini-major-version $houdini_major_version --service-user-name $deadlineuser_name --houdini-license-server-address $houdini_license_server_address"
+
   echo "...End license server config"
 
   set +x
 else
   printf "\n...Skippping setting of Houdini license server: houdini_license_server_enabled: ${houdini_license_server_enabled} houdini_license_server_address:${houdini_license_server_address}\n\n"
   echo "Starting hserver process to allow UBL"
-  sudo -i -u $deadlineuser_name bash -c "cd /opt/hfs$houdini_major_version && source ./houdini_setup && hserver ; sleep 10 ; hserver -S 127.0.0.1 ; hserver -l"
+  sudo -i -u $deadlineuser_name bash -c "/usr/local/bin/hserver-systemd-service --install-service --houdini-major-version $houdini_major_version --service-user-name $deadlineuser_name --houdini-license-server-address 127.0.0.1"
 fi
 
 echo "Determine if mounts should be altered..."
