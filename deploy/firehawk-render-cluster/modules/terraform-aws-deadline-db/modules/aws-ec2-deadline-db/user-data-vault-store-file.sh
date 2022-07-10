@@ -59,8 +59,8 @@ retry \
 
 # set -x
 # if debugging the install script, it is possible to test without rebuilding image.
-# rm -fr /var/tmp/firehawk-main
-# cd /var/tmp; git clone --branch v0.0.47 https://github.com/firehawkvfx/firehawk-main.git
+rm -fr /var/tmp/firehawk-main
+cd /var/tmp; git clone --branch v0.0.47 https://github.com/firehawkvfx/firehawk-main.git
 echo "...Store certificate with script." "$client_cert_file_path" "$client_cert_vault_path" "$resourcetier" "$VAULT_ADDR"
 /var/tmp/firehawk-main/scripts/store_file.sh "$client_cert_file_path" "$client_cert_vault_path" "$resourcetier" "$VAULT_ADDR"
 
