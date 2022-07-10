@@ -13,7 +13,7 @@ resource "aws_iam_role" "instance_role" {
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
   tags = merge( var.common_tags, tomap({"role":"rendernode"}) )
   managed_policy_arns = [
-    "arn:aws:iam::aws:policy/AWSThinkboxDeadlineSpotEventPluginWorkerPolicy",
+    "arn:aws:iam::aws:policy/AWSThinkboxDeadlineSpotEventPluginWorkerPolicy"
     # "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess" # Debuggging only
   ]
 }
