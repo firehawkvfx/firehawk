@@ -1,10 +1,20 @@
 ### This role and profile allows instances access to S3 buckets to aquire and push back downloaded softwre to provision with.  It also has prerequisites for consul and Cault IAM access.
+resource "aws_cloudwatch_log_group" "yada" {
+  name = "CloudWatchRenderNodeLoggingGroup"
+
+  tags = {
+    resourcetier = var.resourcetier
+    Application = "testing"
+  }
+}
+
 resource "aws_iam_role" "instance_role" {
   name = "DeadlineSpot_instance_role_${var.conflictkey}" # Role name must start with 'DeadlineSpot' https://docs.thinkboxsoftware.com/products/deadline/10.1/1_User%20Manual/manual/event-spot-permissions.html#event-spot-iam-policies-ref-label
   assume_role_policy = data.aws_iam_policy_document.assume_role.json
   tags = merge( var.common_tags, tomap({"role":"rendernode"}) )
   managed_policy_arns = [
-    "arn:aws:iam::aws:policy/AWSThinkboxDeadlineSpotEventPluginWorkerPolicy"
+    "arn:aws:iam::aws:policy/AWSThinkboxDeadlineSpotEventPluginWorkerPolicy",
+    # "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess" # Debuggging only
   ]
 }
 resource "aws_iam_instance_profile" "instance_profile" {
@@ -30,6 +40,11 @@ data "aws_iam_policy_document" "assume_role" { # Determines the services able to
 module "iam_policies_s3_read_write" {
   source = "github.com/firehawkvfx/firehawk-modules.git//modules/aws-iam-policies-s3-read-write"
   name = "S3ReadWrite_${var.conflictkey}"
+  iam_role_id = aws_iam_role.instance_role.id
+}
+module "iam_policies_cloudwatch_rendernode_logging" {
+  source = "github.com/firehawkvfx/firehawk-modules.git//modules/aws-iam-policies-cloudwatch-rendernode"
+  name = "CloudWatchRenderNodeLogging_${var.conflictkey}"
   iam_role_id = aws_iam_role.instance_role.id
 }
 # Policy to query the identity of the current role.  Required for Vault.

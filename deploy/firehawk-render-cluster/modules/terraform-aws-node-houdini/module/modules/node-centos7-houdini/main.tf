@@ -18,7 +18,7 @@ resource "aws_instance" "node_centos7_houdini" {
   instance_type          = var.instance_type
   key_name               = var.aws_key_name # The PEM key is disabled for use in production, can be used for debugging.  Instead, signed SSH certificates should be used to access the host.
   subnet_id              = tolist(var.private_subnet_ids)[0]
-  tags                   = merge(tomap({"Name": var.name}), var.common_tags, local.extra_tags)
+  tags                   = merge(tomap({"Name": var.name, "deployment_group": "firehawk-rendernode-test-group"}), var.common_tags, local.extra_tags)
   user_data              = base64decode(var.user_data)
   iam_instance_profile   = data.terraform_remote_state.rendernode_profile.outputs.instance_profile_name
   vpc_security_group_ids = var.vpc_security_group_ids
