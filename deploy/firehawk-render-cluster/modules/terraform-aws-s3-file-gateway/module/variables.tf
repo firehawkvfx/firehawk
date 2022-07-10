@@ -14,7 +14,7 @@ variable "ebs_cache_volume_size" {
 }
 variable "instance_type" {
   description = "The type of EC2 instance to launch.  Consult the AWS Storage Gateway documentation for supported instance types"
-  default     = "m5.large"
+  default     = "t4g.large"
 }
 variable "instance_name" {
   description = "The name for the instance"
