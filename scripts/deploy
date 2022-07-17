@@ -5,7 +5,7 @@ set -e
 cd $SCRIPTDIR/..
 
 aws deploy create-deployment \
-  --application-name firehawk-codedeploy-app \
+  --application-name firehawk-codedeploy-infra-app \
   --deployment-config-name CodeDeployDefault.OneAtATime \
   --deployment-group-name firehawk-deployment-group \
   --description "Firehawk deployment" \
