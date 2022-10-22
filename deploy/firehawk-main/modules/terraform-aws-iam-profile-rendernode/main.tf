@@ -1,6 +1,6 @@
 ### This role and profile allows instances access to S3 buckets to aquire and push back downloaded softwre to provision with.  It also has prerequisites for consul and Vault IAM access.
 resource "aws_cloudwatch_log_group" "yada" {
-  name = "CloudWatchRenderNodeLoggingGroup"
+  name = "codedeploy-rendernode-tests-log"
 
   tags = {
     resourcetier = var.resourcetier
