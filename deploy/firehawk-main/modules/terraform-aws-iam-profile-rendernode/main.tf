@@ -7,7 +7,7 @@ resource "aws_cloudwatch_log_group" "yada" {
     Application = "testing"
   }
 }
-resource "aws_cloudwatch_log_group" ""codedeploy_updater_log"" {
+resource "aws_cloudwatch_log_group" "codedeploy_updater_log" {
   name = "codedeploy-updater-log"
 
   tags = {
