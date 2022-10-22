@@ -1,0 +1,42 @@
+version: 0.2
+
+env:
+  variables:
+    resourcetier: dev
+  # parameter-store:
+  #   onsite_public_ip: "/firehawk/resourcetier/$resourcetier/onsite_public_ip"
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.8
+    commands:
+      - echo "Version of Node in Docker Image"
+      - node --version
+      - python3.8 --version
+      - git rev-parse HEAD
+      - ./gitpullrecursive --init-all
+      - mkdir -p "$HOME/.ssh/tls"
+      # - ./deploy/packer-firehawk-amis/scripts/install-packages
+      # - ./scripts/install-packages # Requirements to ensure the instance exists with the current image to deploy with
+      - export PATH=$PATH:/root/.local/bin
+      - echo "PATH=$PATH"
+
+  build:
+    commands:
+      - echo "Build artifact will be created from this project."
+      # - source ./deploy/packer-firehawk-amis/update_vars.sh --codebuild --resourcetier $resourcetier
+      # - ./deploy/packer-firehawk-amis/modules/firehawk-base-ami/build.sh # Ensure base images exist
+      # - source ./deploy/packer-firehawk-amis/update_vars.sh --codebuild --resourcetier $resourcetier
+      # - ./deploy/packer-firehawk-amis/modules/firehawk-ami/build.sh # Ensure images to deploy exist
+      # - scripts/create_deployment_artifact # Ensure image list is generated 
+      # - source ./update_vars.sh --codebuild --resourcetier $resourcetier
+      # - ./predeploy/predeploy-aws-shell # Ensure deployer instance exists to run BuildArtifact with AWS CodePipeline
+
+artifacts:
+  files:
+    - '**/*'
+    # - 'app/modules/firehawk/firehawk-modules/modules/firehawk-pdg-test/**/*'
+  base-directory: app/modules/firehawk/firehawk-modules/modules/firehawk-pdg-test
+  name: BuildArtifact
+  discard-paths: no
