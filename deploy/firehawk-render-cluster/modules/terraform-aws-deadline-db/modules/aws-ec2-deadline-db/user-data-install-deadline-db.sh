@@ -120,9 +120,10 @@ fi
 ### Install Deadline # Generate certs after install test
 set -x
 
-echo "Delete cloudformation DeadlineResourceTracker stack if it exists..."
-aws cloudformation describe-stacks --stack-name DeadlineResourceTracker && exit_status=0 || exit_status=$?
+echo "Delete cloudformation DeadlineResourceTracker stack if it exists since it was intended for an old instance..."
+output=$(aws cloudformation describe-stacks --stack-name DeadlineResourceTracker) && exit_status=0 || exit_status=$?
 if [[ $exit_status -eq 0 ]]; then
+  echo "Stack exists, deleting stack..."
   aws cloudformation update-termination-protection --stack-name DeadlineResourceTracker --no-enable-termination-protection
   aws cloudformation delete-stack --stack-name DeadlineResourceTracker
 fi
