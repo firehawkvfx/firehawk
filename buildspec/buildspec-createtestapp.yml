@@ -36,7 +36,6 @@ phases:
 artifacts:
   files:
     - '**/*'
-    # - 'app/modules/firehawk/firehawk-modules/modules/firehawk-pdg-test/**/*'
-  base-directory: app/modules/firehawk/firehawk-modules/modules/firehawk-pdg-test
+  base-directory: firehawk-modules/modules/firehawk-pdg-test
   name: BuildArtifact
   discard-paths: no
