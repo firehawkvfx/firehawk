@@ -284,18 +284,18 @@ If you are running Ubuntu 18 or Mac OS, its possible to install a service on you
 
 On your remote mac, ubuntu or Windows WSL (ubuntu, not git bash) onsite host ensure you have the AWS CLI, and jq installed.
 ```
-cd deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client/scripts/firehawk-auth-scripts
+cd deploy/firehawk-main/modules/terraform-aws-vpn/modules/pi-vpn-client/scripts/firehawk-auth-scripts
 ./install-awscli
 ```
 Then Run:
 ```
-cd deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client/scripts/firehawk-auth-scripts
+cd deploy/firehawk-main/modules/terraform-aws-vpn/modules/pi-vpn-client/scripts/firehawk-auth-scripts
 ./install-deadline-cert-service-bash --resourcetier dev --init
 ```
 
 On Windows Subsystem for Linux, running the above command will not be able to start the service (no systemd support).  So run it anyway, but after in a shell, execute this:
 ```
-cd deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client/scripts/firehawk-auth-scripts
+cd deploy/firehawk-main/modules/terraform-aws-vpn/modules/pi-vpn-client/scripts/firehawk-auth-scripts
 watch -n 60 ./aws-auth-deadline-cert --resourcetier dev
 ```
 This will ensure a current certificate exists in the user's home dir whenever a new Deadline DB is deployed.
@@ -313,10 +313,10 @@ To maintain a shared network with AWS, it is recommended that you use a dedicate
 - You will need to configure static routes on your router to send traffic intended for AWS via this static IP.
   - Configure a static route to the AWS Subnet specified in the cloudformation template (eg 10.1.0.0/16) via your raspberry PI Static IP configured above.
   - Configure a static route to the VPN DHCP subnet specified in the cloudformation template (default 172.17.232.0/24).  This route should also send traffic via your raspberry PI Static IP.
-- Install requirements and use the wake script to initialise credentials.
+- Install requirements and use the install-vpn-service script to initialise credentials.
 ```
-deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client/install-requirements --host-type metal
-deploy/firehawk-main/modules/terraform-aws-vpn/modules/openvpn-vagrant-client/wake --resourcetier dev --host-type metal
+deploy/firehawk-main/modules/terraform-aws-vpn/modules/pi-vpn-client/install-requirements --host-type metal
+deploy/firehawk-main/modules/terraform-aws-vpn/modules/pi-vpn-client/install-vpn-service --resourcetier dev --host-type metal
 ```
 - Provided you have run init-aws-auth-ssh and have SSH certificates configured, start the service with:
 ```

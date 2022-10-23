@@ -58,7 +58,7 @@ printf "\nWith a VPN, you can now install the deadline client (download the same
 printf "\nWhen installing, you will use an RCS connection to 10.1.128.12 (dev), and you will set the path to your certificate."
 printf "\nDuring the VPN auth process, you will already have the client certificate located in your home dir: ~/.ssh/Deadline10RemoteClient.pfx"
 printf "\n"
-# - Ensure SSH forwarding is functional with the result command given to you by `./wake`:
+# - Ensure SSH forwarding is functional with the result command given to you by `./install-vpn-service`:
 # ```
 # ssh -J centos@ec2-13-211-132-68.ap-southeast-2.compute.amazonaws.com centos@i-0330138643ba03b32.node.consul -L 8200:vault.service.consul:8200
 # ```
@@ -68,11 +68,11 @@ printf "\n"
 # vault token create -policy=vpn_read_config -policy=deadline_client -explicit-max-ttl=5m -ttl=5m -use-limit=4
 # ```
 
-# - Run the vagrant wake script 
-# ./modules/terraform-aws-vpn/modules/openvpn-vagrant-client/wake {resourcetier} {public host} {private host} 
+# - Run the vagrant install-vpn-service script 
+# ./modules/terraform-aws-vpn/modules/pi-vpn-client/install-vpn-service {resourcetier} {public host} {private host} 
 # eg:
 # ```
-# ./modules/terraform-aws-vpn/modules/openvpn-vagrant-client/wake dev centos@ec2-13-211-132-68.ap-southeast-2.compute.amazonaws.com centos@i-0330138643ba03b32.node.consul
+# ./modules/terraform-aws-vpn/modules/pi-vpn-client/install-vpn-service dev centos@ec2-13-211-132-68.ap-southeast-2.compute.amazonaws.com centos@i-0330138643ba03b32.node.consul
 # ```
 
 # - You can acquire the dynamic open vpn password in vault under `/dev/network/openvpn_admin_pw`
