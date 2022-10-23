@@ -22,5 +22,8 @@ else
   ../vault-init/init
   ../vault-init/configure
   ../deploy/apply
+  echo "Infra deployed."
+  echo "...Submitting render test with codedeploy"
+  ../firehawk-modules/modules/firehawk-pdg-test/scripts/create_deployment
 fi
 cd $EXECDIR
