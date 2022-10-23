@@ -119,5 +119,13 @@ fi
 
 ### Install Deadline # Generate certs after install test
 set -x
+
+echo "Delete cloudformation DeadlineResourceTracker stack if it exists..."
+aws cloudformation describe-stacks --stack-name DeadlineResourceTracker && exit_status=0 || exit_status=$?
+if [[ $exit_status -eq 0 ]]; then
+  aws cloudformation update-termination-protection --stack-name DeadlineResourceTracker --no-enable-termination-protection
+  aws cloudformation delete-stack --stack-name DeadlineResourceTracker
+fi
+
 sudo -i -u $deadlineuser_name $installer_path --deadline-version "$deadline_version" --db-host-name "${db_host_name}" --skip-download-installers --skip-install-packages --skip-install-db --post-certgen-db --skip-install-rcs --post-certgen-rcs --configure-path-mapping --license-forwarder "$license_forwarder"
 set +x
