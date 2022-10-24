@@ -369,8 +369,8 @@ To use this key and Side FX license server on a headless node you can test with 
 
 - Configure your Client ID and Client Secret:
 ```
-echo "APIKey=www.sidefx.com MY_CLIENT_ID MY_CLIENT_SECRET" | tee ~/houdini19.5/hserver.opt
-cat ~/houdini19.5/hserver.opt
+echo "APIKey=www.sidefx.com MY_CLIENT_ID MY_CLIENT_SECRET" | tee ~/houdini19.0/hserver.opt
+cat ~/houdini19.0/hserver.opt
 ```
 This will return:
 ```
@@ -380,7 +380,7 @@ APIKey=www.sidefx.com MY_CLIENT_ID MY_CLIENT_SECRET
 - Ensure the license server is configured.
 ```
 echo "serverhost=https://www.sidefx.com/license/sesinetd" | tee ~/.sesi_licenses.pref
-cd /opt/hfs19.5/; source ./houdini_setup && hserver ; sleep 10 ; hserver -S https://www.sidefx.com/license/sesinetd ; hserver -q ; hserver 
+cd /opt/hfs19.0/; source ./houdini_setup && hserver ; sleep 10 ; hserver -S https://www.sidefx.com/license/sesinetd ; hserver -q ; hserver 
 ```
 
 - check hserver:
@@ -390,8 +390,8 @@ Hostname:       ip-10-1-129-54.ap-southeast-2.compute.internal  [CentOS Linux re
 Uptime:         0:24:14 [Started: Thu Sep 23 12:51:07 2021]
 License Server: https://www.sidefx.com/license/sesinetd
 Connected To:   https://www.sidefx.com/license/sesinetd
-Server Version: sesinetd19.5.10917
-Version:        Houdini19.5.696
+Server Version: sesinetd19.0.10917
+Version:        Houdini19.0.696
 ReadAccess:     +.+.+.*
 WriteAccess:    +.+.+.*
 Forced Http: false
