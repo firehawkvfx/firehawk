@@ -8,6 +8,7 @@ terraform {
 
 locals {
   common_vars = read_terragrunt_config(find_in_parent_folders("common.hcl"))
+  region = local.common_vars.inputs.common_tags["region"]
 }
 
 dependency "data" {
@@ -29,7 +30,7 @@ dependencies {
 inputs = merge(
   local.common_vars.inputs,
   {
-    "vpc_id" : dependency.data.outputs.vpc_id
-    "region" : "ap-southeast-2"
+    "vpc_id" : dependency.data.outputs.vpc_id,
+    "region" : local.region
   }
 )
