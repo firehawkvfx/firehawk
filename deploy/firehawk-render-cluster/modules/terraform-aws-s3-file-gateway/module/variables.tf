@@ -105,3 +105,8 @@ variable "storage_gateway_sg_id" {
   type        = string
   default     = null
 }
+
+variable "region" {
+  description = "The region for the storage gateway"
+  type        = string
+}

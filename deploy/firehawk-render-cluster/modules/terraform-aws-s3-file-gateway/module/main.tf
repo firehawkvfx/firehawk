@@ -29,6 +29,12 @@ resource "aws_instance" "gateway" { # To troubleshoot, the ssh with username 'ad
   instance_type = var.instance_type
   tags          = local.instance_tags
 
+  # TODO this should be a seperate role to the lighthouse that doesn't have permission to become a lighthouse
+  iam_instance_profile = "lighthouse_instance_role_${var.resourcetier}"
+
+  user_data                   = data.template_file.user_data_lighthouse.rendered
+  user_data_replace_on_change = true
+
   # Refer to AWS File Gateway documentation for minimum system requirements.
   ebs_optimized = true
   subnet_id     = length(local.subnet_ids) > 0 ? local.subnet_ids[0] : null
@@ -45,6 +51,23 @@ resource "aws_instance" "gateway" { # To troubleshoot, the ssh with username 'ad
   vpc_security_group_ids = [
     var.storage_gateway_sg_id
   ]
+}
+
+data "aws_s3_object" "nebula_bootstrap" {
+  bucket = local.vpn_scripts_bucket_name
+  key    = "nebula_bootstrap.sh"
+}
+
+data "template_file" "user_data_lighthouse" {
+  template = file("${path.module}/user-data-auth-ssh-host-iam.sh")
+  vars = {
+    resourcetier        = var.resourcetier
+    aws_internal_domain = "${var.region}.compute.internal"
+    nebula_name         = "lighthouse1"
+    aws_region          = var.region
+    bootstrap_serial    = data.aws_s3_object.nebula_bootstrap.etag
+    lighthouse          = "true"
+  }
 }
 
 locals {
