@@ -8,10 +8,12 @@ terraform {
 
 locals {
   common_vars = read_terragrunt_config(find_in_parent_folders("common.hcl"))
+  resourcetier = local.common_vars.inputs.common_tags["resourcetier"]
+  region = local.common_vars.inputs.common_tags["region"]
 }
 
 inputs = merge(local.common_vars.inputs, {
-  "region"                  = "ap-southeast-2",
-  "vpn_scripts_bucket_name" = "nebula.scripts.${var.resourcetier}.firehawkvfx.com",
-  "vpn_certs_bucket_name"   = "nebula.certs.${var.resourcetier}.firehawkvfx.com"
+  "region"                  = local.region,
+  "vpn_scripts_bucket_name" = "nebula.scripts.${local.resourcetier}.firehawkvfx.com",
+  "vpn_certs_bucket_name"   = "nebula.certs.${local.resourcetier}.firehawkvfx.com"
 })
