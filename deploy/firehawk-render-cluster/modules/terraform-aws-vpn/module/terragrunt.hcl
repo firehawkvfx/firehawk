@@ -25,13 +25,11 @@ dependencies {
   paths = ["../data"]
 }
 
+# TODO remove hardcoded region
 inputs = merge(
   local.common_vars.inputs,
   {
     "vpc_id" : dependency.data.outputs.vpc_id
-    "security_group_ids" : [ dependency.data.outputs.vpn_security_group ]
-    "sqs_remote_in_vpn" : dependency.data.outputs.remote_in_vpn_url
-    "host1" : "${dependency.data.outputs.bastion_public_dns}"
-    "host2" : "${dependency.data.outputs.vault_client_private_dns}"
+    "region" : "ap-southeast-2"
   }
 )
