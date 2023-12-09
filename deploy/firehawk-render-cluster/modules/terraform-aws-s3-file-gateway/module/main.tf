@@ -29,7 +29,8 @@ resource "aws_instance" "gateway" { # To troubleshoot, the ssh with username 'ad
   iam_instance_profile = "lighthouse_instance_role_${var.resourcetier}"
 
   user_data                   = data.template_file.user_data_lighthouse.rendered
-  user_data_replace_on_change = true
+  # enable after updateing terraform
+  # user_data_replace_on_change = true
 
   # Refer to AWS File Gateway documentation for minimum system requirements.
   ebs_optimized = true
