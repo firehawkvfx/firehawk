@@ -15,5 +15,3 @@ inputs = merge(local.common_vars.inputs, {
   "vpn_scripts_bucket_name" = "nebula.scripts.${var.resourcetier}.firehawkvfx.com",
   "vpn_certs_bucket_name"   = "nebula.certs.${var.resourcetier}.firehawkvfx.com"
 })
-
-dependencies {}
