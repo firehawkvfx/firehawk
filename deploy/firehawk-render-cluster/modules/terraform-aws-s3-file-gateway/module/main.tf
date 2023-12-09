@@ -50,7 +50,7 @@ resource "aws_instance" "gateway" { # To troubleshoot, the ssh with username 'ad
 }
 
 data "aws_s3_object" "nebula_bootstrap" {
-  bucket = local.vpn_scripts_bucket_name
+  bucket = var.vpn_scripts_bucket_name
   key    = "nebula_bootstrap.sh"
 }
 

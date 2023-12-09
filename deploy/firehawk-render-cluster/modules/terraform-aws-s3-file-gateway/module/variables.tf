@@ -110,3 +110,8 @@ variable "region" {
   description = "The region for the storage gateway"
   type        = string
 }
+
+variable "vpn_scripts_bucket_name" {
+  description = "The name of the bucket containing the VPN scripts"
+  type        = string
+}

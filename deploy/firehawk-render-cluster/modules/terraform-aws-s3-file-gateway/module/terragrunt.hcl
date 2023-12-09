@@ -10,6 +10,7 @@ locals {
   onsite_public_ip             = get_env("TF_VAR_onsite_public_ip", "")
   remote_cloud_public_ip_cidr  = get_env("TF_VAR_remote_cloud_public_ip_cidr", "")
   region                       = local.common_vars.inputs.common_tags["region"]
+  resourcetier                 = local.common_vars.inputs.common_tags["resourcetier"]
 }
 
 dependency "data" {
@@ -38,6 +39,7 @@ dependencies {
 inputs = merge(
   local.common_vars.inputs,
   {
+    vpn_scripts_bucket_name  = "nebula.scripts.${local.resourcetier}.firehawkvfx.com"
     region                   = local.region
     storage_gateway_sg_id    = dependency.data.outputs.storage_gateway_sg_id
     cloud_s3_gateway_enabled = (dependency.data.outputs.cloud_s3_gateway == "true") ? true : false
