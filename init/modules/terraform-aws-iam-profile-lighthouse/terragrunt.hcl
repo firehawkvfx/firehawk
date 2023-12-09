@@ -3,7 +3,7 @@ include {
 }
 
 terraform {
-  source = "../../firehawk-modules/modules/terraform-aws-iam-profile-lighthouse"
+  source = "../../../firehawk-modules/modules/terraform-aws-iam-profile-lighthouse"
 }
 
 locals {
