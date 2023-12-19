@@ -16,7 +16,7 @@ SCRIPTDIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd ) # The direc
 . $SCRIPTDIR/init_deploy_env
 
 # Customise the environment here.
-echo "export FH_VAR_target_infra_state=\"destroy\"" 2>&1 | tee --append TF_VAR_PATH_FIREHAWK_INFRA/env_vars.sh
+echo "export FH_VAR_target_infra_state=\"destroy\"" 2>&1 | tee --append $TF_VAR_PATH_FIREHAWK_INFRA/env_vars.sh
 
 # Finish config and deploy
 . $SCRIPTDIR/add_images_to_env # Append images to the env
