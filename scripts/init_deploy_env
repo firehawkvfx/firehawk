@@ -62,7 +62,7 @@ function output_ami_var {
     printf "$var_name"
     printf "\n  Found role $ami_role result:"
     printf "\n  $ami_result\n\n"
-    echo "export $var_name=$ami_result" | tee --append $SCRIPTDIR/../env_vars.sh
+    echo "export $var_name=$ami_result" | tee --append $TF_VAR_PATH_FIREHAWK/env_vars.sh
   fi
 }
 
@@ -87,5 +87,5 @@ function retrieve_ami {
 
 # Construct env vars file to bake some of the config.
 
-rm -fr $SCRIPTDIR/../env_vars.sh
-echo "#!/bin/bash" | tee $SCRIPTDIR/../env_vars.sh
+rm -fr $TF_VAR_PATH_FIREHAWK/env_vars.sh
+echo "#!/bin/bash" | tee $TF_VAR_PATH_FIREHAWK/env_vars.sh
