@@ -6,3 +6,4 @@ tfplan
 **/.terraform.lock.hcl
 tests/backup
 app/modules/codedeploy-app-firehawk.zip
+env_vars.sh
