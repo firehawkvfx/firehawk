@@ -6,7 +6,7 @@ export TF_VAR_ami_commit_hash="$(
   cd $TF_VAR_firehawk_ami_path
   git rev-parse HEAD
 )"
-echo "export TF_VAR_ami_commit_hash=$TF_VAR_ami_commit_hash" 2>&1 | tee --append $TF_VAR_PATH_FIREHAWK/env_vars.sh
+echo "export TF_VAR_ami_commit_hash=$TF_VAR_ami_commit_hash" 2>&1 | tee --append TF_VAR_PATH_FIREHAWK_INFRA/env_vars.sh
 
 # output image id's
 # These ami's are required for a full deployment
