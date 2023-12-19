@@ -2,13 +2,13 @@
 set -e
 EXECDIR="$(pwd)"
 
-SOURCE=${BASH_SOURCE[0]} # resolve the script dir even if a symlink is used to this script
+SOURCE=${BASH_SOURCE[0]}   # resolve the script dir even if a symlink is used to this script
 while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
-  DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
+  DIR=$(cd -P "$(dirname "$SOURCE")" >/dev/null 2>&1 && pwd)
   SOURCE=$(readlink "$SOURCE")
   [[ $SOURCE != /* ]] && SOURCE=$DIR/$SOURCE # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
-SCRIPTDIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
+SCRIPTDIR=$(cd -P "$(dirname "$SOURCE")" >/dev/null 2>&1 && pwd)
 
 cd $SCRIPTDIR
 source ../update_vars.sh
@@ -18,12 +18,12 @@ if [[ "$FH_VAR_target_infra_state" == "destroy" ]]; then
   ../deploy/destroy
 else
   echo "Will deploy infra..."
-  ../init/init-deploy
-  ../vault-init/init
-  ../vault-init/configure
-  ../deploy/apply
+  # ../init/init-deploy
+  # ../vault-init/init
+  # ../vault-init/configure
+  # ../deploy/apply
   echo "Infra deployed."
-  echo "...Submitting render test with codedeploy"
-  ../firehawk-modules/modules/firehawk-pdg-test/scripts/create_deployment
+  # echo "...Submitting render test with codedeploy"
+  # ../firehawk-modules/modules/firehawk-pdg-test/scripts/create_deployment
 fi
 cd $EXECDIR
